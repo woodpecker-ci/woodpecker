@@ -53,6 +53,7 @@
             GO = "${go}/bin/go";
             GOROOT = "${go}/share/go";
             STATIC_BUILD = "false";
+            pnpm_config_pm_on_fail = "ignore";
           };
       }
     );
