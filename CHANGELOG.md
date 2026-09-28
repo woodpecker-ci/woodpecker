@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7186](https://github.com/woodpecker-ci/woodpecker/pull/7186)]
 - Add MASH to awesome list [[#7191](https://github.com/woodpecker-ci/woodpecker/pull/7191)]
 - Update docs npm deps non-major [[#7163](https://github.com/woodpecker-ci/woodpecker/pull/7163)]
 - docs: document manual Linux binary installation [[#7160](https://github.com/woodpecker-ci/woodpecker/pull/7160)]
@@ -43,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7188](https://github.com/woodpecker-ci/woodpecker/pull/7188)]
 - Update pre-commit non-major [[#7187](https://github.com/woodpecker-ci/woodpecker/pull/7187)]
 - Update dependency mvdan/gofumpt to v0.12.0 [[#7185](https://github.com/woodpecker-ci/woodpecker/pull/7185)]
 - Update woodpeckerci/plugin-release Docker tag to v0.3.2 [[#7184](https://github.com/woodpecker-ci/woodpecker/pull/7184)]
