@@ -88,7 +88,7 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
-func (e *local) genCmdByShell(shellName string, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
+func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
 	}
