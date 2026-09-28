@@ -43,6 +43,16 @@ steps:
     commands: [...]
 ```
 
+By default, the shell executable is resolved using its name from `PATH`.
+The executable path can be overridden with an environment variable named
+`WOODPECKER_SHELL_PATH_<shell>`.
+
+For example, to use Bash from a custom location:
+
+```bash
+WOODPECKER_SHELL_PATH_bash=/custom/path/bash
+```
+
 ### Plugins
 
 ```yaml
