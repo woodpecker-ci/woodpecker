@@ -12,6 +12,7 @@
 
 ### ✨ Features
 
+- Local backend gets support for custom shell paths [[#7194](https://github.com/woodpecker-ci/woodpecker/pull/7194)]
 - Server side enforced agent labels [[#4131](https://github.com/woodpecker-ci/woodpecker/pull/4131)]
 
 ### 📈 Enhancement
@@ -23,7 +24,7 @@
 
 ### 🐛 Bug Fixes
 
-- nix dev env: disable static linking and make pnpm work again [[#7193](https://github.com/woodpecker-ci/woodpecker/pull/7193)]
+- Fix nix dev env by disable static linking and make pnpm work again [[#7193](https://github.com/woodpecker-ci/woodpecker/pull/7193)]
 - Fix data race in SSE stream handlers when the client disconnects early [[#7139](https://github.com/woodpecker-ci/woodpecker/pull/7139)]
 - Disable `cmd.exe` AutoRun commands for local pipelines on Windows [[#7162](https://github.com/woodpecker-ci/woodpecker/pull/7162)]
 - Restart a pipeline that errored before its config was persisted [[#7120](https://github.com/woodpecker-ci/woodpecker/pull/7120)]
