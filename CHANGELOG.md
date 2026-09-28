@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-26
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Add MASH to awesome list [[#7191](https://github.com/woodpecker-ci/woodpecker/pull/7191)]
 - Update docs npm deps non-major [[#7163](https://github.com/woodpecker-ci/woodpecker/pull/7163)]
 - docs: document manual Linux binary installation [[#7160](https://github.com/woodpecker-ci/woodpecker/pull/7160)]
 - Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
