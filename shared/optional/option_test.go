@@ -82,11 +82,6 @@ func TestExtractValue(t *testing.T) {
 	assert.Nil(t, val)
 }
 
-//go:fix inline
-func toPtr[T any](val T) *T {
-	return new(val)
-}
-
 type fakeHas struct{}
 
 func (fakeHas) Has() bool {
