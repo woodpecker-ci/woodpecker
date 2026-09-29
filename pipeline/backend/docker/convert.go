@@ -236,8 +236,3 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 	}
 	return strings.Split(volumeParts, ":"), nil
 }
-
-//go:fix inline
-func toRef[T any](v T) *T {
-	return new(v)
-}

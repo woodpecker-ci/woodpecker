@@ -14,9 +14,11 @@
 
 package constraint
 
-import "maps"
+import (
+	"maps"
 
-import "github.com/bmatcuk/doublestar/v4"
+	"github.com/bmatcuk/doublestar/v4"
+)
 
 // Map defines a runtime constraint for exclude & include map strings.
 type Map struct {
