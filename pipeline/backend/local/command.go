@@ -140,7 +140,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "fish":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			script.WriteString(fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd))
+			fmt.Fprintf(&script, "echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 		}
 		return []string{"-c", script.String()}, nil
 	case "nu":
