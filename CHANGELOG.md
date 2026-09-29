@@ -46,6 +46,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7147](https://github.com/woodpecker-ci/woodpecker/pull/7147)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.3 [[#7199](https://github.com/woodpecker-ci/woodpecker/pull/7199)]
 - Update golangci/golangci-lint Docker tag to v2.13.1 [[#7057](https://github.com/woodpecker-ci/woodpecker/pull/7057)]
 - Update web npm deps non-major [[#7188](https://github.com/woodpecker-ci/woodpecker/pull/7188)]
