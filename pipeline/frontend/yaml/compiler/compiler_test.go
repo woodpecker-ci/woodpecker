@@ -538,3 +538,35 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 	assert.False(t, backConf.Stages[0].Steps[1].Privileged)
 	assert.False(t, backConf.Stages[0].Steps[2].Privileged)
 }
+
+func TestCompilerCompileDefaultCloneStep(t *testing.T) {
+	repoURL := "https://github.com/octocat/hello-world"
+	compiler := New(
+		WithMetadata(metadata.Metadata{
+			Repo: metadata.Repo{
+				Owner:    "octacat",
+				Name:     "hello-world",
+				Private:  true,
+				ForgeURL: repoURL,
+				CloneURL: "https://github.com/octocat/hello-world.git",
+			},
+		}),
+		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
+		WithWorkspaceFromURL("/test", repoURL),
+		WithNetrc("user", "pass", "example.com"),
+	)
+
+	// empty workflow, but with default clone step
+	backConf, err := compiler.Compile(&yaml_types.Workflow{})
+	assert.NoError(t, err)
+
+	assert.Len(t, backConf.Stages, 1)
+	assert.Len(t, backConf.Stages[0].Steps, 1)
+	// make sure we have the clone environment
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_USERNAME")
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_PASSWORD")
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_MACHINE")
+	assert.Equal(t, "user", backConf.Stages[0].Steps[0].Environment["CI_NETRC_USERNAME"])
+	assert.Equal(t, "pass", backConf.Stages[0].Steps[0].Environment["CI_NETRC_PASSWORD"])
+	assert.Equal(t, "example.com", backConf.Stages[0].Steps[0].Environment["CI_NETRC_MACHINE"])
+}

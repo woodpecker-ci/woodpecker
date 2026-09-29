@@ -65,6 +65,23 @@ Supported metadata:
 
 If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
 
+## Command output collapsing
+
+Woodpecker's UI supports collapsing the output of single commands. Many plugins follow a similar structure to "regular" pipeline steps: They execute a fixed set of commands.
+
+<!-- markdownlint-disable no-space-in-code -->
+
+To make more clear to users which output belongs to which command, you can create those sections using a plugin as well: Print `▶  ` (two spaces) followed by the executed command.
+
+<!-- markdownlint-enable no-space-in-code -->
+
+Example:
+
+```bash
+echo "▶  make test"
+make test
+```
+
 ## Example plugin
 
 This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make HTTP requests during the build pipeline.
@@ -91,6 +108,7 @@ Create a simple shell script that invokes curl using the YAML configuration para
 ```bash
 #!/bin/sh
 
+echo "▶  curl -X ${PLUGIN_METHOD} -d ${PLUGIN_BODY} ${PLUGIN_URL}"
 curl \
   -X ${PLUGIN_METHOD} \
   -d ${PLUGIN_BODY} \

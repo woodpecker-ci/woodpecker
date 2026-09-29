@@ -40,7 +40,7 @@ func TestNewSecretsReplacer(t *testing.T) {
 		name:    "secret with one newline",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
 		secrets: []string{"an\nmulti line secret!!"},
-		expect:  "start log\ndone\nnow\n********\n******** ;)",
+		expect:  "start log\ndone\nnow\nan\n******** ;)",
 	}, {
 		name:    "secret with multiple lines with no match",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
@@ -50,7 +50,17 @@ func TestNewSecretsReplacer(t *testing.T) {
 		name:    "secret with multiple lines with match",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)\nwith\ntwo\n\nnewlines",
 		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
-		expect:  "start log\ndone\nnow\n********\n******** ;)\nwith\n********\n\n********",
+		expect:  "start log\ndone\nnow\nan\n******** ;)\nwith\ntwo\n\n********",
+	}, {
+		name:    "secret with multiple lines with partial match",
+		log:     "start with\ntwo",
+		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
+		expect:  "start with\ntwo",
+	}, {
+		name:    "multiline JSON secret does not over-mask short punctuation lines",
+		log:     `[{description,"Run PropEr test suites"},{vsn,"0.12.1"},{registered,[]}]`,
+		secrets: []string{"{\n\"foo\":[\n\"bar\"\n]\n}"},
+		expect:  `[{description,"Run PropEr test suites"},{vsn,"0.12.1"},{registered,[]}]`,
 	}}
 
 	for _, c := range tc {
