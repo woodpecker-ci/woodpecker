@@ -201,6 +201,8 @@ func TestLintConcurrent(t *testing.T) {
 `
 
 	for i := range 16 {
+		i := i
+
 		t.Run(fmt.Sprintf("worker-%d", i), func(t *testing.T) {
 			t.Parallel()
 

@@ -226,7 +226,9 @@ func LogStreamSSE(c *gin.Context) {
 		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
 
 		var innerDone sync.WaitGroup
-		innerDone.Go(func() {
+		innerDone.Add(1)
+		go func() {
+			defer innerDone.Done()
 			for entries := range batches {
 				for _, entry := range entries {
 					if ee, err := json.Marshal(entry); err == nil {
@@ -240,7 +242,7 @@ func LogStreamSSE(c *gin.Context) {
 					}
 				}
 			}
-		})
+		}()
 
 		err := _logs.Tail(ctx, step.ID, batches)
 		if err != nil {

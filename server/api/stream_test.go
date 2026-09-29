@@ -66,11 +66,13 @@ func TestEventStreamSSEConcurrentDisconnect(t *testing.T) {
 			// Fire concurrent publishes while canceling the request.
 			var wg sync.WaitGroup
 			for range 20 {
-				wg.Go(func() {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
 					_ = broker.Publish(ctx, topic, pubsub.Message{
 						Data: []byte(`{"pipeline":1}`),
 					})
-				})
+				}()
 			}
 
 			// Simulate client disconnect mid-publish.
@@ -141,11 +143,13 @@ func TestLogStreamSSEConcurrentDisconnect(t *testing.T) {
 			// Fire concurrent log writes while canceling the request.
 			var wg sync.WaitGroup
 			for i := range 20 {
-				wg.Go(func() {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
 					_ = logService.Write(t.Context(), stepID, []*model.LogEntry{
 						{Line: i, Data: []byte("log line")},
 					})
-				})
+				}()
 			}
 
 			// Simulate client disconnect mid-write.
