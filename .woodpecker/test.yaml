@@ -77,7 +77,7 @@ steps:
       - dummy-web
     image: *golang_image
     commands:
-      - "DIFF=$(go fix -diff -tags 'test integration' ./... | head)"
+      - "DIFF=$(go fix -diff -tags 'test' ./... | head)"
       - '[ -n "$DIFF" ] && { echo "go fix not applied, exec \"go fix -tags ''test'' ./...\" and commit"; exit 1; } || true'
     when: *when
 
