@@ -168,13 +168,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Settings:    cloneSettings,
 			Environment: make(map[string]any),
 		}
-		for k, v := range c.cloneEnv {
-			container.Environment[k] = v
-		}
 		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
+
+		maps.Copy(step.Environment, c.cloneEnv)
 
 		stage := new(backend_types.Stage)
 		stage.Steps = append(stage.Steps, step)

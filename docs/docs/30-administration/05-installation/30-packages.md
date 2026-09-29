@@ -86,6 +86,51 @@ WOODPECKER_SERVER=localhost:9000
 WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 ```
 
+## Manual installation from Linux binaries
+
+1. Download the Woodpecker server and agent tarballs for your Linux architecture from the [GitHub releases](https://github.com/woodpecker-ci/woodpecker/releases/latest) page.
+
+2. Extract both tarballs and install the `woodpecker-server` and `woodpecker-agent` binaries in `/usr/local/bin/`. This example uses Linux ARM64; choose tarballs matching your architecture. Run these commands from the directory containing the downloaded tarballs.
+
+   ```shell
+   tar -xzf woodpecker-server_linux_arm64.tar.gz
+   tar -xzf woodpecker-agent_linux_arm64.tar.gz
+   sudo install -m 755 woodpecker-server woodpecker-agent /usr/local/bin/
+   ```
+
+3. Create the `/etc/woodpecker` directory and the server and agent environment files using the examples above. Replace the `${...}` placeholders with values for your installation, including the public `WOODPECKER_HOST` URL. Set the same `WOODPECKER_AGENT_SECRET` value in both files.
+
+   ```shell
+   sudo mkdir -p /etc/woodpecker
+   sudoedit /etc/woodpecker/woodpecker-server.env
+   sudoedit /etc/woodpecker/woodpecker-agent.env
+   ```
+
+4. Create the `woodpecker` system user and its working directory.
+
+   ```shell
+   sudo useradd --system --user-group --home-dir /var/lib/woodpecker --create-home --shell /usr/sbin/nologin woodpecker
+   ```
+
+   Save the server and agent systemd unit examples above as `/etc/systemd/system/woodpecker-server.service` and `/etc/systemd/system/woodpecker-agent.service`. Then load and start the services:
+
+   ```shell
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now woodpecker-server woodpecker-agent
+   ```
+
+5. Check that both services are running:
+
+   ```shell
+   systemctl status woodpecker-server woodpecker-agent
+   ```
+
+   Check the agent logs for connection errors, then confirm that the agent appears in the Woodpecker server's agent list:
+
+   ```shell
+   journalctl -u woodpecker-agent -b
+   ```
+
 ## Community packages
 
 :::info
