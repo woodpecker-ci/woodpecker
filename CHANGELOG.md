@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-28
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -46,6 +46,7 @@
 
 ### 📦️ Dependency
 
+- Update golangci/golangci-lint Docker tag to v2.13.1 [[#7057](https://github.com/woodpecker-ci/woodpecker/pull/7057)]
 - Update web npm deps non-major [[#7188](https://github.com/woodpecker-ci/woodpecker/pull/7188)]
 - Update pre-commit non-major [[#7187](https://github.com/woodpecker-ci/woodpecker/pull/7187)]
 - Update dependency mvdan/gofumpt to v0.12.0 [[#7185](https://github.com/woodpecker-ci/woodpecker/pull/7185)]
