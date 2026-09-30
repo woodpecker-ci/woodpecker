@@ -279,7 +279,7 @@ func (a *appClient) cloneToken(ctx context.Context, owner, name string, minValid
 	token, err := a.mintToken(ctx, installationID, owner, name, &github.InstallationTokenOptions{
 		Repositories: []string{name},
 		Permissions: &github.InstallationPermissions{
-			Contents: github.Ptr("read"),
+			Contents: new("read"),
 		},
 	})
 	if err != nil {
