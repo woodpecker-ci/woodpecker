@@ -16,8 +16,10 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -49,26 +51,27 @@ type keyedMutex struct {
 }
 
 type keyedLock struct {
-	sync.Mutex
+	// sem holds one token while the lock is held; a channel rather than a
+	// sync.Mutex so that waiting for it can be abandoned
+	sem  chan struct{}
 	refs int
 }
 
-func (k *keyedMutex) lock(key statusKey) (unlock func()) {
+// lock takes key's lock, or gives up with ctx's error if ctx is done first.
+func (k *keyedMutex) lock(ctx context.Context, key statusKey) (unlock func(), err error) {
 	k.mu.Lock()
 	if k.locks == nil {
 		k.locks = make(map[statusKey]*keyedLock)
 	}
 	l := k.locks[key]
 	if l == nil {
-		l = &keyedLock{}
+		l = &keyedLock{sem: make(chan struct{}, 1)}
 		k.locks[key] = l
 	}
 	l.refs++
 	k.mu.Unlock()
 
-	l.Lock()
-	return func() {
-		l.Unlock()
+	release := func() {
 		k.mu.Lock()
 		l.refs--
 		if l.refs == 0 {
@@ -76,10 +79,39 @@ func (k *keyedMutex) lock(key statusKey) (unlock func()) {
 		}
 		k.mu.Unlock()
 	}
+
+	select {
+	case l.sem <- struct{}{}:
+		return func() {
+			<-l.sem
+			release()
+		}, nil
+	case <-ctx.Done():
+		release()
+		return nil, ctx.Err()
+	}
 }
 
 // statusLocks orders the posts of each forge status.
 var statusLocks keyedMutex
+
+// statusPostTimeout bounds a single forge status post. The post runs while
+// holding its status's lock and the forge clients set no HTTP timeout of their
+// own, so without it one hung request would hold up every later post of the
+// same status, including an agent's Init and Done. Addon forges ignore the
+// context and stay unbounded. Past the deadline, ordering is best effort:
+// abandoning a request does not stop a forge that already received it.
+const statusPostTimeout = 30 * time.Second
+
+// statusLockTimeout bounds how long a post waits for its status's lock. Posts
+// of one status queue behind each other - all of a deploy pipeline's workflows
+// share one - so with a hung forge the last of N queued posts would otherwise
+// wait N post timeouts, and the RPC path's context has no deadline to cut that
+// short. A healthy post takes well under a second, so this only trips when the
+// forge has stopped answering.
+//
+// A variable so tests can shorten it.
+var statusLockTimeout = 2 * time.Minute
 
 // PostWorkflowStatus posts the forge status of workflow, with the workflow's
 // and the pipeline's state as persisted when the post is sent. Every post of
@@ -89,7 +121,12 @@ var statusLocks keyedMutex
 // it already runs). Each state change is persisted before it is posted, so the
 // post that reaches the forge last carries the latest state.
 func PostWorkflowStatus(ctx context.Context, _store store.Store, _forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	unlock := statusLocks.lock(statusKeyOf(pipeline, workflow))
+	lockCtx, cancelLock := context.WithTimeout(ctx, statusLockTimeout)
+	unlock, err := statusLocks.lock(lockCtx, statusKeyOf(pipeline, workflow))
+	cancelLock()
+	if err != nil {
+		return fmt.Errorf("waiting to post the status of workflow %d: %w", workflow.ID, err)
+	}
 	defer unlock()
 
 	// copies: the caller's pipeline and workflow are not ours to change
@@ -97,14 +134,22 @@ func PostWorkflowStatus(ctx context.Context, _store store.Store, _forge forge.Fo
 	if current, err := _store.WorkflowLoad(workflow.ID); err != nil {
 		log.Error().Err(err).Msgf("cannot load workflow %d to post its status; posting the state it was handed", workflow.ID)
 	} else {
-		w.State = current.State
+		// the workflow's fields travel with its state; addon forges receive
+		// them, the built-in forges read only the pipeline's
+		w.State, w.Error = current.State, current.Error
+		w.Started, w.Finished = current.Started, current.Finished
 	}
 	if current, err := _store.GetPipeline(pipeline.ID); err != nil {
 		log.Error().Err(err).Msgf("cannot load pipeline %d to post its status; posting the state it was handed", pipeline.ID)
 	} else {
+		// Bitbucket Datacenter derives a duration from the timestamps
 		p.Status = current.Status
+		p.Started, p.Finished = current.Started, current.Finished
 	}
-	return _forge.Status(ctx, user, repo, &p, &w)
+
+	postCtx, cancel := context.WithTimeout(ctx, statusPostTimeout)
+	defer cancel()
+	return _forge.Status(postCtx, user, repo, &p, &w)
 }
 
 // maxConcurrentStatusUpdates bounds the parallel commit-status calls per
