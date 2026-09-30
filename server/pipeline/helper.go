@@ -126,10 +126,7 @@ func updatePipelineStatus(ctx context.Context, _store store.Store, forge forge.F
 	sem := make(chan struct{}, maxConcurrentStatusUpdates)
 
 	for _, workflow := range pipeline.Workflows {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
+		wg.Go(func() {
 			select {
 			case sem <- struct{}{}:
 				defer func() { <-sem }()
@@ -142,7 +139,7 @@ func updatePipelineStatus(ctx context.Context, _store store.Store, forge forge.F
 				failed.Add(1)
 				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 			}
-		}()
+		})
 	}
 	wg.Wait()
 
