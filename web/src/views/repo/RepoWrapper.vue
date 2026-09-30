@@ -71,6 +71,7 @@ import { useForgeStore } from '~/compositions/useForgeStore';
 import { provide } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import useRepos from '~/compositions/useRepos';
+import { RepoVisibility } from '~/lib/api/types';
 import type { Forge, Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
@@ -107,6 +108,19 @@ const forgeIcon = computed<IconNames>(() => {
   return 'repo';
 });
 
+// non-public repos only serve their badge to holders of the badge token, which
+// in turn is only readable with push permissions
+const badgeToken = ref<string>('');
+provide('badge-token', badgeToken);
+
+async function loadBadgeToken() {
+  badgeToken.value = '';
+  if (repo.value?.visibility === RepoVisibility.Public || !repoPermissions.value?.push) {
+    return;
+  }
+  badgeToken.value = (await apiClient.getRepoToken(repositoryId.value)).value;
+}
+
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
   if (!repoPermissions.value.pull) {
@@ -126,6 +140,7 @@ async function loadRepo() {
   if (repo.value) {
     forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
   }
+  await loadBadgeToken();
   updateLastAccess(repositoryId.value);
 }
 
@@ -137,5 +152,17 @@ watch([repositoryId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
+const badgeUrl = computed(() => {
+  if (!repo.value) {
+    return undefined;
+  }
+
+  const url = `${config.rootPath}/api/badges/${repo.value.id}/status.svg`;
+  if (repo.value.visibility === RepoVisibility.Public) {
+    return url;
+  }
+
+  // without the token the badge would only state that it may not be shown
+  return badgeToken.value === '' ? undefined : `${url}?token=${encodeURIComponent(badgeToken.value)}`;
+});
 </script>
