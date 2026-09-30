@@ -18,6 +18,7 @@ import (
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) WorkflowGetTree(pipeline *model.Pipeline) ([]*model.Workflow, error) {
@@ -140,4 +141,40 @@ func (s storage) WorkflowByStep(step *model.Step) (*model.Workflow, error) {
 func (s storage) WorkflowUpdate(workflow *model.Workflow) error {
 	_, err := s.engine.ID(workflow.ID).AllCols().Update(workflow)
 	return err
+}
+
+// WorkflowUpdateIfState rejects stale lifecycle transitions.
+func (s storage) WorkflowUpdateIfState(workflow *model.Workflow, expected model.StatusValue) error {
+	n, err := s.engine.ID(workflow.ID).Where("state = ?", expected).AllCols().Update(workflow)
+	if err != nil {
+		return err
+	}
+	if n == 0 {
+		return types.ErrRecordNotExist
+	}
+	return nil
+}
+
+// WorkflowCancelPending atomically cancels an uninitialized workflow and its
+// pending steps. Agent initialization competes on the same pending state.
+func (s storage) WorkflowCancelPending(id, finished int64) (bool, error) {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return false, err
+	}
+	workflow := &model.Workflow{State: model.StatusCanceled, Finished: finished}
+	n, err := sess.ID(id).Where("state = ?", model.StatusPending).
+		Cols("state", "finished").Update(workflow)
+	if err != nil || n == 0 {
+		return false, err
+	}
+	if _, err := sess.ID(id).Get(workflow); err != nil {
+		return false, err
+	}
+	if _, err := sess.Where("pipeline_id = ? AND ppid = ? AND state = ?", workflow.PipelineID, workflow.PID, model.StatusPending).
+		Cols("state", "finished").Update(&model.Step{State: model.StatusCanceled, Finished: finished}); err != nil {
+		return false, err
+	}
+	return true, sess.Commit()
 }

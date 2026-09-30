@@ -73,26 +73,47 @@
                 <Badge :label="key" :value="value" />
               </div>
             </div>
-            <button
-              v-if="!singleConfig"
-              type="button"
-              :title="workflow.name"
-              class="hover:bg-wp-control-neutral-200 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
-              @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
-            >
-              <Icon
-                name="chevron-right"
-                class="h-6 min-w-6 transition-transform duration-150"
-                :class="{ 'rotate-90 transform': !workflowsCollapsed[workflow.id] }"
-              />
-              <PipelineStatusIcon :status="workflow.state" class="h-4! w-4!" />
-              <span class="truncate">{{ workflow.name }}</span>
-              <PipelineStepDuration
-                v-if="workflow.started !== workflow.finished"
-                :workflow="workflow"
-                class="pr-2px mr-1"
-              />
-            </button>
+            <div class="flex items-center justify-between gap-1">
+              <button
+                v-if="!singleConfig"
+                type="button"
+                :title="workflow.name"
+                class="hover:bg-wp-control-neutral-200 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
+                @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
+              >
+                <Icon
+                  name="chevron-right"
+                  class="h-6 min-w-6 transition-transform duration-150"
+                  :class="{ 'rotate-90 transform': !workflowsCollapsed[workflow.id] }"
+                />
+                <PipelineStatusIcon :status="workflow.state" class="h-4! w-4!" />
+                <span class="truncate">{{ workflow.name }}</span>
+                <PipelineStepDuration
+                  v-if="workflow.started !== workflow.finished"
+                  :workflow="workflow"
+                  class="pr-2px mr-1"
+                />
+              </button>
+              <button
+                v-if="
+                  canCancel &&
+                  ['pending', 'running'].includes(pipeline.status) &&
+                  ['pending', 'running'].includes(workflow.state)
+                "
+                type="button"
+                class="hover:bg-wp-control-neutral-200 ml-auto flex shrink-0 cursor-pointer items-center rounded-md p-2 disabled:cursor-not-allowed disabled:opacity-50"
+                :title="$t('repo.pipeline.actions.cancel_workflow', { name: workflow.name })"
+                :aria-label="$t('repo.pipeline.actions.cancel_workflow', { name: workflow.name })"
+                :aria-busy="cancelingWorkflowIds?.includes(workflow.id) || false"
+                :disabled="cancelingWorkflowIds?.includes(workflow.id)"
+                @click.stop="!cancelingWorkflowIds?.includes(workflow.id) && $emit('cancelWorkflow', workflow.id)"
+              >
+                <Icon
+                  :name="cancelingWorkflowIds?.includes(workflow.id) ? 'spinner' : 'status-declined'"
+                  class="h-4! w-4!"
+                />
+              </button>
+            </div>
           </div>
           <div
             class="transition-height overflow-hidden duration-150"
@@ -138,11 +159,14 @@ import type { Pipeline, PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
+  canCancel?: boolean;
+  cancelingWorkflowIds?: number[];
   selectedStepId?: number | null;
 }>();
 
 defineEmits<{
   (event: 'update:selectedStepId', selectedStepId: number): void;
+  (event: 'cancelWorkflow', workflowId: number): void;
 }>();
 
 const pipeline = toRef(props, 'pipeline');

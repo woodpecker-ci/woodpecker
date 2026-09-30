@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -117,4 +118,72 @@ func TestWorkflowUpdate(t *testing.T) {
 	workflowGet, err = store.WorkflowLoad(1)
 	assert.NoError(t, err)
 	assert.Equal(t, model.StatusValue("success"), workflowGet.State)
+}
+
+func TestWorkflowCancelPending(t *testing.T) {
+	s, close := newTestStore(t, new(model.Workflow), new(model.Step))
+	defer close()
+	w := &model.Workflow{PipelineID: 1, PID: 1, State: model.StatusPending, Children: []*model.Step{
+		{UUID: "pending", PipelineID: 1, PID: 2, PPID: 1, State: model.StatusPending},
+		{UUID: "done", PipelineID: 1, PID: 3, PPID: 1, State: model.StatusSuccess, Finished: 7},
+	}}
+	sibling := &model.Workflow{PipelineID: 1, PID: 4, State: model.StatusPending}
+	require.NoError(t, s.WorkflowsCreate([]*model.Workflow{w, sibling}))
+	canceled, err := s.WorkflowCancelPending(w.ID, 10)
+	require.NoError(t, err)
+	require.True(t, canceled)
+	tree, err := s.WorkflowGetTree(&model.Pipeline{ID: 1})
+	require.NoError(t, err)
+	assert.Equal(t, model.StatusCanceled, tree[0].State)
+	assert.Zero(t, tree[0].Started)
+	assert.EqualValues(t, 10, tree[0].Finished)
+	assert.Equal(t, model.StatusCanceled, tree[0].Children[0].State)
+	assert.Equal(t, model.StatusSuccess, tree[0].Children[1].State)
+	assert.EqualValues(t, 7, tree[0].Children[1].Finished)
+	assert.Equal(t, model.StatusPending, tree[1].State)
+	w.State = model.StatusRunning
+	assert.Error(t, s.WorkflowUpdateIfState(w, model.StatusPending), "canceled workflow cannot initialize")
+	canceled, err = s.WorkflowCancelPending(w.ID, 11)
+	require.NoError(t, err)
+	assert.False(t, canceled)
+	sibling.State = model.StatusRunning
+	require.NoError(t, s.WorkflowUpdateIfState(sibling, model.StatusPending))
+	canceled, err = s.WorkflowCancelPending(sibling.ID, 12)
+	require.NoError(t, err)
+	assert.False(t, canceled, "initialization won")
+}
+
+func TestWorkflowCancellationRaces(t *testing.T) {
+	for _, next := range []model.StatusValue{model.StatusRunning, model.StatusSuccess} {
+		t.Run(string(next), func(t *testing.T) {
+			s, closeStore := newTestStore(t, new(model.Workflow), new(model.Step))
+			defer closeStore()
+			w := &model.Workflow{PipelineID: 1, PID: 1, State: model.StatusPending}
+			require.NoError(t, s.WorkflowsCreate([]*model.Workflow{w}))
+			start := make(chan struct{})
+			cancelResult := make(chan bool, 1)
+			cancelError := make(chan error, 1)
+			transitionError := make(chan error, 1)
+			go func() { <-start; ok, err := s.WorkflowCancelPending(w.ID, 10); cancelResult <- ok; cancelError <- err }()
+			go func() {
+				<-start
+				copy := *w
+				copy.State = next
+				transitionError <- s.WorkflowUpdateIfState(&copy, model.StatusPending)
+			}()
+			close(start)
+			canceled := <-cancelResult
+			require.NoError(t, <-cancelError)
+			err := <-transitionError
+			fresh, loadErr := s.WorkflowLoad(w.ID)
+			require.NoError(t, loadErr)
+			if canceled {
+				assert.Error(t, err)
+				assert.Equal(t, model.StatusCanceled, fresh.State)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, next, fresh.State)
+			}
+		})
+	}
 }

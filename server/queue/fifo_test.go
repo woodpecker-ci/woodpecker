@@ -1311,3 +1311,36 @@ func findTaskByAgent(tasks map[string]int64, agentID int64) string {
 	}
 	return ""
 }
+
+func TestCancelBeforeWaitPreservesSignal(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+	task := genDummyTask()
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got.ID}, ErrCancel))
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{got.ID}, ErrCancel), "concurrent cancellation is harmless")
+	assert.ErrorIs(t, q.Wait(ctx, got.ID), ErrCancel, "agent starts listening after cancellation")
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusKilled))
+}
+
+func TestCancelWorkflowDependencyConditions(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+	tasks := []*model.Task{
+		{ID: "cancel", DepStatus: map[string]model.StatusValue{}},
+		{ID: "success", Dependencies: []string{"cancel"}, DepStatus: map[string]model.StatusValue{}},
+		{ID: "failure", Dependencies: []string{"cancel"}, DepStatus: map[string]model.StatusValue{}, RunOn: []string{"failure"}},
+		{ID: "always", Dependencies: []string{"cancel"}, DepStatus: map[string]model.StatusValue{}, RunOn: []string{"success", "failure"}},
+		{ID: "independent", DepStatus: map[string]model.StatusValue{}},
+	}
+	assert.NoError(t, q.PushAtOnce(ctx, tasks))
+	assert.NoError(t, q.ErrorAtOnce(ctx, []string{"cancel"}, ErrCancel))
+	for range 4 {
+		task, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, task.ID != "success", task.ShouldRun(), task.ID)
+		assert.NoError(t, q.Done(ctx, task.ID, model.StatusSuccess))
+	}
+}

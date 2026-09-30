@@ -470,6 +470,39 @@ func CancelPipeline(c *gin.Context) {
 	}
 }
 
+// CancelWorkflow
+//
+//	@Summary	Cancel a single queued or running workflow
+//	@Router		/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/cancel [post]
+//	@Success	204
+//	@Failure	400	{object}	object	"Invalid ID or inactive workflow/pipeline"
+//	@Failure	401	{object}	object	"Authentication required"
+//	@Failure	404	{object}	object	"Workflow or pipeline not found, or push permission denied"
+//	@Failure	500	{object}	object	"Cancellation failed"
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		pipeline_number	path	int		true	"the number of the pipeline"
+//	@Param		workflow_id		path	int		true	"the database workflow id"
+func CancelWorkflow(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("workflow_id"), 10, 64)
+	if err != nil || id <= 0 {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	repo := session.Repo(c)
+	f, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if err := pipeline.CancelWorkflow(c, f, store.FromContext(c), repo, session.Pipeline(c), id); err != nil {
+		handlePipelineErr(c, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
 // PostApproval
 //
 //	@Summary	Approve and start a pipeline

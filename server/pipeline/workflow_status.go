@@ -34,17 +34,20 @@ func WorkflowStatus(steps []*model.Step) model.StatusValue {
 }
 
 func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+	expected := workflow.State
 	workflow.Started = state.Started
 	workflow.State = model.StatusRunning
-	return &workflow, store.WorkflowUpdate(&workflow)
+	return &workflow, store.WorkflowUpdateIfState(&workflow, expected)
 }
 
 func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (*model.Workflow, error) {
+	expected := workflow.State
 	workflow.State = model.StatusSkipped
-	return &workflow, store.WorkflowUpdate(&workflow)
+	return &workflow, store.WorkflowUpdateIfState(&workflow, expected)
 }
 
 func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+	expected := workflow.State
 	workflow.Finished = state.Finished
 	workflow.Error = state.Error
 	if state.Started == 0 {
@@ -58,5 +61,5 @@ func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, stat
 	if state.Canceled {
 		workflow.State = model.StatusKilled
 	}
-	return &workflow, store.WorkflowUpdate(&workflow)
+	return &workflow, store.WorkflowUpdateIfState(&workflow, expected)
 }

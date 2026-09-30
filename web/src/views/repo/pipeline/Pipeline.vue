@@ -5,6 +5,9 @@
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
         :pipeline="pipeline!"
+        :can-cancel="repoPermissions.push"
+        :canceling-workflow-ids="cancelingWorkflowIds"
+        @cancel-workflow="cancelWorkflow"
       />
 
       <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
@@ -57,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, toRef } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -73,6 +76,7 @@ import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineStep } from '~/lib/api/types';
+import { usePipelineStore } from '~/store/pipelines';
 import { anyStepStarted, pipelineHasErrorsToShow, pipelineHasNonWarningErrors } from '~/lib/pipeline';
 
 const props = defineProps<{
@@ -88,6 +92,32 @@ const i18n = useI18n();
 const pipeline = requiredInject('pipeline');
 const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
+
+const pipelineStore = usePipelineStore();
+const cancelingWorkflowIds = ref<number[]>([]);
+
+async function cancelWorkflow(workflowId: number) {
+  if (cancelingWorkflowIds.value.includes(workflowId)) return;
+  const repoId = repo.value.id;
+  const pipelineNumber = pipeline.value.number;
+  cancelingWorkflowIds.value.push(workflowId);
+  try {
+    await apiClient.cancelWorkflow(repoId, pipelineNumber, workflowId);
+    notifications.notify({ title: i18n.t('repo.pipeline.actions.cancel_workflow_success'), type: 'success' });
+  } catch (error) {
+    // API errors are displayed by the shared client error handler.
+    console.error(error);
+  } finally {
+    try {
+      // Refresh stale-state rejections too, without changing selection or subscriptions.
+      await pipelineStore.loadPipeline(repoId, pipelineNumber);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      cancelingWorkflowIds.value = cancelingWorkflowIds.value.filter((id) => id !== workflowId);
+    }
+  }
+}
 
 const stepId = toRef(props, 'stepId');
 
