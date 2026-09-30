@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-29
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-09-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -63,6 +63,10 @@
 - Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.1 [[#7135](https://github.com/woodpecker-ci/woodpecker/pull/7135)]
 - Update web npm deps non-major [[#7134](https://github.com/woodpecker-ci/woodpecker/pull/7134)]
+
+### Misc
+
+- Fix url including </span> when combined with ansi escapes [[#7196](https://github.com/woodpecker-ci/woodpecker/pull/7196)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
