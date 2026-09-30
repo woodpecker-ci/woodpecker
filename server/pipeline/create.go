@@ -140,7 +140,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	if pipeline.Status == model.StatusBlocked {
 		// blocked pipelines never reach start(), so their statuses are posted here
-		updatePipelineStatus(ctx, _forge, pipeline, repo, repoUser)
+		updatePipelineStatus(ctx, _store, _forge, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
 	publishDuration := time.Since(phaseStart)
@@ -213,7 +213,7 @@ func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store
 		}
 	}
 
-	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+	publishPipeline(ctx, _store, _forge, pipeline, repo, repoUser)
 
 	return nil
 }

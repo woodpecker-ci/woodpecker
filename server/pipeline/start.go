@@ -45,14 +45,14 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		return nil, err
 	}
 
-	updatePipelineStatus(ctx, forge, activePipeline, repo, user)
+	updatePipelineStatus(ctx, store, forge, activePipeline, repo, user)
 
 	return activePipeline, nil
 }
 
-func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
+func publishPipeline(ctx context.Context, _store store.Store, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
 	publishPipelineEvent(ctx, pipeline, repo)
-	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
+	updatePipelineStatus(ctx, _store, forge, pipeline, repo, repoUser)
 }
 
 // publishPipelineEvent informs UI subscribers about a pipeline change without
