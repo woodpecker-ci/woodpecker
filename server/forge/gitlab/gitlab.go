@@ -192,8 +192,8 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 			Page:    int64(p.Page),
 			PerPage: int64(perPage),
 		},
-		AllAvailable:   gitlab.Ptr(false),
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		AllAvailable:   new(false),
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -291,10 +291,10 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 			Page:    int64(p.Page),
 			PerPage: int64(perPage),
 		},
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.hideArchives {
-		opts.Archived = gitlab.Ptr(false)
+		opts.Archived = new(false)
 	}
 	intUserID, err := strconv.Atoi(string(user.ForgeRemoteID))
 	if err != nil {
@@ -400,7 +400,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
 		Path:        &path,
 		Ref:         &pipeline.Commit,
-		Recursive:   gitlab.Ptr(false),
+		Recursive:   new(false),
 	}
 
 	for i := 1; true; i++ {
@@ -449,9 +449,9 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
-		Description: gitlab.Ptr(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   gitlab.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
-		Context:     gitlab.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		Description: new(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -515,13 +515,13 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
-		URL:                   gitlab.Ptr(webURL),
-		Token:                 gitlab.Ptr(token),
-		PushEvents:            gitlab.Ptr(true),
-		TagPushEvents:         gitlab.Ptr(true),
-		MergeRequestsEvents:   gitlab.Ptr(true),
-		DeploymentEvents:      gitlab.Ptr(true),
-		EnableSSLVerification: gitlab.Ptr(!g.skipVerify),
+		URL:                   new(webURL),
+		Token:                 new(token),
+		PushEvents:            new(true),
+		TagPushEvents:         new(true),
+		MergeRequestsEvents:   new(true),
+		DeploymentEvents:      new(true),
+		EnableSSLVerification: new(!g.skipVerify),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -699,7 +699,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 			Page:    1,
 			PerPage: defaultPerPage,
 		},
-		Search: gitlab.Ptr(owner),
+		Search: new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -753,7 +753,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 			Page:    1,
 			PerPage: 1,
 		},
-		Username: gitlab.Ptr(owner),
+		Username: new(owner),
 	})
 	if len(users) == 1 && err == nil {
 		return &model.Org{
@@ -768,7 +768,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 			Page:    1,
 			PerPage: defaultPerPage,
 		},
-		Search: gitlab.Ptr(owner),
+		Search: new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
