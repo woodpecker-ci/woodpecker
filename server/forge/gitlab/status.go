@@ -16,7 +16,7 @@ package gitlab
 
 import (
 	"github.com/rs/zerolog/log"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
