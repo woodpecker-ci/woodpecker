@@ -338,7 +338,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
-	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
+	podInformer := si.Core().V1().Pods().Informer()
+	if _, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
 			DeleteFunc: podDeleted,
@@ -351,7 +352,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// If the pod was deleted before the informer started, no events will
+	// Wait for the informer's initial list before the check below. A pod deleted
+	// before that list never enters the cache, so its deletion is never delivered.
+	if !cache.WaitForCacheSync(ctx.Done(), podInformer.HasSynced) {
+		return nil, ctx.Err()
+	}
+
+	// If the pod was deleted before the informer synced, no events will
 	// ever arrive. Check explicitly so we don't hang forever.
 	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
 		return &types.State{ExitCode: 0, Exited: true}, nil
