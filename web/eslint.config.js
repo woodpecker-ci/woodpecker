@@ -53,7 +53,13 @@ export default antfu(
       '@intlify/vue-i18n/valid-message-syntax': 'error',
       '@intlify/vue-i18n/no-missing-keys': 'error',
       '@intlify/vue-i18n/no-unknown-locale': 'error',
-      '@intlify/vue-i18n/no-unused-keys': ['error', { extensions: ['.ts', '.vue'] }],
+      '@intlify/vue-i18n/no-unused-keys': [
+        'error',
+        {
+          extensions: ['.ts', '.vue'],
+          ignores: ['language_name'], // read by supportedLocalesPlugin in vite.config.ts
+        },
+      ],
       '@intlify/vue-i18n/prefer-sfc-lang-attr': 'error',
       '@intlify/vue-i18n/no-html-messages': 'error',
       '@intlify/vue-i18n/prefer-linked-key-with-paren': 'error',

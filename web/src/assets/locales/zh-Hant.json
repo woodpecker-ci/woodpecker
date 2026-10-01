@@ -525,5 +525,6 @@
     "registration_closed": "註冊功能已關閉",
     "invalid_state": "OAuth 狀態不可用",
     "allowed_orgs_placeholder": "組織名稱",
-    "git_password_desc": "Git 使用者的密碼或個人存取權杖。"
+    "git_password_desc": "Git 使用者的密碼或個人存取權杖。",
+    "language_name": "繁體中文"
 }

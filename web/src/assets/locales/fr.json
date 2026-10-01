@@ -670,5 +670,6 @@
     "disabled": "Désactivé",
     "fullscreen": "Plein écran",
     "exit_fullscreen": "Quitter le plein écran",
-    "help_translating": "Vous pouvez aider à traduire Woodpecker dans votre lanage sur {0}."
+    "help_translating": "Vous pouvez aider à traduire Woodpecker dans votre lanage sur {0}.",
+    "language_name": "français"
 }

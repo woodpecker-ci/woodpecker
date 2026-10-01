@@ -583,5 +583,6 @@
         }
     },
     "org_access_denied": "Non sei autorizzato ad accedere a questa organizzazione",
-    "login_to_woodpecker_with": "Accedi a Woodpecker con"
+    "login_to_woodpecker_with": "Accedi a Woodpecker con",
+    "language_name": "italiano"
 }

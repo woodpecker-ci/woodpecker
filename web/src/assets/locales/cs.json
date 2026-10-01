@@ -486,5 +486,6 @@
         }
     },
     "username": "Uživatelské jméno",
-    "welcome": "Vítejte ve Woodpecker"
+    "welcome": "Vítejte ve Woodpecker",
+    "language_name": "čeština"
 }

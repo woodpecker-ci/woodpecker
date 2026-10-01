@@ -641,5 +641,6 @@
     "exit_fullscreen": "ອອກຈາກໂໝດເຕັມຈໍ",
     "help_translating": "ທ່ານສາມາດຊ່ວຍແປ Woodpecker ເປັນພາສາຂອງທ່ານໄດ້ທີ່ {0}.",
     "weblate": "Weblate ຂອງພວກເຮົາ",
-    "disabled": "ປິດໃຊ້ງານແລ້ວ"
+    "disabled": "ປິດໃຊ້ງານແລ້ວ",
+    "language_name": "ລາວ"
 }

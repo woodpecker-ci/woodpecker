@@ -634,5 +634,6 @@
     "save": "Saglabāt",
     "add": "Pievienot",
     "delete": "Dzēst",
-    "org_access_denied": "Jums nav piekļuves šai organizācijai"
+    "org_access_denied": "Jums nav piekļuves šai organizācijai",
+    "language_name": "latviešu"
 }

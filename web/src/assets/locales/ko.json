@@ -632,5 +632,6 @@
     "exit_fullscreen": "전체 화면 종료",
     "help_translating": "{0}에서 Woodpecker 번역에 참여하실 수 있습니다.",
     "weblate": "우리의 Weblate",
-    "disabled": "비활성화됨"
+    "disabled": "비활성화됨",
+    "language_name": "한국어"
 }

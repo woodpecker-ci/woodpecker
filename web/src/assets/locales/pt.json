@@ -806,5 +806,6 @@
     "delete": "Excluir",
     "allowed_orgs": "Organizações permitidas",
     "allowed_orgs_desc": "Organizações cujos membros podem fazer login usando esta forja, além da configuração global WOODPECKER_ORGS.",
-    "allowed_orgs_placeholder": "Nome da organização"
+    "allowed_orgs_placeholder": "Nome da organização",
+    "language_name": "português"
 }

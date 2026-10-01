@@ -42,7 +42,7 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
+import { LOCALE_NAMES, SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -71,7 +71,7 @@ const collapseLogGroupsByDefault = computed<boolean>({
 const localeOptions = computed(() =>
   SUPPORTED_LOCALES.map((supportedLocale) => ({
     value: supportedLocale,
-    text: new Intl.DisplayNames(supportedLocale, { type: 'language' }).of(supportedLocale) || supportedLocale,
+    text: LOCALE_NAMES[supportedLocale] || supportedLocale,
   })),
 );
 

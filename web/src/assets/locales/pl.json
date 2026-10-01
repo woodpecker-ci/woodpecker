@@ -542,5 +542,6 @@
     "welcome": "Witamy w Woodpecker",
     "empty_list": "Nie znaleziono {entity}!",
     "api": "API",
-    "login_to_woodpecker_with": "Zaloguj się do Woodpecker za pomocą"
+    "login_to_woodpecker_with": "Zaloguj się do Woodpecker za pomocą",
+    "language_name": "polski"
 }

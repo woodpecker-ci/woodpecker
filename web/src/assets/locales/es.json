@@ -565,5 +565,6 @@
     "gitea": "Gitea",
     "public_only": "Solo público",
     "extensions_signatures_public_key": "Clave pública para la firma",
-    "login_to_woodpecker_with": "Iniciar sesión en Woodpecker con"
+    "login_to_woodpecker_with": "Iniciar sesión en Woodpecker con",
+    "language_name": "español"
 }

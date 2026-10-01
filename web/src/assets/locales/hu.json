@@ -647,5 +647,6 @@
     "forge_saved": "Kohó mentve",
     "allowed_orgs": "Engedélyezett szervezetek",
     "allowed_orgs_desc": "Szervezetek, melynek tagjai bejelentkezhetnek ezt a kohót használva, a globális WOODPECKER_ORGS beállításon felül.",
-    "allowed_orgs_placeholder": "Szervezet neve"
+    "allowed_orgs_placeholder": "Szervezet neve",
+    "language_name": "magyar"
 }
