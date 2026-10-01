@@ -75,3 +75,16 @@ func TestPipelineToAPIModel(t *testing.T) {
 		})
 	}
 }
+
+func TestPipelineOptionsValidate(t *testing.T) {
+	t.Parallel()
+
+	assert.NoError(t, (&PipelineOptions{Branch: "main"}).Validate())
+	assert.NoError(t, (&PipelineOptions{Tag: "v1.0.0"}).Validate())
+	assert.NoError(t, (&PipelineOptions{SHA: "abc1234"}).Validate())
+
+	assert.Error(t, (&PipelineOptions{}).Validate())
+	assert.Error(t, (&PipelineOptions{Branch: "main", Tag: "v1"}).Validate())
+	assert.Error(t, (&PipelineOptions{Branch: "main", SHA: "abc"}).Validate())
+	assert.Error(t, (&PipelineOptions{Tag: "v1", SHA: "abc"}).Validate())
+}
