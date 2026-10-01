@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
@@ -61,6 +61,40 @@ function externalCSSPlugin(): Plugin {
   };
 }
 
+function supportedLocalesPlugin(): Plugin {
+  const virtualModuleId = 'virtual:vue-i18n-supported-locales';
+  const resolvedVirtualModuleId = `\0${virtualModuleId}`;
+
+  const localesDir = 'src/assets/locales/';
+  const locales = readdirSync(localesDir).map((filename) => filename.replace('.json', ''));
+
+  // Browsers do not know the name of every language (e.g. Bavarian), so each locale names itself.
+  const readLocaleName = (locale: string) => {
+    const messages = JSON.parse(readFileSync(`${localesDir}${locale}.json`, 'utf-8')) as { language_name?: string };
+    return messages.language_name;
+  };
+  const localeNames = Object.fromEntries(locales.map((locale) => [locale, readLocaleName(locale)]));
+
+  return {
+    name: 'vue-i18n-supported-locales',
+
+    resolveId(id) {
+      if (id === virtualModuleId) {
+        return resolvedVirtualModuleId;
+      }
+    },
+
+    load(id) {
+      if (id === resolvedVirtualModuleId) {
+        return `
+          export const SUPPORTED_LOCALES = ${JSON.stringify(locales)};
+          export const LOCALE_NAMES = ${JSON.stringify(localeNames)};
+        `;
+      }
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -68,28 +102,7 @@ export default defineConfig({
     VueI18nPlugin({
       include: path.resolve(import.meta.dirname, 'src/assets/locales/**'),
     }),
-    (() => {
-      const virtualModuleId = 'virtual:vue-i18n-supported-locales';
-      const resolvedVirtualModuleId = `\0${virtualModuleId}`;
-
-      const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
-
-      return {
-        name: 'vue-i18n-supported-locales',
-
-        resolveId(id) {
-          if (id === virtualModuleId) {
-            return resolvedVirtualModuleId;
-          }
-        },
-
-        load(id) {
-          if (id === resolvedVirtualModuleId) {
-            return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;
-          }
-        },
-      };
-    })(),
+    supportedLocalesPlugin(),
     svgLoader(),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
