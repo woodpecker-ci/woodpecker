@@ -47,18 +47,8 @@ func (c *Config) MergeIfNotSet(c2 *Config) {
 
 var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", "exec", "decode-base64", "completion", "", "context", "ctx"}
 
-// shellCompletionFlag is appended by the generated shell completion scripts.
-// urfave/cli strips it before the Before hooks run and keeps the completion
-// state private, so os.Args is the only place to see it.
-const shellCompletionFlag = "--generate-shell-completion"
-
 func Load(ctx context.Context, c *cli.Command) error {
 	if firstArg := c.Args().First(); slices.Contains(skipSetupForCommands, firstArg) {
-		return nil
-	}
-
-	// Completion only lists commands and flags, so it must work before setup.
-	if len(os.Args) > 0 && os.Args[len(os.Args)-1] == shellCompletionFlag {
 		return nil
 	}
 
