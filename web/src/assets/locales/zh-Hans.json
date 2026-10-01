@@ -804,5 +804,6 @@
     "delete": "删除",
     "allowed_orgs": "允许的组织",
     "allowed_orgs_desc": "指定允许其成员通过此代码托管平台登录的组织，作为全局 WOODPECKER_ORGS 设置的补充。",
-    "allowed_orgs_placeholder": "组织名称"
+    "allowed_orgs_placeholder": "组织名称",
+    "language_name": "简体中文"
 }
