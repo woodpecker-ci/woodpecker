@@ -25,23 +25,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestLookupShellPath(t *testing.T) {
+	t.Run("default", func(t *testing.T) {
+		assert.Equal(t, "woodpecker-test-shell", lookupShellPath("woodpecker-test-shell"))
+	})
+
+	t.Run("override", func(t *testing.T) {
+		t.Setenv("WOODPECKER_SHELL_PATH_woodpecker-test-shell", "/custom/path/woodpecker-test-shell")
+		assert.Equal(t, "/custom/path/woodpecker-test-shell", lookupShellPath("woodpecker-test-shell"))
+	})
+}
+
 func TestGenCmdByShell(t *testing.T) {
 	tmpDir := t.TempDir()
 	e := local{tempDir: tmpDir}
 
 	t.Run("error cases", func(t *testing.T) {
-		args, err := e.genCmdByShell("", []string{"echo hi"}, t.TempDir())
+		args, err := e.genCmdByShell("", "", []string{"echo hi"}, t.TempDir())
 		assert.Nil(t, args)
 		assert.ErrorIs(t, err, ErrNoShellSet)
 
-		args, err = e.genCmdByShell("sh", []string{}, t.TempDir())
+		args, err = e.genCmdByShell("sh", "sh", []string{}, t.TempDir())
 		assert.Nil(t, args)
 		assert.ErrorIs(t, err, ErrNoCmdSet)
 	})
 
 	t.Run("windows shells", func(t *testing.T) {
 		t.Run("cmd", func(t *testing.T) {
-			args, err := e.genCmdByShell("cmd.exe", []string{"echo hi", "call build.bat"}, t.TempDir())
+			args, err := e.genCmdByShell("cmd", "cmd.exe", []string{"echo hi", "call build.bat"}, t.TempDir())
 			require.NoError(t, err)
 			require.Len(t, args, 3)
 			assert.Equal(t, "/D", args[0])
@@ -66,7 +77,7 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 		})
 
 		t.Run("powershell", func(t *testing.T) {
-			args, err := e.genCmdByShell("powershell", []string{"Write-Host 'test'", "echo test"}, t.TempDir())
+			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "echo test"}, t.TempDir())
 			require.NoError(t, err)
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
@@ -75,7 +86,7 @@ Write-Host 'test'
 echo '+ echo test'
 echo test`, args[3])
 
-			args, err = e.genCmdByShell("pwsh", []string{"Get-Process"}, t.TempDir())
+			args, err = e.genCmdByShell("pwsh", "pwsh", []string{"Get-Process"}, t.TempDir())
 			require.NoError(t, err)
 			assert.Len(t, args, 4)
 			assert.Equal(t, "-noprofile", args[0])
@@ -83,7 +94,7 @@ echo test`, args[3])
 	})
 
 	t.Run("unix shells", func(t *testing.T) {
-		args, err := e.genCmdByShell("sh", []string{"echo hello", "pwd"}, t.TempDir())
+		args, err := e.genCmdByShell("sh", "sh", []string{"echo hello", "pwd"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
@@ -91,20 +102,20 @@ echo test`, args[3])
 		assert.Contains(t, args[2], "echo hello")
 		assert.Contains(t, args[2], "pwd")
 
-		args, err = e.genCmdByShell("bash", []string{"ls -la"}, t.TempDir())
+		args, err = e.genCmdByShell("bash", "bash", []string{"ls -la"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
 		assert.Equal(t, "-c", args[1])
 
-		args, err = e.genCmdByShell("zsh", []string{"echo test"}, t.TempDir())
+		args, err = e.genCmdByShell("zsh", "zsh", []string{"echo test"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
 	})
 
 	t.Run("fish shell", func(t *testing.T) {
-		args, err := e.genCmdByShell("fish", []string{"echo test", "ls"}, t.TempDir())
+		args, err := e.genCmdByShell("fish", "fish", []string{"echo test", "ls"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 2)
 		assert.Equal(t, "-c", args[0])
@@ -113,7 +124,7 @@ echo test`, args[3])
 	})
 
 	t.Run("nu shell", func(t *testing.T) {
-		args, err := e.genCmdByShell("nu", []string{"echo test"}, t.TempDir())
+		args, err := e.genCmdByShell("nu", "nu", []string{"echo test"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 2)
 		assert.Equal(t, "--commands", args[0])
@@ -121,7 +132,7 @@ echo test`, args[3])
 	})
 
 	t.Run("command escaping", func(t *testing.T) {
-		args, err := e.genCmdByShell("cmd", []string{"echo 'test with | pipe'", "echo 'test & ampersand'\n\necho new line"}, t.TempDir())
+		args, err := e.genCmdByShell("cmd", "cmd", []string{"echo 'test with | pipe'", "echo 'test & ampersand'\n\necho new line"}, t.TempDir())
 		require.NoError(t, err)
 		content, err := os.ReadFile(args[2])
 		require.NoError(t, err)
@@ -141,8 +152,21 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 `, agentPath, agentPath), string(content))
 	})
 
-	t.Run("shell with .exe suffix", func(t *testing.T) {
-		args, err := e.genCmdByShell("bash.exe", []string{"echo test"}, t.TempDir())
+	t.Run("custom shell path", func(t *testing.T) {
+		if runtime.GOOS == "windows" {
+			t.Skip("requires a POSIX shell")
+		}
+
+		args, err := e.genCmdByShell("custom-sh", "sh", []string{"echo test"}, t.TempDir())
+		require.NoError(t, err)
+		assert.Len(t, args, 3)
+		assert.Equal(t, "-e", args[0])
+		assert.Equal(t, "-c", args[1])
+		assert.Contains(t, args[2], "echo test")
+	})
+
+	t.Run("shell path does not determine shell type", func(t *testing.T) {
+		args, err := e.genCmdByShell("bash", "bash.exe", []string{"echo test"}, t.TempDir())
 		require.NoError(t, err)
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
