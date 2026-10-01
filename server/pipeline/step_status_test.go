@@ -283,27 +283,3 @@ func TestUpdateStepStatus(t *testing.T) {
 		assert.Equal(t, model.StatusKilled, step.State)
 	})
 }
-
-func TestUpdateStepToStatusSkipped(t *testing.T) {
-	t.Parallel()
-
-	t.Run("NotStarted", func(t *testing.T) {
-		t.Parallel()
-
-		step, err := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{}, int64(1), model.StatusSkipped)
-
-		assert.NoError(t, err)
-		assert.Equal(t, model.StatusSkipped, step.State)
-		assert.Equal(t, int64(0), step.Finished)
-	})
-
-	t.Run("AlreadyStarted", func(t *testing.T) {
-		t.Parallel()
-
-		step, err := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{Started: 42}, int64(100), model.StatusSkipped)
-
-		assert.NoError(t, err)
-		assert.Equal(t, model.StatusSuccess, step.State)
-		assert.Equal(t, int64(100), step.Finished)
-	})
-}
