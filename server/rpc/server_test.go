@@ -23,9 +23,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
@@ -138,5 +142,40 @@ func TestServerUnregisterAgent(t *testing.T) {
 		srv := newTestServer(t, store)
 		_, err := srv.UnregisterAgent(ctxWithAgentID(9), new(proto.Empty))
 		assert.ErrorIs(t, err, delErr)
+	})
+}
+
+func TestServerLog(t *testing.T) {
+	logRequest := &proto.LogRequest{LogEntries: []*proto.LogEntry{
+		{StepUuid: "step-uuid-123", Line: 0, Data: []byte("hello")},
+	}}
+
+	t.Run("store failure is retryable for the agent", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(defaultStep(model.StatusRunning), nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(errors.New("db down"))
+
+		_, err := newTestServer(t, mockStore).Log(ctxWithAgentID(1), logRequest)
+		assert.Equal(t, codes.Unavailable, status.Code(err))
+	})
+
+	t.Run("rejected entries are not retryable", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepByUUID", "step-uuid-123").Return(nil, errors.New("not found"))
+
+		_, err := newTestServer(t, mockStore).Log(ctxWithAgentID(1), logRequest)
+		require.Error(t, err)
+		assert.NotEqual(t, codes.Unavailable, status.Code(err))
 	})
 }
