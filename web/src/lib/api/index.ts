@@ -4,6 +4,7 @@ import type {
   Cron,
   ExtensionSettings,
   Forge,
+  ForgeAppHealth,
   Org,
   OrgPermissions,
   Pipeline,
@@ -373,6 +374,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async deleteForge(forge: Forge): Promise<unknown> {
     return this._delete(`/api/forges/${forge.id}`);
+  }
+
+  async getForgeAppHealth(forgeId: Forge['id']): Promise<ForgeAppHealth> {
+    return this._get(`/api/forges/${forgeId}/app-health`) as Promise<ForgeAppHealth>;
   }
 
   async getQueueInfo(): Promise<QueueInfo> {

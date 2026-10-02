@@ -68,7 +68,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	err = setupForgeService(c, store)
+	err = setupForgeService(c, store, setupForge)
 	if err != nil {
 		return nil, err
 	}
