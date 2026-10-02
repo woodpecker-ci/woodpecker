@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type ctxKey struct{}
@@ -491,6 +492,18 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		})
 	}
 
+	// store first, so web clients only see what is stored
+	err = server.Config.Services.LogStore.LogAppend(step, logEntries)
+	if errors.Is(err, types.ErrInsertDuplicateDetected) {
+		// the agent resent a batch that is already stored and published
+		log.Debug().Msgf("ignore resent log entries of step %s", stepUUID)
+		return nil
+	}
+	if err != nil {
+		log.Error().Err(err).Msg("could not store log entries")
+		return err
+	}
+
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
@@ -498,11 +511,6 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
-
-	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
-		log.Error().Err(err).Msg("could not store log entries")
-		return err
-	}
 
 	return nil
 }
