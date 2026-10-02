@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-01
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @healdropper, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Fix/docs deps and flaky test [[#7204](https://github.com/woodpecker-ci/woodpecker/pull/7204)]
 - Add AgentListWithOpts with pagination options [[#7155](https://github.com/woodpecker-ci/woodpecker/pull/7155)]
 - Use more unique sign to detect commands [[#7122](https://github.com/woodpecker-ci/woodpecker/pull/7122)]
 - Run swaggo in golangci-lint [[#7121](https://github.com/woodpecker-ci/woodpecker/pull/7121)]
