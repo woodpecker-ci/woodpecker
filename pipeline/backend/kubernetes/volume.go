@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func mkPersistentVolumeClaim(config *config, name, namespace string) (*kube_core_v1.PersistentVolumeClaim, error) {
@@ -100,4 +102,34 @@ func stopVolume(ctx context.Context, engine *kube, name, namespace string, delet
 		return nil
 	}
 	return err
+}
+
+// dropLocalPathsInsideWorkspace removes local filesystem volumes that mount at or
+// inside the workspace. Kubernetes cannot mount host paths, and the workspace
+// volume already covers that directory tree. Each dropped volume is logged.
+func dropLocalPathsInsideWorkspace(conf *types.Config) {
+	for _, stage := range conf.Stages {
+		for _, step := range stage.Steps {
+			volumes := make([]string, 0, len(step.Volumes))
+			for _, volume := range step.Volumes {
+				mountPath := volumeMountPath(volume)
+				if isLocalPath(volume) && (mountPath == step.WorkspaceBase || isBelowPath(mountPath, step.WorkspaceBase)) {
+					log.Warn().Str("step", step.Name).Str("volume", volume).Msg("dropping local-path volume inside workspace, Kubernetes cannot mount host paths, use --local=false to clone inside the cluster")
+					continue
+				}
+				volumes = append(volumes, volume)
+			}
+			step.Volumes = volumes
+		}
+	}
+}
+
+// isLocalPath reports whether a volume is backed by a local filesystem path.
+func isLocalPath(volume string) bool {
+	return strings.HasPrefix(strings.Split(volume, ":")[0], "/")
+}
+
+// isBelowPath reports whether path lies below the base directory.
+func isBelowPath(path, base string) bool {
+	return base != "" && strings.HasPrefix(path, strings.TrimSuffix(base, "/")+"/")
 }
