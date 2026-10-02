@@ -91,13 +91,20 @@ func EventStreamSSE(c *gin.Context) {
 	)
 	requestCtx := c.Request.Context()
 
+	// Resolve the service on the handler goroutine and wait for the subscribe
+	// goroutine before returning, so nothing started by this handler reads
+	// server.Config after the handler has returned.
+	_scheduler := server.Config.Services.Scheduler
+	var subDone sync.WaitGroup
+
 	defer func() {
 		cancel(nil)
+		subDone.Wait()
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
-	go func() {
-		err := server.Config.Services.Scheduler.Subscribe(ctx, subTopics,
+	subDone.Go(func() {
+		err := _scheduler.Subscribe(ctx, subTopics,
 			func(m pubsub.Message) {
 				select {
 				case <-ctx.Done():
@@ -105,7 +112,7 @@ func EventStreamSSE(c *gin.Context) {
 				}
 			})
 		cancel(err)
-	}()
+	})
 
 	for {
 		select {
@@ -197,19 +204,25 @@ func LogStreamSSE(c *gin.Context) {
 
 	log.Debug().Msg("log stream: connection opened")
 
+	// Same as in EventStreamSSE: resolve the service here and wait for the tail
+	// goroutine before returning.
+	_logs := server.Config.Services.Logs
+	var tailDone sync.WaitGroup
+
 	defer func() {
 		cancel(nil)
+		tailDone.Wait()
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
-	err = server.Config.Services.Logs.Open(ctx, step.ID)
+	err = _logs.Open(ctx, step.ID)
 	if err != nil {
 		log.Error().Err(err).Msg("log stream: open failed")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: can't open stream\n\n"))
 		return
 	}
 
-	go func() {
+	tailDone.Go(func() {
 		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
 
 		var innerDone sync.WaitGroup
@@ -231,7 +244,7 @@ func LogStreamSSE(c *gin.Context) {
 			}
 		}()
 
-		err := server.Config.Services.Logs.Tail(ctx, step.ID, batches)
+		err := _logs.Tail(ctx, step.ID, batches)
 		if err != nil {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
@@ -239,7 +252,7 @@ func LogStreamSSE(c *gin.Context) {
 		close(batches)
 		innerDone.Wait()
 		cancel(err)
-	}()
+	})
 
 	id := 1
 	last, _ := strconv.Atoi(
