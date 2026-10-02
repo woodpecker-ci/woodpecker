@@ -49,6 +49,13 @@
                 "custom_labels": {
                     "desc": "Die benutzerdefinierten Labels, die vom Agent-Administrator beim Start des Agenten festgelegt wurden.",
                     "custom_labels": "Benutzerdefinierte Labels"
+                },
+                "filters": {
+                    "name": "Filter",
+                    "desc": "Agenten-Labels, die auf Server-Seite erzwungen werden, um Workflows zu filtern",
+                    "key": "Labelname",
+                    "value": "Filterwert",
+                    "delete": "Filter löschen"
                 }
             },
             "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
@@ -248,7 +255,11 @@
                 "delete": "Variable löschen"
             },
             "show_pipelines": "Pipelines anzeigen",
-            "no_manual_workflows": "Keine manuell ausführbaren Workflows gefunden. Stelle sicher, dass es mindestens einen Workflow gibt, der beim „manual“-Event läuft."
+            "no_manual_workflows": "Keine manuell ausführbaren Workflows gefunden. Stelle sicher, dass es mindestens einen Workflow gibt, der beim „manual“-Event läuft.",
+            "message": {
+                "title": "Nachricht",
+                "desc": "Diese Nachricht wird in der Bezeichnung der Pipeline als zusätzlich Information angezeigt."
+            }
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Code-Plattform öffnen",

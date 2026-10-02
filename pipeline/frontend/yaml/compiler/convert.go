@@ -90,6 +90,10 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	environment := map[string]string{}
 	maps.Copy(environment, c.env)
 
+	if !container.IsPlugin() {
+		maps.Copy(environment, c.nonPluginEnv)
+	}
+
 	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
 	if stepType == backend_types.StepTypeService || container.Detached {
@@ -146,10 +150,14 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		ports = append(ports, port)
 	}
 
+	whenEnv := map[string]string{}
+	maps.Copy(whenEnv, c.env)
+	maps.Copy(whenEnv, c.nonPluginEnv)
+
 	// at least one constraint contain status success, or all constraints have no status set
-	onSuccess := container.When.IncludesStatusSuccess(c.metadata, false, c.env)
+	onSuccess := container.When.IncludesStatusSuccess(c.metadata, false, whenEnv)
 	// at least one constraint must include the status failure.
-	onFailure := container.When.IncludesStatusFailure(c.metadata, false, c.env)
+	onFailure := container.When.IncludesStatusFailure(c.metadata, false, whenEnv)
 
 	failure := container.Failure
 	if container.Failure == "" {

@@ -236,6 +236,8 @@ linters:
           alias: config_service_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks
           alias: log_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/rpc/mocks
+          alias: rpc_mocks
 
         # kubernetes
         - pkg: k8s.io/api/core/v1
@@ -262,7 +264,7 @@ linters:
           alias: insecure_clear_text_keyset
         - pkg: github.com/migueleliasweb/go-github-mock/src/mock
           alias: github_mock
-        - pkg: gitlab.com/gitlab-org/api/client-go/v2
+        - pkg: gitlab.com/gitlab-org/api/client-go/v3
           alias: gitlab
         - pkg: go.yaml.in/yaml/v4
           alias: go_yaml
@@ -308,6 +310,7 @@ formatters:
     - gci
     - gofmt
     - gofumpt
+    - swaggo
   settings:
     gci:
       sections:
@@ -321,7 +324,10 @@ formatters:
         - pattern: interface{}
           replacement: any
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
+        balance-calls: true
   exclusions:
     generated: lax
     paths:

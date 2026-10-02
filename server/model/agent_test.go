@@ -63,6 +63,39 @@ func TestAgent_GetServerLabels(t *testing.T) {
 			pipeline.LabelFilterOrg: "123",
 		}, filters)
 	})
+
+	t.Run("AgentWithFilters", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:   IDNotSet,
+			Filters: map[string]string{"gpu": "true"},
+		}
+		filters, err := agent.GetServerLabels()
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			"gpu":                   "true",
+			pipeline.LabelFilterOrg: "*",
+		}, filters)
+	})
+
+	t.Run("OrgFilterCanNotBeOverwritten", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:   123,
+			Filters: map[string]string{pipeline.LabelFilterOrg: "456"},
+		}
+		filters, err := agent.GetServerLabels()
+		assert.NoError(t, err)
+		assert.Equal(t, "123", filters[pipeline.LabelFilterOrg])
+	})
+
+	t.Run("DoesNotMutateAgent", func(t *testing.T) {
+		agent := &Agent{
+			OrgID:   123,
+			Filters: map[string]string{"gpu": "true"},
+		}
+		_, err := agent.GetServerLabels()
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{"gpu": "true"}, agent.Filters)
+	})
 }
 
 func TestAgent_CanAccessRepo(t *testing.T) {

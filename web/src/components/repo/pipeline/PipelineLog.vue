@@ -292,8 +292,8 @@ const groupedLogs = computed(() => {
     const trimmedText = (line.rawText || '').trim();
 
     let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
+    if (trimmedText.startsWith('▶  ')) {
+      const cmdPart = trimmedText.slice(3).trim();
       isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
     }
 
@@ -326,7 +326,9 @@ const hasGroupedLogs = computed(() => {
   return groupedLogs.value.find((g) => g.isActualCommand);
 });
 
-const urlRegex = /https?:\/\/\S+/g;
+// Stop a URL at a '<' so that if we are also converting ansi escapes at the end of a URL
+// we don't include their closing </span> in the URL match.
+const urlRegex = /https?:\/\/[^\s<]+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
@@ -485,10 +487,11 @@ async function deleteLogs() {
   }
 }
 
+// A stepless workflow has no `children`, so the deref is guarded.
 function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
     (prev, workflow) => {
-      const result = workflow.children.reduce(
+      const result = (workflow.children ?? []).reduce(
         (prevChild, step) => {
           if (step.pid === pid) {
             return step;

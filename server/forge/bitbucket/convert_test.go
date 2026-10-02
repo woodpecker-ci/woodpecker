@@ -30,9 +30,14 @@ func Test_convertStatus(t *testing.T) {
 	assert.Equal(t, statusSuccess, convertStatus(model.StatusSuccess))
 	assert.Equal(t, statusPending, convertStatus(model.StatusPending))
 	assert.Equal(t, statusPending, convertStatus(model.StatusRunning))
+	assert.Equal(t, statusPending, convertStatus(model.StatusCreated))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusFailure))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusKilled))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusError))
+	assert.Equal(t, statusFailure, convertStatus(model.StatusDeclined))
+	assert.Equal(t, statusFailure, convertStatus(model.StatusSkipped))
+	assert.Equal(t, statusFailure, convertStatus(model.StatusCanceled))
+	assert.Equal(t, statusFailure, convertStatus(model.StatusValue("bogus")))
 }
 
 func Test_convertRepo(t *testing.T) {

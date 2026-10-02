@@ -184,7 +184,6 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 
 	spec := kube_core_v1.PodSpec{
 		RestartPolicy:     kube_core_v1.RestartPolicyNever,
-		RuntimeClassName:  options.RuntimeClassName,
 		PriorityClassName: config.PriorityClassName,
 		HostAliases:       hostAliases(step.ExtraHosts),
 		Hostname:          getHostnameOrEmpty(step.Name),
@@ -200,6 +199,10 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	// Only allow the step to set the service account name if explicitly enabled by the admin.
 	if config.ServiceAccountNameAllowFromStep {
 		spec.ServiceAccountName = options.ServiceAccountName
+	}
+
+	if config.RuntimeClassAllowFromStep {
+		spec.RuntimeClassName = options.RuntimeClassName
 	}
 
 	// If there are tolerations and they are allowed

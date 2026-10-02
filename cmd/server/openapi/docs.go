@@ -82,7 +82,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -1139,7 +1139,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -4687,6 +4687,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "filters": {
+                    "description": "Server side enforced agent filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -5223,6 +5230,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "branch": {
+                    "type": "string"
+                },
+                "message": {
                     "type": "string"
                 },
                 "variables": {

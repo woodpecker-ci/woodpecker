@@ -116,6 +116,12 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-runtime-class-allow-from-step",
+		Usage:   "whether to allow using runtime class name from step's backend options",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",

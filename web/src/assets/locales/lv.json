@@ -210,7 +210,8 @@
             "enabled": "Jau ir iespējots",
             "list_reloaded": "Repozitoriju sarakts tika pārlādēts",
             "reload": "Pārlādēt repozitorijus",
-            "success": "Repozitorijs iespējots"
+            "success": "Repozitorijs iespējots",
+            "conflict": "Konflikts"
         },
         "manual_pipeline": {
             "select_branch": "Norādiet atzaru",
@@ -471,7 +472,8 @@
                 "internal": "Iekšējs",
                 "desc": "Visi autentificētie lietotāji šajā serverī var redzēt šo projektu."
             }
-        }
+        },
+        "refresh": "Atjaunot repozitoriju sarakstu"
     },
     "repos": "Repozitorijas",
     "repositories": {
@@ -627,5 +629,10 @@
     "login_with": "Autorizēties ar {forge}",
     "empty_list": "Nav {entity}!",
     "global_level_secret": "globāls noslēpums",
-    "cli_login_denied": "Autorizešanās pie CLI liegta"
+    "cli_login_denied": "Autorizešanās pie CLI liegta",
+    "login_to_woodpecker_with": "Autorizēties ar",
+    "save": "Saglabāt",
+    "add": "Pievienot",
+    "delete": "Dzēst",
+    "org_access_denied": "Jums nav piekļuves šai organizācijai"
 }

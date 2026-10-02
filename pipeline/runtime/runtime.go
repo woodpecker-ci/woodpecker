@@ -74,6 +74,12 @@ func (r *Runtime) Err() error {
 	return r.err.Get()
 }
 
+// canceled reports whether the workflow context is done, meaning the workflow
+// was canceled or timed out and everything still running is being torn down.
+func (r *Runtime) canceled() bool {
+	return r.ctx.Err() != nil
+}
+
 // makeLogger returns a logger enriched with all runtime description fields.
 func (r *Runtime) makeLogger() zerolog.Logger {
 	logCtx := log.With()

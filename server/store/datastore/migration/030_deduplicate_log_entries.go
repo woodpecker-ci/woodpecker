@@ -15,8 +15,11 @@
 package migration
 
 import (
+	"fmt"
+
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 // Clears the way for the UNIQUE(step_id, line) index on log_entries by keeping
@@ -31,21 +34,44 @@ import (
 // model on every start, and skipping the cleanup would leave that failing.
 var deduplicateLogEntries = xormigrate.Migration{
 	ID: "deduplicate-log-entries",
-	MigrateSession: func(sess *xorm.Session) error {
-		_, err := sess.Exec(`DELETE FROM log_entries WHERE id IN (
-			SELECT id FROM (
-				SELECT entries.id AS id
-				FROM log_entries entries
-				JOIN (
-					SELECT step_id, line, MIN(id) AS keep_id
-					FROM log_entries
-					GROUP BY step_id, line
-					HAVING COUNT(*) > 1
-				) duplicates
-				ON duplicates.step_id = entries.step_id AND duplicates.line = entries.line
-				WHERE entries.id > duplicates.keep_id
-			) removable
-		);`)
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		// To speedup delete query we first create an index.
+		// The error can be ignored as it does not matter if creation failed.
+		_, _ = sess.Exec(`CREATE INDEX idx_log_entries_tmp ON log_entries (step_id, line, id);`)
+
+		// Find duplicat log entries and delete second ones.
+		dialect := sess.Engine().Dialect().URI().DBType
+		switch dialect {
+		case schemas.MYSQL:
+			_, err = sess.Exec(`
+DELETE a FROM log_entries a
+JOIN log_entries b
+ON a.step_id = b.step_id
+AND a.line = b.line
+AND a.id > b.id;`)
+
+			_, _ = sess.Exec(`DROP INDEX IF EXISTS idx_log_entries_tmp ON log_entries;`)
+		case schemas.POSTGRES:
+			_, err = sess.Exec(`
+DELETE FROM log_entries a
+USING log_entries b
+WHERE a.step_id = b.step_id
+AND a.line = b.line
+AND a.id > b.id;`)
+
+			_, _ = sess.Exec(`DROP INDEX IF EXISTS idx_log_entries_tmp;`)
+		case schemas.SQLITE:
+			_, err = sess.Exec(`
+DELETE FROM log_entries AS a
+WHERE EXISTS (
+SELECT 1 FROM log_entries b
+WHERE b.step_id = a.step_id AND b.line = a.line AND b.id < a.id
+);`)
+
+			_, _ = sess.Exec(`DROP INDEX IF EXISTS idx_log_entries_tmp;`)
+		default:
+			err = fmt.Errorf("dialect '%s' not supported", dialect)
+		}
 
 		return err
 	},
