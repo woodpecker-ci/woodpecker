@@ -25,7 +25,6 @@
     "closed_at": null,
     "merged_at": null,
     "merge_commit_sha": "b5fafd8b1c043723a38c99775bc807075bce9235",
-    "assignee": null,
     "assignees": [],
     "requested_reviewers": [],
     "requested_teams": [],
@@ -231,16 +230,6 @@
     "additions": 1,
     "deletions": 0,
     "changed_files": 1
-  },
-  "assignee": {
-    "login": "6543",
-    "id": 24977596,
-    "node_id": "MDQ6VXNlcjI0OTc3NTk2",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/6543",
-    "type": "User",
-    "user_view_type": "public",
-    "site_admin": false
   },
   "repository": {
     "id": 1028609128,
