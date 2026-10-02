@@ -17,10 +17,13 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
@@ -162,6 +165,10 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 		if len(entries) > 0 {
 			if err := s.peer.Log(c, stepUUID, entries); err != nil {
 				log.Error().Err(err).Msg("could not write log entries")
+				if errors.Is(err, errStoreLogEntries) {
+					// the agent retries on Unavailable; resent entries that are already stored are skipped
+					return status.Error(codes.Unavailable, err.Error())
+				}
 				return err
 			}
 		}

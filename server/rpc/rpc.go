@@ -437,6 +437,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	return s.updateAgentLastWork(agent)
 }
 
+// errStoreLogEntries marks a failure of the log store, which is worth a retry
+// by the agent, unlike log entries the server rejects.
+var errStoreLogEntries = errors.New("could not store log entries")
+
 // Log writes a log entry to the database and publishes it to the pubsub.
 // An explicit stepUUID makes it obvious that all entries must come from the same step.
 func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEntry) error {
@@ -501,7 +505,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	}
 	if err != nil {
 		log.Error().Err(err).Msg("could not store log entries")
-		return err
+		return fmt.Errorf("%w: %w", errStoreLogEntries, err)
 	}
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
