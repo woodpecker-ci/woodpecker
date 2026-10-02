@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @confusedsushi, @healdropper, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @healdropper, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
 
 ### 🔒 Security
 
@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix CLI shell completion [[#7203](https://github.com/woodpecker-ci/woodpecker/pull/7203)]
 - Fix nix dev env by disable static linking and make pnpm work again [[#7193](https://github.com/woodpecker-ci/woodpecker/pull/7193)]
 - Fix data race in SSE stream handlers when the client disconnects early [[#7139](https://github.com/woodpecker-ci/woodpecker/pull/7139)]
 - Disable `cmd.exe` AutoRun commands for local pipelines on Windows [[#7162](https://github.com/woodpecker-ci/woodpecker/pull/7162)]
