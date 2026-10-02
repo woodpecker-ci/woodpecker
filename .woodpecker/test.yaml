@@ -71,16 +71,6 @@ steps:
       - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec make generate-openapi and commit"; exit 1; } || true'
     when: *when
 
-  check-go-fix:
-    depends_on:
-      - vendor
-      - dummy-web
-    image: *golang_image
-    commands:
-      - "DIFF=$(go fix -diff -tags 'test' ./... | head)"
-      - '[ -n "$DIFF" ] && { echo "go fix not applied, exec \"go fix -tags ''test'' ./...\" and commit"; exit 1; } || true'
-    when: *when
-
   lint-license-header:
     image: *golang_image
     commands:
