@@ -26,6 +26,7 @@
 ### 🐛 Bug Fixes
 
 - Fix CLI shell completion [[#7203](https://github.com/woodpecker-ci/woodpecker/pull/7203)]
+- Fix url including </span> when combined with ansi escapes [[#7196](https://github.com/woodpecker-ci/woodpecker/pull/7196)]
 - Fix nix dev env by disable static linking and make pnpm work again [[#7193](https://github.com/woodpecker-ci/woodpecker/pull/7193)]
 - Fix data race in SSE stream handlers when the client disconnects early [[#7139](https://github.com/woodpecker-ci/woodpecker/pull/7139)]
 - Disable `cmd.exe` AutoRun commands for local pipelines on Windows [[#7162](https://github.com/woodpecker-ci/woodpecker/pull/7162)]
@@ -48,6 +49,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v3 [[#7201](https://github.com/woodpecker-ci/woodpecker/pull/7201)]
 - Update golang-packages [[#7147](https://github.com/woodpecker-ci/woodpecker/pull/7147)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.3 [[#7199](https://github.com/woodpecker-ci/woodpecker/pull/7199)]
@@ -66,10 +68,6 @@
 - Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.1 [[#7135](https://github.com/woodpecker-ci/woodpecker/pull/7135)]
 - Update web npm deps non-major [[#7134](https://github.com/woodpecker-ci/woodpecker/pull/7134)]
-
-### Misc
-
-- Fix url including </span> when combined with ansi escapes [[#7196](https://github.com/woodpecker-ci/woodpecker/pull/7196)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
