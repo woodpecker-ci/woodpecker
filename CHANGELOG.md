@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @healdropper, @jagerman, @joseph0531, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @usiegj00
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @healdropper, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @thiagola92, @tunglambk, @usiegj00
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Store workflow/step dependencies in database and update API [[#6130](https://github.com/woodpecker-ci/woodpecker/pull/6130)]
 - Fix/docs deps and flaky test [[#7204](https://github.com/woodpecker-ci/woodpecker/pull/7204)]
 - Add AgentListWithOpts with pagination options [[#7155](https://github.com/woodpecker-ci/woodpecker/pull/7155)]
 - Use more unique sign to detect commands [[#7122](https://github.com/woodpecker-ci/woodpecker/pull/7122)]
@@ -25,6 +26,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix workspace volume mismatch when using CLI exec with the Kubernetes backend [[#7150](https://github.com/woodpecker-ci/woodpecker/pull/7150)]
 - Fix CLI shell completion [[#7203](https://github.com/woodpecker-ci/woodpecker/pull/7203)]
 - Fix url including </span> when combined with ansi escapes [[#7196](https://github.com/woodpecker-ci/woodpecker/pull/7196)]
 - Fix nix dev env by disable static linking and make pnpm work again [[#7193](https://github.com/woodpecker-ci/woodpecker/pull/7193)]
