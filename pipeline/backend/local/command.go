@@ -95,7 +95,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 
 	script := ""
 	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("▶  "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
@@ -120,7 +120,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		for _, cmd := range cmdList {
 			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
 			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
-			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
+			encodedCmd := base64.StdEncoding.EncodeToString([]byte("▶  " + cmd + "\n"))
 
 			script += "\n"
 			script += agentPath + " decode-base64 " + encodedCmd + "\n"
@@ -139,7 +139,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "fish":
 		script := ""
 		for _, cmd := range cmdList {
-			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("▶  "+cmd)), cmd)
 		}
 		return []string{"-c", script}, nil
 	case "nu":
