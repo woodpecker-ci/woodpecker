@@ -60,8 +60,7 @@ func EnhanceHTTPError(err error, method, endpoint string) error {
 
 	// check for net package errors
 	// dns error handling
-	var dnsErr *net.DNSError
-	if errors.As(err, &dnsErr) {
+	if dnsErr, ok := errors.AsType[*net.DNSError](err); ok {
 		if dnsErr.IsNotFound {
 			return fmt.Errorf("DNS resolution failed: %s: %w (hostname %s does not exist or cannot be resolved)", baseMsg, err, host)
 		}
@@ -72,8 +71,7 @@ func EnhanceHTTPError(err error, method, endpoint string) error {
 	}
 
 	// op error handling
-	var opErr *net.OpError
-	if errors.As(err, &opErr) {
+	if opErr, ok := errors.AsType[*net.OpError](err); ok {
 		// connection refused
 		if errors.Is(opErr.Err, syscall.ECONNREFUSED) {
 			return fmt.Errorf("connection refused: %s: %w (server at %s is not accepting connections - is it running?)", baseMsg, err, host)
@@ -103,24 +101,20 @@ func EnhanceHTTPError(err error, method, endpoint string) error {
 	}
 
 	// check for url parsing errors
-	var urlErr *url.Error
-	if errors.As(err, &urlErr) {
+	if _, ok := errors.AsType[*url.Error](err); ok {
 		return fmt.Errorf("URL error: %s: %w (check if the endpoint URL is correctly formatted)", baseMsg, err)
 	}
 
 	// check for TLS/certificate errors
-	var certErr *x509.CertificateInvalidError
-	if errors.As(err, &certErr) {
+	if _, ok := errors.AsType[*x509.CertificateInvalidError](err); ok {
 		return fmt.Errorf("TLS certificate invalid: %s: %w (certificate validation failed for %s)", baseMsg, err, host)
 	}
 
-	var unknownAuthErr *x509.UnknownAuthorityError
-	if errors.As(err, &unknownAuthErr) {
+	if _, ok := errors.AsType[*x509.UnknownAuthorityError](err); ok {
 		return fmt.Errorf("TLS certificate verification failed: %s: %w (certificate signed by unknown authority for %s)", baseMsg, err, host)
 	}
 
-	var hostErr *x509.HostnameError
-	if errors.As(err, &hostErr) {
+	if _, ok := errors.AsType[*x509.HostnameError](err); ok {
 		return fmt.Errorf("TLS hostname mismatch: %s: %w (certificate is not valid for %s)", baseMsg, err, host)
 	}
 

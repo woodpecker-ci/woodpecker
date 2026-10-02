@@ -235,7 +235,7 @@ func TestStartStep(t *testing.T) {
 
 	t.Run("WithLogger", func(t *testing.T) {
 		t.Parallel()
-		var logCalled int32
+		var logCalled atomic.Int32
 		engine := mocks.NewMockBackend(t)
 		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
@@ -243,7 +243,7 @@ func TestStartStep(t *testing.T) {
 
 		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)),
 			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
-				atomic.AddInt32(&logCalled, 1)
+				logCalled.Add(1)
 				_, _ = io.ReadAll(rc)
 				return nil
 			})))
@@ -253,7 +253,7 @@ func TestStartStep(t *testing.T) {
 		require.NoError(t, err)
 
 		waitForLogs()
-		assert.Equal(t, int32(1), atomic.LoadInt32(&logCalled))
+		assert.Equal(t, int32(1), logCalled.Load())
 	})
 
 	t.Run("LoggerError", func(t *testing.T) {
@@ -491,10 +491,10 @@ func TestExecuteStep(t *testing.T) {
 	// with the Eventually polling goroutine reading it.
 	t.Run("DetachedStep", func(t *testing.T) {
 		t.Parallel()
-		var traced int32
+		var traced atomic.Int32
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).
-			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Run(func(mock.Arguments) { traced.Add(1) }).
 			Return(nil).Maybe()
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("svc")
@@ -506,7 +506,7 @@ func TestExecuteStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Eventually(t, func() bool {
-			return atomic.LoadInt32(&traced) >= 2
+			return traced.Load() >= 2
 		}, time.Second, 10*time.Millisecond)
 	})
 }
@@ -577,10 +577,10 @@ func TestRunDetachedStep(t *testing.T) {
 	// with the Eventually polling goroutine reading it.
 	t.Run("ReturnsImmediately", func(t *testing.T) {
 		t.Parallel()
-		var traced int32
+		var traced atomic.Int32
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).
-			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Run(func(mock.Arguments) { traced.Add(1) }).
 			Return(nil).Maybe()
 		r := newDummyRuntime(t, tracer)
 		step := dummyStep("svc")
@@ -590,7 +590,7 @@ func TestRunDetachedStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Eventually(t, func() bool {
-			return atomic.LoadInt32(&traced) >= 1
+			return traced.Load() >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
 
@@ -614,10 +614,10 @@ func TestRunDetachedStep(t *testing.T) {
 	// with the Eventually polling goroutine reading it.
 	t.Run("BackgroundContextCanceled", func(t *testing.T) {
 		t.Parallel()
-		var traced int32
+		var traced atomic.Int32
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).
-			Run(func(mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Run(func(mock.Arguments) { traced.Add(1) }).
 			Return(nil).Maybe()
 
 		engine := mocks.NewMockBackend(t)
@@ -641,7 +641,7 @@ func TestRunDetachedStep(t *testing.T) {
 		assert.NoError(t, err) // returns immediately
 		// Wait for the goroutine to finish and emit its trace.
 		assert.Eventually(t, func() bool {
-			return atomic.LoadInt32(&traced) >= 1
+			return traced.Load() >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
 
@@ -658,10 +658,10 @@ func TestRunDetachedStep(t *testing.T) {
 			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		var traced int32
+		var traced atomic.Int32
 		tracer := tracer_mocks.NewMockTracer(t)
 		tracer.On("Trace", mock.Anything).
-			Run(func(_ mock.Arguments) { atomic.AddInt32(&traced, 1) }).
+			Run(func(_ mock.Arguments) { traced.Add(1) }).
 			Return(traceErr) // every Trace call fails
 
 		r := New(
@@ -675,7 +675,7 @@ func TestRunDetachedStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Eventually(t, func() bool {
-			return atomic.LoadInt32(&traced) >= 1
+			return traced.Load() >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
 }

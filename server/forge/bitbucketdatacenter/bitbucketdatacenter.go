@@ -165,7 +165,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bitbucket.Repository
 	if rID.IsValid() {
-		opts := &bitbucket.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bitbucket.PermissionRepoWrite, ListOptions: bitbucket.ListOptions{Limit: listLimit}}
+		opts := &bitbucket.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bitbucket.PermissionRepoWrite, Limit: listLimit}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -223,8 +223,8 @@ func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 	}
 
 	opts := &bitbucket.RepositorySearchOptions{
-		Permission:  bitbucket.PermissionRepoWrite,
-		ListOptions: bitbucket.ListOptions{Limit: listLimit},
+		Permission: bitbucket.PermissionRepoWrite,
+		Limit:      listLimit,
 	}
 	all := make([]*model.Repo, 0)
 	for {
@@ -243,7 +243,7 @@ func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 	}
 
 	// Add admin permissions to relevant repositories
-	opts = &bitbucket.RepositorySearchOptions{Permission: bitbucket.PermissionRepoAdmin, ListOptions: bitbucket.ListOptions{Limit: listLimit}}
+	opts = &bitbucket.RepositorySearchOptions{Permission: bitbucket.PermissionRepoAdmin, Limit: listLimit}
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 		if err != nil {
