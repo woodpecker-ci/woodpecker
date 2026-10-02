@@ -28,7 +28,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -191,7 +191,7 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 		Page:           int64(p.Page),
 		PerPage:        int64(perPage),
 		AllAvailable:   new(false),
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -287,7 +287,7 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	opts := &gitlab.ListProjectsOptions{
 		Page:           int64(p.Page),
 		PerPage:        int64(perPage),
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.hideArchives {
 		opts.Archived = new(false)
