@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"codeberg.org/6543/xyaml/v2"
-	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
@@ -169,9 +168,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// prefix for the local-execution workspace volume name
-	prefix := "wp_" + ulid.Make().String()
-
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
@@ -203,7 +199,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		)
 		volumes = append(
 			volumes,
-			prefix+"_default:"+c.String("workspace-base"),
 			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
 		)
 	} else {
