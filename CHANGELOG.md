@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Adopt Golang v1.27 [[#7153](https://github.com/woodpecker-ci/woodpecker/pull/7153)]
 - Store workflow/step dependencies in database and update API [[#6130](https://github.com/woodpecker-ci/woodpecker/pull/6130)]
 - Fix/docs deps and flaky test [[#7204](https://github.com/woodpecker-ci/woodpecker/pull/7204)]
 - Add AgentListWithOpts with pagination options [[#7155](https://github.com/woodpecker-ci/woodpecker/pull/7155)]
@@ -44,32 +45,22 @@
 
 - Update docs npm deps non-major [[#7186](https://github.com/woodpecker-ci/woodpecker/pull/7186)]
 - Add MASH to awesome list [[#7191](https://github.com/woodpecker-ci/woodpecker/pull/7191)]
-- Update docs npm deps non-major [[#7163](https://github.com/woodpecker-ci/woodpecker/pull/7163)]
 - docs: document manual Linux binary installation [[#7160](https://github.com/woodpecker-ci/woodpecker/pull/7160)]
-- Update docs npm deps non-major [[#7137](https://github.com/woodpecker-ci/woodpecker/pull/7137)]
-- Update docs npm deps non-major [[#7133](https://github.com/woodpecker-ci/woodpecker/pull/7133)]
 
 ### 📦️ Dependency
 
 - Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v3 [[#7201](https://github.com/woodpecker-ci/woodpecker/pull/7201)]
-- Update golang-packages [[#7147](https://github.com/woodpecker-ci/woodpecker/pull/7147)]
 - Update docker.io/woodpeckerci/plugin-codecov Docker tag to v2.3.3 [[#7199](https://github.com/woodpecker-ci/woodpecker/pull/7199)]
 - Update golangci/golangci-lint Docker tag to v2.13.1 [[#7057](https://github.com/woodpecker-ci/woodpecker/pull/7057)]
-- Update web npm deps non-major [[#7188](https://github.com/woodpecker-ci/woodpecker/pull/7188)]
-- Update pre-commit non-major [[#7187](https://github.com/woodpecker-ci/woodpecker/pull/7187)]
 - Update dependency mvdan/gofumpt to v0.12.0 [[#7185](https://github.com/woodpecker-ci/woodpecker/pull/7185)]
 - Update woodpeckerci/plugin-release Docker tag to v0.3.2 [[#7184](https://github.com/woodpecker-ci/woodpecker/pull/7184)]
 - Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.4.3 [[#7182](https://github.com/woodpecker-ci/woodpecker/pull/7182)]
 - Update docker.io/woodpeckerci/plugin-trivy Docker tag to v1.6.1 [[#7183](https://github.com/woodpecker-ci/woodpecker/pull/7183)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v6.1.2 [[#7180](https://github.com/woodpecker-ci/woodpecker/pull/7180)]
 - Update docker.io/woodpeckerci/plugin-editorconfig-checker Docker tag to v0.3.4 [[#7181](https://github.com/woodpecker-ci/woodpecker/pull/7181)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.9.8 [[#7164](https://github.com/woodpecker-ci/woodpecker/pull/7164)]
-- Update golang-packages [[#7127](https://github.com/woodpecker-ci/woodpecker/pull/7127)]
 - Update dependency simple-icons to v16.31.0 [[#7138](https://github.com/woodpecker-ci/woodpecker/pull/7138)]
-- Lock file maintenance [[#7140](https://github.com/woodpecker-ci/woodpecker/pull/7140)]
 - Update woodpeckerci/plugin-git Docker tag to v2.10.1 [[#7135](https://github.com/woodpecker-ci/woodpecker/pull/7135)]
-- Update web npm deps non-major [[#7134](https://github.com/woodpecker-ci/woodpecker/pull/7134)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
 
