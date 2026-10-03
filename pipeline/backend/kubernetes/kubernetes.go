@@ -247,6 +247,9 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
+	// drop local filesystem volumes inside the workspace, Kubernetes cannot mount host paths
+	dropLocalPathsInsideWorkspace(conf)
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Creating workflow volume")
 	_, err := startVolume(ctx, e, conf.Volume, namespace)
 	if err != nil {

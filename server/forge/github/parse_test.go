@@ -435,10 +435,6 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			if assert.NotNil(t, p.Assignee) {
-				assert.Equal(t, "demoaccount2-commits", *p.Assignee.Login)
-				assert.Equal(t, int64(223550959), *p.Assignee.ID)
-			}
 			if assert.Len(t, p.Assignees, 1) {
 				assert.Equal(t, "demoaccount2-commits", *p.Assignees[0].Login)
 				assert.Equal(t, int64(223550959), *p.Assignees[0].ID)
@@ -480,7 +476,6 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			assert.Nil(t, p.Assignee)
 			assert.Empty(t, p.Assignees)
 			if assert.Len(t, p.Labels, 1) {
 				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
