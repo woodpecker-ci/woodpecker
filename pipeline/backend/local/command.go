@@ -170,6 +170,20 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
+	case "csi", "dotnet-script", "csharp":
+		script, err := os.CreateTemp(baseDir, "*.csx")
+		if err != nil {
+			return nil, err
+		}
+
+		defer script.Close()
+
+		// Keep the commands unchanged so directives such as #r and #load remain valid.
+		if _, err := script.WriteString(strings.Join(cmdList, "\n")); err != nil {
+			return nil, err
+		}
+
+		return []string{script.Name()}, nil
 	}
 }
 
