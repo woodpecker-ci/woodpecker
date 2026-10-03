@@ -52,6 +52,14 @@ var cronCreateCmd = &cli.Command{
 			Usage: "whether cron is enabled",
 			Value: true,
 		},
+		&cli.StringSliceFlag{
+			Name:    "workflow",
+			Aliases: []string{"w"},
+			Usage:   "run only the named workflow, repeat to select several (default: all)",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
+		},
 		common.FormatFlag(tmplCronList, true),
 	},
 }
@@ -80,10 +88,11 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 	}
 
 	cron := &woodpecker.Cron{
-		Name:     cronName,
-		Branch:   branch,
-		Schedule: schedule,
-		Enabled:  enabled,
+		Name:      cronName,
+		Branch:    branch,
+		Schedule:  schedule,
+		Enabled:   enabled,
+		Workflows: c.StringSlice("workflow"),
 	}
 	cron, err = client.CronCreate(repoID, cron)
 	if err != nil {

@@ -43,6 +43,14 @@ var pipelineCreateCmd = &cli.Command{
 				TrimSpace: true,
 			},
 		},
+		&cli.StringSliceFlag{
+			Name:    "workflow",
+			Aliases: []string{"w"},
+			Usage:   "run only the named workflow, repeat to select several (default: all)",
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
+		},
 	}...),
 }
 
@@ -70,6 +78,7 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	options := &woodpecker.PipelineOptions{
 		Branch:    branch,
 		Variables: variables,
+		Workflows: c.StringSlice("workflow"),
 	}
 
 	pipeline, err := client.PipelineCreate(repoID, options)
