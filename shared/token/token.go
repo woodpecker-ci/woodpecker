@@ -16,6 +16,7 @@ package token
 
 import (
 	"fmt"
+	"maps"
 	"net/http"
 	"slices"
 
@@ -132,9 +133,7 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 		return "", fmt.Errorf("token claim is not a MapClaims")
 	}
 
-	for k, v := range t.claims {
-		claims[k] = v
-	}
+	maps.Copy(claims, t.claims)
 
 	claims["type"] = t.Type
 	if exp > 0 {
