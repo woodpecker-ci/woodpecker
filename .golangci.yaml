@@ -31,6 +31,7 @@ linters:
     - makezero
     - misspell
     - mnd
+    - modernize
     - nolintlint
     - revive
     - rowserrcheck
@@ -264,7 +265,7 @@ linters:
           alias: insecure_clear_text_keyset
         - pkg: github.com/migueleliasweb/go-github-mock/src/mock
           alias: github_mock
-        - pkg: gitlab.com/gitlab-org/api/client-go/v2
+        - pkg: gitlab.com/gitlab-org/api/client-go/v3
           alias: gitlab
         - pkg: go.yaml.in/yaml/v4
           alias: go_yaml
@@ -324,7 +325,10 @@ formatters:
         - pattern: interface{}
           replacement: any
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
+        balance-calls: true
   exclusions:
     generated: lax
     paths:

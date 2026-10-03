@@ -15,6 +15,7 @@
 package token
 
 import (
+	"slices"
 	"testing"
 )
 
@@ -45,13 +46,7 @@ func FuzzParse(f *testing.F) {
 		if err != nil {
 			return
 		}
-		found := false
-		for _, allowed := range allowedTypes {
-			if parsed.Type == allowed {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(allowedTypes, parsed.Type)
 		if !found {
 			t.Fatalf("parsed token has disallowed type %q", parsed.Type)
 		}

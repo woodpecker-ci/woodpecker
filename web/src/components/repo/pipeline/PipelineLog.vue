@@ -326,7 +326,9 @@ const hasGroupedLogs = computed(() => {
   return groupedLogs.value.find((g) => g.isActualCommand);
 });
 
-const urlRegex = /https?:\/\/\S+/g;
+// Stop a URL at a '<' so that if we are also converting ansi escapes at the end of a URL
+// we don't include their closing </span> in the URL match.
+const urlRegex = /https?:\/\/[^\s<]+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {

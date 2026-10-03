@@ -24,11 +24,6 @@
       "enabled": false
     },
     {
-      "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yaml"],
-      "addLabels": ["devx"]
-    },
-    {
       "groupName": "golang-lang",
       "matchUpdateTypes": ["minor", "patch"],
       "matchPackageNames": ["/^golang$/", "/xgo/"]

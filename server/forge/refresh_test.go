@@ -144,12 +144,12 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 	var wg sync.WaitGroup
 	users := make([]*model.User, numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		users[i] = expiredUser(42) // same user ID
 	}
 
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
 			forge.Refresh(context.Background(), f, mockStore, u)
@@ -161,7 +161,7 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 	assert.Equal(t, int32(1), refreshCount.Load(), "expected exactly 1 refresh call, got %d", refreshCount.Load())
 
 	// All goroutines should have the fresh tokens
-	for i := 0; i < len(users); i++ {
+	for i := range users {
 		assert.Equal(t, "new-access-token", users[i].AccessToken, "user[%d] missing new access token", i)
 		assert.Equal(t, "new-refresh-token", users[i].RefreshToken, "user[%d] missing new refresh token", i)
 	}
@@ -182,12 +182,12 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 	var wg sync.WaitGroup
 	users := make([]*model.User, numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		users[i] = expiredUser(99) // same user ID
 	}
 
 	wg.Add(numGoroutines)
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
 			forge.Refresh(context.Background(), f, mockStore, u)
@@ -196,7 +196,7 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 	wg.Wait()
 
 	// Tokens should remain unchanged (error path)
-	for i := 0; i < len(users); i++ {
+	for i := range users {
 		assert.Equal(t, "old-access-token", users[i].AccessToken, "user[%d] token should be unchanged after error", i)
 	}
 
