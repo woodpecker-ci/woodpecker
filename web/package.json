@@ -6,7 +6,7 @@
   "packageManager": "pnpm@12.6.0",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "start": "vite",
