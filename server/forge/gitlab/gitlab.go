@@ -188,10 +188,8 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 	perPage := min(p.PerPage, defaultPerPage)
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    int64(p.Page),
-			PerPage: int64(perPage),
-		},
+		Page:           int64(p.Page),
+		PerPage:        int64(perPage),
 		AllAvailable:   new(false),
 		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}, gitlab.WithContext(ctx))
@@ -287,10 +285,8 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	perPage := min(p.PerPage, defaultPerPage)
 
 	opts := &gitlab.ListProjectsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    int64(p.Page),
-			PerPage: int64(perPage),
-		},
+		Page:           int64(p.Page),
+		PerPage:        int64(perPage),
 		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.hideArchives {
@@ -349,8 +345,8 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	state := "opened"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
-		ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)},
-		State:       &state,
+		Page: int64(p.Page), PerPage: int64(p.PerPage),
+		State: &state,
 	})
 	if err != nil {
 		return nil, err
@@ -397,10 +393,10 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	}
 
 	opts := &gitlab.ListTreeOptions{
-		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
-		Path:        &path,
-		Ref:         &pipeline.Commit,
-		Recursive:   new(false),
+		PerPage:   defaultPerPage,
+		Path:      &path,
+		Ref:       &pipeline.Commit,
+		Recursive: new(false),
 	}
 
 	for i := 1; true; i++ {
@@ -546,10 +542,8 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
-		ListOptions: gitlab.ListOptions{
-			PerPage: defaultPerPage,
-			Page:    1,
-		},
+		PerPage: defaultPerPage,
+		Page:    1,
 	}
 	for {
 		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
@@ -592,7 +586,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
-		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)}},
+		&gitlab.ListBranchesOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)},
 		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -695,11 +689,9 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
-		Search: new(owner),
+		Page:    1,
+		PerPage: defaultPerPage,
+		Search:  new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -716,10 +708,8 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	opts := &gitlab.ListGroupMembersOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
+		Page:    1,
+		PerPage: defaultPerPage,
 	}
 
 	for i := 1; true; i++ {
@@ -749,10 +739,8 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	users, _, err := client.Users.ListUsers(&gitlab.ListUsersOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: 1,
-		},
+		Page:     1,
+		PerPage:  1,
 		Username: new(owner),
 	})
 	if len(users) == 1 && err == nil {
@@ -764,11 +752,9 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
-		Search: new(owner),
+		Page:    1,
+		PerPage: defaultPerPage,
+		Search:  new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err

@@ -145,12 +145,10 @@ func TestAuthInterceptorCoalescesConcurrentRefresh(t *testing.T) {
 	errs := make(chan error, callers)
 	var wg sync.WaitGroup
 	for range callers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			<-start
 			errs <- interceptor.refreshTokenAfterUnauthenticated(context.Background(), "old-token")
-		}()
+		})
 	}
 	close(start)
 	wg.Wait()

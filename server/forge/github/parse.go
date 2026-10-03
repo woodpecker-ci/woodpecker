@@ -129,8 +129,8 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 		pipeline.TagTitle = strings.TrimPrefix(pipeline.Ref, "refs/tags/")
 		// For tags, if the base_ref (tag's base branch) is set, we're using it
 		// as pipeline's branch so that we can filter events base on it
-		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.TrimPrefix(hook.GetBaseRef(), "refs/heads/")
+		if after, ok := strings.CutPrefix(hook.GetBaseRef(), "refs/heads/"); ok {
+			pipeline.Branch = after
 		}
 		return repo, pipeline, "", ""
 	}

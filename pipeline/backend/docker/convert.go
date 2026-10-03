@@ -79,14 +79,12 @@ func toContainerName(step *types.Step) string {
 // returns a container host configuration.
 func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
 	config := &container.HostConfig{
-		Resources: container.Resources{
-			CPUQuota:   conf.resourceLimit.CPUQuota,
-			CPUShares:  conf.resourceLimit.CPUShares,
-			CpusetCpus: conf.resourceLimit.CPUSet,
-			Memory:     conf.resourceLimit.MemLimit,
-			MemorySwap: conf.resourceLimit.MemSwapLimit,
-		},
-		ShmSize: conf.resourceLimit.ShmSize,
+		CPUQuota:   conf.resourceLimit.CPUQuota,
+		CPUShares:  conf.resourceLimit.CPUShares,
+		CpusetCpus: conf.resourceLimit.CPUSet,
+		Memory:     conf.resourceLimit.MemLimit,
+		MemorySwap: conf.resourceLimit.MemSwapLimit,
+		ShmSize:    conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
@@ -237,8 +235,4 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 		return cleanResults, nil
 	}
 	return strings.Split(volumeParts, ":"), nil
-}
-
-func toRef[T any](v T) *T {
-	return &v
 }

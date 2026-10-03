@@ -31,6 +31,7 @@ linters:
     - makezero
     - misspell
     - mnd
+    - modernize
     - nolintlint
     - revive
     - rowserrcheck
