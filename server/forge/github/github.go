@@ -25,7 +25,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/go-github/v92/github"
 	"github.com/rs/zerolog/log"
@@ -164,9 +163,7 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newConfig()
 
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
