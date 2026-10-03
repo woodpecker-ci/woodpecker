@@ -43,6 +43,7 @@
 
 ### 📚 Documentation
 
+- Update dependency @types/node to v25.9.9 [[#7211](https://github.com/woodpecker-ci/woodpecker/pull/7211)]
 - Update docs npm deps non-major [[#7208](https://github.com/woodpecker-ci/woodpecker/pull/7208)]
 - Update docs npm deps non-major [[#7186](https://github.com/woodpecker-ci/woodpecker/pull/7186)]
 - Add MASH to awesome list [[#7191](https://github.com/woodpecker-ci/woodpecker/pull/7191)]
