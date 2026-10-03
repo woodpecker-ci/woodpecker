@@ -51,6 +51,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency @vueuse/core to v15 [[#7212](https://github.com/woodpecker-ci/woodpecker/pull/7212)]
 - Update dependency dotenv to v18 [[#7213](https://github.com/woodpecker-ci/woodpecker/pull/7213)]
 - Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
 - Update module gitlab.com/gitlab-org/api/client-go/v2 to v3 [[#7201](https://github.com/woodpecker-ci/woodpecker/pull/7201)]
