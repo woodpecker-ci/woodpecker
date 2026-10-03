@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v91/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -306,20 +306,22 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	errChan := make(chan error)
 
 	for _, file := range data {
-		go func(path string) {
-			content, err := c.File(ctx, u, r, b, path)
-			if err != nil {
-				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+		if file.GetType() == "file" {
+			go func(path string) {
+				content, err := c.File(ctx, u, r, b, path)
+				if err != nil {
+					if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+						err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+					}
+					errChan <- err
+				} else {
+					fc <- &forge_types.FileMeta{
+						Name: path,
+						Data: content,
+					}
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
-			}
-		}(f + "/" + *file.Name)
+			}(f + "/" + file.GetName())
+		}
 	}
 
 	var files []*forge_types.FileMeta
@@ -347,11 +349,9 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+		State:   "open",
 	})
 	if err != nil {
 		return nil, err
@@ -641,10 +641,8 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
 	})
 	if err != nil {
 		return nil, err

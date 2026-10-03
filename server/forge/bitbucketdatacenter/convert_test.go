@@ -40,8 +40,28 @@ func Test_convertStatus(t *testing.T) {
 			to:   bitbucket.BuildStatusStateInProgress,
 		},
 		{
+			from: model.StatusCreated,
+			to:   bitbucket.BuildStatusStateInProgress,
+		},
+		{
 			from: model.StatusSuccess,
 			to:   bitbucket.BuildStatusStateSuccessful,
+		},
+		{
+			from: model.StatusFailure,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusSkipped,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusCanceled,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusBlocked,
+			to:   bitbucket.BuildStatusStateFailed,
 		},
 		{
 			from: model.StatusValue("other"),
@@ -127,13 +147,11 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 		},
 		{
 			from: &bitbucket.RepositoryPushEvent{
-				Event: bitbucket.Event{
-					Date: bitbucket.ISOTime(now),
-					Actor: bitbucket.User{
-						Name:  "John Doe",
-						Email: "john.doe@mail.com",
-						Slug:  "john.doe_mail.com",
-					},
+				Date: bitbucket.ISOTime(now),
+				Actor: bitbucket.User{
+					Name:  "John Doe",
+					Email: "john.doe@mail.com",
+					Slug:  "john.doe_mail.com",
 				},
 				Repository: bitbucket.Repository{
 					Slug: "REPO",
@@ -175,14 +193,12 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 func Test_convertPullRequestEvent(t *testing.T) {
 	now := time.Now()
 	from := &bitbucket.PullRequestEvent{
-		Event: bitbucket.Event{
-			Date:     bitbucket.ISOTime(now),
-			EventKey: bitbucket.EventKeyPullRequestFrom,
-			Actor: bitbucket.User{
-				Name:  "John Doe",
-				Email: "john.doe@mail.com",
-				Slug:  "john.doe_mail.com",
-			},
+		Date:     bitbucket.ISOTime(now),
+		EventKey: bitbucket.EventKeyPullRequestFrom,
+		Actor: bitbucket.User{
+			Name:  "John Doe",
+			Email: "john.doe@mail.com",
+			Slug:  "john.doe_mail.com",
 		},
 		PullRequest: bitbucket.PullRequest{
 			ID:    123,
@@ -231,14 +247,12 @@ func Test_convertPullRequestEvent(t *testing.T) {
 func Test_convertPullRequestCloseEvent(t *testing.T) {
 	now := time.Now()
 	from := &bitbucket.PullRequestEvent{
-		Event: bitbucket.Event{
-			Date:     bitbucket.ISOTime(now),
-			EventKey: bitbucket.EventKeyPullRequestMerged,
-			Actor: bitbucket.User{
-				Name:  "John Doe",
-				Email: "john.doe@mail.com",
-				Slug:  "john.doe_mail.com",
-			},
+		Date:     bitbucket.ISOTime(now),
+		EventKey: bitbucket.EventKeyPullRequestMerged,
+		Actor: bitbucket.User{
+			Name:  "John Doe",
+			Email: "john.doe@mail.com",
+			Slug:  "john.doe_mail.com",
 		},
 		PullRequest: bitbucket.PullRequest{
 			ID:    123,

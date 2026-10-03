@@ -168,13 +168,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Settings:    cloneSettings,
 			Environment: make(map[string]any),
 		}
-		for k, v := range c.cloneEnv {
-			container.Environment[k] = v
-		}
 		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
+
+		maps.Copy(step.Environment, c.cloneEnv)
 
 		stage := new(backend_types.Stage)
 		stage.Steps = append(stage.Steps, step)
@@ -274,8 +273,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		// If the missing dep exists in the config but isn't in the surviving
 		// step list, it was filtered out by its 'when' conditions. Surface a
 		// more actionable error.
-		var missingDepErr *ErrStepMissingDependency
-		if errors.As(err, &missingDepErr) {
+		if missingDepErr, ok := errors.AsType[*ErrStepMissingDependency](err); ok {
 			if _, inConfig := stepNames[missingDepErr.dep]; inConfig {
 				return nil, &ErrStepFilteredDependency{name: missingDepErr.name, dep: missingDepErr.dep}
 			}

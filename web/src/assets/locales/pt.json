@@ -513,6 +513,13 @@
                 "custom_labels": {
                     "custom_labels": "Etiquetas personalizadas",
                     "desc": "As etiquetas personalizadas definidas pelo administrador do agente na inicialização do agente."
+                },
+                "filters": {
+                    "name": "Filtros",
+                    "desc": "Etiquetas de agentes aplicadas no lado do servidor para filtrar fluxos de trabalho",
+                    "key": "Nome da etiqueta",
+                    "value": "Valor do filtro",
+                    "delete": "Excluir filtro"
                 }
             },
             "settings": "Configurações administrativas",

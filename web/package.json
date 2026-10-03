@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.3.4",
+  "packageManager": "pnpm@12.6.0",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -52,7 +52,7 @@
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/compiler-sfc": "^3.5.32",
     "@vue/test-utils": "^2.4.6",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.0",
     "eslint": "^10.2.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vue-scoped-css": "^3.0.0",
