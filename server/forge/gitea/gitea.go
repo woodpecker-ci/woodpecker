@@ -184,10 +184,8 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User, p *model.ListOptions) 
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			gitea.ListOrgsOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		teams := make([]*model.Team, 0, len(orgs))
@@ -251,10 +249,8 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User, p *model.ListOptions) 
 	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
-				ListOptions: gitea.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		return repos, err
@@ -414,10 +410,8 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
 		hooks, _, err := client.ListRepoHooks(forgeRepo.Owner, forgeRepo.Name, gitea.ListHooksOptions{
-			ListOptions: gitea.ListOptions{
-				Page:     page,
-				PageSize: c.perPage(ctx),
-			},
+			Page:     page,
+			PageSize: c.perPage(ctx),
 		})
 		return hooks, err
 	}, -1)
@@ -443,7 +437,7 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *m
 	}
 
 	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-		gitea.ListRepoBranchesOptions{ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage}})
+		gitea.ListRepoBranchesOptions{Page: p.Page, PageSize: p.PerPage})
 	if err != nil {
 		return nil, err
 	}
@@ -480,8 +474,8 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 	}
 
 	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
-		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
-		State:       gitea.StateOpen,
+		Page: p.Page, PageSize: p.PerPage,
+		State: gitea.StateOpen,
 	})
 	if err != nil {
 		// Repositories without commits return empty list with status code 404
@@ -661,7 +655,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
-			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
+			gitea.ListPullRequestFilesOptions{Page: page})
 		if err != nil {
 			return nil, err
 		}

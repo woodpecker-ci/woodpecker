@@ -253,9 +253,9 @@ func TestRunStep(t *testing.T) {
 			require.Truef(t, len(outputLines) > 3, "output of lines must be bigger than 3 at least but we got: %#v", outputLines)
 			// we first test output without environments
 			wantBeforeEnvs := []string{
-				"+ echo hello",
+				"▶  echo hello",
 				"hello",
-				"+ env",
+				"▶  env",
 			}
 			gotBeforeEnvs := outputLines[:len(wantBeforeEnvs)]
 			assert.Equal(t, wantBeforeEnvs, gotBeforeEnvs)
@@ -428,7 +428,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	t.Parallel()
 	for _, uuid := range taskUUIDs {
 		t.Run("start step in "+uuid, func(t *testing.T) {
-			for i := 0; i < 3; i++ {
+			for i := range 3 {
 				counter.Store(counter.Load() + 1)
 				step := &types.Step{
 					UUID:        fmt.Sprintf("step-%s-%d", uuid, i),
@@ -476,7 +476,7 @@ loop:
 	// Cleanup all workflows
 	for _, uuid := range taskUUIDs {
 		// Cleanup all steps
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			stepUUID := fmt.Sprintf("step-%s-%d", uuid, i)
 			assert.NoError(t, backend.DestroyStep(ctx, &types.Step{UUID: stepUUID}, uuid))
 		}
