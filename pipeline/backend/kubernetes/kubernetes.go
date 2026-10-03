@@ -83,6 +83,7 @@ type config struct {
 	PriorityClassName               string
 	StopTimeout                     int64
 	PermissionInitImage             string
+	EnableUserNamespaces            bool
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -93,8 +94,9 @@ func (c *config) GetNamespace(orgID int64) string {
 }
 
 type SecurityContextConfig struct {
-	RunAsNonRoot bool
-	FSGroup      *int64
+	RunAsNonRoot                    bool
+	FSGroup                         *int64
+	OverrideNonRootInUserNamespaces bool
 }
 
 func (c *config) newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
@@ -128,9 +130,11 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				RuntimeClassAllowFromStep:    c.Bool("backend-k8s-runtime-class-allow-from-step"),
 				ImagePullSecretNames:         c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
-					FSGroup:      newInt64(defaultFSGroup),
+					RunAsNonRoot:                    c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:                         newInt64(defaultFSGroup),
+					OverrideNonRootInUserNamespaces: c.Bool("backend-k8s-user-namespaces-override-secctx-nonroot"), // cspell:words secctx nonroot
 				},
+				EnableUserNamespaces:            c.Bool("backend-k8s-user-namespaces"),
 				NativeSecretsAllowFromStep:      c.Bool("backend-k8s-allow-native-secrets"),
 				ServiceAccountNameAllowFromStep: c.Bool("backend-k8s-service-account-name-allow-from-step"),
 				StopTimeout:                     c.Int64("backend-k8s-stop-timeout"),
