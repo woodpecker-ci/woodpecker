@@ -24,8 +24,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-// A task that lingers in the in-memory queue but is already gone from the
-// backup store must be dropped on Poll instead of being handed to the agent,
+// A task that lingers in memory after its workflow was canceled and its backup
+// removed must be dropped on Poll instead of being handed to the agent,
 // otherwise it loops forever (re-poll, illegal-instruction, resubmit).
 func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
@@ -33,6 +33,7 @@ func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 
 	store := store_mocks.NewMockStore(t)
 	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
+	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusCanceled}, nil).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 

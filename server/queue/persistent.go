@@ -79,61 +79,75 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) err
 
 // Poll retrieves and removes a task head of this queue.
 func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error) {
+	validate := func(task *model.Task) *model.Task {
+		return q.validateTask(c, task)
+	}
+	if poller, ok := q.Queue.(interface {
+		pollWithValidation(context.Context, int64, func(*model.Task) (bool, int), func(*model.Task) *model.Task) (*model.Task, error)
+	}); ok {
+		return poller.pollWithValidation(c, agentID, f, validate)
+	}
+
 	task, err := q.Queue.Poll(c, agentID, f)
 	if task != nil {
-		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
-		if deleteErr := q.store.TaskDelete(task.ID); deleteErr != nil {
-			if errors.Is(deleteErr, types.ErrRecordNotExist) {
-				// The task is no longer in the backup store, which means it was
-				// already finished/removed (e.g. its workflow was canceled) and
-				// only lingered in the in-memory queue. Handing it to the agent
-				// would loop forever, so drop it from the queue instead.
-				log.Error().Err(deleteErr).Msgf("pull queue item: %s: not found in backup, dropping stale task", task.ID)
-				if dropErr := q.Queue.Error(c, task.ID, deleteErr); dropErr != nil {
-					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
-				}
-				return nil, nil
-			}
-			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
-		} else {
-			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
-
-			workflowID, parseErr := strconv.ParseInt(task.ID, 10, 64)
-			if parseErr != nil {
-				log.Error().Err(parseErr).Msgf("pull queue item: %s: invalid workflow id", task.ID)
-				return task, err
-			}
-
-			workflow, loadErr := q.store.WorkflowLoad(workflowID)
-			if loadErr != nil {
-				if errors.Is(loadErr, types.ErrRecordNotExist) {
-					// A queued task without its workflow can never be initialized.
-					// Drop it now instead of letting the agent reject and later
-					// re-poll the same task after its lease expires.
-					log.Error().Err(loadErr).Msgf("pull queue item: %s: workflow missing, dropping stale task", task.ID)
-					if dropErr := q.Queue.Error(c, task.ID, loadErr); dropErr != nil {
-						log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
-					}
-					return nil, nil
-				}
-				log.Error().Err(loadErr).Msgf("pull queue item: %s: failed to load workflow", task.ID)
-				return task, err
-			}
-
-			if isTerminalWorkflowState(workflow.State) {
-				// The task can still exist in the persistent queue while its
-				// workflow was completed through another path. Returning it to an
-				// agent makes RPC.Init reject it as already finished, while the
-				// in-memory task remains running and is resubmitted after timeout.
-				log.Warn().Str("state", string(workflow.State)).Msgf("pull queue item: %s: workflow already terminal, dropping stale task", task.ID)
-				if dropErr := q.Queue.Done(c, task.ID, workflow.State); dropErr != nil {
-					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop terminal task", task.ID)
-				}
-				return nil, nil
-			}
+		task = validate(task)
+		if task == nil {
+			return nil, nil
 		}
 	}
 	return task, err
+}
+
+func (q *persistentQueue) validateTask(c context.Context, task *model.Task) *model.Task {
+	log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
+	deleteErr := q.store.TaskDelete(task.ID)
+	if deleteErr != nil {
+		if !errors.Is(deleteErr, types.ErrRecordNotExist) {
+			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
+		}
+		// A previous assignment already removed the backup of an expired task.
+		// Missing backup alone does not mean its workflow is stale. Expiry still
+		// requeues only in memory; it does not restore the backup across restart.
+	} else {
+		log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
+	}
+
+	workflowID, parseErr := strconv.ParseInt(task.ID, 10, 64)
+	if parseErr != nil {
+		log.Error().Err(parseErr).Msgf("pull queue item: %s: invalid workflow id", task.ID)
+		if errors.Is(deleteErr, types.ErrRecordNotExist) {
+			if dropErr := q.Queue.Error(c, task.ID, parseErr); dropErr != nil {
+				log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop invalid task", task.ID)
+			}
+			return nil
+		}
+		return task
+	}
+
+	workflow, loadErr := q.store.WorkflowLoad(workflowID)
+	if loadErr != nil {
+		if errors.Is(loadErr, types.ErrRecordNotExist) {
+			// A queued task without its workflow can never be initialized.
+			log.Error().Err(loadErr).Msgf("pull queue item: %s: workflow missing, dropping stale task", task.ID)
+			if dropErr := q.Queue.Error(c, task.ID, loadErr); dropErr != nil {
+				log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
+			}
+			return nil
+		}
+		log.Error().Err(loadErr).Msgf("pull queue item: %s: failed to load workflow", task.ID)
+		return task
+	}
+
+	if isTerminalWorkflowState(workflow.State) {
+		// Returning a completed workflow makes RPC.Init reject it, leaving the
+		// task to be resubmitted again when its lease expires.
+		log.Warn().Str("state", string(workflow.State)).Msgf("pull queue item: %s: workflow already terminal, dropping stale task", task.ID)
+		if dropErr := q.Queue.Done(c, task.ID, workflow.State); dropErr != nil {
+			log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop terminal task", task.ID)
+		}
+		return nil
+	}
+	return task
 }
 
 // Done signals the task is complete.
