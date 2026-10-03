@@ -253,9 +253,9 @@ func TestRunStep(t *testing.T) {
 			require.Truef(t, len(outputLines) > 3, "output of lines must be bigger than 3 at least but we got: %#v", outputLines)
 			// we first test output without environments
 			wantBeforeEnvs := []string{
-				"+ echo hello",
+				"▶  echo hello",
 				"hello",
-				"+ env",
+				"▶  env",
 			}
 			gotBeforeEnvs := outputLines[:len(wantBeforeEnvs)]
 			assert.Equal(t, wantBeforeEnvs, gotBeforeEnvs)
