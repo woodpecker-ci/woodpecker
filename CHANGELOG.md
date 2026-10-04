@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-03
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- Ignore GitLab rejecting a commit status transition [[#7217](https://github.com/woodpecker-ci/woodpecker/pull/7217)]
 - Fix workspace volume mismatch when using CLI exec with the Kubernetes backend [[#7150](https://github.com/woodpecker-ci/woodpecker/pull/7150)]
 - Fix CLI shell completion [[#7203](https://github.com/woodpecker-ci/woodpecker/pull/7203)]
 - Fix url including </span> when combined with ansi escapes [[#7196](https://github.com/woodpecker-ci/woodpecker/pull/7196)]
