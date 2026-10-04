@@ -449,8 +449,21 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
+	if isRejectedStatusTransition(err) {
+		// GitLab refuses to move a pending/running status back to pending; this is
+		// harmless, the next update for this context still goes through.
+		log.Debug().Err(err).Msgf("gitlab rejected commit status transition for %s", repo.FullName)
+		return nil
+	}
 
 	return err
+}
+
+func isRejectedStatusTransition(err error) bool {
+	var errResp *gitlab.ErrorResponse
+	return errors.As(err, &errResp) &&
+		errResp.StatusCode == http.StatusBadRequest &&
+		strings.Contains(errResp.Message, "Cannot transition status")
 }
 
 // Netrc returns a netrc file capable of authenticating Gitlab requests and
