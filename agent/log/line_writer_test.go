@@ -56,14 +56,14 @@ func TestLineWriter(t *testing.T) {
 	peer.AssertExpectations(t)
 }
 
-// TestLineWriterWithSecretsWriter guards the agent contract: wrapping the
-// line writer in shared.NewSecretsWriter masks secret values before they
+// TestLineWriterWithSecretsReplaceWriter guards the agent contract: wrapping the
+// line writer in shared.NewSecretsReplaceWriter masks secret values before they
 // are enqueued, matching the previous built-in masking behavior.
-func TestLineWriterWithSecretsWriter(t *testing.T) {
-	peer := mocks.NewMockPeer(t)
+func TestLineWriterWithSecretsReplaceWriter(t *testing.T) {
+	peer := rpc_mocks.NewMockPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
-	lw := shared.NewSecretsWriter(
+	lw := shared.NewSecretsReplaceWriter(
 		log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d"),
 		[]string{"world"},
 	)

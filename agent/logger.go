@@ -43,7 +43,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) lo
 
 		logger.Debug().Msg("log stream opened")
 
-		logStream := shared.NewSecretsWriter(log.NewLineWriter(r.client, step.UUID), secrets)
+		logStream := shared.NewSecretsReplaceWriter(log.NewLineWriter(r.client, step.UUID), secrets)
 		if err := pipeline_utils.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}

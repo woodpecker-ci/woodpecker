@@ -16,14 +16,15 @@ package shared
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSecretsWriter(t *testing.T) {
+func TestSecretsReplaceWriter(t *testing.T) {
 	var buf bytes.Buffer
-	w := NewSecretsWriter(&buf, []string{"supersecret"})
+	w := NewSecretsReplaceWriter(&buf, []string{"supersecret"})
 
 	n, err := w.Write([]byte("token is supersecret\n"))
 	assert.NoError(t, err)
@@ -31,11 +32,24 @@ func TestSecretsWriter(t *testing.T) {
 	assert.Equal(t, "token is ********\n", buf.String())
 }
 
-func TestSecretsWriterNoSecrets(t *testing.T) {
+func TestSecretsReplaceWriterNoSecrets(t *testing.T) {
 	var buf bytes.Buffer
-	w := NewSecretsWriter(&buf, nil)
+	w := NewSecretsReplaceWriter(&buf, nil)
 
 	_, err := w.Write([]byte("plain\n"))
 	assert.NoError(t, err)
 	assert.Equal(t, "plain\n", buf.String())
+}
+
+type errWriter struct{ err error }
+
+func (e *errWriter) Write([]byte) (int, error) { return 0, e.err }
+
+func TestSecretsReplaceWriterPropagatesError(t *testing.T) {
+	wantErr := errors.New("sink closed")
+	w := NewSecretsReplaceWriter(&errWriter{err: wantErr}, nil)
+
+	n, err := w.Write([]byte("x"))
+	assert.ErrorIs(t, err, wantErr)
+	assert.Zero(t, n)
 }

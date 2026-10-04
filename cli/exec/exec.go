@@ -330,7 +330,7 @@ func newLogger(config *backend_types.Config) logging.Logger {
 	}
 	return func(step *backend_types.Step, rc io.ReadCloser) error {
 		logWriter := NewLineWriter(step.Name, step.UUID)
-		masked := shared.NewSecretsWriter(logWriter, secrets)
+		masked := shared.NewSecretsReplaceWriter(logWriter, secrets)
 		return pipeline_utils.CopyLineByLine(masked, rc, pipeline.MaxLogLineLength)
 	}
 }

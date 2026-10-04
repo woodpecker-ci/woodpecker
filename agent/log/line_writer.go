@@ -38,8 +38,8 @@ type LineWriter struct {
 
 // NewLineWriter returns a new line reader.
 //
-// Sanitizing (e.g. secret masking) is not handled here; wrap the writer
-// with shared.NewSecretsWriter or shared.NewSanitizeWriter.
+// Secret masking is not handled here; wrap the writer with
+// shared.NewSecretsReplaceWriter.
 func NewLineWriter(peer rpc.Peer, stepUUID string) io.Writer {
 	lw := &LineWriter{
 		peer:      peer,

@@ -14,12 +14,30 @@
 
 package shared
 
-import "io"
+import (
+	"io"
+	"strings"
+)
 
-// NewSecretsWriter wraps dst so that any of the given secret values are
-// replaced with asterisks before being written. It is a convenience for
-// NewSanitizeWriter with the secrets replacer as the sanitize function;
-// other sanitize algorithms can be plugged in via NewSanitizeWriter.
-func NewSecretsWriter(dst io.Writer, secrets []string) io.Writer {
-	return NewSanitizeWriter(dst, NewSecretsReplacer(secrets).Replace)
+type secretsReplaceWriter struct {
+	dst      io.Writer
+	replacer *strings.Replacer
+}
+
+// NewSecretsReplaceWriter wraps dst so that the given secret values are
+// replaced with asterisks before being written. It is meant to wrap a
+// line-oriented writer, as secrets are matched per write.
+func NewSecretsReplaceWriter(dst io.Writer, secrets []string) io.Writer {
+	return &secretsReplaceWriter{
+		dst:      dst,
+		replacer: NewSecretsReplacer(secrets),
+	}
+}
+
+func (w *secretsReplaceWriter) Write(p []byte) (int, error) {
+	if _, err := w.dst.Write([]byte(w.replacer.Replace(string(p)))); err != nil {
+		return 0, err
+	}
+	// report the consumed input length, masking changes the written length
+	return len(p), nil
 }
