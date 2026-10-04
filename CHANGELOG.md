@@ -45,6 +45,7 @@
 
 ### 📚 Documentation
 
+- Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
 - Use CI to update latest version on mastodon profile [[#7179](https://github.com/woodpecker-ci/woodpecker/pull/7179)]
 - Update dependency @types/node to v25.9.9 [[#7211](https://github.com/woodpecker-ci/woodpecker/pull/7211)]
 - Update docs npm deps non-major [[#7208](https://github.com/woodpecker-ci/woodpecker/pull/7208)]
