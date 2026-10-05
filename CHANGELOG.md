@@ -57,6 +57,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7209](https://github.com/woodpecker-ci/woodpecker/pull/7209)]
 - Update dependency @vueuse/core to v15 [[#7212](https://github.com/woodpecker-ci/woodpecker/pull/7212)]
 - Update dependency dotenv to v18 [[#7213](https://github.com/woodpecker-ci/woodpecker/pull/7213)]
 - Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
