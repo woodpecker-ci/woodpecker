@@ -8,7 +8,7 @@ when:
 
 steps:
   - name: mastodon-toot
-    image: docker.io/woodpeckerci/plugin-mastodon-post
+    image: docker.io/woodpeckerci/plugin-mastodon-post:1.1.0
     settings:
       server_url: https://floss.social
       access_token:
@@ -27,7 +27,7 @@ steps:
         The changelog entry: {{ changelog }}
 
   - name: mastodon-profile
-    image: docker.io/woodpeckerci/plugin-mastodon-profile
+    image: docker.io/woodpeckerci/plugin-mastodon-profile:1.0.2
     settings:
       server_url: https://floss.social
       access_token:
@@ -37,7 +37,7 @@ steps:
           value: ${CI_COMMIT_TAG##v}
 
   - name: bluesky-post
-    image: docker.io/woodpeckerci/plugin-bluesky-post
+    image: docker.io/woodpeckerci/plugin-bluesky-post:1.0.0
     settings:
       app_password:
         from_secret: bluesky_token
