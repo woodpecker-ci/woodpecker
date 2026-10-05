@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix race condition on concurrent pipeline config persist [[#7192](https://github.com/woodpecker-ci/woodpecker/pull/7192)]
 - Reload user from store before refreshing OAuth token [[#7176](https://github.com/woodpecker-ci/woodpecker/pull/7176)]
 - Ignore GitLab rejecting a commit status transition [[#7217](https://github.com/woodpecker-ci/woodpecker/pull/7217)]
 - Fix workspace volume mismatch when using CLI exec with the Kubernetes backend [[#7150](https://github.com/woodpecker-ci/woodpecker/pull/7150)]
@@ -46,7 +47,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7221](https://github.com/woodpecker-ci/woodpecker/pull/7221)]
 - Fix docs link in systemd example unit [[#7222](https://github.com/woodpecker-ci/woodpecker/pull/7222)]
 - Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
 - Use CI to update latest version on mastodon profile [[#7179](https://github.com/woodpecker-ci/woodpecker/pull/7179)]
@@ -58,7 +58,6 @@
 
 ### 📦️ Dependency
 
-- Update web npm deps non-major [[#7209](https://github.com/woodpecker-ci/woodpecker/pull/7209)]
 - Update dependency @vueuse/core to v15 [[#7212](https://github.com/woodpecker-ci/woodpecker/pull/7212)]
 - Update dependency dotenv to v18 [[#7213](https://github.com/woodpecker-ci/woodpecker/pull/7213)]
 - Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
