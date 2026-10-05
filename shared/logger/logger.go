@@ -43,13 +43,13 @@ var GlobalLoggerFlags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_DEBUG_PRETTY"),
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
-		Value:   isInteractiveTerminal(), // make pretty on interactive terminal by default
+		Value:   IsInteractiveTerminal(), // make pretty on interactive terminal by default
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEBUG_NOCOLOR"),
 		Name:    "nocolor",
 		Usage:   "disable colored debug output, only has effect if pretty output is set too",
-		Value:   !isInteractiveTerminal(), // do color on interactive terminal by default
+		Value:   !IsInteractiveTerminal(), // do color on interactive terminal by default
 	},
 }
 
