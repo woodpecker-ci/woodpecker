@@ -16,6 +16,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 
@@ -24,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
@@ -181,6 +183,172 @@ func TestStepLogMsgReplacesTheLogOfAStep(t *testing.T) {
 	assert.True(t, m.logChanged, "the shown log gets redrawn")
 }
 
+// commandLog is the log of two commands with something printed before them.
+func commandLog(stepID int64) LogMsg {
+	var log LogMsg
+	for i, line := range []string{
+		"pulling image",
+		common.CommandMarker + "make build",
+		"compiling",
+		"linking",
+		common.CommandMarker + "make test",
+		"ok",
+	} {
+		log = append(log, &woodpecker.LogEntry{StepID: stepID, Line: i, Data: []byte(line)})
+	}
+	return log
+}
+
+// logTexts returns the texts of the rows shown in the log pane.
+func logTexts(m *Model) []string {
+	texts := make([]string, 0, len(m.logRows))
+	for _, row := range m.logRows {
+		texts = append(texts, row.text)
+	}
+	return texts
+}
+
+func TestLogFoldsOutputOfCommands(t *testing.T) {
+	all := []string{"Initialization", "pulling image", "▶  make build", "compiling", "linking", "▶  make test", "ok"}
+	heads := []string{"Initialization", "▶  make build", "▶  make test"}
+
+	// newModel returns a view with the log pane focused on the log of step 12.
+	newModel := func(state string) *Model {
+		m := New()
+		send(m, tea.WindowSizeMsg{Width: 100, Height: 20})
+		workflows := testWorkflows()
+		workflows[0].Children[1].State = state
+		send(m, workflows)
+		send(m, key("g"))
+		send(m, key("down"))
+		send(m, key("down"))
+		send(m, commandLog(12))
+		send(m, tickMsg{})
+		send(m, key("enter"))
+		require.Equal(t, paneLog, m.focus)
+		return m
+	}
+
+	t.Run("all folded once the step is finished", func(t *testing.T) {
+		m := newModel("success")
+		assert.Equal(t, heads, logTexts(m))
+		assert.Contains(t, ansi.Strip(m.render()), "2    0s ▸ ▶  make build")
+	})
+
+	t.Run("the last command of a running step is open", func(t *testing.T) {
+		m := newModel("running")
+		assert.Equal(t, []string{"Initialization", "▶  make build", "▶  make test", "ok"}, logTexts(m))
+		assert.Contains(t, ansi.Strip(m.render()), "5       ▾ ▶  make test")
+
+		send(m, LogMsg{{StepID: 12, Line: 6, Data: []byte("PASS")}})
+		send(m, tickMsg{})
+		assert.Equal(t, []string{"Initialization", "▶  make build", "▶  make test", "ok", "PASS"}, logTexts(m))
+		assert.Equal(t, 4, m.logCursor, "the cursor follows the end of the log")
+
+		send(m, LogMsg{{StepID: 12, Line: 7, Data: []byte(common.CommandMarker + "make install")}, {StepID: 12, Line: 8, Data: []byte("installing")}})
+		send(m, tickMsg{})
+		assert.Equal(t, []string{"Initialization", "▶  make build", "▶  make test", "▶  make install", "installing"}, logTexts(m),
+			"the next command takes over")
+
+		workflows := testWorkflows()
+		workflows[0].Children[1].State = "success"
+		send(m, workflows)
+		send(m, tickMsg{})
+		assert.Equal(t, append(slices.Clone(heads), "▶  make install"), logTexts(m), "all folded as the step finished")
+		assert.Equal(t, 3, m.logCursor)
+	})
+
+	t.Run("unfold and fold the command the cursor is on", func(t *testing.T) {
+		m := newModel("success")
+		send(m, key("up"))
+		send(m, key("enter"))
+		assert.Equal(t, []string{"Initialization", "▶  make build", "compiling", "linking", "▶  make test"}, logTexts(m))
+		assert.Equal(t, 1, m.logCursor)
+
+		send(m, key("down")) // on "compiling"
+		send(m, key("enter"))
+		assert.Equal(t, heads, logTexts(m))
+		assert.Equal(t, 1, m.logCursor, "the cursor moves to the command its line was folded into")
+	})
+
+	t.Run("what is set stays while the step runs on", func(t *testing.T) {
+		m := newModel("running")
+		send(m, key("up"))
+		send(m, key("enter")) // fold the last command
+		send(m, key("up"))
+		send(m, key("enter")) // unfold the one before
+		want := []string{"Initialization", "▶  make build", "compiling", "linking", "▶  make test"}
+		assert.Equal(t, want, logTexts(m))
+
+		send(m, LogMsg{{StepID: 12, Line: 6, Data: []byte("PASS")}})
+		send(m, tickMsg{})
+		assert.Equal(t, want, logTexts(m))
+	})
+
+	t.Run("unfold and fold all", func(t *testing.T) {
+		m := newModel("success")
+		send(m, key("e"))
+		assert.Equal(t, all, logTexts(m))
+		send(m, key("c"))
+		assert.Equal(t, heads, logTexts(m))
+	})
+
+	t.Run("each step has its own folds", func(t *testing.T) {
+		m := newModel("success")
+		send(m, key("e"))
+		send(m, commandLog(13))
+		send(m, tea.KeyPressMsg{Code: tea.KeyEscape})
+		send(m, key("down"))
+		assert.EqualValues(t, 13, m.selected)
+		assert.Equal(t, append(slices.Clone(heads), "ok"), logTexts(m), "a step that is not finished")
+	})
+}
+
+func TestLogWithoutCommandsHasNoBlocks(t *testing.T) {
+	m := New()
+	send(m, tea.WindowSizeMsg{Width: 100, Height: 20})
+	send(m, testWorkflows())
+	send(m, LogMsg{{StepID: 12, Line: 0, Data: []byte("plugin output")}, {StepID: 12, Line: 1, Data: []byte("done")}})
+	send(m, tickMsg{})
+	send(m, key("enter"))
+
+	send(m, key("enter"))
+	send(m, key("c"))
+	assert.Equal(t, []string{"plugin output", "done"}, logTexts(m))
+}
+
+func TestLogCursorStaysInView(t *testing.T) {
+	m := New()
+	send(m, tea.WindowSizeMsg{Width: 60, Height: 12})
+	send(m, testWorkflows())
+	for i := range 50 {
+		// every other line is long enough to get wrapped
+		send(m, LogMsg{{StepID: 12, Line: i, Data: fmt.Appendf(nil, "line %d %s", i, strings.Repeat("x", i%2*60))}})
+	}
+	send(m, tickMsg{})
+	send(m, key("enter"))
+
+	shown := func(line int) bool {
+		return strings.Contains(ansi.Strip(m.render()), fmt.Sprintf("line %d ", line))
+	}
+	assert.True(t, shown(49), "the end of the log")
+
+	for range 20 {
+		send(m, key("up"))
+	}
+	assert.True(t, shown(29), "the row the cursor moved up to")
+	assert.False(t, shown(49))
+
+	send(m, LogMsg{{StepID: 12, Line: 50, Data: []byte("line 50 ")}})
+	send(m, tickMsg{})
+	assert.True(t, shown(29), "a growing log does not move a cursor that left its end")
+
+	send(m, key("G"))
+	assert.True(t, shown(50))
+	send(m, key("g"))
+	assert.True(t, shown(0))
+}
+
 func TestCleanLine(t *testing.T) {
 	tests := map[string]string{
 		"plain text":                             "plain text",
@@ -240,7 +408,7 @@ func TestRenderShowsStepsAndLog(t *testing.T) {
 	view := ansi.Strip(m.render())
 	for _, want := range []string{
 		"▾ ● build", "✓ clone", "✗ compile", "00:01", "○ package", "▾ ○ deploy",
-		"Step Logs: build / compile", "    1    3s gcc: error", "✗ Exit Code 2",
+		"Step Logs: build / compile", "    1    3s   gcc: error", "✗ Exit Code 2",
 	} {
 		assert.Contains(t, view, want)
 	}

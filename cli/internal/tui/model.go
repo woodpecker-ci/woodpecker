@@ -101,7 +101,12 @@ type Model struct {
 	selected int64
 	// logChanged is set if the shown log has lines not drawn yet
 	logChanged bool
-	canceled   bool
+	// logRows are the rows of the shown log, logCursor is the selected one
+	logRows   []logRow
+	logCursor int
+	// folded are the blocks of a log set to be folded or not, by step id
+	folded   map[int64]map[int]bool
+	canceled bool
 
 	focus         pane
 	width, height int
@@ -115,6 +120,7 @@ func New() *Model {
 	m := &Model{
 		collapsed:    make(map[int64]bool),
 		logs:         make(map[int64][]*woodpecker.LogEntry),
+		folded:       make(map[int64]map[int]bool),
 		follow:       true,
 		logView:      viewport.New(),
 		messagesView: viewport.New(),
@@ -212,6 +218,9 @@ func (m *Model) setWorkflows(workflows []*woodpecker.Workflow) {
 		}
 	}
 
+	// which blocks of the log are folded depends on the state of its step
+	m.logChanged = true
+
 	rows := m.rows()
 	if m.follow {
 		// the running step, or to start with the first one
@@ -304,8 +313,8 @@ func (m *Model) selectStep() tea.Cmd {
 	}
 
 	m.selected = step.ID
+	m.logRows = nil
 	m.showLog()
-	m.logView.GotoBottom()
 
 	if m.OnSelect == nil {
 		return nil
@@ -314,24 +323,6 @@ func (m *Model) selectStep() tea.Cmd {
 	return func() tea.Msg {
 		m.OnSelect(&selected)
 		return nil
-	}
-}
-
-// showLog puts the log of the selected step into the log pane and keeps
-// following it, if its end was shown.
-func (m *Model) showLog() {
-	m.logChanged = false
-
-	entries := m.logs[m.selected]
-	lines := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		lines = append(lines, cleanLine(entry.Data))
-	}
-
-	atBottom := m.logView.AtBottom()
-	m.logView.SetContentLines(lines)
-	if atBottom {
-		m.logView.GotoBottom()
 	}
 }
 
@@ -357,24 +348,22 @@ func (m *Model) handleKey(msg tea.KeyPressMsg) tea.Cmd {
 		return nil
 	}
 
-	var view *viewport.Model
 	switch m.focus {
 	case paneSteps:
 		return m.handleStepsKey(msg)
 	case paneLog:
-		view = &m.logView
-	case paneMessages:
-		view = &m.messagesView
+		m.handleLogKey(msg)
+		return nil
 	}
 
 	switch msg.String() {
 	case "g", "home":
-		view.GotoTop()
+		m.messagesView.GotoTop()
 	case "G", "end":
-		view.GotoBottom()
+		m.messagesView.GotoBottom()
 	default:
 		var cmd tea.Cmd
-		*view, cmd = view.Update(msg)
+		m.messagesView, cmd = m.messagesView.Update(msg)
 		return cmd
 	}
 	return nil
