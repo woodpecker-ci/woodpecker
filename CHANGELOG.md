@@ -46,6 +46,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7221](https://github.com/woodpecker-ci/woodpecker/pull/7221)]
 - Fix docs link in systemd example unit [[#7222](https://github.com/woodpecker-ci/woodpecker/pull/7222)]
 - Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
 - Use CI to update latest version on mastodon profile [[#7179](https://github.com/woodpecker-ci/woodpecker/pull/7179)]
