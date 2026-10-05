@@ -78,6 +78,11 @@ var flags = []cli.Flag{
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXEC_IGNORE_LABELS"),
+		Name:    "ignore-labels",
+		Usage:   "run each workflow on the first backend in use, even if its labels ask for another backend, platform or anything else",
+	},
 	&cli.StringMapFlag{
 		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
 		Name:    "secrets",

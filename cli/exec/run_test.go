@@ -285,10 +285,20 @@ steps:
 	require.NoError(t, err, "a skipped workflow does not fail the pipeline")
 
 	assert.Contains(t, out, "[build/run:L0:0s] StepName: run\n")
-	assert.Contains(t, out, "workflow deploy is skipped: its labels (backend=kubernetes, zone=eu) match none of the backends in use (dummy)\n")
+	assert.Contains(t, out, "workflow deploy is skipped: its labels (backend=kubernetes, zone=eu) match none of the backends in use (dummy), run it anyway with --ignore-labels\n")
 	assert.Contains(t, out, "# deploy: skipped\n")
 	assert.NotContains(t, out, "[deploy/apply:")
 	assert.Contains(t, out, "# notify: skipped\n", "what depends on a skipped workflow is skipped too")
+}
+
+func TestExecIgnoresLabelsIfAsked(t *testing.T) {
+	out, err := execWorkflows(t.Context(), t, map[string]string{
+		"deploy": fmt.Sprintf(workflowForBackend, "kubernetes"),
+	}, "--ignore-labels")
+
+	require.NoError(t, err)
+	assert.Contains(t, out, "[run:L0:0s] StepName: run\n")
+	assert.NotContains(t, out, "skipped")
 }
 
 // namedBackend is a backend that is available but must not be asked to

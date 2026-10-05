@@ -163,7 +163,7 @@ func unfitMessage(item *builder.Item, backends []execBackend) string {
 	for _, backend := range backends {
 		names = append(names, backend.Name())
 	}
-	return fmt.Sprintf("workflow %s is skipped: its labels (%s) match none of the backends in use (%s)",
+	return fmt.Sprintf("workflow %s is skipped: its labels (%s) match none of the backends in use (%s), run it anyway with --ignore-labels",
 		item.Workflow.Name, strings.Join(labels, ", "), strings.Join(names, ", "))
 }
 
