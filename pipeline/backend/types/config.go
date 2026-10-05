@@ -29,3 +29,9 @@ var CliCommand contextKey
 // an immutable public variable with a unique type. It's immutable
 // because nobody else can create a ContextKey, being unexported.
 type contextKey struct{}
+
+// ImagePullOutput is the context key to pass an io.Writer the image pull
+// progress is written to instead of stdout.
+var ImagePullOutput imagePullOutputKey
+
+type imagePullOutputKey struct{}
