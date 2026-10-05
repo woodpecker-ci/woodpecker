@@ -62,15 +62,20 @@ func streamLog(client *mocks.MockClient, err error, entries ...*woodpecker.LogEn
 func TestPipelineViewerLoadLog(t *testing.T) {
 	line0 := &woodpecker.LogEntry{StepID: 3, Line: 0}
 	line1 := &woodpecker.LogEntry{StepID: 3, Line: 1}
+	stored := func(entries ...*woodpecker.LogEntry) tea.Msg {
+		return tui.StepLogMsg{StepID: 3, Entries: entries}
+	}
 
-	t.Run("follows the log of a running step", func(t *testing.T) {
+	t.Run("follows the log of a running step and completes it from the stored log", func(t *testing.T) {
 		client := mocks.NewMockClient(t)
-		streamLog(client, nil, line0, line1)
+		// the stream ends fine, but a line got lost on the way
+		streamLog(client, nil, line0)
+		client.On("StepLogEntries", int64(1), int64(2), int64(3)).Return([]*woodpecker.LogEntry{line0, line1}, nil).Once()
 		viewer, sent := testViewer(client)
 
 		viewer.loadLog(t.Context(), &woodpecker.Step{ID: 3, State: "running"})
 
-		assert.Equal(t, []tea.Msg{tui.LogMsg{line0}, tui.LogMsg{line1}}, *sent)
+		assert.Equal(t, []tea.Msg{tui.LogMsg{line0}, stored(line0, line1)}, *sent)
 	})
 
 	t.Run("fetches the stored log if the step finished meanwhile", func(t *testing.T) {
@@ -81,7 +86,7 @@ func TestPipelineViewerLoadLog(t *testing.T) {
 
 		viewer.loadLog(t.Context(), &woodpecker.Step{ID: 3, State: "pending"})
 
-		assert.Equal(t, []tea.Msg{tui.LogMsg{line0, line1}}, *sent)
+		assert.Equal(t, []tea.Msg{stored(line0, line1)}, *sent)
 	})
 
 	t.Run("fetches the stored log of a finished step only once", func(t *testing.T) {
@@ -92,7 +97,7 @@ func TestPipelineViewerLoadLog(t *testing.T) {
 		viewer.loadLog(t.Context(), &woodpecker.Step{ID: 3, State: "failure"})
 		viewer.loadLog(t.Context(), &woodpecker.Step{ID: 3, State: "failure"})
 
-		assert.Equal(t, []tea.Msg{tui.LogMsg{line0}}, *sent)
+		assert.Equal(t, []tea.Msg{stored(line0)}, *sent)
 	})
 
 	t.Run("asks for no log of a step that never ran", func(t *testing.T) {
@@ -115,9 +120,8 @@ func TestPipelineViewerLoadLog(t *testing.T) {
 		viewer.loadLog(t.Context(), step)
 
 		assert.Equal(t, []tea.Msg{
-			tui.LogMsg(nil),
 			tui.MessageMsg("could not load log of step build: server down"),
-			tui.LogMsg{line0},
+			stored(line0),
 		}, *sent)
 	})
 

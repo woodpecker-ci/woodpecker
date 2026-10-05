@@ -50,6 +50,11 @@ type (
 	// LogMsg adds log lines to the steps they belong to. Lines of a step have
 	// to come in order, the ones it already has are ignored.
 	LogMsg []*woodpecker.LogEntry
+	// StepLogMsg replaces the log of a step.
+	StepLogMsg struct {
+		StepID  int64
+		Entries []*woodpecker.LogEntry
+	}
 	// MessageMsg adds text that belongs to no step to the messages pane.
 	MessageMsg string
 	// StatusMsg sets the status of the pipeline. Without it the status is
@@ -172,6 +177,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for _, entry := range msg {
 			m.addLog(entry)
 		}
+
+	case StepLogMsg:
+		m.logs[msg.StepID] = msg.Entries[max(0, len(msg.Entries)-maxLogLines):]
+		m.logChanged = m.logChanged || msg.StepID == m.selected
 
 	case MessageMsg:
 		m.addMessage(string(msg))

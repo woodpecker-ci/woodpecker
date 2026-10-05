@@ -164,17 +164,23 @@ func (v *pipelineViewer) sendLog(ctx context.Context, step *woodpecker.Step) err
 		// never ran, so there is no log
 		return nil
 	case state.IsActive():
-		err := v.client.StepLogStream(ctx, v.repoID, v.number, step.ID, func(entry *woodpecker.LogEntry) {
+		// However the stream ends, and it fails without any entry if the step
+		// just finished, the stored log has all the lines afterwards, also
+		// the ones the server did not send as the stream was too slow. So it
+		// is fetched like the one of a finished step and replaces what the
+		// stream delivered, to end up with the same log.
+		_ = v.client.StepLogStream(ctx, v.repoID, v.number, step.ID, func(entry *woodpecker.LogEntry) {
 			v.send(tui.LogMsg{entry})
 		})
-		if err == nil || ctx.Err() != nil {
+		if ctx.Err() != nil {
 			return nil
 		}
-		// The stream fails if the step just finished. Either way the stored
-		// log has all the lines, as far as there are any.
 	}
 
 	entries, err := v.client.StepLogEntries(v.repoID, v.number, step.ID)
-	v.send(tui.LogMsg(entries))
-	return err
+	if err != nil {
+		return err
+	}
+	v.send(tui.StepLogMsg{StepID: step.ID, Entries: entries})
+	return nil
 }
