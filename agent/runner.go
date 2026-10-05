@@ -18,7 +18,6 @@ package agent
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"runtime"
 	"strconv"
@@ -204,18 +203,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		}),
 	).Run(runnerCtx)
 
-	state.Finished = time.Now().Unix()
-
-	if err != nil {
-		if errors.Is(err, pipeline_errors.ErrCancel) {
-			// A canceled workflow did not fail. The server stores Error as the
-			// workflow error and shows it as a runtime error, so only report
-			// the cancellation itself.
-			state.Canceled = true
-		} else {
-			state.Error = err.Error()
-		}
-	}
+	state.Finish(err)
 
 	logger.Debug().
 		Str("error", state.Error).

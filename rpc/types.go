@@ -16,6 +16,7 @@ package rpc
 
 import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 )
 
 type (
@@ -25,24 +26,10 @@ type (
 	}
 
 	// StepState defines the step state.
-	StepState struct {
-		StepUUID string `json:"step_uuid"`
-		Started  int64  `json:"started"`
-		Finished int64  `json:"finished"`
-		Exited   bool   `json:"exited"`
-		ExitCode int    `json:"exit_code"`
-		Error    string `json:"error"`
-		Canceled bool   `json:"canceled"`
-		Skipped  bool   `json:"skipped"`
-	}
+	StepState = status.StepState
 
 	// WorkflowState defines the workflow state.
-	WorkflowState struct {
-		Started  int64  `json:"started"`
-		Finished int64  `json:"finished"`
-		Error    string `json:"error"`
-		Canceled bool   `json:"canceled"`
-	}
+	WorkflowState = status.WorkflowState
 
 	// Workflow defines the workflow execution details.
 	Workflow struct {
