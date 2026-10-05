@@ -31,7 +31,8 @@ var CliCommand contextKey
 type contextKey struct{}
 
 // ImagePullOutput is the context key to pass an io.Writer the image pull
-// progress is written to instead of stdout.
+// progress is written to instead of stdout. The pipeline runtime sets it
+// for StartStep, to show the progress in front of the step logs.
 var ImagePullOutput imagePullOutputKey
 
 type imagePullOutputKey struct{}

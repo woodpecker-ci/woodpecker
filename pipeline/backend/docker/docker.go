@@ -37,6 +37,7 @@ import (
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -177,22 +178,20 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 
 // pullImage pulls the image and prints the pull progress.
 func (e *docker) pullImage(ctx context.Context, image string, opts client.ImagePullOptions) error {
+	var out io.Writer = os.Stdout
+	if w, ok := ctx.Value(backend_types.ImagePullOutput).(io.Writer); ok {
+		out = w
+		fmt.Fprintf(out, "%sdocker pull %s\n", common.CommandMarker, image)
+	}
+
 	responseBody, err := e.client.ImagePull(ctx, image, opts)
 	if err != nil {
 		return err
 	}
 	defer responseBody.Close()
 
-	// TODO(1936): show image pull progress in web-ui
-	var out io.Writer = os.Stdout
-	if w, ok := ctx.Value(backend_types.ImagePullOutput).(io.Writer); ok {
-		out = w
-	}
 	fd, isTerminal := term.GetFdInfo(out)
-	if err := jsonmessage.DisplayJSONMessagesStream(responseBody, out, fd, isTerminal, nil); err != nil {
-		log.Error().Err(err).Msg("DisplayJSONMessagesStream")
-	}
-	return nil
+	return jsonmessage.DisplayJSONMessagesStream(responseBody, out, fd, isTerminal, nil)
 }
 
 func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
