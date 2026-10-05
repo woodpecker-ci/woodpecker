@@ -175,6 +175,26 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend_types.Config, 
 	return err
 }
 
+// pullImage pulls the image and prints the pull progress.
+func (e *docker) pullImage(ctx context.Context, image string, opts client.ImagePullOptions) error {
+	responseBody, err := e.client.ImagePull(ctx, image, opts)
+	if err != nil {
+		return err
+	}
+	defer responseBody.Close()
+
+	// TODO(1936): show image pull progress in web-ui
+	var out io.Writer = os.Stdout
+	if w, ok := ctx.Value(backend_types.ImagePullOutput).(io.Writer); ok {
+		out = w
+	}
+	fd, isTerminal := term.GetFdInfo(out)
+	if err := jsonmessage.DisplayJSONMessagesStream(responseBody, out, fd, isTerminal, nil); err != nil {
+		log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+	}
+	return nil
+}
+
 func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
@@ -202,18 +222,9 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
 	if step.Pull {
-		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
-		if pErr == nil {
-			// TODO(1936): show image pull progress in web-ui
-			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
-				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
-			}
-			responseBody.Close()
-		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
-		if pErr != nil && step.AuthConfig.Password != "" {
+		if pErr := e.pullImage(ctx, config.Image, pullOpts); pErr != nil && step.AuthConfig.Password != "" {
 			return pErr
 		}
 	}
@@ -229,16 +240,9 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
-		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
-		if pErr != nil {
+		if pErr := e.pullImage(ctx, config.Image, pullOpts); pErr != nil {
 			return pErr
 		}
-		// TODO(1936): show image pull progress in web-ui
-		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
-			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
-		}
-		responseBody.Close()
 
 		_, err = e.client.ContainerCreate(ctx, client.ContainerCreateOptions{
 			Config:     config,
