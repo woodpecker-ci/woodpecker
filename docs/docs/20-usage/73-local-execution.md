@@ -26,7 +26,9 @@ The workflows are executed like on a server: they run in parallel, wait for the 
 
 In a terminal the pipeline is shown in an interactive view with all workflows and steps, their status, and the log of the selected step. Pass `--no-tui` to get plain log lines instead, which is also what you get if the output is not a terminal.
 
-By default, Woodpecker auto-detects a backend. Select one explicitly when you want the local run to match a specific agent backend:
+By default, Woodpecker uses all backends that are available on your machine. A workflow runs on the backend its [`labels`](./20-workflow-syntax.md#labels) ask for, like it would be picked up by an agent with that backend, and on the first available one if its labels leave the choice open. A workflow whose labels match none of the backends is shown, but skipped with a message that tells why.
+
+Select a backend explicitly to use only that one:
 
 ```shell
 woodpecker-cli exec --backend-engine docker .woodpecker/my-first-workflow.yaml

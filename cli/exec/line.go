@@ -89,3 +89,10 @@ func (o *lineOutput) Log(entry *woodpecker.LogEntry) {
 	defer o.mu.Unlock()
 	fmt.Fprintf(o.out, "[%s:L%d:%ds] %s\n", o.prefixes[entry.StepID], entry.Line, entry.Time, entry.Data)
 }
+
+// Message prints what the user should know about the run itself.
+func (o *lineOutput) Message(text string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	fmt.Fprintln(o.out, text)
+}

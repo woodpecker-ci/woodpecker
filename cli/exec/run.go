@@ -16,8 +16,11 @@ package exec
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"maps"
 	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +38,26 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
+// execBackend is a backend to execute workflows on, with the labels an agent
+// running that backend would have.
+type execBackend struct {
+	backend_types.Backend
+	labels map[string]string
+}
+
+// selectBackend returns the backend whose labels fit the ones of a workflow
+// best, the first one if several fit equally well, or nil if none fits.
+func selectBackend(backends []execBackend, workflowLabels map[string]string) backend_types.Backend {
+	var best backend_types.Backend
+	bestScore := -1
+	for _, b := range backends {
+		if matches, score := pipeline.MatchLabels(workflowLabels, b.labels); matches && score > bestScore {
+			best, bestScore = b.Backend, score
+		}
+	}
+	return best
+}
+
 // output is where a pipeline run reports to.
 type output interface {
 	// Workflow is called with a copy of a workflow each time the status of it
@@ -42,14 +65,19 @@ type output interface {
 	Workflow(workflow *woodpecker.Workflow)
 	// Log is called for each log line of a step.
 	Log(entry *woodpecker.LogEntry)
+	// Message is called with what the user should know about the run itself.
+	Message(text string)
 }
 
 // pipelineRun executes the workflows of a pipeline and keeps their status.
 // It does to the local runtime what an agent and the server do together:
 // its methods mirror the rpc calls of an agent and how the server handles them.
 type pipelineRun struct {
-	items   []*builder.Item
-	backend backend_types.Backend
+	items []*builder.Item
+	// the backend each workflow is executed on, none if no backend fits it
+	backends map[*builder.Item]backend_types.Backend
+	// what to tell about the workflows no backend fits
+	unfit map[*builder.Item]string
 	// timeout of a single workflow
 	timeout time.Duration
 	out     output
@@ -69,10 +97,11 @@ type pipelineRun struct {
 
 // newPipelineRun returns a run for the given workflows, all pending.
 // The given cancelWorkflows has to cancel the context the workflows are run with.
-func newPipelineRun(items []*builder.Item, backend backend_types.Backend, timeout time.Duration, cancelWorkflows context.CancelCauseFunc) *pipelineRun {
+func newPipelineRun(items []*builder.Item, backends []execBackend, timeout time.Duration, cancelWorkflows context.CancelCauseFunc) *pipelineRun {
 	r := &pipelineRun{
 		items:           items,
-		backend:         backend,
+		backends:        make(map[*builder.Item]backend_types.Backend, len(items)),
+		unfit:           make(map[*builder.Item]string),
 		timeout:         timeout,
 		cancelWorkflows: cancelWorkflows,
 		steps:           make(map[string]*woodpecker.Step),
@@ -111,9 +140,31 @@ func newPipelineRun(items []*builder.Item, backend backend_types.Backend, timeou
 			}
 		}
 		r.workflows[item] = workflow
+
+		if backend := selectBackend(backends, item.Labels); backend != nil {
+			r.backends[item] = backend
+		} else {
+			r.unfit[item] = unfitMessage(item, backends)
+		}
 	}
 
 	return r
+}
+
+// unfitMessage tells why a workflow is not executed on any of the backends.
+func unfitMessage(item *builder.Item, backends []execBackend) string {
+	var labels []string
+	for _, label := range slices.Sorted(maps.Keys(item.Labels)) {
+		if !strings.HasPrefix(label, pipeline.InternalLabelPrefix) && item.Labels[label] != "" {
+			labels = append(labels, label+"="+item.Labels[label])
+		}
+	}
+	names := make([]string, 0, len(backends))
+	for _, backend := range backends {
+		names = append(names, backend.Name())
+	}
+	return fmt.Sprintf("workflow %s is skipped: its labels (%s) match none of the backends in use (%s)",
+		item.Workflow.Name, strings.Join(labels, ", "), strings.Join(names, ", "))
 }
 
 // execute runs all workflows and returns the status of the pipeline.
@@ -125,6 +176,14 @@ func (r *pipelineRun) execute(ctx context.Context) status.Value {
 		r.changed(r.workflows[item])
 	}
 	r.mu.Unlock()
+
+	// A server would let these wait for an agent that fits, here none will come.
+	for _, item := range r.items {
+		if message, unfit := r.unfit[item]; unfit {
+			r.out.Message(message)
+			r.Skip(item)
+		}
+	}
 
 	scheduler.Run(ctx, r.items, runtime.NumCPU(), r)
 
@@ -150,7 +209,7 @@ func (r *pipelineRun) Run(ctx context.Context, item *builder.Item) status.Value 
 
 	// the runtime needs a context that outlives the cancellation to clean up
 	err := pipeline_runtime.New(
-		item.Config, r.backend,
+		item.Config, r.backends[item],
 		pipeline_runtime.WithContext(workflowCtx),
 		pipeline_runtime.WithLogger(r.log),
 		pipeline_runtime.WithTracer(tracing.TraceFunc(r.update)),

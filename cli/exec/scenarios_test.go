@@ -114,6 +114,8 @@ func (o *recordOutput) Workflow(workflow *woodpecker.Workflow) {
 
 func (*recordOutput) Log(*woodpecker.LogEntry) {}
 
+func (*recordOutput) Message(string) {}
+
 func TestRunMatchesServerScenarios(t *testing.T) {
 	for _, sc := range loadScenarios(t) {
 		t.Run(sc.Name, func(t *testing.T) {
@@ -145,7 +147,7 @@ func TestRunMatchesServerScenarios(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(t.Context())
 			defer cancel(nil)
 			out := &recordOutput{workflows: make(map[int64]*woodpecker.Workflow)}
-			run := newPipelineRun(items, dummy.New(), time.Minute, cancel)
+			run := newPipelineRun(items, []execBackend{{Backend: dummy.New()}}, time.Minute, cancel)
 			run.out = out
 
 			assert.EqualValues(t, sc.ExpectedStatus, run.execute(ctx), "pipeline status")

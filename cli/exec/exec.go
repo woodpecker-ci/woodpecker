@@ -29,7 +29,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/local"
@@ -128,11 +128,6 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 }
 
 func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, repoPath string) error {
-	// if we use the local backend we should signal to run at $repoPath
-	if c.String("backend-engine") == "local" {
-		local.CLIWorkaroundExecAtDir = repoPath
-	}
-
 	// collect secrets from flags
 	var secrets []compiler.Secret
 	for key, val := range c.StringMap("secrets") {
@@ -259,19 +254,19 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		return fmt.Errorf("no workflows to execute (all filtered out)")
 	}
 
-	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
-	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
+	execBackends, err := loadBackends(ctx, c)
 	if err != nil {
 		return err
 	}
-	if _, err = backendEngine.Load(backendCtx); err != nil {
-		return err
+	// if we use the local backend we should signal to run at $repoPath
+	if slices.ContainsFunc(execBackends, func(b execBackend) bool { return b.Name() == "local" }) {
+		local.CLIWorkaroundExecAtDir = repoPath
 	}
 
 	ctx, cancel := context.WithCancelCause(ctx)
 	defer cancel(nil)
 
-	pipelineRun := newPipelineRun(items, backendEngine, c.Duration("timeout"), cancel)
+	pipelineRun := newPipelineRun(items, execBackends, c.Duration("timeout"), cancel)
 
 	var pipelineStatus status.Value
 	if useTUI {
@@ -287,6 +282,51 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		return fmt.Errorf("pipeline finished with status %s", pipelineStatus)
 	}
 	return nil
+}
+
+// loadBackends returns the backends to execute workflows on: the selected one,
+// or else all that are available. Each gets the labels an agent has by default.
+func loadBackends(ctx context.Context, c *cli.Command) ([]execBackend, error) {
+	ctx = context.WithValue(ctx, backend_types.CliCommand, c)
+	selected := c.String("backend-engine")
+	autoDetect := selected == "auto-detect"
+	hostname, _ := os.Hostname()
+
+	var loaded []execBackend
+	for _, engine := range backends {
+		use := engine.Name() == selected
+		if autoDetect {
+			use = engine.IsAvailable(ctx)
+		}
+		if !use {
+			continue
+		}
+
+		info, err := engine.Load(ctx)
+		if err != nil {
+			if !autoDetect {
+				return nil, err
+			}
+			log.Warn().Err(err).Msgf("backend engine '%s' is not used as it failed to load", engine.Name())
+			continue
+		}
+
+		loaded = append(loaded, execBackend{engine, map[string]string{
+			pipeline.LabelFilterHostname: hostname,
+			pipeline.LabelFilterPlatform: info.Platform,
+			pipeline.LabelFilterBackend:  engine.Name(),
+			pipeline.LabelFilterRepo:     "*",
+		}})
+	}
+
+	switch {
+	case len(loaded) > 0:
+		return loaded, nil
+	case autoDetect:
+		return nil, fmt.Errorf("can't detect an available backend engine")
+	default:
+		return nil, fmt.Errorf("backend engine '%s' not found", selected)
+	}
 }
 
 // convertPathForWindows converts a path to use slash separators

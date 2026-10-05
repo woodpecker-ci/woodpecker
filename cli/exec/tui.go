@@ -44,9 +44,13 @@ func (o tuiOutput) Log(entry *woodpecker.LogEntry) {
 	o.program.Send(tui.LogMsg{entry})
 }
 
+func (o tuiOutput) Message(text string) {
+	o.program.Send(tui.MessageMsg(text))
+}
+
 // Write shows text that belongs to no step.
 func (o tuiOutput) Write(p []byte) (int, error) {
-	o.program.Send(tui.MessageMsg(p))
+	o.Message(string(p))
 	return len(p), nil
 }
 

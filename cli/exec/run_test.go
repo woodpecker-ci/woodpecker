@@ -19,19 +19,24 @@ package exec
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // execWorkflows runs the exec command with the dummy backend on the given
 // workflow files and returns what it printed to stderr.
-func execWorkflows(ctx context.Context, t *testing.T, workflows map[string]string) (string, error) {
+func execWorkflows(ctx context.Context, t *testing.T, workflows map[string]string, flags ...string) (string, error) {
 	t.Helper()
 
 	repoDir := t.TempDir()
@@ -56,12 +61,11 @@ func execWorkflows(ctx context.Context, t *testing.T, workflows map[string]strin
 
 	clearEnv(t)
 
-	runErr := Command.Run(ctx, []string{
-		"woodpecker-cli",
-		"--backend-engine", "dummy",
-		"--repo-path", repoDir,
-		configDir,
-	})
+	args := []string{"woodpecker-cli", "--repo-path", repoDir}
+	if !slices.Contains(flags, "--backend-engine") {
+		args = append(args, "--backend-engine", "dummy")
+	}
+	runErr := Command.Run(ctx, append(append(args, flags...), configDir))
 
 	w.Close()
 	return <-output, runErr
@@ -240,4 +244,104 @@ steps:
 	assert.Less(t, time.Since(start), 30*time.Second)
 	assert.Contains(t, out, "# build: killed\n")
 	assert.Contains(t, out, "# deploy: skipped\n")
+}
+
+const workflowForBackend = `
+when:
+  - event: manual
+labels:
+  backend: %s
+steps:
+  - name: run
+    image: alpine
+    commands: make
+`
+
+func TestExecSkipsWorkflowNoBackendFits(t *testing.T) {
+	out, err := execWorkflows(t.Context(), t, map[string]string{
+		"build": fmt.Sprintf(workflowForBackend, "dummy"),
+		"deploy": `
+when:
+  - event: manual
+labels:
+  backend: kubernetes
+  zone: eu
+steps:
+  - name: apply
+    image: alpine
+    commands: kubectl apply
+`,
+		"notify": `
+when:
+  - event: manual
+depends_on: [deploy]
+steps:
+  - name: mail
+    image: alpine
+    commands: mail
+`,
+	})
+
+	require.NoError(t, err, "a skipped workflow does not fail the pipeline")
+
+	assert.Contains(t, out, "[build/run:L0:0s] StepName: run\n")
+	assert.Contains(t, out, "workflow deploy is skipped: its labels (backend=kubernetes, zone=eu) match none of the backends in use (dummy)\n")
+	assert.Contains(t, out, "# deploy: skipped\n")
+	assert.NotContains(t, out, "[deploy/apply:")
+	assert.Contains(t, out, "# notify: skipped\n", "what depends on a skipped workflow is skipped too")
+}
+
+// namedBackend is a backend that is available but must not be asked to
+// execute anything.
+type namedBackend struct {
+	backend_types.Backend
+	name string
+}
+
+func (b namedBackend) Name() string                     { return b.name }
+func (b namedBackend) IsAvailable(context.Context) bool { return true }
+func (b namedBackend) Load(context.Context) (*backend_types.BackendInfo, error) {
+	return &backend_types.BackendInfo{Platform: "test/arch"}, nil
+}
+
+func TestExecRunsWorkflowOnBackendItsLabelsAskFor(t *testing.T) {
+	originalBackends := backends
+	// the dummy backend is the last one, so not what auto-detect picks first
+	backends = []backend_types.Backend{namedBackend{name: "first"}, dummy.New()}
+	t.Cleanup(func() { backends = originalBackends })
+
+	out, err := execWorkflows(t.Context(), t, map[string]string{
+		"build": fmt.Sprintf(workflowForBackend, "dummy"),
+	}, "--backend-engine", "auto-detect")
+
+	require.NoError(t, err)
+	assert.Contains(t, out, "[run:L0:0s] StepName: run\n")
+}
+
+func TestSelectBackend(t *testing.T) {
+	docker := namedBackend{name: "docker"}
+	local := namedBackend{name: "local"}
+	backends := []execBackend{
+		{docker, map[string]string{"backend": "docker", "platform": "linux/amd64", "repo": "*"}},
+		{local, map[string]string{"backend": "local", "platform": "linux/amd64", "repo": "*"}},
+	}
+
+	tests := []struct {
+		name   string
+		labels map[string]string
+		want   backend_types.Backend
+	}{
+		{"no labels: first backend", nil, docker},
+		{"internal labels are ignored", map[string]string{"woodpecker-ci.org/repo-id": "1"}, docker},
+		{"label of first backend", map[string]string{"backend": "docker"}, docker},
+		{"label of second backend", map[string]string{"backend": "local"}, local},
+		{"label all backends have: first backend", map[string]string{"platform": "linux/amd64"}, docker},
+		{"all labels have to match", map[string]string{"backend": "local", "platform": "linux/arm64"}, nil},
+		{"label no backend has", map[string]string{"gpu": "true"}, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, selectBackend(backends, tt.labels))
+		})
+	}
 }
