@@ -17,7 +17,6 @@ package exec
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -27,11 +26,9 @@ import (
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/kubernetes"
@@ -40,11 +37,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
-	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
-	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Command exports the exec command.
@@ -66,9 +60,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	return common.RunPipelineFunc(ctx, c, execFile, execDir)
 }
 
-// TODO: do parallel runs with output to multiple _windows_ e.g. tmux like
 func execDir(ctx context.Context, c *cli.Command, dir string) error {
-	// TODO: respect pipeline dependency
 	repoPath := c.String("repo-path")
 	if repoPath != "" {
 		repoPath, _ = filepath.Abs(repoPath)
@@ -185,6 +177,8 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		),
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(pipelineEnv),
+		// TODO: remove with version 4.x, as it is just the default of the server until then
+		compiler.WithForceIgnoreServiceFailure(),
 	}
 
 	// configure volumes for local execution
@@ -266,39 +260,16 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		return err
 	}
 
-	var execErr error
-	// TODO: respect depends_on and run in parallel where possible
-	for _, item := range items {
-		fmt.Println("#", item.Workflow.Name)
+	ctx, cancel := context.WithCancelCause(ctx)
+	defer cancel(nil)
 
-		pipelineCtx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
-		defer cancel()
-		pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
-			fmt.Printf("ctrl+c received, terminating workflow '%s'\n", item.Workflow.Name)
-		})
+	pipelineRun := newPipelineRun(items, backendEngine, c.Duration("timeout"), cancel)
+	pipelineRun.out = newLineOutput(os.Stderr, len(items) > 1)
 
-		runtime := pipeline_runtime.New(
-			item.Config, backendEngine,
-			pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
-			pipeline_runtime.WithLogger(defaultLogger),
-			pipeline_runtime.WithDescription(map[string]string{
-				"CLI": "exec",
-			}),
-		)
-
-		err := runtime.Run(ctx)
-		if err == nil {
-			// Run does not report step failures as runtime errors, but a failed
-			// step must still let the command exit non-zero.
-			err = runtime.Err()
-		}
-		if err != nil {
-			fmt.Println(err)
-			execErr = multierr.Append(execErr, err)
-		}
-		fmt.Println("")
+	if pipelineStatus := pipelineRun.execute(ctx); pipelineStatus != status.Success {
+		return fmt.Errorf("pipeline finished with status %s", pipelineStatus)
 	}
-	return execErr
+	return nil
 }
 
 // convertPathForWindows converts a path to use slash separators
@@ -319,8 +290,3 @@ func convertPathForWindows(path string) string {
 
 	return filepath.ToSlash(path)
 }
-
-var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
-	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
-})
