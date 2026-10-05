@@ -22,6 +22,11 @@ import (
 
 var flags = []cli.Flag{
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXEC_NO_TUI"),
+		Name:    "no-tui",
+		Usage:   "print plain log lines instead of showing the interactive pipeline view, which is the default in a terminal",
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOCAL"),
 		Name:    "local",
 		Usage:   "run from local directory",

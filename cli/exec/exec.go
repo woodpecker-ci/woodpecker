@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 // Command exports the exec command.
@@ -238,10 +239,17 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		},
 	}
 
+	useTUI := !c.Bool("no-tui") && logger.IsInteractiveTerminal()
+
 	items, err := b.Build()
+	var warnings string
 	if err != nil {
-		str, fmtErr := lint.FormatLintError("pipeline", err, false)
-		fmt.Print(str)
+		var fmtErr error
+		warnings, fmtErr = lint.FormatLintError("pipeline", err, false)
+		// the view shows them itself
+		if !useTUI || fmtErr != nil {
+			fmt.Print(warnings)
+		}
 		if fmtErr != nil {
 			return fmtErr
 		}
@@ -264,9 +272,18 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	defer cancel(nil)
 
 	pipelineRun := newPipelineRun(items, backendEngine, c.Duration("timeout"), cancel)
-	pipelineRun.out = newLineOutput(os.Stderr, len(items) > 1)
 
-	if pipelineStatus := pipelineRun.execute(ctx); pipelineStatus != status.Success {
+	var pipelineStatus status.Value
+	if useTUI {
+		if pipelineStatus, err = executeWithTUI(ctx, pipelineRun, warnings); err != nil {
+			return err
+		}
+	} else {
+		pipelineRun.out = newLineOutput(os.Stderr, len(items) > 1)
+		pipelineStatus = pipelineRun.execute(ctx)
+	}
+
+	if pipelineStatus != status.Success {
 		return fmt.Errorf("pipeline finished with status %s", pipelineStatus)
 	}
 	return nil
