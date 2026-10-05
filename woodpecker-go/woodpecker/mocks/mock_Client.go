@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	"context"
 	"net/http"
 
 	mock "github.com/stretchr/testify/mock"
@@ -4656,6 +4657,81 @@ func (_c *MockClient_StepLogEntries_Call) Return(logEntrys []*woodpecker.LogEntr
 }
 
 func (_c *MockClient_StepLogEntries_Call) RunAndReturn(run func(repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error)) *MockClient_StepLogEntries_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// StepLogStream provides a mock function for the type MockClient
+func (_mock *MockClient) StepLogStream(ctx context.Context, repoID int64, pipeline int64, stepID int64, handle func(*woodpecker.LogEntry)) error {
+	ret := _mock.Called(ctx, repoID, pipeline, stepID, handle)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StepLogStream")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64, func(*woodpecker.LogEntry)) error); ok {
+		r0 = returnFunc(ctx, repoID, pipeline, stepID, handle)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_StepLogStream_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepLogStream'
+type MockClient_StepLogStream_Call struct {
+	*mock.Call
+}
+
+// StepLogStream is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - pipeline int64
+//   - stepID int64
+//   - handle func(*woodpecker.LogEntry)
+func (_e *MockClient_Expecter) StepLogStream(ctx any, repoID any, pipeline any, stepID any, handle any) *MockClient_StepLogStream_Call {
+	return &MockClient_StepLogStream_Call{Call: _e.mock.On("StepLogStream", ctx, repoID, pipeline, stepID, handle)}
+}
+
+func (_c *MockClient_StepLogStream_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64, stepID int64, handle func(*woodpecker.LogEntry))) *MockClient_StepLogStream_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
+		var arg4 func(*woodpecker.LogEntry)
+		if args[4] != nil {
+			arg4 = args[4].(func(*woodpecker.LogEntry))
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_StepLogStream_Call) Return(err error) *MockClient_StepLogStream_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_StepLogStream_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64, stepID int64, handle func(*woodpecker.LogEntry)) error) *MockClient_StepLogStream_Call {
 	_c.Call.Return(run)
 	return _c
 }
