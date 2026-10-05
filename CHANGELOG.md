@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @healdropper, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -46,6 +46,7 @@
 
 ### 📚 Documentation
 
+- Fix docs link in systemd example unit [[#7222](https://github.com/woodpecker-ci/woodpecker/pull/7222)]
 - Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
 - Use CI to update latest version on mastodon profile [[#7179](https://github.com/woodpecker-ci/woodpecker/pull/7179)]
 - Update dependency @types/node to v25.9.9 [[#7211](https://github.com/woodpecker-ci/woodpecker/pull/7211)]
