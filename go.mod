@@ -4,7 +4,10 @@ go 1.27.0
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.1
+	charm.land/bubbles/v2 v2.0.0
+	charm.land/bubbletea/v2 v2.0.2
 	charm.land/huh/v2 v2.0.3
+	charm.land/lipgloss/v2 v2.0.1
 	code.gitea.io/sdk/gitea v0.25.1
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
@@ -13,6 +16,7 @@ require (
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/cenkalti/backoff/v7 v7.0.0
+	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
 	github.com/docker/cli v29.8.1+incompatible
@@ -77,9 +81,6 @@ require (
 )
 
 require (
-	charm.land/bubbles/v2 v2.0.0 // indirect
-	charm.land/bubbletea/v2 v2.0.2 // indirect
-	charm.land/lipgloss/v2 v2.0.1 // indirect
 	codeberg.org/6543/xyaml v1.1.0 // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/42wim/httpsig v1.2.4 // indirect
@@ -96,7 +97,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.2 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20260205113103-524a6607adb8 // indirect
-	github.com/charmbracelet/x/ansi v0.11.6 // indirect
 	github.com/charmbracelet/x/exp/ordered v0.1.0 // indirect
 	github.com/charmbracelet/x/exp/strings v0.0.0-20240722160745-212f7b056ed0 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
