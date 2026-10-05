@@ -72,9 +72,11 @@ func Refresh(ctx context.Context, forge Forge, _store store.Store, user *model.U
 			// The caller's copy may predate a refresh that finished after it was
 			// loaded. Forges with single-use refresh tokens (e.g. Bitbucket Cloud)
 			// reject the stale one and may revoke the whole token family.
-			if stored, err := _store.GetUser(user.ID); err != nil {
-				log.Warn().Err(err).Msgf("could not reload user '%s' before oauth token refresh", user.Login)
-			} else {
+			stored, err := _store.GetUser(user.ID)
+			if err != nil {
+				log.Warn().Err(err).Str("user", user.Login).Msg("could not reload user before oauth token refresh")
+			}
+			if err == nil {
 				user.AccessToken = stored.AccessToken
 				user.RefreshToken = stored.RefreshToken
 				user.Expiry = stored.Expiry
