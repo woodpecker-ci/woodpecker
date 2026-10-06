@@ -34,7 +34,7 @@ import (
 func startCanceledStep(t *testing.T, backend *local, taskUUID string) *types.Step {
 	t.Helper()
 
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	cancel(nil) // pre-cancel
 
 	step := &types.Step{
@@ -65,7 +65,7 @@ func TestDestroyWorkflowOfNotStartedStep(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-destroy-workflow-not-started"
 	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
 
@@ -86,7 +86,7 @@ func TestDestroyStepOfNotStartedStep(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-destroy-step-not-started"
 	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
 	t.Cleanup(func() {

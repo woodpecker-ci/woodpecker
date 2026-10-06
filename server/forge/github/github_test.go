@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.SkipVerify)
 }
 
-func Test_github(t *testing.T) {
+func TestGithub(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
@@ -204,7 +204,7 @@ func TestHook(t *testing.T) {
 	require.NoError(t, err)
 
 	// Use the custom type as the key
-	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
 
 	// Create a mock store using the proper mocking pattern
 	mockStore := store_mocks.NewMockStore(t)
@@ -349,7 +349,7 @@ func TestGetTagCommitSHA(t *testing.T) {
 	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
 	require.NoError(t, err)
 
-	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
 
 	mockStore := store_mocks.NewMockStore(t)
 	mockStore.On("GetUser", mock.Anything).Return(&model.User{
