@@ -38,17 +38,8 @@ type AgentListOptions struct {
 	ListOptions
 }
 
-// AgentList returns the first page of registered agents.
-//
-// Deprecated: use AgentListWithOpts instead, which can ask for any page.
-func (c *client) AgentList(ctx context.Context) ([]*Agent, error) {
-	out := make([]*Agent, 0, 5)
-	uri := fmt.Sprintf(pathAgents, c.addr)
-	return out, c.get(ctx, uri, &out)
-}
-
-// AgentListWithOpts returns a page of registered agents.
-func (c *client) AgentListWithOpts(ctx context.Context, opt AgentListOptions) ([]*Agent, error) {
+// AgentList returns a page of registered agents.
+func (c *client) AgentList(ctx context.Context, opt AgentListOptions) ([]*Agent, error) {
 	out := make([]*Agent, 0, 5)
 	uri, _ := url.Parse(fmt.Sprintf(pathAgents, c.addr))
 	uri.RawQuery = opt.getURLQuery().Encode()

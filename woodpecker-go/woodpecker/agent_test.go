@@ -95,92 +95,6 @@ func TestClient_AgentCreate(t *testing.T) {
 func TestClient_AgentList(t *testing.T) {
 	tests := []struct {
 		name     string
-		handler  http.HandlerFunc
-		expected []*Agent
-		wantErr  bool
-	}{
-		{
-			name: "success",
-			handler: func(w http.ResponseWriter, _ *http.Request) {
-				w.WriteHeader(http.StatusOK)
-				_, err := fmt.Fprint(w, `[
-					{
-						"id": 1,
-						"name": "agent-1",
-						"backend": "local",
-						"capacity": 2,
-						"version": "1.0.0"
-					},
-					{
-						"id": 2,
-						"name": "agent-2",
-						"backend": "kubernetes",
-						"capacity": 4,
-						"version": "1.0.0"
-					}
-				]`)
-				assert.NoError(t, err)
-			},
-			expected: []*Agent{
-				{
-					ID:       1,
-					Name:     "agent-1",
-					Backend:  "local",
-					Capacity: 2,
-					Version:  "1.0.0",
-				},
-				{
-					ID:       2,
-					Name:     "agent-2",
-					Backend:  "kubernetes",
-					Capacity: 4,
-					Version:  "1.0.0",
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "server error",
-			handler: func(w http.ResponseWriter, _ *http.Request) {
-				w.WriteHeader(http.StatusInternalServerError)
-			},
-			expected: nil,
-			wantErr:  true,
-		},
-		{
-			name: "invalid response",
-			handler: func(w http.ResponseWriter, _ *http.Request) {
-				w.WriteHeader(http.StatusOK)
-				_, err := fmt.Fprint(w, `invalid json`)
-				assert.NoError(t, err)
-			},
-			expected: nil,
-			wantErr:  true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ts := httptest.NewServer(tt.handler)
-			defer ts.Close()
-
-			client := NewClient(ts.URL, http.DefaultClient)
-			agents, err := client.AgentList(t.Context())
-
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expected, agents)
-		})
-	}
-}
-
-func TestClient_AgentListWithOpts(t *testing.T) {
-	tests := []struct {
-		name     string
 		opt      AgentListOptions
 		handler  http.HandlerFunc
 		expected []*Agent
@@ -232,6 +146,16 @@ func TestClient_AgentListWithOpts(t *testing.T) {
 			expected: nil,
 			wantErr:  true,
 		},
+		{
+			name: "invalid response",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `invalid json`)
+				assert.NoError(t, err)
+			},
+			expected: nil,
+			wantErr:  true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -240,7 +164,7 @@ func TestClient_AgentListWithOpts(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agents, err := client.AgentListWithOpts(t.Context(), tt.opt)
+			agents, err := client.AgentList(t.Context(), tt.opt)
 
 			if tt.wantErr {
 				assert.Error(t, err)

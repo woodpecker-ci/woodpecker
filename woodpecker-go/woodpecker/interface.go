@@ -244,15 +244,10 @@ type Client interface {
 	// CronUpdate update an existing cron job of a repo.
 	CronUpdate(ctx context.Context, repoID int64, cron *Cron) (*Cron, error)
 
-	// AgentList returns the first page of registered agents.
-	//
-	// Deprecated: use AgentListWithOpts instead, which can ask for any page.
-	AgentList(ctx context.Context) ([]*Agent, error)
-
-	// AgentListWithOpts returns a page of registered agents. The server never
+	// AgentList returns a page of registered agents. The server never
 	// returns more than one page, so a caller that needs every agent has to
 	// walk the pages until one comes back short.
-	AgentListWithOpts(ctx context.Context, opt AgentListOptions) ([]*Agent, error)
+	AgentList(ctx context.Context, opt AgentListOptions) ([]*Agent, error)
 
 	// Agent returns an agent by id.
 	Agent(ctx context.Context, agentID int64) (*Agent, error)
