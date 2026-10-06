@@ -188,6 +188,10 @@ linters:
         - pkg: google.golang.org/protobuf/proto
           alias: grpc_proto
 
+        # package name differs from import path
+        - pkg: charm.land/bubbletea/v2
+          alias: tea
+
         # woodpecker internal
         - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types
           alias: backend_types

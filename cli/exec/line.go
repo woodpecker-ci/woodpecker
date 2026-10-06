@@ -17,33 +17,82 @@ package exec
 import (
 	"fmt"
 	"io"
-	"os"
-	"time"
+	"sync"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
-// LineWriter sends logs to the client.
-type LineWriter struct {
-	stepName  string
-	stepUUID  string
-	num       int
-	startTime time.Time
+// lineOutput prints what a pipeline run reports line by line.
+type lineOutput struct {
+	out io.Writer
+	// print the workflow name in front of each log line
+	multiWorkflow bool
+
+	mu sync.Mutex
+	// last printed state by workflow id
+	states map[int64]string
+	// log line prefix by step id
+	prefixes map[int64]string
 }
 
-// NewLineWriter returns a new line reader.
-func NewLineWriter(stepName, stepUUID string) io.WriteCloser {
-	return &LineWriter{
-		stepName:  stepName,
-		stepUUID:  stepUUID,
-		startTime: time.Now().UTC(),
+func newLineOutput(out io.Writer, multiWorkflow bool) *lineOutput {
+	return &lineOutput{
+		out:           out,
+		multiWorkflow: multiWorkflow,
+		states:        make(map[int64]string),
+		prefixes:      make(map[int64]string),
 	}
 }
 
-func (w *LineWriter) Write(p []byte) (n int, err error) {
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p)
-	w.num++
-	return len(p), nil
+// Workflow prints a workflow when it starts and how it ended.
+func (o *lineOutput) Workflow(workflow *woodpecker.Workflow) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	if o.states[workflow.ID] == workflow.State {
+		return
+	}
+	o.states[workflow.ID] = workflow.State
+
+	switch status.Value(workflow.State) {
+	case status.Running:
+		fmt.Fprintln(o.out, "#", workflow.Name)
+		for _, step := range workflow.Children {
+			o.prefixes[step.ID] = step.Name
+			if o.multiWorkflow {
+				o.prefixes[step.ID] = workflow.Name + "/" + step.Name
+			}
+		}
+	case status.Pending, status.Success:
+	default:
+		fmt.Fprintf(o.out, "# %s: %s\n", workflow.Name, workflow.State)
+		if workflow.Error != "" {
+			fmt.Fprintln(o.out, workflow.Error)
+		}
+		for _, step := range workflow.Children {
+			if status.Value(step.State) != status.Failure {
+				continue
+			}
+			if step.Error != "" {
+				fmt.Fprintf(o.out, "step %s: %s\n", step.Name, step.Error)
+			} else {
+				fmt.Fprintf(o.out, "step %s: exit code %d\n", step.Name, step.ExitCode)
+			}
+		}
+	}
 }
 
-func (w *LineWriter) Close() error {
-	return nil
+// Log prints a log line of a step.
+func (o *lineOutput) Log(entry *woodpecker.LogEntry) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	fmt.Fprintf(o.out, "[%s:L%d:%ds] %s\n", o.prefixes[entry.StepID], entry.Line, entry.Time, entry.Data)
+}
+
+// Message prints what the user should know about the run itself.
+func (o *lineOutput) Message(text string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	fmt.Fprintln(o.out, text)
 }

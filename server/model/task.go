@@ -16,9 +16,9 @@ package model
 
 import (
 	"fmt"
-	"slices"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 )
 
 // Task defines scheduled pipeline Task.
@@ -68,39 +68,9 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies.
 func (t *Task) ShouldRun() bool {
-	if t.runsOnFailure() && t.runsOnSuccess() {
-		return true
+	deps := make([]status.Value, 0, len(t.DepStatus))
+	for _, s := range t.DepStatus {
+		deps = append(deps, status.Value(s))
 	}
-
-	if !t.runsOnFailure() && t.runsOnSuccess() {
-		for _, status := range t.DepStatus {
-			if status != StatusSuccess {
-				return false
-			}
-		}
-		return true
-	}
-
-	if t.runsOnFailure() && !t.runsOnSuccess() {
-		for _, status := range t.DepStatus {
-			if status == StatusSuccess {
-				return false
-			}
-		}
-		return true
-	}
-
-	return false
-}
-
-func (t *Task) runsOnFailure() bool {
-	return slices.Contains(t.RunOn, string(StatusFailure))
-}
-
-func (t *Task) runsOnSuccess() bool {
-	if len(t.RunOn) == 0 {
-		return true
-	}
-
-	return slices.Contains(t.RunOn, string(StatusSuccess))
+	return status.ShouldRun(t.RunOn, deps)
 }

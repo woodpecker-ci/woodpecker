@@ -20,7 +20,7 @@ import (
 	"golang.org/x/term"
 )
 
-// isInteractiveTerminal checks if the output is piped, but NOT if the session is run interactively.
-func isInteractiveTerminal() bool {
+// IsInteractiveTerminal checks if the output is piped, but NOT if the session is run interactively.
+func IsInteractiveTerminal() bool {
 	return term.IsTerminal(int(os.Stdout.Fd()))
 }

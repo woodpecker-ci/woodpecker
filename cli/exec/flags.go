@@ -22,6 +22,11 @@ import (
 
 var flags = []cli.Flag{
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXEC_NO_TUI"),
+		Name:    "no-tui",
+		Usage:   "print plain log lines instead of showing the interactive pipeline view, which is the default in a terminal",
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOCAL"),
 		Name:    "local",
 		Usage:   "run from local directory",
@@ -72,6 +77,11 @@ var flags = []cli.Flag{
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_EXEC_IGNORE_LABELS"),
+		Name:    "ignore-labels",
+		Usage:   "run each workflow on the first backend in use, even if its labels ask for another backend, platform or anything else",
 	},
 	&cli.StringMapFlag{
 		Sources: cli.EnvVars("WOODPECKER_SECRETS"),

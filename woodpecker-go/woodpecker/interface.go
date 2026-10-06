@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -109,6 +110,10 @@ type Client interface {
 
 	// StepLogEntries returns the LogEntries for the given pipeline step
 	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
+
+	// StepLogStream calls handle for each log entry of a step that is not
+	// finished yet, including the ones already written, until the log ends.
+	StepLogStream(ctx context.Context, repoID, pipeline, stepID int64, handle func(*LogEntry)) error
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
