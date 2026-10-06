@@ -27,6 +27,7 @@ import (
 	kube_core_v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_types "k8s.io/apimachinery/pkg/types"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -199,6 +200,54 @@ func secretReference(name string) kube_core_v1.LocalObjectReference {
 	return kube_core_v1.LocalObjectReference{
 		Name: name,
 	}
+}
+
+// setSecretsOwner sets the step pod as owner of the ephemeral secrets created for the step.
+// This lets GC remove the secrets when the pod is removed.
+func setSecretsOwner(ctx context.Context, engine *kube, step *types.Step, pod *kube_core_v1.Pod) error {
+	var names []string
+	if needsRegistrySecret(step) {
+		name, err := registrySecretName(step)
+		if err != nil {
+			return err
+		}
+		names = append(names, name)
+	}
+	if needsStepSecret(step) {
+		name, err := stepSecretName(step)
+		if err != nil {
+			return err
+		}
+		names = append(names, name)
+	}
+
+	for _, name := range names {
+		if err := setSecretOwner(ctx, engine, step, name, pod); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func setSecretOwner(ctx context.Context, engine *kube, step *types.Step, secretName string, pod *kube_core_v1.Pod) error {
+	patch, err := json.Marshal(map[string]any{
+		"metadata": map[string]any{
+			"ownerReferences": []kube_meta_v1.OwnerReference{{
+				APIVersion: "v1",
+				Kind:       "Pod",
+				Name:       pod.Name,
+				UID:        pod.UID,
+			}},
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	log.Trace().Str("name", secretName).Msg("setting secret owner")
+	_, err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).
+		Patch(ctx, secretName, kube_types.MergePatchType, patch, kube_meta_v1.PatchOptions{})
+	return err
 }
 
 func needsRegistrySecret(step *types.Step) bool {
