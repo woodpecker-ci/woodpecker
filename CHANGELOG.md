@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @chiliec, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @chiliec, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @roian6, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Generalize log output groups [[#7226](https://github.com/woodpecker-ci/woodpecker/pull/7226)]
 - Add default user namespace support with configurable non-root override [[#6943](https://github.com/woodpecker-ci/woodpecker/pull/6943)]
 - Adopt Golang v1.27 [[#7153](https://github.com/woodpecker-ci/woodpecker/pull/7153)]
 - Store workflow/step dependencies in database and update API [[#6130](https://github.com/woodpecker-ci/woodpecker/pull/6130)]
@@ -76,6 +77,7 @@
 
 ### Misc
 
+- Include HTTP status in Bitbucket errors without a message [[#7227](https://github.com/woodpecker-ci/woodpecker/pull/7227)]
 - Fix infinite hook pagination loop on Bitbucket Cloud [[#7210](https://github.com/woodpecker-ci/woodpecker/pull/7210)]
 - Remove remainig gitpod artifacts [[#7216](https://github.com/woodpecker-ci/woodpecker/pull/7216)]
 
