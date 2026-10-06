@@ -37,21 +37,21 @@ func Show(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repo, err := repoShow(c, client)
+	repo, err := repoShow(ctx, c, client)
 	if err != nil {
 		return err
 	}
 	return repoOutput(c, []*woodpecker.Repo{repo})
 }
 
-func repoShow(c *cli.Command, client woodpecker.Client) (*woodpecker.Repo, error) {
+func repoShow(ctx context.Context, c *cli.Command, client woodpecker.Client) (*woodpecker.Repo, error) {
 	repoIDOrFullName := c.Args().First()
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return nil, err
 	}
 
-	repo, err := client.Repo(repoID)
+	repo, err := client.Repo(ctx, repoID)
 	if err != nil {
 		return nil, err
 	}

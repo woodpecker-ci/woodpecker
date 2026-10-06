@@ -115,7 +115,7 @@ func TestClient_QueueInfo(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			info, err := client.QueueInfo()
+			info, err := client.QueueInfo(t.Context())
 
 			if tt.wantErr {
 				assert.Error(t, err)

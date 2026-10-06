@@ -46,14 +46,14 @@ func secretList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
 	opt := woodpecker.SecretListOptions{}
 
-	list, err := client.SecretList(repoID, opt)
+	list, err := client.SecretList(ctx, repoID, opt)
 	if err != nil {
 		return err
 	}

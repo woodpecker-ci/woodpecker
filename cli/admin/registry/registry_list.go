@@ -45,7 +45,7 @@ func registryList(ctx context.Context, c *cli.Command) error {
 
 	opt := woodpecker.RegistryListOptions{}
 
-	list, err := client.GlobalRegistryList(opt)
+	list, err := client.GlobalRegistryList(ctx, opt)
 	if err != nil {
 		return err
 	}

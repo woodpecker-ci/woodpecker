@@ -40,7 +40,7 @@ func info(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	user, err := client.Self()
+	user, err := client.Self(ctx)
 	if err != nil {
 		return err
 	}

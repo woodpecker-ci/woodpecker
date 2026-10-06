@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -27,244 +28,244 @@ type Client interface {
 	SetAddress(string)
 
 	// Self returns the currently authenticated user.
-	Self() (*User, error)
+	Self(ctx context.Context) (*User, error)
 
 	// User returns a user by login.
 	// It is recommended to specify forgeID (default is 1).
-	User(login string, forgeID ...int64) (*User, error)
+	User(ctx context.Context, login string, forgeID ...int64) (*User, error)
 
 	// UserList returns a list of all registered users.
-	UserList(opt UserListOptions) ([]*User, error)
+	UserList(ctx context.Context, opt UserListOptions) ([]*User, error)
 
 	// UserPost creates a new user account.
-	UserPost(*User) (*User, error)
+	UserPost(ctx context.Context, user *User) (*User, error)
 
 	// UserPatch updates a user account.
-	UserPatch(*User) (*User, error)
+	UserPatch(ctx context.Context, user *User) (*User, error)
 
 	// UserDel deletes a user account.
 	// It is recommended to specify forgeID (default is 1).
-	UserDel(login string, forgeID ...int64) error
+	UserDel(ctx context.Context, login string, forgeID ...int64) error
 
 	// Repo returns a repository by name.
-	Repo(repoID int64) (*Repo, error)
+	Repo(ctx context.Context, repoID int64) (*Repo, error)
 
 	// RepoLookup returns a repository id by the owner and name.
-	RepoLookup(repoFullName string) (*Repo, error)
+	RepoLookup(ctx context.Context, repoFullName string) (*Repo, error)
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
-	RepoList(opt RepoListOptions) ([]*Repo, error)
+	RepoList(ctx context.Context, opt RepoListOptions) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(opt RepoPostOptions) (*Repo, error)
+	RepoPost(ctx context.Context, opt RepoPostOptions) (*Repo, error)
 
 	// RepoPatch updates a repository.
-	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
+	RepoPatch(ctx context.Context, repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(repoID int64, opt RepoMoveOptions) error
+	RepoMove(ctx context.Context, repoID int64, opt RepoMoveOptions) error
 
 	// RepoChown updates a repository owner.
-	RepoChown(repoID int64) (*Repo, error)
+	RepoChown(ctx context.Context, repoID int64) (*Repo, error)
 
 	// RepoRepair repairs the repository hooks.
-	RepoRepair(repoID int64) error
+	RepoRepair(ctx context.Context, repoID int64) error
 
 	// RepoDel deletes a repository.
-	RepoDel(repoID int64) error
+	RepoDel(ctx context.Context, repoID int64) error
 
 	// Pipeline returns a repository pipeline by number.
-	Pipeline(repoID, pipeline int64) (*Pipeline, error)
+	Pipeline(ctx context.Context, repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineLast returns the latest repository pipeline.
-	PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error)
+	PipelineLast(ctx context.Context, repoID int64, opt PipelineLastOptions) (*Pipeline, error)
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
+	PipelineList(ctx context.Context, repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
 
-	PipelineDelete(repoID, pipeline int64) error
+	PipelineDelete(ctx context.Context, repoID, pipeline int64) error
 
 	// PipelineQueue returns a list of enqueued pipelines.
-	PipelineQueue() ([]*Feed, error)
+	PipelineQueue(ctx context.Context) ([]*Feed, error)
 
 	// PipelineCreate returns creates a pipeline on specified branch.
-	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
+	PipelineCreate(ctx context.Context, repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
+	PipelineStart(ctx context.Context, repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
-	PipelineStop(repoID, pipeline int64) error
+	PipelineStop(ctx context.Context, repoID, pipeline int64) error
 
 	// PipelineApprove approves a blocked pipeline.
-	PipelineApprove(repoID, pipeline int64) (*Pipeline, error)
+	PipelineApprove(ctx context.Context, repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineDecline declines a blocked pipeline.
-	PipelineDecline(repoID, pipeline int64) (*Pipeline, error)
+	PipelineDecline(ctx context.Context, repoID, pipeline int64) (*Pipeline, error)
 
 	// PipelineMetadata returns metadata for a pipeline.
-	PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error)
+	PipelineMetadata(ctx context.Context, repoID int64, pipelineNumber int) ([]byte, error)
 
 	// StepLogEntries returns the LogEntries for the given pipeline step
-	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
+	StepLogEntries(ctx context.Context, repoID, pipeline, stepID int64) ([]*LogEntry, error)
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
+	Deploy(ctx context.Context, repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
-	LogsPurge(repoID, pipeline int64) error
+	LogsPurge(ctx context.Context, repoID, pipeline int64) error
 
 	// StepLogsPurge purges the pipeline logs for the specified step.
-	StepLogsPurge(repoID, pipelineNumber, stepID int64) error
+	StepLogsPurge(ctx context.Context, repoID, pipelineNumber, stepID int64) error
 
 	// Registry returns a registry by hostname.
-	Registry(repoID int64, hostname string) (*Registry, error)
+	Registry(ctx context.Context, repoID int64, hostname string) (*Registry, error)
 
 	// RegistryList returns a list of all repository registries.
-	RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error)
+	RegistryList(ctx context.Context, repoID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// RegistryCreate creates a registry.
-	RegistryCreate(repoID int64, registry *Registry) (*Registry, error)
+	RegistryCreate(ctx context.Context, repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryUpdate updates a registry.
-	RegistryUpdate(repoID int64, registry *Registry) (*Registry, error)
+	RegistryUpdate(ctx context.Context, repoID int64, registry *Registry) (*Registry, error)
 
 	// RegistryDelete deletes a registry.
-	RegistryDelete(repoID int64, hostname string) error
+	RegistryDelete(ctx context.Context, repoID int64, hostname string) error
 
 	// OrgRegistry returns an organization registry by address.
-	OrgRegistry(orgID int64, registry string) (*Registry, error)
+	OrgRegistry(ctx context.Context, orgID int64, registry string) (*Registry, error)
 
 	// OrgRegistryList returns a list of all organization registries.
-	OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error)
+	OrgRegistryList(ctx context.Context, orgID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// OrgRegistryCreate creates an organization registry.
-	OrgRegistryCreate(orgID int64, registry *Registry) (*Registry, error)
+	OrgRegistryCreate(ctx context.Context, orgID int64, registry *Registry) (*Registry, error)
 
 	// OrgRegistryUpdate updates an organization registry.
-	OrgRegistryUpdate(orgID int64, registry *Registry) (*Registry, error)
+	OrgRegistryUpdate(ctx context.Context, orgID int64, registry *Registry) (*Registry, error)
 
 	// OrgRegistryDelete deletes an organization registry.
-	OrgRegistryDelete(orgID int64, registry string) error
+	OrgRegistryDelete(ctx context.Context, orgID int64, registry string) error
 
 	// GlobalRegistry returns an global registry by address.
-	GlobalRegistry(registry string) (*Registry, error)
+	GlobalRegistry(ctx context.Context, registry string) (*Registry, error)
 
 	// GlobalRegistryList returns a list of all global registries.
-	GlobalRegistryList(opt RegistryListOptions) ([]*Registry, error)
+	GlobalRegistryList(ctx context.Context, opt RegistryListOptions) ([]*Registry, error)
 
 	// GlobalRegistryCreate creates a global registry.
-	GlobalRegistryCreate(registry *Registry) (*Registry, error)
+	GlobalRegistryCreate(ctx context.Context, registry *Registry) (*Registry, error)
 
 	// GlobalRegistryUpdate updates a global registry.
-	GlobalRegistryUpdate(registry *Registry) (*Registry, error)
+	GlobalRegistryUpdate(ctx context.Context, registry *Registry) (*Registry, error)
 
 	// GlobalRegistryDelete deletes a global registry.
-	GlobalRegistryDelete(registry string) error
+	GlobalRegistryDelete(ctx context.Context, registry string) error
 
 	// Secret returns a secret by name.
-	Secret(repoID int64, secret string) (*Secret, error)
+	Secret(ctx context.Context, repoID int64, secret string) (*Secret, error)
 
 	// SecretList returns a list of all repository secrets.
-	SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error)
+	SecretList(ctx context.Context, repoID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// SecretCreate creates a secret.
-	SecretCreate(repoID int64, secret *Secret) (*Secret, error)
+	SecretCreate(ctx context.Context, repoID int64, secret *Secret) (*Secret, error)
 
 	// SecretUpdate updates a secret.
-	SecretUpdate(repoID int64, secret *Secret) (*Secret, error)
+	SecretUpdate(ctx context.Context, repoID int64, secret *Secret) (*Secret, error)
 
 	// SecretDelete deletes a secret.
-	SecretDelete(repoID int64, secret string) error
+	SecretDelete(ctx context.Context, repoID int64, secret string) error
 
 	// Org returns an organization by name.
-	Org(orgID int64) (*Org, error)
+	Org(ctx context.Context, orgID int64) (*Org, error)
 
 	// OrgLookup returns an organization id by name.
-	OrgLookup(orgName string) (*Org, error)
+	OrgLookup(ctx context.Context, orgName string) (*Org, error)
 
 	// OrgList returns a list of all organizations.
-	OrgList(opt ListOptions) ([]*Org, error)
+	OrgList(ctx context.Context, opt ListOptions) ([]*Org, error)
 
 	// OrgSecret returns an organization secret by name.
-	OrgSecret(orgID int64, secret string) (*Secret, error)
+	OrgSecret(ctx context.Context, orgID int64, secret string) (*Secret, error)
 
 	// OrgSecretList returns a list of all organization secrets.
-	OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error)
+	OrgSecretList(ctx context.Context, orgID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// OrgSecretCreate creates an organization secret.
-	OrgSecretCreate(orgID int64, secret *Secret) (*Secret, error)
+	OrgSecretCreate(ctx context.Context, orgID int64, secret *Secret) (*Secret, error)
 
 	// OrgSecretUpdate updates an organization secret.
-	OrgSecretUpdate(orgID int64, secret *Secret) (*Secret, error)
+	OrgSecretUpdate(ctx context.Context, orgID int64, secret *Secret) (*Secret, error)
 
 	// OrgSecretDelete deletes an organization secret.
-	OrgSecretDelete(orgID int64, secret string) error
+	OrgSecretDelete(ctx context.Context, orgID int64, secret string) error
 
 	// GlobalSecret returns an global secret by name.
-	GlobalSecret(secret string) (*Secret, error)
+	GlobalSecret(ctx context.Context, secret string) (*Secret, error)
 
 	// GlobalSecretList returns a list of all global secrets.
-	GlobalSecretList(opt SecretListOptions) ([]*Secret, error)
+	GlobalSecretList(ctx context.Context, opt SecretListOptions) ([]*Secret, error)
 
 	// GlobalSecretCreate creates a global secret.
-	GlobalSecretCreate(secret *Secret) (*Secret, error)
+	GlobalSecretCreate(ctx context.Context, secret *Secret) (*Secret, error)
 
 	// GlobalSecretUpdate updates a global secret.
-	GlobalSecretUpdate(secret *Secret) (*Secret, error)
+	GlobalSecretUpdate(ctx context.Context, secret *Secret) (*Secret, error)
 
 	// GlobalSecretDelete deletes a global secret.
-	GlobalSecretDelete(secret string) error
+	GlobalSecretDelete(ctx context.Context, secret string) error
 
 	// QueueInfo returns the queue state.
-	QueueInfo() (*Info, error)
+	QueueInfo(ctx context.Context) (*Info, error)
 
 	// LogLevel returns the current logging level.
-	LogLevel() (*LogLevel, error)
+	LogLevel(ctx context.Context) (*LogLevel, error)
 
 	// SetLogLevel sets the server's logging level.
-	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
+	SetLogLevel(ctx context.Context, logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo.
-	CronList(repoID int64, opt CronListOptions) ([]*Cron, error)
+	CronList(ctx context.Context, repoID int64, opt CronListOptions) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id.
-	CronGet(repoID, cronID int64) (*Cron, error)
+	CronGet(ctx context.Context, repoID, cronID int64) (*Cron, error)
 
 	// CronDelete delete a specific cron job of a repo by id.
-	CronDelete(repoID, cronID int64) error
+	CronDelete(ctx context.Context, repoID, cronID int64) error
 
 	// CronCreate create a new cron job in a repo.
-	CronCreate(repoID int64, cron *Cron) (*Cron, error)
+	CronCreate(ctx context.Context, repoID int64, cron *Cron) (*Cron, error)
 
 	// CronUpdate update an existing cron job of a repo.
-	CronUpdate(repoID int64, cron *Cron) (*Cron, error)
+	CronUpdate(ctx context.Context, repoID int64, cron *Cron) (*Cron, error)
 
 	// AgentList returns the first page of registered agents.
 	//
 	// Deprecated: use AgentListWithOpts instead, which can ask for any page.
-	AgentList() ([]*Agent, error)
+	AgentList(ctx context.Context) ([]*Agent, error)
 
 	// AgentListWithOpts returns a page of registered agents. The server never
 	// returns more than one page, so a caller that needs every agent has to
 	// walk the pages until one comes back short.
-	AgentListWithOpts(opt AgentListOptions) ([]*Agent, error)
+	AgentListWithOpts(ctx context.Context, opt AgentListOptions) ([]*Agent, error)
 
 	// Agent returns an agent by id.
-	Agent(int64) (*Agent, error)
+	Agent(ctx context.Context, agentID int64) (*Agent, error)
 
 	// AgentCreate creates a new agent.
-	AgentCreate(*Agent) (*Agent, error)
+	AgentCreate(ctx context.Context, agent *Agent) (*Agent, error)
 
 	// AgentUpdate updates an existing agent.
-	AgentUpdate(*Agent) (*Agent, error)
+	AgentUpdate(ctx context.Context, agent *Agent) (*Agent, error)
 
 	// AgentDelete deletes an agent.
-	AgentDelete(int64) error
+	AgentDelete(ctx context.Context, agentID int64) error
 
 	// AgentTasksList returns a list of all tasks executed by an agent.
-	AgentTasksList(int64) ([]*Task, error)
+	AgentTasksList(ctx context.Context, agentID int64) ([]*Task, error)
 }

@@ -36,12 +36,12 @@ func repoChown(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	repo, err := client.RepoChown(repoID)
+	repo, err := client.RepoChown(ctx, repoID)
 	if err != nil {
 		return err
 	}

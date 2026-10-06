@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
@@ -63,13 +64,13 @@ func TestRepoShow(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewMockClient(t)
-			mockClient.On("Repo", tt.repoID).Return(tt.mockRepo, tt.mockError).Maybe()
-			mockClient.On("RepoLookup", "owner/repo").Return(tt.mockRepo, nil).Maybe()
+			mockClient.On("Repo", mock.Anything, tt.repoID).Return(tt.mockRepo, tt.mockError).Maybe()
+			mockClient.On("RepoLookup", mock.Anything, "owner/repo").Return(tt.mockRepo, nil).Maybe()
 
 			command := repoShowCmd
 			command.Writer = io.Discard
-			command.Action = func(_ context.Context, c *cli.Command) error {
-				output, err := repoShow(c, mockClient)
+			command.Action = func(ctx context.Context, c *cli.Command) error {
+				output, err := repoShow(ctx, c, mockClient)
 				if tt.wantErr {
 					assert.Error(t, err)
 					return nil

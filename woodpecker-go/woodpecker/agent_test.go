@@ -80,7 +80,7 @@ func TestClient_AgentCreate(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agent, err := client.AgentCreate(tt.input)
+			agent, err := client.AgentCreate(t.Context(), tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -165,7 +165,7 @@ func TestClient_AgentList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agents, err := client.AgentList()
+			agents, err := client.AgentList(t.Context())
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -240,7 +240,7 @@ func TestClient_AgentListWithOpts(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agents, err := client.AgentListWithOpts(tt.opt)
+			agents, err := client.AgentListWithOpts(t.Context(), tt.opt)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -325,7 +325,7 @@ func TestClient_Agent(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agent, err := client.Agent(tt.agentID)
+			agent, err := client.Agent(t.Context(), tt.agentID)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -407,7 +407,7 @@ func TestClient_AgentUpdate(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			agent, err := client.AgentUpdate(tt.input)
+			agent, err := client.AgentUpdate(t.Context(), tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -470,7 +470,7 @@ func TestClient_AgentDelete(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			err := client.AgentDelete(tt.agentID)
+			err := client.AgentDelete(t.Context(), tt.agentID)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -585,7 +585,7 @@ func TestClient_AgentTasksList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			tasks, err := client.AgentTasksList(tt.agentID)
+			tasks, err := client.AgentTasksList(t.Context(), tt.agentID)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

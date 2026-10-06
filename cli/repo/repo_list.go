@@ -47,20 +47,20 @@ func List(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repos, err := repoList(c, client)
+	repos, err := repoList(ctx, c, client)
 	if err != nil {
 		return err
 	}
 	return repoOutput(c, repos)
 }
 
-func repoList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Repo, error) {
+func repoList(ctx context.Context, c *cli.Command, client woodpecker.Client) ([]*woodpecker.Repo, error) {
 	repos := make([]*woodpecker.Repo, 0)
 	opt := woodpecker.RepoListOptions{
 		All: c.Bool("all"),
 	}
 
-	raw, err := client.RepoList(opt)
+	raw, err := client.RepoList(ctx, opt)
 	if err != nil || len(raw) == 0 {
 		return nil, err
 	}

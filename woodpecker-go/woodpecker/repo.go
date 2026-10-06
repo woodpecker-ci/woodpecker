@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -151,282 +152,282 @@ func (opt *RepoMoveOptions) QueryEncode() string {
 }
 
 // Repo returns a repository by id.
-func (c *client) Repo(repoID int64) (*Repo, error) {
+func (c *client) Repo(ctx context.Context, repoID int64) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // RepoLookup returns a repository by name.
-func (c *client) RepoLookup(fullName string) (*Repo, error) {
+func (c *client) RepoLookup(ctx context.Context, fullName string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepoLookup, c.addr, fullName)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // RepoPost activates a repository.
-func (c *client) RepoPost(opt RepoPostOptions) (*Repo, error) {
+func (c *client) RepoPost(ctx context.Context, opt RepoPostOptions) (*Repo, error) {
 	out := new(Repo)
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoPost, c.addr))
 	uri.RawQuery = opt.QueryEncode()
-	err := c.post(uri.String(), nil, out)
+	err := c.post(ctx, uri.String(), nil, out)
 	return out, err
 }
 
 // RepoChown updates a repository owner.
-func (c *client) RepoChown(repoID int64) (*Repo, error) {
+func (c *client) RepoChown(ctx context.Context, repoID int64) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathChown, c.addr, repoID)
-	err := c.post(uri, nil, out)
+	err := c.post(ctx, uri, nil, out)
 	return out, err
 }
 
 // RepoRepair repairs the repository hooks.
-func (c *client) RepoRepair(repoID int64) error {
+func (c *client) RepoRepair(ctx context.Context, repoID int64) error {
 	uri := fmt.Sprintf(pathRepair, c.addr, repoID)
-	return c.post(uri, nil, nil)
+	return c.post(ctx, uri, nil, nil)
 }
 
 // RepoPatch updates a repository.
-func (c *client) RepoPatch(repoID int64, in *RepoPatch) (*Repo, error) {
+func (c *client) RepoPatch(ctx context.Context, repoID int64, in *RepoPatch) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // RepoDel deletes a repository.
-func (c *client) RepoDel(repoID int64) error {
+func (c *client) RepoDel(ctx context.Context, repoID int64) error {
 	uri := fmt.Sprintf(pathRepo, c.addr, repoID)
-	err := c.delete(uri)
+	err := c.delete(ctx, uri)
 	return err
 }
 
 // RepoMove moves a repository.
-func (c *client) RepoMove(repoID int64, opt RepoMoveOptions) error {
+func (c *client) RepoMove(ctx context.Context, repoID int64, opt RepoMoveOptions) error {
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoMove, c.addr, repoID))
 	uri.RawQuery = opt.QueryEncode()
-	return c.post(uri.String(), nil, nil)
+	return c.post(ctx, uri.String(), nil, nil)
 }
 
 // Registry returns a registry by hostname.
-func (c *client) Registry(repoID int64, hostname string) (*Registry, error) {
+func (c *client) Registry(ctx context.Context, repoID int64, hostname string) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, hostname)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error) {
+func (c *client) RegistryList(ctx context.Context, repoID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoRegistries, c.addr, repoID))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // RegistryCreate creates a registry.
-func (c *client) RegistryCreate(repoID int64, in *Registry) (*Registry, error) {
+func (c *client) RegistryCreate(ctx context.Context, repoID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathRepoRegistries, c.addr, repoID)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
 // RegistryUpdate updates a registry.
-func (c *client) RegistryUpdate(repoID int64, in *Registry) (*Registry, error) {
+func (c *client) RegistryUpdate(ctx context.Context, repoID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, in.Address)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // RegistryDelete deletes a registry.
-func (c *client) RegistryDelete(repoID int64, hostname string) error {
+func (c *client) RegistryDelete(ctx context.Context, repoID int64, hostname string) error {
 	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, hostname)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }
 
 // Secret returns a secret by name.
-func (c *client) Secret(repoID int64, secret string) (*Secret, error) {
+func (c *client) Secret(ctx context.Context, repoID int64, secret string) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, secret)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // SecretList returns a list of all repository secrets.
-func (c *client) SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error) {
+func (c *client) SecretList(ctx context.Context, repoID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoSecrets, c.addr, repoID))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // SecretCreate creates a secret.
-func (c *client) SecretCreate(repoID int64, in *Secret) (*Secret, error) {
+func (c *client) SecretCreate(ctx context.Context, repoID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathRepoSecrets, c.addr, repoID)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
 // SecretUpdate updates a secret.
-func (c *client) SecretUpdate(repoID int64, in *Secret) (*Secret, error) {
+func (c *client) SecretUpdate(ctx context.Context, repoID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, in.Name)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // SecretDelete deletes a secret.
-func (c *client) SecretDelete(repoID int64, secret string) error {
+func (c *client) SecretDelete(ctx context.Context, repoID int64, secret string) error {
 	uri := fmt.Sprintf(pathRepoSecret, c.addr, repoID, secret)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }
 
 // CronList returns a list of cronjobs for the specified repository.
-func (c *client) CronList(repoID int64, opt CronListOptions) ([]*Cron, error) {
+func (c *client) CronList(ctx context.Context, repoID int64, opt CronListOptions) ([]*Cron, error) {
 	out := make([]*Cron, 0, 5)
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoCrons, c.addr, repoID))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	return out, c.get(uri.String(), &out)
+	return out, c.get(ctx, uri.String(), &out)
 }
 
 // CronCreate creates a new cron job for the specified repository.
-func (c *client) CronCreate(repoID int64, in *Cron) (*Cron, error) {
+func (c *client) CronCreate(ctx context.Context, repoID int64, in *Cron) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
-	return out, c.post(uri, in, out)
+	return out, c.post(ctx, uri, in, out)
 }
 
 // CronUpdate updates an existing cron job for the specified repository.
-func (c *client) CronUpdate(repoID int64, in *Cron) (*Cron, error) {
+func (c *client) CronUpdate(ctx context.Context, repoID int64, in *Cron) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, in.ID)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // CronDelete deletes a cron job by cron-id for the specified repository.
-func (c *client) CronDelete(repoID, cronID int64) error {
+func (c *client) CronDelete(ctx context.Context, repoID, cronID int64) error {
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }
 
 // CronGet returns a cron job by cron-id for the specified repository.
-func (c *client) CronGet(repoID, cronID int64) (*Cron, error) {
+func (c *client) CronGet(ctx context.Context, repoID, cronID int64) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
-	return out, c.get(uri, out)
+	return out, c.get(ctx, uri, out)
 }
 
 // Pipeline returns a repository pipeline by pipeline-id.
-func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
+func (c *client) Pipeline(ctx context.Context, repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // PipelineLast returns the latest repository pipeline.
-func (c *client) PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error) {
+func (c *client) PipelineLast(ctx context.Context, repoID int64, opt PipelineLastOptions) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, "latest"))
 	uri.RawQuery = opt.QueryEncode()
-	err := c.get(uri.String(), out)
+	err := c.get(ctx, uri.String(), out)
 	return out, err
 }
 
 // PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error) {
+func (c *client) PipelineList(ctx context.Context, repoID int64, opt PipelineListOptions) ([]*Pipeline, error) {
 	var out []*Pipeline
 	uri, _ := url.Parse(fmt.Sprintf(pathPipelines, c.addr, repoID))
 	uri.RawQuery = opt.QueryEncode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // PipelineDelete deletes a pipeline by the specified repository ID and pipeline ID.
-func (c *client) PipelineDelete(repoID, pipeline int64) error {
+func (c *client) PipelineDelete(ctx context.Context, repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.delete(uri)
+	err := c.delete(ctx, uri)
 	return err
 }
 
 // PipelineCreate creates a new pipeline for the specified repository.
-func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeline, error) {
+func (c *client) PipelineCreate(ctx context.Context, repoID int64, options *PipelineOptions) (*Pipeline, error) {
 	var out *Pipeline
 	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
-	err := c.post(uri, options, &out)
+	err := c.post(ctx, uri, options, &out)
 	return out, err
 }
 
 // PipelineStart re-starts a stopped pipeline.
-func (c *client) PipelineStart(repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
+func (c *client) PipelineStart(ctx context.Context, repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
 	uri.RawQuery = opt.QueryEncode()
-	err := c.post(uri.String(), nil, out)
+	err := c.post(ctx, uri.String(), nil, out)
 	return out, err
 }
 
 // PipelineStop cancels the running step.
-func (c *client) PipelineStop(repoID, pipeline int64) error {
+func (c *client) PipelineStop(ctx context.Context, repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathStop, c.addr, repoID, pipeline)
-	err := c.post(uri, nil, nil)
+	err := c.post(ctx, uri, nil, nil)
 	return err
 }
 
 // PipelineApprove approves a blocked pipeline.
-func (c *client) PipelineApprove(repoID, pipeline int64) (*Pipeline, error) {
+func (c *client) PipelineApprove(ctx context.Context, repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathApprove, c.addr, repoID, pipeline)
-	err := c.post(uri, nil, out)
+	err := c.post(ctx, uri, nil, out)
 	return out, err
 }
 
 // PipelineDecline declines a blocked pipeline.
-func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
+func (c *client) PipelineDecline(ctx context.Context, repoID, pipeline int64) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri := fmt.Sprintf(pathDecline, c.addr, repoID, pipeline)
-	err := c.post(uri, nil, out)
+	err := c.post(ctx, uri, nil, out)
 	return out, err
 }
 
 // LogsPurge purges the pipeline all steps logs for the specified pipeline.
-func (c *client) LogsPurge(repoID, pipeline int64) error {
+func (c *client) LogsPurge(ctx context.Context, repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathPipelineLogs, c.addr, repoID, pipeline)
-	err := c.delete(uri)
+	err := c.delete(ctx, uri)
 	return err
 }
 
 // Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error) {
+func (c *client) Deploy(ctx context.Context, repoID, pipeline int64, opt DeployOptions) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
 	uri.RawQuery = opt.QueryEncode()
-	err := c.post(uri.String(), nil, out)
+	err := c.post(ctx, uri.String(), nil, out)
 	return out, err
 }
 
 // StepLogEntries returns the pipeline logs for the specified step.
-func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
+func (c *client) StepLogEntries(ctx context.Context, repoID, num, step int64) ([]*LogEntry, error) {
 	uri := fmt.Sprintf(pathStepLogs, c.addr, repoID, num, step)
 	var out []*LogEntry
-	err := c.get(uri, &out)
+	err := c.get(ctx, uri, &out)
 	return out, err
 }
 
 // StepLogsPurge purges the pipeline logs for the specified step.
-func (c *client) StepLogsPurge(repoID, pipelineNumber, stepID int64) error {
+func (c *client) StepLogsPurge(ctx context.Context, repoID, pipelineNumber, stepID int64) error {
 	uri := fmt.Sprintf(pathStepLogs, c.addr, repoID, pipelineNumber, stepID)
-	err := c.delete(uri)
+	err := c.delete(ctx, uri)
 	return err
 }

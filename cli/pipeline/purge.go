@@ -64,15 +64,15 @@ func Purge(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	return pipelinePurge(c, client, start)
+	return pipelinePurge(ctx, c, client, start)
 }
 
-func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (err error) {
+func pipelinePurge(ctx context.Context, c *cli.Command, client woodpecker.Client, start time.Time) (err error) {
 	repoIDOrFullName := c.Args().First()
 	if len(repoIDOrFullName) == 0 {
 		return fmt.Errorf("missing required argument repo-id / repo-full-name")
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
@@ -90,13 +90,13 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (e
 	var pipelinesKeep []*woodpecker.Pipeline
 
 	if keepMin > 0 {
-		pipelinesKeep, err = fetchPipelinesToKeep(client, repoID, branch, int(keepMin))
+		pipelinesKeep, err = fetchPipelinesToKeep(ctx, client, repoID, branch, int(keepMin))
 		if err != nil {
 			return err
 		}
 	}
 
-	pipelines, err := fetchPipelines(client, repoID, branch, before)
+	pipelines, err := fetchPipelines(ctx, client, repoID, branch, before)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (e
 			continue
 		}
 
-		err := client.PipelineDelete(repoID, p.Number)
+		err := client.PipelineDelete(ctx, repoID, p.Number)
 		if err != nil {
 			var clientErr *woodpecker.ClientError
 			if errors.As(err, &clientErr) && clientErr.StatusCode == http.StatusUnprocessableEntity {
@@ -141,12 +141,13 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client, start time.Time) (e
 	return nil
 }
 
-func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string, keepMin int) ([]*woodpecker.Pipeline, error) {
+func fetchPipelinesToKeep(ctx context.Context, client woodpecker.Client, repoID int64, branch string, keepMin int) ([]*woodpecker.Pipeline, error) {
 	if keepMin <= 0 {
 		return nil, nil
 	}
 	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
 		return client.PipelineList(
+			ctx,
 			repoID,
 			woodpecker.PipelineListOptions{
 				Page:   page,
@@ -156,9 +157,10 @@ func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string,
 	}, keepMin)
 }
 
-func fetchPipelines(client woodpecker.Client, repoID int64, branch string, before time.Time) ([]*woodpecker.Pipeline, error) {
+func fetchPipelines(ctx context.Context, client woodpecker.Client, repoID int64, branch string, before time.Time) ([]*woodpecker.Pipeline, error) {
 	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
 		return client.PipelineList(
+			ctx,
 			repoID,
 			woodpecker.PipelineListOptions{
 				Page:   page,

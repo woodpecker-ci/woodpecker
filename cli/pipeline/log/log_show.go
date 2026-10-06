@@ -43,7 +43,7 @@ func logShow(ctx context.Context, c *cli.Command) error {
 	if len(repoIDOrFullName) == 0 {
 		return fmt.Errorf("missing required argument repo-id / repo-full-name")
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return fmt.Errorf("invalid repo '%s': %w ", repoIDOrFullName, err)
 	}
@@ -59,18 +59,18 @@ func logShow(ctx context.Context, c *cli.Command) error {
 
 	stepArg := c.Args().Get(2) //nolint:mnd
 	if len(stepArg) == 0 {
-		return pipelineLog(client, repoID, number)
+		return pipelineLog(ctx, client, repoID, number)
 	}
 
-	step, err := internal.ParseStep(client, repoID, number, stepArg)
+	step, err := internal.ParseStep(ctx, client, repoID, number, stepArg)
 	if err != nil {
 		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
 	}
-	return stepLog(client, repoID, number, step)
+	return stepLog(ctx, client, repoID, number, step)
 }
 
-func pipelineLog(client woodpecker.Client, repoID, number int64) error {
-	pipeline, err := client.Pipeline(repoID, number)
+func pipelineLog(ctx context.Context, client woodpecker.Client, repoID, number int64) error {
+	pipeline, err := client.Pipeline(ctx, repoID, number)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func pipelineLog(client woodpecker.Client, repoID, number int64) error {
 			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
-			err := stepLog(client, repoID, number, step.ID)
+			err := stepLog(ctx, client, repoID, number, step.ID)
 			if err != nil {
 				return err
 			}
@@ -95,8 +95,8 @@ func pipelineLog(client woodpecker.Client, repoID, number int64) error {
 	return nil
 }
 
-func stepLog(client woodpecker.Client, repoID, number, step int64) error {
-	logs, err := client.StepLogEntries(repoID, number, step)
+func stepLog(ctx context.Context, client woodpecker.Client, repoID, number, step int64) error {
+	logs, err := client.StepLogEntries(ctx, repoID, number, step)
 	if err != nil {
 		return err
 	}

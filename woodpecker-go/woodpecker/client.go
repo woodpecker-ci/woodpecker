@@ -16,6 +16,7 @@ package woodpecker
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -73,18 +74,18 @@ func (c *client) SetAddress(addr string) {
 }
 
 // LogLevel returns the current logging level.
-func (c *client) LogLevel() (*LogLevel, error) {
+func (c *client) LogLevel(ctx context.Context) (*LogLevel, error) {
 	out := new(LogLevel)
 	uri := fmt.Sprintf(pathLogLevel, c.addr)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // SetLogLevel sets the logging level of the server.
-func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
+func (c *client) SetLogLevel(ctx context.Context, in *LogLevel) (*LogLevel, error) {
 	out := new(LogLevel)
 	uri := fmt.Sprintf(pathLogLevel, c.addr)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
@@ -93,28 +94,28 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 //
 
 // Helper function for making an http GET request.
-func (c *client) get(rawURL string, out any) error {
-	return c.do(rawURL, http.MethodGet, nil, out)
+func (c *client) get(ctx context.Context, rawURL string, out any) error {
+	return c.do(ctx, rawURL, http.MethodGet, nil, out)
 }
 
 // Helper function for making an http POST request.
-func (c *client) post(rawURL string, in, out any) error {
-	return c.do(rawURL, http.MethodPost, in, out)
+func (c *client) post(ctx context.Context, rawURL string, in, out any) error {
+	return c.do(ctx, rawURL, http.MethodPost, in, out)
 }
 
 // Helper function for making an http PATCH request.
-func (c *client) patch(rawURL string, in, out any) error {
-	return c.do(rawURL, http.MethodPatch, in, out)
+func (c *client) patch(ctx context.Context, rawURL string, in, out any) error {
+	return c.do(ctx, rawURL, http.MethodPatch, in, out)
 }
 
 // Helper function for making an http DELETE request.
-func (c *client) delete(rawURL string) error {
-	return c.do(rawURL, http.MethodDelete, nil, nil)
+func (c *client) delete(ctx context.Context, rawURL string) error {
+	return c.do(ctx, rawURL, http.MethodDelete, nil, nil)
 }
 
 // Helper function to make an http request.
-func (c *client) do(rawURL, method string, in, out any) error {
-	body, err := c.open(rawURL, method, in)
+func (c *client) do(ctx context.Context, rawURL, method string, in, out any) error {
+	body, err := c.open(ctx, rawURL, method, in)
 	if err != nil {
 		return err
 	}
@@ -126,12 +127,12 @@ func (c *client) do(rawURL, method string, in, out any) error {
 }
 
 // Helper function to open an http request.
-func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
+func (c *client) open(ctx context.Context, rawURL, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(method, uri.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, method, uri.String(), nil)
 	if err != nil {
 		return nil, err
 	}

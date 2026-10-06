@@ -79,11 +79,11 @@ func secretUpdate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	orgID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.OrgSecretUpdate(orgID, secret)
+	_, err = client.OrgSecretUpdate(ctx, orgID, secret)
 	return err
 }

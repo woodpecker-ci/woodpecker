@@ -78,16 +78,16 @@ func List(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	pipelines, err := pipelineList(c, client)
+	pipelines, err := pipelineList(ctx, c, client)
 	if err != nil {
 		return err
 	}
 	return pipelineOutput(c, pipelines)
 }
 
-func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
+func pipelineList(ctx context.Context, c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
 	repoIDOrFullName := c.Args().First()
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return nil, err
 	}
@@ -108,6 +108,7 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipel
 
 	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
 		return client.PipelineList(
+			ctx,
 			repoID,
 			woodpecker.PipelineListOptions{
 				Page:   page,

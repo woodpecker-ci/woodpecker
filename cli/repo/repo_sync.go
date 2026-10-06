@@ -45,7 +45,7 @@ func repoSync(ctx context.Context, c *cli.Command) error {
 		All: true,
 	}
 
-	repos, err := client.RepoList(opt)
+	repos, err := client.RepoList(ctx, opt)
 	if err != nil || len(repos) == 0 {
 		return err
 	}

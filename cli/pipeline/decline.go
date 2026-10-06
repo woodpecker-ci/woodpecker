@@ -37,7 +37,7 @@ func pipelineDecline(ctx context.Context, c *cli.Command) (err error) {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func pipelineDecline(ctx context.Context, c *cli.Command) (err error) {
 		return err
 	}
 
-	_, err = client.PipelineDecline(repoID, number)
+	_, err = client.PipelineDecline(ctx, repoID, number)
 	if err != nil {
 		return err
 	}
