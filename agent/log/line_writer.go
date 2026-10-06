@@ -16,8 +16,8 @@
 package log
 
 import (
+	"bytes"
 	"io"
-	"strings"
 	"sync"
 	"time"
 
@@ -50,11 +50,11 @@ func NewLineWriter(peer rpc.Peer, stepUUID string) io.Writer {
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	data := string(p)
-	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
+	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", p)
 
 	line := &rpc.LogEntry{
-		Data:     []byte(strings.TrimSuffix(data, "\n")), // remove trailing newline
+		// remove trailing newline; clone as p must not be retained
+		Data:     bytes.Clone(bytes.TrimSuffix(p, []byte("\n"))),
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.startTime).Seconds()),
 		Type:     rpc.LogEntryStdout,
@@ -64,5 +64,5 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	w.num++
 
 	w.peer.EnqueueLog(line)
-	return len(data), nil
+	return len(p), nil
 }

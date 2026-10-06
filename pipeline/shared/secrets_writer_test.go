@@ -23,12 +23,81 @@ import (
 )
 
 func TestSecretsReplaceWriter(t *testing.T) {
+	tc := []struct {
+		name    string
+		log     string
+		secrets []string
+		expect  string
+	}{{
+		name:    "dont replace secrets with less than 3 chars",
+		log:     "start log\ndone",
+		secrets: []string{"", "d", "art"},
+		expect:  "start log\ndone",
+	}, {
+		name:    "single line passwords",
+		log:     `this IS secret: password`,
+		secrets: []string{"password", " IS "},
+		expect:  `this IS secret: ********`,
+	}, {
+		name:    "secret multiple times",
+		log:     "token token2 token\n",
+		secrets: []string{"token"},
+		expect:  "******** ********2 ********\n",
+	}, {
+		name:    "multiple secrets in one line",
+		log:     "user=admin1 pass=hunter2\n",
+		secrets: []string{"hunter2", "admin1"},
+		expect:  "user=******** pass=********\n",
+	}, {
+		name:    "secret with one newline",
+		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
+		secrets: []string{"an\nmulti line secret!!"},
+		expect:  "start log\ndone\nnow\nan\n******** ;)",
+	}, {
+		name:    "secret with multiple lines with no match",
+		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
+		secrets: []string{"Test\nwith\n\ntwo new lines"},
+		expect:  "start log\ndone\nnow\nan\nmulti line secret!! ;)",
+	}, {
+		name:    "secret with multiple lines with match",
+		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)\nwith\ntwo\n\nnewlines",
+		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
+		expect:  "start log\ndone\nnow\nan\n******** ;)\nwith\ntwo\n\n********",
+	}, {
+		name:    "secret with multiple lines with partial match",
+		log:     "start with\ntwo",
+		secrets: []string{"an\nmulti line secret!!", "two\n\nnewlines"},
+		expect:  "start with\ntwo",
+	}, {
+		name:    "multiline JSON secret does not over-mask short punctuation lines",
+		log:     `[{description,"Run PropEr test suites"},{vsn,"0.12.1"},{registered,[]}]`,
+		secrets: []string{"{\n\"foo\":[\n\"bar\"\n]\n}"},
+		expect:  `[{description,"Run PropEr test suites"},{vsn,"0.12.1"},{registered,[]}]`,
+	}}
+
+	for _, c := range tc {
+		t.Run(c.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			w := NewSecretsReplaceWriter(&buf, c.secrets)
+
+			n, err := w.Write([]byte(c.log))
+			assert.NoError(t, err)
+			assert.Equal(t, len(c.log), n)
+			assert.Equal(t, c.expect, buf.String())
+		})
+	}
+}
+
+// TestSecretsReplaceWriterKeepsInput guards the io.Writer contract: masking
+// must not modify the caller's buffer.
+func TestSecretsReplaceWriterKeepsInput(t *testing.T) {
 	var buf bytes.Buffer
 	w := NewSecretsReplaceWriter(&buf, []string{"supersecret"})
 
-	n, err := w.Write([]byte("token is supersecret\n"))
+	in := []byte("token is supersecret\n")
+	_, err := w.Write(in)
 	assert.NoError(t, err)
-	assert.Equal(t, len("token is supersecret\n"), n)
+	assert.Equal(t, "token is supersecret\n", string(in))
 	assert.Equal(t, "token is ********\n", buf.String())
 }
 

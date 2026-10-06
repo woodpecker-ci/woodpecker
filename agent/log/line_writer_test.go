@@ -81,3 +81,24 @@ func TestLineWriterWithSecretsReplaceWriter(t *testing.T) {
 
 	peer.AssertExpectations(t)
 }
+
+// TestLineWriterDoesNotRetainInput guards the io.Writer contract: the caller
+// may reuse its buffer after Write returns, while the entry stays queued.
+func TestLineWriterDoesNotRetainInput(t *testing.T) {
+	var got *rpc.LogEntry
+	peer := rpc_mocks.NewMockPeer(t)
+	peer.On("EnqueueLog", mock.Anything).Run(func(args mock.Arguments) {
+		got, _ = args.Get(0).(*rpc.LogEntry)
+	})
+
+	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d")
+
+	buf := []byte("hello world\n")
+	_, err := lw.Write(buf)
+	assert.NoError(t, err)
+	copy(buf, "XXXXXXXXXXX")
+
+	if assert.NotNil(t, got) {
+		assert.Equal(t, "hello world", string(got.Data))
+	}
+}
