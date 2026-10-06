@@ -142,20 +142,20 @@ func TestDependsOnRoundTrip(t *testing.T) {
 		{"multiple required", DependsOn{{Name: "lint"}, {Name: "test"}}},
 		{"mixed required and optional", DependsOn{{Name: "lint"}, {Name: "test", Optional: true}}},
 	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			out, err := yaml.Marshal(StructDependsOn{DependsOn: tc.in})
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			out, err := yaml.Marshal(StructDependsOn{DependsOn: tt.in})
 			assert.NoError(t, err)
 
 			var back StructDependsOn
 			assert.NoError(t, yaml.Unmarshal(out, &back))
 
-			if tc.in == nil {
+			if tt.in == nil {
 				assert.Nil(t, back.DependsOn)
 				return
 			}
 			assert.NotNil(t, back.DependsOn, "non-nil input must round-trip non-nil")
-			assert.Equal(t, tc.in, back.DependsOn)
+			assert.Equal(t, tt.in, back.DependsOn)
 		})
 	}
 }

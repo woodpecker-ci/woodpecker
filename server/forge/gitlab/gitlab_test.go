@@ -50,7 +50,7 @@ func load(config string) *GitLab {
 	return &gitlab
 }
 
-func Test_GitLab(t *testing.T) {
+func TestGitLab(t *testing.T) {
 	// setup a dummy gitlab server
 	server := fixtures.NewServer(t)
 	defer server.Close()
@@ -627,21 +627,21 @@ func TestExtractFromPath(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			owner, name, err := extractFromPath(tc.input)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			owner, name, err := extractFromPath(tt.input)
 
 			// Check error expectations
-			if tc.errContains != "" {
+			if tt.errContains != "" {
 				if assert.Error(t, err) {
-					assert.Contains(t, err.Error(), tc.errContains)
+					assert.Contains(t, err.Error(), tt.errContains)
 				}
 				return
 			}
 
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.wantOwner, owner)
-			assert.EqualValues(t, tc.wantName, name)
+			assert.EqualValues(t, tt.wantOwner, owner)
+			assert.EqualValues(t, tt.wantName, name)
 		})
 	}
 }
@@ -744,16 +744,16 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			mux := http.NewServeMux()
 			mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
 				_, _ = w.Write([]byte(`{"id":4,"path_with_namespace":"diaspora/diaspora-client"}`))
 			})
 			mux.HandleFunc("/api/v4/projects/4/statuses/abc123", func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(tc.code)
-				_, _ = w.Write([]byte(tc.body))
+				w.WriteHeader(tt.code)
+				_, _ = w.Write([]byte(tt.body))
 			})
 
 			server := httptest.NewServer(mux)
@@ -766,7 +766,7 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
 
 			err := client.Status(t.Context(), user, repo, pipeline, workflow)
-			if tc.wantErr {
+			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)

@@ -762,18 +762,18 @@ func TestForgejoParser(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tc.data))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tt.data))
 			req.Header = http.Header{}
-			req.Header.Set(hookEvent, tc.event)
+			req.Header.Set(hookEvent, tt.event)
 			r, p, err := parseHook(req)
-			if tc.err != nil {
-				assert.ErrorIs(t, err, tc.err)
+			if tt.err != nil {
+				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
-				assert.EqualValues(t, tc.repo, r)
+				assert.EqualValues(t, tt.repo, r)
 				p.Timestamp = 0
-				assert.EqualValues(t, tc.pipe, p)
+				assert.EqualValues(t, tt.pipe, p)
 			}
 		})
 	}

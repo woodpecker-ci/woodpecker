@@ -42,7 +42,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.skipVerify)
 }
 
-func Test_forgejo(t *testing.T) {
+func TestForgejo(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
