@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @chiliec, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -76,6 +76,7 @@
 
 ### Misc
 
+- Fix infinite hook pagination loop on Bitbucket Cloud [[#7210](https://github.com/woodpecker-ci/woodpecker/pull/7210)]
 - Remove remainig gitpod artifacts [[#7216](https://github.com/woodpecker-ci/woodpecker/pull/7216)]
 
 ## [3.18.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.18.1) - 2026-09-08
