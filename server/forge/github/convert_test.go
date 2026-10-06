@@ -24,7 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_convertStatus(t *testing.T) {
+func TestConvertStatus(t *testing.T) {
 	tests := []struct {
 		name   string
 		status model.StatusValue
@@ -45,14 +45,14 @@ func Test_convertStatus(t *testing.T) {
 		{name: "out of enum", status: model.StatusValue("bogus"), want: statusError},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, convertStatus(tc.status))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, convertStatus(tt.status))
 		})
 	}
 }
 
-func Test_convertDesc(t *testing.T) {
+func TestConvertDesc(t *testing.T) {
 	assert.Equal(t, descSuccess, convertDesc(model.StatusSuccess))
 	assert.Equal(t, descPending, convertDesc(model.StatusPending))
 	assert.Equal(t, descPending, convertDesc(model.StatusRunning))
@@ -63,7 +63,7 @@ func Test_convertDesc(t *testing.T) {
 	assert.Equal(t, descError, convertDesc(model.StatusError))
 }
 
-func Test_convertRepoList(t *testing.T) {
+func TestConvertRepoList(t *testing.T) {
 	from := []*github.Repository{
 		{
 			Private:  new(false),
@@ -90,7 +90,7 @@ func Test_convertRepoList(t *testing.T) {
 	assert.Equal(t, "hello-world", to[0].Name)
 }
 
-func Test_convertRepo(t *testing.T) {
+func TestConvertRepo(t *testing.T) {
 	from := github.Repository{
 		FullName:      new("octocat/hello-world"),
 		Name:          new("hello-world"),
@@ -120,7 +120,7 @@ func Test_convertRepo(t *testing.T) {
 	assert.Equal(t, "https://github.com/octocat/hello-world", to.ForgeURL)
 }
 
-func Test_convertPerm(t *testing.T) {
+func TestConvertPerm(t *testing.T) {
 	from := &github.Repository{
 		Permissions: &github.RepositoryPermissions{
 			Admin: new(true),
@@ -135,7 +135,7 @@ func Test_convertPerm(t *testing.T) {
 	assert.True(t, to.Admin)
 }
 
-func Test_convertTeam(t *testing.T) {
+func TestConvertTeam(t *testing.T) {
 	from := &github.Organization{
 		Login:     new("octocat"),
 		AvatarURL: new("http://..."),
@@ -145,7 +145,7 @@ func Test_convertTeam(t *testing.T) {
 	assert.Equal(t, "http://...", to.Avatar)
 }
 
-func Test_convertTeamList(t *testing.T) {
+func TestConvertTeamList(t *testing.T) {
 	from := []*github.Organization{
 		{
 			Login:     new("octocat"),
@@ -157,7 +157,7 @@ func Test_convertTeamList(t *testing.T) {
 	assert.Equal(t, "http://...", to[0].Avatar)
 }
 
-func Test_convertRepoHook(t *testing.T) {
+func TestConvertRepoHook(t *testing.T) {
 	t.Run("should convert a repository from webhook", func(t *testing.T) {
 		from := &github.PushEventRepository{Owner: &github.User{}}
 		from.Owner.Login = new("octocat")

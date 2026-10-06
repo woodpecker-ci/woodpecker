@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package internal
 
 import (
-	"sort"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeduplicateStrings(t *testing.T) {
-	tests := []struct {
-		in  []string
-		out []string
-	}{{
-		in:  []string{"", "ab", "12", "ab"},
-		out: []string{"12", "ab"},
-	}, {
-		in:  nil,
-		out: nil,
-	}, {
-		in:  []string{""},
-		out: nil,
-	}}
+func TestErrorMessage(t *testing.T) {
+	err := Error{Status: http.StatusTooManyRequests}
+	assert.Equal(t, "bitbucket responded with HTTP 429 Too Many Requests", err.Error())
 
-	for _, tt := range tests {
-		result := DeduplicateStrings(tt.in)
-		sort.Strings(result)
-		if len(tt.out) == 0 {
-			assert.Len(t, result, 0)
-		} else {
-			assert.EqualValues(t, tt.out, result, "could not correctly process input '%#v'", tt.in)
-		}
-	}
+	err.Body.Message = "Resource not found"
+	assert.Equal(t, "Resource not found", err.Error())
 }

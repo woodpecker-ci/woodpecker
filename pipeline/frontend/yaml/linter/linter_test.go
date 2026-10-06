@@ -223,26 +223,26 @@ func TestLintErrors(t *testing.T) {
 		},
 	}
 
-	for _, test := range testdata {
-		conf, err := yaml.ParseString(test.from)
+	for _, tt := range testdata {
+		conf, err := yaml.ParseString(tt.from)
 		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
-			File:      test.from,
-			RawConfig: test.from,
+			File:      tt.from,
+			RawConfig: tt.from,
 			Workflow:  conf,
 		}})
-		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+		assert.Error(t, lerr, "expected lint error for configuration", tt.from)
 
 		lerrors := errors.GetPipelineErrors(lerr)
 		found := false
 		for _, lerr := range lerrors {
-			if lerr.Message == test.want {
+			if lerr.Message == tt.want {
 				found = true
 				break
 			}
 		}
-		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+		assert.True(t, found, "Expected error %q, got %q", tt.want, lerrors)
 	}
 }
 
@@ -265,13 +265,13 @@ func TestDeprecations(t *testing.T) {
 		{from: `steps: { build: { image: golang, commands: ["echo $CI_PREV_COMMIT_AUTHOR_AVATAR"] } }`, want: "Usage of `CI_PREV_COMMIT_AUTHOR_AVATAR` is deprecated, use `CI_PREV_PIPELINE_AVATAR`"},
 	}
 
-	for _, test := range testdata {
-		conf, err := yaml.ParseString(test.from)
+	for _, tt := range testdata {
+		conf, err := yaml.ParseString(tt.from)
 		assert.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
-			File:      test.from,
-			RawConfig: test.from,
+			File:      tt.from,
+			RawConfig: tt.from,
 			Workflow:  conf,
 		}})
 
@@ -282,7 +282,7 @@ func TestDeprecations(t *testing.T) {
 				break
 			}
 		}
-		assert.Equal(t, test.want, found, "config %q", test.from)
+		assert.Equal(t, tt.want, found, "config %q", tt.from)
 	}
 }
 
@@ -305,25 +305,25 @@ func TestBadHabits(t *testing.T) {
 		},
 	}
 
-	for _, test := range testdata {
-		conf, err := yaml.ParseString(test.from)
+	for _, tt := range testdata {
+		conf, err := yaml.ParseString(tt.from)
 		assert.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
-			File:      test.from,
-			RawConfig: test.from,
+			File:      tt.from,
+			RawConfig: tt.from,
 			Workflow:  conf,
 		}})
-		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+		assert.Error(t, lerr, "expected lint error for configuration", tt.from)
 
 		lerrors := errors.GetPipelineErrors(lerr)
 		found := false
 		for _, lerr := range lerrors {
-			if lerr.Message == test.want {
+			if lerr.Message == tt.want {
 				found = true
 				break
 			}
 		}
-		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+		assert.True(t, found, "Expected error %q, got %q", tt.want, lerrors)
 	}
 }
