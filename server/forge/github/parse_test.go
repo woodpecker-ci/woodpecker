@@ -45,7 +45,7 @@ func testHookRequest(payload []byte, event string) *http.Request {
 	return req
 }
 
-func Test_parseHook(t *testing.T) {
+func TestParseHook(t *testing.T) {
 	t.Run("ignore unsupported hook events", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
 		p, r, b, cc, pc, err := parseHook(req, false)

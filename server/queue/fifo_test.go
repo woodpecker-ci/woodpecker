@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -43,9 +44,7 @@ func setupTestQueue(t *testing.T) (context.Context, context.CancelCauseFunc, *fi
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
-	if q == nil {
-		t.Fatal("Failed to create queue")
-	}
+	require.NotNil(t, q, "Failed to create queue")
 
 	return ctx, cancel, q
 }

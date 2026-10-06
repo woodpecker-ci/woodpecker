@@ -130,13 +130,13 @@ func TestSetupWorkflow(t *testing.T) {
 		},
 	}
 
-	err := engine.SetupWorkflow(context.Background(), conf, taskUUID)
+	err := engine.SetupWorkflow(t.Context(), conf, taskUUID)
 	assert.NoError(t, err, "SetupWorkflow should not error with minimal config and fake client")
 
-	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(t.Context(), "volume-name", kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "persistent volume should be created during workflow setup")
 
-	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().Services(namespace).Get(t.Context(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
 }
 
@@ -179,7 +179,7 @@ func TestAffinityFromCliContext(t *testing.T) {
 			return nil
 		},
 	}
-	err := cmd.Run(context.Background(), []string{"test"})
+	err := cmd.Run(t.Context(), []string{"test"})
 	require.NoError(t, err)
 }
 
@@ -217,9 +217,7 @@ func createPod(
 			Phase: kube_core_v1.PodPending,
 		},
 	}
-	_, err = client.CoreV1().Pods(namespace).Create(
-		context.Background(), pod, kube_meta_v1.CreateOptions{},
-	)
+	_, err = client.CoreV1().Pods(namespace).Create(t.Context(), pod, kube_meta_v1.CreateOptions{})
 	require.NoError(t, err)
 	return podName
 }
@@ -232,7 +230,7 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 
 	createPod(t, client, step, namespace)
 
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 
 	type result struct {
 		state *types.State
@@ -268,7 +266,7 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	podName := createPod(t, client, step, namespace)
 
 	// Delete before WaitStep starts
-	err := client.CoreV1().Pods(namespace).Delete(context.Background(), podName, kube_meta_v1.DeleteOptions{})
+	err := client.CoreV1().Pods(namespace).Delete(t.Context(), podName, kube_meta_v1.DeleteOptions{})
 	require.NoError(t, err)
 
 	type result struct {
@@ -277,7 +275,7 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	}
 	ch := make(chan result, 1)
 	go func() {
-		s, err := engine.WaitStep(context.Background(), step, "task-1")
+		s, err := engine.WaitStep(t.Context(), step, "task-1")
 		ch <- result{s, err}
 	}()
 
@@ -377,7 +375,7 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := range numSteps {
 		wg.Go(func() {
-			ctx, cancel := context.WithCancelCause(context.Background())
+			ctx, cancel := context.WithCancelCause(t.Context())
 
 			go func() {
 				_, _ = engine.WaitStep(ctx, steps[i], fmt.Sprintf("task-%d", i))
