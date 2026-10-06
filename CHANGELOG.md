@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Harmonize unit test patterns [[#7229](https://github.com/woodpecker-ci/woodpecker/pull/7229)]
 - Generalize log output groups [[#7226](https://github.com/woodpecker-ci/woodpecker/pull/7226)]
 - Include HTTP status in Bitbucket errors without a message [[#7227](https://github.com/woodpecker-ci/woodpecker/pull/7227)]
 - Add default user namespace support with configurable non-root override [[#6943](https://github.com/woodpecker-ci/woodpecker/pull/6943)]
