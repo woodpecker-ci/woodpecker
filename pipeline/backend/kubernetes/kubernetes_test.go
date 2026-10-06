@@ -300,42 +300,62 @@ func TestWaitStepReturnsOnPodDeletedBeforeInformerSync(t *testing.T) {
 
 	podName := createPod(t, client, step, namespace)
 
-	// Delete the pod right after the first Get has seen it, like a workflow
-	// teardown removing a service pod while WaitStep sets up its informer.
+	// Delete the pod inside the informer's initial List, so it never enters the
+	// cache and no delete event can arrive; only the guard Get can end the wait.
 	deleted := false
-	client.PrependReactor("get", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
-		get, ok := action.(kube_testing.GetAction)
-		if !ok || deleted || get.GetName() != podName {
+	client.PrependReactor("list", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+		if deleted {
 			return false, nil, nil
 		}
-		gvr := action.GetResource()
-		pod, err := client.Tracker().Get(gvr, namespace, podName)
-		if err != nil {
+		deleted = true
+		if err := client.Tracker().Delete(action.GetResource(), namespace, podName); err != nil {
 			return true, nil, err
 		}
-		deleted = true
-		return true, pod, client.Tracker().Delete(gvr, namespace, podName)
+		return false, nil, nil
 	})
 
-	type result struct {
-		state *types.State
-		err   error
-	}
-	ch := make(chan result, 1)
-	go func() {
-		s, err := engine.WaitStep(context.Background(), step, "task-1")
-		ch <- result{s, err}
-	}()
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
 
-	select {
-	case r := <-ch:
-		require.NoError(t, r.err)
-		require.NotNil(t, r.state)
-		assert.True(t, r.state.Exited)
-		assert.Equal(t, 0, r.state.ExitCode)
-	case <-time.After(3 * time.Second):
-		t.Fatal("WaitStep did not return for pod deleted before informer sync")
-	}
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	require.True(t, deleted, "the informer's List should have removed the pod")
+	require.NotNil(t, state)
+	assert.True(t, state.Exited)
+	assert.Equal(t, 0, state.ExitCode)
+}
+
+func TestWaitStepReturnsOnAlreadyTerminatedPod(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-done-01")
+	namespace := "test-ns"
+
+	podName, err := stepToPodName(step)
+	require.NoError(t, err)
+	_, err = client.CoreV1().Pods(namespace).Create(t.Context(), &kube_core_v1.Pod{
+		Name:      podName,
+		Namespace: namespace,
+		Status: kube_core_v1.PodStatus{
+			Phase: kube_core_v1.PodFailed,
+			ContainerStatuses: []kube_core_v1.ContainerStatus{{
+				State: kube_core_v1.ContainerState{
+					Terminated: &kube_core_v1.ContainerStateTerminated{ExitCode: 1},
+				},
+			}},
+		},
+	}, kube_meta_v1.CreateOptions{})
+	require.NoError(t, err)
+
+	// Below defaultResyncDuration, so a resync Update cannot end the wait instead.
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	assert.True(t, state.Exited)
+	assert.Equal(t, 1, state.ExitCode)
 }
 
 func TestWaitStepNoGoroutineLeak(t *testing.T) {

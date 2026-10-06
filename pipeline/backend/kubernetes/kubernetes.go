@@ -304,10 +304,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	finished := make(chan struct{})
 	var finishedOnce sync.Once
 
-	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*kube_core_v1.Pod)
+	podChanged := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", newPod)
+			log.Error().Msgf("could not parse pod: %v", obj)
 			return
 		}
 
@@ -344,7 +344,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	podInformer := si.Core().V1().Pods().Informer()
 	if _, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
-			UpdateFunc: podUpdated,
+			// A pod already terminal at the initial List only produces an Add event.
+			AddFunc:    podChanged,
+			UpdateFunc: func(_, newPod any) { podChanged(newPod) },
 			DeleteFunc: podDeleted,
 		},
 	); err != nil {
