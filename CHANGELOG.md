@@ -30,6 +30,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix queue scheduler debug log spam [[#7224](https://github.com/woodpecker-ci/woodpecker/pull/7224)]
 - Wait for informer cache sync before checking pod deletion [[#7158](https://github.com/woodpecker-ci/woodpecker/pull/7158)]
 - Fix race condition on concurrent pipeline config persist [[#7192](https://github.com/woodpecker-ci/woodpecker/pull/7192)]
 - Reload user from store before refreshing OAuth token [[#7176](https://github.com/woodpecker-ci/woodpecker/pull/7176)]
