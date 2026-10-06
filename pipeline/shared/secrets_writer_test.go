@@ -49,6 +49,21 @@ func TestSecretsReplaceWriter(t *testing.T) {
 		secrets: []string{"hunter2", "admin1"},
 		expect:  "user=******** pass=********\n",
 	}, {
+		name:    "longer secret wins over a shorter one it contains",
+		log:     "my password and my pass\n",
+		secrets: []string{"pass", "password"},
+		expect:  "my ******** and my ********\n",
+	}, {
+		name:    "longer secret wins over an earlier overlapping one",
+		log:     "abcde\n",
+		secrets: []string{"abcd", "bcdef", "cde"},
+		expect:  "********e\n",
+	}, {
+		name:    "longer secret wins even if it starts later",
+		log:     "xabcdefx\n",
+		secrets: []string{"xabc", "bcdef"},
+		expect:  "xa********x\n",
+	}, {
 		name:    "secret with one newline",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
 		secrets: []string{"an\nmulti line secret!!"},

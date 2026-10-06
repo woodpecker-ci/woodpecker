@@ -16,7 +16,9 @@ package shared
 
 import (
 	"bytes"
+	"cmp"
 	"io"
+	"slices"
 	"strings"
 )
 
@@ -45,6 +47,11 @@ func NewSecretsReplaceWriter(dst io.Writer, secrets []string) io.Writer {
 			w.secrets = append(w.secrets, []byte(part))
 		}
 	}
+	// Secrets are replaced one after another, so mask the longest first.
+	// Else a secret that is part of a longer one would leak the rest of it.
+	slices.SortStableFunc(w.secrets, func(a, b []byte) int {
+		return cmp.Compare(len(b), len(a))
+	})
 	return w
 }
 
