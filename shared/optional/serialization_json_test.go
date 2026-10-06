@@ -36,11 +36,11 @@ func TestOptionalToJson(t *testing.T) {
 			want: `{"normal_string":"a string","normal_bool":true,"optional_bool":false,"optional_string":"","optional_two_bool":null,"optional_twostring":null}`,
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			b, err := json.Marshal(tc.obj)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b, err := json.Marshal(tt.obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "std json module returned unexpected")
+			assert.EqualValues(t, tt.want, string(b), "std json module returned unexpected")
 		})
 	}
 }
@@ -70,12 +70,12 @@ func TestOptionalFromJson(t *testing.T) {
 			},
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			var obj testSerializationStruct
-			err := json.Unmarshal([]byte(tc.data), &obj)
+			err := json.Unmarshal([]byte(tt.data), &obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj, "std json module returned unexpected")
+			assert.EqualValues(t, tt.want, obj, "std json module returned unexpected")
 		})
 	}
 }

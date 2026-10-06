@@ -29,13 +29,13 @@ import (
 
 func TestRepoShow(t *testing.T) {
 	tests := []struct {
-		name          string
-		repoID        int64
-		mockRepo      *woodpecker.Repo
-		mockError     error
-		expectedError bool
-		expected      *woodpecker.Repo
-		args          []string
+		name      string
+		repoID    int64
+		mockRepo  *woodpecker.Repo
+		mockError error
+		wantErr   bool
+		expected  *woodpecker.Repo
+		args      []string
 	}{
 		{
 			name:     "valid repo by ID",
@@ -52,11 +52,11 @@ func TestRepoShow(t *testing.T) {
 			args:     []string{"show", "owner/repo"},
 		},
 		{
-			name:          "invalid repo ID",
-			repoID:        999,
-			expectedError: true,
-			args:          []string{"show", "invalid"},
-			mockError:     errors.New("repo not found"),
+			name:      "invalid repo ID",
+			repoID:    999,
+			wantErr:   true,
+			args:      []string{"show", "invalid"},
+			mockError: errors.New("repo not found"),
 		},
 	}
 
@@ -70,7 +70,7 @@ func TestRepoShow(t *testing.T) {
 			command.Writer = io.Discard
 			command.Action = func(_ context.Context, c *cli.Command) error {
 				output, err := repoShow(c, mockClient)
-				if tt.expectedError {
+				if tt.wantErr {
 					assert.Error(t, err)
 					return nil
 				}

@@ -38,11 +38,11 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
-		name          string
-		repoName      string
-		dbSecrets     []*model.Secret
-		expected      []*model.Secret
-		expectedError bool
+		name      string
+		repoName  string
+		dbSecrets []*model.Secret
+		expected  []*model.Secret
+		wantErr   bool
 	}{
 		{
 			name:     "Extension overrides base secret by name",
@@ -56,7 +56,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 				{Name: "ext-only", Value: "only-in-ext"},
 				{ID: 2, RepoID: 1, Name: "db-only", Value: "only-in-db"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:     "Extension returns 204 no secrets",
@@ -67,7 +67,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			expected: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:     "Extension error falls back to base secrets",
@@ -78,7 +78,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 			expected: []*model.Secret{
 				{ID: 1, RepoID: 1, Name: "db-secret", Value: "db-value"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 	}
 
@@ -161,7 +161,7 @@ func TestCombinedSecretListPipeline(t *testing.T) {
 				&model.Pipeline{},
 				nil,
 			)
-			if tt.expectedError {
+			if tt.wantErr {
 				require.Error(t, err, "expected an error")
 			} else {
 				require.NoError(t, err, "error fetching secrets")

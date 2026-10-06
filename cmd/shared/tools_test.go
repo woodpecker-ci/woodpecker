@@ -15,7 +15,6 @@
 package shared
 
 import (
-	"context"
 	"io"
 	"os"
 	"testing"
@@ -41,7 +40,7 @@ func TestBase64Decoder(t *testing.T) {
 		Name:   "decode-base64",
 		Action: Base64Decoder,
 	}
-	require.NoError(t, command.Run(context.Background(), []string{"decode-base64", "KyBlY2hvIGhpCg=="}))
+	require.NoError(t, command.Run(t.Context(), []string{"decode-base64", "KyBlY2hvIGhpCg=="}))
 	require.NoError(t, writer.Close())
 
 	output, err := io.ReadAll(reader)
@@ -71,14 +70,14 @@ func TestBase64DecoderErrors(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			command := &cli.Command{
 				Name:   "decode-base64",
 				Action: Base64Decoder,
 			}
-			err := command.Run(context.Background(), append([]string{"decode-base64"}, test.args...))
-			require.EqualError(t, err, test.message)
+			err := command.Run(t.Context(), append([]string{"decode-base64"}, tt.args...))
+			require.EqualError(t, err, tt.message)
 		})
 	}
 }

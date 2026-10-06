@@ -63,7 +63,7 @@ func TestClassifyRPCErrUnauthenticatedIsRetryable(t *testing.T) {
 	t.Parallel()
 
 	err := status.Error(codes.Unauthenticated, "expired token")
-	classified := classifyRPCErr(context.Background(), err)
+	classified := classifyRPCErr(t.Context(), err)
 
 	assert.Equal(t, codes.Unauthenticated, status.Code(classified))
 	assert.False(t, errors.Is(classified, backoff.ErrPermanent))
@@ -72,7 +72,7 @@ func TestClassifyRPCErrUnauthenticatedIsRetryable(t *testing.T) {
 func TestRetryRPCUnauthenticatedHonorsFiniteTimeout(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	c := &client{connectionRetryTimeout: time.Nanosecond}
 	var attempts int
 
@@ -89,7 +89,7 @@ func TestRetryRPCUnauthenticatedHonorsFiniteTimeout(t *testing.T) {
 func TestRetryRPCUnauthenticatedRetriesUntilContextCancellation(t *testing.T) {
 	t.Parallel()
 
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
 	c := &client{connectionRetryTimeout: 0}
 	var attempts int
