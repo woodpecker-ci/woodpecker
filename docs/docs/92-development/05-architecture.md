@@ -95,4 +95,119 @@ The engine is the shared kernel that validates, parses frontend facing config fi
 
 The runtime is the package controlling how a workflow is executed, and can be found at `pipeline/runtime`.
 
-<img src="/svg/woodpecker-workflow-run-flowchart.svg" alt="Pipeline/runtime flow diagram" style="max-width: 600px; width: 100%;" />
+A workflow is one call of `Run(runnerCtx)`. Its stages run one after the other, the steps of a stage run in parallel.
+The workflow context `r.ctx` is canceled if the workflow is canceled or timed out, `runnerCtx` outlives it so the cleanup can still reach the backend.
+
+```mermaid
+stateDiagram-v2
+    direction TB
+
+    [*] --> ValidateConfig: Run(runnerCtx)
+    ValidateConfig --> [*]: tracer, logger or spec is nil,<br/>return error
+    ValidateConfig --> SetupWorkflow: defer DestroyWorkflow()
+    SetupWorkflow --> DestroyWorkflow: error, trace setup error
+    SetupWorkflow --> Stage: ok
+
+    state "Stage: runStage(steps)" as Stage {
+        [*] --> StepA: executeStep(step)
+        StepA --> [*]
+        --
+        [*] --> StepB: executeStep(step)
+        StepB --> [*]
+        --
+        [*] --> DetachedStep: executeStep(step)
+        DetachedStep --> [*]: started, return nil,<br/>pipeline continues
+    }
+
+    Stage --> Stage: errgroup collected the errors,<br/>r.err.Set(), next stage
+    Stage --> DestroyWorkflow: all stages done
+    Stage --> DestroyWorkflow: r.ctx canceled,<br/>wait for the running stage
+    DestroyWorkflow --> [*]: setup error or canceled,<br/>return error
+    DestroyWorkflow --> WaitDetached: all stages done
+    WaitDetached --> [*]: return nil,<br/>or the error if it is no step failure
+
+    note right of ValidateConfig
+        Checks values a user has no control over
+    end note
+    note right of SetupWorkflow
+        Blocks: the workflow
+        Calls: SetupWorkflow(r.ctx)
+    end note
+    note right of Stage
+        All steps in parallel (errgroup),
+        one goroutine per step
+        Blocks: the next stage, until every
+        step goroutine returned
+        A detached step returns once it is started
+    end note
+    note right of DestroyWorkflow
+        Runs exactly once, also on every early return
+        Calls: DestroyWorkflow(runnerCtx)
+        Uses a 5s shutdown context if runnerCtx is done
+    end note
+    note right of WaitDetached
+        Blocks: the return of Run()
+        On: detached steps completing in the
+        background, with their logs and traces
+    end note
+```
+
+Each step of a stage goes through `executeStep(step)`.
+It is the only place where the runtime calls the step functions of the backend:
+
+```mermaid
+stateDiagram-v2
+    direction TB
+
+    [*] --> Skipped: shouldSkipStep(),<br/>OnSuccess / OnFailure check
+    Skipped --> [*]: trace skip, return nil
+
+    [*] --> Starting: traceStep(nil, nil, step),<br/>emit "step started" trace
+    Starting --> Tailing: StartStep ok
+    Starting --> Failed: StartStep error
+
+    Tailing --> Running: TailStep ok,<br/>log goroutine started
+    Tailing --> Failed: TailStep error
+
+    Running --> Exiting: log stream drained
+    Exiting --> Cleanup: WaitStep returned the state
+    Exiting --> Failed: WaitStep error
+    Cleanup --> Done: DestroyStep ok
+    Cleanup --> Failed: DestroyStep error
+
+    Failed --> [*]: traceStep(nil, err, step),<br/>return err
+    Done --> [*]: traceStep(state, err, step),<br/>emit "step completed" trace,<br/>return err (exit code, OOM, canceled)
+
+    note right of Starting
+        setStepEnv(): CI_* variables of the step,
+        if plugin: SetDroneEnviron()
+        Blocks: this step goroutine
+        On: the backend starting the step, e.g. image pull
+        Calls: StartStep(r.ctx)
+    end note
+    note right of Tailing
+        Calls: TailStep(r.ctx), returns the log stream
+        startStep() = StartStep + TailStep + log goroutine
+    end note
+    note right of Running
+        step.Detached? yes: executeStep() returns nil here,
+        the rest runs in a background goroutine and its
+        errors are logged, not returned
+        no: blocks this step goroutine
+        On: the backend closing the log stream
+    end note
+    note right of Exiting
+        completeStep() = drain logs, Wait, Destroy
+        Blocks: this step goroutine
+        On: the step process to exit
+        Calls: WaitStep(r.ctx)
+    end note
+    note right of Cleanup
+        Calls: DestroyStep(runnerCtx),
+        so it still works after a cancel
+    end note
+    note left of Done
+        FailureIgnore? The error of a blocking
+        step is suppressed if failure is ignored
+    end note
+```
