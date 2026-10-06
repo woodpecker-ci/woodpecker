@@ -16,16 +16,20 @@ package rpc
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // AuthInterceptor is a client interceptor for authentication.
 type AuthInterceptor struct {
 	authClient  *AuthClient
+	mu          sync.RWMutex
 	accessToken string
 }
 
@@ -43,7 +47,9 @@ func NewAuthInterceptor(ctx context.Context, authClient *AuthClient, refreshDura
 	return interceptor, nil
 }
 
-// Unary returns a client interceptor to authenticate unary RPC.
+// Unary returns a client interceptor to authenticate unary RPC. If the server
+// rejects the attached token, it refreshes the token before returning the
+// error so the caller's retry policy can repeat the call.
 func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 	return func(
 		ctx context.Context,
@@ -53,7 +59,15 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
 	) error {
-		return invoker(interceptor.attachToken(ctx), method, req, reply, cc, opts...)
+		callCtx, rejectedToken := interceptor.attachToken(ctx)
+		err := invoker(callCtx, method, req, reply, cc, opts...)
+		if status.Code(err) == codes.Unauthenticated {
+			refreshErr := interceptor.refreshTokenAfterUnauthenticated(ctx, rejectedToken)
+			if refreshErr != nil {
+				log.Warn().Err(refreshErr).Msg("could not reauthenticate after the server rejected the gRPC token")
+			}
+		}
+		return err
 	}
 }
 
@@ -67,12 +81,17 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamClientInterceptor {
 		streamer grpc.Streamer,
 		opts ...grpc.CallOption,
 	) (grpc.ClientStream, error) {
-		return streamer(interceptor.attachToken(ctx), desc, cc, method, opts...)
+		callCtx, _ := interceptor.attachToken(ctx)
+		return streamer(callCtx, desc, cc, method, opts...)
 	}
 }
 
-func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Context {
-	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.accessToken)
+func (interceptor *AuthInterceptor) attachToken(ctx context.Context) (context.Context, string) {
+	interceptor.mu.RLock()
+	accessToken := interceptor.accessToken
+	interceptor.mu.RUnlock()
+
+	return metadata.AppendToOutgoingContext(ctx, "token", accessToken), accessToken
 }
 
 func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshInterval time.Duration) error {
@@ -103,6 +122,26 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, re
 }
 
 func (interceptor *AuthInterceptor) refreshToken(ctx context.Context) error {
+	interceptor.mu.Lock()
+	defer interceptor.mu.Unlock()
+
+	return interceptor.refreshTokenLocked(ctx)
+}
+
+func (interceptor *AuthInterceptor) refreshTokenAfterUnauthenticated(ctx context.Context, rejectedToken string) error {
+	interceptor.mu.Lock()
+	defer interceptor.mu.Unlock()
+
+	// Another rejected RPC or the refresh timer may already have replaced the
+	// token while this call was in flight. Reuse that refresh when it did.
+	if interceptor.accessToken != rejectedToken {
+		return nil
+	}
+
+	return interceptor.refreshTokenLocked(ctx)
+}
+
+func (interceptor *AuthInterceptor) refreshTokenLocked(ctx context.Context) error {
 	accessToken, _, err := interceptor.authClient.Auth(ctx)
 	if err != nil {
 		return err

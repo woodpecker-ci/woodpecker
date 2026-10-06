@@ -25,7 +25,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types/mocks"
 )
 
 func TestExecDummy(t *testing.T) {
@@ -122,4 +126,80 @@ func TestRepoRootFromFile(t *testing.T) {
 	otherFile := filepath.Join(rootDir, "ci.yaml")
 	require.NoError(t, os.WriteFile(otherFile, []byte("steps: {}\n"), 0o644))
 	assert.Equal(t, rootDir, repoRootFromFile(otherFile))
+}
+
+// TestExecStepVolumesReferenceWorkflowVolume ensures every step mounts the workspace
+// volume the backend creates from config.Volume, and that the local repository path
+// is still mounted for backends running on the host.
+func TestExecStepVolumesReferenceWorkflowVolume(t *testing.T) {
+	const (
+		workspaceBase = "/woodpecker"
+		workspacePath = "src"
+	)
+
+	repoDir := t.TempDir()
+	workflowPath := filepath.Join(repoDir, "workflow.yaml")
+	require.NoError(t, os.WriteFile(workflowPath, []byte(`when:
+  - event: manual
+
+steps:
+  - name: build
+    image: alpine
+    commands:
+      - echo hello
+`), 0o600))
+
+	engine := mocks.NewMockBackend(t)
+	engine.On("Name").Return("dummy")
+	engine.On("Load", mock.Anything).Return(&backend_types.BackendInfo{}, nil)
+
+	var workflowVolume string
+	var stepVolumes [][]string
+
+	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			conf, _ := args.Get(1).(*backend_types.Config)
+			workflowVolume = conf.Volume
+		}).
+		Return(nil)
+	engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			step, _ := args.Get(1).(*backend_types.Step)
+			stepVolumes = append(stepVolumes, step.Volumes)
+		}).
+		Return(nil)
+	engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+		Return(io.NopCloser(strings.NewReader("")), nil)
+	engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+		Return(&backend_types.State{Exited: true}, nil)
+	engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	originalBackends := backends
+	backends = []backend_types.Backend{engine}
+	t.Cleanup(func() { backends = originalBackends })
+
+	// This is important, else the metadata of the running test leaks
+	// into the exec command.
+	clearEnv(t)
+
+	require.NoError(t, Command.Run(t.Context(), []string{
+		"woodpecker-cli",
+		"--backend-engine", "dummy",
+		"--repo-path", repoDir,
+		workflowPath,
+	}))
+
+	require.NotEmpty(t, workflowVolume, "backend should create a workflow volume")
+	require.NotEmpty(t, stepVolumes, "backend should start at least one step")
+
+	workspaceMount := workflowVolume + ":" + workspaceBase
+	repoMount := repoDir + ":" + workspaceBase + "/" + workspacePath
+
+	for _, volumes := range stepVolumes {
+		assert.Contains(t, volumes, workspaceMount,
+			"steps must mount the workflow volume the backend creates from config.Volume")
+		assert.Contains(t, volumes, repoMount,
+			"steps must still mount the local repository for backends running on the host")
+	}
 }

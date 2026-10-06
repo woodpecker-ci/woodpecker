@@ -103,7 +103,6 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 }
 
 func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
-	const batchSize = perPage
 	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
@@ -121,9 +120,9 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	}
 
 	// delete related pipelines
-	for startPipelines := 0; ; startPipelines += batchSize {
-		pipelineIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("id").Where("repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
+	for {
+		pipelineIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage).Table("pipelines").Cols("id").Where("repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
 		if len(pipelineIDs) == 0 {
@@ -162,7 +161,7 @@ func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFil
 }
 
 // RepoListAll list all repos.
-func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
+func (s storage) RepoListAll(active bool, p *model.ListOptionsWithAll) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.paginate(p).Table("repos")
 	if active {

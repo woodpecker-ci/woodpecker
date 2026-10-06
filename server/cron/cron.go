@@ -82,7 +82,12 @@ func CalcNewNext(schedule, tzLoc string, now time.Time) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}
-	return c.Next(now), nil
+
+	next := c.Next(now)
+	if next.IsZero() {
+		return time.Time{}, fmt.Errorf("cron schedule yields no future execution time")
+	}
+	return next, nil
 }
 
 func runCron(ctx context.Context, store store.Store, cron *model.Cron, now time.Time) error {

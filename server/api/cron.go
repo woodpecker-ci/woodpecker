@@ -289,7 +289,7 @@ func PatchCron(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetCronList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := store.FromContext(c).CronList(repo, session.Pagination(c))
+	list, err := store.FromContext(c).CronList(repo, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting cron list. %s", err)
 		return

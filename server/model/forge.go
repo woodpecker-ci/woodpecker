@@ -34,6 +34,7 @@ type Forge struct {
 	OAuthClientSecret string         `json:"-"                            xorm:"VARCHAR(250) 'oauth_client_secret'"` // do not expose client secret
 	SkipVerify        bool           `json:"skip_verify,omitempty"        xorm:"bool"`
 	OAuthHost         string         `json:"oauth_host,omitempty"         xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
+	Orgs              []string       `json:"orgs,omitempty"               xorm:"json 'orgs'"`               // members of those orgs may log in using this forge, in addition to the globally allowed ones
 	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
 } //	@name	Forge
 

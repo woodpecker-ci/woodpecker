@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
@@ -79,4 +80,108 @@ func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.Contains(t, w.Body.String(), "Remove the stale repository entry")
 	mockStore.AssertNotCalled(t, "PermUpsert", mock.Anything)
+}
+
+func moveRepoForge(t *testing.T) *forge_mocks.MockForge {
+	t.Helper()
+	mgr := manager_mocks.NewMockManager(t)
+	mockForge := forge_mocks.NewMockForge(t)
+	mgr.On("ForgeFromRepo", mock.Anything).Return(mockForge, nil)
+	server.Config.Services.Manager = mgr
+	server.Config.Server.WebhookHost = "https://woodpecker.example"
+	return mockForge
+}
+
+func TestMoveRepoUpdatesOrg(t *testing.T) {
+	s := newTestStore(t)
+
+	seed := func(t *testing.T, forgeID int64, owner, name string) (*model.User, *model.Org, *model.Repo) {
+		t.Helper()
+		user := &model.User{Login: "alice-" + name, ForgeID: forgeID, ForgeRemoteID: model.ForgeRemoteID("u-" + name), Hash: "userhash-" + name}
+		require.NoError(t, s.CreateUser(user))
+		oldOrg := &model.Org{Name: owner, ForgeID: forgeID}
+		require.NoError(t, s.OrgCreate(oldOrg))
+		repo := &model.Repo{
+			ForgeID:       forgeID,
+			ForgeRemoteID: model.ForgeRemoteID("r-" + name),
+			Owner:         owner,
+			Name:          name,
+			FullName:      owner + "/" + name,
+			OrgID:         oldOrg.ID,
+			UserID:        user.ID,
+			Hash:          "hash-" + name,
+			IsActive:      true,
+		}
+		require.NoError(t, s.CreateRepo(repo))
+		return user, oldOrg, repo
+	}
+
+	move := func(t *testing.T, user *model.User, repo *model.Repo, to string) (int, string) {
+		t.Helper()
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos/1/move?to="+to, nil)
+		MoveRepo(tc.Ctx)
+		return tc.Ctx.Writer.Status(), tc.Recorder.Body.String()
+	}
+
+	t.Run("move to unknown owner creates the org and relinks the repo", func(t *testing.T) {
+		user, oldOrg, repo := seed(t, 1, "oldcorp", "rocket")
+		mockForge := moveRepoForge(t)
+
+		from := &model.Repo{
+			ForgeRemoteID: repo.ForgeRemoteID,
+			Owner:         "newcorp",
+			Name:          "rocket",
+			FullName:      "newcorp/rocket",
+			Perm:          &model.Perm{Admin: true},
+		}
+		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newcorp", "rocket").Return(from, nil)
+		mockForge.On("Org", mock.Anything, user, "newcorp").Return(&model.Org{Name: "newcorp"}, nil)
+		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+		code, body := move(t, user, repo, "newcorp/rocket")
+		require.Equal(t, http.StatusNoContent, code, body)
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		assert.Equal(t, "newcorp/rocket", stored.FullName)
+		assert.NotEqual(t, oldOrg.ID, stored.OrgID, "repo must not stay linked to the old org")
+
+		newOrg, err := s.OrgFindByName("newcorp", repo.ForgeID)
+		require.NoError(t, err)
+		assert.Equal(t, newOrg.ID, stored.OrgID)
+		assert.EqualValues(t, repo.ForgeID, newOrg.ForgeID)
+	})
+
+	t.Run("move to known owner links the existing org of the repo's forge", func(t *testing.T) {
+		user, oldOrg, repo := seed(t, 1, "oldinc", "probe")
+		// same-named org on ANOTHER forge that must not be picked
+		require.NoError(t, s.OrgCreate(&model.Org{Name: "newinc", ForgeID: 2}))
+		target := &model.Org{Name: "newinc", ForgeID: 1}
+		require.NoError(t, s.OrgCreate(target))
+
+		mockForge := moveRepoForge(t)
+		from := &model.Repo{
+			ForgeRemoteID: repo.ForgeRemoteID,
+			Owner:         "newinc",
+			Name:          "probe",
+			FullName:      "newinc/probe",
+			Perm:          &model.Perm{Admin: true},
+		}
+		// no Org() expectation: forge must not be asked for a known org
+		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newinc", "probe").Return(from, nil)
+		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+		code, body := move(t, user, repo, "newinc/probe")
+		require.Equal(t, http.StatusNoContent, code, body)
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		assert.Equal(t, target.ID, stored.OrgID)
+		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
+	})
 }

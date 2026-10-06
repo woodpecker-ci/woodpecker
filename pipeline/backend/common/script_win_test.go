@@ -29,6 +29,7 @@ func TestGenerateScriptWin(t *testing.T) {
 		{
 			from: []string{"echo %PATH%", "go build", "go test"},
 			want: `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "/woodpecker/some")) { New-Item -Path "/woodpecker/some" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
@@ -43,13 +44,13 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "/woodpecker/some";
 
-Write-Output ('+ "echo %PATH%"');
+Write-Output ('▶  "echo %PATH%"');
 & echo %PATH%; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
-Write-Output ('+ "go build"');
+Write-Output ('▶  "go build"');
 & go build; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
-Write-Output ('+ "go test"');
+Write-Output ('▶  "go test"');
 & go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `,
 		},

@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"codeberg.org/6543/xyaml/v2"
-	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
@@ -169,9 +168,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// prefix for the local-execution workspace volume name
-	prefix := "wp_" + ulid.Make().String()
-
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
@@ -203,7 +199,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		)
 		volumes = append(
 			volumes,
-			prefix+"_default:"+c.String("workspace-base"),
 			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
 		)
 	} else {
@@ -282,14 +277,21 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 			fmt.Printf("ctrl+c received, terminating workflow '%s'\n", item.Workflow.Name)
 		})
 
-		err := pipeline_runtime.New(
+		runtime := pipeline_runtime.New(
 			item.Config, backendEngine,
 			pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
 			pipeline_runtime.WithLogger(defaultLogger),
 			pipeline_runtime.WithDescription(map[string]string{
 				"CLI": "exec",
 			}),
-		).Run(ctx)
+		)
+
+		err := runtime.Run(ctx)
+		if err == nil {
+			// Run does not report step failures as runtime errors, but a failed
+			// step must still let the command exit non-zero.
+			err = runtime.Err()
+		}
 		if err != nil {
 			fmt.Println(err)
 			execErr = multierr.Append(execErr, err)

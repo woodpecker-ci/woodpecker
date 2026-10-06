@@ -11,7 +11,7 @@ import svgLoader from 'vite-svg-loader';
 import type { ViteUserConfig } from 'vitest/config';
 import { defineConfig } from 'vitest/config';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env'), quiet: true });
+dotenv.config({ path: path.resolve(import.meta.dirname, '../.env'), quiet: true });
 
 const getEnvString = (envVar: string | undefined) => (envVar != null && envVar !== '' ? envVar : undefined);
 const viteUserSessCookie = getEnvString(process.env.VITE_DEV_USER_SESS_COOKIE);
@@ -66,7 +66,7 @@ export default defineConfig({
   plugins: [
     vue(),
     VueI18nPlugin({
-      include: path.resolve(__dirname, 'src/assets/locales/**'),
+      include: path.resolve(import.meta.dirname, 'src/assets/locales/**'),
     }),
     (() => {
       const virtualModuleId = 'virtual:vue-i18n-supported-locales';
@@ -100,7 +100,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '~/': `${path.resolve(__dirname, 'src')}/`,
+      '~/': `${path.resolve(import.meta.dirname, 'src')}/`,
     },
   },
   logLevel: 'warn',

@@ -196,6 +196,7 @@ type (
 	// Feed represents an item in the user's feed or timeline.
 	Feed struct {
 		RepoID   int64  `json:"repo_id"`
+		FullName string `json:"full_name,omitempty"`
 		ID       int64  `json:"id,omitempty"`
 		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`

@@ -280,9 +280,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			assert.Nil(t, p.Milestone)
@@ -322,13 +322,13 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 2) {
-				assert.Equal(t, int64(9024465376), *p.Labels[0].ID)
-				assert.Equal(t, "documentation", *p.Labels[0].Name)
-				assert.Equal(t, "0075ca", *p.Labels[0].Color)
-				assert.Equal(t, "Improvements or additions to documentation", *p.Labels[0].Description)
-				assert.Equal(t, int64(9024465382), *p.Labels[1].ID)
-				assert.Equal(t, "enhancement", *p.Labels[1].Name)
-				assert.Equal(t, "a2eeef", *p.Labels[1].Color)
+				assert.Equal(t, int64(9024465376), p.Labels[0].ID)
+				assert.Equal(t, "documentation", p.Labels[0].Name)
+				assert.Equal(t, "0075ca", p.Labels[0].Color)
+				assert.Equal(t, "Improvements or additions to documentation", p.Labels[0].GetDescription())
+				assert.Equal(t, int64(9024465382), p.Labels[1].ID)
+				assert.Equal(t, "enhancement", p.Labels[1].Name)
+				assert.Equal(t, "a2eeef", p.Labels[1].Color)
 				assert.Equal(t, "New feature or request", *p.Labels[1].Description)
 			}
 			if assert.NotNil(t, p.Milestone) {
@@ -369,9 +369,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			if assert.NotNil(t, p.Head) {
@@ -435,17 +435,13 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			if assert.NotNil(t, p.Assignee) {
-				assert.Equal(t, "demoaccount2-commits", *p.Assignee.Login)
-				assert.Equal(t, int64(223550959), *p.Assignee.ID)
-			}
 			if assert.Len(t, p.Assignees, 1) {
 				assert.Equal(t, "demoaccount2-commits", *p.Assignees[0].Login)
 				assert.Equal(t, int64(223550959), *p.Assignees[0].ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {
@@ -480,11 +476,10 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			assert.Nil(t, p.Assignee)
 			assert.Empty(t, p.Assignees)
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {

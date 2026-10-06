@@ -36,7 +36,7 @@ import (
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalRegistryList(c *gin.Context) {
 	registryService := server.Config.Services.Manager.RegistryService()
-	list, err := registryService.GlobalRegistryList(session.Pagination(c))
+	list, err := registryService.GlobalRegistryList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global registry list. %s", err)
 		return

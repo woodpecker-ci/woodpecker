@@ -122,6 +122,8 @@ steps:
           runAsUser: 0
 ```
 
+You can use [WOODPECKER_BACKEND_K8S_USER_NAMESPACES](#backend_k8s_user_namespaces) to run all pods in a dedicated user namespace by default.
+
 :::note
 User namespaces require Kubernetes v1.25+ with the `UserNamespacesSupport` feature gate enabled, and a compatible container runtime (e.g. CRI-O, containerd v2.0+).
 :::
@@ -157,6 +159,8 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
 
 You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#backend_k8s_pod_node_selector) if you want to set the node selector per Agent
 or [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
+
+By default, setting `nodeSelector` from a step's backend options is **not allowed**, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes. To enable it, set [`WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`](#backend_k8s_pod_node_selector_allow_from_step) on the agent.
 
 ### Tolerations
 
@@ -485,7 +489,7 @@ steps:
 
   - name: docker
     image: docker:dind # use 'docker:<major-version>-dind' or similar in production
-    detached: true
+    detach: true
     privileged: true
     environment:
       DOCKER_TLS_CERTDIR: /woodpecker/dind-certs
@@ -516,6 +520,19 @@ The namespace to create worker Pods in.
 Enables namespace isolation per Woodpecker organization. When enabled, each organization gets its own dedicated Kubernetes namespace for improved security and resource isolation.
 
 With this feature enabled, Woodpecker creates separate Kubernetes namespaces for each organization using the format `{WOODPECKER_BACKEND_K8S_NAMESPACE}-{organization-id}`. Namespaces are created automatically when needed, but they are not automatically deleted when organizations are removed from Woodpecker.
+
+---
+
+### BACKEND_K8S_CLUSTER_DOMAIN
+
+- Name: `WOODPECKER_BACKEND_K8S_CLUSTER_DOMAIN`
+- Default: `cluster.local`
+
+The DNS domain of the Kubernetes cluster. It is used to build the DNS search entry that lets a step reach a service by its hostname.
+
+Set this value if your cluster was installed with a custom cluster domain.
+
+---
 
 ### BACKEND_K8S_VOLUME_SIZE
 
@@ -607,12 +624,39 @@ Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{
 
 ---
 
+### BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `nodeSelector` can be defined from a step's backend options. Disabled by default, as it would otherwise let any user with push access pin pipeline pods onto chosen nodes.
+
+---
+
 ### BACKEND_K8S_SECCTX_NONROOT <!-- cspell:ignore SECCTX NONROOT -->
 
 - Name: `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
 - Default: `false`
 
 Determines if containers must be required to run as non-root users.
+
+---
+
+### BACKEND_K8S_USER_NAMESPACES
+
+- Name: `WOODPECKER_BACKEND_K8S_USER_NAMESPACES`
+- Default: `false`
+
+Default to running containers in a dedicated user namespace (i.e. `hostUsers: false`) where `root` is mapped to a `non-root` user on the host.
+
+---
+
+### BACKEND_K8S_USER_NAMESPACES_OVERRIDE_SECCTX_NONROOT <!-- cspell:ignore SECCTX -->
+
+- Name: `WOODPECKER_BACKEND_K8S_USER_NAMESPACES_OVERRIDE_SECCTX_NONROOT`
+- Default: `false`
+
+Allow containers running in a custom user namespace to override `BACKEND_K8S_SECCTX_NONROOT` and run as `root`.
 
 ---
 
@@ -649,3 +693,12 @@ Container image used for the workspace permission init container, which is used 
 - Default: `false`
 
 Determines if the Pod `serviceAccountName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary service account and escalate privileges.
+
+---
+
+### BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP`
+- Default: `false`
+
+Determines if the Pod `runtimeClassName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary runtime class.

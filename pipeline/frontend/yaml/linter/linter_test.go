@@ -112,6 +112,37 @@ steps:
 	}
 }
 
+func TestLintDeeplyNestedBackendOptions(t *testing.T) {
+	config := `
+when:
+  event: push
+steps:
+  test:
+    image: golang
+    backend_options:
+      kubernetes:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: accelerator
+                      operator: In
+                      values:
+                        - nvidia-tesla-v100
+`
+
+	workflow, err := yaml.ParseString(config)
+	require.NoError(t, err)
+
+	err = linter.New().Lint([]*linter.WorkflowConfig{{
+		File:      "deep.yml",
+		RawConfig: config,
+		Workflow:  workflow,
+	}})
+	require.NoError(t, err)
+}
+
 func TestLintErrors(t *testing.T) {
 	testdata := []struct {
 		from string
@@ -185,6 +216,10 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
+		},
+		{
+			from: "{steps: { build: { image: golang } }, services: [ { name: database, image: mysql }, { name: database, image: postgres } ] }",
+			want: "Service names must be unique, `database` is used more than once",
 		},
 	}
 

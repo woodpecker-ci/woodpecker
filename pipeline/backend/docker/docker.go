@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/containerd/errdefs"
 	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/api/pkg/stdcopy"
@@ -183,7 +183,10 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := e.toConfig(step, options)
+	config, err := e.toConfig(step, options)
+	if err != nil {
+		return err
+	}
 	hostConfig, err := toHostConfig(step, &e.config)
 	if err != nil {
 		return err
@@ -345,7 +348,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 
 	// we first signal to the container to stop ...
 	if _, err := e.client.ContainerStop(ctx, containerName, client.ContainerStopOptions{
-		Timeout: toRef(int(e.config.stopTimeout)),
+		Timeout: new(int(e.config.stopTimeout)),
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		// we do not return error yet as we try to kill it first
 		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)

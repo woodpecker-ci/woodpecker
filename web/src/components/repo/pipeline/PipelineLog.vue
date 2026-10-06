@@ -31,11 +31,10 @@
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
-            :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
             class="hover:bg-white/10!"
             icon="download"
-            @click="download"
+            :href="logDownloadUrl"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
@@ -180,7 +179,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import useUserConfig from '~/compositions/useUserConfig';
-import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
 
 interface LogLine {
@@ -215,9 +214,10 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
-const pipelineConfigs = requiredInject('pipeline-configs');
 const apiClient = useApiClient();
 const route = useRoute();
+
+const config = useConfig();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -226,6 +226,9 @@ const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
 const fullscreen = ref(false);
+const logDownloadUrl = computed(
+  () => `${config.rootPath}/api/repos/${repo.value.id}/logs/${pipeline.value.number}/${step.value?.id}/download`,
+);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
@@ -235,66 +238,24 @@ const hasLogs = computed(
 );
 const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
-const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
-
-const config = useConfig();
 
 const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
-const commandRegex = /^\s*-\s(.+)$/gm;
-const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
-const matrixVariableRegex = /\\\$(\\\{\w+\\\})/g;
-
-const knownCommandMatchers = computed(() => {
-  if (!pipelineConfigs.value) return [];
-  const patterns: RegExp[] = [];
-  pipelineConfigs.value.forEach((config: PipelineConfig) => {
-    const decoded = decode(config.data);
-    const matches = decoded.matchAll(commandRegex);
-    for (const match of matches) {
-      const rawCommand = match[1].trim();
-      // Replace matrix variable ${VAR} with a wildcard match (non-greedy)
-      const patternString = rawCommand
-        .replace(specialCharsRegex, '\\$&') // escape all
-        .replace(matrixVariableRegex, '.*'); // match ${VAR}
-
-      patterns.push(new RegExp(`^${patternString}$`));
-    }
-  });
-  return patterns;
-});
-
 const groupedLogs = computed(() => {
   if (!log.value) return [];
-
-  if (!pipelineConfigs.value || pipelineConfigs.value.length === 0) {
-    return [
-      {
-        id: 0,
-        command: null,
-        lines: log.value,
-        isActualCommand: false,
-      },
-    ];
-  }
 
   const blocks: LogBlock[] = [];
   let currentBlock: LogBlock | null = null;
 
   log.value.forEach((line) => {
     const trimmedText = (line.rawText || '').trim();
-
-    let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
-      isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
-    }
+    const isCommand = trimmedText.startsWith('▶  ') && trimmedText.slice(3).trim().length > 0;
 
     if (isCommand) {
       currentBlock = {
@@ -325,7 +286,9 @@ const hasGroupedLogs = computed(() => {
   return groupedLogs.value.find((g) => g.isActualCommand);
 });
 
-const urlRegex = /https?:\/\/\S+/g;
+// Stop a URL at a '<' so that if we are also converting ansi escapes at the end of a URL
+// we don't include their closing </span> in the URL match.
+const urlRegex = /https?:\/\/[^\s<]+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
@@ -435,39 +398,6 @@ const flushLogs = debounce((scroll: boolean) => {
   }
 }, 500);
 
-async function download() {
-  if (!repo?.value || !pipeline.value || !step.value) {
-    throw new Error('The repository, pipeline or step was undefined');
-  }
-  let logs;
-  try {
-    downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-  } catch (e) {
-    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
-    return;
-  } finally {
-    downloadInProgress.value = false;
-  }
-  const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
-      type: 'text/plain',
-    }),
-  );
-  const fileLink = document.createElement('a');
-
-  fileLink.href = fileURL;
-  fileLink.setAttribute(
-    'download',
-    `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
-  );
-  document.body.appendChild(fileLink);
-
-  fileLink.click();
-  document.body.removeChild(fileLink);
-  window.URL.revokeObjectURL(fileURL);
-}
-
 async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
@@ -517,10 +447,11 @@ async function deleteLogs() {
   }
 }
 
+// A stepless workflow has no `children`, so the deref is guarded.
 function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
     (prev, workflow) => {
-      const result = workflow.children.reduce(
+      const result = (workflow.children ?? []).reduce(
         (prevChild, step) => {
           if (step.pid === pid) {
             return step;

@@ -13,7 +13,7 @@
             },
             "private": {
                 "private": "Privát",
-                "desc": "Csak te és a többi tulajdonos láthatjátok ezt a projektet."
+                "desc": "Csak te és a kódtár többi tulajdonosa láthatjátok ezt a projektet."
             },
             "internal": {
                 "internal": "Belső",
@@ -38,9 +38,10 @@
                     "default": "Alapértelmezetten: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "path": "Pipeline elérési útja",
                     "desc_path_example": "saját/elérési_utam/",
-                    "desc": "Az élérési út a pipeline konfigurációdhoz (például {0}). A Mappáknak {1}-ra kéne végződnie."
+                    "desc": "Az élérési út a pipeline konfigurációdhoz (például {0}). A Mappáknak {1}-ra kéne végződnie.",
+                    "by_default": "Alapértelmezett: {paths}"
                 },
-                "general": "Általános",
+                "general": "Projekt",
                 "allow_pr": {
                     "allow": "Pull Requestek bekapcsolása",
                     "desc": "A pipelineok lefuttatásának engedélyezése a pull requesteken."
@@ -66,27 +67,28 @@
                 },
                 "netrc_only_trusted": {
                     "netrc_only_trusted": "Egyedi megbízott klón pluginok",
-                    "desc": "A pluginok amelyek hozzáférést kapnak a netrc hozzáférési adatokhoz tudnak repositorykat klónozni az adott kódplatformról vagy pusholni az adott kódplatformra."
+                    "desc": "A pluginok amelyek hozzáférést kapnak a netrc hozzáférési adatokhoz tudnak kódtárakat klónozni az adott kohóról vagy feltölteni az adott kohóra.",
+                    "placeholder": "Plugin konténerkép"
                 }
             },
             "actions": {
                 "disable": {
-                    "disable": "Tároló inaktiválása",
-                    "success": "Repository kikapcsolva"
+                    "disable": "Kódtár letiltása",
+                    "success": "Kódtár letiltva"
                 },
                 "delete": {
-                    "delete": "Repository törlése",
-                    "success": "Repository törölve",
+                    "delete": "Kódtár törlése",
+                    "success": "Kódtár törölve",
                     "confirm": "Minden adat el fog veszni ez az akció után!\n\nBiztos, hogy folytatni akarod?"
                 },
                 "actions": "Actions",
                 "repair": {
-                    "repair": "Repository javítása",
-                    "success": "Repository javítva"
+                    "repair": "Kódtár javítása",
+                    "success": "Kódtár javítva"
                 },
                 "enable": {
-                    "enable": "Repository bekapcsolása",
-                    "success": "Repository bekapcsolva"
+                    "enable": "Kódtár engedélyezése",
+                    "success": "Kódtár engedélyezve"
                 }
             },
             "crons": {
@@ -108,23 +110,31 @@
                     "placeholder": "A cron feladat neve"
                 },
                 "schedule": {
-                    "title": "Menetrend (UTC időzónán alapozva)",
+                    "title": "Menetrend",
                     "placeholder": "Menetrend"
                 },
                 "crons": "Cronok",
                 "edit": "Cron szerkesztése",
                 "delete": "Cron törlése",
                 "show": "Cronok mutatása",
-                "add": "Cron hozzáadása"
+                "add": "Cron hozzáadása",
+                "next_exec_local": "Következő végrehajtás: {local}",
+                "next_exec_both": "Következő végrehajtás: {local} ({zoned}{timezone})",
+                "timezone": "Időzóna",
+                "your_timezone": "A böngésződ időzónájában.",
+                "enabled": "Engedélyezett"
             },
-            "not_allowed": "Nincs hozzáférésed ennek a repositorynak a beállításaihoz",
+            "not_allowed": "Nincs hozzáférésed ennek a kódtárnak a beállításaihoz",
             "badge": {
                 "branch": "Branch",
                 "type_html": "HTML",
                 "type_url": "URL",
                 "type_markdown": "Markdown",
                 "badge": "Jelvény",
-                "type": "Szintaxis"
+                "type": "Szintaxis",
+                "events": "Események",
+                "workflow": "Munkafolyamat",
+                "step": "Lépés"
             }
         },
         "pipeline": {
@@ -139,7 +149,10 @@
                 "deploy": "Üzembe helyezés",
                 "log_auto_scroll_off": "Automata görgetés kikapcsolása",
                 "cancel": "Mégse",
-                "restart": "Újraindítás"
+                "restart": "Újraindítás",
+                "skipped": "Ez a lépés ki lett hagyva.",
+                "expand_all": "Összes kibontása",
+                "collapse_all": "Összes összecsukása"
             },
             "event": {
                 "cron": "Időzítő",
@@ -149,7 +162,8 @@
                 "tag": "Bélyeg",
                 "pr": "Pull request",
                 "deploy": "Üzembe helyezés",
-                "push": "Push"
+                "push": "Push",
+                "pr_metadata": "Pull Request metaadat megváltozott"
             },
             "debug": {
                 "title": "Debuggolás",
@@ -158,7 +172,7 @@
                 "metadata_download_successful": "Metadat sikeresen letöltve",
                 "no_permission": "Nincs jogosultságod a debug információkhoz",
                 "metadata_exec_title": "Pipeline újrafuttatása lokálisan",
-                "metadata_exec_desc": "A pipeline metaadatjának letöltése, hogy lokálisan lehessen futtatni. Így kitudsz javítani hibákat benne és változtatásokat tesztelni mielőtt véglegesítenéd őket. A `woodpecker-cli` lokális verziójának és a Woodpecker Szerver verziójának egyeznie kell."
+                "metadata_exec_desc": "A pipeline metaadatának letöltése, hogy lokálisan lehessen futtatni. Így ki tudsz javítani hibákat benne és változtatásokat tesztelni mielőtt véglegesítenéd őket. A Woodpecker CLI, szerverrel azonos verziójának, telepítve kell lennie lokálisan."
             },
             "no_logs": "Nincsen napló",
             "status": {
@@ -172,7 +186,8 @@
                 "declined": "elutasítva",
                 "error": "hiba",
                 "failure": "sikertelen",
-                "killed": "terminálva"
+                "killed": "terminálva",
+                "canceled": "lemondva"
             },
             "log_delete_confirm": "Biztos, hogy akarod ehhez a lépéshez tartozó naplót törölni?",
             "protected": {
@@ -184,7 +199,7 @@
                 "decline_success": "Pipeline elutasítva"
             },
             "created": "Készítve: {created}",
-            "duration": "Pipeline lefutási ideje",
+            "duration": "Pipeline lefutási ideje: {duration}",
             "config": "Konfiguráció",
             "files": "Megváltoztatott fájlok",
             "errors": "Hibák",
@@ -201,7 +216,18 @@
             "no_pipelines": "Egy pipeline sem indult még el.",
             "step_not_started": "Ez a lépés még nem indult el.",
             "pipeline": "#{pipelineId} Pipeline",
-            "log_title": "Lépés napló"
+            "log_title": "Lépés napló",
+            "load_more": "Még több betöltése",
+            "parse_errors": "Elemzési hibák",
+            "runtime_errors": "Futásidejű hibák",
+            "version": "A Woodpecker verziója amin a pipeline futtatva volt.",
+            "version_header": "Woodpecker verzió",
+            "cancel_info": {
+                "superseded_by": "Meghaladta a #{pipelineId}",
+                "canceled_by_user": "{user} által lemondva",
+                "canceled_by_step": "{step} miatt lemondva"
+            },
+            "view": "Pipeline megtekintése"
         },
         "manual_pipeline": {
             "variables": {
@@ -214,7 +240,12 @@
             "select_branch": "Branch választás",
             "title": "Manuális pipeline futtatás előidézése",
             "trigger": "Pipeline futtatása",
-            "show_pipelines": "Pipelineok mutatása"
+            "show_pipelines": "Pipelineok mutatása",
+            "no_manual_workflows": "Nem található egyező munkafolyamat. Győződj meg róla, hogy legalább egy munkafolyamatot elindít a kézi esemény.",
+            "message": {
+                "title": "Üzenet",
+                "desc": "Ez az üzenet további információként hozzáadásra kerül a pipeline üzeneteihez."
+            }
         },
         "deploy_pipeline": {
             "variables": {
@@ -232,16 +263,22 @@
         "activity": "Aktivitás",
         "branches": "Branchek",
         "pull_requests": "Pull requestek",
-        "add": "Repository hozzáadása",
-        "user_none": "Ez az organizáció/felhasználó nem rendelkezik még semmilyen projektekkel",
-        "not_allowed": "Nincs hozzáférésed ehhez a repositoryhoz",
+        "add": "Kódtár hozzáadása",
+        "user_none": "Ez a szervezet/felhasználó nem rendelkezik még semmilyen projektekkel",
+        "not_allowed": "Nincs hozzáférésed ehhez a kódtárhoz",
         "enable": {
             "disabled": "Kikapcsolva",
-            "success": "Repository bekapcsolva",
+            "success": "Kódtár bekapcsolva",
             "enabled": "Már bekapcsolva",
-            "enable": "Bekapcsolás"
+            "enable": "Bekapcsolás",
+            "conflict_desc": "Ez a kódtár újra létre lett hozva a kohóban egy új IDval, de egy elavult bejegyzés még továbbra is létezik a Woodpeckeren. Töröld az elavultat hogy bekapcsold az újat, vagy Javítsd meg a régit.",
+            "forge_repo_missing": "Hiányzik a kohó kódtár!",
+            "new_forge_repo": "új kódtár a kohóban",
+            "stale_wp_repo": "elavult Woodpecker kódtár",
+            "conflict": "Konfliktus"
         },
-        "open_in_forge": "Repository megnyitása a kódplatformban"
+        "open_in_forge": "Kódtár megnyitása a kohóban",
+        "refresh": "Kódtár lista frissítése"
     },
     "admin": {
         "settings": {
@@ -259,23 +296,25 @@
                 "avatar_url": "Avatár URL",
                 "users": "Felhasználók",
                 "email": "Email",
-                "login": "Bejelentkezés",
+                "login": "Felhasználónév",
                 "none": "Még nincenek felhasználók.",
-                "delete_confirm": "Biztos, hogy akarod ezt a felhasználót törölni? Minden repository ami a felhasználóhoz tartozik is törlődik.",
+                "delete_confirm": "Biztos, hogy törölni akarod ezt a felhasználót? Minden kódtár ami a felhasználóhoz tartozik is törlődik.",
                 "admin": {
                     "admin": "Adminisztrátor",
-                    "placeholder": "A felhasználó egy adminisztrátor"
-                }
+                    "placeholder": "A felhasználó egy adminisztrátor",
+                    "admin_warning": "Ennek a felhasználónak admin jogosultságai vannak a környezeted beállításai miatt. Hiába vonod vissza a jogosultságait itt, a felhasználó visszakapja őket amikor legközelebb bejelentkezik."
+                },
+                "forge": "Kohó"
             },
             "orgs": {
                 "orgs": "Szervezetek",
                 "delete_org": "Szervezet törlése",
-                "delete_confirm": "Biztos, hogy akarod ezt az organizációt törölni? Minden repository ami az organizációhoz tartozik is törlődik.",
-                "deleted": "Organizáció törölve",
-                "view": "Organizáció megnézése",
-                "desc": "Organizációk amelyek repositorykat tart ezen a szerveren.",
-                "none": "Még nincsenek organizációk.",
-                "org_settings": "Organizáció beállítások"
+                "delete_confirm": "Biztos, hogy törölni akarod ezt a szervezetet? Ezzel minden kódtár ami a szervezethez tartozik is törlésre kerül.",
+                "deleted": "Szervezet törölve",
+                "view": "Szervezet megtekintése",
+                "desc": "Szervezetek amelyek kódtárakat tulajdonolnak ezen a szerveren.",
+                "none": "Még nincsenek szervezetek.",
+                "org_settings": "Szervezet beállításai"
             },
             "queue": {
                 "resumed": "Feldolgozási sor folytatása",
@@ -285,8 +324,8 @@
                 "paused": "Feldolgozási sor szünteltetve",
                 "task_pending": "Feladat futtatása függőben",
                 "queue": "Feldolgozási sor",
-                "desc": "Feladatok amelyek az agent végrehajtására várnak.",
-                "agent": "agent",
+                "desc": "Végrehajtásra váró feladatok.",
+                "agent": "végrehajtó",
                 "resume": "Folytatás",
                 "stats": {
                     "waiting_on_deps_count": "Függőségekre vár",
@@ -301,35 +340,38 @@
             "agents": {
                 "capacity": {
                     "capacity": "Kapacitás",
-                    "desc": "Az agent által maximum párhuzamosan futtatható pipelineok száma.",
+                    "desc": "Az végrehajtó által párhuzamosan futtatható maximum pipelineok száma.",
                     "badge": "kapacitás"
                 },
                 "name": {
                     "name": "Név",
-                    "placeholder": "Az Agent neve"
+                    "placeholder": "A végrehajtó neve"
                 },
-                "delete_confirm": "Biztos, hogy törölni akarod ezt az agentet? Mostantól, nem fog tudni kommunikálni a szerverrel.",
+                "delete_confirm": "Biztos, hogy törölni akarod ezt a végrehajtót? Mostantól, nem fog tudni kommunikálni a szerverrel.",
                 "never": "Soha",
-                "last_contact": "Legutóbbi kommunikáció",
-                "edit_agent": "Agent szerkesztése",
-                "agents": "Agentek",
-                "none": "Még nincsenek agentek.",
+                "last_contact": {
+                    "last_contact": "Utolsó kapcsolat",
+                    "badge": "utolsó kapcsolat"
+                },
+                "edit_agent": "Végrehajtó szerkesztése",
+                "agents": "Végrehajtók",
+                "none": "Még nincsenek végrehajtók.",
                 "id": "ID",
-                "add": "Agent hozzáadása",
-                "show": "Agentek mutatása",
-                "saved": "Agent elmentve",
-                "delete_agent": "Agent törlése",
+                "add": "Végrehajtó hozzáadása",
+                "show": "Végrehajtók megtekintése",
+                "saved": "Végrehajtó mentve",
+                "delete_agent": "Végrehajtó törlése",
                 "custom_labels": {
                     "custom_labels": "Egyedi bélyegek",
-                    "desc": "Az egyedi bélyegek az agent adminisztrátorja állítja be az agent elindításánál."
+                    "desc": "Az egyedi bélyegeket a végrehajtó adminja állítja be a végrehajtó elindításánál."
                 },
-                "desc": "Agentek amelyek ehhez a szerverhez vannak regisztrálva.",
-                "save": "Agent mentése",
-                "created": "Agent létrehozva",
-                "deleted": "Agent törölve",
+                "desc": "Regisztrált végrehajtók ezen a szerveren.",
+                "save": "Végrehajtó mentése",
+                "created": "Végrehajtó létrehozva",
+                "deleted": "Végrehajtó törölve",
                 "no_schedule": {
-                    "name": "Agent kikapcsolása",
-                    "placeholder": "Az agent megakadályozása, hogy új feladatokat vegyen fel"
+                    "name": "Végrehajtó kikapcsolása",
+                    "placeholder": "A végrehajtó megakadályozása abban, hogy új feladatokat vegyen fel"
                 },
                 "token": "Token",
                 "platform": {
@@ -346,26 +388,27 @@
                 }
             },
             "repos": {
-                "view": "Repository megnézése",
-                "repos": "Repositoryk",
-                "desc": "Repositoryk amik aktiválva vagy aktiválva voltak ezen a szerveren.",
-                "none": "Még nincsenek repositoryk.",
-                "settings": "Repository beállítások",
+                "view": "Kódtárak megtekintése",
+                "repos": "Kódtárak",
+                "desc": "Kódtárak amik aktiválva vannak vagy voltak ezen a szerveren.",
+                "none": "Még nincsenek kódtárak.",
+                "settings": "Kódtár beállítások",
                 "disabled": "Kikapcsolva",
                 "repair": {
                     "repair": "Minden javítása",
-                    "success": "Repositoryk javítva"
+                    "success": "Kódtárak javítva"
                 }
             },
             "not_allowed": "Nincs hozzá",
             "secrets": {
-                "desc": "A globális titkos változók az összes repository összes pipelinejában használhatóak.",
+                "desc": "A globális titkos változók használhatóak az összes kódtár összes pipelinejában.",
                 "warning": "Ezek a titkos változók minden felhasználónak elérhetőek."
             },
             "registries": {
                 "warning": "Ezek a regisztry hozzáférési adatok elérhetőek az összes felhasználónak.",
                 "desc": "Lehetőség van globális regisztry hozzáférési adatok hozzáadására,hogy minden pipelinenak hozzáférése legyen privát Docker környezet imagekhez."
-            }
+            },
+            "settings": "Admin beállítások"
         }
     },
     "cancel": "Mégse",
@@ -376,7 +419,12 @@
     "repositories": {
         "title": "Kódtárak",
         "all": {
-            "title": "Összes kódtár"
+            "title": "Összes kódtár",
+            "desc": "Kódtárak az utolsó pipeline létrehozás sorrendjében"
+        },
+        "last": {
+            "title": "Utoljára megtekintett",
+            "desc": "Utoljára megtekintett kódtárak a hozzáférés ideje szerint rendezve"
         }
     },
     "documentation_for": "{topic} dokumentációja",
@@ -409,14 +457,15 @@
         "deleted": "Titkos változó törölve",
         "delete_confirm": "Biztos, hogy törölni akarod ezt a titkos változót?",
         "saved": "Titkos változó elmentve",
-        "desc": "A titkos változók minden a repositoryn futó pipelineban elérhetőek.",
+        "desc": "A titkos változók minden a kódtárhoz tartozó pipelineban elérhetőek.",
         "none": "Még nincsenek titkos változók.",
-        "created": "Titkos változó létrehozva"
+        "created": "Titkos változó létrehozva",
+        "note": "Feljegyzés"
     },
     "default": "alapértelmezett",
     "no_search_results": "Nincs találat",
     "all_repositories": "Összes Repository",
-    "org_access_denied": "Nincs hozzáférésed ehhez az organizáció megnézéséhez",
+    "org_access_denied": "Nincs hozzáférésed ehhez a szervezethez",
     "user": {
         "settings": {
             "general": {
@@ -426,8 +475,15 @@
                     "theme": "Téma",
                     "dark": "Sötét"
                 },
-                "general": "Általános",
-                "language": "Nyelv"
+                "general": "Felhasználói fiók",
+                "language": "Nyelv",
+                "pipeline_logs": {
+                    "pipeline_logs": "Pipeline naplók",
+                    "collapse_groups": {
+                        "collapse": "Napló csoportok összecsukása alapértelmezetten",
+                        "desc": "Elkészült lépés megnyitásánál az összes parancs csoport összecsukása, hogy csak az áttekintést mutassa."
+                    }
+                }
             },
             "cli_and_api": {
                 "download_cli": "CLI letöltése",
@@ -443,15 +499,15 @@
                 "desc": "Lehetőség van felhasználói regisztry hozzáférési adatok hozzáadására,hogy minden saját pipelinenak hozzáférése legyen privát Docker környezet imagekhez."
             },
             "agents": {
-                "desc": "Agentek amelyek a fiókod repositoryjaihoz vannak regisztrálva."
+                "desc": "Végrehajtók amelyek a fiókod kódtáraihoz vannak regisztrálva."
             },
             "settings": "Felhasználói beállítások",
             "secrets": {
-                "desc": "A felhasználó titkos változójai minden a felhasználó tulajdonában álló repositoryn futó pipelinejaiban felhasználható."
+                "desc": "A felhasználói szintű titkos változók minden a felhasználó tulajdonában álló kódtárhoz tartozó pipelineban felhasználhatóak."
             }
         }
     },
-    "invalid_state": "Az OAuth helyzete érvénytelen",
+    "invalid_state": "Az OAuth állapota érvénytelen",
     "registries": {
         "add": "Regisztry hozzáadása",
         "delete_confirm": "Biztos, hogy törölni akarod ezt a regisztryt?",
@@ -476,7 +532,7 @@
         "require_approval_for": "Engedélyezési feltételek",
         "desc": "Előzz meg rosszindulatú pipelineok lefutását, amelyek titkos változókat fedhetnek fel vagy káros feladatokat futtathatnak, azáltal, hogy jóváhagyod őket a végrehajtás előtt.",
         "none_desc": "Minden esemény előidéz pipelineokat, beleértve a Pull Requesteket. Ez a beállítás veszélyes lehet és csak privát munkamenetekhez ajánlott.",
-        "forks": "Pull Request egy forkolt repositoryból",
+        "forks": "Pull Request egy forkolt kódtárból",
         "pull_requests": "Mindegyik Pull Request",
         "none": "Nincs",
         "all_events": "Az összes esemény a kódplatformtól",
@@ -489,14 +545,14 @@
     "org": {
         "settings": {
             "agents": {
-                "desc": "Regisztrált agentek ehhez az organizációhoz."
+                "desc": "Regisztrált végrehajtók ehhez a szervezethez."
             },
-            "not_allowed": "Nincs jogosultságod ennek az organizáció beállításaihoz",
+            "not_allowed": "Nincs jogosultságod ennek a szervezetnek a beállításaihoz",
             "secrets": {
-                "desc": "Az organizáció titkos változói elérhetőek az organizáció összes repositoryhoz tartózó pipelinejainak."
+                "desc": "Az szervezet titkos változói elérhetőek a szervezet összes kódtárához tartózó pipeline számára."
             },
             "registries": {
-                "desc": "Az organizáció hozzáférési adatai tárolója hozzáadható, hogy privát Docker image-eket használhassanak az organizáció összes pipeline-jában."
+                "desc": "A szervezet hozzáférési adatai tárolója hozzáadható, hogy privát konténerképeket használhassanak a szervezet összes pipeline-jában."
             }
         }
     },
@@ -512,15 +568,84 @@
         "just_now": "Most éppen"
     },
     "update_woodpecker": "Kérlek frissítsd a Woodpeckered {0}-ra",
-    "org_level_secret": "organizáció titkos változó",
-    "login_to_cli": "Belépés a CLIbe",
-    "login_to_cli_description": "Ha folytatod, be leszel léptetve a CLIbe.",
+    "org_level_secret": "szervezeti titkos változó",
+    "login_to_cli": "Bejelentkezés a CLIbe",
+    "login_to_cli_description": "Ha folytatod, be leszel jelentkeztetve a CLIbe.",
     "abort": "Megszakítás",
-    "cli_login_success": "Sikeres belépés a CLIbe",
-    "cli_login_failed": "Sikertelen belépés a CLIbe",
-    "cli_login_denied": "Belépés a CLIbe megtagadva",
+    "cli_login_success": "Sikeres bejelentkezés a CLIbe",
+    "cli_login_failed": "Sikertelen bejelentkezés a CLIbe",
+    "cli_login_denied": "Bejelentkezés a CLIbe megtagadva",
     "return_to_cli": "Mostmár bezárhatod ezt az ablakot és visszaléphetsz a CLIbe.",
     "settings": "Beállítások",
     "access_denied": "Nincs hozzáférésed ehhez a munkamenethez",
-    "login_to_woodpecker_with": "Bejelentkezés a Woodpeckerbe"
+    "login_to_woodpecker_with": "Bejelentkezés a Woodpeckerbe",
+    "fullscreen": "Teljes képernyő",
+    "exit_fullscreen": "Kilépés teljes képernyőből",
+    "help_translating": "Itt segíthetsz lefordítani a Woodpeckert a saját nyelvedre: {0}.",
+    "weblate": "mi Weblateünk",
+    "disabled": "Letiltott",
+    "global_level_registry": "Globális registry",
+    "org_level_registry": "szervezeti registry",
+    "extensions": "Kiterjesztések",
+    "extensions_description": "A kiterjesztések HTTP szolgáltatások, amiket a Woodpecker meg tud hívni a beépítettek helyett.",
+    "extension_endpoint_placeholder": "például https://example.com/api",
+    "config_extension_endpoint": "Konfigurációs kiterjesztés végpontja",
+    "registry_extension_endpoint": "Registry kiterjesztés végpontja",
+    "config_extension_exclusive": "Kizárólagos",
+    "config_extension_exclusive_desc": "Ha be van kapcsolva minden más módja a konfiguráció betöltésének kihagyásra kerül, a kohót is beleértve.",
+    "secret_extension_endpoint": "Titkos változók kiterjesztés végpontja",
+    "extension_netrc": "netrc hitelesítő adatok használata",
+    "extension_netrc_desc": "A kohó netrc hitelesítő adatainak elküldése a kiterjesztésnek.",
+    "extensions_signatures_public_key": "Publikus kulcs az aláírásokhoz",
+    "extensions_signatures_public_key_description": "Ezt a publikus kulcsot kellene használnia a kiterjesztéseknek a webhook hívások ellenőrzésére, hogy azok valóban a Woodpeckertől érkeznek.",
+    "extensions_configuration_saved": "Kiterjesztések konfigurációja mentve",
+    "forges": "Kohók",
+    "forges_desc": "Kódtárakat kiszolgáló kohók konfigurációja, mely kódtárakra a Woodpeckernek futnia kell.",
+    "add_forge": "Kohó hozzáadása",
+    "show_forges": "Kohók mutatása",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Kiegészítő",
+    "forge_type": "Kohó típusa",
+    "oauth_client_id": "OAuth Kliens ID",
+    "oauth_client_secret": "OAuth Kliens Titok",
+    "oauth_host": "OAuth hoszt",
+    "merge_ref": "Git merge ref",
+    "merge_ref_desc": "Merge alapját képző git ref. Ez határozza meg a diff-et a pull requesteknél.",
+    "public_only": "Csak publikus",
+    "public_only_desc": "Csak publikus kódtárak mutatása.",
+    "git_username": "Git felhasználónév",
+    "git_username_desc": "A Git felhasználó neve.",
+    "git_password": "Git jelszó",
+    "git_password_desc": "Jelszó vagy saját hozzáférési token a Git felhasználóhoz.",
+    "executable": "Futtatható fájl",
+    "executable_desc": "A kiegészítő futtatható fájljára mutató elérési út.",
+    "save": "Mentés",
+    "add": "Hozzáadás",
+    "delete": "Törlés",
+    "skip_verify": "SSL ellenőrzés kihagyása",
+    "skip_verify_desc": "SSL ellenőrzés kihagyása az API kapcsolathoz. Ez nem javasolt fontos környezetben.",
+    "url": "URL",
+    "forge_managed_by_env": "Az elsődleges kohót környezeti változók állítják be. Bármilyen változtatás visszavonásra kerül újraindításkor.",
+    "oauth_redirect_url": "OAuth átirányítási URL",
+    "forge_created": "Kohó létrehozva",
+    "advanced_options": "Speciális beállítások",
+    "leave_empty_to_keep_current_value": "A jelenlegi érték megtartásához hagyd üresen",
+    "forge_deleted": "Kohó törölve",
+    "forge_delete_confirm": "Biztos törölni akarod ezt a kohót? Ez törölni fog minden kódtárat, felhasználót és pipelinet ami a kohóhoz tartozik.",
+    "edit_forge": "Kohó szerkesztése",
+    "delete_forge": "Kohó törlése",
+    "no_forges": "Még nincsenek kohók.",
+    "use_this_redirect_url_to_create": "Az OAuth alkalmazás létrehozásához, vagy szerkesztéséhez használd ezt az átirányítási URLt.",
+    "developer_settings_to_create": "Menj a {0}-ra, és állítsd be az OAuth alkalmazást.",
+    "developer_settings": "fejlesztői beállítások",
+    "public_url_for_oauth_if": "Publikus URL az OAuth-hoz ha eltér az URLtől: {0}",
+    "forge_saved": "Kohó mentve",
+    "allowed_orgs": "Engedélyezett szervezetek",
+    "allowed_orgs_desc": "Szervezetek, melynek tagjai bejelentkezhetnek ezt a kohót használva, a globális WOODPECKER_ORGS beállításon felül.",
+    "allowed_orgs_placeholder": "Szervezet neve"
 }

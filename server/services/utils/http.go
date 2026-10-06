@@ -30,7 +30,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"github.com/yaronf/httpsign"
 
@@ -209,8 +209,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 // isRetryableError checks if an error is transient and suitable for retry.
 func isRetryableError(err error) bool {
 	// Check for network-related errors
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	if netErr, ok := errors.AsType[net.Error](err); ok {
 		// Retry on timeout errors
 		if netErr.Timeout() {
 			return true

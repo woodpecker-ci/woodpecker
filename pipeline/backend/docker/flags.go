@@ -56,6 +56,11 @@ var Flags = []cli.Flag{
 		Name:    "backend-docker-volumes",
 		Usage:   "backend docker volumes (comma separated)",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_APPARMOR_PROFILE"),
+		Name:    "backend-docker-apparmor-profile",
+		Usage:   "AppArmor profile applied to backend Docker containers",
+	},
 	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_STOP_TIMEOUT"),
 		Name:    "backend-docker-stop-timeout",

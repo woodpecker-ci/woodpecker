@@ -138,6 +138,31 @@ func checkWorkflowAllowsStepUpdate(workflowState model.StatusValue, step *model.
 	return retErr
 }
 
+// checkAgentReportedInitState validates the workflow state an agent reports
+// on Init. An agent always stamps Started before calling Init and cannot know
+// a cancel result yet, so a zero Started or a set Canceled flag cannot come
+// from a compatible agent.
+func checkAgentReportedInitState(agentID int64, state rpc.WorkflowState) error {
+	if state.Started == 0 || state.Canceled {
+		retErr := ErrAgentImpossibleWorkflowState
+		log.Error().Err(retErr).Int64("agentID", agentID).Msgf("init: impossible workflow state reported: %#v", state)
+		return retErr
+	}
+	return nil
+}
+
+// checkAgentReportedDoneState validates the workflow state an agent reports
+// on Done. A canceled workflow was necessarily started, so Canceled combined
+// with a zero Started timestamp cannot come from a compatible agent.
+func checkAgentReportedDoneState(agentID int64, state rpc.WorkflowState) error {
+	if state.Canceled && state.Started == 0 {
+		retErr := ErrAgentImpossibleWorkflowState
+		log.Error().Err(retErr).Int64("agentID", agentID).Msgf("done: impossible workflow state reported: %#v", state)
+		return retErr
+	}
+	return nil
+}
+
 // checkWorkflowState checks if a workflow's own state allows it to be
 // initialized or marked as done. A workflow that is already in a terminal
 // state (success, failure, killed, …) must not be re-run, and a blocked

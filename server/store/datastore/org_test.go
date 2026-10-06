@@ -67,7 +67,7 @@ func TestOrgCRUD(t *testing.T) {
 	assert.Error(t, store.OrgCreate(&model.Org{Name: ""}), "expect to fail if name is empty")
 
 	// get all repos for a specific org
-	repos, err := store.OrgRepoList(someUser, &model.ListOptions{All: true})
+	repos, err := store.OrgRepoList(someUser, &model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, repos, 2)
 

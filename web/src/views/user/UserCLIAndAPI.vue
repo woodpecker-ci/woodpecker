@@ -58,11 +58,11 @@ const usageWithCurl = computed(() => {
   let usage = `export WOODPECKER_SERVER="${address}"\n`;
   usage += `export WOODPECKER_TOKEN="${token.value}"\n`;
   usage += `\n`;
-  usage += `# curl -i \${WOODPECKER_SERVER}/api/user -H "Authorization: Bearer \${WOODPECKER_TOKEN}"`;
+  usage += `curl -i -H "Authorization: Bearer \${WOODPECKER_TOKEN}" "\${WOODPECKER_SERVER}/api/user"`;
   return usage;
 });
 
-const usageWithCli = `# woodpecker setup --server ${address}`;
+const usageWithCli = `# woodpecker-cli setup --server ${address}`;
 
 const cliDownload = 'https://github.com/woodpecker-ci/woodpecker/releases';
 

@@ -72,11 +72,16 @@ func Test_parseBackendOptions(t *testing.T) {
 							"limits":   map[string]string{"memory": "256Mi", "cpu": "2"},
 						},
 						"securityContext": map[string]any{
-							"privileged":   newBool(true),
-							"runAsNonRoot": newBool(true),
-							"runAsUser":    newInt64(101),
-							"runAsGroup":   newInt64(101),
-							"fsGroup":      newInt64(101),
+							"privileged":               newBool(true),
+							"runAsNonRoot":             newBool(true),
+							"runAsUser":                newInt64(101),
+							"runAsGroup":               newInt64(101),
+							"fsGroup":                  newInt64(101),
+							"fsGroupChangePolicy":      "OnRootMismatch",
+							"allowPrivilegeEscalation": newBool(false),
+							"capabilities": map[string]any{
+								"drop": []string{"ALL"},
+							},
 							"seccompProfile": map[string]any{
 								"type":             "Localhost",
 								"localhostProfile": "profiles/audit.json",
@@ -106,59 +111,65 @@ func Test_parseBackendOptions(t *testing.T) {
 					},
 				},
 			},
-			want: BackendOptions{
-				NodeSelector:       map[string]string{"storage": "ssd"},
-				ServiceAccountName: "wp-svc-acc",
-				WorkspaceVolume:    newBool(false),
-				HostUsers:          newBool(false),
-				Labels:             map[string]string{"app": "test"},
-				Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
-				Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
-				Affinity: &kube_core_v1.Affinity{
-					PodAffinity: &kube_core_v1.PodAffinity{
-						RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
-							{
-								LabelSelector: &kube_meta_v1.LabelSelector{},
-								MatchLabelKeys: []string{
-									"woodpecker-ci.org/task-uuid",
+			want: func() BackendOptions {
+				fsGroupChangePolicy := kube_core_v1.PodFSGroupChangePolicy("OnRootMismatch")
+				return BackendOptions{
+					NodeSelector:       map[string]string{"storage": "ssd"},
+					ServiceAccountName: "wp-svc-acc",
+					WorkspaceVolume:    newBool(false),
+					HostUsers:          newBool(false),
+					Labels:             map[string]string{"app": "test"},
+					Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
+					Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+					Affinity: &kube_core_v1.Affinity{
+						PodAffinity: &kube_core_v1.PodAffinity{
+							RequiredDuringSchedulingIgnoredDuringExecution: []kube_core_v1.PodAffinityTerm{
+								{
+									LabelSelector: &kube_meta_v1.LabelSelector{},
+									MatchLabelKeys: []string{
+										"woodpecker-ci.org/task-uuid",
+									},
+									TopologyKey: "kubernetes.io/hostname",
 								},
-								TopologyKey: "kubernetes.io/hostname",
 							},
 						},
 					},
-				},
-				Resources: Resources{
-					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-				},
-				SecurityContext: &SecurityContext{
-					Privileged:   newBool(true),
-					RunAsNonRoot: newBool(true),
-					RunAsUser:    newInt64(101),
-					RunAsGroup:   newInt64(101),
-					FSGroup:      newInt64(101),
-					SeccompProfile: &SecProfile{
-						Type:             "Localhost",
-						LocalhostProfile: "profiles/audit.json",
+					Resources: Resources{
+						Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+						Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
 					},
-					ApparmorProfile: &SecProfile{
-						Type:             "Localhost",
-						LocalhostProfile: "k8s-apparmor-example-deny-write",
+					SecurityContext: &SecurityContext{
+						Privileged:               newBool(true),
+						RunAsNonRoot:             newBool(true),
+						RunAsUser:                newInt64(101),
+						RunAsGroup:               newInt64(101),
+						FSGroup:                  newInt64(101),
+						FsGroupChangePolicy:      &fsGroupChangePolicy,
+						AllowPrivilegeEscalation: newBool(false),
+						Capabilities:             &Capabilities{Drop: []string{"ALL"}},
+						SeccompProfile: &SecProfile{
+							Type:             "Localhost",
+							LocalhostProfile: "profiles/audit.json",
+						},
+						ApparmorProfile: &SecProfile{
+							Type:             "Localhost",
+							LocalhostProfile: "k8s-apparmor-example-deny-write",
+						},
 					},
-				},
-				Secrets: []SecretRef{
-					{
-						Name:   "aws",
-						Key:    "access-key",
-						Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+					Secrets: []SecretRef{
+						{
+							Name:   "aws",
+							Key:    "access-key",
+							Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+						},
+						{
+							Name:   "reg-cred",
+							Key:    ".dockerconfigjson",
+							Target: SecretTarget{File: "~/.docker/config.json"},
+						},
 					},
-					{
-						Name:   "reg-cred",
-						Key:    ".dockerconfigjson",
-						Target: SecretTarget{File: "~/.docker/config.json"},
-					},
-				},
-			},
+				}
+			}(),
 		},
 		{
 			name: "number options",

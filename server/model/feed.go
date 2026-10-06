@@ -20,6 +20,7 @@ import "fmt"
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
 	RepoID   int64        `json:"repo_id"                 xorm:"repo_id"`
+	FullName string       `json:"full_name,omitempty"     xorm:"repo_full_name"`
 	ID       int64        `json:"id,omitempty"            xorm:"pipeline_id"`
 	Number   int64        `json:"number,omitempty"        xorm:"pipeline_number"`
 	Event    WebhookEvent `json:"event,omitempty"         xorm:"pipeline_event"`

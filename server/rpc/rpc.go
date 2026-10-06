@@ -214,7 +214,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		(step.State == model.StatusFailure ||
 			step.State == model.StatusKilled ||
 			step.State == model.StatusError) {
-		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name).Inc()
+		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name, string(step.Type)).Inc()
 	}
 
 	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished >= step.Started {
@@ -223,6 +223,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 			workflow.Name,
 			repo.FullName,
 			step.Name,
+			string(step.Type),
 		).Observe(float64(duration))
 	}
 	if state.Exited {
@@ -274,6 +275,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	// check workflow's own state to prevent re-initializing a finished or blocked workflow
 	if err := checkWorkflowState(workflow.State); err != nil {
+		return err
+	}
+
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedInitState(agent.ID, state); err != nil {
 		return err
 	}
 
@@ -347,6 +353,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedDoneState(agent.ID, state); err != nil {
+		return err
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -399,7 +410,12 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		for _, step := range workflow.Children {
 			if step.State != model.StatusSkipped {
 				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+					// A step killed before it ran never opened a stream.
+					if errors.Is(err, logging.ErrNotFound) {
+						logger.Debug().Err(err).Msgf("done: no log stream to close for step %d", step.ID)
+					} else {
+						logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+					}
 				}
 			}
 		}

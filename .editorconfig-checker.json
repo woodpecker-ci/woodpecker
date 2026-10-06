@@ -11,6 +11,7 @@
     "server/store/datastore/migration/test-files/postgres.sql",
     "server/store/datastore/feed.go",
     "cmd/server/openapi/docs.go",
+    "cmd/cli/docs.go",
     "_test.go",
     "Makefile"
   ]

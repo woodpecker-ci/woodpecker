@@ -32,6 +32,12 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_CLUSTER_DOMAIN"),
+		Name:    "backend-k8s-cluster-domain",
+		Usage:   "backend k8s cluster domain, used to build the DNS search entry",
+		Value:   defaultClusterDomain,
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_VOLUME_SIZE"),
 		Name:    "backend-k8s-volume-size",
 		Usage:   "backend k8s volume size (default 10G)",
@@ -91,6 +97,12 @@ var Flags = []cli.Flag{
 		Usage:   "whether to allow using tolerations from step's backend options",
 		Value:   true,
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-pod-node-selector-allow-from-step",
+		Usage:   "whether to allow using node selector from step's backend options",
+		Value:   false,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_AFFINITY"),
 		Name:    "backend-k8s-pod-affinity",
@@ -104,9 +116,25 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_RUNTIME_CLASS_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-runtime-class-allow-from-step",
+		Usage:   "whether to allow using runtime class name from step's backend options",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_USER_NAMESPACES"),
+		Name:    "backend-k8s-user-namespaces",
+		Usage:   "default to running pods in a custom user namespace (i.e. `hostUsers: false`), where uid `0` is mapped to a non-root user on the host",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_USER_NAMESPACES_OVERRIDE_SECCTX_NONROOT"), // cspell:words secctx nonroot
+		Name:    "backend-k8s-user-namespaces-override-secctx-nonroot",
+		Usage:   "allow overriding the global run as non-root security context requirement for pods running in a custom user namespace",
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"),

@@ -25,16 +25,6 @@
     "closed_at": null,
     "merged_at": null,
     "merge_commit_sha": "b5fafd8b1c043723a38c99775bc807075bce9235",
-    "assignee": {
-      "login": "demoaccount2-commits",
-      "id": 223550959,
-      "node_id": "U_kgDODVMd7w",
-      "gravatar_id": "",
-      "url": "https://api.github.com/users/demoaccount2-commits",
-      "type": "User",
-      "user_view_type": "public",
-      "site_admin": false
-    },
     "assignees": [
       {
         "login": "demoaccount2-commits",
@@ -251,16 +241,6 @@
     "additions": 1,
     "deletions": 0,
     "changed_files": 1
-  },
-  "assignee": {
-    "login": "demoaccount2-commits",
-    "id": 223550959,
-    "node_id": "U_kgDODVMd7w",
-    "gravatar_id": "",
-    "url": "https://api.github.com/users/demoaccount2-commits",
-    "type": "User",
-    "user_view_type": "public",
-    "site_admin": false
   },
   "repository": {
     "id": 1028609128,

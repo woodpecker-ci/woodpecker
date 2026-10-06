@@ -24,6 +24,7 @@ import (
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/api/types/system"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -129,9 +130,24 @@ func TestToContainerName(t *testing.T) {
 	assert.EqualValues(t, "wp_d841ee40-e66e-4275-bb3f-55bf89744b21", toContainerName(testPluginStep))
 }
 
+func TestToHostConfigApparmorProfile(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"})
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, []string{"apparmor=osgeo-woodie"}, hostConfig.SecurityOpt)
+}
+
+func TestToHostConfigApparmorProfileDefault(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, &config{})
+
+	assert.NoError(t, err)
+	assert.Nil(t, hostConfig.SecurityOpt)
+}
+
 func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
-	conf := testEngine.toConfig(testCmdStep, BackendOptions{})
+	conf, err := testEngine.toConfig(testCmdStep, BackendOptions{})
+	require.NoError(t, err)
 	if assert.NotNil(t, conf) {
 		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
 		assert.Nil(t, conf.Cmd)
@@ -139,7 +155,8 @@ func TestStepToConfig(t *testing.T) {
 	}
 
 	// StepTypePlugin
-	conf = testEngine.toConfig(testPluginStep, BackendOptions{})
+	conf, err = testEngine.toConfig(testPluginStep, BackendOptions{})
+	require.NoError(t, err)
 	if assert.NotNil(t, conf) {
 		assert.Nil(t, conf.Cmd)
 		assert.EqualValues(t, testPluginStep.UUID, conf.Labels["wp_uuid"])
@@ -170,12 +187,13 @@ func TestEncodeAuthToBase64(t *testing.T) {
 func TestToConfigSmall(t *testing.T) {
 	engine := docker{info: system.Info{OSType: "linux", Architecture: "riscv64"}}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:     "test",
 		UUID:     "09238932",
 		Commands: []string{"go test"},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -187,7 +205,7 @@ func TestToConfigSmall(t *testing.T) {
 			"wp_uuid": "09238932",
 		},
 		Env: []string{
-			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiIgpjZCAiIgoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg==",
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiIgpjZCAiIgoKZWNobyAn4pa2ICAnJ2dvIHRlc3QnCmdvIHRlc3QK",
 			"SHELL=/bin/sh",
 		},
 	}, conf)
@@ -208,7 +226,7 @@ func TestToConfigFull(t *testing.T) {
 		},
 	}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:          "test",
 		UUID:          "09238932",
 		Type:          backend_types.StepTypeCommands,
@@ -235,6 +253,7 @@ func TestToConfigFull(t *testing.T) {
 		Ports:         []backend_types.Port{{Number: 21}, {Number: 22}},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -248,7 +267,7 @@ func TestToConfigFull(t *testing.T) {
 			"wp_uuid": "09238932",
 		},
 		Env: []string{
-			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiL3NyYy9hYmMiCmNkICIvc3JjL2FiYyIKCmVjaG8gKyAnZ28gdGVzdCcKZ28gdGVzdAoKZWNobyArICdnbyB2ZXQgLi8uLi4nCmdvIHZldCAuLy4uLgo=",
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiL3NyYy9hYmMiCmNkICIvc3JjL2FiYyIKCmVjaG8gJ+KWtiAgJydnbyB0ZXN0JwpnbyB0ZXN0CgplY2hvICfilrYgICcnZ28gdmV0IC4vLi4uJwpnbyB2ZXQgLi8uLi4K",
 			"SHELL=/bin/sh",
 			"TAGS=sqlite",
 		},
@@ -258,6 +277,8 @@ func TestToConfigFull(t *testing.T) {
 	}, conf)
 }
 
+const windowsCIScriptBase64 = "CiRMQVNURVhJVENPREUgPSAwCiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CmlmICgtbm90IChUZXN0LVBhdGggIkM6L3NyYy9hYmMiKSkgeyBOZXctSXRlbSAtUGF0aCAiQzovc3JjL2FiYyIgLUl0ZW1UeXBlIERpcmVjdG9yeSAtRm9yY2UgfTsKaWYgKC1ub3QgW0Vudmlyb25tZW50XTo6R2V0RW52aXJvbm1lbnRWYXJpYWJsZSgnSE9NRScpKSB7IFtFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoJ0hPTUUnLCAnYzpccm9vdCcpIH07CmlmICgtbm90IChUZXN0LVBhdGggIiRlbnY6SE9NRSIpKSB7IE5ldy1JdGVtIC1QYXRoICIkZW52OkhPTUUiIC1JdGVtVHlwZSBEaXJlY3RvcnkgLUZvcmNlIH07CmlmICgkRW52OkNJX05FVFJDX01BQ0hJTkUpIHsKJG5ldHJjPVtzdHJpbmddOjpGb3JtYXQoInswfVxfbmV0cmMiLCRFbnY6SE9NRSk7CiJtYWNoaW5lICRFbnY6Q0lfTkVUUkNfTUFDSElORSIgPj4gJG5ldHJjOwoibG9naW4gJEVudjpDSV9ORVRSQ19VU0VSTkFNRSIgPj4gJG5ldHJjOwoicGFzc3dvcmQgJEVudjpDSV9ORVRSQ19QQVNTV09SRCIgPj4gJG5ldHJjOwp9OwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9ORVRSQ19QQVNTV09SRCIsJG51bGwpOwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9TQ1JJUFQiLCRudWxsKTsKY2QgIkM6L3NyYy9hYmMiOwoKV3JpdGUtT3V0cHV0ICgn4pa2ICAiZ28gdGVzdCInKTsKJiBnbyB0ZXN0OyBpZiAoJExBU1RFWElUQ09ERSAtbmUgMCkge2V4aXQgJExBU1RFWElUQ09ERX0KCldyaXRlLU91dHB1dCAoJ+KWtiAgImdvIHZldCAuLy4uLiInKTsKJiBnbyB2ZXQgLi8uLi47IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQo="
+
 func TestToWindowsConfig(t *testing.T) {
 	engine := docker{
 		info: system.Info{OSType: "windows", Architecture: "x86_64"},
@@ -266,7 +287,7 @@ func TestToWindowsConfig(t *testing.T) {
 		},
 	}
 
-	conf := engine.toConfig(&backend_types.Step{
+	conf, err := engine.toConfig(&backend_types.Step{
 		Name:          "test",
 		UUID:          "23434553",
 		Type:          backend_types.StepTypeCommands,
@@ -288,6 +309,7 @@ func TestToWindowsConfig(t *testing.T) {
 		Ports:       []backend_types.Port{{Number: 21}, {Number: 22}},
 	}, BackendOptions{})
 
+	require.NoError(t, err)
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
@@ -301,7 +323,7 @@ func TestToWindowsConfig(t *testing.T) {
 			"wp_uuid": "23434553",
 		},
 		Env: []string{
-			"CI_SCRIPT=CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CmlmICgtbm90IChUZXN0LVBhdGggIkM6L3NyYy9hYmMiKSkgeyBOZXctSXRlbSAtUGF0aCAiQzovc3JjL2FiYyIgLUl0ZW1UeXBlIERpcmVjdG9yeSAtRm9yY2UgfTsKaWYgKC1ub3QgW0Vudmlyb25tZW50XTo6R2V0RW52aXJvbm1lbnRWYXJpYWJsZSgnSE9NRScpKSB7IFtFbnZpcm9ubWVudF06OlNldEVudmlyb25tZW50VmFyaWFibGUoJ0hPTUUnLCAnYzpccm9vdCcpIH07CmlmICgtbm90IChUZXN0LVBhdGggIiRlbnY6SE9NRSIpKSB7IE5ldy1JdGVtIC1QYXRoICIkZW52OkhPTUUiIC1JdGVtVHlwZSBEaXJlY3RvcnkgLUZvcmNlIH07CmlmICgkRW52OkNJX05FVFJDX01BQ0hJTkUpIHsKJG5ldHJjPVtzdHJpbmddOjpGb3JtYXQoInswfVxfbmV0cmMiLCRFbnY6SE9NRSk7CiJtYWNoaW5lICRFbnY6Q0lfTkVUUkNfTUFDSElORSIgPj4gJG5ldHJjOwoibG9naW4gJEVudjpDSV9ORVRSQ19VU0VSTkFNRSIgPj4gJG5ldHJjOwoicGFzc3dvcmQgJEVudjpDSV9ORVRSQ19QQVNTV09SRCIgPj4gJG5ldHJjOwp9OwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9ORVRSQ19QQVNTV09SRCIsJG51bGwpOwpbRW52aXJvbm1lbnRdOjpTZXRFbnZpcm9ubWVudFZhcmlhYmxlKCJDSV9TQ1JJUFQiLCRudWxsKTsKY2QgIkM6L3NyYy9hYmMiOwoKV3JpdGUtT3V0cHV0ICgnKyAiZ28gdGVzdCInKTsKJiBnbyB0ZXN0OyBpZiAoJExBU1RFWElUQ09ERSAtbmUgMCkge2V4aXQgJExBU1RFWElUQ09ERX0KCldyaXRlLU91dHB1dCAoJysgImdvIHZldCAuLy4uLiInKTsKJiBnbyB2ZXQgLi8uLi47IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQo=",
+			"CI_SCRIPT=" + windowsCIScriptBase64,
 			"CI_WORKSPACE=C:/src",
 			"SHELL=powershell.exe",
 			"TAGS=sqlite",
@@ -316,6 +338,7 @@ func TestToWindowsConfig(t *testing.T) {
 	ciScript, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(conf.Env[0], "CI_SCRIPT="))
 	if assert.NoError(t, err) {
 		assert.EqualValues(t, `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "C:/src/abc")) { New-Item -Path "C:/src/abc" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
@@ -330,10 +353,10 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "C:/src/abc";
 
-Write-Output ('+ "go test"');
+Write-Output ('▶  "go test"');
 & go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
-Write-Output ('+ "go vet ./..."');
+Write-Output ('▶  "go vet ./..."');
 & go vet ./...; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `, string(ciScript))
 	}

@@ -199,6 +199,7 @@
     "sslmode",
     "stepbuilder",
     "stretchr",
+    "Strs",
     "structs",
     "sublicensable",
     "swaggo",
@@ -222,6 +223,7 @@
     "Tunnelmole",
     "typecheck",
     "Typeflag",
+    "tzdata",
     "unplugin",
     "unsanitize",
     "Upsert",
@@ -255,7 +257,8 @@
     "yamls",
     "Yuno",
     "zerolog",
-    "zerologger"
+    "zerologger",
+    "zoneinfo"
   ],
   "ignorePaths": [
     ".cspell.json",

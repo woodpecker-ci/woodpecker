@@ -426,7 +426,9 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-For pipelines without file changes (empty commits or on events without file changes like `tag`), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
+`pull_request` events always contain all changed files of the pull request **not** just the files from the last pushed commit.
+
+For pipelines without file changes (empty commits), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
 
 ```yaml
 when:
@@ -518,6 +520,10 @@ steps:
   ...
 ```
 
+:::
+
+:::warning
+As soon as one step uses `depends_on`, steps are looked up by name, so all step names of the workflow must be unique. Duplicate names are rejected.
 :::
 
 ### `volumes`
@@ -632,6 +638,8 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 You can define labels for your workflow in order to select an agent to execute the workflow. An agent takes up a workflow and executes it if **every** label assigned to it matches the label of the agent.
 
 To specify additional agent labels, check the [Agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
+
+Administrators can additionally restrict an agent with [agent filters](../30-administration/10-configuration/30-agent.md#agent-filters), so a workflow might not be picked up by an agent even though its own labels match.
 
 Workflow labels with an empty value are ignored.
 By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.

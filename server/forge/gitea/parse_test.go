@@ -703,3 +703,40 @@ func Test_parsePullRequestDraft(t *testing.T) {
 		assert.True(t, p.PullRequestDraft)
 	}
 }
+
+func TestParseIncompleteHookPayloads(t *testing.T) {
+	incomplete := []string{
+		`{}`,
+		`{"repository": {}}`,
+		`{"repository": {"full_name": "noslash"}, "sender": {}}`,
+	}
+	for _, payload := range incomplete {
+		t.Run(payload, func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_, _, err := parsePushHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseCreatedHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parsePullRequestHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+			})
+		})
+	}
+
+	incompletePullRequest := []string{
+		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {}}`,
+		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {"user": {}}}`,
+	}
+	for _, payload := range incompletePullRequest {
+		t.Run(payload, func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_, _, err := parsePullRequestHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+			})
+		})
+	}
+}

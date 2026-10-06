@@ -236,12 +236,10 @@ func mkRegistrySecret(step *types.Step, config *config) (*kube_core_v1.Secret, e
 	}
 
 	return &kube_core_v1.Secret{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Namespace: config.GetNamespace(step.OrgID),
-			Name:      name,
-			Labels:    labels,
-		},
-		Type: kube_core_v1.SecretTypeDockerConfigJson,
+		Namespace: config.GetNamespace(step.OrgID),
+		Name:      name,
+		Labels:    labels,
+		Type:      kube_core_v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
 			kube_core_v1.DockerConfigJsonKey: configFileJSON,
 		},
@@ -260,7 +258,7 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			labels[k], err = toDNSName(v)
+			labels[k], err = toLabelValue(v)
 			if err != nil {
 				return labels, err
 			}
@@ -270,11 +268,11 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
-	labels[StepLabelLegacy], err = stepLabel(step)
+	labels[StepLabelLegacy], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
-	labels[StepLabel], err = stepLabel(step)
+	labels[StepLabel], err = toLabelValue(step.Name)
 	if err != nil {
 		return labels, err
 	}
@@ -333,10 +331,8 @@ func mkStepSecret(step *types.Step, config *config) (*kube_core_v1.Secret, error
 	}
 
 	return &kube_core_v1.Secret{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Namespace: config.GetNamespace(step.OrgID),
-			Name:      name,
-		},
+		Namespace:  config.GetNamespace(step.OrgID),
+		Name:       name,
 		Type:       kube_core_v1.SecretTypeOpaque,
 		StringData: step.SecretMapping,
 	}, nil

@@ -65,6 +65,27 @@ Supported metadata:
 
 If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
 
+## Output groups
+
+Woodpecker's UI supports collapsible output groups for commands, plugin stages, test suites, or any other title. Titles do not need to match a command in the pipeline configuration, and groups work even when no pipeline configuration is available.
+
+<!-- markdownlint-disable no-space-in-code -->
+
+To start a group, print a line beginning with `▶  ` (`▶` followed by two ASCII spaces), then a nonempty title. Leading and trailing whitespace is ignored when detecting group headings. A single space, an embedded marker, or an empty or whitespace-only title does not start a group.
+
+<!-- markdownlint-enable no-space-in-code -->
+
+Groups are flat: each group includes its heading and all following output until the next group heading or the end of the log. There are no nested groups or explicit end markers. Output before the first group remains visible.
+
+For example, a plugin can group its build and test output:
+
+```bash
+echo "▶  Build assets"
+make build
+echo "▶  Test suite"
+make test
+```
+
 ## Example plugin
 
 This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make HTTP requests during the build pipeline.
@@ -91,6 +112,7 @@ Create a simple shell script that invokes curl using the YAML configuration para
 ```bash
 #!/bin/sh
 
+echo "▶  curl -X ${PLUGIN_METHOD} -d ${PLUGIN_BODY} ${PLUGIN_URL}"
 curl \
   -X ${PLUGIN_METHOD} \
   -d ${PLUGIN_BODY} \
