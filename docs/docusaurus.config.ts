@@ -268,6 +268,7 @@ const config = {
     }),
   ],
   themes: [
+    '@docusaurus/theme-mermaid',
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
     [
       require.resolve('@easyops-cn/docusaurus-search-local'),
@@ -318,6 +319,7 @@ const config = {
   ],
   markdown: {
     format: 'detect',
+    mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: 'throw',
       onBrokenMarkdownImages: 'throw',
