@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-05
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -28,6 +28,7 @@
 
 ### 🐛 Bug Fixes
 
+- Wait for informer cache sync before checking pod deletion [[#7158](https://github.com/woodpecker-ci/woodpecker/pull/7158)]
 - Fix race condition on concurrent pipeline config persist [[#7192](https://github.com/woodpecker-ci/woodpecker/pull/7192)]
 - Reload user from store before refreshing OAuth token [[#7176](https://github.com/woodpecker-ci/woodpecker/pull/7176)]
 - Ignore GitLab rejecting a commit status transition [[#7217](https://github.com/woodpecker-ci/woodpecker/pull/7217)]
