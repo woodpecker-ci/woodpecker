@@ -18,6 +18,7 @@
 ### 📈 Enhancement
 
 - Generalize log output groups [[#7226](https://github.com/woodpecker-ci/woodpecker/pull/7226)]
+- Include HTTP status in Bitbucket errors without a message [[#7227](https://github.com/woodpecker-ci/woodpecker/pull/7227)]
 - Add default user namespace support with configurable non-root override [[#6943](https://github.com/woodpecker-ci/woodpecker/pull/6943)]
 - Adopt Golang v1.27 [[#7153](https://github.com/woodpecker-ci/woodpecker/pull/7153)]
 - Store workflow/step dependencies in database and update API [[#6130](https://github.com/woodpecker-ci/woodpecker/pull/6130)]
@@ -77,7 +78,6 @@
 
 ### Misc
 
-- Include HTTP status in Bitbucket errors without a message [[#7227](https://github.com/woodpecker-ci/woodpecker/pull/7227)]
 - Fix infinite hook pagination loop on Bitbucket Cloud [[#7210](https://github.com/woodpecker-ci/woodpecker/pull/7210)]
 - Remove remainig gitpod artifacts [[#7216](https://github.com/woodpecker-ci/woodpecker/pull/7216)]
 
