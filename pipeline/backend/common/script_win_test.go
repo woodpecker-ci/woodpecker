@@ -55,9 +55,9 @@ Write-Output ('▶  "go test"');
 `,
 		},
 	}
-	for _, test := range testdata {
-		script := generateScriptWindows(test.from, "/woodpecker/some")
-		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
+	for _, tt := range testdata {
+		script := generateScriptWindows(tt.from, "/woodpecker/some")
+		assert.EqualValues(t, tt.want, script, "Want encoded script for %s", tt.from)
 	}
 }
 

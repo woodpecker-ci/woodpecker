@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_trimImage(t *testing.T) {
+func TestTrimImage(t *testing.T) {
 	testdata := []struct {
 		from string
 		want string
@@ -67,12 +67,12 @@ func Test_trimImage(t *testing.T) {
 			want: "foo/bar?baz:boo",
 		},
 	}
-	for _, test := range testdata {
-		assert.Equal(t, test.want, trimImage(test.from))
+	for _, tt := range testdata {
+		assert.Equal(t, tt.want, trimImage(tt.from))
 	}
 }
 
-func Test_expandImage(t *testing.T) {
+func TestExpandImage(t *testing.T) {
 	testdata := []struct {
 		from string
 		want string
@@ -123,12 +123,12 @@ func Test_expandImage(t *testing.T) {
 			want: "foo/bar?baz:boo",
 		},
 	}
-	for _, test := range testdata {
-		assert.Equal(t, test.want, expandImage(test.from))
+	for _, tt := range testdata {
+		assert.Equal(t, tt.want, expandImage(tt.from))
 	}
 }
 
-func Test_imageHasTag(t *testing.T) {
+func TestImageHasTag(t *testing.T) {
 	testdata := []struct {
 		from string
 		want bool
@@ -174,12 +174,12 @@ func Test_imageHasTag(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		assert.Equal(t, test.want, imageHasTag(test.from))
+	for _, tt := range testdata {
+		assert.Equal(t, tt.want, imageHasTag(tt.from))
 	}
 }
 
-func Test_matchImage(t *testing.T) {
+func TestMatchImage(t *testing.T) {
 	testdata := []struct {
 		from, to string
 		want     bool
@@ -260,12 +260,12 @@ func Test_matchImage(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		assert.Equal(t, test.want, MatchImage(test.from, test.to))
+	for _, tt := range testdata {
+		assert.Equal(t, tt.want, MatchImage(tt.from, tt.to))
 	}
 }
 
-func Test_matchImageDynamic(t *testing.T) {
+func TestMatchImageDynamic(t *testing.T) {
 	testdata := []struct {
 		name, from string
 		to         []string
@@ -308,14 +308,14 @@ func Test_matchImageDynamic(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		if !assert.Equal(t, test.want, MatchImageDynamic(test.from, test.to...)) {
-			t.Logf("test data: '%s' -> '%s'", test.from, test.to)
+	for _, tt := range testdata {
+		if !assert.Equal(t, tt.want, MatchImageDynamic(tt.from, tt.to...)) {
+			t.Logf("test data: '%s' -> '%s'", tt.from, tt.to)
 		}
 	}
 }
 
-func Test_matchHostname(t *testing.T) {
+func TestMatchHostname(t *testing.T) {
 	testdata := []struct {
 		image, hostname string
 		want            bool
@@ -366,7 +366,7 @@ func Test_matchHostname(t *testing.T) {
 			want:     false,
 		},
 	}
-	for _, test := range testdata {
-		assert.Equal(t, test.want, MatchHostname(test.image, test.hostname))
+	for _, tt := range testdata {
+		assert.Equal(t, tt.want, MatchHostname(tt.image, tt.hostname))
 	}
 }

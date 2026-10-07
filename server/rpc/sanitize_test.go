@@ -209,7 +209,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("step running always allowed", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			name   string
 			status model.StatusValue
 			finish int64
@@ -219,9 +219,9 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{"pipeline failure stale", model.StatusFailure, staleFinish},
 			{"pipeline killed stale", model.StatusKilled, staleFinish},
 		} {
-			t.Run(tc.name, func(t *testing.T) {
+			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.status, Finished: tc.finish}
+				p := &model.Pipeline{Status: tt.status, Finished: tt.finish}
 				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: model.StatusRunning}))
 			})
 		}
@@ -246,7 +246,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("recent finish drain allowed", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			pStatus model.StatusValue
 			sState  model.StatusValue
 		}{
@@ -254,10 +254,10 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{model.StatusFailure, model.StatusFailure},
 			{model.StatusKilled, model.StatusPending},
 		} {
-			t.Run(fmt.Sprintf("%s/%s", tc.pStatus, tc.sState), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/%s", tt.pStatus, tt.sState), func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.pStatus, Finished: recentFinish}
-				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: tc.sState}))
+				p := &model.Pipeline{Status: tt.pStatus, Finished: recentFinish}
+				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: tt.sState}))
 			})
 		}
 	})
@@ -266,7 +266,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("stale finish drain rejected", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			pStatus model.StatusValue
 			sState  model.StatusValue
 			finish  int64
@@ -277,10 +277,10 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{model.StatusError, model.StatusCreated, staleFinish},
 			{model.StatusSuccess, model.StatusSuccess, 0}, // zero = never recorded
 		} {
-			t.Run(fmt.Sprintf("%s/%s/fin=%d", tc.pStatus, tc.sState, tc.finish), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/%s/fin=%d", tt.pStatus, tt.sState, tt.finish), func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.pStatus, Finished: tc.finish}
-				assert.ErrorIs(t, allowAppendingLogs(p, &model.Step{State: tc.sState}), ErrAgentIllegalLogStreaming)
+				p := &model.Pipeline{Status: tt.pStatus, Finished: tt.finish}
+				assert.ErrorIs(t, allowAppendingLogs(p, &model.Step{State: tt.sState}), ErrAgentIllegalLogStreaming)
 			})
 		}
 	})

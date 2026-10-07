@@ -195,33 +195,33 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 
 func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 	t.Parallel()
-	var destroyed int32
+	var destroyed atomic.Int32
 	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
-		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+		Run(func(_ mock.Arguments) { destroyed.Add(1) }).Return(nil)
 
 	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&destroyed))
+	assert.Equal(t, int32(1), destroyed.Load())
 }
 
 func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	t.Parallel()
-	var destroyed int32
+	var destroyed atomic.Int32
 	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Return(errors.New("setup boom"))
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
-		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+		Run(func(_ mock.Arguments) { destroyed.Add(1) }).Return(nil)
 
 	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&destroyed))
+	assert.Equal(t, int32(1), destroyed.Load())
 }
 
 func TestTraceWorkflowSetupError(t *testing.T) {
@@ -320,7 +320,7 @@ func TestWithOptions(t *testing.T) {
 	t.Parallel()
 	engine := dummy.New()
 	tracer := newTestTracer(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	desc := map[string]string{"repo": "test"}
 
 	r := New(
@@ -377,7 +377,7 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 		}).Return(nil)
 
 	// Pass a pre-canceled runnerCtx so ctx.Err() != nil in the defer.
-	runnerCtx, cancel := context.WithCancelCause(context.Background())
+	runnerCtx, cancel := context.WithCancelCause(t.Context())
 	cancel(nil)
 
 	r := New(

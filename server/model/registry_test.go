@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2026 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package model
 
 import (
-	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeduplicateStrings(t *testing.T) {
-	tests := []struct {
-		in  []string
-		out []string
-	}{{
-		in:  []string{"", "ab", "12", "ab"},
-		out: []string{"12", "ab"},
-	}, {
-		in:  nil,
-		out: nil,
-	}, {
-		in:  []string{""},
-		out: nil,
-	}}
+func TestRegistryValidateAddress(t *testing.T) {
+	for _, address := range []string{
+		"docker.io",
+		"ghcr.io",
+		"registry.example.com:5000",
+		"10.0.1.32:5000",
+		"localhost:5000",
+		"https://registry.example.com",
+	} {
+		r := Registry{Address: address, Username: "user", Password: "pass"}
+		assert.NoError(t, r.Validate(), address)
+	}
 
-	for _, tt := range tests {
-		result := DeduplicateStrings(tt.in)
-		sort.Strings(result)
-		if len(tt.out) == 0 {
-			assert.Len(t, result, 0)
-		} else {
-			assert.EqualValues(t, tt.out, result, "could not correctly process input '%#v'", tt.in)
-		}
+	for _, address := range []string{"", "registry.example.com:port", "10.0.1.32:5000/%zz"} {
+		r := Registry{Address: address, Username: "user", Password: "pass"}
+		assert.Error(t, r.Validate(), address)
 	}
 }

@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_convertStatus(t *testing.T) {
+func TestConvertStatus(t *testing.T) {
 	assert.Equal(t, statusSuccess, convertStatus(model.StatusSuccess))
 	assert.Equal(t, statusPending, convertStatus(model.StatusPending))
 	assert.Equal(t, statusPending, convertStatus(model.StatusRunning))
@@ -40,7 +40,7 @@ func Test_convertStatus(t *testing.T) {
 	assert.Equal(t, statusFailure, convertStatus(model.StatusValue("bogus")))
 }
 
-func Test_convertRepo(t *testing.T) {
+func TestConvertRepo(t *testing.T) {
 	from := &internal.Repo{
 		FullName:  "octocat/hello-world",
 		IsPrivate: true,
@@ -66,7 +66,7 @@ func Test_convertRepo(t *testing.T) {
 	assert.False(t, to.Perm.Admin)
 }
 
-func Test_convertWorkspace(t *testing.T) {
+func TestConvertWorkspace(t *testing.T) {
 	from := &internal.Workspace{Slug: "octocat"}
 	from.Links.Avatar.Href = "http://..."
 	to := convertWorkspace(from)
@@ -74,7 +74,7 @@ func Test_convertWorkspace(t *testing.T) {
 	assert.Equal(t, from.Slug, to.Login)
 }
 
-func Test_convertWorkspaceList(t *testing.T) {
+func TestConvertWorkspaceList(t *testing.T) {
 	from := &internal.Workspace{Slug: "octocat"}
 	from.Links.Avatar.Href = "http://..."
 	to := convertWorkspaceList([]*internal.Workspace{from})
@@ -82,7 +82,7 @@ func Test_convertWorkspaceList(t *testing.T) {
 	assert.Equal(t, from.Slug, to[0].Login)
 }
 
-func Test_convertUser(t *testing.T) {
+func TestConvertUser(t *testing.T) {
 	token := &oauth2.Token{
 		AccessToken:  "foo",
 		RefreshToken: "bar",
@@ -100,7 +100,7 @@ func Test_convertUser(t *testing.T) {
 	assert.Equal(t, token.Expiry.UTC().Unix(), result.Expiry)
 }
 
-func Test_cloneLink(t *testing.T) {
+func TestCloneLink(t *testing.T) {
 	repo := &internal.Repo{}
 	repo.Links.Clone = append(repo.Links.Clone, internal.Link{
 		Name: "https",
@@ -115,7 +115,7 @@ func Test_cloneLink(t *testing.T) {
 	assert.Equal(t, "https://bitbucket.org/foo/bar.git", link)
 }
 
-func Test_convertPullHook(t *testing.T) {
+func TestConvertPullHook(t *testing.T) {
 	hook := &internal.PullRequestHook{}
 	hook.Actor.Login = "octocat"
 	hook.Actor.Links.Avatar.Href = "https://..."
@@ -143,7 +143,7 @@ func Test_convertPullHook(t *testing.T) {
 	assert.Equal(t, hook.PullRequest.Updated.Unix(), pipeline.Timestamp)
 }
 
-func Test_convertPushHook(t *testing.T) {
+func TestConvertPushHook(t *testing.T) {
 	change := internal.Change{}
 	change.New.Target.Hash = "73f9c44d"
 	change.New.Name = "main"
@@ -169,7 +169,7 @@ func Test_convertPushHook(t *testing.T) {
 	assert.Equal(t, change.New.Target.Date.Unix(), pipeline.Timestamp)
 }
 
-func Test_convertPushHookTag(t *testing.T) {
+func TestConvertPushHookTag(t *testing.T) {
 	change := internal.Change{}
 	change.New.Name = "v1.0.0"
 	change.New.Type = "tag"

@@ -579,14 +579,14 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			_manager := manager_mocks.NewMockManager(t)
 			_forge := forge_mocks.NewMockForge(t)
 			_store := store_mocks.NewMockStore(t)
 			server.Config.Services.Manager = _manager
 			server.Config.Permissions.Open = true
-			server.Config.Permissions.Orgs = permissions.NewOrgs(tc.globalOrgs)
+			server.Config.Permissions.Orgs = permissions.NewOrgs(tt.globalOrgs)
 			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
@@ -599,19 +599,19 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 			}
 
 			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
-			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1, Orgs: tc.forgeOrgs}, nil)
+			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1, Orgs: tt.forgeOrgs}, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 
 			// memberships are only requested if there is a list to check against
-			if len(tc.globalOrgs)+len(tc.forgeOrgs) > 0 {
-				teams := make([]*model.Team, 0, len(tc.teams))
-				for _, team := range tc.teams {
+			if len(tt.globalOrgs)+len(tt.forgeOrgs) > 0 {
+				teams := make([]*model.Team, 0, len(tt.teams))
+				for _, team := range tt.teams {
 					teams = append(teams, &model.Team{Login: team})
 				}
 				_forge.On("Teams", mock.Anything, user, mock.Anything).Return(teams, nil)
 			}
 
-			if tc.allow {
+			if tt.allow {
 				_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 				_store.On("OrgGet", org.ID).Return(org, nil)
 				_store.On("UpdateUser", mock.Anything).Return(nil)
@@ -623,7 +623,7 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 			api.HandleAuth(c)
 
 			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			if tc.allow {
+			if tt.allow {
 				assert.Equal(t, "/", c.Writer.Header().Get("Location"))
 			} else {
 				assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
