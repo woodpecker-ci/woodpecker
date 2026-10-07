@@ -20,6 +20,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Vieter](https://git.rustybever.be/vieter-v/vieter) - Archlinux/Pacman repository server & automated package build system
   - [Rieter](https://git.rustybever.be/Chewing_Bever/rieter) - Rewrite of the Vieter project in Rust
 - [Alex](https://git.rustybever.be/Chewing_Bever/alex) - Minecraft server wrapper designed to automate backups & complement Docker installations
+- [OpenCloud](https://github.com/opencloud-eu/opencloud) - An open source platform for secure file management, sharing and collaboration, with team spaces and flexible self-hosting
 
 ## Tools
 
@@ -37,6 +38,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 ## Configuration Services
 
 - [Dynamic Pipelines for Nix Flakes](https://github.com/pinpox/woodpecker-flake-pipeliner) - Define pipelines as Nix Flake outputs
+- [Starlark Config Extension](https://github.com/opencloud-eu/woodpecker-ci-config-service) - Drone's starlark suport as service
 
 ## Pipelines
 
@@ -86,3 +88,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 ## Plugins
 
 We have a separate [index](/plugins) for plugins.
+
+## Usefull Images
+
+- [GodotCI](https://codeberg.org/Bigaston/GodotCI) - Images for Woodpecker to automate build of Godot games
