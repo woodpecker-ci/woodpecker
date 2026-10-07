@@ -31,6 +31,7 @@
 
 ### 🐛 Bug Fixes
 
+- Release agents waiting on long polls during server shutdown [[#7189](https://github.com/woodpecker-ci/woodpecker/pull/7189)]
 - Add version endpoint to API as per spec [[#7232](https://github.com/woodpecker-ci/woodpecker/pull/7232)]
 - Accept host:port registry addresses [[#7235](https://github.com/woodpecker-ci/woodpecker/pull/7235)]
 - Fix queue scheduler debug log spam [[#7224](https://github.com/woodpecker-ci/woodpecker/pull/7224)]
