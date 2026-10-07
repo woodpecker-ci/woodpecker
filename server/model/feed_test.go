@@ -55,12 +55,12 @@ func TestFeedToAPIModel(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			f := tc.feed
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := tt.feed
 			af := f.ToAPIModel()
-			assert.Equal(t, tc.wantTitle, af.Title)
-			assert.Equal(t, tc.wantMessage, af.Message)
+			assert.Equal(t, tt.wantTitle, af.Title)
+			assert.Equal(t, tt.wantMessage, af.Message)
 		})
 	}
 }

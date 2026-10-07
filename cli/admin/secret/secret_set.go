@@ -67,8 +67,8 @@ func secretUpdate(ctx context.Context, c *cli.Command) error {
 		Images: c.StringSlice("image"),
 		Events: c.StringSlice("event"),
 	}
-	if strings.HasPrefix(secret.Value, "@") {
-		path := strings.TrimPrefix(secret.Value, "@")
+	if after, ok := strings.CutPrefix(secret.Value, "@"); ok {
+		path := after
 		out, err := os.ReadFile(path)
 		if err != nil {
 			return err

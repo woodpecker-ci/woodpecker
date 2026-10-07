@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_LogLevel(t *testing.T) {
+func TestLogLevel(t *testing.T) {
 	logLevel := "warn"
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {

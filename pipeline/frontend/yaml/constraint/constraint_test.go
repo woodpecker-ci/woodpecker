@@ -45,17 +45,17 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 		{conf: "[{event: push, status: success},{status: failure}]", wantSuccess: false, wantFail: true},
 		{conf: "[{status: failure},{event: push, status: success}]", wantSuccess: false, wantFail: true},
 	}
-	for _, test := range testdata {
-		t.Run(test.conf, func(t *testing.T) {
-			c := parseConstraints(t, test.conf)
+	for _, tt := range testdata {
+		t.Run(tt.conf, func(t *testing.T) {
+			c := parseConstraints(t, tt.conf)
 			assert.Equalf(t,
-				test.wantSuccess,
+				tt.wantSuccess,
 				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
-				"include success is wrong for when: '%s'", test.conf)
+				"include success is wrong for when: '%s'", tt.conf)
 			assert.Equal(t,
-				test.wantFail,
+				tt.wantFail,
 				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
-				"include fail is wrong for when: '%s'", test.conf)
+				"include fail is wrong for when: '%s'", tt.conf)
 		})
 	}
 }
@@ -187,14 +187,14 @@ func TestConstraints(t *testing.T) {
 		},
 	}
 
-	for _, test := range testdata {
-		t.Run(test.desc, func(t *testing.T) {
-			conf, err := metadata.EnvVarSubst(test.conf, test.with.Environ())
+	for _, tt := range testdata {
+		t.Run(tt.desc, func(t *testing.T) {
+			conf, err := metadata.EnvVarSubst(tt.conf, tt.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
-			got, err := c.Match(test.with, false, test.env)
+			got, err := c.Match(tt.with, false, tt.env)
 			assert.NoError(t, err)
-			assert.Equal(t, test.want, got)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

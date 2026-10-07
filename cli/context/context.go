@@ -45,13 +45,8 @@ var listCommand = &cli.Command{
 	Name:    "list",
 	Aliases: []string{"ls"},
 	Usage:   "list all contexts",
-	Flags: append(common.OutputFlags("table"), []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "output-no-headers",
-			Usage: "do not print headers in output",
-		},
-	}...),
-	Action: listContexts,
+	Flags:   common.OutputFlags("table"),
+	Action:  listContexts,
 }
 
 var useCommand = &cli.Command{

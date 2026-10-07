@@ -18,6 +18,7 @@ package setup
 
 import (
 	"context"
+	"maps"
 	"testing"
 	"time"
 
@@ -88,9 +89,7 @@ func WithHostname(name string) AgentOption {
 //	  gpu: "true"
 func WithCustomLabels(labels map[string]string) AgentOption {
 	return func(c *agentConfig) {
-		for k, v := range labels {
-			c.customLabels[k] = v
-		}
+		maps.Copy(c.customLabels, labels)
 	}
 }
 
@@ -202,9 +201,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 			"repo":     "*",
 		},
 	}
-	for k, v := range cfg.customLabels {
-		filter.Labels[k] = v
-	}
+	maps.Copy(filter.Labels, cfg.customLabels)
 
 	counter := &agent.State{
 		Polling:  cfg.capacity,

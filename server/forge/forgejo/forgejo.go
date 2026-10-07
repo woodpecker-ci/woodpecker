@@ -182,10 +182,8 @@ func (c *Forgejo) Teams(ctx context.Context, u *model.User, p *model.ListOptions
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			forgejo.ListOrgsOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		teams := make([]*model.Team, 0, len(orgs))
@@ -249,10 +247,8 @@ func (c *Forgejo) Repos(ctx context.Context, u *model.User, p *model.ListOptions
 	repos, err := shared_utils.Paginate(func(page int) ([]*forgejo.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			forgejo.ListReposOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		return repos, err
@@ -412,10 +408,8 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*forgejo.Hook, error) {
 		hooks, _, err := client.ListRepoHooks(forgeRepo.Owner, forgeRepo.Name, forgejo.ListHooksOptions{
-			ListOptions: forgejo.ListOptions{
-				Page:     page,
-				PageSize: c.perPage(ctx),
-			},
+			Page:     page,
+			PageSize: c.perPage(ctx),
 		})
 		return hooks, err
 	}, -1)
@@ -441,7 +435,7 @@ func (c *Forgejo) Branches(ctx context.Context, u *model.User, r *model.Repo, p 
 	}
 
 	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-		forgejo.ListRepoBranchesOptions{ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage}})
+		forgejo.ListRepoBranchesOptions{Page: p.Page, PageSize: p.PerPage})
 	if err != nil {
 		return nil, err
 	}
@@ -478,8 +472,8 @@ func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo
 	}
 
 	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, forgejo.ListPullRequestsOptions{
-		ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage},
-		State:       forgejo.StateOpen,
+		Page: p.Page, PageSize: p.PerPage,
+		State: forgejo.StateOpen,
 	})
 	if err != nil {
 		// Repositories without commits return empty list with status code 404
@@ -659,7 +653,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		forgejoFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
-			forgejo.ListPullRequestFilesOptions{ListOptions: forgejo.ListOptions{Page: page}})
+			forgejo.ListPullRequestFilesOptions{Page: page})
 		if err != nil {
 			return nil, err
 		}

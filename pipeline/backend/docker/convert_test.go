@@ -16,7 +16,6 @@ package docker
 
 import (
 	"encoding/base64"
-	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -86,10 +85,13 @@ func TestSplitVolumeParts(t *testing.T) {
 			success: true,
 		},
 	}
-	for _, test := range testdata {
-		results, err := splitVolumeParts(test.from)
-		if test.success != (err == nil) {
-			assert.Equal(t, test.success, reflect.DeepEqual(results, test.to))
+	for _, tt := range testdata {
+		results, err := splitVolumeParts(tt.from)
+		if tt.success {
+			require.NoError(t, err)
+			assert.Equal(t, tt.to, results)
+		} else {
+			assert.Error(t, err)
 		}
 	}
 }
