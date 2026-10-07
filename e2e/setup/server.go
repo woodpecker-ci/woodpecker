@@ -98,7 +98,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	fixtures := seedFixtures(t, memStore)
 	mockForge := newMockForge(t, files)
 
-	mgr, err := newTestManager(memStore, mockForge)
+	mgr, err := newTestManager(ctx, memStore, mockForge)
 	require.NoError(t, err, "create services manager")
 
 	memQueue, err := queue.New(ctx, queue.Config{Backend: queue.TypeMemory})
@@ -150,7 +150,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 
 // newTestManager builds a services.Manager whose SetupForge always returns
 // the provided MockForge, bypassing real forge instantiation.
-func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.Manager, error) {
+func newTestManager(ctx context.Context, s store.Store, mockForge *forge_mocks.MockForge) (services.Manager, error) {
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
 			// Config fetch tuning.
@@ -172,7 +172,7 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 		return mockForge, nil
 	})
 
-	return services.NewManager(cmd, s, setupForge)
+	return services.NewManager(ctx, cmd, s, setupForge)
 }
 
 // startGRPCServer binds to a random TCP port and serves Woodpecker's gRPC

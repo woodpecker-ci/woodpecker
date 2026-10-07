@@ -27,8 +27,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// ProbeGuest is a module to test the sandbox itself.
-const ProbeGuest = "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/wasm/testdata/guest"
+const (
+	// ProbeGuest is a module to test the sandbox itself.
+	ProbeGuest = "go.woodpecker-ci.org/woodpecker/v3/server/services/utils/wasm/testdata/guest"
+	// ConfigGuest is a minimal configuration extension.
+	ConfigGuest = "go.woodpecker-ci.org/woodpecker/v3/server/services/config/testdata/guest"
+)
 
 var (
 	lock  sync.Mutex

@@ -15,6 +15,8 @@
 package services
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -63,4 +65,40 @@ func TestSetupForgeServiceKeepsOrgs(t *testing.T) {
 	// the options coming from the environment are written back
 	assert.Equal(t, model.ForgeTypeGithub, updated.Type)
 	assert.Equal(t, "client-id", updated.OAuthClientID)
+}
+
+func TestSetupConfigExtension(t *testing.T) {
+	command := func(endpoint, wasmPath string) *cli.Command {
+		return &cli.Command{
+			Flags: []cli.Flag{
+				&cli.StringFlag{Name: "config-extension-endpoint", Value: endpoint},
+				&cli.StringFlag{Name: "config-extension-wasm", Value: wasmPath},
+				&cli.BoolFlag{Name: "config-extension-netrc"},
+			},
+		}
+	}
+
+	t.Run("none configured", func(t *testing.T) {
+		extension, err := setupConfigExtension(t.Context(), command("", ""), nil)
+		assert.NoError(t, err)
+		assert.Nil(t, extension)
+	})
+
+	t.Run("http and wasm are exclusive", func(t *testing.T) {
+		_, err := setupConfigExtension(t.Context(), command("https://example.com/ciconfig", "/extension.wasm"), nil)
+		assert.ErrorContains(t, err, "can not be used together")
+	})
+
+	t.Run("server does not start with a missing wasm module", func(t *testing.T) {
+		_, err := setupConfigExtension(t.Context(), command("", filepath.Join(t.TempDir(), "missing.wasm")), nil)
+		assert.ErrorContains(t, err, "could not read wasm config extension")
+	})
+
+	t.Run("server does not start with a broken wasm module", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "broken.wasm")
+		assert.NoError(t, os.WriteFile(path, []byte("not wasm"), 0o600))
+
+		_, err := setupConfigExtension(t.Context(), command("", path), nil)
+		assert.ErrorContains(t, err, "could not load wasm config extension")
+	})
 }

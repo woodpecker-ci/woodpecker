@@ -29,6 +29,36 @@ The global configuration will be called before the repository specific configura
 WOODPECKER_CONFIG_EXTENSION_ENDPOINT=https://example.com/ciconfig
 ```
 
+## WebAssembly module
+
+:::info
+This is experimental and only available as global extension.
+:::
+
+Instead of running a web service, an extension can be compiled to a WebAssembly module that the Woodpecker server loads and runs itself:
+
+```ini title="Server"
+WOODPECKER_CONFIG_EXTENSION_WASM=/etc/woodpecker/config-extension.wasm
+```
+
+The module has to be a [WASI](https://wasi.dev/) (preview 1) command, most languages can produce one, for Go it is `GOOS=wasip1 GOARCH=wasm go build`.
+It is started once per pipeline with the arguments `woodpecker-extension config` and talks the same JSON as the HTTP extension:
+
+| HTTP extension              | WebAssembly module                                           |
+| --------------------------- | ------------------------------------------------------------ |
+| request body                | standard input                                               |
+| response body, status `200` | standard output, exit code `0`                               |
+| status `204 No Content`     | nothing on standard output, exit code `0`                    |
+| any other status            | any other exit code, standard error is used as error message |
+
+The module is handled as untrusted code and therefore has to be a pure function of its input:
+
+- It has no access to the network, the filesystem, environment variables or the clock.
+- It never gets `netrc` data, `WOODPECKER_CONFIG_EXTENSION_NETRC` is ignored. The files it needs have to come with the request, so make sure the server finds them with [`WOODPECKER_DEFAULT_PIPELINE_CONFIGS`](../../30-administration/10-configuration/10-server.md#default_pipeline_configs) and [`WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS`](../../30-administration/10-configuration/10-server.md#default_pipeline_config_extensions) or the config path of the repository.
+- Every pipeline gets a fresh instance, nothing is kept between two calls.
+- A call can use up to 256 MiB of memory, run for 10 seconds and answer with 10 MiB, at most 4 calls run at the same time.
+- If the module fails, exceeds a limit or answers with something else than a response, the pipeline fails. The configuration from the forge is not used as fallback.
+
 ## How it works
 
 When a pipeline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers official yaml format that should be used.
