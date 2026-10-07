@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @chiliec, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @roian6, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
+@6543, @ChrisJr404, @KR-Ravindra, @LaGrunge, @cacarico, @chiliec, @confusedsushi, @grisu48, @healdropper, @hsdfat, @jagerman, @joseph0531, @lafriks, @mattwilkinsonn, @qwerty287, @roian6, @sb123sb123, @somaz94, @spatterIight, @tehlordvortex, @thiagola92, @tunglambk, @usiegj00, @xoxys
 
 ### 🔒 Security
 
@@ -52,6 +52,7 @@
 
 ### 📚 Documentation
 
+- Clarify secret precedence order [[#7233](https://github.com/woodpecker-ci/woodpecker/pull/7233)]
 - Fix docs link in systemd example unit [[#7222](https://github.com/woodpecker-ci/woodpecker/pull/7222)]
 - Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
 - Use CI to update latest version on mastodon profile [[#7179](https://github.com/woodpecker-ci/woodpecker/pull/7179)]
