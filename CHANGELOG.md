@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-07
+
+### 📦️ Dependency
+
+- Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
+
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
 
 ### ❤️ Thanks to all contributors! ❤️
