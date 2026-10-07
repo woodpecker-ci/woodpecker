@@ -33,38 +33,16 @@ type httpService struct {
 	includeNetrc bool
 }
 
-// configData same as forge.FileMeta but with json tags and string data.
-type configData struct {
-	Name string `json:"name"`
-	Data string `json:"data"`
-}
-
-type requestStructure struct {
-	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"pipeline"`
-	Netrc         *model.Netrc    `json:"netrc"`
-	Configuration []*configData   `json:"configuration,omitempty"`
-}
-
-type responseStructure struct {
-	Configs []*configData `json:"configs"`
-}
-
 func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) Service {
 	return &httpService{endpoint, client, includeNetrc}
 }
 
 func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
-	configuration := make([]*configData, len(oldConfigData))
-	for i, oldConfig := range oldConfigData {
-		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
-	}
-
 	response := new(responseStructure)
 	body := requestStructure{
 		Repo:          repo,
 		Pipeline:      pipeline,
-		Configuration: configuration,
+		Configuration: toConfigData(oldConfigData),
 	}
 
 	if h.includeNetrc {
@@ -94,10 +72,5 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
 	}
 
-	fileMetaList := make([]*types.FileMeta, len(response.Configs))
-	for i, config := range response.Configs {
-		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
-	}
-
-	return fileMetaList, nil
+	return toFileMeta(response.Configs), nil
 }
