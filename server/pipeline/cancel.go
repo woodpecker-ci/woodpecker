@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"context"
-	"fmt"
 	"slices"
 
 	"github.com/rs/zerolog/log"
@@ -38,58 +37,15 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return &ErrNotFound{Msg: err.Error()}
 	}
 
-	// First cancel/evict the running and pending workflows from the queue
-	var workflowsToCancel []string
-	for _, w := range workflows {
-		if w.State == model.StatusRunning || w.State == model.StatusPending {
-			workflowsToCancel = append(workflowsToCancel, fmt.Sprint(w.ID))
-		}
-	}
-
-	if err := server.Config.Services.Scheduler.CancelWorkflows(ctx, workflowsToCancel); err != nil {
-		log.Error().Err(err).Msgf("cancel workflows: %v", workflowsToCancel)
-	}
-
-	hasPendingOnly := true
-
-	// Then update the DB status for pending pipelines
-	// Running ones will be set when the agents stop on the cancel signal
-	for _, workflow := range workflows {
-		if workflow.State == model.StatusPending {
-			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
-				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-			}
-		} else {
-			hasPendingOnly = false
-		}
-		for _, step := range workflow.Children {
-			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
-					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-				}
-			}
-		}
-	}
-
-	plState := model.StatusKilled
-	if hasPendingOnly {
-		plState = model.StatusCanceled
-	}
-	killedPipeline, err := UpdateToStatusKilled(store, *pipeline, cancelInfo, plState)
+	// The scheduler owns the cancellation: it evicts the workflows from the
+	// queue, persists the skipped/killed state and notifies subscribers. The
+	// only thing left for us is to sync the forge status afterwards.
+	killedPipeline, err := server.Config.Services.Scheduler.CancelWorkflows(ctx, repo, pipeline, workflows, cancelInfo)
 	if err != nil {
-		log.Error().Err(err).Msgf("UpdateToStatusKilled: %v", pipeline)
 		return err
 	}
 
 	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
-
-	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
-		return err
-	}
-
-	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, killedPipeline); err != nil {
-		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
-	}
 
 	return nil
 }
