@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 package shared
 
 import (
+	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSecretsReplacer(t *testing.T) {
+func TestSecretsReplaceWriter(t *testing.T) {
 	tc := []struct {
 		name    string
 		log     string
@@ -36,6 +38,31 @@ func TestNewSecretsReplacer(t *testing.T) {
 		log:     `this IS secret: password`,
 		secrets: []string{"password", " IS "},
 		expect:  `this IS secret: ********`,
+	}, {
+		name:    "secret multiple times",
+		log:     "token token2 token\n",
+		secrets: []string{"token"},
+		expect:  "******** ********2 ********\n",
+	}, {
+		name:    "multiple secrets in one line",
+		log:     "user=admin1 pass=hunter2\n",
+		secrets: []string{"hunter2", "admin1"},
+		expect:  "user=******** pass=********\n",
+	}, {
+		name:    "longer secret wins over a shorter one it contains",
+		log:     "my password and my pass\n",
+		secrets: []string{"pass", "password"},
+		expect:  "my ******** and my ********\n",
+	}, {
+		name:    "longer secret wins over an earlier overlapping one",
+		log:     "abcde\n",
+		secrets: []string{"abcd", "bcdef", "cde"},
+		expect:  "********e\n",
+	}, {
+		name:    "longer secret wins even if it starts later",
+		log:     "xabcdefx\n",
+		secrets: []string{"xabc", "bcdef"},
+		expect:  "xa********x\n",
 	}, {
 		name:    "secret with one newline",
 		log:     "start log\ndone\nnow\nan\nmulti line secret!! ;)",
@@ -65,9 +92,48 @@ func TestNewSecretsReplacer(t *testing.T) {
 
 	for _, c := range tc {
 		t.Run(c.name, func(t *testing.T) {
-			rep := NewSecretsReplacer(c.secrets)
-			result := rep.Replace(c.log)
-			assert.EqualValues(t, c.expect, result)
+			var buf bytes.Buffer
+			w := NewSecretsReplaceWriter(&buf, c.secrets)
+
+			n, err := w.Write([]byte(c.log))
+			assert.NoError(t, err)
+			assert.Equal(t, len(c.log), n)
+			assert.Equal(t, c.expect, buf.String())
 		})
 	}
+}
+
+// TestSecretsReplaceWriterKeepsInput guards the io.Writer contract: masking
+// must not modify the caller's buffer.
+func TestSecretsReplaceWriterKeepsInput(t *testing.T) {
+	var buf bytes.Buffer
+	w := NewSecretsReplaceWriter(&buf, []string{"supersecret"})
+
+	in := []byte("token is supersecret\n")
+	_, err := w.Write(in)
+	assert.NoError(t, err)
+	assert.Equal(t, "token is supersecret\n", string(in))
+	assert.Equal(t, "token is ********\n", buf.String())
+}
+
+func TestSecretsReplaceWriterNoSecrets(t *testing.T) {
+	var buf bytes.Buffer
+	w := NewSecretsReplaceWriter(&buf, nil)
+
+	_, err := w.Write([]byte("plain\n"))
+	assert.NoError(t, err)
+	assert.Equal(t, "plain\n", buf.String())
+}
+
+type errWriter struct{ err error }
+
+func (e *errWriter) Write([]byte) (int, error) { return 0, e.err }
+
+func TestSecretsReplaceWriterPropagatesError(t *testing.T) {
+	wantErr := errors.New("sink closed")
+	w := NewSecretsReplaceWriter(&errWriter{err: wantErr}, nil)
+
+	n, err := w.Write([]byte("x"))
+	assert.ErrorIs(t, err, wantErr)
+	assert.Zero(t, n)
 }
