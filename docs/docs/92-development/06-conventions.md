@@ -14,3 +14,11 @@ Go code is formatted by `make format` and linted by `make lint`. The linters are
 - `context.WithCancel` is forbidden, use `context.WithCancelCause` instead.
 - `print`, `println`, `panic` and `log.Fatal()` are forbidden. Return an error or use the logger instead.
 - Top-level comments start with a capital letter and end with a period.
+
+## Breaking changes
+
+Every change that users, admins or API clients have to react to needs an entry in the [migration guide](/migrations) (`docs/src/pages/migrations.md`). This includes deprecations. Add it to the `next` version, in the section of the affected group (user-facing, admin-facing or API changes).
+
+Write one entry per change, do not combine multiple changes into one entry.
+
+Changes of the pipeline configuration have to follow the [deprecation policy](./40-deprecations.md) too.
