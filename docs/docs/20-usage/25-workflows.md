@@ -78,14 +78,14 @@ Each workflow will report its own status back to your forge.
 
 ## Agent information
 
-Once an agent picked up a workflow, the WebUI can show which agent runs or ran it. Select a step and click the information icon in the **Step Logs** toolbar to see the agent's name, platform and backend. **Show labels** lists the agent's custom labels. The information is refreshed when the workflow gets an agent assigned and whenever its state changes.
+Once an agent picked up a workflow, the WebUI can show which agent runs or ran it. Select a step and click the information icon in the **Step Logs** toolbar to see the agent's name, platform and backend. **Show labels** lists the agent's custom labels.
 
-The icon is grayed out while no agent is assigned yet, when the agent does not exist anymore, or when you are not allowed to see it:
+The server stores this information when the agent gets the workflow assigned, so it stays available after the agent was changed or deleted, e.g. by an autoscaler. Workflows that ran before this was introduced have no agent information.
+
+The icon is grayed out while no agent is assigned yet, when no agent information is available, or when you are not allowed to see it:
 
 - Instance admins can see every agent.
 - Organization admins can see the agents registered for the repository's organization, unless [user agent registration](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is disabled. Global agents stay hidden for them.
-
-The details come from the current agent record, not from a snapshot taken when the workflow ran.
 
 ## Flow control
 

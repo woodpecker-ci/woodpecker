@@ -4,14 +4,14 @@ import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import PipelineWorkflowAgent from '~/components/repo/pipeline/PipelineWorkflowAgent.vue';
-import type { Agent, OrgPermissions, PipelineWorkflow, User } from '~/lib/api/types';
+import { ApiRequestError } from '~/lib/api/client';
+import type { AgentSnapshot, PipelineWorkflow, User } from '~/lib/api/types';
 
-const getAgent = vi.fn<(id: number) => Promise<Agent>>();
-const getOrgAgents = vi.fn<(orgId: number, opts?: { page?: number; perPage?: number }) => Promise<Agent[] | null>>();
-const getOrgPermissions = vi.fn<(orgId: number) => Promise<OrgPermissions>>();
+const getWorkflowAgent =
+  vi.fn<(repoId: number, pipelineNumber: number, workflowId: number) => Promise<AgentSnapshot>>();
 
 vi.mock('~/compositions/useApiClient', () => ({
-  default: () => ({ getAgent, getOrgAgents, getOrgPermissions }),
+  default: () => ({ getWorkflowAgent }),
 }));
 
 const i18n = createI18n({
@@ -24,23 +24,14 @@ const i18n = createI18n({
 
 const repo = ref({ id: 1, org_id: 5, owner: 'owner', name: 'repo' });
 
-function makeAgent(overrides: Partial<Agent> = {}): Agent {
+function makeAgent(overrides: Partial<AgentSnapshot> = {}): AgentSnapshot {
   return {
     id: 3,
-    name: 'builder-03',
-    owner_id: -1,
     org_id: -1,
-    token: 'secret-agent-token',
-    created: 1,
-    updated: 1,
-    last_contact: 1,
+    name: 'builder-03',
     platform: 'linux/amd64',
     backend: 'docker',
-    capacity: 2,
-    version: 'next',
-    no_schedule: false,
     custom_labels: { zone: 'eu-1' },
-    filters: {},
     ...overrides,
   };
 }
@@ -51,7 +42,7 @@ function makeWorkflow(overrides: Partial<PipelineWorkflow> = {}): PipelineWorkfl
 
 function mountAgent(workflow: PipelineWorkflow | undefined = makeWorkflow()) {
   return mount(PipelineWorkflowAgent, {
-    props: { workflow },
+    props: { workflow, pipelineNumber: 7 },
     attachTo: document.body,
     global: { plugins: [i18n], provide: { repo } },
   });
@@ -78,79 +69,44 @@ enableAutoUnmount(afterEach);
 beforeEach(() => {
   vi.clearAllMocks();
   window.WOODPECKER_USER = { id: 1, login: 'admin', admin: true } as User;
-  window.WOODPECKER_USER_REGISTERED_AGENTS = true;
-  getAgent.mockResolvedValue(makeAgent());
-  getOrgAgents.mockResolvedValue([]);
-  getOrgPermissions.mockResolvedValue({ member: true, admin: true });
+  getWorkflowAgent.mockResolvedValue(makeAgent());
 });
 
 afterEach(() => {
   window.WOODPECKER_USER = undefined;
-  window.WOODPECKER_USER_REGISTERED_AGENTS = undefined;
 });
 
 describe('pipelineWorkflowAgent', () => {
   describe('permissions', () => {
-    it('grays out the icon for anonymous users without calling any api', async () => {
+    it('grays out the icon for anonymous users without asking the server', async () => {
       window.WOODPECKER_USER = undefined;
       const wrapper = mountAgent();
       await flushPromises();
 
       expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
       expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.no_permission');
-      expect(getAgent).not.toHaveBeenCalled();
-      expect(getOrgPermissions).not.toHaveBeenCalled();
+      expect(getWorkflowAgent).not.toHaveBeenCalled();
     });
 
-    it('grays out the icon for a user that is neither instance nor org admin', async () => {
+    it('lets the server decide for logged in users and grays out the icon when it forbids access', async () => {
       window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      getOrgPermissions.mockResolvedValue({ member: true, admin: false });
+      getWorkflowAgent.mockRejectedValue(new ApiRequestError('Forbidden', 403));
       const wrapper = mountAgent();
       await flushPromises();
 
-      expect(getOrgPermissions).toHaveBeenCalledWith(5);
+      expect(getWorkflowAgent).toHaveBeenCalledWith(1, 7, 1);
       expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
       expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.no_permission');
-      expect(getAgent).not.toHaveBeenCalled();
-      expect(getOrgAgents).not.toHaveBeenCalled();
     });
 
-    it('does not ask for org permissions when user registered agents are disabled', async () => {
+    it('shows the agent to a non admin the server allows, e.g. an org admin', async () => {
       window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      window.WOODPECKER_USER_REGISTERED_AGENTS = false;
+      getWorkflowAgent.mockResolvedValue(makeAgent({ org_id: 5, name: 'org-builder' }));
       const wrapper = mountAgent();
       await flushPromises();
 
-      expect(getOrgPermissions).not.toHaveBeenCalled();
-      expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
-    });
-
-    it('lets an org admin look up an agent of the org through the org agent list, page by page', async () => {
-      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      const fullPage = Array.from({ length: 50 }, (_, i) => makeAgent({ id: 100 + i, org_id: 5 }));
-      getOrgAgents
-        .mockResolvedValueOnce(fullPage)
-        .mockResolvedValueOnce([makeAgent({ id: 3, org_id: 5, name: 'org-builder' })]);
-      const wrapper = mountAgent();
-      await flushPromises();
-
-      expect(getAgent).not.toHaveBeenCalled();
-      expect(getOrgAgents).toHaveBeenNthCalledWith(1, 5, { page: 1, perPage: 50 });
-      expect(getOrgAgents).toHaveBeenNthCalledWith(2, 5, { page: 2, perPage: 50 });
-      expect(infoButton(wrapper).attributes('disabled')).toBeUndefined();
       await infoButton(wrapper).trigger('click');
       expect(popover().text()).toContain('org-builder');
-    });
-
-    it('grays out the icon for an org admin when the agent is not one of the org agents', async () => {
-      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      getOrgAgents.mockResolvedValue([makeAgent({ id: 9, org_id: 5 })]);
-      const wrapper = mountAgent();
-      await flushPromises();
-
-      expect(getOrgAgents).toHaveBeenCalledOnce();
-      expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
-      expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.no_permission');
     });
   });
 
@@ -161,7 +117,7 @@ describe('pipelineWorkflowAgent', () => {
 
       expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
       expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.not_assigned');
-      expect(getAgent).not.toHaveBeenCalled();
+      expect(getWorkflowAgent).not.toHaveBeenCalled();
     });
 
     it('loads the agent as soon as a pending workflow gets one assigned', async () => {
@@ -171,36 +127,24 @@ describe('pipelineWorkflowAgent', () => {
       await wrapper.setProps({ workflow: makeWorkflow({ state: 'running', agent_id: 3 }) });
       await flushPromises();
 
-      expect(getAgent).toHaveBeenCalledWith(3);
+      expect(getWorkflowAgent).toHaveBeenCalledWith(1, 7, 1);
       expect(infoButton(wrapper).attributes('disabled')).toBeUndefined();
       expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.title');
     });
 
-    it('refreshes the shown agent when the workflow state changes', async () => {
-      const wrapper = mountAgent();
-      await flushPromises();
-      await infoButton(wrapper).trigger('click');
-
-      getAgent.mockResolvedValue(makeAgent({ name: 'renamed-builder' }));
-      await wrapper.setProps({ workflow: makeWorkflow({ state: 'success', finished: 2 }) });
-      await flushPromises();
-
-      expect(getAgent).toHaveBeenCalledTimes(2);
-      expect(popover().text()).toContain('renamed-builder');
-    });
-
-    it('does not refetch when only steps of the workflow change', async () => {
+    it('does not refetch the snapshot for state or step updates of the same assignment', async () => {
       const wrapper = mountAgent();
       await flushPromises();
 
       await wrapper.setProps({ workflow: makeWorkflow({ children: [] }) });
+      await wrapper.setProps({ workflow: makeWorkflow({ state: 'success', finished: 2 }) });
       await flushPromises();
 
-      expect(getAgent).toHaveBeenCalledOnce();
+      expect(getWorkflowAgent).toHaveBeenCalledOnce();
     });
 
-    it('grays out the icon when the agent cannot be loaded anymore', async () => {
-      getAgent.mockRejectedValue(new Error('Not Found'));
+    it('grays out the icon when no agent information was recorded', async () => {
+      getWorkflowAgent.mockRejectedValue(new ApiRequestError('Not Found', 404));
       const wrapper = mountAgent(makeWorkflow({ state: 'success' }));
       await flushPromises();
 
@@ -209,11 +153,11 @@ describe('pipelineWorkflowAgent', () => {
     });
 
     it('ignores a late answer for a previously selected workflow', async () => {
-      const slow = deferred<Agent>();
-      getAgent.mockReturnValueOnce(slow.promise);
+      const slow = deferred<AgentSnapshot>();
+      getWorkflowAgent.mockReturnValueOnce(slow.promise);
       const wrapper = mountAgent();
 
-      getAgent.mockResolvedValue(makeAgent({ id: 4, name: 'test-agent' }));
+      getWorkflowAgent.mockResolvedValue(makeAgent({ id: 4, name: 'test-agent' }));
       await wrapper.setProps({ workflow: makeWorkflow({ id: 2, name: 'test', agent_id: 4 }) });
       await flushPromises();
       slow.resolve(makeAgent());
@@ -225,13 +169,13 @@ describe('pipelineWorkflowAgent', () => {
     });
 
     it('ignores a late failure for a previously selected workflow', async () => {
-      const slow = deferred<Agent>();
-      getAgent.mockReturnValueOnce(slow.promise);
+      const slow = deferred<AgentSnapshot>();
+      getWorkflowAgent.mockReturnValueOnce(slow.promise);
       const wrapper = mountAgent();
 
       await wrapper.setProps({ workflow: makeWorkflow({ id: 2, agent_id: 4 }) });
       await flushPromises();
-      slow.reject(new Error('Not Found'));
+      slow.reject(new ApiRequestError('Forbidden', 403));
       await flushPromises();
 
       expect(infoButton(wrapper).attributes('disabled')).toBeUndefined();
@@ -242,8 +186,8 @@ describe('pipelineWorkflowAgent', () => {
       await flushPromises();
       await infoButton(wrapper).trigger('click');
 
-      const slow = deferred<Agent>();
-      getAgent.mockReturnValueOnce(slow.promise);
+      const slow = deferred<AgentSnapshot>();
+      getWorkflowAgent.mockReturnValueOnce(slow.promise);
       await wrapper.setProps({ workflow: makeWorkflow({ agent_id: 4 }) });
       expect(popover().exists()).toBe(false);
       expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
@@ -252,16 +196,6 @@ describe('pipelineWorkflowAgent', () => {
       await flushPromises();
       await infoButton(wrapper).trigger('click');
       expect(popover().text()).toContain('replacement');
-    });
-
-    it('keeps the popover open with the current data while refreshing the same agent', async () => {
-      const wrapper = mountAgent();
-      await flushPromises();
-      await infoButton(wrapper).trigger('click');
-
-      getAgent.mockReturnValueOnce(deferred<Agent>().promise);
-      await wrapper.setProps({ workflow: makeWorkflow({ state: 'success', finished: 2 }) });
-      expect(popover().text()).toContain('builder-03');
     });
 
     it('closes the popover when another workflow gets selected', async () => {
@@ -277,7 +211,7 @@ describe('pipelineWorkflowAgent', () => {
   });
 
   describe('popover', () => {
-    it('shows workflow, agent, platform and backend, labels only on demand and never the token', async () => {
+    it('shows workflow, agent, platform and backend, and labels only on demand', async () => {
       const wrapper = mountAgent();
       await flushPromises();
       expect(popover().exists()).toBe(false);
@@ -289,7 +223,6 @@ describe('pipelineWorkflowAgent', () => {
       expect(text).toContain('builder-03');
       expect(text).toContain('linux/amd64');
       expect(text).not.toContain('zone');
-      expect(text).not.toContain('secret-agent-token');
 
       await popover().get('button').trigger('click');
       expect(popover().text()).toContain('zone');
@@ -300,7 +233,7 @@ describe('pipelineWorkflowAgent', () => {
     });
 
     it('falls back to the agent id for an agent without name and says when it has no labels', async () => {
-      getAgent.mockResolvedValue(makeAgent({ name: '', custom_labels: {} }));
+      getWorkflowAgent.mockResolvedValue(makeAgent({ name: '', custom_labels: {} }));
       const wrapper = mountAgent();
       await flushPromises();
       await infoButton(wrapper).trigger('click');

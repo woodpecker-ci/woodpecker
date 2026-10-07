@@ -79,21 +79,21 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
-import type { Agent, PipelineWorkflow } from '~/lib/api/types';
+import { ApiRequestError } from '~/lib/api/client';
+import type { AgentSnapshot, PipelineWorkflow } from '~/lib/api/types';
 
 const props = defineProps<{
   workflow?: PipelineWorkflow;
+  pipelineNumber: number;
 }>();
 
-// the org agent list is paginated with the server's maximum page size
-const ORG_AGENTS_PAGE_SIZE = 50;
 // px between icon and popover, and kept free to the viewport edges
 const POPOVER_GAP = 8;
 const VIEWPORT_MARGIN = 16;
 const ARROW_HALF_WIDTH = 6;
 
 const apiClient = useApiClient();
-const { user, userRegisteredAgents } = useConfig();
+const { user } = useConfig();
 const repo = requiredInject('repo');
 const { t } = useI18n();
 
@@ -104,16 +104,10 @@ const popoverId = useId();
 
 const open = ref(false);
 const showLabels = ref(false);
-const agent = ref<Agent>();
+const agent = ref<AgentSnapshot>();
 const loading = ref(false);
-const unavailable = ref(false);
+const forbidden = ref(false);
 const position = ref({ top: 0, right: VIEWPORT_MARGIN, maxHeight: 0, arrowRight: 12 });
-
-// GET /agents/:id is admin only; org admins can only list the agents registered for their org
-const isOrgAdmin = ref(false);
-const canReadAllAgents = !!user?.admin;
-const canReadOrgAgents = computed(() => !canReadAllAgents && userRegisteredAgents && isOrgAdmin.value);
-const hasPermission = computed(() => canReadAllAgents || canReadOrgAgents.value);
 
 const labels = computed(() => Object.entries(agent.value?.custom_labels ?? {}));
 
@@ -121,43 +115,22 @@ const title = computed(() => {
   if (!props.workflow?.agent_id) {
     return t('repo.pipeline.agent.not_assigned');
   }
+  if (!user || forbidden.value) {
+    return t('repo.pipeline.agent.no_permission');
+  }
   if (loading.value) {
     return t('repo.pipeline.agent.loading');
   }
-  if (unavailable.value) {
-    return t('repo.pipeline.agent.unavailable');
-  }
   if (!agent.value) {
-    return t('repo.pipeline.agent.no_permission');
+    return t('repo.pipeline.agent.unavailable');
   }
   return t('repo.pipeline.agent.title');
 });
 
-async function findOrgAgent(agentId: number): Promise<Agent | undefined> {
-  for (let page = 1; ; page++) {
-    const agents = (await apiClient.getOrgAgents(repo.value.org_id, { page, perPage: ORG_AGENTS_PAGE_SIZE })) ?? [];
-    const found = agents.find((a) => a.id === agentId);
-    if (found || agents.length < ORG_AGENTS_PAGE_SIZE) {
-      return found;
-    }
-  }
-}
-
-async function loadOrgPermissions() {
-  if (!user || canReadAllAgents || !userRegisteredAgents) {
-    return;
-  }
-  try {
-    isOrgAdmin.value = (await apiClient.getOrgPermissions(repo.value.org_id)).admin;
-  } catch {
-    isOrgAdmin.value = false;
-  }
-}
-
-// The workflow tree of a pipeline is replaced on every pipeline event. Only a new workflow,
-// a new agent assignment or a state transition needs fresh agent data.
+// The server keeps a snapshot of the agent per assignment and decides who may read it,
+// so it is only loaded again for another workflow or a new assignment.
 watch(
-  [() => props.workflow?.id, () => props.workflow?.agent_id, () => props.workflow?.state, hasPermission],
+  [() => props.workflow?.id, () => props.workflow?.agent_id],
   async ([workflowId, agentId], [oldWorkflowId], onCleanup) => {
     let stale = false;
     onCleanup(() => {
@@ -168,28 +141,23 @@ watch(
       open.value = false;
       showLabels.value = false;
     }
-    unavailable.value = false;
+    agent.value = undefined;
+    forbidden.value = false;
+    loading.value = false;
 
-    if (!agentId || !hasPermission.value) {
-      agent.value = undefined;
-      loading.value = false;
+    if (!user || workflowId === undefined || !agentId) {
       return;
     }
 
-    // keep showing the current data while refreshing the same agent
-    if (agent.value?.id !== agentId) {
-      agent.value = undefined;
-    }
     loading.value = true;
     try {
-      const result = canReadAllAgents ? await apiClient.getAgent(agentId) : await findOrgAgent(agentId);
+      const result = await apiClient.getWorkflowAgent(repo.value.id, props.pipelineNumber, workflowId);
       if (!stale) {
         agent.value = result;
       }
-    } catch {
+    } catch (error) {
       if (!stale) {
-        agent.value = undefined;
-        unavailable.value = true;
+        forbidden.value = error instanceof ApiRequestError && error.status === 403;
       }
     } finally {
       if (!stale) {
@@ -251,6 +219,4 @@ onKeyStroke('Escape', () => {
   open.value = false;
   (button.value?.$el as HTMLElement | undefined)?.focus();
 });
-
-void loadOrgPermissions();
 </script>

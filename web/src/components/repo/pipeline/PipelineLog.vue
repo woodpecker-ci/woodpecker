@@ -23,7 +23,7 @@
         </span>
 
         <div class="ml-auto flex flex-row items-center gap-x-2">
-          <PipelineWorkflowAgent :workflow="workflow" />
+          <PipelineWorkflowAgent :workflow="workflow" :pipeline-number="pipeline.number" />
           <IconButton
             :title="fullscreen ? $t('exit_fullscreen') : $t('fullscreen')"
             class="hidden! hover:bg-white/10! md:flex!"

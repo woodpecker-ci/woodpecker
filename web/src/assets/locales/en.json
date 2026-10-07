@@ -242,7 +242,7 @@
         "no_labels": "This agent has no custom labels",
         "not_assigned": "No agent has been assigned to this workflow yet",
         "loading": "Loading agent information…",
-        "unavailable": "The agent of this workflow does not exist anymore",
+        "unavailable": "No agent information is available for this workflow",
         "no_permission": "You are not allowed to view the agent of this workflow"
       },
       "log_delete_confirm": "Do you really want to delete the step logs?",
