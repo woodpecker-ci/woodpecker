@@ -17,7 +17,6 @@ package woodpecker
 import (
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -80,7 +79,7 @@ type PipelineLastOptions struct {
 }
 
 type RepoPostOptions struct {
-	ForgeRemoteID int64
+	ForgeRemoteID string
 }
 
 type RepoMoveOptions struct {
@@ -139,7 +138,7 @@ func (opt *PipelineLastOptions) QueryEncode() string {
 // QueryEncode returns the URL query parameters for the RepoPostOptions.
 func (opt *RepoPostOptions) QueryEncode() string {
 	query := make(url.Values)
-	query.Add("forge_remote_id", strconv.FormatInt(opt.ForgeRemoteID, 10))
+	query.Add("forge_remote_id", opt.ForgeRemoteID)
 	return query.Encode()
 }
 
