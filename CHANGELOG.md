@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-06
+## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -63,6 +63,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.16.0 [[#7234](https://github.com/woodpecker-ci/woodpecker/pull/7234)]
 - Update dependency @vueuse/core to v15 [[#7212](https://github.com/woodpecker-ci/woodpecker/pull/7212)]
 - Update dependency dotenv to v18 [[#7213](https://github.com/woodpecker-ci/woodpecker/pull/7213)]
 - Update module github.com/google/go-github/v91 to v92 [[#7200](https://github.com/woodpecker-ci/woodpecker/pull/7200)]
