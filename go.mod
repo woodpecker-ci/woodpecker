@@ -12,10 +12,10 @@ require (
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.10.2
-	github.com/cenkalti/backoff/v7 v7.0.0
+	github.com/cenkalti/backoff/v7 v7.0.1
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.8.1+incompatible
+	github.com/docker/cli v29.8.2+incompatible
 	github.com/docker/go-connections v0.8.1
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -37,8 +37,8 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.52
 	github.com/migueleliasweb/go-github-mock v1.5.0
-	github.com/moby/moby/api v1.56.0
-	github.com/moby/moby/client v0.6.0
+	github.com/moby/moby/api v1.56.1
+	github.com/moby/moby/client v0.6.1
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
 	github.com/neticdk/go-bitbucket v1.0.5
@@ -51,11 +51,11 @@ require (
 	github.com/swaggo/swag v1.16.6
 	github.com/tink-crypto/tink-go/v2 v2.8.0
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
-	github.com/urfave/cli/v3 v3.13.0
+	github.com/urfave/cli/v3 v3.14.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yaronf/httpsign v0.6.1
+	github.com/yaronf/httpsign v0.6.2
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v3 v3.15.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.16.0
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 	golang.org/x/image v0.46.0
@@ -73,7 +73,7 @@ require (
 	sigs.k8s.io/yaml v1.6.0
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
-	xorm.io/xorm v1.4.1
+	xorm.io/xorm v1.4.3
 )
 
 require (
@@ -111,7 +111,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/docker/docker-credential-helpers v0.8.0 // indirect
-	github.com/dunglas/httpsfv v1.1.1 // indirect
+	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
