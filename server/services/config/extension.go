@@ -15,6 +15,8 @@
 package config
 
 import (
+	"errors"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -46,10 +48,14 @@ func toConfigData(files []*types.FileMeta) []*configData {
 	return configs
 }
 
-func toFileMeta(configs []*configData) []*types.FileMeta {
+// toFileMeta converts the answer of an extension, which is foreign input and can contain anything.
+func toFileMeta(configs []*configData) ([]*types.FileMeta, error) {
 	files := make([]*types.FileMeta, len(configs))
 	for i, config := range configs {
+		if config == nil {
+			return nil, errors.New("config extension returned an empty config")
+		}
 		files[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
-	return files
+	return files, nil
 }

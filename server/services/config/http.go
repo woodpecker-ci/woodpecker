@@ -72,5 +72,5 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
 	}
 
-	return toFileMeta(response.Configs), nil
+	return toFileMeta(response.Configs)
 }
