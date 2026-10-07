@@ -38,6 +38,8 @@ import (
 )
 
 func TestServeReleasesPollingAgentsOnShutdown(t *testing.T) {
+	t.Parallel()
+
 	const jwtSecret = "serve-test-secret"
 
 	store := store_mocks.NewMockStore(t)
@@ -48,7 +50,8 @@ func TestServeReleasesPollingAgentsOnShutdown(t *testing.T) {
 	sched.On("Poll", mock.Anything, int64(1), mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) {
 			close(polling)
-			ctx, _ := args.Get(0).(context.Context)
+			ctx, ok := args.Get(0).(context.Context)
+			require.True(t, ok, "Poll called without context")
 			<-ctx.Done()
 		}).
 		Return(nil, context.Canceled)
@@ -113,6 +116,8 @@ func TestServeReleasesPollingAgentsOnShutdown(t *testing.T) {
 }
 
 func TestReleaseOnShutdownInterceptor(t *testing.T) {
+	t.Parallel()
+
 	// blocking mimics the long polls: it waits for its context and then
 	// returns resp without error, like the queue does for Wait.
 	blocking := func(resp any) grpc.UnaryHandler {
@@ -129,6 +134,8 @@ func TestReleaseOnShutdownInterceptor(t *testing.T) {
 	}
 
 	t.Run("released Wait returns Unavailable", func(t *testing.T) {
+		t.Parallel()
+
 		interceptor := releaseOnShutdownInterceptor(shutdown())
 		info := &grpc.UnaryServerInfo{FullMethod: proto.Woodpecker_Wait_FullMethodName}
 
@@ -138,6 +145,8 @@ func TestReleaseOnShutdownInterceptor(t *testing.T) {
 	})
 
 	t.Run("cancel signal still reaches the agent", func(t *testing.T) {
+		t.Parallel()
+
 		interceptor := releaseOnShutdownInterceptor(shutdown())
 		info := &grpc.UnaryServerInfo{FullMethod: proto.Woodpecker_Wait_FullMethodName}
 
@@ -147,6 +156,8 @@ func TestReleaseOnShutdownInterceptor(t *testing.T) {
 	})
 
 	t.Run("assigned workflow still reaches the agent", func(t *testing.T) {
+		t.Parallel()
+
 		interceptor := releaseOnShutdownInterceptor(shutdown())
 		info := &grpc.UnaryServerInfo{FullMethod: proto.Woodpecker_Next_FullMethodName}
 		want := &proto.NextResponse{Workflow: &proto.Workflow{Id: "1"}}
@@ -157,6 +168,8 @@ func TestReleaseOnShutdownInterceptor(t *testing.T) {
 	})
 
 	t.Run("other calls are not canceled", func(t *testing.T) {
+		t.Parallel()
+
 		interceptor := releaseOnShutdownInterceptor(shutdown())
 		info := &grpc.UnaryServerInfo{FullMethod: proto.Woodpecker_Done_FullMethodName}
 
@@ -168,6 +181,8 @@ func TestReleaseOnShutdownInterceptor(t *testing.T) {
 	})
 
 	t.Run("agent disconnect is passed through", func(t *testing.T) {
+		t.Parallel()
+
 		interceptor := releaseOnShutdownInterceptor(t.Context())
 		info := &grpc.UnaryServerInfo{FullMethod: proto.Woodpecker_Next_FullMethodName}
 		ctx, cancel := context.WithCancelCause(t.Context())
