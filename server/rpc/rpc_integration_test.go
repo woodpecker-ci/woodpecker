@@ -483,6 +483,44 @@ func TestRPCDone(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("skipped last workflow keeps pipeline finish time", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+
+		agent := defaultAgent()
+		repo := defaultRepo()
+		pipeline := defaultPipeline(model.StatusRunning)
+		// a dependent workflow that never ran, because the workflow it depends on failed
+		workflow := defaultWorkflow(model.StatusPending)
+		workflow.Children = []*model.Step{}
+		failedWorkflow := &model.Workflow{ID: 31, PipelineID: 20, State: model.StatusFailure, Started: 100, Finished: 200}
+		// workflow tree as stored after this Done call marked the workflow skipped
+		storedWorkflow := &model.Workflow{ID: 30, PipelineID: 20, State: model.StatusSkipped}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{failedWorkflow, storedWorkflow}, nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
+		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		// skipped workflows report neither a start nor a finish time
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{})
+		require.NoError(t, err)
+
+		mockStore.AssertCalled(t, "UpdatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
+			return p.Status == model.StatusFailure && p.Finished == 200
+		}))
+	})
+
 	t.Run("reject workflow already finished", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		agent := defaultAgent()
