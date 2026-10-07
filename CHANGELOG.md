@@ -52,6 +52,7 @@
 
 ### 📚 Documentation
 
+- Harmonize secrets docs [[#7236](https://github.com/woodpecker-ci/woodpecker/pull/7236)]
 - Clarify secret precedence order [[#7233](https://github.com/woodpecker-ci/woodpecker/pull/7233)]
 - Fix docs link in systemd example unit [[#7222](https://github.com/woodpecker-ci/woodpecker/pull/7222)]
 - Update pnpm to v12.9.1 [[#7219](https://github.com/woodpecker-ci/woodpecker/pull/7219)]
