@@ -1,0 +1,16 @@
+scenarioKinds:
+- id: primary
+  name: Primary
+  description: The usual successful path of the behavior.
+- id: alternative
+  name: Alternative
+  description: Another successful path, starting from a different situation or taking a different route.
+- id: validation
+  name: Validation
+  description: 'The Product refuses the request: invalid input, or someone who may not act.'
+- id: edge
+  name: Edge
+  description: A conflict, failure or unavailable dependency the Product distinguishes.
+- id: unattended
+  name: Unattended
+  description: Behavior the Product runs on its own, without an Actor starting it.
