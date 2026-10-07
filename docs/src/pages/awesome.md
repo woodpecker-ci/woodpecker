@@ -35,7 +35,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another Woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
 - [Woodpecker MCP](https://github.com/j04n-f/woodpecker-mcp) - A Model Context Protocol (MCP) server that connects AI assistants to Woodpecker CI. Debug pipeline failures, analyze build logs, and troubleshoot CI/CD configurations with AI assistance.
 
-## Configuration Services
+## [Configuration Extensions](/docs/usage/extensions#configuration)
 
 - [Dynamic Pipelines for Nix Flakes](https://github.com/pinpox/woodpecker-flake-pipeliner) - Define pipelines as Nix Flake outputs
 - [Starlark Config Extension](https://github.com/opencloud-eu/woodpecker-ci-config-service) - Drone's starlark suport as service
