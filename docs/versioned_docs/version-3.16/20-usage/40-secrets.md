@@ -3,7 +3,7 @@
 Woodpecker provides the ability to store named variables in a central secret store.
 These secrets can be securely passed on to individual pipeline steps using the keyword `from_secret`.
 
-There are three different levels of secrets available. If a secret is defined at more than one level, the highest-priority value is used. Priority is repository, then organization, then global:
+Secrets exist at three scopes, listed below from highest to lowest priority. When the same secret is defined at multiple scopes, the highest-priority value is used:
 
 1. **Repository secrets**: Available for all pipelines of a repository.
 1. **Organization secrets**: Available for all pipelines of an organization.
