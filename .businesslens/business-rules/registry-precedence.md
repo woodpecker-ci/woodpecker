@@ -19,6 +19,6 @@ references:
   target: docs/docs/20-usage/41-registries.md
 ---
 
-# A repository registry overrides an organization registry of the same address, which overrides a global one
+# Repository registries override organization ones of the same address, then global ones
 
 A step's image is pulled with the credentials whose address matches the image's registry host. When several levels hold the same address, the one closest to the repository wins, and credentials saved in Woodpecker win over read-only ones from the server's Docker configuration. Registry credentials are never given to the steps themselves.

@@ -32,6 +32,6 @@ references:
   target: docs/docs/20-usage/72-extensions/index.md
 ---
 
-# Extensions take precedence, and a failing secret or registry extension falls back to what Woodpecker keeps
+# Extensions take precedence; a failing extension falls back to what Woodpecker keeps
 
 Secrets and registries an extension returns override those Woodpecker keeps under the same name or address; when the extension fails or returns nothing, pipelines receive the kept ones. A configuration extension that answers with no content keeps the configuration Woodpecker found; when it fails, a new pipeline falls back to that configuration or ends in error without one, and a restart is refused. Forge credentials are sent to an extension only while Include netrc credentials is on for it.

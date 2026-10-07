@@ -57,7 +57,6 @@ references:
 - kind: doc
   role: context
   target: docs/docs/20-usage/15-terminology/index.md
-  title: Terminology
 - kind: doc
   role: context
   target: https://woodpecker-ci.org/docs/intro

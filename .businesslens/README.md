@@ -48,4 +48,4 @@ with their Experiences and Screens, Domains, Capabilities and their Scenarios,
 Business Rules, Journeys and their Scenarios, and Variations. A resource is
 `<id>.md`, or `<id>/<type>.md` when it owns child resources or assets.
 
-Documentation: https://businesslens.io
+Documentation: <https://businesslens.io>
