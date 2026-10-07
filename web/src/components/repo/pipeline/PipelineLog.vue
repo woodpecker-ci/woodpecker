@@ -23,6 +23,7 @@
         </span>
 
         <div class="ml-auto flex flex-row items-center gap-x-2">
+          <PipelineWorkflowAgent :workflow="workflow" />
           <IconButton
             :title="fullscreen ? $t('exit_fullscreen') : $t('fullscreen')"
             class="hidden! hover:bg-white/10! md:flex!"
@@ -174,6 +175,7 @@ import { useRoute } from 'vue-router';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
+import PipelineWorkflowAgent from '~/components/repo/pipeline/PipelineWorkflowAgent.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
@@ -222,6 +224,9 @@ const config = useConfig();
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
 const step = computed(() => pipeline.value && findStep(pipeline.value.workflows || [], stepId.value));
+const workflow = computed(() =>
+  pipeline.value.workflows?.find((wf) => (wf.children ?? []).some((child) => child.pid === stepId.value)),
+);
 const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
