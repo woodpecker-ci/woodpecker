@@ -56,7 +56,7 @@ The module is handled as untrusted code and therefore has to be a pure function 
 - It has no access to the network, the filesystem, environment variables or the clock.
 - It never gets `netrc` data, `WOODPECKER_CONFIG_EXTENSION_NETRC` is ignored. The files it needs have to come with the request, so make sure the server finds them with [`WOODPECKER_DEFAULT_PIPELINE_CONFIGS`](../../30-administration/10-configuration/10-server.md#default_pipeline_configs) and [`WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS`](../../30-administration/10-configuration/10-server.md#default_pipeline_config_extensions) or the config path of the repository.
 - Every pipeline gets a fresh instance, nothing is kept between two calls.
-- A call can use up to 256 MiB of memory, run for 10 seconds and answer with 10 MiB, at most 4 calls run at the same time.
+- A call can use up to 256 MiB of memory, run for 10 seconds and answer with 10 MiB, at most 4 calls run at the same time and only one per repository.
 - If the module fails, exceeds a limit or answers with something else than a response, the pipeline fails. The configuration from the forge is not used as fallback.
 
 ## How it works

@@ -49,11 +49,11 @@ func newRunner(t *testing.T, change func(*wasm.Limits)) *wasm.Runner {
 func TestRunnerPassesData(t *testing.T) {
 	runner := newRunner(t, nil)
 
-	out, err := runner.Run(t.Context(), []string{"guest", "echo"}, []byte(`{"some":"input"}`))
+	out, err := runner.Run(t.Context(), "", []string{"guest", "echo"}, []byte(`{"some":"input"}`))
 	require.NoError(t, err)
 	assert.JSONEq(t, `{"some":"input"}`, string(out))
 
-	out, err = runner.Run(t.Context(), []string{"guest", "args", "extra"}, nil)
+	out, err = runner.Run(t.Context(), "", []string{"guest", "args", "extra"}, nil)
 	require.NoError(t, err)
 	assert.Equal(t, "guest,args,extra", string(out))
 }
@@ -61,7 +61,7 @@ func TestRunnerPassesData(t *testing.T) {
 func TestRunnerReportsFailure(t *testing.T) {
 	runner := newRunner(t, nil)
 
-	_, err := runner.Run(t.Context(), []string{"guest", "fail"}, nil)
+	_, err := runner.Run(t.Context(), "", []string{"guest", "fail"}, nil)
 
 	var exit *wasm.ExitError
 	require.ErrorAs(t, err, &exit)
@@ -73,7 +73,7 @@ func TestRunnerSandbox(t *testing.T) {
 	t.Setenv("WOODPECKER_AGENT_SECRET", "must-not-leak")
 	runner := newRunner(t, nil)
 
-	out, err := runner.Run(t.Context(), []string{"guest", "probe"}, nil)
+	out, err := runner.Run(t.Context(), "", []string{"guest", "probe"}, nil)
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{
@@ -89,7 +89,7 @@ func TestRunnerKeepsNoState(t *testing.T) {
 	runner := newRunner(t, nil)
 
 	for range 3 {
-		out, err := runner.Run(t.Context(), []string{"guest", "calls"}, nil)
+		out, err := runner.Run(t.Context(), "", []string{"guest", "calls"}, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "1", string(out))
 	}
@@ -102,7 +102,7 @@ func TestRunnerIsolatesParallelCalls(t *testing.T) {
 	outputs := make([]string, wasm.DefaultLimits().Concurrency)
 	for i := range outputs {
 		wg.Go(func() {
-			out, err := runner.Run(t.Context(), []string{"guest", "echo"}, []byte(strings.Repeat(strconv.Itoa(i), 1<<16)))
+			out, err := runner.Run(t.Context(), strconv.Itoa(i), []string{"guest", "echo"}, []byte(strings.Repeat(strconv.Itoa(i), 1<<16)))
 			assert.NoError(t, err)
 			outputs[i] = string(out)
 		})
@@ -119,7 +119,7 @@ func TestRunnerLimits(t *testing.T) {
 		runner := newRunner(t, func(l *wasm.Limits) { l.Timeout = 300 * time.Millisecond })
 
 		start := time.Now()
-		_, err := runner.Run(t.Context(), []string{"guest", "spin"}, nil)
+		_, err := runner.Run(t.Context(), "", []string{"guest", "spin"}, nil)
 		require.ErrorIs(t, err, context.DeadlineExceeded)
 		assert.Less(t, time.Since(start), 5*time.Second)
 	})
@@ -129,14 +129,14 @@ func TestRunnerLimits(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(t.Context())
 		time.AfterFunc(300*time.Millisecond, func() { cancel(nil) })
 
-		_, err := runner.Run(ctx, []string{"guest", "spin"}, nil)
+		_, err := runner.Run(ctx, "", []string{"guest", "spin"}, nil)
 		require.ErrorIs(t, err, context.Canceled)
 	})
 
 	t.Run("memory", func(t *testing.T) {
 		runner := newRunner(t, func(l *wasm.Limits) { l.MemoryBytes = 32 << 20 })
 
-		_, err := runner.Run(t.Context(), []string{"guest", "alloc"}, nil)
+		_, err := runner.Run(t.Context(), "", []string{"guest", "alloc"}, nil)
 		var exit *wasm.ExitError
 		require.ErrorAs(t, err, &exit, "the guest must run out of memory before the time is up")
 		assert.Contains(t, exit.Stderr, "out of memory")
@@ -145,44 +145,70 @@ func TestRunnerLimits(t *testing.T) {
 	t.Run("stdout", func(t *testing.T) {
 		runner := newRunner(t, func(l *wasm.Limits) { l.StdoutBytes = 1 << 20 })
 
-		_, err := runner.Run(t.Context(), []string{"guest", "flood-stdout"}, nil)
+		_, err := runner.Run(t.Context(), "", []string{"guest", "flood-stdout"}, nil)
 		require.ErrorIs(t, err, wasm.ErrOutputTooLarge)
 	})
 
 	t.Run("stderr is cut but does not fail the call", func(t *testing.T) {
 		runner := newRunner(t, func(l *wasm.Limits) { l.StderrBytes = 1 << 10 })
 
-		out, err := runner.Run(t.Context(), []string{"guest", "flood-stderr"}, nil)
+		out, err := runner.Run(t.Context(), "", []string{"guest", "flood-stderr"}, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "done", string(out))
 	})
 
 	t.Run("parallel calls", func(t *testing.T) {
-		runner := newRunner(t, func(l *wasm.Limits) {
-			l.Concurrency = 1
-			l.Timeout = time.Second
-		})
+		runner := newRunner(t, func(l *wasm.Limits) { l.Concurrency = 1 })
 
-		// occupies the only slot until its time is up
+		// occupies the only slot until it gets stopped
+		busyCtx, stop := context.WithCancelCause(t.Context())
 		busy := make(chan error, 1)
 		go func() {
-			_, err := runner.Run(t.Context(), []string{"guest", "spin"}, nil)
+			_, err := runner.Run(busyCtx, "busy", []string{"guest", "spin"}, nil)
 			busy <- err
 		}()
 		time.Sleep(200 * time.Millisecond)
 
 		ctx, cancel := context.WithTimeout(t.Context(), 200*time.Millisecond)
 		defer cancel()
-		_, err := runner.Run(ctx, []string{"guest", "echo"}, nil)
+		_, err := runner.Run(ctx, "other", []string{"guest", "echo"}, nil)
 		require.ErrorContains(t, err, "waiting for a free wasm slot")
 		require.ErrorIs(t, err, context.DeadlineExceeded)
 
+		stop(nil)
 		require.ErrorContains(t, <-busy, "wasm module was stopped")
 
 		// the slot is free again
-		_, err = runner.Run(t.Context(), []string{"guest", "echo"}, nil)
+		_, err = runner.Run(t.Context(), "other", []string{"guest", "echo"}, nil)
 		require.NoError(t, err)
 	})
+}
+
+func TestRunnerKeepsSlotsFreeForOthers(t *testing.T) {
+	runner := newRunner(t, func(l *wasm.Limits) { l.Concurrency = 2 })
+
+	// one tenant asks for as many slots as there are and does not finish on its own
+	greedyCtx, stop := context.WithCancelCause(t.Context())
+	greedy := make(chan error, 2)
+	for range 2 {
+		go func() {
+			_, err := runner.Run(greedyCtx, "greedy", []string{"guest", "spin"}, nil)
+			greedy <- err
+		}()
+	}
+	time.Sleep(200 * time.Millisecond)
+
+	// has to be served long before the greedy calls run into their time limit
+	ctx, cancel := context.WithTimeout(t.Context(), wasm.DefaultLimits().Timeout/3)
+	defer cancel()
+	out, err := runner.Run(ctx, "other", []string{"guest", "echo"}, []byte("still served"))
+	require.NoError(t, err)
+	assert.Equal(t, "still served", string(out))
+
+	stop(nil)
+	errs := []string{(<-greedy).Error(), (<-greedy).Error()}
+	assert.Contains(t, strings.Join(errs, "\n"), "wasm module was stopped")
+	assert.Contains(t, strings.Join(errs, "\n"), "waiting for an earlier call")
 }
 
 func TestNewRunnerRejects(t *testing.T) {

@@ -111,6 +111,7 @@ type Runner struct {
 	compiled wazero.CompiledModule
 	limits   Limits
 	slots    chan struct{}
+	keys     keyedLock
 }
 
 // NewRunner compiles the module and checks that it only asks for what the sandbox offers.
@@ -162,9 +163,18 @@ func NewRunner(ctx context.Context, binary []byte, limits Limits) (_ *Runner, er
 }
 
 // Run starts a fresh instance of the module with the given arguments, feeds it stdin and returns what it wrote to stdout.
-func (r *Runner) Run(ctx context.Context, args []string, stdin []byte) ([]byte, error) {
+//
+// The key names on whose behalf the call is made. Calls with the same key run one after another,
+// so a single tenant can not take all slots and keep everybody else waiting.
+func (r *Runner) Run(ctx context.Context, key string, args []string, stdin []byte) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.limits.Timeout)
 	defer cancel()
+
+	unlock, err := r.keys.lock(ctx, key)
+	if err != nil {
+		return nil, fmt.Errorf("gave up waiting for an earlier call of %q: %w", key, err)
+	}
+	defer unlock()
 
 	select {
 	case r.slots <- struct{}{}:

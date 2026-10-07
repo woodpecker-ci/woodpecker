@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 
@@ -58,7 +59,8 @@ func (w *wasmService) Fetch(ctx context.Context, _ forge.Forge, _ *model.User, r
 		return nil, fmt.Errorf("could not encode request for wasm config extension: %w", err)
 	}
 
-	output, err := w.runner.Run(ctx, wasmArgs, request)
+	// one repo is one tenant, it can not keep the others from getting their config
+	output, err := w.runner.Run(ctx, strconv.FormatInt(repo.ID, 10), wasmArgs, request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch config via wasm: %w", err)
 	}
