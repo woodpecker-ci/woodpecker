@@ -23,6 +23,48 @@ If an interface has no mock yet, just add it to `.mockery.yaml` in a dedicated p
 
 ### Integration Tests
 
+The tests in `e2e/` start a server and an agent inside the test process and let them run whole pipelines. The server uses an in-memory SQLite database and a mocked forge, the agent uses the [dummy backend](#dummy-backend). So no forge and no container runtime are needed. Run them with:
+
+```bash
+make test-e2e
+```
+
+Most test cases are scenarios in `e2e/scenarios/fixtures/`. A scenario is a workflow file and a JSON file of the same name that describes the expected result:
+
+```yaml title="02_step_failure.yaml"
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+    environment:
+      STEP_EXIT_CODE: '1'
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+```
+
+```json title="02_step_failure.json"
+{
+  "name": "step failure stops pipeline",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [{ "name": "woodpecker", "status": "failure", "error": "" }],
+  "expected_steps": [
+    { "name": "build", "status": "failure", "exit_code": 1 },
+    { "name": "deploy", "status": "skipped", "exit_code": 0 }
+  ]
+}
+```
+
+A scenario with multiple workflows is a folder that contains one YAML file per workflow and a `scenario.json`. New scenarios are picked up automatically, you do not have to write Go code for them.
+
+Cases that need more than a comparison of the final result, like canceling or restarting a pipeline, are written as Go tests in `e2e/scenarios/` and use the helpers of `e2e/setup/`.
+
 ### Dummy backend
 
 There is a special backend called **`dummy`** which does not execute any commands, but emulates how a typical backend should behave.
