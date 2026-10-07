@@ -133,7 +133,7 @@ func TestCompleteChildrenIfParentCompleted(t *testing.T) {
 
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
-		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowUpdateIfState", mock.Anything, mock.Anything).Return(nil)
 
 		s := RPC{store: mockStore}
 		s.completeChildrenIfParentCompleted(&workflow, 1234567900)

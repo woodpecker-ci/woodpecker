@@ -186,3 +186,11 @@ concurrency:
   limit: 1
   group: deploy-${CI_COMMIT_BRANCH}
 ```
+
+## Canceling a workflow
+
+Users with push permission can cancel an individual pending or running workflow using the cancel button beside its heading in the pipeline sidebar. A queued workflow is removed from scheduling and marked `canceled`. A running workflow receives a stop request and becomes `killed` after its agent finishes cleanup.
+
+Other workflows continue, and the pipeline stays active until all workflows finish. Canceling a workflow contributes to the final pipeline result; it does not turn the pipeline into a success. Default success-only dependents are skipped, while workflows configured to run on failure or on both success and failure follow their existing conditions. Independent workflows remain eligible according to the normal scheduling rules. Canceling frees capacity but does not select which workflow runs next.
+
+Blocked and finished workflows cannot be canceled individually. Use the pipeline cancel action to stop the entire pipeline.
