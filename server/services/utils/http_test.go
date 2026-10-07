@@ -99,3 +99,28 @@ func TestRetry(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rr)
 	assert.Equal(t, 6, numRetry)
 }
+
+// An extension is a foreign service, it must not be able to make the server buffer an endless answer.
+func TestSendLimitsResponseSize(t *testing.T) {
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		requests++
+		chunk := bytes.Repeat([]byte("a"), 1<<20)
+		for range 11 {
+			if _, err := w.Write(chunk); err != nil {
+				return
+			}
+		}
+	}))
+	defer server.Close()
+
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
+	require.NoError(t, err)
+
+	_, err = client.Send(t.Context(), http.MethodPost, server.URL+"/", map[string]string{"foo": "bar"}, nil)
+	assert.ErrorContains(t, err, "response is larger than")
+	assert.Equal(t, 1, requests, "asking again does not make the answer smaller")
+}
