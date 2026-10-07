@@ -66,6 +66,7 @@ func (m *Metadata) Environ() map[string]string {
 
 	pipeline := m.Curr
 	setNonEmptyEnvVar(params, "CI_PIPELINE_NUMBER", strconv.FormatInt(pipeline.Number, 10))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_ORIG_PARENT", strconv.FormatInt(pipeline.OrigParent, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_PARENT", strconv.FormatInt(pipeline.Parent, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_EVENT", string(pipeline.Event))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_EVENT_REASON", strings.Join(pipeline.EventReason, ","))

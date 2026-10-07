@@ -27,6 +27,7 @@ type Pipeline struct {
 	RepoID               int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
 	Number               int64                   `json:"number"                  xorm:"UNIQUE(s) 'number'"`
 	Author               string                  `json:"author"                  xorm:"INDEX 'author'"` // TODO: only // The user sending the webhook data or triggering the pipeline event
+	OrigParent           int64                   `json:"orig_parent"             xorm:"orig_parent"`
 	Parent               int64                   `json:"parent"                  xorm:"parent"`
 	Event                WebhookEvent            `json:"event"                   xorm:"event"`
 	EventReason          []string                `json:"event_reason"            xorm:"json 'event_reason'"`

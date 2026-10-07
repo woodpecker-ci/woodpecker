@@ -29,7 +29,7 @@ import (
 )
 
 // Restart a pipeline by creating a new one out of the old and start it.
-func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, failedOnly bool) (*model.Pipeline, error) {
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
@@ -64,8 +64,14 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
+	if lastPipeline.OrigParent == 0 {
+		newPipeline.OrigParent = lastPipeline.Number
+	} else {
+		newPipeline.OrigParent = lastPipeline.OrigParent
+	}
 	newPipeline.RerunCount++
 	newPipeline.Version = version.String()
+	newPipeline.Workflows = nil
 
 	err = store.CreatePipeline(newPipeline)
 	if err != nil {
@@ -102,7 +108,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false)
+	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false, lastPipeline)
+
 	if handleParseErrors(newPipeline, parseErr) {
 		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, parseErr); uErr != nil {
 			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)

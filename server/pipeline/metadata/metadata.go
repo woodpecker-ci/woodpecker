@@ -122,12 +122,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	}
 
 	parent := int64(0)
+	origParent := int64(0)
 	if includeParent {
 		parent = pipeline.Parent
+		origParent = pipeline.OrigParent
 	}
 
 	metadata := metadata.Pipeline{
 		Number:      pipeline.Number,
+		OrigParent:  origParent,
 		Parent:      parent,
 		Created:     pipeline.Created,
 		Started:     pipeline.Started,

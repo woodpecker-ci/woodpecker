@@ -48,6 +48,12 @@
               @click="restartPipeline"
             />
             <Button
+              class="shrink-0"
+              :text="$t('repo.pipeline.actions.restart_failed')"
+              :is-loading="isRestartingFailedPipeline"
+              @click="restartFailedPipeline"
+            />
+            <Button
               v-if="pipeline.status === 'success' && repo.allow_deploy"
               class="shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"
@@ -215,6 +221,18 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
 const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncAction(async () => {
   const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
     fork: true,
+  });
+  notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
+  await router.push({
+    name: 'repo-pipeline',
+    params: { pipelineId: newPipeline.number },
+  });
+});
+
+const { doSubmit: restartFailedPipeline, isLoading: isRestartingFailedPipeline } = useAsyncAction(async () => {
+  const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
+    fork: true,
+    failed_only: true,
   });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
   await router.push({
