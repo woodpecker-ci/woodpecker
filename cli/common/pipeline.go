@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v3"
@@ -26,16 +27,37 @@ import (
 )
 
 func DetectPipelineConfig() (isDir bool, config string, _ error) {
-	for _, config := range constant.DefaultConfigOrder {
-		shouldBeDir := strings.HasSuffix(config, "/")
-		config = strings.TrimSuffix(config, "/")
-
-		if fi, err := os.Stat(config); err == nil && shouldBeDir == fi.IsDir() {
-			return fi.IsDir(), config, nil
-		}
+	isDir, config, found, err := FindPipelineConfig(".")
+	if err != nil {
+		return false, "", err
+	}
+	if found {
+		return isDir, config, nil
 	}
 
 	return false, "", fmt.Errorf("could not detect pipeline config")
+}
+
+// FindPipelineConfig searches dir using the default pipeline config order.
+func FindPipelineConfig(dir string) (isDir bool, config string, found bool, _ error) {
+	for _, configPath := range constant.DefaultConfigOrder {
+		shouldBeDir := strings.HasSuffix(configPath, "/")
+		configPath = filepath.Join(dir, strings.TrimSuffix(configPath, "/"))
+
+		fi, err := os.Stat(configPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return false, "", false, err
+		}
+
+		if shouldBeDir == fi.IsDir() {
+			return fi.IsDir(), configPath, true, nil
+		}
+	}
+
+	return false, "", false, nil
 }
 
 func RunPipelineFunc(ctx context.Context, c *cli.Command, fileFunc, dirFunc func(context.Context, *cli.Command, string) error) error {
