@@ -107,6 +107,9 @@ type Client interface {
 	// PipelineMetadata returns metadata for a pipeline.
 	PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error)
 
+	// WorkflowAgent returns the snapshot of the agent the workflow got assigned to.
+	WorkflowAgent(repoID, pipeline, workflowID int64) (*AgentSnapshot, error)
+
 	// StepLogEntries returns the LogEntries for the given pipeline step
 	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
 

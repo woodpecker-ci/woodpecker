@@ -5106,3 +5106,77 @@ func (_c *MockClient_Version_Call) RunAndReturn(run func() (*woodpecker.Version,
 	_c.Call.Return(run)
 	return _c
 }
+
+// WorkflowAgent provides a mock function for the type MockClient
+func (_mock *MockClient) WorkflowAgent(repoID int64, pipeline int64, workflowID int64) (*woodpecker.AgentSnapshot, error) {
+	ret := _mock.Called(repoID, pipeline, workflowID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowAgent")
+	}
+
+	var r0 *woodpecker.AgentSnapshot
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) (*woodpecker.AgentSnapshot, error)); ok {
+		return returnFunc(repoID, pipeline, workflowID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) *woodpecker.AgentSnapshot); ok {
+		r0 = returnFunc(repoID, pipeline, workflowID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.AgentSnapshot)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, int64, int64) error); ok {
+		r1 = returnFunc(repoID, pipeline, workflowID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_WorkflowAgent_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowAgent'
+type MockClient_WorkflowAgent_Call struct {
+	*mock.Call
+}
+
+// WorkflowAgent is a helper method to define mock.On call
+//   - repoID int64
+//   - pipeline int64
+//   - workflowID int64
+func (_e *MockClient_Expecter) WorkflowAgent(repoID any, pipeline any, workflowID any) *MockClient_WorkflowAgent_Call {
+	return &MockClient_WorkflowAgent_Call{Call: _e.mock.On("WorkflowAgent", repoID, pipeline, workflowID)}
+}
+
+func (_c *MockClient_WorkflowAgent_Call) Run(run func(repoID int64, pipeline int64, workflowID int64)) *MockClient_WorkflowAgent_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_WorkflowAgent_Call) Return(agentSnapshot *woodpecker.AgentSnapshot, err error) *MockClient_WorkflowAgent_Call {
+	_c.Call.Return(agentSnapshot, err)
+	return _c
+}
+
+func (_c *MockClient_WorkflowAgent_Call) RunAndReturn(run func(repoID int64, pipeline int64, workflowID int64) (*woodpecker.AgentSnapshot, error)) *MockClient_WorkflowAgent_Call {
+	_c.Call.Return(run)
+	return _c
+}
