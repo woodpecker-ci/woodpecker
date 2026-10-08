@@ -17,8 +17,9 @@ Go code is formatted by `make format` and linted by `make lint`. The linters are
 
 ## Breaking changes
 
-Every change that users, admins or API clients have to react to needs an entry in the [migration guide](/migrations) (`docs/src/pages/migrations.md`). This includes deprecations. Add it to the `next` version, in the section of the affected group (user-facing, admin-facing or API changes).
+Every change that users, admins or API clients have to react to needs an entry in the [migration guide](/migrations) (`docs/src/pages/migrations.md`).
+This includes deprecations. Add it to the `next` version, in the section of the affected group (user-facing, admin-facing or API changes).
 
-Write one entry per change, do not combine multiple changes into one entry.
+Write one entry per change. Only combine multiple changes if the result stays readable, understandable, and is topic-related.
 
 Changes of the pipeline configuration have to follow the [deprecation policy](./40-deprecations.md) too.
