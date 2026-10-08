@@ -2,6 +2,27 @@
 
 Creating a new plugin is simple: Build a Docker container which uses your plugin logic as the ENTRYPOINT.
 
+## Security
+
+A plugin is not secure just because it is a plugin. For Woodpecker it is a step like any other that runs your image. Many plugins only save the user from writing some commands, and that is fine.
+
+The difference is that a plugin can get more trust than a normal step:
+
+- A secret can be limited to a list of plugins with the [plugins filter](../40-secrets.md#plugins-filter). The owner of the secret then relies on these plugins not to reveal it.
+- Admins can allow a plugin to run privileged with [`WOODPECKER_PLUGINS_PRIVILEGED`](../../30-administration/10-configuration/10-server.md#plugins_privileged).
+- A clone plugin can get the Git credentials of the repository if it is a [trusted clone plugin](../75-project-settings.md#custom-trusted-clone-plugins).
+
+This trust is given to your image, not to the person who writes the workflow. Everybody who can change the workflow, for example with a pull request, controls all settings and all files in the workspace. So if your plugin should be trusted, treat **settings and workspace as untrusted input** that must not be able to get the secrets or the privileges out of your plugin.
+
+A plugin has to be designed for this. If yours is not, say so in its documentation, so nobody adds it to one of these lists. If it is, follow these rules:
+
+- Do not allow arbitrary code execution. Do not add settings for commands, scripts or free arguments that are passed to a shell. Keep in mind that many tools execute code from the workspace, like build scripts, hooks or config files.
+- Do not load settings from files in the workspace, like a `.env` file.
+- Never print secrets, also not in debug output or error messages. Woodpecker masks secrets in the logs, but only if they show up unchanged. An encoded secret (e.g. base64) is not masked.
+- If settings support placeholders like `{{ NAME }}`, only replace a fixed list of values. Never give them access to the whole environment, as it contains the secrets. Never replace placeholders in text you did not get from a setting, like file content or the response of a service.
+- Pass secrets only to the programs that need them. Every program your plugin starts gets its whole environment by default.
+- A secret is sent to the place the settings point to, like a server URL. You can not prevent a changed workflow from sending it somewhere else, so tell your users to limit such secrets with the [events filter](../40-secrets.md#events-filter) too.
+
 ## Settings
 
 To allow users to configure the behavior of your plugin, you should use `settings:`.
@@ -42,7 +63,7 @@ Values like this are converted to JSON and then passed to your plugin. In the ex
 
 ### Secrets
 
-Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage).
+Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage). See [security](#security) for what your plugin has to take care of.
 
 ## Plugin library
 
