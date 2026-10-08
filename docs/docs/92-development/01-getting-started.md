@@ -1,8 +1,28 @@
 # Getting started
 
+## Nix development shell
+
+If you use [Nix](https://nixos.org/), you can skip the install steps below. The repository contains a `flake.nix` that does it all for you:
+
+```bash
+nix develop
+```
+
+This opens a shell with Go, make, Node.js, `pnpm`, `protoc` and all development tools. The tools are built with the same Go version as Woodpecker. Only [`pre-commit`](#install-pre-commit-optional) is not included.
+
 ## Install Go
 
-Install Golang as described by [this guide](https://go.dev/doc/install).
+Install Golang as described by [this guide](https://go.dev/doc/install). You need at least the version that is set in the `go.mod` file.
+
+:::info
+An older Go version can still build Woodpecker, as it downloads the needed toolchain on its own. But tools that are installed with `go install`, like `golangci-lint`, are then built with the old version and refuse to work:
+
+```none
+Error: can't load config: the Go language version (go1.26) used to build golangci-lint is lower than the targeted Go version (1.27.0)
+```
+
+In this case update Go and install the tools again.
+:::
 
 ## Install make
 
@@ -13,6 +33,20 @@ Install make on:
 - Ubuntu: `apt install make` - [Docs](https://wiki.ubuntuusers.de/Makefile/)
 - [Windows](https://stackoverflow.com/a/32127632/8461267)
 - Mac OS: `brew install make`
+
+## Install development tools (optional)
+
+The make targets use some tools to lint, format and generate code. You can install them with:
+
+```bash
+make install-tools
+```
+
+They are installed with `go install`, so make sure that the `bin` folder of your Go path (`go env GOPATH`) is part of your `PATH`.
+
+If a tool is not installed, `make lint`, `make format` and `make generate` start it with `go run` instead. This works too, but is slower.
+
+To generate the gRPC code, which is a part of `make generate`, you also need [`protoc`](https://protobuf.dev/installation/). It is not installed by `make install-tools`.
 
 ## Install Node.js & `pnpm`
 
