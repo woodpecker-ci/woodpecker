@@ -160,6 +160,24 @@ func convertPullRequestEvent(ev *bitbucket.PullRequestEvent, baseURL string) *mo
 	return pipeline
 }
 
+// convertCommit converts a Bitbucket Data Center commit to the common
+// Woodpecker commit structure.
+func convertCommit(from *bitbucket.Commit, forgeURL string) *model.Commit {
+	commit := &model.Commit{
+		SHA:      from.ID,
+		Message:  from.Message,
+		ForgeURL: forgeURL,
+		Author: model.CommitAuthor{
+			Name:  from.Author.Name,
+			Email: from.Author.Email,
+		},
+	}
+	if authored := time.Time(from.Authored); !authored.IsZero() {
+		commit.Timestamp = authored.UTC().Unix()
+	}
+	return commit
+}
+
 func authorLabel(name string) string {
 	var result string
 

@@ -387,10 +387,14 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	}
 	for _, branch := range branches {
 		if branch.DisplayID == b {
-			return &model.Commit{
-				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
-			}, nil
+			// the branch only carries the sha, load the commit for the rest
+			commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, branch.LatestCommit)
+			if err != nil {
+				return nil, fmt.Errorf("unable to read commit: %w", err)
+			}
+			head := convertCommit(commit, fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit))
+			head.SHA = branch.LatestCommit
+			return head, nil
 		}
 	}
 	return nil, fmt.Errorf("no matching branches found")
@@ -566,7 +570,13 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
 	}
 
-	p.Commit.Message = commit.Message
+	pushed := p.Commit
+	p.Commit = convertCommit(commit, fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, pushed.SHA))
+	p.Commit.SHA = pushed.SHA
+	if p.Commit.Timestamp == 0 {
+		// keep the time of the push if the commit does not report its own
+		p.Commit.Timestamp = pushed.Timestamp
+	}
 
 	opts := &bitbucket.CompareChangesOptions{}
 	if currCommit != "" {
