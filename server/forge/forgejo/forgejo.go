@@ -458,10 +458,7 @@ func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, 
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.Commit.ID,
-		ForgeURL: b.Commit.URL,
-	}, nil
+	return convertPayloadCommit(b.Commit), nil
 }
 
 func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {

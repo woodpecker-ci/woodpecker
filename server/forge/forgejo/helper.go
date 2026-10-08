@@ -71,6 +71,26 @@ func toTeam(from *forgejo.Organization, link string) *model.Team {
 	}
 }
 
+// convertPayloadCommit converts a commit of a webhook payload or a branch to the
+// common Woodpecker commit structure.
+func convertPayloadCommit(from *forgejo.PayloadCommit) *model.Commit {
+	commit := &model.Commit{
+		SHA:      from.ID,
+		Message:  from.Message,
+		ForgeURL: from.URL,
+	}
+	if from.Author != nil {
+		commit.Author = model.CommitAuthor{
+			Name:  from.Author.Name,
+			Email: from.Author.Email,
+		}
+	}
+	if !from.Timestamp.IsZero() {
+		commit.Timestamp = from.Timestamp.Unix()
+	}
+	return commit
+}
+
 // pipelineFromPush extracts the Pipeline data from a Forgejo push hook.
 func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
@@ -78,28 +98,26 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	var message string
+	headCommit := hook.HeadCommit
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
-		message = hook.Commits[0].Message
+		headCommit = hook.Commits[0]
 		if len(hook.Commits) == 1 {
 			link = hook.Commits[0].URL
 		}
 	} else {
-		message = hook.HeadCommit.Message
 		link = hook.HeadCommit.URL
 	}
 
+	commit := convertPayloadCommit(&headCommit)
+	commit.SHA = hook.After
+	if commit.Timestamp == 0 {
+		commit.Timestamp = time.Now().UTC().Unix()
+	}
+
 	return &model.Pipeline{
-		Event: model.EventPush,
-		Commit: &model.Commit{
-			SHA:       hook.After,
-			Message:   message,
-			Timestamp: time.Now().UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: hook.Sender.Email,
-			},
-		},
+		Event:        model.EventPush,
+		Commit:       commit,
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),

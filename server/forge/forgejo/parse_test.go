@@ -66,10 +66,12 @@ func TestForgejoParser(t *testing.T) {
 				Author: "6543",
 				Event:  "push",
 				Commit: &model.Commit{
-					SHA:     "28c3613ae62640216bea5e7dc71aa65356e4298b",
-					Message: "Delete '.woodpecker/.check.yml'\n",
+					SHA:      "28c3613ae62640216bea5e7dc71aa65356e4298b",
+					Message:  "Delete '.woodpecker/.check.yml'\n",
+					ForgeURL: "https://codeberg.org/meisam/woodpecktester/commit/28c3613ae62640216bea5e7dc71aa65356e4298b",
 					Author: model.CommitAuthor{
-						Email: "6543@obermui.de",
+						Name:  "meisam",
+						Email: "meisam@noreply.codeberg.org",
 					},
 				},
 				Branch:       "fdsafdsa",
@@ -104,9 +106,11 @@ func TestForgejoParser(t *testing.T) {
 				Author: "gordon",
 				Event:  "push",
 				Commit: &model.Commit{
-					SHA:     "ef98532add3b2feb7a137426bba1248724367df5",
-					Message: "bump\n",
+					SHA:      "ef98532add3b2feb7a137426bba1248724367df5",
+					Message:  "bump\n",
+					ForgeURL: "http://forgejo.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
 					Author: model.CommitAuthor{
+						Name:  "Gordon the Gopher",
 						Email: "gordon@golang.org",
 					},
 				},
@@ -142,10 +146,12 @@ func TestForgejoParser(t *testing.T) {
 				Author: "test-user",
 				Event:  "push",
 				Commit: &model.Commit{
-					SHA:     "29be01c073851cf0db0c6a466e396b725a670453",
-					Message: "add some text\n",
+					SHA:      "29be01c073851cf0db0c6a466e396b725a670453",
+					Message:  "add some text\n",
+					ForgeURL: "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
 					Author: model.CommitAuthor{
-						Email: "test@noreply.localhost",
+						Name:  "6543",
+						Email: "6543@obermui.de",
 					},
 				},
 				Branch:       "main",
