@@ -37,6 +37,31 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
+// getOrCreateOrg resolves the org named owner on the given forge, creating it
+// from forge data if it is not known yet.
+func getOrCreateOrg(c *gin.Context, _store store.Store, _forge forge.Forge, user *model.User, forgeID int64, owner string) (*model.Org, error) {
+	org, err := _store.OrgFindByName(owner, forgeID)
+	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
+		return nil, err
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.ErrRecordNotExist) {
+		org, err = _forge.Org(c, user, owner)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch organization from forge: %w", err)
+		}
+
+		org.ForgeID = forgeID
+		err = _store.OrgCreate(org)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create organization: %w", err)
+		}
+	}
+
+	return org, nil
+}
+
 // PostRepo
 //
 //	@Summary	Activate a repository
@@ -123,31 +148,12 @@ func PostRepo(c *gin.Context) {
 	}
 
 	// find org of repo
-	var org *model.Org
-	org, err = _store.OrgFindByName(repo.Owner, user.ForgeID)
-	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
-		c.String(http.StatusInternalServerError, err.Error())
+	org, err := getOrCreateOrg(c, _store, _forge, user, user.ForgeID, repo.Owner)
+	if err != nil {
+		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
-	}
-
-	// create an org if it doesn't exist yet
-	if errors.Is(err, types.ErrRecordNotExist) {
-		org, err = _forge.Org(c, user, repo.Owner)
-		if err != nil {
-			msg := fmt.Sprintf("Organization %s not found in DB. Attempting to create new one.", repo.Owner)
-			log.Error().Err(err).Msg(msg)
-			c.String(http.StatusInternalServerError, msg)
-			return
-		}
-
-		org.ForgeID = user.ForgeID
-		err = _store.OrgCreate(org)
-		if err != nil {
-			msg := fmt.Sprintf("Failed to create organization %s.", repo.Owner)
-			log.Error().Err(err).Msg(msg)
-			c.String(http.StatusInternalServerError, msg)
-			return
-		}
 	}
 
 	repo.OrgID = org.ID
@@ -277,6 +283,10 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
+		if repo.Timeout < 1 {
+			c.String(http.StatusBadRequest, "Timeout must be at least 1 minute")
+			return
+		}
 	}
 	if in.Config != nil {
 		repo.Config = *in.Config
@@ -601,6 +611,18 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	repo.Update(from)
+
+	// the owner changed, so re-resolve the org of the repo: org-level
+	// secrets and registries of the old owner must no longer apply
+	org, err := getOrCreateOrg(c, _store, _forge, user, repo.ForgeID, repo.Owner)
+	if err != nil {
+		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+	repo.OrgID = org.ID
+
 	errStore := _store.UpdateRepo(repo)
 	if errStore != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, errStore)
@@ -661,7 +683,7 @@ func GetAllRepos(c *gin.Context) {
 
 	active, _ := strconv.ParseBool(c.Query("active"))
 
-	repos, err := _store.RepoListAll(active, session.Pagination(c))
+	repos, err := _store.RepoListAll(active, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
@@ -682,7 +704,7 @@ func GetAllRepos(c *gin.Context) {
 func RepairAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	repos, err := _store.RepoListAll(true, &model.ListOptions{All: true})
+	repos, err := _store.RepoListAll(true, &model.ListOptionsWithAll{All: true})
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return

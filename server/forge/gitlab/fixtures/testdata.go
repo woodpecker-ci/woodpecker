@@ -76,6 +76,9 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/user":
 			_, _ = w.Write(currentUserPayload)
 			return
+		case "/api/v4/groups":
+			_, _ = w.Write(groupsPayload)
+			return
 		}
 
 		// else return a 404

@@ -14,7 +14,10 @@
 
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathAgents     = "%s/api/agents"
@@ -29,11 +32,26 @@ func (c *client) AgentCreate(in *Agent) (*Agent, error) {
 	return out, c.post(uri, in, out)
 }
 
-// AgentList returns a list of all registered agents.
+// AgentListOptions represents the options for the agent list.
+type AgentListOptions struct {
+	ListOptions
+}
+
+// AgentList returns the first page of registered agents.
+//
+// Deprecated: use AgentListWithOpts instead, which can ask for any page.
 func (c *client) AgentList() ([]*Agent, error) {
 	out := make([]*Agent, 0, 5)
 	uri := fmt.Sprintf(pathAgents, c.addr)
 	return out, c.get(uri, &out)
+}
+
+// AgentListWithOpts returns a page of registered agents.
+func (c *client) AgentListWithOpts(opt AgentListOptions) ([]*Agent, error) {
+	out := make([]*Agent, 0, 5)
+	uri, _ := url.Parse(fmt.Sprintf(pathAgents, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	return out, c.get(uri.String(), &out)
 }
 
 // Agent returns an agent by id.

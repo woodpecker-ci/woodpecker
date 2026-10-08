@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_convertStatus(t *testing.T) {
+func TestConvertStatus(t *testing.T) {
 	tests := []struct {
 		from model.StatusValue
 		to   bitbucket.BuildStatusState
@@ -40,8 +40,28 @@ func Test_convertStatus(t *testing.T) {
 			to:   bitbucket.BuildStatusStateInProgress,
 		},
 		{
+			from: model.StatusCreated,
+			to:   bitbucket.BuildStatusStateInProgress,
+		},
+		{
 			from: model.StatusSuccess,
 			to:   bitbucket.BuildStatusStateSuccessful,
+		},
+		{
+			from: model.StatusFailure,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusSkipped,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusCanceled,
+			to:   bitbucket.BuildStatusStateFailed,
+		},
+		{
+			from: model.StatusBlocked,
+			to:   bitbucket.BuildStatusStateFailed,
 		},
 		{
 			from: model.StatusValue("other"),
@@ -54,7 +74,7 @@ func Test_convertStatus(t *testing.T) {
 	}
 }
 
-func Test_convertRepo(t *testing.T) {
+func TestConvertRepo(t *testing.T) {
 	from := &bitbucket.Repository{
 		ID:   uint64(1234),
 		Slug: "REPO",
@@ -92,7 +112,7 @@ func Test_convertRepo(t *testing.T) {
 	}, to)
 }
 
-func Test_convertRepositoryPushEvent(t *testing.T) {
+func TestConvertRepositoryPushEvent(t *testing.T) {
 	now := time.Now()
 	tests := []struct {
 		from *bitbucket.RepositoryPushEvent
@@ -127,13 +147,11 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 		},
 		{
 			from: &bitbucket.RepositoryPushEvent{
-				Event: bitbucket.Event{
-					Date: bitbucket.ISOTime(now),
-					Actor: bitbucket.User{
-						Name:  "John Doe",
-						Email: "john.doe@mail.com",
-						Slug:  "john.doe_mail.com",
-					},
+				Date: bitbucket.ISOTime(now),
+				Actor: bitbucket.User{
+					Name:  "John Doe",
+					Email: "john.doe@mail.com",
+					Slug:  "john.doe_mail.com",
 				},
 				Repository: bitbucket.Repository{
 					Slug: "REPO",
@@ -172,17 +190,15 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 	}
 }
 
-func Test_convertPullRequestEvent(t *testing.T) {
+func TestConvertPullRequestEvent(t *testing.T) {
 	now := time.Now()
 	from := &bitbucket.PullRequestEvent{
-		Event: bitbucket.Event{
-			Date:     bitbucket.ISOTime(now),
-			EventKey: bitbucket.EventKeyPullRequestFrom,
-			Actor: bitbucket.User{
-				Name:  "John Doe",
-				Email: "john.doe@mail.com",
-				Slug:  "john.doe_mail.com",
-			},
+		Date:     bitbucket.ISOTime(now),
+		EventKey: bitbucket.EventKeyPullRequestFrom,
+		Actor: bitbucket.User{
+			Name:  "John Doe",
+			Email: "john.doe@mail.com",
+			Slug:  "john.doe_mail.com",
 		},
 		PullRequest: bitbucket.PullRequest{
 			ID:    123,
@@ -231,17 +247,15 @@ func Test_convertPullRequestEvent(t *testing.T) {
 	}, to)
 }
 
-func Test_convertPullRequestCloseEvent(t *testing.T) {
+func TestConvertPullRequestCloseEvent(t *testing.T) {
 	now := time.Now()
 	from := &bitbucket.PullRequestEvent{
-		Event: bitbucket.Event{
-			Date:     bitbucket.ISOTime(now),
-			EventKey: bitbucket.EventKeyPullRequestMerged,
-			Actor: bitbucket.User{
-				Name:  "John Doe",
-				Email: "john.doe@mail.com",
-				Slug:  "john.doe_mail.com",
-			},
+		Date:     bitbucket.ISOTime(now),
+		EventKey: bitbucket.EventKeyPullRequestMerged,
+		Actor: bitbucket.User{
+			Name:  "John Doe",
+			Email: "john.doe@mail.com",
+			Slug:  "john.doe_mail.com",
 		},
 		PullRequest: bitbucket.PullRequest{
 			ID:    123,
@@ -290,7 +304,7 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 	}, to)
 }
 
-func Test_convertUser(t *testing.T) {
+func TestConvertUser(t *testing.T) {
 	from := &bitbucket.User{
 		Slug:  "slug",
 		Email: "john.doe@mail.com",
@@ -305,7 +319,7 @@ func Test_convertUser(t *testing.T) {
 	}, to)
 }
 
-func Test_convertProjectsToTeams(t *testing.T) {
+func TestConvertProjectsToTeams(t *testing.T) {
 	tests := []struct {
 		projects []*bitbucket.Project
 		baseURL  string
@@ -351,14 +365,8 @@ func Test_convertProjectsToTeams(t *testing.T) {
 	}
 }
 
-func Test_convertListOptions(t *testing.T) {
+func TestConvertListOptions(t *testing.T) {
 	t.Parallel()
-
-	t.Run("all returns empty options", func(t *testing.T) {
-		t.Parallel()
-		got := convertListOptions(&model.ListOptions{All: true, Page: 3, PerPage: 50})
-		assert.Equal(t, bitbucket.ListOptions{}, got)
-	})
 
 	t.Run("paged computes limit and start", func(t *testing.T) {
 		t.Parallel()
@@ -374,7 +382,7 @@ func Test_convertListOptions(t *testing.T) {
 	})
 }
 
-func Test_updateUserCredentials(t *testing.T) {
+func TestUpdateUserCredentials(t *testing.T) {
 	t.Parallel()
 
 	u := &model.User{}
@@ -390,7 +398,7 @@ func Test_updateUserCredentials(t *testing.T) {
 	assert.Equal(t, expiry.UTC().Unix(), u.Expiry)
 }
 
-func Test_anonymizeLink(t *testing.T) {
+func TestAnonymizeLink(t *testing.T) {
 	t.Parallel()
 
 	t.Run("strips user info", func(t *testing.T) {

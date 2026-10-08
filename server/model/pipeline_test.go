@@ -57,6 +57,16 @@ func TestPipelineToAPIModel(t *testing.T) {
 			wantIsPrerelease: true,
 		},
 		{
+			name:        "manual without message uses default message",
+			pipeline:    Pipeline{Event: EventManual, Branch: "main", Commit: &Commit{Message: "head commit"}},
+			wantMessage: "MANUAL PIPELINE @ main",
+		},
+		{
+			name:        "manual with message uses custom message",
+			pipeline:    Pipeline{Event: EventManual, Branch: "main", ManualMessage: "redeploy", Commit: &Commit{Message: "head commit"}},
+			wantMessage: "MANUAL: redeploy @ main",
+		},
+		{
 			name:     "push leaves derived fields untouched",
 			pipeline: Pipeline{Event: EventPush, Commit: &Commit{Message: "fix bug"}},
 			// message is the stored commit message, not overwritten
@@ -64,14 +74,14 @@ func TestPipelineToAPIModel(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			p := tc.pipeline
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := tt.pipeline
 			ap := p.ToAPIModel()
-			assert.Equal(t, tc.wantTitle, ap.Title)
-			assert.Equal(t, tc.wantMessage, ap.Message)
-			assert.Equal(t, tc.wantSender, ap.Sender)
-			assert.Equal(t, tc.wantIsPrerelease, ap.IsPrerelease)
+			assert.Equal(t, tt.wantTitle, ap.Title)
+			assert.Equal(t, tt.wantMessage, ap.Message)
+			assert.Equal(t, tt.wantSender, ap.Sender)
+			assert.Equal(t, tt.wantIsPrerelease, ap.IsPrerelease)
 		})
 	}
 }

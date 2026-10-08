@@ -16,11 +16,14 @@ package encryption
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
+
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestShortMessageLongKey(t *testing.T) {
@@ -161,4 +164,84 @@ func TestRandomBytesLength(t *testing.T) {
 		bytes := random.GetRandomBytes(length)
 		assert.Len(t, bytes, int(length), "random bytes should have requested length")
 	}
+}
+
+func TestKeyDerivationKnownVector(t *testing.T) {
+	// Pins the password -> AES key derivation (SHAKE256, 32 bytes) so that
+	// refactorings do not silently break decryption of existing data.
+	aes := &aesEncryptionService{}
+	key, err := aes.hash([]byte("this-is-a-test-password"))
+	require.NoError(t, err)
+	assert.Equal(t, "fd0331e5103fcd88306554e97f1e25e1b7fa73622ed18dd8a396d194f9271f6a", hex.EncodeToString(key))
+}
+
+func TestKeyIDDeterministic(t *testing.T) {
+	// The key id must be stable across service instances (server restarts),
+	// otherwise validateKey rejects the correct key after a restart.
+	password := string(random.GetRandomBytes(32))
+
+	first := &aesEncryptionService{}
+	require.NoError(t, first.loadCipher(password))
+
+	second := &aesEncryptionService{}
+	require.NoError(t, second.loadCipher(password))
+
+	assert.NotEmpty(t, first.keyID)
+	assert.Equal(t, first.keyID, second.keyID)
+}
+
+func TestKeyIDDiffersPerPassword(t *testing.T) {
+	first := &aesEncryptionService{}
+	require.NoError(t, first.loadCipher("password-one"))
+
+	second := &aesEncryptionService{}
+	require.NoError(t, second.loadCipher("password-two"))
+
+	assert.NotEqual(t, first.keyID, second.keyID)
+}
+
+func TestKeyIDDiffersFromKey(t *testing.T) {
+	// The key id is stored (encrypted) in the database and must never leak
+	// the raw AES key or the plain key derivation of the password.
+	aes := &aesEncryptionService{}
+	require.NoError(t, aes.loadCipher("some-password"))
+
+	key, err := aes.hash([]byte("some-password"))
+	require.NoError(t, err)
+
+	assert.NotEqual(t, hex.EncodeToString(key), aes.keyID)
+	assert.NotContains(t, aes.keyID, hex.EncodeToString(key))
+}
+
+func TestValidateKeyAcrossRestart(t *testing.T) {
+	password := string(random.GetRandomBytes(32))
+
+	// first service instance: enable encryption and store the sample
+	first := &aesEncryptionService{}
+	require.NoError(t, first.loadCipher(password))
+	sample, err := first.Encrypt(first.keyID, keyIDAssociatedData)
+	require.NoError(t, err)
+
+	// second service instance ("after restart"): same password, stored sample
+	s := store_mocks.NewMockStore(t)
+	s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
+
+	second := &aesEncryptionService{store: s}
+	require.NoError(t, second.loadCipher(password))
+	assert.NoError(t, second.validateKey())
+}
+
+func TestValidateKeyWrongPassword(t *testing.T) {
+	// sample was created with a different password -> key must be rejected
+	first := &aesEncryptionService{}
+	require.NoError(t, first.loadCipher("correct-password"))
+	sample, err := first.Encrypt(first.keyID, keyIDAssociatedData)
+	require.NoError(t, err)
+
+	s := store_mocks.NewMockStore(t)
+	s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
+
+	second := &aesEncryptionService{store: s}
+	require.NoError(t, second.loadCipher("wrong-password"))
+	assert.Error(t, second.validateKey())
 }

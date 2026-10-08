@@ -84,3 +84,61 @@ func TestRestartPipeline(t *testing.T) {
 	assert.Equal(t, originalFinished.ID, originalAfter[0].PipelineID,
 		"original's workflow must still be linked to the original pipeline")
 }
+
+// secretPipelineYAML is a pipeline that uses a secret via from_secret. It will
+// fail during compilation if the secret doesn't exist (blocking error), then
+// succeed after the secret is created and the pipeline is restarted.
+var secretPipelineYAML = []byte(`
+steps:
+  - name: use-secret
+    image: dummy
+    commands:
+      - echo "secret value is $MY_SECRET"
+    environment:
+      MY_SECRET:
+        from_secret: my_secret
+`)
+
+// TestRestartPipelineAfterSecretAdded verifies that restarting a pipeline
+// that originally failed due to a missing secret works after the secret is
+// created. This is a regression test for #2982. Previously, pipelines that
+// failed with a blocking parse error did not persist their configs, making
+// restart show "pipeline definition not found" instead of re-evaluating.
+func TestRestartPipelineAfterSecretAdded(t *testing.T) {
+	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
+		{Name: ".woodpecker.yaml", Data: secretPipelineYAML},
+	})
+	agent := setup.StartAgent(t, env.GRPCAddr)
+	setup.WaitForAgentRegistered(t, env.Store, agent)
+
+	// Create the pipeline: it should fail because the secret doesn't exist.
+	original, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
+	require.NoError(t, err, "create should not return error (pipeline is stored with error status)")
+	require.NotNil(t, original)
+
+	// The pipeline should be in error state due to missing secret.
+	originalResult := setup.WaitForPipeline(t, env.Store, original.ID)
+	assert.Equal(t, model.StatusError, originalResult.Status,
+		"pipeline should fail with error status when secret is missing")
+
+	// Now create the missing secret.
+	err = env.Store.SecretCreate(&model.Secret{
+		RepoID: env.Fixtures.Repo.ID,
+		Name:   "my_secret",
+		Value:  "super-secret-value",
+		Events: []model.WebhookEvent{model.EventPush, model.EventTag, model.EventPull, model.EventDeploy},
+	})
+	require.NoError(t, err, "create secret")
+
+	// Restart the failed pipeline: this should now succeed.
+	restarted, err := pipeline.Restart(t.Context(), env.Store, originalResult, env.Fixtures.Owner, env.Fixtures.Repo, nil)
+	require.NoError(t, err, "restart should succeed now that secret exists")
+	require.NotNil(t, restarted, "restart should return a pipeline")
+
+	// Wait for the restarted pipeline to finish.
+	restartedResult := setup.WaitForPipeline(t, env.Store, restarted.ID)
+	assert.Equal(t, model.StatusSuccess, restartedResult.Status,
+		"restarted pipeline should succeed after secret is added")
+	assert.Equal(t, originalResult.Number, restartedResult.Parent,
+		"restarted pipeline should reference original as parent")
+}

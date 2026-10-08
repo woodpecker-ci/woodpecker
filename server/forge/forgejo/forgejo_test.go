@@ -20,6 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -41,7 +42,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.skipVerify)
 }
 
-func Test_forgejo(t *testing.T) {
+func TestForgejo(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
@@ -96,6 +97,19 @@ func Test_forgejo(t *testing.T) {
 	t.Run("not found error", func(t *testing.T) {
 		_, err := c.Repos(ctx, fakeUserNoRepos, &model.ListOptions{Page: 1, PerPage: 10})
 		assert.Error(t, err)
+	})
+
+	t.Run("pull request list", func(t *testing.T) {
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Len(t, prs, 1)
+		assert.Equal(t, "add feature X", prs[0].Title)
+	})
+	t.Run("pull request list for repo without commits", func(t *testing.T) {
+		// Forgejo answers with 404 for repos without commits; that must be treated as an empty list, not an error
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepoEmpty, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Empty(t, prs)
 	})
 
 	t.Run("register repository", func(t *testing.T) {
@@ -160,6 +174,12 @@ var (
 		FullName: "test_name/repo_not_found",
 	}
 
+	fakeRepoEmpty = &model.Repo{
+		Owner:    "test_name",
+		Name:     "repo_without_commits",
+		FullName: "test_name/repo_without_commits",
+	}
+
 	fakePipeline = &model.Pipeline{
 		Commit: &model.Commit{SHA: "9ecad50"},
 	}
@@ -169,3 +189,29 @@ var (
 		State: model.StatusSuccess,
 	}
 )
+
+func TestGetStatus(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		status model.StatusValue
+		want   forgejo.StatusState
+	}{
+		{model.StatusPending, forgejo.StatusPending},
+		{model.StatusBlocked, forgejo.StatusPending},
+		{model.StatusCreated, forgejo.StatusPending},
+		{model.StatusRunning, forgejo.StatusPending},
+		{model.StatusSuccess, forgejo.StatusSuccess},
+		{model.StatusFailure, forgejo.StatusFailure},
+		{model.StatusKilled, forgejo.StatusFailure},
+		{model.StatusSkipped, forgejo.StatusFailure},
+		{model.StatusCanceled, forgejo.StatusFailure},
+		{model.StatusDeclined, forgejo.StatusWarning},
+		{model.StatusError, forgejo.StatusError},
+		{model.StatusValue("bogus"), forgejo.StatusFailure},
+	}
+
+	for _, tt := range tests {
+		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
+	}
+}

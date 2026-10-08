@@ -717,25 +717,44 @@
       "type": "string"
     },
     "step_backend_options": {
-      "description": "Advanced options for the different agent backends",
+      "description": "Advanced options for the different agent backends. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#backend_options",
       "type": "object",
       "properties": {
+        "docker": {
+          "$ref": "#/definitions/step_backend_docker"
+        },
         "kubernetes": {
           "$ref": "#/definitions/step_backend_kubernetes"
         }
       }
     },
-    "step_backend_kubernetes": {
-      "description": "Advanced options for the kubernetes agent backends",
+    "step_backend_docker": {
+      "description": "Advanced options for the Docker backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#step-specific-configuration",
       "type": "object",
       "properties": {
+        "user": {
+          "description": "User or user:group used to run the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#run-user",
+          "type": "string"
+        }
+      }
+    },
+    "step_backend_kubernetes": {
+      "description": "Advanced options for the Kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
+      "type": "object",
+      "properties": {
+        "resources": {
+          "description": "CPU, memory, and other resource requests and limits. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#resources",
+          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        },
         "labels": {
+          "description": "Additional Kubernetes pod labels. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#annotations-and-labels",
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]
           }
         },
         "annotations": {
+          "description": "Additional Kubernetes pod annotations. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#annotations-and-labels",
           "type": "object",
           "additionalProperties": {
             "type": ["boolean", "string", "number"]
@@ -750,14 +769,38 @@
           "minLength": 1
         },
         "securityContext": {
+          "description": "Kubernetes pod and container security context. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
         "runtimeClassName": {
           "description": "Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
+        "serviceAccountName": {
+          "description": "Name of the Kubernetes service account mounted into the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
+          "type": "string"
+        },
+        "workspaceVolume": {
+          "description": "Whether the default workspace volume is mounted into a service pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#workspace-volume",
+          "type": "boolean"
+        },
+        "hostUsers": {
+          "description": "Whether the pod uses the host user namespace. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#user-namespaces",
+          "type": "boolean"
+        },
+        "nodeSelector": {
+          "description": "Labels used to select the node on which the step is executed. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#node-selector",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "affinity": {
+          "description": "Kubernetes affinity and anti-affinity rules for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#affinity",
+          "type": "object"
+        },
         "secrets": {
-          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+          "description": "The secrets section defines a list of references to native Kubernetes secrets. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
           "type": "array",
           "items": {
             "$ref": "#/definitions/step_kubernetes_secret"
@@ -783,61 +826,76 @@
       "type": "object",
       "properties": {
         "privileged": {
+          "description": "Whether the container runs in privileged mode. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "boolean"
         },
         "runAsNonRoot": {
+          "description": "Whether the pod must run as a non-root user. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "boolean"
         },
         "runAsUser": {
+          "description": "User ID used to run the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
         "runAsGroup": {
+          "description": "Group ID used to run the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
         "fsGroup": {
+          "description": "Filesystem group ID for mounted volumes. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "number"
         },
+        "fsGroupChangePolicy": {
+          "description": "Policy for changing mounted-volume ownership. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "string"
+        },
         "seccompProfile": {
+          "description": "Seccomp profile for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_secprofile"
         },
         "apparmorProfile": {
+          "description": "AppArmor profile for the pod. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        },
+        "allowPrivilegeEscalation": {
+          "description": "Whether the container can gain additional privileges. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "boolean"
+        },
+        "capabilities": {
+          "description": "Linux capabilities removed from the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "$ref": "#/definitions/step_backend_kubernetes_capabilities"
+        }
+      }
+    },
+    "step_backend_kubernetes_capabilities": {
+      "description": "Linux capabilities to remove from the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+      "type": "object",
+      "properties": {
+        "drop": {
+          "description": "Linux capabilities to remove. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
     "step_backend_kubernetes_secprofile": {
-      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
+      "description": "Pod or container security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
       "type": "object",
       "properties": {
         "type": {
+          "description": "Security profile type. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "string"
         },
         "localhostProfile": {
+          "description": "Path to the local security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
           "type": "string"
         }
       }
     },
     "step_kubernetes_resources_object": {
-      "description": "A list of kubernetes resource mappings",
-      "type": "object",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
-    "step_backend_kubernetes_service_account": {
-      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
-      "type": "object",
-      "properties": {
-        "requests": {
-          "$ref": "#/definitions/step_kubernetes_service_account_object"
-        },
-        "limits": {
-          "$ref": "#/definitions/step_kubernetes_service_account_object"
-        }
-      }
-    },
-    "step_kubernetes_service_account_object": {
-      "description": "A list of kubernetes resource mappings",
+      "description": "Kubernetes resource quantities keyed by resource name. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#resources",
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -911,20 +969,35 @@
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
       "oneOf": [
         {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/service"
-          },
-          "minProperties": 1
+          "$ref": "#/definitions/services_map"
         },
         {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/service"
-          },
-          "minLength": 1
+          "$ref": "#/definitions/services_list"
         }
       ]
+    },
+    "services_map": {
+      "description": "Services keyed by name, where the map key is used as the service name. Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/service"
+      },
+      "minProperties": 1
+    },
+    "services_list": {
+      "description": "Services as a list. There is no map key to take the name from, so each service must set `name` itself. Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/definitions/service"
+          },
+          {
+            "required": ["name"]
+          }
+        ]
+      },
+      "minLength": 1
     },
     "service": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
@@ -934,7 +1007,7 @@
       "required": ["image"],
       "properties": {
         "name": {
-          "description": "The name of the service. Can be used if using the array style services list",
+          "description": "The name of the service. It is used as the hostname other containers reach the service by, and is required when using the array style services list",
           "type": "string"
         },
         "image": {

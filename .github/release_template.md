@@ -21,6 +21,7 @@
 ### Release
 
 - [ ] Test the latest container images to make sure they work as expected
+- [ ] Executed `FUZZ_TIME=90s make fuzz` to make sure we stay hardened against user input
 - [ ] Update `https://ci.woodpecker.org` to the latest version of `next` and verify that it works as expected
 - [ ] Merge documentation PR (shortly before release)
 - [ ] Merge the release PR to start the release pipeline

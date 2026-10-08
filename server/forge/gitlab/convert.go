@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -75,8 +75,8 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo, projectMember),
-			Push:  isWrite(projectMember),
-			Admin: isAdmin(projectMember),
+			Push:  isWrite(_repo, projectMember),
+			Admin: isAdmin(_repo, projectMember),
 		},
 		PREnabled: _repo.MergeRequestsAccessLevel != gitlab.DisabledAccessControl,
 	}
@@ -178,6 +178,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		return 0, 0, nil, nil, fmt.Errorf("target key expected in merge request hook")
 	case source == nil:
 		return 0, 0, nil, nil, fmt.Errorf("source key expected in merge request hook")
+	case hook.User == nil:
+		return 0, 0, nil, nil, fmt.Errorf("user key expected in merge request hook")
 	}
 
 	if target.PathWithNamespace != "" {
@@ -286,6 +288,9 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
@@ -343,6 +348,9 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, pipeline.TagTitle)
 
 	for _, cm := range hook.Commits {
+		if cm == nil {
+			continue
+		}
 		if hook.After == cm.ID {
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message

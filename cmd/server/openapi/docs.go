@@ -82,7 +82,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -1139,7 +1139,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -2827,6 +2827,56 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/repos/{repo_id}/logs/{pipeline_number}/{step_id}/download": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Download logs for a pipeline step",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "step_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -4643,6 +4693,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "filters": {
+                    "description": "Server side enforced agent filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4827,13 +4884,20 @@ const docTemplate = `{
                     "$ref": "#/definitions/Deployment"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished": {
                     "type": "integer"
                 },
+                "full_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
+                },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
                 },
                 "message": {
                     "type": "string"
@@ -4887,6 +4951,13 @@ const docTemplate = `{
                     "description": "public url for oauth if different from url",
                     "type": "string"
                 },
+                "orgs": {
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "skip_verify": {
                     "type": "boolean"
                 },
@@ -4917,6 +4988,13 @@ const docTemplate = `{
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
+                },
+                "orgs": {
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "skip_verify": {
                     "type": "boolean"
@@ -5116,6 +5194,10 @@ const docTemplate = `{
                     "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
+                },
                 "message": {
                     "description": "deprecated, use commit.message (pull_request, pull_request_closed \u0026 push), deployment.description, cron (cron) or tag_title (tag) instead",
                     "type": "string"
@@ -5208,6 +5290,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "branch": {
+                    "type": "string"
+                },
+                "message": {
                     "type": "string"
                 },
                 "variables": {
@@ -5762,6 +5847,12 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "error": {
                     "type": "string"
                 },
@@ -6457,6 +6548,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Step"
+                    }
+                },
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 },
                 "environ": {

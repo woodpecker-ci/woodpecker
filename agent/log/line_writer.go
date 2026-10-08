@@ -16,14 +16,13 @@
 package log
 
 import (
+	"bytes"
 	"io"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
 
@@ -35,29 +34,27 @@ type LineWriter struct {
 	stepUUID  string
 	num       int
 	startTime time.Time
-	replacer  *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
+//
+// Secret masking is not handled here; wrap the writer with
+// shared.NewSecretsReplaceWriter.
+func NewLineWriter(peer rpc.Peer, stepUUID string) io.Writer {
 	lw := &LineWriter{
 		peer:      peer,
 		stepUUID:  stepUUID,
 		startTime: time.Now().UTC(),
-		replacer:  shared.NewSecretsReplacer(secret),
 	}
 	return lw
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	data := string(p)
-	if w.replacer != nil {
-		data = w.replacer.Replace(data)
-	}
-	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
+	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", p)
 
 	line := &rpc.LogEntry{
-		Data:     []byte(strings.TrimSuffix(data, "\n")), // remove trailing newline
+		// remove trailing newline; clone as p must not be retained
+		Data:     bytes.Clone(bytes.TrimSuffix(p, []byte("\n"))),
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.startTime).Seconds()),
 		Type:     rpc.LogEntryStdout,
@@ -67,5 +64,5 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	w.num++
 
 	w.peer.EnqueueLog(line)
-	return len(data), nil
+	return len(p), nil
 }

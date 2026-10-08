@@ -60,7 +60,7 @@ func TestForgeCRUD(t *testing.T) {
 	assert.NoError(t, store.ForgeCreate(&model.Forge{Type: "gitea"}))
 
 	// get all repos for a specific forge
-	forges, err := store.ForgeList(&model.ListOptions{All: true})
+	forges, err := store.ForgeList(&model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, forges, 3)
 

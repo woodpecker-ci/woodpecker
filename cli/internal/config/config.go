@@ -45,7 +45,7 @@ func (c *Config) MergeIfNotSet(c2 *Config) {
 	}
 }
 
-var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", "exec", "completion", "", "context", "ctx"}
+var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", "exec", "decode-base64", "completion", "", "context", "ctx"}
 
 func Load(ctx context.Context, c *cli.Command) error {
 	if firstArg := c.Args().First(); slices.Contains(skipSetupForCommands, firstArg) {

@@ -29,18 +29,18 @@ func TestFeedToAPIModel(t *testing.T) {
 	}{
 		{
 			name:        "tag uses tag title in message",
-			feed:        Feed{Event: string(EventTag), TagTitle: "v1.0"},
+			feed:        Feed{Event: EventTag, TagTitle: "v1.0"},
 			wantMessage: "created tag v1.0",
 		},
 		{
 			name:        "release without release object falls back to tag title",
-			feed:        Feed{Event: string(EventRelease), TagTitle: "v3.0"},
+			feed:        Feed{Event: EventRelease, TagTitle: "v3.0"},
 			wantMessage: "created release v3.0",
 		},
 		{
 			name: "release with release object uses release title",
 			feed: Feed{
-				Event:    string(EventRelease),
+				Event:    EventRelease,
 				TagTitle: "v3.0",
 				Release:  &Release{Title: "My Release"},
 			},
@@ -48,19 +48,31 @@ func TestFeedToAPIModel(t *testing.T) {
 			wantMessage: "created release My Release",
 		},
 		{
+			name:        "manual without message keeps commit message",
+			feed:        Feed{Event: EventManual, Commit: &Commit{Message: "head commit"}},
+			wantTitle:   "head commit",
+			wantMessage: "head commit",
+		},
+		{
+			name:        "manual with message uses custom message",
+			feed:        Feed{Event: EventManual, Branch: "main", ManualMessage: "redeploy", Commit: &Commit{Message: "head commit"}},
+			wantTitle:   "head commit",
+			wantMessage: "MANUAL: redeploy @ main",
+		},
+		{
 			name:        "push leaves derived fields untouched",
-			feed:        Feed{Event: string(EventPush), Commit: &Commit{Message: "some commit"}},
+			feed:        Feed{Event: EventPush, Commit: &Commit{Message: "some commit"}},
 			wantTitle:   "some commit",
 			wantMessage: "some commit",
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			f := tc.feed
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := tt.feed
 			af := f.ToAPIModel()
-			assert.Equal(t, tc.wantTitle, af.Title)
-			assert.Equal(t, tc.wantMessage, af.Message)
+			assert.Equal(t, tt.wantTitle, af.Title)
+			assert.Equal(t, tt.wantMessage, af.Message)
 		})
 	}
 }

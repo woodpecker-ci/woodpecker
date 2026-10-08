@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -202,6 +202,7 @@ func classifyRPCErr(ctx context.Context, err error) error {
 	case codes.Aborted,
 		codes.DataLoss,
 		codes.DeadlineExceeded,
+		codes.Unauthenticated,
 		codes.Unavailable:
 		return err
 	default:
@@ -388,6 +389,10 @@ func (c *client) processLogs(ctx context.Context) {
 		bytes = 0
 	}
 
+	// Ensure periodic flush even during continuous log output
+	ticker := time.NewTicker(maxLogFlushPeriod)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -406,7 +411,7 @@ func (c *client) processLogs(ctx context.Context) {
 				send()
 			}
 
-		case <-time.After(maxLogFlushPeriod):
+		case <-ticker.C:
 			send()
 		}
 	}

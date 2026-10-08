@@ -27,9 +27,9 @@ const (
 
 type LogEntry struct {
 	ID      int64        `json:"id"       xorm:"pk autoincr 'id'"`
-	StepID  int64        `json:"step_id"  xorm:"INDEX 'step_id'"`
+	StepID  int64        `json:"step_id"  xorm:"UNIQUE(s) INDEX 'step_id'"`
 	Time    int64        `json:"time"     xorm:"'time'"`
-	Line    int          `json:"line"     xorm:"'line'"`
+	Line    int          `json:"line"     xorm:"UNIQUE(s) 'line'"`
 	Data    []byte       `json:"data"     xorm:"LONGBLOB"`
 	Created int64        `json:"-"        xorm:"created"`
 	Type    LogEntryType `json:"type"     xorm:"'type'"`

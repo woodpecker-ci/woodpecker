@@ -34,12 +34,12 @@ func (d *db) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error
 	return d.store.RegistryFind(repo, addr)
 }
 
-func (d *db) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (d *db) RegistryList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return d.store.RegistryList(repo, false, p)
 }
 
 func (d *db) RegistryListPipeline(_ context.Context, repo *model.Repo, _ *model.Pipeline, _ *model.Netrc) ([]*model.Registry, error) {
-	r, err := d.store.RegistryList(repo, true, &model.ListOptions{All: true})
+	r, err := d.store.RegistryList(repo, true, &model.ListOptionsWithAll{All: true})
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (d *db) OrgRegistryFind(owner int64, name string) (*model.Registry, error) 
 	return d.store.OrgRegistryFind(owner, name)
 }
 
-func (d *db) OrgRegistryList(owner int64, p *model.ListOptions) ([]*model.Registry, error) {
+func (d *db) OrgRegistryList(owner int64, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return d.store.OrgRegistryList(owner, p)
 }
 
@@ -115,7 +115,7 @@ func (d *db) GlobalRegistryFind(addr string) (*model.Registry, error) {
 	return d.store.GlobalRegistryFind(addr)
 }
 
-func (d *db) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (d *db) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return d.store.GlobalRegistryList(p)
 }
 

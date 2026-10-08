@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_parsePush(t *testing.T) {
+func TestParsePush(t *testing.T) {
 	t.Run("Should parse push hook payload", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPush)
 		hook, err := parsePush(buf)
@@ -108,7 +108,7 @@ func Test_parsePush(t *testing.T) {
 	})
 }
 
-func Test_parsePullRequest(t *testing.T) {
+func TestParsePullRequest(t *testing.T) {
 	t.Run("Should parse pull_request hook payload", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPullRequest)
 		hook, err := parsePullRequest(buf)
@@ -161,7 +161,7 @@ func Test_parsePullRequest(t *testing.T) {
 	})
 }
 
-func Test_toPerm(t *testing.T) {
+func TestToPerm(t *testing.T) {
 	perms := []gitea.Permission{
 		{
 			Admin: true,
@@ -187,7 +187,7 @@ func Test_toPerm(t *testing.T) {
 	}
 }
 
-func Test_toTeam(t *testing.T) {
+func TestToTeam(t *testing.T) {
 	from := &gitea.Organization{
 		Name:      "woodpecker",
 		AvatarURL: "/avatars/1",
@@ -198,7 +198,7 @@ func Test_toTeam(t *testing.T) {
 	assert.Equal(t, "http://localhost:80/avatars/1", to.Avatar)
 }
 
-func Test_toRepo(t *testing.T) {
+func TestToRepo(t *testing.T) {
 	from := gitea.Repository{
 		FullName: "gophers/hello-world",
 		Owner: &gitea.User{
@@ -223,7 +223,7 @@ func Test_toRepo(t *testing.T) {
 	assert.True(t, repo.Perm.Admin)
 }
 
-func Test_fixMalformedAvatar(t *testing.T) {
+func TestFixMalformedAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
 		After  string
@@ -252,7 +252,7 @@ func Test_fixMalformedAvatar(t *testing.T) {
 	}
 }
 
-func Test_expandAvatar(t *testing.T) {
+func TestExpandAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
 		After  string

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { watch } from 'vue';
+import { nextTick, watch } from 'vue';
 import type { Ref } from 'vue';
 
 import { usePagination } from './usePaginate';
@@ -154,5 +154,156 @@ describe('usePaginate', () => {
     await waitForState(usePaginationComposition.loading, false);
     expect(usePaginationComposition.hasMore.value).toBe(false);
     expect(usePaginationComposition.data.value.length).toBe(6);
+  });
+
+  describe('reset while a request is in flight', () => {
+    interface Deferred {
+      page: number;
+      resolve: (items: { name: string }[]) => void;
+    }
+
+    function useControlledPagination(pageSize = 3) {
+      const calls: Deferred[] = [];
+      let usePaginationComposition = null as unknown as ReturnType<typeof usePagination<{ name: string }>>;
+
+      mountComposition(() => {
+        usePaginationComposition = usePagination<{ name: string }>(
+          async (page) =>
+            new Promise<{ name: string }[]>((resolve) => {
+              calls.push({ page, resolve });
+            }),
+          () => true,
+          { pageSize },
+        );
+      });
+
+      return { calls, composition: usePaginationComposition };
+    }
+
+    const flush = async () => {
+      // let pending promise callbacks and (pre-flush) watchers run
+      await nextTick();
+      await nextTick();
+    };
+
+    it('discards a stale response that resolves after resetPage', async () => {
+      // real world: user scrolls to page 2, then switches the branch filter
+      // while the page 2 request is still in flight
+      const { calls, composition } = useControlledPagination();
+
+      await flush();
+      calls[0].resolve([{ name: 'old1' }, { name: 'old2' }, { name: 'old3' }]);
+      await waitForState(composition.loading, false);
+
+      composition.nextPage();
+      await flush();
+      expect(calls[1].page).toBe(2);
+
+      // switch filter: reset while page 2 request still pending
+      void composition.resetPage();
+      await flush();
+
+      const freshCall = calls.at(-1)!;
+      expect(freshCall.page).toBe(1);
+      freshCall.resolve([{ name: 'new1' }, { name: 'new2' }, { name: 'new3' }]);
+      await flush();
+
+      // stale page 2 response arrives last
+      calls[1].resolve([{ name: 'stale1' }, { name: 'stale2' }, { name: 'stale3' }]);
+      await flush();
+
+      expect(composition.data.value.map(({ name }) => name)).toStrictEqual(['new1', 'new2', 'new3']);
+    });
+
+    it('does not let a stale response overwrite hasMore', async () => {
+      const { calls, composition } = useControlledPagination();
+
+      await flush();
+      calls[0].resolve([{ name: 'old1' }, { name: 'old2' }, { name: 'old3' }]);
+      await waitForState(composition.loading, false);
+
+      composition.nextPage();
+      await flush();
+
+      void composition.resetPage();
+      await flush();
+
+      const freshCall = calls.at(-1)!;
+      freshCall.resolve([{ name: 'new1' }, { name: 'new2' }, { name: 'new3' }]);
+      await flush();
+
+      // stale response is a short (last) page and would clear hasMore
+      calls[1].resolve([{ name: 'stale1' }]);
+      await flush();
+
+      expect(composition.hasMore.value).toBe(true);
+      expect(composition.data.value.map(({ name }) => name)).toStrictEqual(['new1', 'new2', 'new3']);
+    });
+
+    it('reloads page 1 when resetPage is called while the initial request is in flight', async () => {
+      // real world: user switches the filter twice quickly while still on page 1
+      const { calls, composition } = useControlledPagination();
+
+      await flush();
+      expect(calls[0].page).toBe(1);
+
+      void composition.resetPage();
+      await flush();
+
+      expect(calls.length).toBe(2);
+      const freshCall = calls.at(-1)!;
+      expect(freshCall.page).toBe(1);
+
+      freshCall.resolve([{ name: 'new1' }, { name: 'new2' }, { name: 'new3' }]);
+      await flush();
+
+      // stale initial response arrives last
+      calls[0].resolve([{ name: 'stale1' }, { name: 'stale2' }, { name: 'stale3' }]);
+      await flush();
+
+      expect(composition.data.value.map(({ name }) => name)).toStrictEqual(['new1', 'new2', 'new3']);
+      expect(composition.loading.value).toBe(false);
+    });
+
+    it('keeps loading consistent so the next page can still be fetched after a stale response', async () => {
+      const { calls, composition } = useControlledPagination();
+
+      await flush();
+      calls[0].resolve([{ name: 'old1' }, { name: 'old2' }, { name: 'old3' }]);
+      await waitForState(composition.loading, false);
+
+      composition.nextPage();
+      await flush();
+
+      void composition.resetPage();
+      await flush();
+
+      const freshCall = calls.at(-1)!;
+
+      // stale page 2 response resolves while the fresh page 1 request is in flight;
+      // it must not flip loading back to false mid-request
+      calls[1].resolve([{ name: 'stale1' }, { name: 'stale2' }, { name: 'stale3' }]);
+      await flush();
+      expect(composition.loading.value).toBe(true);
+
+      freshCall.resolve([{ name: 'new1' }, { name: 'new2' }, { name: 'new3' }]);
+      await waitForState(composition.loading, false);
+
+      composition.nextPage();
+      await flush();
+      const page2Call = calls.at(-1)!;
+      expect(page2Call.page).toBe(2);
+      page2Call.resolve([{ name: 'new4' }, { name: 'new5' }, { name: 'new6' }]);
+      await waitForState(composition.loading, false);
+
+      expect(composition.data.value.map(({ name }) => name)).toStrictEqual([
+        'new1',
+        'new2',
+        'new3',
+        'new4',
+        'new5',
+        'new6',
+      ]);
+    });
   });
 });

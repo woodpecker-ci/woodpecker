@@ -19,7 +19,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v92/github"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -50,13 +51,16 @@ const (
 // GitHub commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled, model.StatusCreated:
 		return statusPending
 	case model.StatusFailure, model.StatusDeclined:
 		return statusFailure
+	case model.StatusKilled, model.StatusError:
+		return statusError
 	case model.StatusSuccess:
 		return statusSuccess
 	default:
+		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return statusError
 	}
 }
@@ -164,7 +168,7 @@ func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
 		Index:     model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
 		Title:     pr.GetTitle(),
-		Labels:    convertLabels(pr.Labels),
+		Labels:    convertLabels(pr.GetLabels()),
 		Milestone: pr.GetMilestone().GetTitle(),
 		FromFork:  pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
 		Draft:     pr.GetDraft(),
@@ -176,7 +180,7 @@ func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
 func convertLabels(from []*github.Label) []string {
 	labels := make([]string, len(from))
 	for i, label := range from {
-		labels[i] = *label.Name
+		labels[i] = label.GetName()
 	}
 	return labels
 }

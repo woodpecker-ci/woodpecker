@@ -16,14 +16,15 @@ package datastore
 
 import (
 	"context"
-	"strings"
+	"errors"
 	"time"
 
-	"github.com/cenkalti/backoff/v6"
+	"github.com/cenkalti/backoff/v7"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -56,16 +57,18 @@ func (s storage) GetPipelineLastByBranch(repo *model.Repo, branch string) (*mode
 		Get(pipeline))
 }
 
+// GetPipelineLastBefore returns the pipeline of a branch that precedes the
+// given pipeline number.
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
 		Desc("number").
-		Where(builder.Lt{"id": num}.
+		Where(builder.Lt{"number": num}.
 			And(builder.Eq{"repo_id": repo.ID, "branch": branch})).
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
+func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptionsWithAll, f *model.PipelineFilter) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
 	cond := builder.NewCond().And(builder.Eq{"repo_id": repo.ID})
@@ -105,16 +108,32 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 func (s storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, len(repoIDs))
 
-	pipelineIDs := make([]int64, 0, len(repoIDs))
-	if err := s.engine.Select("MAX(id) AS id").
+	// The latest pipeline of a repo is the one holding the highest number,
+	// which is assigned per repo in the order pipelines are created.
+	type repoLatest struct {
+		RepoID int64 `xorm:"repo_id"`
+		Number int64 `xorm:"number"`
+	}
+
+	latest := make([]*repoLatest, 0, len(repoIDs))
+	if err := s.engine.Select("repo_id, MAX(number) AS number").
 		Table("pipelines").
 		Where(builder.In("repo_id", repoIDs)).
 		GroupBy("repo_id").
-		Find(&pipelineIDs); err != nil {
+		Find(&latest); err != nil {
 		return nil, err
 	}
 
-	return pipelines, s.engine.Where(builder.In("id", pipelineIDs)).Find(&pipelines)
+	if len(latest) == 0 {
+		return pipelines, nil
+	}
+
+	cond := builder.NewCond()
+	for _, l := range latest {
+		cond = cond.Or(builder.Eq{"repo_id": l.RepoID, "number": l.Number})
+	}
+
+	return pipelines, s.engine.Where(cond).Find(&pipelines)
 }
 
 // GetActivePipelineList get all pipelines that are pending, running or blocked.
@@ -169,7 +188,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
 		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
-			if isUniqueConstraintError(err) {
+			if errors.Is(err, types.ErrInsertDuplicateDetected) {
 				return struct{}{}, err
 			}
 			return struct{}{}, backoff.Permanent(err)
@@ -179,7 +198,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
 			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
-				if isUniqueConstraintError(err) {
+				if errors.Is(err, types.ErrInsertDuplicateDetected) {
 					return struct{}{}, err
 				}
 				return struct{}{}, backoff.Permanent(err)
@@ -190,21 +209,6 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries))
 
 	return err
-}
-
-// isUniqueConstraintError checks if an error is a unique constraint violation error.
-func isUniqueConstraintError(err error) bool {
-	if err == nil {
-		return false
-	}
-
-	errStr := err.Error()
-	// Check for common unique constraint error patterns across different databases
-	return strings.Contains(errStr, "duplicate key") ||
-		strings.Contains(errStr, "Duplicate entry") ||
-		strings.Contains(errStr, "UNIQUE constraint failed") ||
-		strings.Contains(errStr, "unique constraint") ||
-		strings.Contains(errStr, "UNIQUE violation")
 }
 
 func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {

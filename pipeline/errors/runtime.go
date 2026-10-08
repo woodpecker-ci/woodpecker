@@ -50,3 +50,12 @@ type OomError struct {
 func (e *OomError) Error() string {
 	return fmt.Sprintf("uuid=%s: received oom kill", e.UUID)
 }
+
+// IsStepFailure reports whether err was caused by a step itself terminating
+// unsuccessfully (non-zero exit code or oom kill), as opposed to the runtime
+// or backend failing to execute the workflow.
+func IsStepFailure(err error) bool {
+	var exitErr *ExitError
+	var oomErr *OomError
+	return errors.As(err, &exitErr) || errors.As(err, &oomErr)
+}

@@ -226,7 +226,12 @@ func PostHook(c *gin.Context) {
 		defer cancel()
 		pl, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
 		if err != nil {
-			log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
+			// A filtered pipeline is an expected outcome, not a failure.
+			if errors.Is(err, pipeline.ErrFiltered) {
+				log.Debug().Str("repo", repo.FullName).Msg("webhook produced no matching workflows; skipped")
+			} else {
+				log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
+			}
 		}
 		done <- struct{}{}
 	}()

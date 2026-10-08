@@ -17,12 +17,14 @@ package github
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v92/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -49,7 +51,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.SkipVerify)
 }
 
-func Test_github(t *testing.T) {
+func TestGithub(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
@@ -95,6 +97,55 @@ func Test_github(t *testing.T) {
 	})
 }
 
+func TestStatusDeployment(t *testing.T) {
+	var (
+		method    string
+		path      string
+		decodeErr error
+		body      struct {
+			State       string `json:"state"`
+			Description string `json:"description"`
+			LogURL      string `json:"log_url"`
+		}
+	)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		method = r.Method
+		path = r.URL.Path
+		decodeErr = json.NewDecoder(r.Body).Decode(&body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{}`))
+	}))
+	t.Cleanup(server.Close)
+
+	gh, err := github.NewClient(
+		github.WithURLs(new(server.URL+"/"), nil),
+		github.WithHTTPClient(server.Client()),
+	)
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+	c := &client{}
+	err = c.Status(ctx, fakeUser, &model.Repo{
+		ID:    7,
+		Owner: "octocat",
+		Name:  "Hello-World",
+	}, &model.Pipeline{
+		Number:   9,
+		Event:    model.EventDeploy,
+		Status:   model.StatusSuccess,
+		ForgeURL: "https://api.github.com/repos/octocat/Hello-World/deployments/42",
+	}, nil)
+	require.NoError(t, err)
+
+	assert.Equal(t, http.MethodPost, method)
+	assert.Equal(t, "/repos/octocat/Hello-World/deployments/42/statuses", path)
+	require.NoError(t, decodeErr)
+	assert.Equal(t, "success", body.State)
+	assert.Equal(t, "Pipeline was successful", body.Description)
+	assert.Contains(t, body.LogURL, "/repos/7/pipeline/9")
+}
+
 var (
 	fakeUser = &model.User{
 		Login:       "6543",
@@ -129,14 +180,14 @@ func TestHook(t *testing.T) {
 			},
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("README.md")},
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("README.md")},
+					{Filename: new("main.go")},
 				},
 				Commit: &github.Commit{
-					SHA:     github.Ptr("0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"),
-					Message: github.Ptr("Update the README with new information"),
+					SHA:     new("0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"),
+					Message: new("Update the README with new information"),
 					Author: &github.CommitAuthor{
-						Name: github.Ptr("baxterthehacker"),
+						Name: new("baxterthehacker"),
 					},
 				},
 			},
@@ -145,15 +196,15 @@ func TestHook(t *testing.T) {
 			github_mock.GetReposCompareByOwnerByRepoByBasehead,
 			github.CommitsComparison{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("main.go")},
 				},
 			},
 		),
 		github_mock.WithRequestMatch(
 			github_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
 			[]*github.CommitFile{
-				{Filename: github.Ptr("README.md")},
-				{Filename: github.Ptr("main.go")},
+				{Filename: new("README.md")},
+				{Filename: new("main.go")},
 			},
 		),
 		github_mock.WithRequestMatch(
@@ -163,11 +214,11 @@ func TestHook(t *testing.T) {
 			},
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("go.mod")},
+					{Filename: new("go.mod")},
 				},
 				Commit: &github.Commit{
-					SHA:     github.Ptr("9049f1265b7d61be4a8904a9a27120d2064dab3b"),
-					Message: github.Ptr("Update gomod"),
+					SHA:     new("9049f1265b7d61be4a8904a9a27120d2064dab3b"),
+					Message: new("Update gomod"),
 				},
 			},
 		),
@@ -178,7 +229,7 @@ func TestHook(t *testing.T) {
 	require.NoError(t, err)
 
 	// Use the custom type as the key
-	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
 
 	// Create a mock store using the proper mocking pattern
 	mockStore := store_mocks.NewMockStore(t)
@@ -298,5 +349,59 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
+	})
+}
+
+func TestGetCommitAndMessageFromTag(t *testing.T) {
+	// Tags API paginates 30 per page; put the target tag on the second page
+	// to exercise pagination instead of a first-page match.
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatchPages(
+			github_mock.GetReposTagsByOwnerByRepo,
+			[]github.RepositoryTag{
+				{Name: new("v1.0.0")},
+				{Name: new("v1.0.1")},
+			},
+			[]github.RepositoryTag{
+				{Name: new("v1.0.2")},
+				{
+					Name:   new("v1.0.3"),
+					Commit: &github.Commit{SHA: new("deadbeefcafe")},
+				},
+			},
+		),
+	)
+
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{
+		ID:          1,
+		Login:       "6543",
+		AccessToken: "token",
+	}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "6543",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	t.Run("finds a tag beyond the first page", func(t *testing.T) {
+		commit, err := c.getCommitAndMessageFromTag(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		require.NoError(t, err)
+		assert.Equal(t, "deadbeefcafe", commit.SHA)
+	})
+
+	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
+		_, err := c.getCommitAndMessageFromTag(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		require.Error(t, err)
 	})
 }

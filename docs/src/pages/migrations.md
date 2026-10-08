@@ -28,7 +28,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `tag_title` for tag events
     - `cron` for cron events
     - `deployment.description` for deployment events
-    - dropped for manual events (was a combination of `MANUAL PIPELINE` and branch)
+    - `manual_message` for manual events with a custom message, otherwise dropped (was a combination of `MANUAL PIPELINE` and branch)
   - `timestamp` => was never actively used, use `created` instead
   - `sender` => `author`
   - `avatar` => `author_avatar`
@@ -43,6 +43,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 ### Admin-facing migrations
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
+- changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
 
 #### Extensions
 

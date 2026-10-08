@@ -180,7 +180,7 @@ steps:
 	forge.On("URL").Return("https://github.com")
 
 	store := store_mocks.NewMockStore(t)
-	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.ID).Return(nil, store_types.ErrRecordNotExist)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(nil, store_types.ErrRecordNotExist)
 
 	mockManager := manager_mocks.NewMockManager(t)
 	server.Config.Services.Manager = mockManager

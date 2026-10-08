@@ -36,9 +36,9 @@ func TestOption(t *testing.T) {
 	assert.Equal(t, boolPtr, optional.None[bool]().ToPtr())
 
 	boolPtr = optional.Some[bool](false).ToPtr()
-	assert.Equal(t, toPtr(false), boolPtr)
+	assert.Equal(t, new(false), boolPtr)
 
-	opt1 := optional.FromPtr(toPtr(1))
+	opt1 := optional.FromPtr(new(1))
 	assert.True(t, opt1.Has())
 	assert.Equal(t, int(1), opt1.Value())
 
@@ -80,10 +80,6 @@ func TestExtractValue(t *testing.T) {
 	val, ok = optional.ExtractValue(wrongType)
 	assert.False(t, ok)
 	assert.Nil(t, val)
-}
-
-func toPtr[T any](val T) *T {
-	return &val
 }
 
 type fakeHas struct{}

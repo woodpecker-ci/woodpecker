@@ -79,7 +79,7 @@ func (w *withExtension) RegistryFind(repo *model.Repo, addr string) (*model.Regi
 	return w.base.RegistryFind(repo, addr)
 }
 
-func (w *withExtension) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (w *withExtension) RegistryList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return w.base.RegistryList(repo, p)
 }
 
@@ -99,7 +99,7 @@ func (w *withExtension) OrgRegistryFind(owner int64, addr string) (*model.Regist
 	return w.base.OrgRegistryFind(owner, addr)
 }
 
-func (w *withExtension) OrgRegistryList(owner int64, p *model.ListOptions) ([]*model.Registry, error) {
+func (w *withExtension) OrgRegistryList(owner int64, p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return w.base.OrgRegistryList(owner, p)
 }
 
@@ -119,7 +119,7 @@ func (w *withExtension) GlobalRegistryFind(addr string) (*model.Registry, error)
 	return w.base.GlobalRegistryFind(addr)
 }
 
-func (w *withExtension) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+func (w *withExtension) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*model.Registry, error) {
 	return w.base.GlobalRegistryList(p)
 }
 

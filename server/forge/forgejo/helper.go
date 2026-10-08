@@ -53,6 +53,9 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 
 // toPerm converts a Forgejo permission to a Woodpecker permission.
 func toPerm(from *forgejo.Permission) *model.Perm {
+	if from == nil {
+		return &model.Perm{}
+	}
 	return &model.Perm{
 		Pull:  from.Pull,
 		Push:  from.Push,
@@ -80,16 +83,21 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		link = hook.HeadCommit.URL
 	}
 
+	var commitAuthor model.CommitAuthor
+	if hook.HeadCommit.Author != nil {
+		commitAuthor = model.CommitAuthor{
+			Name:  hook.HeadCommit.Author.Name,
+			Email: hook.HeadCommit.Author.Email,
+		}
+	}
+
 	return &model.Pipeline{
 		Event: model.EventPush,
 		Commit: &model.Commit{
 			SHA:      hook.After,
 			Message:  hook.HeadCommit.Message,
 			ForgeURL: hook.HeadCommit.URL,
-			Author: model.CommitAuthor{
-				Name:  hook.HeadCommit.Author.Name,
-				Email: hook.HeadCommit.Author.Email,
-			},
+			Author:   commitAuthor,
 		},
 		Ref:          hook.Ref,
 		ForgeURL:     link,

@@ -130,6 +130,14 @@ func setupLogStore(c *cli.Command, s store.Store) (service_log.Service, error) {
 
 const jwtSecretID = "jwt-secret"
 
+func setupGrpcSecret(secret string) (string, bool) {
+	if secret != "" {
+		return secret, false
+	}
+
+	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32)), true
+}
+
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.ErrRecordNotExist) {

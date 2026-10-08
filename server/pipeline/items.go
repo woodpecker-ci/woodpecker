@@ -19,7 +19,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"maps"
 
 	"github.com/rs/zerolog/log"
 
@@ -43,7 +42,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	// get the previous pipeline so that we can send status change notifications
-	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.Number)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
@@ -99,8 +98,6 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		}
 	}
 
-	maps.Copy(envs, currentPipeline.AdditionalVariables)
-
 	serverMetadata := metadata.NewServerMetadata(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	yamls := make([]*builder.YamlFile, 0, len(forgeYamls))
@@ -114,6 +111,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	b := builder.PipelineBuilder{
 		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
 		Envs:                envs,
+		AdditionalEnvs:      currentPipeline.AdditionalVariables,
 		Yamls:               yamls,
 		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
@@ -267,6 +265,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			DependsOn:  item.DependsOn.Names(),
 		}
 
 		if pipeline.Status == model.StatusBlocked {
@@ -286,6 +285,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 					State:      model.StatusPending,
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
+					DependsOn:  step.DependsOn,
 				}
 
 				if pipeline.Status == model.StatusBlocked {

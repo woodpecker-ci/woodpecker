@@ -19,22 +19,25 @@ import "fmt"
 
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
-	RepoID       int64        `json:"repo_id"                     xorm:"repo_id"`
-	ID           int64        `json:"id,omitempty"                xorm:"pipeline_id"`
-	Number       int64        `json:"number,omitempty"            xorm:"pipeline_number"`
-	Event        string       `json:"event,omitempty"             xorm:"pipeline_event"`
-	Status       string       `json:"status,omitempty"            xorm:"pipeline_status"`
-	Created      int64        `json:"created,omitempty"           xorm:"pipeline_created"`
-	Started      int64        `json:"started,omitempty"           xorm:"pipeline_started"`
-	Finished     int64        `json:"finished,omitempty"          xorm:"pipeline_finished"`
-	Branch       string       `json:"branch,omitempty"            xorm:"pipeline_branch"`
-	Ref          string       `json:"ref,omitempty"               xorm:"pipeline_ref"`
-	Refspec      string       `json:"refspec,omitempty"           xorm:"pipeline_refspec"`
-	Deployment   *Deployment  `json:"deployment"                  xorm:"json 'pipeline_deployment'"`
-	PullRequest  *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pipeline_pull_request'"`
-	Release      *Release     `json:"release,omitempty" xorm:"json 'pipeline_release'"`
-	TagTitle     string       `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
-	AuthorAvatar string       `json:"author_avatar,omitempty"     xorm:"pipeline_author_avatar"`
+	RepoID      int64        `json:"repo_id"                     xorm:"repo_id"`
+	FullName    string       `json:"full_name,omitempty"         xorm:"repo_full_name"`
+	ID          int64        `json:"id,omitempty"                xorm:"pipeline_id"`
+	Number      int64        `json:"number,omitempty"            xorm:"pipeline_number"`
+	Event       WebhookEvent `json:"event,omitempty"             xorm:"pipeline_event"`
+	Status      string       `json:"status,omitempty"            xorm:"pipeline_status"`
+	Created     int64        `json:"created,omitempty"           xorm:"pipeline_created"`
+	Started     int64        `json:"started,omitempty"           xorm:"pipeline_started"`
+	Finished    int64        `json:"finished,omitempty"          xorm:"pipeline_finished"`
+	Branch      string       `json:"branch,omitempty"            xorm:"pipeline_branch"`
+	Ref         string       `json:"ref,omitempty"               xorm:"pipeline_ref"`
+	Refspec     string       `json:"refspec,omitempty"           xorm:"pipeline_refspec"`
+	Deployment  *Deployment  `json:"deployment"                  xorm:"json 'pipeline_deployment'"`
+	PullRequest *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pipeline_pull_request'"`
+	Release     *Release     `json:"release,omitempty" xorm:"json 'pipeline_release'"`
+	TagTitle    string       `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
+	// custom message of a manual pipeline
+	ManualMessage string `json:"manual_message,omitempty" xorm:"pipeline_manual_message"`
+	AuthorAvatar  string `json:"author_avatar,omitempty"     xorm:"pipeline_author_avatar"`
 	// TODO change json to 'commit' in next major
 	Commit *Commit `json:"commit_pipeline,omitempty"   xorm:"json 'pipeline_commit'"`
 }
@@ -51,7 +54,11 @@ func (f *Feed) ToAPIModel() *APIFeed {
 		af.Author = f.Commit.Author.Name
 	}
 
-	switch WebhookEvent(af.Event) {
+	switch af.Event {
+	case EventManual:
+		if af.ManualMessage != "" {
+			af.Message = "MANUAL: " + af.ManualMessage + " @ " + af.Branch
+		}
 	case EventTag:
 		af.Message = fmt.Sprintf("created tag %s", af.TagTitle)
 	case EventRelease:

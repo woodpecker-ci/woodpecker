@@ -54,14 +54,14 @@ func TestFetchFromConfigService(t *testing.T) {
 		repoConfig        string
 		files             []file
 		expectedFileNames []string
-		expectedError     bool
+		wantErr           bool
 	}{
 		{
 			name:              "External Fetch empty repo",
 			repoConfig:        "",
 			files:             []file{},
 			expectedFileNames: []string{"override1", "override2", "override3"},
-			expectedError:     false,
+			wantErr:           false,
 		},
 		{
 			name:       "Default config - Additional sub-folders",
@@ -74,7 +74,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{"override1", "override2", "override3"},
-			expectedError:     false,
+			wantErr:           false,
 		},
 		{
 			name:       "Fetch empty",
@@ -90,7 +90,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{},
-			expectedError:     true,
+			wantErr:           true,
 		},
 		{
 			name:       "Use old config",
@@ -111,14 +111,12 @@ func TestFetchFromConfigService(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 	}
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		t.Fatal("can't generate ed25519 key pair")
-	}
+	require.NoError(t, err, "can't generate ed25519 key pair")
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
@@ -232,10 +230,10 @@ func TestFetchFromConfigService(t *testing.T) {
 				[]*forge_types.FileMeta{},
 				false,
 			)
-			if tt.expectedError && err == nil {
-				t.Fatal("expected an error")
-			} else if !tt.expectedError && err != nil {
-				t.Fatal("error fetching config:", err)
+			if tt.wantErr {
+				require.Error(t, err, "expected an error")
+			} else {
+				require.NoError(t, err, "error fetching config")
 			}
 
 			matchingFiles := make([]string, len(files))

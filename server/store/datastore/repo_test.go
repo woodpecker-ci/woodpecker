@@ -349,6 +349,52 @@ func TestRepoCrud(t *testing.T) {
 	assert.EqualValues(t, 1, pipelineCount)
 }
 
+func TestRepoDelete(t *testing.T) {
+	store, closer := newTestStore(t,
+		new(model.Repo),
+		new(model.User),
+		new(model.Perm),
+		new(model.Pipeline),
+		new(model.PipelineConfig),
+		new(model.LogEntry),
+		new(model.Step),
+		new(model.Secret),
+		new(model.Registry),
+		new(model.Config),
+		new(model.Redirection),
+		new(model.Workflow))
+	defer closer()
+
+	repo := model.Repo{
+		ForgeID:       1,
+		ForgeRemoteID: "bradrydzewskitest",
+		UserID:        1,
+		FullName:      "bradrydzewski/test",
+		Owner:         "bradrydzewski",
+		Name:          "test",
+	}
+	assert.NoError(t, store.CreateRepo(&repo))
+
+	// create 60 new pipelines to test more than one page is deleted
+	for range 60 {
+		pipeline := model.Pipeline{
+			RepoID: repo.ID,
+		}
+		step := model.Step{
+			Name: "a step",
+		}
+		assert.NoError(t, store.CreatePipeline(&pipeline, &step))
+	}
+	assert.NoError(t, store.DeleteRepo(&repo))
+
+	stepCount, err := store.engine.Count(new(model.Step))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 0, stepCount)
+	pipelineCount, err := store.engine.Count(new(model.Pipeline))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 0, pipelineCount)
+}
+
 func TestRepoRedirection(t *testing.T) {
 	store, closer := newTestStore(t,
 		new(model.Repo),

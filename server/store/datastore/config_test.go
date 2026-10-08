@@ -15,9 +15,14 @@
 package datastore
 
 import (
+	"context"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"xorm.io/xorm/contexts"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -117,4 +122,61 @@ func TestConfigPersist(t *testing.T) {
 	count, err = store.engine.Count(new(model.Config))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 3, count)
+}
+
+// concurrentConfigInsertHook simulates a concurrent request that persists the
+// same config after ConfigPersist looked it up but before it inserts its own.
+type concurrentConfigInsertHook struct {
+	store *storage
+	conf  model.Config
+	fired bool
+	err   error
+}
+
+var configInsertRe = regexp.MustCompile("(?i)^INSERT INTO [`\"]?configs[`\"]? ")
+
+func (h *concurrentConfigInsertHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
+	if !h.fired && configInsertRe.MatchString(c.SQL) {
+		h.fired = true
+		conf := h.conf
+		// bounded, so a ConfigPersist that holds the only connection fails instead of hanging
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_, h.err = h.store.engine.Context(ctx).Insert(&conf)
+	}
+	return c.Ctx, nil
+}
+
+func (h *concurrentConfigInsertHook) AfterProcess(*contexts.ContextHook) error {
+	return nil
+}
+
+// test for https://github.com/woodpecker-ci/woodpecker/issues/7173
+func TestConfigPersistConcurrentDuplicate(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Config))
+	defer closer()
+
+	hook := &concurrentConfigInsertHook{
+		store: store,
+		conf:  model.Config{RepoID: 2, Data: data, Hash: hash, Name: name},
+	}
+	store.engine.AddHook(hook)
+
+	conf, err := store.ConfigPersist(&model.Config{
+		RepoID: 2,
+		Data:   data,
+		Name:   name,
+	})
+	require.True(t, hook.fired)
+	require.NoError(t, hook.err)
+	require.NoError(t, err)
+
+	existing, err := store.configFindIdentical(store.engine.NewSession(), 2, hash, name)
+	require.NoError(t, err)
+	assert.Equal(t, existing.ID, conf.ID)
+	assert.EqualValues(t, data, conf.Data)
+
+	count, err := store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, count)
 }

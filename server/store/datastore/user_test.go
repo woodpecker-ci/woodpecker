@@ -78,7 +78,7 @@ func TestUsers(t *testing.T) {
 		Hash:          "A",
 	}
 	assert.NoError(t, store.CreateUser(&user2))
-	users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
+	users, err := store.GetUserList(&model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}})
 	assert.NoError(t, err)
 	assert.Len(t, users, 2)
 	// "jane" user is first due to alphabetic sorting

@@ -54,11 +54,11 @@ func TestMetadataPipelineFromModelPipelineRelease(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			result := metadataPipelineFromModelPipeline(tc.pipeline, false)
-			assert.Equal(t, tc.wantRelease, result.Release.Title)
-			assert.Equal(t, tc.wantIsPrerelease, result.Release.IsPrerelease)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := metadataPipelineFromModelPipeline(tt.pipeline, false)
+			assert.Equal(t, tt.wantRelease, result.Release.Title)
+			assert.Equal(t, tt.wantIsPrerelease, result.Release.IsPrerelease)
 		})
 	}
 }

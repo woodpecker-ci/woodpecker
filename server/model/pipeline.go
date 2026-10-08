@@ -51,7 +51,8 @@ type Pipeline struct {
 	AdditionalVariables map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	Deployment          *Deployment             `json:"deployment,omitempty"    xorm:"json 'deployment'"`
 	PullRequest         *PullRequest            `json:"pull_request,omitempty"  xorm:"json 'pull_request'"`
-	Cron                string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
+	Cron                string                  `json:"cron,omitempty"          xorm:"cron"`                   // name of the cron job
+	ManualMessage       string                  `json:"manual_message,omitempty" xorm:"TEXT 'manual_message'"` // custom message of a manual pipeline
 	Release             *Release                `json:"release,omitempty"       xorm:"json 'release'"`
 	TagTitle            string                  `json:"tag_title,omitempty"     xorm:"tag_title"`
 	Version             string                  `json:"version"                 xorm:"'version'"`
@@ -111,6 +112,9 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		}
 	case EventManual:
 		ap.Message = "MANUAL PIPELINE @ " + p.Branch
+		if p.ManualMessage != "" {
+			ap.Message = "MANUAL: " + p.ManualMessage + " @ " + p.Branch
+		}
 	case EventDeploy:
 		if p.Deployment != nil {
 			ap.DeployTo = p.Deployment.Target
@@ -154,6 +158,7 @@ func (p Pipeline) IsPullRequest() bool {
 }
 
 type PipelineOptions struct {
+	Message   string            `json:"message"`
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions
