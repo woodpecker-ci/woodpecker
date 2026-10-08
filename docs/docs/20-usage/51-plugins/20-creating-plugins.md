@@ -11,7 +11,7 @@ Everybody who can change the workflow, for example with a pull request, controls
 - No settings that run commands or scripts.
 - No settings loaded from files in the workspace.
 - Never print secrets.
-- No access to the environment for placeholders in settings.
+- Placeholders in settings are fine, as long as they can not reach a secret: remove your secret settings (e.g. `PLUGIN_TOKEN`) from the environment before you replace them, or only allow a fixed list of names.
 
 If your plugin is not designed for this, say so in its documentation.
 
