@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@YouCD
+@6543, @YouCD
 
 ### 🐛 Bug Fixes
 
@@ -12,12 +12,17 @@
 
 ### 📚 Documentation
 
+- Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
 - Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
 
 ### 📦️ Dependency
 
 - Update web npm deps non-major [[#7251](https://github.com/woodpecker-ci/woodpecker/pull/7251)]
 - Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
+
+### Misc
+
+- Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
 
