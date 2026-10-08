@@ -63,7 +63,9 @@ func TestRPCStaleAgentLosesLeaseAfterExpiry(t *testing.T) {
 	require.NoError(t, s.CreateRepo(repo))
 	pl := &model.Pipeline{RepoID: repo.ID, Status: model.StatusPending, Number: 1}
 	require.NoError(t, s.CreatePipeline(pl))
-	wf := &model.Workflow{PipelineID: pl.ID, PID: 1, State: model.StatusPending, Name: "wf"}
+	wf := &model.Workflow{PipelineID: pl.ID, PID: 1, State: model.StatusPending, Name: "wf", Children: []*model.Step{
+		{UUID: "step-1", PipelineID: pl.ID, PID: 2, PPID: 1, Name: "build", State: model.StatusPending},
+	}}
 	require.NoError(t, s.WorkflowsCreate([]*model.Workflow{wf}))
 
 	q, err := queue.New(ctx, queue.Config{Backend: queue.TypeMemory, Store: s})
@@ -101,6 +103,13 @@ func TestRPCStaleAgentLosesLeaseAfterExpiry(t *testing.T) {
 	require.ErrorIs(t, err, queue.ErrTaskExpired)
 
 	err = r.Init(ctxA, wfID, rpc.WorkflowState{Started: time.Now().Unix()})
+	require.ErrorIs(t, err, ErrAgentLostLease)
+
+	// The store still locks the workflow to A, only the queue knows the lease
+	// is gone: A can neither report a step nor finish the workflow.
+	err = r.Update(ctxA, wfID, rpc.StepState{StepUUID: "step-1", Started: time.Now().Unix()})
+	require.ErrorIs(t, err, ErrAgentLostLease)
+	err = r.Done(ctxA, wfID, rpc.WorkflowState{Started: 1, Finished: time.Now().Unix()})
 	require.ErrorIs(t, err, ErrAgentLostLease)
 
 	nextCtx, nextCancel := context.WithTimeout(ctxB, 5*time.Second)
