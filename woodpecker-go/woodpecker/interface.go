@@ -223,6 +223,9 @@ type Client interface {
 	// QueueInfo returns the queue state.
 	QueueInfo(ctx context.Context) (*Info, error)
 
+	// Version returns the version of the server.
+	Version(ctx context.Context) (*Version, error)
+
 	// LogLevel returns the current logging level.
 	LogLevel(ctx context.Context) (*LogLevel, error)
 

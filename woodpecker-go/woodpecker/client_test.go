@@ -110,3 +110,23 @@ func TestRequestCanceledByContext(t *testing.T) {
 		})
 	}
 }
+
+func TestVersion(t *testing.T) {
+	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "/api/version", r.URL.Path)
+		_, err := fmt.Fprint(w, `{"source":"https://github.com/woodpecker-ci/woodpecker","version":"3.15.0"}`)
+		assert.NoError(t, err)
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
+	defer ts.Close()
+
+	client := NewClient(ts.URL, http.DefaultClient)
+
+	version, err := client.Version(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, &Version{
+		Source:  "https://github.com/woodpecker-ci/woodpecker",
+		Version: "3.15.0",
+	}, version)
+}

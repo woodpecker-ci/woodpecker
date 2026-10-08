@@ -30,11 +30,11 @@ import (
 
 const (
 	pathLogLevel = "%s/api/log-level"
+	pathVersion  = "%s/api/version"
 
 	//nolint:godot
 	// TODO: implement endpoints
 	// pathFeed           = "%s/api/user/feed"
-	// pathVersion        = "%s/version"
 )
 
 type ClientError struct {
@@ -71,6 +71,14 @@ func (c *client) SetClient(client *http.Client) {
 // SetAddress sets the server address.
 func (c *client) SetAddress(addr string) {
 	c.addr = addr
+}
+
+// Version returns the version of the server.
+func (c *client) Version(ctx context.Context) (*Version, error) {
+	out := new(Version)
+	uri := fmt.Sprintf(pathVersion, c.addr)
+	err := c.get(ctx, uri, out)
+	return out, err
 }
 
 // LogLevel returns the current logging level.

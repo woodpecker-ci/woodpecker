@@ -2,7 +2,7 @@
   "name": "woodpecker",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@12.9.1",
+  "packageManager": "pnpm@12.10.1",
   "scripts": {
     "start": "cd ../ && make generate-docs && cd docs && docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
@@ -49,6 +49,7 @@
     "@types/react": "^19.2.14",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
+    "@vue/compiler-sfc": "^3.5.43",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }

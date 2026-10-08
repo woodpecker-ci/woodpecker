@@ -27,6 +27,7 @@ type LineWriter struct {
 	stepUUID  string
 	num       int
 	startTime time.Time
+	out       io.Writer
 }
 
 // NewLineWriter returns a new line reader.
@@ -35,11 +36,14 @@ func NewLineWriter(stepName, stepUUID string) io.WriteCloser {
 		stepName:  stepName,
 		stepUUID:  stepUUID,
 		startTime: time.Now().UTC(),
+		out:       os.Stderr,
 	}
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p)
+	if _, err := fmt.Fprintf(w.out, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p); err != nil {
+		return 0, err
+	}
 	w.num++
 	return len(p), nil
 }
