@@ -21,6 +21,10 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `release.title`: for release events
   - `message` =>
     - `tag_title` for tag events
+    - `commit_pipeline.message` for events that carry a commit
+  - `commit` => `commit_pipeline.sha`
+  - `timestamp` => `commit_pipeline.timestamp`
+  - `author_email` => `commit_pipeline.author.email`
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
 

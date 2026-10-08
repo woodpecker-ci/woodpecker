@@ -802,7 +802,7 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 			client := load(server.URL + "?client_id=test&client_secret=test")
 			user := &model.User{Login: "test_user", AccessToken: "token"}
 			repo := &model.Repo{ForgeRemoteID: "4", Owner: "diaspora", Name: "diaspora-client", FullName: "diaspora/diaspora-client"}
-			pipeline := &model.Pipeline{Number: 1, Commit: "abc123", Event: model.EventPush}
+			pipeline := &model.Pipeline{Number: 1, Commit: &model.Commit{SHA: "abc123"}, Event: model.EventPush}
 			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
 
 			err := client.Status(t.Context(), user, repo, pipeline, workflow)

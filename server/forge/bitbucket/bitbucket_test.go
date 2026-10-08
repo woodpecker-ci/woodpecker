@@ -211,7 +211,7 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
-	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit.SHA)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
@@ -284,7 +284,9 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{
+			SHA: "9ecad50",
+		},
 	}
 
 	fakeWorkflow = &model.Workflow{
