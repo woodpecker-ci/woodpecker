@@ -10,6 +10,10 @@
 
 - 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
 
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
+
 ### 📦️ Dependency
 
 - Update web npm deps non-major [[#7251](https://github.com/woodpecker-ci/woodpecker/pull/7251)]
