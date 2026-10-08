@@ -31,10 +31,10 @@ The snapshot of a new version is created by a release manager in a dedicated pul
 # generate the CLI docs first
 make generate-docs
 
-# switch to docs and install dependencys
+# switch to docs and install the dependencies
 cd docs/; pnpm i
 
-# generate version snapshot and format
+# generate the version snapshot and format it
 pnpm docusaurus docs:version x.x; pnpm format
 ```
 
