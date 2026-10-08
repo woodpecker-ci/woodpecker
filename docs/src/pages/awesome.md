@@ -89,6 +89,6 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 
 We have a separate [index](/plugins) for plugins.
 
-## Usefull Images
+## Useful images
 
 - [GodotCI](https://codeberg.org/Bigaston/GodotCI) - Images for Woodpecker to automate build of Godot games
