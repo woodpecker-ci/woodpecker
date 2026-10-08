@@ -460,10 +460,7 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.Commit.ID,
-		ForgeURL: b.Commit.URL,
-	}, nil
+	return convertPayloadCommit(b.Commit), nil
 }
 
 func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {

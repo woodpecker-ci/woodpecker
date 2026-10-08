@@ -77,6 +77,22 @@ func TestParsePush(t *testing.T) {
 		assert.Equal(t, []string{"CHANGELOG.md", "app/controller/application.rb"}, pipeline.ChangedFiles)
 	})
 
+	t.Run("Should take the commit data of the head commit from a push hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPushMulti)
+		hook, _ := parsePush(buf)
+		pipeline := pipelineFromPush(hook)
+		assert.Equal(t, &model.Commit{
+			SHA:       "29be01c073851cf0db0c6a466e396b725a670453",
+			Message:   "add some text\n",
+			ForgeURL:  "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+			Timestamp: 1708557487,
+			Author: model.CommitAuthor{
+				Name:  "6543",
+				Email: "6543@obermui.de",
+			},
+		}, pipeline.Commit)
+	})
+
 	t.Run("Should return a Repo struct from a push hook", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPush)
 		hook, _ := parsePush(buf)
