@@ -148,6 +148,7 @@ Either build the UI once with `make build-ui` or create placeholder with:
 ```bash
 mkdir -p web/dist/ && echo "test" > web/dist/index.html
 ```
+
 :::
 
 ```bash title="start agent"
