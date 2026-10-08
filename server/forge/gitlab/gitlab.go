@@ -655,10 +655,19 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return nil, err
 	}
 
-	return &model.Commit{
+	commit := &model.Commit{
 		SHA:      b.Commit.ID,
+		Message:  b.Commit.Message,
 		ForgeURL: b.Commit.WebURL,
-	}, nil
+		Author: model.CommitAuthor{
+			Name:  b.Commit.AuthorName,
+			Email: b.Commit.AuthorEmail,
+		},
+	}
+	if b.Commit.CommittedDate != nil {
+		commit.Timestamp = b.Commit.CommittedDate.Unix()
+	}
+	return commit, nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -963,8 +972,10 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	// taken from the authenticated webhook (convertTagHook sets it to
 	// hook.UserUsername). Trusting it lets a pusher spoof an
 	// ApprovalAllowedUsers entry and skip approval (CVE-2026-58370).
+	pipeline.Commit.Author.Name = cm.AuthorName
 	pipeline.Commit.Author.Email = cm.AuthorEmail
 	pipeline.Commit.Message = cm.Message
+	pipeline.Commit.ForgeURL = cm.WebURL
 	pipeline.Commit.Timestamp = cm.CommittedDate.Unix()
 	if len(pipeline.Commit.Author.Email) != 0 {
 		pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
