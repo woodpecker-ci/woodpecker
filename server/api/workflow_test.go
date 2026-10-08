@@ -41,9 +41,9 @@ func TestGetWorkflowAgent(t *testing.T) {
 	admin := &model.User{ID: 1, Login: "root", ForgeID: 1, Admin: true}
 	user := &model.User{ID: 2, Login: "alice", ForgeID: 1}
 
-	globalAgent := &model.AgentSnapshot{ID: 101, AgentID: 7, OrgID: model.IDNotSet, Name: "global-builder", CustomLabels: map[string]string{}}
-	orgAgent := &model.AgentSnapshot{ID: 102, AgentID: 8, OrgID: 5, Name: "acme-builder", CustomLabels: map[string]string{"zone": "eu"}}
-	otherOrgAgent := &model.AgentSnapshot{ID: 103, AgentID: 9, OrgID: 6, Name: "other-builder"}
+	globalAgent := &model.AgentSnapshot{ID: 101, OrgID: model.IDNotSet, Name: "global-builder", CustomLabels: map[string]string{}}
+	orgAgent := &model.AgentSnapshot{ID: 102, OrgID: 5, Name: "acme-builder", CustomLabels: map[string]string{"zone": "eu"}}
+	otherOrgAgent := &model.AgentSnapshot{ID: 103, OrgID: 6, Name: "other-builder"}
 	snapshots := map[int64]*model.AgentSnapshot{101: globalAgent, 102: orgAgent, 103: otherOrgAgent}
 	// a reference to a snapshot that is gone, which should not happen
 	const danglingSnapshotID = 104
@@ -66,6 +66,13 @@ func TestGetWorkflowAgent(t *testing.T) {
 			name:       "instance admin reads a global agent",
 			user:       admin,
 			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 7, AgentSnapshotID: globalAgent.ID},
+			wantStatus: http.StatusOK,
+			wantAgent:  globalAgent,
+		},
+		{
+			name:       "the snapshot is shared, the agent id comes from the workflow",
+			user:       admin,
+			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 70, AgentSnapshotID: globalAgent.ID},
 			wantStatus: http.StatusOK,
 			wantAgent:  globalAgent,
 		},
@@ -191,10 +198,12 @@ func TestGetWorkflowAgent(t *testing.T) {
 				var got model.AgentSnapshot
 				require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))
 				want := *tt.wantAgent
-				// the snapshot's own id and hash are internal
+				// the snapshot's own id and hash are internal, the agent id is the workflow's
 				want.ID = 0
+				want.AgentID = tt.workflow.AgentID
 				assert.Equal(t, want, got)
 				assert.NotContains(t, w.Body.String(), `"hash"`)
+				assert.Zero(t, tt.wantAgent.AgentID, "the loaded snapshot must not be changed")
 			} else {
 				assert.NotContains(t, w.Body.String(), "builder")
 			}

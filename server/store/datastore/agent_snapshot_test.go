@@ -30,7 +30,6 @@ import (
 
 func testAgentSnapshot() *model.AgentSnapshot {
 	return &model.AgentSnapshot{
-		AgentID:      3,
 		OrgID:        model.IDNotSet,
 		Name:         "builder-03",
 		Platform:     "linux/amd64",
@@ -55,7 +54,6 @@ func TestAgentSnapshotPersist(t *testing.T) {
 
 	// every field is part of the identity
 	changes := []func(*model.AgentSnapshot){
-		func(s *model.AgentSnapshot) { s.AgentID = 4 },
 		func(s *model.AgentSnapshot) { s.OrgID = 5 },
 		func(s *model.AgentSnapshot) { s.Name = "builder-04" },
 		func(s *model.AgentSnapshot) { s.Platform = "linux/arm64" },
@@ -155,4 +153,32 @@ func TestAgentSnapshotPersistConcurrentDuplicate(t *testing.T) {
 	existing, err := store.AgentSnapshotFind(snapshot.ID)
 	require.NoError(t, err)
 	assert.Equal(t, reference.Hash, existing.Hash)
+}
+
+// Autoscaled agents with the same metadata must not create a row each.
+func TestAgentSnapshotPersistSharedByAgents(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot))
+	defer closer()
+
+	first := testAgentSnapshot()
+	first.AgentID = 3
+	second := testAgentSnapshot()
+	second.AgentID = 4
+
+	persistedFirst, err := store.AgentSnapshotPersist(first)
+	require.NoError(t, err)
+	persistedSecond, err := store.AgentSnapshotPersist(second)
+	require.NoError(t, err)
+
+	assert.Equal(t, persistedFirst.ID, persistedSecond.ID)
+	count, err := store.engine.Count(new(model.AgentSnapshot))
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, count)
+
+	// the agent id is not stored, whether the row was created or found
+	assert.Zero(t, persistedFirst.AgentID)
+	assert.Zero(t, persistedSecond.AgentID)
+	loaded, err := store.AgentSnapshotFind(persistedFirst.ID)
+	require.NoError(t, err)
+	assert.Zero(t, loaded.AgentID)
 }

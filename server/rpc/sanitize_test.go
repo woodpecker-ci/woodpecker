@@ -128,7 +128,6 @@ func TestLockAgentToWorkflow(t *testing.T) {
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
 		mockStore.On("AgentSnapshotPersist", &model.AgentSnapshot{
-			AgentID:      agent.ID,
 			OrgID:        999,
 			Name:         "org-agent",
 			Platform:     "linux/arm64",

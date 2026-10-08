@@ -4795,6 +4795,7 @@ const docTemplate = `{
                     }
                 },
                 "id": {
+                    "description": "AgentID is the id of the agent that got the workflow assigned. It is not stored with\nthe snapshot but taken from the workflow, so agents with the same metadata share one.",
                     "type": "integer"
                 },
                 "name": {

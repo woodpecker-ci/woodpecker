@@ -15,10 +15,7 @@
 package datastore
 
 import (
-	"crypto/sha256"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"maps"
 
 	"xorm.io/xorm"
@@ -26,22 +23,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
-
-// agentSnapshotHash identifies a snapshot by its content. Every content field is part of
-// the JSON encoding (ID and Hash are not), and encoding/json sorts map keys, so equal
-// content always gets the same hash.
-func agentSnapshotHash(snapshot *model.AgentSnapshot) (string, error) {
-	content := *snapshot
-	// no labels are no labels, whether the agent reported none or an empty set
-	if len(content.CustomLabels) == 0 {
-		content.CustomLabels = nil
-	}
-	raw, err := json.Marshal(content)
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", sha256.Sum256(raw)), nil
-}
 
 func (s storage) agentSnapshotFindByHash(sess *xorm.Session, hash string) (*model.AgentSnapshot, error) {
 	snapshot := new(model.AgentSnapshot)
@@ -54,7 +35,7 @@ func (s storage) agentSnapshotFindByHash(sess *xorm.Session, hash string) (*mode
 // AgentSnapshotPersist stores the snapshot unless an identical one exists, and returns
 // the stored one.
 func (s storage) AgentSnapshotPersist(snapshot *model.AgentSnapshot) (*model.AgentSnapshot, error) {
-	hash, err := agentSnapshotHash(snapshot)
+	hash, err := snapshot.ContentHash()
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +57,7 @@ func (s storage) AgentSnapshotPersist(snapshot *model.AgentSnapshot) (*model.Age
 	stored := *snapshot
 	stored.ID = 0
 	stored.Hash = hash
+	stored.AgentID = 0
 	stored.CustomLabels = maps.Clone(snapshot.CustomLabels)
 	err = wrapInsert(sess.Insert(&stored))
 	if errors.Is(err, types.ErrInsertDuplicateDetected) {

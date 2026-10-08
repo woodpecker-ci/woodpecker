@@ -89,7 +89,10 @@ func GetWorkflowAgent(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, snapshot)
+	// the snapshot is shared by all agents with the same metadata, the workflow knows which one
+	response := *snapshot
+	response.AgentID = workflow.AgentID
+	c.JSON(http.StatusOK, response)
 }
 
 // workflowAgentSnapshot returns the agent snapshot referenced by the workflow, or nil if
