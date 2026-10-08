@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v92/github"
@@ -251,6 +252,9 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "admin@philipp.info", pipeline.Commit.Author.Email)
+		assert.Equal(t, "Philipp", pipeline.Commit.Author.Name)
+		assert.Equal(t, "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit.ForgeURL)
+		assert.Equal(t, int64(1642370257), pipeline.Commit.Timestamp)
 		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -322,11 +326,14 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
+		assert.Equal(t, "6543", pipeline.Commit.Author.Name)
+		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit.ForgeURL)
+		assert.Equal(t, int64(1753800084), pipeline.Commit.Timestamp)
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }
 
-func TestGetTagCommitSHA(t *testing.T) {
+func TestGetTagCommit(t *testing.T) {
 	// Tags API paginates 30 per page; put the target tag on the second page
 	// to exercise pagination instead of a first-page match.
 	mockedHTTPClient := github_mock.NewMockedHTTPClient(
@@ -341,6 +348,21 @@ func TestGetTagCommitSHA(t *testing.T) {
 				{
 					Name:   new("v1.0.3"),
 					Commit: &github.Commit{SHA: new("deadbeefcafe")},
+				},
+			},
+		),
+		github_mock.WithRequestMatch(
+			github_mock.GetReposCommitsByOwnerByRepoByRef,
+			github.RepositoryCommit{
+				SHA:     new("deadbeefcafe"),
+				HTMLURL: new("https://github.com/6543/hello-world/commit/deadbeefcafe"),
+				Commit: &github.Commit{
+					Message: new("Release it"),
+					Author: &github.CommitAuthor{
+						Name:  new("Jane"),
+						Email: new("jane@example.com"),
+						Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
+					},
 				},
 			},
 		),
@@ -369,13 +391,63 @@ func TestGetTagCommitSHA(t *testing.T) {
 	c := &client{API: defaultAPI, url: defaultURL}
 
 	t.Run("finds a tag beyond the first page", func(t *testing.T) {
-		sha, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		commit, err := c.getTagCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
 		require.NoError(t, err)
-		assert.Equal(t, "deadbeefcafe", sha)
+		assert.Equal(t, &model.Commit{
+			SHA:       "deadbeefcafe",
+			Message:   "Release it",
+			ForgeURL:  "https://github.com/6543/hello-world/commit/deadbeefcafe",
+			Timestamp: 1700000000,
+			Author: model.CommitAuthor{
+				Name:  "Jane",
+				Email: "jane@example.com",
+			},
+		}, commit)
 	})
 
 	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
-		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		_, err := c.getTagCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
 		require.Error(t, err)
 	})
+}
+
+func TestBranchHead(t *testing.T) {
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatch(
+			github_mock.GetReposBranchesByOwnerByRepoByBranch,
+			github.Branch{
+				Name: new("main"),
+				Commit: &github.RepositoryCommit{
+					SHA:     new("deadbeefcafe"),
+					HTMLURL: new("https://github.com/6543/hello-world/commit/deadbeefcafe"),
+					Commit: &github.Commit{
+						Message: new("Fix the thing"),
+						Author: &github.CommitAuthor{
+							Name:  new("Jane"),
+							Email: new("jane@example.com"),
+							Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
+						},
+					},
+				},
+			},
+		),
+	)
+
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	commit, err := c.BranchHead(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "6543", Name: "hello-world"}, "main")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:       "deadbeefcafe",
+		Message:   "Fix the thing",
+		ForgeURL:  "https://github.com/6543/hello-world/commit/deadbeefcafe",
+		Timestamp: 1700000000,
+		Author: model.CommitAuthor{
+			Name:  "Jane",
+			Email: "jane@example.com",
+		},
+	}, commit)
 }

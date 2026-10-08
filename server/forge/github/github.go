@@ -666,10 +666,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.GetCommit().GetSHA(),
-		ForgeURL: b.GetCommit().GetHTMLURL(),
-	}, nil
+	return convertCommit(b.GetCommit()), nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -687,11 +684,13 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
 			if pipeline.Commit.SHA == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+				commit, err := c.getTagCommit(ctx, repo, pipeline.TagTitle)
 				if err != nil {
 					return nil, nil, err
 				}
-				pipeline.Commit.SHA = sha
+				if commit != nil {
+					pipeline.Commit = commit
+				}
 			}
 		}
 	}
@@ -758,21 +757,22 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	return pipeline, err
 }
 
-func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+// getTagCommit returns the commit a tag points to.
+func (c *client) getTagCommit(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return "", nil
+		return nil, nil
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Refresh the OAuth token before making API calls.
@@ -782,7 +782,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 
 	gh, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	opts := &github.ListOptions{Page: 1}
@@ -790,7 +790,7 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	for opts.Page > 0 {
 		tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		for _, t := range tags {
@@ -806,9 +806,15 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		opts.Page = resp.NextPage
 	}
 	if tag == nil {
-		return "", fmt.Errorf("could not find tag %s", tagName)
+		return nil, fmt.Errorf("could not find tag %s", tagName)
 	}
-	return tag.GetCommit().GetSHA(), nil
+
+	// the tag list only carries the sha, load the commit for the rest
+	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, tag.GetCommit().GetSHA(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return convertCommit(commit), nil
 }
 
 func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {

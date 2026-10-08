@@ -108,11 +108,14 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 		Commit: &model.Commit{
-			SHA:     hook.GetHeadCommit().GetID(),
-			Message: hook.GetHeadCommit().GetMessage(),
+			SHA:      hook.GetHeadCommit().GetID(),
+			Message:  hook.GetHeadCommit().GetMessage(),
+			ForgeURL: hook.GetHeadCommit().GetURL(),
 			Author: model.CommitAuthor{
+				Name:  hook.GetHeadCommit().GetAuthor().GetName(),
 				Email: hook.GetHeadCommit().GetAuthor().GetEmail(),
 			},
+			Timestamp: unixTime(hook.GetHeadCommit().GetTimestamp()),
 		},
 		Ref:      hook.GetRef(),
 		ForgeURL: hook.GetHeadCommit().GetURL(),
