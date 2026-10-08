@@ -183,9 +183,9 @@ ui-dependencies: ## Install UI dependencies
 lint: ## Lint code
 	@echo "Running golangci-lint"
 	@if command -v golangci-lint > /dev/null 2>&1; then \
-		golangci-lint run; \
+		golangci-lint run --max-same-issues 0; \
 	else \
-		go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run; \
+		go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run --max-same-issues 0; \
 	fi
 
 lint-ui: ui-dependencies ## Lint UI code
