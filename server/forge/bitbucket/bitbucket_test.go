@@ -133,6 +133,9 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "branch_head_name", branchHead.SHA)
 	assert.Equal(t, "https://bitbucket.org/commitlink", branchHead.ForgeURL)
+	assert.Equal(t, "update README", branchHead.Message)
+	assert.Equal(t, int64(1700000000), branchHead.Timestamp)
+	assert.Equal(t, model.CommitAuthor{Name: "Jane Doe", Email: "jane@example.com"}, branchHead.Author)
 
 	_, err = c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
 	assert.Error(t, err)

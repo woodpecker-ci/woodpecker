@@ -396,10 +396,16 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
+	head := &model.Commit{
 		SHA:      commit.Hash,
+		Message:  commit.Message,
 		ForgeURL: commit.Links.HTML.Href,
-	}, nil
+		Author:   convertCommitAuthor(commit.Author.Raw),
+	}
+	if !commit.Date.IsZero() {
+		head.Timestamp = commit.Date.UTC().Unix()
+	}
+	return head, nil
 }
 
 // PullRequests returns the pull requests of the named repository.
