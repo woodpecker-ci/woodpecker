@@ -137,18 +137,17 @@ go run ./cmd/server
 ```
 
 :::info
-The server embeds the web UI from `web/dist/` at compile time. This folder is not part of the repository. Without it everything that compiles the server (like `go run ./cmd/server`, `go build ./...`, `make test-server` or `make lint`) fails with:
+The server embeds the web UI from `web/dist/` at compile time. If not build jet compiling and go runs will fail with:
 
 ```none
 web/web.go:26:12: pattern all:dist/*: no matching files found
 ```
 
-Build the UI once with `make build-ui` to fix this. If you only work on Go code or use the [dev-proxy](./03-ui.md#setup) for the UI, a placeholder file is enough. This is also what our CI does:
+Either build the UI once with `make build-ui` or create placeholder with:
 
 ```bash
 mkdir -p web/dist/ && echo "test" > web/dist/index.html
 ```
-
 :::
 
 ```bash title="start agent"
