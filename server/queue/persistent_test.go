@@ -168,3 +168,92 @@ func TestPersistentQueueDoneIgnoresAlreadyRemovedBackupTask(t *testing.T) {
 	assert.Equal(t, 0, info.Stats.Pending)
 	assert.Equal(t, 0, info.Stats.Running)
 }
+
+func TestPersistentQueuePausePersistsState(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().ServerConfigSet(serverConfigQueuePaused, "true").Return(nil).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+	pq.Pause()
+
+	assert.True(t, pq.Info(ctx).Paused)
+}
+
+func TestPersistentQueueResumePersistsState(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().ServerConfigSet(serverConfigQueuePaused, "true").Return(nil).Once()
+	store.EXPECT().ServerConfigSet(serverConfigQueuePaused, "false").Return(nil).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+	pq.Pause()
+	pq.Resume()
+
+	assert.False(t, pq.Info(ctx).Paused)
+}
+
+func TestWithTaskStoreRestoresPausedState(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskList().Return(nil, nil).Once()
+	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("true", nil).Once()
+
+	pq := WithTaskStore(ctx, q, store)
+
+	assert.True(t, pq.Info(ctx).Paused)
+}
+
+func TestWithTaskStoreLeavesQueueRunningWhenNotPaused(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskList().Return(nil, nil).Once()
+	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("false", nil).Once()
+
+	pq := WithTaskStore(ctx, q, store)
+
+	assert.False(t, pq.Info(ctx).Paused)
+}
+
+func TestWithTaskStoreLeavesQueueRunningWhenNoPausedConfig(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().TaskList().Return(nil, nil).Once()
+	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("", types.ErrRecordNotExist).Once()
+
+	pq := WithTaskStore(ctx, q, store)
+
+	assert.False(t, pq.Info(ctx).Paused)
+}
+
+func TestWithTaskStoreRestoresPausedStateAfterRestart(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().ServerConfigSet(serverConfigQueuePaused, "true").Return(nil).Once()
+
+	pq := &persistentQueue{Queue: q, store: store}
+	pq.Pause()
+	assert.True(t, pq.Info(ctx).Paused)
+
+	// Fresh in-memory queue after process restart; paused flag comes from store.
+	ctx2, cancel2, q2 := setupTestQueue(t)
+	defer cancel2(nil)
+
+	store.EXPECT().TaskList().Return(nil, nil).Once()
+	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("true", nil).Once()
+
+	restored := WithTaskStore(ctx2, q2, store)
+	assert.True(t, restored.Info(ctx2).Paused)
+}
