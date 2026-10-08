@@ -79,6 +79,9 @@ func parseHookPayload(webhookType string, raw []byte, merge bool) (_ *github.Pul
 	if err != nil {
 		return nil, nil, nil, "", "", err
 	}
+	if payload == nil {
+		return nil, nil, nil, "", "", fmt.Errorf("empty payload for webhook type %q", webhookType)
+	}
 
 	switch hook := payload.(type) {
 	case *github.PushEvent:
