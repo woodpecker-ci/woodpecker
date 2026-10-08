@@ -441,6 +441,11 @@ const branchCommitsPayload = `
 		"values": [
 				{
 						"hash": "branch_head_name",
+						"message": "update README",
+						"date": "2023-11-14T22:13:20+00:00",
+						"author": {
+							"raw": "Jane Doe <jane@example.com>"
+						},
 						"links": {
 							"html": {
 								"href": "https://bitbucket.org/commitlink"

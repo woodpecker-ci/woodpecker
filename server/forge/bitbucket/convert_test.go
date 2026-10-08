@@ -159,6 +159,8 @@ func TestConvertPushHook(t *testing.T) {
 	pipeline := convertPushHook(&hook, &change)
 	assert.Equal(t, model.EventPush, pipeline.Event)
 	assert.Equal(t, "test@domain.tld", pipeline.Commit.Author.Email)
+	assert.Equal(t, "Test", pipeline.Commit.Author.Name)
+	assert.Equal(t, change.New.Target.Links.HTML.Href, pipeline.Commit.ForgeURL)
 	assert.Equal(t, hook.Actor.Login, pipeline.Author)
 	assert.Equal(t, hook.Actor.Links.Avatar.Href, pipeline.Avatar)
 	assert.Equal(t, change.New.Target.Hash, pipeline.Commit.SHA)
@@ -179,4 +181,23 @@ func TestConvertPushHookTag(t *testing.T) {
 	pipeline := convertPushHook(&hook, &change)
 	assert.Equal(t, model.EventTag, pipeline.Event)
 	assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
+}
+
+func TestConvertCommitAuthor(t *testing.T) {
+	tests := []struct {
+		raw  string
+		want model.CommitAuthor
+	}{
+		{raw: "Test <test@domain.tld>", want: model.CommitAuthor{Name: "Test", Email: "test@domain.tld"}},
+		{raw: "Jane van Doe <jane@example.com>", want: model.CommitAuthor{Name: "Jane van Doe", Email: "jane@example.com"}},
+		{raw: "<test@domain.tld>", want: model.CommitAuthor{Email: "test@domain.tld"}},
+		{raw: "only a name", want: model.CommitAuthor{Name: "only a name"}},
+		{raw: "", want: model.CommitAuthor{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.raw, func(t *testing.T) {
+			assert.Equal(t, tt.want, convertCommitAuthor(tt.raw))
+		})
+	}
 }
