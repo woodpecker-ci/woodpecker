@@ -105,18 +105,24 @@ make lint
 ```
 
 ```bash title="lint UI code"
-make lint-frontend
+make lint-ui
 ```
 
 ```bash title="test UI code"
-make test-frontend
+make test-ui
 ```
 
 If you want to test a specific Go file, you can also use:
 
 ```bash
-go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v3/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s -tags test go.woodpecker-ci.org/woodpecker/v3/<path-to-the-package-or-file-to-test>
 ```
+
+:::warning
+Always pass `-tags test`. Many test files and test helpers, like the [dummy backend](./09-testing.md#dummy-backend),
+are only compiled with the `test` build tag. Without it `go test` skips these tests without any hint!
+Make targets do it for you.
+:::
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
 
