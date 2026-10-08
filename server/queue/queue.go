@@ -126,9 +126,17 @@ type Queue interface {
 	// If still pending they will just get removed from the queue.
 	ErrorAtOnce(c context.Context, ids []string, err error) error
 
-	// Wait waits until the task is complete.
-	// Also signals via error ErrCancel if workflow got canceled.
-	Wait(c context.Context, id string) error
+	// Wait waits until the task leased to the agent is complete.
+	// It signals ErrCancel if the workflow got canceled, ErrTaskExpired if
+	// the lease expired and the task is queued again, ErrAgentMissMatch if
+	// another agent holds the lease now, and returns nil for a task the
+	// queue does not know, so agents outlive a server restart.
+	Wait(c context.Context, agentID int64, id string) error
+
+	// Leased checks whether the agent holds the lease of the task: nil if it
+	// does, ErrTaskExpired or ErrAgentMissMatch if it lost it, ErrNotFound
+	// for a task the queue does not know.
+	Leased(c context.Context, agentID int64, id string) error
 
 	// Info returns internal queue information.
 	Info(c context.Context) InfoT

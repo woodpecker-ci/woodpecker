@@ -129,7 +129,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		// Start waiting on the task
 		waitDone := make(chan error, 1)
 		go func() {
-			waitDone <- q.Wait(ctx, got1.ID)
+			waitDone <- q.Wait(ctx, 1, got1.ID)
 		}()
 
 		time.Sleep(10 * time.Millisecond)
@@ -157,7 +157,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		waitCtx, waitCancel := context.WithCancelCause(ctx)
 		waitDone2 := make(chan error, 1)
 		go func() {
-			waitDone2 <- q.Wait(waitCtx, got2.ID)
+			waitDone2 <- q.Wait(waitCtx, 2, got2.ID)
 		}()
 
 		time.Sleep(10 * time.Millisecond)
@@ -189,7 +189,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		waitResults := make(chan error, numWaiters)
 		for range numWaiters {
 			go func() {
-				waitResults <- q.Wait(ctx, got3.ID)
+				waitResults <- q.Wait(ctx, 3, got3.ID)
 			}()
 		}
 
@@ -907,7 +907,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.NoError(t, err)
 
 		errCh := make(chan error, 1)
-		go func() { errCh <- q.Wait(ctx, got.ID) }()
+		go func() { errCh <- q.Wait(ctx, 1, got.ID) }()
 
 		waitForProcess()
 		select {
@@ -983,7 +983,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 
 		var wg sync.WaitGroup
 		wg.Go(func() {
-			assert.NoError(t, q.Wait(ctx, got.ID))
+			assert.NoError(t, q.Wait(ctx, 1, got.ID))
 		})
 
 		time.Sleep(time.Millisecond)
@@ -991,7 +991,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		wg.Wait()
 
 		// Edge case: Wait on non-existent task should return immediately
-		assert.NoError(t, q.Wait(ctx, "non-existent"))
+		assert.NoError(t, q.Wait(ctx, 1, "non-existent"))
 
 		dummyTask2 := &model.Task{ID: "wait-2"}
 		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask2}))
@@ -1000,7 +1000,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 
 		waitCtx, waitCancel := context.WithCancelCause(ctx)
 		errCh := make(chan error, 1)
-		go func() { errCh <- q.Wait(waitCtx, got2.ID) }()
+		go func() { errCh <- q.Wait(waitCtx, 1, got2.ID) }()
 
 		time.Sleep(50 * time.Millisecond)
 		waitCancel(nil)
@@ -1026,7 +1026,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		wg2.Add(3)
 		for range 3 {
 			go func() {
-				assert.NoError(t, q.Wait(ctx, got3.ID))
+				assert.NoError(t, q.Wait(ctx, 1, got3.ID))
 				wg2.Done()
 			}()
 		}
@@ -1305,4 +1305,91 @@ func findTaskByAgent(tasks map[string]int64, agentID int64) string {
 		}
 	}
 	return ""
+}
+
+func TestFifoWaitLeaseOwnership(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	t.Run("wait and leased follow the lease", func(t *testing.T) {
+		q.extension = 0
+		t.Cleanup(func() {
+			q.extension = 50 * time.Millisecond
+		})
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{{ID: "lease-own-1"}}))
+
+		waitForProcess()
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		require.NoError(t, err)
+
+		// the lease holder is accepted, any other agent is not
+		assert.NoError(t, q.Leased(ctx, 1, got.ID))
+		assert.ErrorIs(t, q.Leased(ctx, 2, got.ID), ErrAgentMissMatch)
+		assert.ErrorIs(t, q.Wait(ctx, 2, got.ID), ErrAgentMissMatch)
+
+		// once the lease expired the task is pending again and the old holder
+		// has lost it: Wait must not report it as finished
+		waitForProcess()
+		assert.ErrorIs(t, q.Leased(ctx, 1, got.ID), ErrTaskExpired)
+		assert.ErrorIs(t, q.Wait(ctx, 1, got.ID), ErrTaskExpired)
+
+		// a task the queue does not know keeps the old behavior, so agents
+		// outlive a server restart
+		assert.NoError(t, q.Wait(ctx, 1, "non-existent"))
+		assert.ErrorIs(t, q.Leased(ctx, 1, "non-existent"), ErrNotFound)
+
+		// the agent that polls the task again holds the new lease
+		q.extension = 50 * time.Millisecond
+		got2, err := q.Poll(ctx, 2, filterFnTrue)
+		require.NoError(t, err)
+		assert.Equal(t, got.ID, got2.ID)
+		assert.NoError(t, q.Leased(ctx, 2, got2.ID))
+		assert.ErrorIs(t, q.Leased(ctx, 1, got2.ID), ErrAgentMissMatch)
+		assert.ErrorIs(t, q.Wait(ctx, 1, got2.ID), ErrAgentMissMatch)
+
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
+		assert.ErrorIs(t, q.Leased(ctx, 2, got2.ID), ErrNotFound)
+
+		info := q.Info(ctx)
+		assert.Len(t, info.Pending, 0)
+		assert.Len(t, info.Running, 0)
+	})
+
+	t.Run("waiting on dependencies counts as lost lease", func(t *testing.T) {
+		q.extension = 0
+		t.Cleanup(func() {
+			q.extension = 50 * time.Millisecond
+		})
+		dep := &model.Task{ID: "lease-own-dep"}
+		task := &model.Task{ID: "lease-own-2", Dependencies: []string{dep.ID}, DepStatus: map[string]model.StatusValue{}}
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dep, task}))
+
+		waitForProcess()
+		gotDep, err := q.Poll(ctx, 1, filterFnTrue)
+		require.NoError(t, err)
+		assert.Equal(t, dep.ID, gotDep.ID)
+
+		// the dependency expired and is queued again, so the dependent task
+		// keeps waiting on it; neither belongs to agent 1 anymore
+		waitForProcess()
+		assert.ErrorIs(t, q.Leased(ctx, 1, dep.ID), ErrTaskExpired)
+		assert.ErrorIs(t, q.Leased(ctx, 1, task.ID), ErrTaskExpired)
+
+		q.extension = 50 * time.Millisecond
+		gotDep2, err := q.Poll(ctx, 1, filterFnTrue)
+		require.NoError(t, err)
+		assert.NoError(t, q.Done(ctx, gotDep2.ID, model.StatusSuccess))
+		waitForProcess()
+		got2, err := q.Poll(ctx, 1, filterFnTrue)
+		require.NoError(t, err)
+		assert.Equal(t, task.ID, got2.ID)
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
+
+		info := q.Info(ctx)
+		assert.Len(t, info.Pending, 0)
+		assert.Len(t, info.WaitingOnDeps, 0)
+		assert.Len(t, info.Running, 0)
+	})
 }

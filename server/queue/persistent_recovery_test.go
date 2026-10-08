@@ -55,7 +55,10 @@ func expirePersistentLease(t *testing.T, ctx context.Context, q *fifo, id string
 	t.Helper()
 	waitCtx, registered := withWaitRegistration(ctx)
 	waitResult := make(chan error, 1)
-	go func(waitCtx context.Context) { waitResult <- q.Wait(waitCtx, id) }(waitCtx)
+	q.Lock()
+	agentID := q.running[id].item.AgentID
+	q.Unlock()
+	go func(waitCtx context.Context) { waitResult <- q.Wait(waitCtx, agentID, id) }(waitCtx)
 	select {
 	case <-registered:
 	case <-ctx.Done():

@@ -176,27 +176,79 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 	return errors.Join(errs...)
 }
 
-// Wait waits until the item is done executing.
-// Also signals via error ErrCancel if workflow got canceled.
-func (q *fifo) Wait(ctx context.Context, taskID string) error {
+// Wait waits until the item leased to the agent is done executing.
+// Also signals via error ErrCancel if workflow got canceled, ErrTaskExpired
+// if the task is queued again and ErrAgentMissMatch if another agent holds
+// the lease, so a slow agent stops instead of running next to the new one.
+func (q *fifo) Wait(ctx context.Context, agentID int64, taskID string) error {
 	q.Lock()
-	state := q.running[taskID]
+	state, err := q.leaseOf(agentID, taskID)
 	q.Unlock()
-	if state != nil {
-		select {
-		case <-ctx.Done():
-		case <-state.done:
-			// check if we have a wrapped cancel error and unwrap it
-			if errors.Is(state.error, ErrCancel) {
-				return ErrCancel
-			}
-			// or return queue errors and no workflow errors
-			if !errors.Is(state.error, new(ErrExternal)) {
-				return state.error
-			}
+	if err != nil || state == nil {
+		return err
+	}
+	select {
+	case <-ctx.Done():
+	case <-state.done:
+		// check if we have a wrapped cancel error and unwrap it
+		if errors.Is(state.error, ErrCancel) {
+			return ErrCancel
+		}
+		// or return queue errors and no workflow errors
+		if !errors.Is(state.error, new(ErrExternal)) {
+			return state.error
 		}
 	}
 	return nil
+}
+
+// Leased reports whether the agent holds the lease of the task.
+func (q *fifo) Leased(_ context.Context, agentID int64, taskID string) error {
+	q.Lock()
+	defer q.Unlock()
+
+	state, err := q.leaseOf(agentID, taskID)
+	if err != nil {
+		return err
+	}
+	if state == nil {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// leaseOf returns the running entry of the task if the agent holds its lease.
+// A task that is pending or waiting on dependencies again lost its lease
+// (ErrTaskExpired), one running under another agent was handed out again
+// (ErrAgentMissMatch), and one the queue does not know gives nil, nil.
+// Expects the queue to be locked by the caller.
+func (q *fifo) leaseOf(agentID int64, taskID string) (*entry, error) {
+	if state, ok := q.running[taskID]; ok {
+		if state.item.AgentID != agentID {
+			return nil, ErrAgentMissMatch
+		}
+		return state, nil
+	}
+	if q.queued(taskID) {
+		return nil, ErrTaskExpired
+	}
+	return nil, nil
+}
+
+// queued reports whether the task is pending or waiting on dependencies.
+// Expects the queue to be locked by the caller.
+func (q *fifo) queued(taskID string) bool {
+	for element := q.pending.Front(); element != nil; element = element.Next() {
+		if task, _ := element.Value.(*model.Task); task.ID == taskID {
+			return true
+		}
+	}
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		if task, _ := element.Value.(*model.Task); task.ID == taskID {
+			return true
+		}
+	}
+	return false
 }
 
 // Extend extends the task execution deadline.
