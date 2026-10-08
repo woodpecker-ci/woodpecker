@@ -7,6 +7,8 @@
 [We use default golang unit tests](https://go.dev/doc/tutorial/add-a-test)
 with [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify/assert) to simplify testing.
 
+Tests that need test-only code, like the [dummy backend](#dummy-backend), start with `//go:build test`. They only run if the `test` build tag is set, see [testing & linting code](./01-getting-started.md#testing--linting-code).
+
 ### Integration Tests
 
 ### Dummy backend
