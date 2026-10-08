@@ -1,6 +1,14 @@
 # Changelog
 
-## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-07
+## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-08
+
+### ❤️ Thanks to all contributors! ❤️
+
+@YouCD
+
+### 🐛 Bug Fixes
+
+- 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
 
 ### 📦️ Dependency
 
