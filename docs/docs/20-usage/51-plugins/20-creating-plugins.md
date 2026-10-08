@@ -46,7 +46,11 @@ Secrets should be passed as settings too. Therefore, users should use [`from_sec
 
 ## Plugin library
 
-For Go, we provide a plugin library you can use to get easy access to internal env vars and your settings. See <https://codeberg.org/woodpecker-plugins/go-plugin>.
+We provide plugin libraries you can use to get easy access to internal env vars and your settings:
+
+- Go: [go-plugin](https://codeberg.org/woodpecker-plugins/go-plugin), import as `codeberg.org/woodpecker-plugins/go-plugin`
+- TypeScript / JavaScript: [ts-plugin](https://codeberg.org/woodpecker-plugins/ts-plugin), published as [`@woodpecker-ci/plugin`](https://www.npmjs.com/package/@woodpecker-ci/plugin)
+- Rust: [rust-plugin](https://codeberg.org/woodpecker-plugins/rust-plugin), published as [`woodpecker-plugin`](https://crates.io/crates/woodpecker-plugin)
 
 ## Metadata
 
