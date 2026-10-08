@@ -279,7 +279,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, resp, err := client.Repositories.GetFile(ctx, r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.Repositories.GetFile(ctx, r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
@@ -295,7 +295,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	// List files in repository
-	contents, resp, err := client.Repositories.ListContents(ctx, r.Owner, r.Name, b.Commit, f)
+	contents, resp, err := client.Repositories.ListContents(ctx, r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -333,7 +333,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.Repositories.CreateStatus(ctx,
 		repo.Owner,
 		repo.Name,
-		pipeline.Commit,
+		pipeline.Commit.SHA,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State, c.canSkip),
 			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
@@ -533,7 +533,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request, secret string) (*mode
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
+			pipeline.Commit.SHA = sha
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			if len(pipeline.ChangedFiles) == 0 {

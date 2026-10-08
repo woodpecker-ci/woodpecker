@@ -137,16 +137,9 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		DeployTo:    pipeline.DeployTo,
 		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:       pipeline.Commit,
-			Ref:       pipeline.Ref,
-			Refspec:   pipeline.Refspec,
-			Branch:    pipeline.Branch,
-			Message:   pipeline.Message,
-			Timestamp: pipeline.Timestamp,
-			Author: metadata.Author{
-				Name:  pipeline.Author,
-				Email: pipeline.Email,
-			},
+			Ref:                  pipeline.Ref,
+			Refspec:              pipeline.Refspec,
+			Branch:               pipeline.Branch,
 			ChangedFiles:         pipeline.ChangedFiles,
 			PullRequestLabels:    pipeline.PullRequestLabels,
 			PullRequestMilestone: pipeline.PullRequestMilestone,
@@ -155,6 +148,18 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
 		Avatar: pipeline.Avatar,
+	}
+
+	if pipeline.Commit != nil {
+		metadata.Commit.Sha = pipeline.Commit.SHA
+		metadata.Commit.Message = pipeline.Commit.Message
+		metadata.Commit.Timestamp = pipeline.Commit.Timestamp
+		metadata.Commit.Author.Name = pipeline.Commit.Author.Name
+		metadata.Commit.Author.Email = pipeline.Commit.Author.Email
+	}
+	if metadata.Commit.Author.Name == "" {
+		// not every forge reports the commit author, fall back to the pipeline author
+		metadata.Commit.Author.Name = pipeline.Author
 	}
 
 	if pipeline.Release != nil {

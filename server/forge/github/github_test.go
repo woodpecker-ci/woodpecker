@@ -103,7 +103,7 @@ func TestGithub(t *testing.T) {
 	})
 
 	t.Run("dir is fetched with a single graphql request", func(t *testing.T) {
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "somedir")
 		assert.NoError(t, err)
 		require.Len(t, files, 1)
 		assert.Equal(t, "somedir/a.yaml", files[0].Name)
@@ -111,12 +111,12 @@ func TestGithub(t *testing.T) {
 	})
 
 	t.Run("dir returns config-not-found for missing directories", func(t *testing.T) {
-		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "no-such-dir")
+		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "no-such-dir")
 		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
 	})
 
 	t.Run("dir skips symlinks", func(t *testing.T) {
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "symlink-dir")
 		require.NoError(t, err)
 		assert.Equal(t, []*forge_types.FileMeta{
 			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
@@ -129,7 +129,7 @@ func TestGithub(t *testing.T) {
 
 		// the graphql entry carries the link target as its text, which must
 		// never be used as the file content
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "symlink-dir")
 		require.NoError(t, err)
 		assert.Equal(t, []*forge_types.FileMeta{
 			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
@@ -138,7 +138,7 @@ func TestGithub(t *testing.T) {
 	})
 
 	t.Run("dir loads large and binary files over rest", func(t *testing.T) {
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "large-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "large-dir")
 		require.NoError(t, err)
 		assert.Equal(t, []*forge_types.FileMeta{
 			{Name: "large-dir/a.yaml", Data: []byte("steps: a")},
@@ -148,7 +148,7 @@ func TestGithub(t *testing.T) {
 	})
 
 	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "rest-fallback-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "rest-fallback-dir")
 		assert.NoError(t, err)
 		require.Len(t, files, 1)
 		assert.Equal(t, "rest-fallback-dir/b.yaml", files[0].Name)
@@ -158,7 +158,7 @@ func TestGithub(t *testing.T) {
 	t.Run("dir falls back instead of reporting config-not-found for an unexpected graphql response", func(t *testing.T) {
 		// a 200 without a repository object must not be mistaken for a missing
 		// path: config-not-found makes the caller drop the pipeline silently
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "null-repo-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: &model.Commit{SHA: "abc123"}}, "null-repo-dir")
 		require.NoError(t, err)
 		assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
 		require.Len(t, files, 1)
@@ -315,12 +315,12 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, "366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit)
-		assert.Equal(t, "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests", pipeline.Message)
+		assert.Equal(t, "366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit.SHA)
+		assert.Equal(t, "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests", pipeline.Commit.Message)
 		assert.Equal(t, "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
-		assert.Equal(t, "admin@philipp.info", pipeline.Email)
+		assert.Equal(t, "admin@philipp.info", pipeline.Commit.Author.Email)
 		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -340,8 +340,8 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/pull/1/head", pipeline.Ref)
 		assert.Equal(t, "changes:main", pipeline.Refspec)
-		assert.Equal(t, "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c", pipeline.Commit)
-		assert.Equal(t, "Update the README with new information", pipeline.Message)
+		assert.Equal(t, "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c", pipeline.Commit.SHA)
+		assert.Equal(t, "Update the README with new information", pipeline.Commit.Message)
 		assert.Equal(t, "Update the README with new information", pipeline.Title)
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
@@ -364,8 +364,8 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventDeploy, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, "9049f1265b7d61be4a8904a9a27120d2064dab3b", pipeline.Commit)
-		assert.Equal(t, "", pipeline.Message)
+		assert.Equal(t, "9049f1265b7d61be4a8904a9a27120d2064dab3b", pipeline.Commit.SHA)
+		assert.Equal(t, "", pipeline.Commit.Message)
 		assert.Equal(t, "https://api.github.com/repos/baxterthehacker/public-repo/deployments/710692", pipeline.ForgeURL)
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
@@ -386,12 +386,12 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/tags/the-tag-v1", pipeline.Ref)
-		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit)
+		assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit.SHA)
 		assert.Equal(t, "the-tag-v1", pipeline.TagTitle)
 		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.ForgeURL)
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
-		assert.Equal(t, "6543@obermui.de", pipeline.Email)
+		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }
@@ -605,9 +605,9 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 	})
 
 	t.Run("without store the pipeline is unchanged", func(t *testing.T) {
-		p, err := c.loadChangedFilesFromCommits(t.Context(), repo, &model.Pipeline{Commit: curr}, curr, prev)
+		p, err := c.loadChangedFilesFromCommits(t.Context(), repo, &model.Pipeline{Commit: &model.Commit{SHA: curr}}, curr, prev)
 		require.NoError(t, err)
-		assert.Equal(t, &model.Pipeline{Commit: curr}, p)
+		assert.Equal(t, &model.Pipeline{Commit: &model.Commit{SHA: curr}}, p)
 	})
 }
 
@@ -677,7 +677,7 @@ func TestFileAndDir(t *testing.T) {
 	c := &client{API: defaultAPI, url: defaultURL}
 	user := &model.User{AccessToken: "token"}
 	repo := &model.Repo{Owner: "octocat", Name: "hello-world"}
-	pipeline := &model.Pipeline{Commit: "abc"}
+	pipeline := &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}
 
 	data, err := c.File(ctx, user, repo, pipeline, ".woodpecker/a.yaml")
 	require.NoError(t, err)
@@ -751,7 +751,7 @@ func TestDirLimitsParallelFileFetches(t *testing.T) {
 	)
 	c := &client{API: defaultAPI, url: defaultURL}
 
-	metas, err := c.Dir(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, &model.Pipeline{Commit: "abc"}, ".woodpecker")
+	metas, err := c.Dir(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}, ".woodpecker")
 	require.NoError(t, err)
 	assert.LessOrEqual(t, maxInFlight.Load(), int32(maxParallelFileFetches))
 	// files keep the order of the folder listing

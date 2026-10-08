@@ -397,7 +397,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	if err != nil {
 		return nil, err
 	}
-	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit}, gitlab.WithContext(ctx))
+	file, resp, err := client.RepositoryFiles.GetRawFile(_repo.ID, fileName, &gitlab.GetRawFileOptions{Ref: &pipeline.Commit.SHA}, gitlab.WithContext(ctx))
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{fileName}})
 	}
@@ -420,7 +420,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	opts := &gitlab.ListTreeOptions{
 		PerPage:   defaultPerPage,
 		Path:      &path,
-		Ref:       &pipeline.Commit,
+		Ref:       &pipeline.Commit.SHA,
 		Recursive: new(false),
 	}
 
@@ -468,7 +468,7 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
+	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit.SHA, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
 		Description: new(common.GetPipelineStatusDescription(workflow.State)),
 		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
@@ -701,7 +701,7 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "tag deleted"}
 		}
 		repo, pipeline, cmID, err := convertTagHook(event)
-		if err != nil || pipeline.Message != "" {
+		if err != nil || pipeline.Commit.Message != "" {
 			return repo, pipeline, err
 		}
 
@@ -956,18 +956,18 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	// For annotated tags `sha` is the tag object's own SHA; the commits
 	// endpoint resolves it to the tagged commit. Record that commit so
 	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
-	pipeline.Commit = cm.ID
+	pipeline.Commit.SHA = cm.ID
 
 	// Do not set pipeline.Author from the git commit metadata here: it is
 	// controlled by whoever made the commit and would overwrite the author
 	// taken from the authenticated webhook (convertTagHook sets it to
 	// hook.UserUsername). Trusting it lets a pusher spoof an
 	// ApprovalAllowedUsers entry and skip approval (CVE-2026-58370).
-	pipeline.Email = cm.AuthorEmail
-	pipeline.Message = cm.Message
-	pipeline.Timestamp = cm.CommittedDate.Unix()
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
+	pipeline.Commit.Author.Email = cm.AuthorEmail
+	pipeline.Commit.Message = cm.Message
+	pipeline.Commit.Timestamp = cm.CommittedDate.Unix()
+	if len(pipeline.Commit.Author.Email) != 0 {
+		pipeline.Avatar = getUserAvatar(pipeline.Commit.Author.Email)
 	}
 
 	return pipeline, nil
