@@ -165,7 +165,12 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bitbucket.Repository
 	if rID.IsValid() {
-		opts := &bitbucket.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bitbucket.PermissionRepoWrite, Limit: listLimit}
+		// Note: do not filter the search by name here. Bitbucket matches the
+		// name filter against the repository display name, while the name we
+		// have at hand is the repository slug (see convertRepo). Display names
+		// containing e.g. spaces have a slug that differs from the name, so
+		// filtering by it would exclude the repository from the results.
+		opts := &bitbucket.RepositorySearchOptions{ProjectKey: owner, Permission: bitbucket.PermissionRepoWrite, Limit: listLimit}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {

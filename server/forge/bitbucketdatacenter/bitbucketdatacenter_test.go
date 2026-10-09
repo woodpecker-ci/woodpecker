@@ -15,11 +15,17 @@
 package bitbucketdatacenter
 
 import (
+	"encoding/json"
+	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/neticdk/go-bitbucket/bitbucket"
+	"github.com/neticdk/go-bitbucket/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
@@ -95,6 +101,69 @@ func TestBitbucketDC(t *testing.T) {
 	// Execute the Status method
 	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 	assert.NoError(t, err)
+}
+
+func TestBitbucketDCRepoByIDWithSpacesInName(t *testing.T) {
+	// Bitbucket matches the "name" search filter against the repository
+	// display name, while Woodpecker stores the repository slug. For a
+	// repository with a space in its display name the slug differs from the
+	// name, so looking the repository up by its forge remote ID must still
+	// find it. See https://github.com/woodpecker-ci/woodpecker/issues/5821
+	repos := []*bitbucket.Repository{
+		{
+			ID:   uint64(1234),
+			Slug: "test-repo",
+			Name: "test repo",
+			Project: &bitbucket.Project{
+				ID:  uint64(456),
+				Key: "TEST",
+			},
+		},
+	}
+
+	s := mock.NewMockServer(
+		mock.WithRequestMatchHandler(mock.SearchRepositories, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// emulate Bitbucket: the "name" filter matches the display name
+			nameFilter := strings.ToLower(r.URL.Query().Get("name"))
+			filtered := make([]*bitbucket.Repository, 0, len(repos))
+			for _, repo := range repos {
+				if nameFilter == "" || strings.Contains(strings.ToLower(repo.Name), nameFilter) {
+					filtered = append(filtered, repo)
+				}
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			err := json.NewEncoder(w).Encode(bitbucket.RepositoryList{
+				Repositories: filtered,
+				ListResponse: bitbucket.ListResponse{
+					Size:     uint(len(filtered)),
+					LastPage: true,
+				},
+			})
+			assert.NoError(t, err)
+		})),
+		mock.WithRequestMatch(mock.GetDefaultBranch, bitbucket.Branch{
+			ID:        "refs/head/main",
+			DisplayID: "main",
+			Default:   true,
+		}),
+	)
+	defer s.Close()
+
+	c := &client{urlAPI: s.URL}
+
+	repo, err := c.Repo(t.Context(), fakeUser, model.ForgeRemoteID("1234"), "TEST", "test-repo")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Repo{
+		Name:          "test-repo",
+		Owner:         "TEST",
+		Perm:          &model.Perm{Pull: true, Push: true},
+		Branch:        "main",
+		IsSCMPrivate:  true,
+		PREnabled:     true,
+		ForgeRemoteID: model.ForgeRemoteID("1234"),
+		FullName:      "TEST/test-repo",
+	}, repo)
 }
 
 var (
