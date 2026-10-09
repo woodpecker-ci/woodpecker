@@ -228,19 +228,20 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
-// regex for git author fields (r.g. "name <name@mail.tld>").
-var reGitMail = regexp.MustCompile("(.*) <(.*)>")
+// regex for git author fields (e.g. "name <name@mail.tld>").
+var reGitAuthor = regexp.MustCompile(`^(.*?)\s*<([^>]*)>\s*$`)
 
-// extracts the email from a git commit author string.
+// convertCommitAuthor converts a git commit author string to the common
+// Woodpecker commit author structure. The name is optional.
 func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
-	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
-	if len(matches) == 1 {
-		return model.CommitAuthor{
-			Name:  matches[0][1],
-			Email: matches[0][2],
-		}
+	matches := reGitAuthor.FindStringSubmatch(gitAuthor)
+	if matches == nil {
+		return model.CommitAuthor{Name: strings.TrimSpace(gitAuthor)}
 	}
-	return model.CommitAuthor{}
+	return model.CommitAuthor{
+		Name:  matches[1],
+		Email: matches[2],
+	}
 }
 
 // unixTime returns the unix time of t, zero if it is not set.
