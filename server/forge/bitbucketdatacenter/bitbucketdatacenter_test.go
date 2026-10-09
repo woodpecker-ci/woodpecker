@@ -135,10 +135,8 @@ func TestBitbucketDCRepoByIDWithSpacesInName(t *testing.T) {
 			w.Header().Set("Content-Type", "application/json")
 			err := json.NewEncoder(w).Encode(bitbucket.RepositoryList{
 				Repositories: filtered,
-				ListResponse: bitbucket.ListResponse{
-					Size:     uint(len(filtered)),
-					LastPage: true,
-				},
+				Size:         uint(len(filtered)),
+				LastPage:     true,
 			})
 			assert.NoError(t, err)
 		})),
