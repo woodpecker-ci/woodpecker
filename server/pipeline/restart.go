@@ -62,6 +62,16 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		}
 	}
 
+	// The config service is allowed to hand back a different set of configs than
+	// the ones linked to the original pipeline: the forge fetcher replays them
+	// verbatim, but an external config service re-runs and can return a superset.
+	// Re-apply the original selection so a restart cannot silently run workflows
+	// the first run never had.
+	pipelineFiles, err = filterConfigsByWorkflows(pipelineFiles, lastPipeline.SelectedWorkflows)
+	if err != nil {
+		return nil, err
+	}
+
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
 	newPipeline.RerunCount++

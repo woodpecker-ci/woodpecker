@@ -266,12 +266,27 @@ type (
 		Created   int64  `json:"created"`
 		Branch    string `json:"branch"`
 		Enabled   bool   `json:"enabled"`
+		// Workflows optionally narrows the run to the named workflows.
+		// An empty list runs every workflow config found in the repo. Not
+		// omitempty: on update the server leaves the selection alone when the
+		// field is null and clears it when it is an empty list, so both must
+		// reach the wire.
+		Workflows []string `json:"workflows"`
+	}
+
+	// WorkflowInfo is one selectable workflow and the workflows it requires.
+	WorkflowInfo struct {
+		Name      string   `json:"name"`
+		DependsOn []string `json:"depends_on,omitempty"`
 	}
 
 	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+		// Workflows optionally narrows the run to the named workflows.
+		// An empty list runs every workflow config found in the repo.
+		Workflows []string `json:"workflows,omitempty"`
 	}
 
 	// Agent is the JSON data for an agent.

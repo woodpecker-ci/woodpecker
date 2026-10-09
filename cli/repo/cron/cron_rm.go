@@ -31,7 +31,7 @@ var cronDeleteCmd = &cli.Command{
 	Action:    cronDelete,
 	Flags: []cli.Flag{
 		common.RepoFlag,
-		&cli.StringFlag{
+		&cli.Int64Flag{
 			Name:     "id",
 			Usage:    "cron id",
 			Required: true,

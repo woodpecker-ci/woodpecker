@@ -76,4 +76,7 @@ ID: {{ .ID }}
 Branch: {{ .Branch }}
 Schedule: {{ .Schedule }}
 NextExec: {{ .NextExec }}
+{{- if .Workflows }}
+Workflows: {{ range $i, $w := .Workflows }}{{ if $i }}, {{ end }}{{ $w }}{{ end }}
+{{- end }}
 `

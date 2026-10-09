@@ -11,3 +11,4 @@ export * from './repo';
 export * from './secret';
 export * from './user';
 export * from './webhook';
+export * from './workflowInfo';

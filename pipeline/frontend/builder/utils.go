@@ -32,7 +32,13 @@ func SanitizePath(path string) string {
 // filterMissingDependencies drops items with missing required deps and
 // drops missing optional deps from items that survive. Loops until stable
 // so a transitive removal doesn't kill an optional consumer.
-func filterMissingDependencies(items []*Item) []*Item {
+//
+// The ignoreMissing argument names deps that are allowed to be missing
+// without dropping the item that needs them, treating them like an optional
+// dep instead. This is for workflows a trigger's selection left out on
+// purpose, as opposed to one a `when` filter pruned for this run, which must
+// still drop its dependents as before. May be nil.
+func filterMissingDependencies(items []*Item, ignoreMissing map[string]bool) []*Item {
 	for {
 		kept := make([]*Item, 0, len(items))
 		changed := false
@@ -44,7 +50,7 @@ func filterMissingDependencies(items []*Item) []*Item {
 					resolved = append(resolved, dep)
 					continue
 				}
-				if dep.Optional {
+				if dep.Optional || ignoreMissing[dep.Name] {
 					changed = true
 					continue
 				}
