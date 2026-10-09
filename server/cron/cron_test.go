@@ -51,20 +51,34 @@ func TestCreatePipeline(t *testing.T) {
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
 	store.On("GetUser", mock.Anything).Return(repoUser, nil)
 	_forge.On("BranchHead", mock.Anything, repoUser, repo1, "default").Return(&model.Commit{
-		ForgeURL: "https://example.com/sha1",
-		SHA:      "sha1",
+		ForgeURL:  "https://example.com/sha1",
+		SHA:       "sha1",
+		Message:   "fix the thing",
+		Timestamp: 1700000000,
+		Author: model.CommitAuthor{
+			Name:  "Jane",
+			Email: "jane@example.com",
+		},
 	}, nil)
 	_manager.On("ForgeFromRepo", repo1).Return(_forge, nil)
 	server.Config.Services.Manager = _manager
 
 	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
-		Name: "test",
+		Name:     "test",
+		NextExec: 1700000500,
 	})
 	assert.NoError(t, err)
 	assert.EqualValues(t, &model.Pipeline{
 		Branch: "default",
 		Commit: &model.Commit{
-			SHA: "sha1",
+			ForgeURL:  "https://example.com/sha1",
+			SHA:       "sha1",
+			Message:   "fix the thing",
+			Timestamp: 1700000000,
+			Author: model.CommitAuthor{
+				Name:  "Jane",
+				Email: "jane@example.com",
+			},
 		},
 		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",
