@@ -63,6 +63,13 @@ func TestWrapInsert(t *testing.T) {
 		assert.ErrorIs(t, wrapInsert(0, errors.New(driverErr)), types.ErrInsertDuplicateDetected, driverErr)
 	}
 
+	// Database locked errors must surface as ErrDatabaseLocked so the retry sees them as retryable.
+	for _, driverErr := range []string{
+		"database is locked", // sqlite
+	} {
+		assert.ErrorIs(t, wrapInsert(0, errors.New(driverErr)), types.ErrDatabaseLocked, driverErr)
+	}
+
 	// Everything else passes through untouched.
 	other := errors.New("connection refused")
 	assert.Equal(t, other, wrapInsert(0, other))
