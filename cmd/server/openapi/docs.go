@@ -4874,6 +4874,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
+                },
                 "message": {
                     "description": "deprecated, use commit_pipeline.message, tag_title (tag) or release.title (release) instead",
                     "type": "string"
@@ -5161,6 +5165,10 @@ const docTemplate = `{
                 "is_prerelease": {
                     "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
+                },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
                 },
                 "message": {
                     "description": "deprecated, use commit_pipeline.message, cron (cron), tag_title (tag) or release.title (release) instead",

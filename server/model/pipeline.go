@@ -54,7 +54,8 @@ type Pipeline struct {
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
 	PullRequestDraft     bool                    `json:"pr_draft,omitempty"      xorm:"pr_draft"`
-	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
+	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"`                   // name of the cron job
+	ManualMessage        string                  `json:"manual_message,omitempty" xorm:"TEXT 'manual_message'"` // custom message of a manual pipeline
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
 	Version              string                  `json:"version"                 xorm:"'version'"`
 
@@ -99,6 +100,8 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	case EventCron:
 		ap.Message = p.Cron
 		ap.Sender = p.Cron
+	case EventManual:
+		ap.Message = manualMessage(p.ManualMessage, p.Branch)
 	case EventTag:
 		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
 	case EventRelease:
@@ -111,6 +114,14 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	}
 
 	return ap
+}
+
+// manualMessage returns the message the API reports for a manual pipeline.
+func manualMessage(message, branch string) string {
+	if message != "" {
+		return "MANUAL: " + message + " @ " + branch
+	}
+	return "MANUAL PIPELINE @ " + branch
 }
 
 type PipelineFilter struct {

@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -274,6 +275,43 @@ func TestCancelPipeline(t *testing.T) {
 		CancelPipeline(c)
 
 		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+}
+
+func TestCreateTmpPipeline(t *testing.T) {
+	user := &model.User{Login: "octocat", Avatar: "https://example.com/avatar.png", Email: "octocat@example.com"}
+	head := &model.Commit{
+		SHA:       "abc123",
+		Message:   "fix the thing",
+		ForgeURL:  "https://example.com/commit/abc123",
+		Timestamp: 1700000000,
+		Author:    model.CommitAuthor{Name: "Jane", Email: "jane@example.com"},
+	}
+
+	t.Run("keeps the branch head commit and the custom message apart", func(t *testing.T) {
+		pl := createTmpPipeline(model.EventManual, head, user, &model.PipelineOptions{
+			Branch:    "main",
+			Message:   "redeploy",
+			Variables: map[string]string{"KEY": "value"},
+		})
+		assert.Equal(t, &model.Pipeline{
+			Event:               model.EventManual,
+			Commit:              head,
+			Branch:              "main",
+			Ref:                 "refs/heads/main",
+			ManualMessage:       "redeploy",
+			AdditionalVariables: map[string]string{"KEY": "value"},
+			Author:              "octocat",
+			Avatar:              "https://example.com/avatar.png",
+			ForgeURL:            "https://example.com/commit/abc123",
+		}, pl)
+	})
+
+	t.Run("uses the current time if the forge reports no commit time", func(t *testing.T) {
+		before := time.Now().Unix()
+		pl := createTmpPipeline(model.EventManual, &model.Commit{SHA: "abc123"}, user, &model.PipelineOptions{Branch: "main"})
+		assert.GreaterOrEqual(t, pl.Commit.Timestamp, before)
+		assert.Empty(t, pl.ManualMessage)
 	})
 }
 

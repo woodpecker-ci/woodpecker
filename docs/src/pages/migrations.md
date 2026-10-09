@@ -22,6 +22,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
   - `message` =>
     - `tag_title` for tag events
     - `commit_pipeline.message` for events that carry a commit
+    - `manual_message` for manual events, which report the head commit of the branch as `commit_pipeline` now
   - `commit` => `commit_pipeline.sha`
   - `timestamp` => `commit_pipeline.timestamp`
   - `author_email` => `commit_pipeline.author.email`

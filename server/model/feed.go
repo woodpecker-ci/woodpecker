@@ -40,6 +40,8 @@ type Feed struct {
 	// // New
 	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
 	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
+
+	ManualMessage string `json:"manual_message,omitempty" xorm:"pipeline_manual_message"` // custom message of a manual pipeline
 }
 
 func (f *Feed) ToAPIModel() *APIFeed {
@@ -52,6 +54,8 @@ func (f *Feed) ToAPIModel() *APIFeed {
 		af.Email = f.Commit.Author.Email
 	}
 	switch af.Event {
+	case EventManual:
+		af.Message = manualMessage(af.ManualMessage, af.Branch)
 	case EventTag:
 		af.Message = fmt.Sprintf("created tag %s", af.TagTitle)
 	case EventRelease:

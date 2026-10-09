@@ -40,7 +40,8 @@ pipelines.title as pipeline_title,
 pipelines.author as pipeline_author,
 pipelines.avatar as pipeline_avatar,
 pipelines.release as pipeline_release,
-pipelines.tag_title as pipeline_tag_title`
+pipelines.tag_title as pipeline_tag_title,
+pipelines.manual_message as pipeline_manual_message`
 
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }
