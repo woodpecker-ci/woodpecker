@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v92/github"
@@ -278,6 +279,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)
 		assert.Equal(t, "admin@philipp.info", pipeline.Commit.Author.Email)
+		assert.Equal(t, int64(1642370257), pipeline.Commit.Timestamp)
 		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -351,6 +353,7 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.AuthorAvatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
+		assert.Equal(t, int64(1753800084), pipeline.Commit.Timestamp)
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }
@@ -383,6 +386,7 @@ func TestGetCommitAndMessageFromTag(t *testing.T) {
 					Author: &github.CommitAuthor{
 						Name:  new("Jane"),
 						Email: new("jane@example.com"),
+						Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
 					},
 				},
 			},
@@ -415,9 +419,10 @@ func TestGetCommitAndMessageFromTag(t *testing.T) {
 		commit, err := c.getCommitAndMessageFromTag(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
 		require.NoError(t, err)
 		assert.Equal(t, &model.Commit{
-			SHA:      "deadbeefcafe",
-			Message:  "Release it",
-			ForgeURL: "https://github.com/6543/hello-world/commit/deadbeefcafe",
+			SHA:       "deadbeefcafe",
+			Message:   "Release it",
+			ForgeURL:  "https://github.com/6543/hello-world/commit/deadbeefcafe",
+			Timestamp: 1700000000,
 			Author: model.CommitAuthor{
 				Name:  "Jane",
 				Email: "jane@example.com",
@@ -445,6 +450,7 @@ func TestBranchHead(t *testing.T) {
 						Author: &github.CommitAuthor{
 							Name:  new("Jane"),
 							Email: new("jane@example.com"),
+							Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
 						},
 					},
 				},
@@ -460,9 +466,10 @@ func TestBranchHead(t *testing.T) {
 	commit, err := c.BranchHead(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "6543", Name: "hello-world"}, "main")
 	require.NoError(t, err)
 	assert.Equal(t, &model.Commit{
-		SHA:      "deadbeefcafe",
-		Message:  "Fix the thing",
-		ForgeURL: "https://github.com/6543/hello-world/commit/deadbeefcafe",
+		SHA:       "deadbeefcafe",
+		Message:   "Fix the thing",
+		ForgeURL:  "https://github.com/6543/hello-world/commit/deadbeefcafe",
+		Timestamp: 1700000000,
 		Author: model.CommitAuthor{
 			Name:  "Jane",
 			Email: "jane@example.com",

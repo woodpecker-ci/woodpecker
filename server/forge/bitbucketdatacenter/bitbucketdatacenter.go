@@ -391,7 +391,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 	cm := commits[0]
 
-	return &model.Commit{
+	commit := &model.Commit{
 		SHA:      cm.ID,
 		ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), cm.ID),
 		Message:  cm.Message,
@@ -399,7 +399,11 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 			Name:  cm.Author.Name,
 			Email: cm.Author.Email,
 		},
-	}, nil
+	}
+	if authored := time.Time(cm.Authored); !authored.IsZero() {
+		commit.Timestamp = authored.Unix()
+	}
+	return commit, nil
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -569,6 +573,10 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 	p.Commit.Author = model.CommitAuthor{
 		Name:  commit.Author.Name,
 		Email: commit.Author.Email,
+	}
+	// keep the time of the push if the commit does not report its own
+	if authored := time.Time(commit.Authored); !authored.IsZero() {
+		p.Commit.Timestamp = authored.Unix()
 	}
 
 	// In Bitbucket Data Center, when using annotated tags, the webhook's ToHash is the tag object SHA, not the actual commit SHA.

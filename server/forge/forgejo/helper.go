@@ -91,13 +91,19 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		}
 	}
 
+	var commitTime int64
+	if !hook.HeadCommit.Timestamp.IsZero() {
+		commitTime = hook.HeadCommit.Timestamp.Unix()
+	}
+
 	return &model.Pipeline{
 		Event: model.EventPush,
 		Commit: &model.Commit{
-			SHA:      hook.After,
-			Message:  hook.HeadCommit.Message,
-			ForgeURL: hook.HeadCommit.URL,
-			Author:   commitAuthor,
+			SHA:       hook.After,
+			Message:   hook.HeadCommit.Message,
+			ForgeURL:  hook.HeadCommit.URL,
+			Author:    commitAuthor,
+			Timestamp: commitTime,
 		},
 		Ref:          hook.Ref,
 		ForgeURL:     link,

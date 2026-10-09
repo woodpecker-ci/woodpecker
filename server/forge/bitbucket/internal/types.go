@@ -267,8 +267,9 @@ type CommitsResp struct {
 }
 
 type Commit struct {
-	Hash    string `json:"hash"`
-	Message string `json:"message"`
+	Hash    string    `json:"hash"`
+	Message string    `json:"message"`
+	Date    time.Time `json:"date"`
 	Author  struct {
 		Raw string `json:"raw"`
 	}

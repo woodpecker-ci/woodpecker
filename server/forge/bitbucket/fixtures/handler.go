@@ -441,6 +441,7 @@ const branchCommitsPayload = `
 		"values": [
 				{
 						"hash": "branch_head_name",
+						"date": "2023-11-14T22:13:20+00:00",
 						"links": {
 							"html": {
 								"href": "https://bitbucket.org/commitlink"

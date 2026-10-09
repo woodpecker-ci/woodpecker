@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 
@@ -225,6 +226,9 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (mergeI
 		},
 		ForgeURL: lastCommit.URL,
 	}
+	if lastCommit.Timestamp != nil {
+		pipeline.Commit.Timestamp = lastCommit.Timestamp.Unix()
+	}
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
@@ -295,6 +299,9 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
+			if cm.Timestamp != nil {
+				pipeline.Commit.Timestamp = cm.Timestamp.Unix()
+			}
 		}
 
 		files = append(files, cm.Added...)
@@ -355,6 +362,9 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, string
 			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
+			if cm.Timestamp != nil {
+				pipeline.Commit.Timestamp = cm.Timestamp.Unix()
+			}
 			break
 		}
 	}
@@ -413,6 +423,10 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		// it is known it's a tag (git-plugin looks for it)
 		Ref:      "refs/tags/" + hook.Tag,
 		TagTitle: hook.Tag,
+	}
+	// the release payload sends the commit time as plain string
+	if timestamp, err := time.Parse(time.RFC3339, hook.Commit.Timestamp); err == nil {
+		pipeline.Commit.Timestamp = timestamp.Unix()
 	}
 
 	return repo, pipeline, nil

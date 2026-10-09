@@ -458,7 +458,7 @@ func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, 
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
+	commit := &model.Commit{
 		SHA:      b.Commit.ID,
 		ForgeURL: b.Commit.URL,
 		Message:  b.Commit.Message,
@@ -466,7 +466,11 @@ func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, 
 			Name:  b.Commit.Author.Name,
 			Email: b.Commit.Author.Email,
 		},
-	}, nil
+	}
+	if !b.Commit.Timestamp.IsZero() {
+		commit.Timestamp = b.Commit.Timestamp.Unix()
+	}
+	return commit, nil
 }
 
 func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -737,7 +741,7 @@ func (c *Forgejo) getCommitFromSHA(ctx context.Context, user *model.User, repo *
 		return nil, err
 	}
 
-	return &model.Commit{
+	result := &model.Commit{
 		Message: commit.RepoCommit.Message,
 		Author: model.CommitAuthor{
 			Name:  commit.RepoCommit.Author.Name,
@@ -745,7 +749,11 @@ func (c *Forgejo) getCommitFromSHA(ctx context.Context, user *model.User, repo *
 		},
 		ForgeURL: commit.HTMLURL,
 		SHA:      commit.SHA,
-	}, nil
+	}
+	if date, err := time.Parse(time.RFC3339, commit.RepoCommit.Author.Date); err == nil {
+		result.Timestamp = date.Unix()
+	}
+	return result, nil
 }
 
 func (c *Forgejo) perPage(ctx context.Context) int {

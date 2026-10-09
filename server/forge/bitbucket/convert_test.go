@@ -164,6 +164,7 @@ func TestConvertPushHook(t *testing.T) {
 	assert.Equal(t, change.New.Target.Links.HTML.Href, pipeline.ForgeURL)
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
 	assert.Equal(t, change.New.Target.Message, pipeline.Commit.Message)
+	assert.Equal(t, change.New.Target.Date.Unix(), pipeline.Commit.Timestamp)
 }
 
 func TestConvertPushHookTag(t *testing.T) {

@@ -197,5 +197,14 @@ func convertCommit(from *github.RepositoryCommit) *model.Commit {
 			Name:  from.GetCommit().GetAuthor().GetName(),
 			Email: from.GetCommit().GetAuthor().GetEmail(),
 		},
+		Timestamp: unixTime(from.GetCommit().GetAuthor().GetDate()),
 	}
+}
+
+// unixTime returns the unix time of a GitHub timestamp, zero if it is not set.
+func unixTime(t github.Timestamp) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
 }

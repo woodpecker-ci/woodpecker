@@ -796,6 +796,10 @@ func TestForgejoParser(t *testing.T) {
 				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
 				assert.EqualValues(t, tt.repo, r)
+				// the commit time is checked by the push helper tests
+				if p != nil && p.Commit != nil {
+					p.Commit.Timestamp = 0
+				}
 				assert.EqualValues(t, tt.pipe, p)
 			}
 		})

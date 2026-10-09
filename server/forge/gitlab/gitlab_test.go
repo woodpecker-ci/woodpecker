@@ -158,6 +158,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/heads/main", pipeline.Ref)
 				assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
+				assert.Equal(t, int64(1632717974), pipeline.Commit.Timestamp)
 				assert.Equal(t, model.EventPush, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
 			}
@@ -204,6 +205,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker", hookRepo.Name)
 				assert.Equal(t, "Update client.go 🎉", pipeline.PullRequest.Title)
+				assert.Equal(t, int64(1642434458), pipeline.Commit.Timestamp)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -387,6 +389,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 				assert.Equal(t, "ci", hookRepo.Name)
 				assert.Equal(t, "Awesome version 0.0.2", pipeline.Release.Title)
+				assert.Equal(t, int64(1641206391), pipeline.Commit.Timestamp)
 				assert.Equal(t, model.EventRelease, pipeline.Event)
 			}
 		})

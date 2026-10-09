@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/rs/zerolog/log"
@@ -94,8 +95,9 @@ func convertRepositoryPushEvent(ev *bitbucket.RepositoryPushEvent, baseURL strin
 	pipeline := &model.Pipeline{
 		Commit: &model.Commit{
 			// message is set later
-			SHA:      change.ToHash,
-			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+			SHA:       change.ToHash,
+			ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+			Timestamp: time.Time(ev.Date).UTC().Unix(),
 		},
 		Branch:       change.Ref.DisplayID,
 		AuthorAvatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
@@ -132,8 +134,9 @@ func convertPullRequestEvent(ev *bitbucket.PullRequestEvent, baseURL string) *mo
 	pipeline := &model.Pipeline{
 		Commit: &model.Commit{
 			// message is set later
-			SHA:      ev.PullRequest.Source.Latest,
-			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+			SHA:       ev.PullRequest.Source.Latest,
+			ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+			Timestamp: time.Time(ev.Date).UTC().Unix(),
 		},
 		Branch:       ev.PullRequest.Source.DisplayID,
 		AuthorAvatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),

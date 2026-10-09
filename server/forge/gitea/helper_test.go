@@ -85,6 +85,13 @@ func TestParsePush(t *testing.T) {
 		assert.Equal(t, []string{"CHANGELOG.md", "app/controller/application.rb"}, pipeline.ChangedFiles)
 	})
 
+	t.Run("Should take the commit time of the head commit from a push hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPushMulti)
+		hook, _ := parsePush(buf)
+		pipeline := pipelineFromPush(hook)
+		assert.Equal(t, int64(1708557487), pipeline.Commit.Timestamp)
+	})
+
 	t.Run("Should return a Repo struct from a push hook", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPush)
 		hook, _ := parsePush(buf)

@@ -172,8 +172,9 @@ func TestConvertRepositoryPushEvent(t *testing.T) {
 			},
 			to: &model.Pipeline{
 				Commit: &model.Commit{
-					SHA:      "1234567890abcdef",
-					ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+					SHA:       "1234567890abcdef",
+					ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+					Timestamp: now.UTC().Unix(),
 				},
 				Branch:       "branch",
 				AuthorAvatar: "https://base.url/users/john.doe_mail.com/avatar.png",
@@ -230,8 +231,9 @@ func TestConvertPullRequestEvent(t *testing.T) {
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
 		Commit: &model.Commit{
-			SHA:      "1234567890abcdef",
-			ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+			SHA:       "1234567890abcdef",
+			ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+			Timestamp: now.UTC().Unix(),
 		},
 		Branch:       "branch",
 		AuthorAvatar: "https://base.url/users/john.doe_mail.com/avatar.png",
@@ -287,8 +289,9 @@ func TestConvertPullRequestCloseEvent(t *testing.T) {
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
 		Commit: &model.Commit{
-			SHA:      "1234567890abcdef",
-			ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+			SHA:       "1234567890abcdef",
+			ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+			Timestamp: now.UTC().Unix(),
 		},
 		Branch:       "branch",
 		AuthorAvatar: "https://base.url/users/john.doe_mail.com/avatar.png",

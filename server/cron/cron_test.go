@@ -58,7 +58,8 @@ func TestCreatePipeline(t *testing.T) {
 	server.Config.Services.Manager = _manager
 
 	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
-		Name: "test",
+		Name:     "test",
+		NextExec: 1700000000,
 	})
 	assert.NoError(t, err)
 	assert.EqualValues(t, &model.Pipeline{
@@ -66,6 +67,8 @@ func TestCreatePipeline(t *testing.T) {
 		Commit: &model.Commit{
 			ForgeURL: "https://example.com/sha1",
 			SHA:      "sha1",
+			// the forge reports no commit time, the planned run is used
+			Timestamp: 1700000000,
 		},
 		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",

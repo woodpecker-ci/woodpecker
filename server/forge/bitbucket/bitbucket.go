@@ -396,10 +396,11 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return nil, err
 	}
 	return &model.Commit{
-		SHA:      commit.Hash,
-		ForgeURL: commit.Links.HTML.Href,
-		Message:  commit.Message,
-		Author:   convertCommitAuthor(commit.Author.Raw),
+		SHA:       commit.Hash,
+		ForgeURL:  commit.Links.HTML.Href,
+		Message:   commit.Message,
+		Author:    convertCommitAuthor(commit.Author.Raw),
+		Timestamp: unixTime(commit.Date),
 	}, nil
 }
 
@@ -558,10 +559,11 @@ func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*
 	}
 
 	return &model.Commit{
-		SHA:      commit.Hash,
-		ForgeURL: commit.Links.HTML.Href,
-		Message:  commit.Message,
-		Author:   convertCommitAuthor(commit.Author.Raw),
+		SHA:       commit.Hash,
+		ForgeURL:  commit.Links.HTML.Href,
+		Message:   commit.Message,
+		Author:    convertCommitAuthor(commit.Author.Raw),
+		Timestamp: unixTime(commit.Date),
 	}, nil
 }
 

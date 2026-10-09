@@ -643,12 +643,16 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		return nil, err
 	}
 
-	return &model.Commit{
+	commit := &model.Commit{
 		SHA:      b.Commit.ID,
 		ForgeURL: b.Commit.WebURL,
 		Message:  b.Commit.Message,
 		Author:   model.CommitAuthor{Name: b.Commit.AuthorName, Email: b.Commit.AuthorEmail},
-	}, nil
+	}
+	if b.Commit.CommittedDate != nil {
+		commit.Timestamp = b.Commit.CommittedDate.Unix()
+	}
+	return commit, nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -932,6 +936,9 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	pipeline.Commit.Author = model.CommitAuthor{Name: cm.AuthorName, Email: cm.AuthorEmail}
 	pipeline.Commit.Message = cm.Message
 	pipeline.Commit.ForgeURL = cm.WebURL
+	if cm.CommittedDate != nil {
+		pipeline.Commit.Timestamp = cm.CommittedDate.Unix()
+	}
 
 	return pipeline, nil
 }

@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
@@ -204,10 +205,11 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit: &model.Commit{
-			SHA:      change.New.Target.Hash,
-			ForgeURL: change.New.Target.Links.HTML.Href,
-			Message:  change.New.Target.Message,
-			Author:   convertCommitAuthor(change.New.Target.Author.Raw),
+			SHA:       change.New.Target.Hash,
+			ForgeURL:  change.New.Target.Links.HTML.Href,
+			Message:   change.New.Target.Message,
+			Author:    convertCommitAuthor(change.New.Target.Author.Raw),
+			Timestamp: unixTime(change.New.Target.Date),
 		},
 		ForgeURL:     change.New.Target.Links.HTML.Href,
 		Branch:       change.New.Name,
@@ -239,6 +241,14 @@ func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
 		}
 	}
 	return model.CommitAuthor{}
+}
+
+// unixTime returns the unix time of t, zero if it is not set.
+func unixTime(t time.Time) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
 }
 
 func convertPullRequest(from *internal.PullRequest) *model.PullRequest {
