@@ -9,6 +9,7 @@ when:
 steps:
   - name: mastodon-toot
     image: docker.io/woodpeckerci/plugin-mastodon-post:1.1.0
+    depends_on: []
     settings:
       server_url: https://floss.social
       access_token:
@@ -28,6 +29,7 @@ steps:
 
   - name: mastodon-profile
     image: docker.io/woodpeckerci/plugin-mastodon-profile:1.0.2
+    depends_on: []
     settings:
       server_url: https://floss.social
       access_token:
@@ -38,6 +40,7 @@ steps:
 
   - name: bluesky-post
     image: docker.io/woodpeckerci/plugin-bluesky-post:1.0.0
+    depends_on: []
     settings:
       app_password:
         from_secret: bluesky_token
