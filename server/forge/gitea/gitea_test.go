@@ -100,6 +100,20 @@ func TestGitea(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("pull request list", func(t *testing.T) {
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Len(t, prs, 2)
+		assert.Equal(t, model.ForgeRemoteID("1"), prs[0].Index)
+		assert.Equal(t, "add feature X", prs[0].Title)
+		assert.Equal(t, "feature-x", prs[0].SourceBranch)
+		assert.Equal(t, "main", prs[0].TargetBranch)
+		// head and base can be missing, e.g. if the source branch got deleted
+		assert.Equal(t, model.ForgeRemoteID("2"), prs[1].Index)
+		assert.Empty(t, prs[1].SourceBranch)
+		assert.Empty(t, prs[1].TargetBranch)
+	})
+
 	t.Run("register repository", func(t *testing.T) {
 		err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
 		assert.NoError(t, err)

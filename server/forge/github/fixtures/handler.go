@@ -28,6 +28,7 @@ func Handler() http.Handler {
 	e := gin.New()
 	e.GET("/api/v3/repos/:owner/:name", getRepo)
 	e.GET("/api/v3/repositories/:id", getRepoByID)
+	e.GET("/api/v3/repos/:owner/:name/pulls", getPullRequests)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
 
@@ -63,6 +64,10 @@ func getMembership(c *gin.Context) {
 	}
 }
 
+func getPullRequests(c *gin.Context) {
+	c.String(http.StatusOK, pullRequestsPayload)
+}
+
 var repoPayload = `
 {
 	"id": 5,
@@ -82,6 +87,48 @@ var repoPayload = `
 		"pull": true
 	}
 }
+`
+
+var pullRequestsPayload = `
+[
+	{
+		"number": 1347,
+		"state": "open",
+		"title": "Amazing new feature",
+		"head": {
+			"label": "octocat:new-topic",
+			"ref": "new-topic",
+			"sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+		},
+		"base": {
+			"label": "octocat:main",
+			"ref": "main",
+			"sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+		}
+	},
+	{
+		"number": 1348,
+		"state": "open",
+		"title": "Fix typo from a fork",
+		"head": {
+			"label": "contributor:patch-1",
+			"ref": "patch-1",
+			"sha": "f3bf5c8a7d0e1b2c4a6d8e0f1a2b3c4d5e6f7a8b"
+		},
+		"base": {
+			"label": "octocat:release/v1",
+			"ref": "release/v1",
+			"sha": "6dcb09b5b57875f334f61aebed695e2e4193db5e"
+		}
+	},
+	{
+		"number": 1349,
+		"state": "open",
+		"title": "Without branch info",
+		"head": null,
+		"base": null
+	}
+]
 `
 
 var membershipIsOwnerPayload = `

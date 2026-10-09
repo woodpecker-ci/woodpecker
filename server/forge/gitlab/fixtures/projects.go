@@ -334,3 +334,17 @@ var project6PayloadMembers = []byte(`
 	"expires_at": null
 }
 `)
+
+var project4PayloadMergeRequests = []byte(`
+[
+	{
+		"id": 1001,
+		"iid": 7,
+		"project_id": 4,
+		"title": "Add feature X",
+		"state": "opened",
+		"source_branch": "feature/x",
+		"target_branch": "develop"
+	}
+]
+`)

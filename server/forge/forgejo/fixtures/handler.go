@@ -188,7 +188,25 @@ const listRepoPullsPayload = `
 		"id": 1,
 		"number": 1,
 		"title": "add feature X",
-		"state": "open"
+		"state": "open",
+		"head": {
+			"label": "feature-x",
+			"ref": "feature-x",
+			"sha": "e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd"
+		},
+		"base": {
+			"label": "main",
+			"ref": "main",
+			"sha": "8b3b7cb33d3aea5cdb93a2e1f4f9c2a3c09e13c5"
+		}
+	},
+	{
+		"id": 2,
+		"number": 2,
+		"title": "without branch info",
+		"state": "open",
+		"head": null,
+		"base": null
 	}
 ]
 `

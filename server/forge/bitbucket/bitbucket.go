@@ -414,8 +414,10 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
-			Title: pullRequest.Title,
+			Index:        model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
+			Title:        pullRequest.Title,
+			SourceBranch: pullRequest.Source.Branch.Name,
+			TargetBranch: pullRequest.Dest.Branch.Name,
 		})
 	}
 	return result, nil

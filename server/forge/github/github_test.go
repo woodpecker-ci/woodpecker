@@ -95,6 +95,21 @@ func TestGithub(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
 	})
+	t.Run("pull request list", func(t *testing.T) {
+		prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Len(t, prs, 3)
+		assert.Equal(t, model.ForgeRemoteID("1347"), prs[0].Index)
+		assert.Equal(t, "Amazing new feature", prs[0].Title)
+		assert.Equal(t, "new-topic", prs[0].SourceBranch)
+		assert.Equal(t, "main", prs[0].TargetBranch)
+		// pull request from a fork: the branch name is used, not the "owner:branch" label
+		assert.Equal(t, "patch-1", prs[1].SourceBranch)
+		assert.Equal(t, "release/v1", prs[1].TargetBranch)
+		// head and base can be missing
+		assert.Empty(t, prs[2].SourceBranch)
+		assert.Empty(t, prs[2].TargetBranch)
+	})
 }
 
 func TestStatusDeployment(t *testing.T) {

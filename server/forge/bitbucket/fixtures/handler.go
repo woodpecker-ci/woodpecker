@@ -462,7 +462,17 @@ const pullRequestsPayload = `
 		"values": [
 				{
 						"id": 123,
-						"title": "PRs title"
+						"title": "PRs title",
+						"source": {
+								"branch": {
+										"name": "feature/x"
+								}
+						},
+						"destination": {
+								"branch": {
+										"name": "main"
+								}
+						}
 				},
 				{
 						"id": 456,

@@ -33,6 +33,7 @@ func Handler() http.Handler {
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
+	e.GET("/api/v1/repos/:owner/:name/pulls", listRepoPulls)
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
@@ -128,6 +129,10 @@ func getVersion(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]any{"version": "1.18.0"})
 }
 
+func listRepoPulls(c *gin.Context) {
+	c.String(http.StatusOK, listRepoPullsPayload)
+}
+
 func getPRFiles(c *gin.Context) {
 	page := c.Query("page")
 	if page == "1" {
@@ -136,6 +141,35 @@ func getPRFiles(c *gin.Context) {
 		c.String(http.StatusOK, "[]")
 	}
 }
+
+const listRepoPullsPayload = `
+[
+	{
+		"id": 1,
+		"number": 1,
+		"title": "add feature X",
+		"state": "open",
+		"head": {
+			"label": "feature-x",
+			"ref": "feature-x",
+			"sha": "e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd"
+		},
+		"base": {
+			"label": "main",
+			"ref": "main",
+			"sha": "8b3b7cb33d3aea5cdb93a2e1f4f9c2a3c09e13c5"
+		}
+	},
+	{
+		"id": 2,
+		"number": 2,
+		"title": "without branch info",
+		"state": "open",
+		"head": null,
+		"base": null
+	}
+]
+`
 
 const listRepoHookPayloads = `
 [
