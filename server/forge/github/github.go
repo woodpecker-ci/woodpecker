@@ -663,7 +663,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	return convertCommit(b.GetCommit().GetCommit()), nil
+	return convertCommit(b.GetCommit()), nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -806,7 +806,13 @@ func (c *client) getCommitAndMessageFromTag(ctx context.Context, repo *model.Rep
 	if tag == nil {
 		return nil, fmt.Errorf("could not find tag %s", tagName)
 	}
-	return convertCommit(tag.GetCommit()), nil
+
+	// the tag list only carries the sha, load the commit for the rest
+	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, tag.GetCommit().GetSHA(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return convertCommit(commit), nil
 }
 
 func (c *client) getCommitFromSHA(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
@@ -835,7 +841,7 @@ func (c *client) getCommitFromSHA(ctx context.Context, repo *model.Repo, sha str
 		return nil, err
 	}
 
-	return convertCommit(commit.GetCommit()), nil
+	return convertCommit(commit), nil
 }
 
 func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {

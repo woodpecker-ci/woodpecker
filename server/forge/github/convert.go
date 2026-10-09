@@ -185,14 +185,17 @@ func convertLabels(from []*github.Label) []string {
 	return labels
 }
 
-func convertCommit(from *github.Commit) *model.Commit {
+// convertCommit converts a GitHub repository commit to the common Woodpecker
+// commit structure. The API only sets the sha and the link on the repository
+// commit, the nested git commit carries the message and the author.
+func convertCommit(from *github.RepositoryCommit) *model.Commit {
 	return &model.Commit{
 		SHA:      from.GetSHA(),
 		ForgeURL: from.GetHTMLURL(),
-		Message:  from.GetMessage(),
+		Message:  from.GetCommit().GetMessage(),
 		Author: model.CommitAuthor{
-			Name:  from.GetAuthor().GetName(),
-			Email: from.GetAuthor().GetEmail(),
+			Name:  from.GetCommit().GetAuthor().GetName(),
+			Email: from.GetCommit().GetAuthor().GetEmail(),
 		},
 	}
 }
