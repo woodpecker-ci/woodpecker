@@ -60,6 +60,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&deduplicateLogEntries,
 	&drop024MigrationArtifacts,
 	&updatePipelineStructureCommit,
+	&moveManualPipelineMessage,
 }
 
 var allBeans = []any{

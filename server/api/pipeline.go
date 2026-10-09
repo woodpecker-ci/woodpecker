@@ -76,7 +76,7 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
-	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
+	tmpPipeline := createTmpPipeline(lastCommit, user, &opts)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
@@ -91,18 +91,17 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
-	pl := &model.Pipeline{
-		Event: event,
-		Commit: &model.Commit{
-			SHA:       commit.SHA,
-			Message:   "MANUAL PIPELINE @ " + opts.Branch,
-			Timestamp: time.Now().UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: user.Email,
-			},
-		},
-		Branch: opts.Branch,
+func createTmpPipeline(commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+	if commit.Timestamp == 0 {
+		// not every forge reports the commit time
+		commit.Timestamp = time.Now().UTC().Unix()
+	}
+
+	return &model.Pipeline{
+		Event:         model.EventManual,
+		Commit:        commit,
+		Branch:        opts.Branch,
+		ManualMessage: opts.Message,
 
 		Avatar: user.Avatar,
 
@@ -114,12 +113,6 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		ForgeURL: commit.ForgeURL,
 	}
-
-	if opts.Message != "" {
-		pl.Commit.Message = "MANUAL: " + opts.Message + " @ " + opts.Branch
-	}
-
-	return pl
 }
 
 // GetRepoWorkflows
@@ -152,7 +145,7 @@ func GetRepoWorkflows(c *gin.Context) {
 		return
 	}
 
-	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(model.EventManual, lastCommit, user, &opts))
+	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(lastCommit, user, &opts))
 	if err != nil {
 		handlePipelineErr(c, err)
 		return
