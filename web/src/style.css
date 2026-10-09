@@ -2,6 +2,8 @@
 
 :root,
 :root[data-theme='light'] {
+  color-scheme: light;
+
   --wp-background-100: var(--color-white);
   --wp-background-200: var(--color-gray-50);
   --wp-background-300: var(--color-gray-200);
@@ -46,9 +48,9 @@
 
   --wp-code-inline-text-100: var(--color-gray-600);
 
-  --wp-code-100: var(--color-int-wp-secondary-300);
-  --wp-code-200: var(--color-int-wp-secondary-600);
-  --wp-code-300: var(--color-int-wp-secondary-600);
+  --wp-code-100: var(--color-int-wp-secondary-200);
+  --wp-code-200: var(--color-int-wp-secondary-300);
+  --wp-code-300: var(--color-int-wp-secondary-300);
 
   --wp-code-text-100: var(--color-gray-200);
   --wp-code-text-alt-100: var(--color-gray-300);
@@ -58,20 +60,22 @@
 }
 
 :root[data-theme='dark'] {
-  --wp-background-100: var(--color-int-wp-secondary-200);
+  color-scheme: dark;
+
+  --wp-background-100: var(--color-int-wp-secondary-300);
   --wp-background-200: var(--color-int-wp-secondary-400);
   --wp-background-300: var(--color-int-wp-secondary-500);
   --wp-background-400: var(--color-int-wp-secondary-600);
   --wp-background-500: var(--color-int-wp-secondary-800);
 
-  --wp-text-100: var(--color-gray-300);
-  --wp-text-200: var(--color-gray-200);
+  --wp-text-100: var(--color-gray-200);
+  --wp-text-200: var(--color-gray-100);
   --wp-text-alt-100: var(--color-gray-400);
 
-  --wp-primary-100: var(--color-int-wp-secondary-300);
-  --wp-primary-200: var(--color-int-wp-secondary-400);
-  --wp-primary-300: var(--color-int-wp-secondary-600);
-  --wp-primary-text-100: var(--color-gray-300);
+  --wp-primary-100: var(--color-int-wp-primary-300);
+  --wp-primary-200: var(--color-int-wp-primary-400);
+  --wp-primary-300: var(--color-int-wp-primary-500);
+  --wp-primary-text-100: var(--color-white);
 
   --wp-control-neutral-100: var(--color-int-wp-secondary-400);
   --wp-control-neutral-200: var(--color-int-wp-secondary-300);
@@ -85,11 +89,11 @@
   --wp-control-ok-200: var(--color-int-wp-control-ok-dark-200);
   --wp-control-ok-300: var(--color-int-wp-control-ok-dark-300);
 
-  --wp-error-100: var(--color-int-wp-error-200);
-  --wp-error-200: var(--color-int-wp-error-300);
-  --wp-error-300: var(--color-int-wp-error-300);
+  --wp-error-100: var(--color-int-wp-error-dark-100);
+  --wp-error-200: var(--color-int-wp-error-dark-200);
+  --wp-error-300: var(--color-int-wp-error-dark-300);
 
-  --wp-state-neutral-100: var(--color-int-wp-state-neutral-100);
+  --wp-state-neutral-100: var(--color-int-wp-state-neutral-dark-100);
   --wp-state-ok-100: var(--color-int-wp-state-ok-dark-100);
   --wp-state-info-100: var(--color-int-wp-state-info-dark-100);
   --wp-state-warn-100: var(--color-int-wp-state-warn-dark-100);
@@ -97,14 +101,14 @@
   --wp-hint-warn-100: var(--color-int-wp-hint-warn-dark-100);
   --wp-hint-warn-200: var(--color-int-wp-hint-warn-dark-200);
 
-  --wp-code-inline-100: var(--color-int-wp-secondary-700);
-  --wp-code-inline-200: var(--color-int-wp-secondary-300);
+  --wp-code-inline-100: var(--color-int-wp-secondary-300);
+  --wp-code-inline-200: var(--color-int-wp-secondary-200);
 
-  --wp-code-inline-text-100: var(--color-gray-300);
+  --wp-code-inline-text-100: var(--color-gray-200);
 
-  --wp-code-100: var(--color-int-wp-secondary-700); /* #222631 */
-  --wp-code-200: var(--color-int-wp-secondary-600); /* #2a2e3a */
-  --wp-code-300: var(--color-int-wp-secondary-800); /* #1B1F28 */
+  --wp-code-100: var(--color-int-wp-secondary-400); /* log header / footer */
+  --wp-code-200: var(--color-int-wp-secondary-500);
+  --wp-code-300: var(--color-int-wp-secondary-600); /* log body */
 
   --wp-code-text-100: var(--color-gray-200);
   --wp-code-text-alt-100: var(--color-gray-400);
@@ -129,11 +133,11 @@ body,
 }
 
 .vue-notification.success {
-  @apply !border-wp-error-200 !bg-wp-control-ok-100 !border-l;
+  @apply !border-wp-control-ok-300 !bg-wp-control-ok-100 !border-l;
 }
 
 .vue-notification.error {
-  @apply !border-wp-error-200 !bg-wp-error-100 !border-l;
+  @apply !border-wp-error-300 !bg-wp-error-200 !border-l;
 }
 
 *::-webkit-scrollbar {
@@ -147,11 +151,11 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply dark:bg-wp-background-200 rounded-full bg-gray-200 bg-clip-content;
+  @apply dark:bg-wp-background-100 rounded-full bg-gray-200 bg-clip-content;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply dark:bg-wp-background-100 bg-gray-300;
+  @apply dark:bg-wp-control-neutral-300 bg-gray-300;
 }
 
 *::-webkit-scrollbar-corner {
@@ -159,7 +163,7 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md p-4 text-sm break-words;
+  @apply bg-wp-code-300 text-wp-code-text-100 rounded-md p-4 text-sm break-words;
   white-space: pre-wrap;
 }
 

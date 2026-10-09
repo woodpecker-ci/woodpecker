@@ -5,7 +5,7 @@
     @click="toggle"
   >
     <div v-if="pipelineCount > 0" class="spinner" />
-    <div class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white/15 font-bold dark:bg-black/10">
+    <div class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white/15 font-bold">
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       {{ pipelineCount > 9 ? '9+' : pipelineCount }}
     </div>
@@ -62,10 +62,5 @@ onMounted(async () => {
   */
   border-radius: calc(0.375rem - 0.125rem);
   content: '';
-}
-
-:root[data-theme='dark'] .spinner::before,
-:root[data-theme='dark'] .spinner::after {
-  @apply bg-wp-primary-300;
 }
 </style>
