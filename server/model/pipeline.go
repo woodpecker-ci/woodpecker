@@ -38,7 +38,7 @@ type Pipeline struct {
 	Finished             int64                   `json:"finished"                xorm:"finished"`
 	DeployTo             string                  `json:"deploy_to"               xorm:"deploy"`
 	DeployTask           string                  `json:"deploy_task"             xorm:"deploy_task"`
-	Commit               string                  `json:"commit"                  xorm:"commit"`
+	Commit               *Commit                 `json:"commit_pipeline"         xorm:"json 'commit'"` // TODO change json to 'commit' in next major
 	Branch               string                  `json:"branch"                  xorm:"branch"`
 	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
@@ -54,7 +54,8 @@ type Pipeline struct {
 	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
 	PullRequestDraft     bool                    `json:"pr_draft,omitempty"      xorm:"pr_draft"`
-	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
+	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"`                   // name of the cron job
+	ManualMessage        string                  `json:"manual_message,omitempty" xorm:"TEXT 'manual_message'"` // custom message of a manual pipeline
 	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
 	Version              string                  `json:"version"                 xorm:"'version'"`
 
@@ -63,18 +64,19 @@ type Pipeline struct {
 	Release  *Release `json:"release,omitempty"       xorm:"json 'release'"`
 	TagTitle string   `json:"tag_title,omitempty"     xorm:"tag_title"`
 	// // Deprecated
-	Title     string `json:"title"                   xorm:"title"`
-	Message   string `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp int64  `json:"timestamp"               xorm:"'timestamp'"`
-	Sender    string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Email     string `json:"author_email"            xorm:"varchar(500) email"`
+	Title  string `json:"title"                   xorm:"title"`
+	Sender string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
 }
 
 // APIPipeline TODO remove deprecated properties in next major.
 type APIPipeline struct {
 	*Pipeline
 
-	IsPrerelease bool `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
+	IsPrerelease bool   `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
+	Commit       string `json:"commit"`                  // deprecated, use commit_pipeline.sha instead
+	Message      string `json:"message"`                 // deprecated, use commit_pipeline.message, cron (cron), tag_title (tag) or release.title (release) instead
+	Timestamp    int64  `json:"timestamp"`               // deprecated, use commit_pipeline.timestamp instead
+	Email        string `json:"author_email"`            // deprecated, use commit_pipeline.author.email instead
 } //	@name	Pipeline
 
 // TableName return database table name for xorm.
@@ -87,10 +89,19 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		Pipeline: p,
 	}
 
+	if p.Commit != nil {
+		ap.Commit = p.Commit.SHA
+		ap.Message = p.Commit.Message
+		ap.Timestamp = p.Commit.Timestamp
+		ap.Email = p.Commit.Author.Email
+	}
+
 	switch p.Event {
 	case EventCron:
 		ap.Message = p.Cron
 		ap.Sender = p.Cron
+	case EventManual:
+		ap.Message = manualMessage(p.ManualMessage, p.Branch)
 	case EventTag:
 		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
 	case EventRelease:
@@ -103,6 +114,14 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	}
 
 	return ap
+}
+
+// manualMessage returns the message the API reports for a manual pipeline.
+func manualMessage(message, branch string) string {
+	if message != "" {
+		return "MANUAL: " + message + " @ " + branch
+	}
+	return "MANUAL PIPELINE @ " + branch
 }
 
 type PipelineFilter struct {

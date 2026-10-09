@@ -170,26 +170,28 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:  event,
-		Commit: from.PullRequest.Source.Commit.Hash,
-		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
+		Event: event,
+		Commit: &model.Commit{
+			SHA:       from.PullRequest.Source.Commit.Hash,
+			Message:   from.PullRequest.Title,
+			Timestamp: from.PullRequest.Updated.UTC().Unix(),
+		},
+		Ref: fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf(
 			"%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Source.Branch.Name,
-		Message:   from.PullRequest.Title,
-		Avatar:    from.Actor.Links.Avatar.Href,
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
-		Timestamp: from.PullRequest.Updated.UTC().Unix(),
-		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+		ForgeURL: from.PullRequest.Links.HTML.Href,
+		Branch:   from.PullRequest.Source.Branch.Name,
+		Avatar:   from.Actor.Links.Avatar.Href,
+		Author:   from.Actor.Login,
+		Sender:   from.Actor.Login,
+		FromFork: from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
 	}
 
 	if from.PullRequest.State == stateClosed {
-		pipeline.Commit = from.PullRequest.MergeCommit.Hash
+		pipeline.Commit.SHA = from.PullRequest.MergeCommit.Hash
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
 		pipeline.Branch = from.PullRequest.Dest.Branch.Name
 	}
@@ -201,14 +203,18 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    change.New.Target.Hash,
-		ForgeURL:  change.New.Target.Links.HTML.Href,
-		Branch:    change.New.Name,
-		Message:   change.New.Target.Message,
-		Avatar:    hook.Actor.Links.Avatar.Href,
-		Author:    hook.Actor.Login,
-		Sender:    hook.Actor.Login,
-		Timestamp: change.New.Target.Date.UTC().Unix(),
+		Commit: &model.Commit{
+			SHA:       change.New.Target.Hash,
+			Message:   change.New.Target.Message,
+			ForgeURL:  change.New.Target.Links.HTML.Href,
+			Author:    convertCommitAuthor(change.New.Target.Author.Raw),
+			Timestamp: change.New.Target.Date.UTC().Unix(),
+		},
+		ForgeURL: change.New.Target.Links.HTML.Href,
+		Branch:   change.New.Name,
+		Avatar:   hook.Actor.Links.Avatar.Href,
+		Author:   hook.Actor.Login,
+		Sender:   hook.Actor.Login,
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
@@ -219,20 +225,21 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
-	if len(change.New.Target.Author.Raw) != 0 {
-		pipeline.Email = extractEmail(change.New.Target.Author.Raw)
-	}
 	return pipeline
 }
 
-// regex for git author fields (r.g. "name <name@mail.tld>").
-var reGitMail = regexp.MustCompile("<(.*)>")
+// regex for git author fields (e.g. "name <name@mail.tld>").
+var reGitAuthor = regexp.MustCompile(`^(.*?)\s*<([^>]*)>\s*$`)
 
-// extracts the email from a git commit author string.
-func extractEmail(gitAuthor string) (author string) {
-	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
-	if len(matches) == 1 {
-		author = matches[0][1]
+// convertCommitAuthor converts a git commit author string to the common
+// Woodpecker commit author structure.
+func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
+	matches := reGitAuthor.FindStringSubmatch(gitAuthor)
+	if matches == nil {
+		return model.CommitAuthor{Name: strings.TrimSpace(gitAuthor)}
 	}
-	return author
+	return model.CommitAuthor{
+		Name:  matches[1],
+		Email: matches[2],
+	}
 }

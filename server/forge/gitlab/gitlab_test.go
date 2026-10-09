@@ -160,6 +160,16 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
 				assert.Equal(t, model.EventPush, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
+				assert.Equal(t, &model.Commit{
+					SHA:       "16862e368d8ab812e48833b741dad720d6e2cb7f",
+					Message:   "Update main.go",
+					ForgeURL:  "http://10.40.8.5:3200/test/woodpecker/-/commit/16862e368d8ab812e48833b741dad720d6e2cb7f",
+					Timestamp: 1632717974,
+					Author: model.CommitAuthor{
+						Name:  "the test",
+						Email: "test@test.test",
+					},
+				}, pipeline.Commit)
 			}
 		})
 
@@ -203,6 +213,10 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker", hookRepo.Name)
 				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
+				assert.Equal(t, "c136499ec574e1034b24c5d306de9acda3005367", pipeline.Commit.SHA)
+				assert.Equal(t, "https://gitlab.com/anbraten/woodpecker/-/commit/c136499ec574e1034b24c5d306de9acda3005367", pipeline.Commit.ForgeURL)
+				assert.Equal(t, int64(1642434458), pipeline.Commit.Timestamp)
+				assert.Equal(t, model.CommitAuthor{Name: "Anbraten", Email: "some@mail.info"}, pipeline.Commit.Author)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -387,6 +401,16 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "ci", hookRepo.Name)
 				assert.Equal(t, "Awesome version 0.0.2", pipeline.Release.Title)
 				assert.Equal(t, model.EventRelease, pipeline.Event)
+				assert.Equal(t, &model.Commit{
+					SHA:       "0b8c02955ba445ea70d22824d9589678852e2b93",
+					Message:   "Initial commit",
+					ForgeURL:  "https://gitlab.com/anbratens-test/ci/-/commit/0b8c02955ba445ea70d22824d9589678852e2b93",
+					Timestamp: 1641206391,
+					Author: model.CommitAuthor{
+						Name:  "Anbraten",
+						Email: "2251488-anbraten@users.noreply.gitlab.com",
+					},
+				}, pipeline.Commit)
 			}
 		})
 
@@ -802,7 +826,7 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 			client := load(server.URL + "?client_id=test&client_secret=test")
 			user := &model.User{Login: "test_user", AccessToken: "token"}
 			repo := &model.Repo{ForgeRemoteID: "4", Owner: "diaspora", Name: "diaspora-client", FullName: "diaspora/diaspora-client"}
-			pipeline := &model.Pipeline{Number: 1, Commit: "abc123", Event: model.EventPush}
+			pipeline := &model.Pipeline{Number: 1, Commit: &model.Commit{SHA: "abc123"}, Event: model.EventPush}
 			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
 
 			err := client.Status(t.Context(), user, repo, pipeline, workflow)

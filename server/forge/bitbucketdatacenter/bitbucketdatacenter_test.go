@@ -95,6 +95,20 @@ func TestBitbucketDC(t *testing.T) {
 	// Execute the Status method
 	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 	assert.NoError(t, err)
+
+	// branch head
+	commit, err := c.BranchHead(ctx, fakeUser, &model.Repo{Owner: "PRJ", Name: "repo-slug", ForgeURL: "https://base.url/projects/PRJ/repos/repo-slug/browse"}, "main")
+	assert.NoError(t, err)
+	assert.Equal(t, &model.Commit{
+		SHA:       "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		Message:   "Fix the thing",
+		ForgeURL:  "https://base.url/projects/PRJ/repos/repo-slug/commits/3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		Timestamp: 1700000000,
+		Author: model.CommitAuthor{
+			Name:  "Jane Doe",
+			Email: "jane@example.com",
+		},
+	}, commit)
 }
 
 var (
@@ -111,9 +125,11 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		ID:       1,
-		Number:   42,
-		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		ID:     1,
+		Number: 42,
+		Commit: &model.Commit{
+			SHA: "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		},
 		Started:  1759825800,
 		Finished: 1759825883,
 		Branch:   "feature-branch",

@@ -41,8 +41,10 @@ func TestCreateSkipCommitMessageReturnsErrFiltered(t *testing.T) {
 
 	// Filtered before the pipeline is persisted, so the store is untouched.
 	created, err := Create(t.Context(), mockStore, repo, &model.Pipeline{
-		Event:   model.EventPush,
-		Message: "chore: tidy up [skip ci]",
+		Commit: &model.Commit{
+			Message: "chore: tidy up [skip ci]",
+		},
+		Event: model.EventPush,
 	})
 
 	assert.Nil(t, created)
