@@ -148,12 +148,14 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		return nil, nil, err
 	}
 
+	if commit.Timestamp == 0 {
+		// not every forge reports the commit time, use the planned run
+		commit.Timestamp = cron.NextExec
+	}
+
 	return repo, &model.Pipeline{
-		Event: model.EventCron,
-		Commit: &model.Commit{
-			SHA:       commit.SHA,
-			Timestamp: cron.NextExec,
-		},
+		Event:               model.EventCron,
+		Commit:              commit,
 		Ref:                 "refs/heads/" + cron.Branch,
 		Branch:              cron.Branch,
 		Cron:                cron.Name,
