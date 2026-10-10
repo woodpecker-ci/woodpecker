@@ -73,6 +73,15 @@ func (t *Task) ShouldRun() bool {
 	}
 
 	if !t.runsOnFailure() && t.runsOnSuccess() {
+		if len(t.Dependencies) > 0 {
+			for _, depID := range t.Dependencies {
+				status, exists := t.DepStatus[depID]
+				if !exists || status != StatusSuccess {
+					return false
+				}
+			}
+			return true
+		}
 		for _, status := range t.DepStatus {
 			if status != StatusSuccess {
 				return false
@@ -82,6 +91,19 @@ func (t *Task) ShouldRun() bool {
 	}
 
 	if t.runsOnFailure() && !t.runsOnSuccess() {
+		if len(t.Dependencies) > 0 {
+			hasFailure := false
+			for _, depID := range t.Dependencies {
+				status, exists := t.DepStatus[depID]
+				if exists && status != StatusSuccess {
+					hasFailure = true
+				}
+				if exists && status == StatusSuccess {
+					return false
+				}
+			}
+			return hasFailure
+		}
 		for _, status := range t.DepStatus {
 			if status == StatusSuccess {
 				return false
