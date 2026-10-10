@@ -38,7 +38,6 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -99,11 +98,9 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 		return nil
 	}
 
+	// client.WithHost can only configure a plain *http.Transport, so it must not be wrapped.
 	return &http.Client{
-		Transport: httputil.NewUserAgentRoundTripper(
-			&http.Transport{TLSClientConfig: tlsConf},
-			"backend-docker",
-		),
+		Transport:     &http.Transport{TLSClientConfig: tlsConf},
 		CheckRedirect: client.CheckRedirect,
 	}
 }
