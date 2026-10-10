@@ -15,6 +15,7 @@
 package services
 
 import (
+	"context"
 	"crypto"
 	"strings"
 	"time"
@@ -62,7 +63,7 @@ type manager struct {
 	client              *utils.Client
 }
 
-func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
+func NewManager(ctx context.Context, c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
 	signaturePrivateKey, signaturePublicKey, err := setupSignatureKeys(store)
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	configService, err := setupConfigService(c, client)
+	configService, err := setupConfigService(ctx, c, client)
 	if err != nil {
 		return nil, err
 	}

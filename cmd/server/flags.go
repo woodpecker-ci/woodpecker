@@ -303,10 +303,15 @@ var flags = append([]cli.Flag{
 		Aliases: []string{"config-service-endpoint"}, // TODO: remove in v4.0.0
 		Usage:   "url used for calling global configuration service endpoint",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_WASM"),
+		Name:    "config-extension-wasm",
+		Usage:   "path to a wasm module used as global configuration extension, it runs sandboxed inside of the server",
+	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE"),
 		Name:    "config-extension-exclusive",
-		Usage:   "whether global configuration service endpoint should be exclusive (skip forge)",
+		Usage:   "whether global configuration extension should be exclusive (skip forge)",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_NETRC"),

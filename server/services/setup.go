@@ -15,12 +15,15 @@
 package services
 
 import (
+	"context"
 	"crypto"
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -31,6 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils/wasm"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -70,7 +74,7 @@ func setupSecretService(store store.Store, endpoint string, client *utils.Client
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {
+func setupConfigService(ctx context.Context, c *cli.Command, client *utils.Client) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
 	if retries == 0 {
@@ -78,15 +82,52 @@ func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, e
 	}
 	configFetcher := config.NewForge(timeout, retries, c.StringSlice("default-pipeline-configs"), c.StringSlice("default-pipeline-config-extensions"))
 
-	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
-		httpFetcher := config.NewHTTP(endpoint, client, c.Bool("config-extension-netrc"))
-		if c.Bool("config-extension-exclusive") {
-			return httpFetcher, nil
-		}
-		return config.NewCombined(configFetcher, httpFetcher), nil
+	extension, err := setupConfigExtension(ctx, c, client)
+	if err != nil {
+		return nil, err
+	}
+	if extension == nil {
+		return configFetcher, nil
 	}
 
-	return configFetcher, nil
+	if c.Bool("config-extension-exclusive") {
+		return extension, nil
+	}
+	return config.NewCombined(configFetcher, extension), nil
+}
+
+// setupConfigExtension returns the global configuration extension or nil if there is none.
+func setupConfigExtension(ctx context.Context, c *cli.Command, client *utils.Client) (config.Service, error) {
+	endpoint := c.String("config-extension-endpoint")
+	wasmPath := c.String("config-extension-wasm")
+
+	switch {
+	case endpoint != "" && wasmPath != "":
+		return nil, errors.New("WOODPECKER_CONFIG_EXTENSION_ENDPOINT and WOODPECKER_CONFIG_EXTENSION_WASM can not be used together")
+	case endpoint != "":
+		return config.NewHTTP(endpoint, client, c.Bool("config-extension-netrc")), nil
+	case wasmPath != "":
+		return setupConfigWasmExtension(ctx, wasmPath)
+	}
+
+	return nil, nil
+}
+
+func setupConfigWasmExtension(ctx context.Context, path string) (config.Service, error) {
+	module, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not read wasm config extension: %w", err)
+	}
+
+	// The runner lives as long as the server, so there is no need to close it.
+	runner, err := wasm.NewRunner(ctx, module, wasm.DefaultLimits())
+	if err != nil {
+		return nil, fmt.Errorf("could not load wasm config extension '%s': %w", path, err)
+	}
+
+	log.Info().Str("path", path).Str("sha256", fmt.Sprintf("%x", sha256.Sum256(module))).Msg("loaded wasm config extension")
+
+	return config.NewWasm(runner), nil
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions).

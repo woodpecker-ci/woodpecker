@@ -1035,6 +1035,15 @@ Specify a configuration extension endpoint, see [Configuration Extension](../../
 
 ---
 
+### CONFIG_EXTENSION_WASM
+
+- Name: `WOODPECKER_CONFIG_EXTENSION_WASM`
+- Default: none
+
+Path to a WebAssembly module that is used as global configuration extension and runs inside of the server, see [Configuration Extension](../../20-usage/72-extensions/40-configuration-extension.md#webassembly-module). Can not be combined with `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`.
+
+---
+
 ### DEFAULT_PIPELINE_CONFIGS
 
 - Name: `WOODPECKER_DEFAULT_PIPELINE_CONFIGS`
@@ -1055,7 +1064,7 @@ Specify the default pipeline config extensions when scanning a pipeline config d
 
 ### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_EXTENSION_EXCLUSIVE`
+- Name: `WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.

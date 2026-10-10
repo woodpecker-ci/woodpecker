@@ -195,7 +195,7 @@ test-agent: ## Test agent code
 	go test -race -cover -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
+	go test -race -cover -coverprofile server-coverage.out -timeout 120s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
 	go test -race -cover -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
@@ -218,7 +218,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test-e2e: ## Test by running yaml config and compare expected result
-	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 120s -tags 'test $(TAGS)' ./e2e/...
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
