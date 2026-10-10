@@ -188,7 +188,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
 		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
-			if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			if errors.Is(err, types.ErrInsertDuplicateDetected) || errors.Is(err, types.ErrDatabaseLocked) {
 				return struct{}{}, err
 			}
 			return struct{}{}, backoff.Permanent(err)
@@ -198,7 +198,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
 			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
-				if errors.Is(err, types.ErrInsertDuplicateDetected) {
+				if errors.Is(err, types.ErrInsertDuplicateDetected) || errors.Is(err, types.ErrDatabaseLocked) {
 					return struct{}{}, err
 				}
 				return struct{}{}, backoff.Permanent(err)
