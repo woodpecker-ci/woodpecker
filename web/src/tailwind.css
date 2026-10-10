@@ -14,13 +14,13 @@
   --color-int-wp-primary-500: #248438;
   --color-int-wp-primary-600: #166e30;
 
-  --color-int-wp-secondary-200: #434858;
-  --color-int-wp-secondary-300: #383c4a;
-  --color-int-wp-secondary-400: #303440;
-  --color-int-wp-secondary-500: #2d313d;
-  --color-int-wp-secondary-600: #2a2e3a;
-  --color-int-wp-secondary-700: #222631;
-  --color-int-wp-secondary-800: #1b1f28;
+  --color-int-wp-secondary-200: #3c3d3e;
+  --color-int-wp-secondary-300: #2d2e2f;
+  --color-int-wp-secondary-400: #242526;
+  --color-int-wp-secondary-500: #18191a;
+  --color-int-wp-secondary-600: #121314;
+  --color-int-wp-secondary-700: #0e0f10;
+  --color-int-wp-secondary-800: #0a0b0c;
 
   --color-int-wp-control-neutral-100: #fff;
   --color-int-wp-control-neutral-200: #d1d5db;
@@ -30,41 +30,47 @@
   --color-int-wp-control-info-200: #155e75;
   --color-int-wp-control-info-300: #164e63;
 
-  --color-int-wp-control-info-dark-100: #266778;
-  --color-int-wp-control-info-dark-200: #2a5360;
-  --color-int-wp-control-info-dark-300: #284651;
+  --color-int-wp-control-info-dark-100: #1f6feb;
+  --color-int-wp-control-info-dark-200: #1158c7;
+  --color-int-wp-control-info-dark-300: #0d419d;
 
   --color-int-wp-control-ok-100: #369943;
   --color-int-wp-control-ok-200: #248438;
   --color-int-wp-control-ok-300: #166e30;
 
-  --color-int-wp-control-ok-dark-100: #408f4b;
-  --color-int-wp-control-ok-dark-200: #2c7c3d;
-  --color-int-wp-control-ok-dark-300: #1d6733;
+  --color-int-wp-control-ok-dark-100: #369943;
+  --color-int-wp-control-ok-dark-200: #248438;
+  --color-int-wp-control-ok-dark-300: #166e30;
 
   --color-int-wp-error-100: #b91c1c;
   --color-int-wp-error-200: #991b1b;
   --color-int-wp-error-300: #7f1d1d;
 
+  --color-int-wp-error-dark-100: #ef4444;
+  --color-int-wp-error-dark-200: #b91c1c;
+  --color-int-wp-error-dark-300: #7f1d1d;
+
   --color-int-wp-state-neutral-100: #4b5563;
 
-  --color-int-wp-state-ok-100: #16a34a;
+  --color-int-wp-state-neutral-dark-100: #6b7280;
 
-  --color-int-wp-state-ok-dark-100: #29904f;
+  --color-int-wp-state-ok-100: #248438;
+
+  --color-int-wp-state-ok-dark-100: #4caf50;
 
   --color-int-wp-state-info-100: #0891b2;
 
-  --color-int-wp-state-info-dark-100: #1b869f;
+  --color-int-wp-state-info-dark-100: #58a6ff;
 
   --color-int-wp-state-warn-100: #facc15;
 
-  --color-int-wp-state-warn-dark-100: #e2be2d;
+  --color-int-wp-state-warn-dark-100: #d29922;
 
   --color-int-wp-hint-warn-100: #fef9c3;
   --color-int-wp-hint-warn-200: #fde047;
 
-  --color-int-wp-hint-warn-dark-100: #c5ba7f;
-  --color-int-wp-hint-warn-dark-200: #a18e51;
+  --color-int-wp-hint-warn-dark-100: #2b2110;
+  --color-int-wp-hint-warn-dark-200: #8a6d1b;
 
   --color-wp-background-100: var(--wp-background-100);
   --color-wp-background-200: var(--wp-background-200);

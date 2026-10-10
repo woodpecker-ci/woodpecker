@@ -16,7 +16,7 @@
     <div
       class="min-h-sm border-wp-background-400 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-200 flex w-full flex-col overflow-hidden border md:m-8 md:w-3xl md:flex-row md:rounded-md"
     >
-      <div class="bg-wp-primary-200 dark:bg-wp-primary-300 flex min-h-48 items-center justify-center md:w-3/5">
+      <div class="bg-wp-primary-200 flex min-h-48 items-center justify-center md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
       <div class="flex min-h-48 flex-col items-center justify-center gap-4 p-4 text-center md:w-2/5">

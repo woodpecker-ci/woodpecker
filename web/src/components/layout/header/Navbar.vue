@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="text-neutral-content border-wp-background-400 dark:border-wp-background-100 bg-wp-primary-200 text-wp-primary-text-100 dark:bg-wp-primary-300 flex border-b p-4 font-bold"
+    class="text-neutral-content bg-wp-primary-200 text-wp-primary-text-100 flex border-b border-black/20 p-4 font-bold"
   >
     <div class="flex items-center space-x-2">
       <router-link :to="{ name: 'home' }" class="-my-2 flex flex-col px-2">
@@ -37,7 +37,7 @@
         v-else
         :text="$t('login')"
         :to="{ name: 'login' }"
-        class="navbar-link !text-wp-primary-text-100 bg-wp-primary-200 dark:bg-wp-primary-300 !border-transparent"
+        class="navbar-link !text-wp-primary-text-100 bg-wp-primary-200 !border-transparent"
         @click="saveRedirect"
       />
     </div>
@@ -77,7 +77,7 @@ function saveRedirect() {
 @reference '~/tailwind.css';
 
 .navbar-icon {
-  @apply h-11 w-11 rounded-md p-2.5 hover:bg-black/20 dark:hover:bg-white/5;
+  @apply h-11 w-11 rounded-md p-2.5 hover:bg-black/20!;
 }
 
 .navbar-icon :deep(svg) {
@@ -85,6 +85,6 @@ function saveRedirect() {
 }
 
 .navbar-link {
-  @apply -my-1 rounded-md px-3 py-2 hover:bg-black/20 dark:hover:bg-white/5;
+  @apply -my-1 rounded-md px-3 py-2 hover:bg-black/20!;
 }
 </style>

@@ -8,7 +8,7 @@
         color === 'gray',
       'border-wp-control-ok-300 bg-wp-control-ok-100 hover:bg-wp-control-ok-200 text-white': color === 'green',
       'border-wp-control-info-300 bg-wp-control-info-100 hover:bg-wp-control-info-200 text-white': color === 'blue',
-      'border-wp-error-300 bg-wp-error-100 hover:bg-wp-error-200 text-white': color === 'red',
+      'border-wp-error-300 bg-wp-error-200 hover:bg-wp-error-300 text-white': color === 'red',
       ...passedClasses,
     }"
     :title="title"
