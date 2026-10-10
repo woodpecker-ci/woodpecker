@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-10
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @YouCD
+@6543, @Sawarz, @YouCD
+
+### 📈 Enhancement
+
+- Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
 
 ### 🐛 Bug Fixes
 
