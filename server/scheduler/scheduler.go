@@ -46,7 +46,8 @@ type Scheduler interface {
 	Extend(c context.Context, agentID int64, workflowID string) error
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 	Error(c context.Context, id string, err error) error
-	Wait(c context.Context, id string) error
+	Wait(c context.Context, agentID int64, id string) error
+	Leased(c context.Context, agentID int64, id string) error
 	Info(c context.Context) queue.InfoT
 	Pause()
 	Resume()

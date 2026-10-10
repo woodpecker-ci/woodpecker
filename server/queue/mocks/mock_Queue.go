@@ -391,6 +391,69 @@ func (_c *MockQueue_KickAgentWorkers_Call) RunAndReturn(run func(agentID int64))
 	return _c
 }
 
+// Leased provides a mock function for the type MockQueue
+func (_mock *MockQueue) Leased(c context.Context, agentID int64, id string) error {
+	ret := _mock.Called(c, agentID, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Leased")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(c, agentID, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockQueue_Leased_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Leased'
+type MockQueue_Leased_Call struct {
+	*mock.Call
+}
+
+// Leased is a helper method to define mock.On call
+//   - c context.Context
+//   - agentID int64
+//   - id string
+func (_e *MockQueue_Expecter) Leased(c any, agentID any, id any) *MockQueue_Leased_Call {
+	return &MockQueue_Leased_Call{Call: _e.mock.On("Leased", c, agentID, id)}
+}
+
+func (_c *MockQueue_Leased_Call) Run(run func(c context.Context, agentID int64, id string)) *MockQueue_Leased_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockQueue_Leased_Call) Return(err error) *MockQueue_Leased_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockQueue_Leased_Call) RunAndReturn(run func(c context.Context, agentID int64, id string) error) *MockQueue_Leased_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Pause provides a mock function for the type MockQueue
 func (_mock *MockQueue) Pause() {
 	_mock.Called()
@@ -589,16 +652,16 @@ func (_c *MockQueue_Resume_Call) RunAndReturn(run func()) *MockQueue_Resume_Call
 }
 
 // Wait provides a mock function for the type MockQueue
-func (_mock *MockQueue) Wait(c context.Context, id string) error {
-	ret := _mock.Called(c, id)
+func (_mock *MockQueue) Wait(c context.Context, agentID int64, id string) error {
+	ret := _mock.Called(c, agentID, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Wait")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = returnFunc(c, id)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(c, agentID, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -612,24 +675,30 @@ type MockQueue_Wait_Call struct {
 
 // Wait is a helper method to define mock.On call
 //   - c context.Context
+//   - agentID int64
 //   - id string
-func (_e *MockQueue_Expecter) Wait(c any, id any) *MockQueue_Wait_Call {
-	return &MockQueue_Wait_Call{Call: _e.mock.On("Wait", c, id)}
+func (_e *MockQueue_Expecter) Wait(c any, agentID any, id any) *MockQueue_Wait_Call {
+	return &MockQueue_Wait_Call{Call: _e.mock.On("Wait", c, agentID, id)}
 }
 
-func (_c *MockQueue_Wait_Call) Run(run func(c context.Context, id string)) *MockQueue_Wait_Call {
+func (_c *MockQueue_Wait_Call) Run(run func(c context.Context, agentID int64, id string)) *MockQueue_Wait_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -640,7 +709,7 @@ func (_c *MockQueue_Wait_Call) Return(err error) *MockQueue_Wait_Call {
 	return _c
 }
 
-func (_c *MockQueue_Wait_Call) RunAndReturn(run func(c context.Context, id string) error) *MockQueue_Wait_Call {
+func (_c *MockQueue_Wait_Call) RunAndReturn(run func(c context.Context, agentID int64, id string) error) *MockQueue_Wait_Call {
 	_c.Call.Return(run)
 	return _c
 }

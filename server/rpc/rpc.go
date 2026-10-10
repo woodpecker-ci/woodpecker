@@ -114,11 +114,16 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 		return false, err
 	}
 
-	if err := s.scheduler.Wait(c, workflowID); err != nil {
+	if err := s.scheduler.Wait(c, agent.ID, workflowID); err != nil {
 		if errors.Is(err, queue.ErrCancel) {
 			// we explicit send a cancel signal
 			log.Debug().Str("workflowID", workflowID).Msg("while waiting the queue reported the workflow as canceled")
 			return true, nil
+		}
+		if errors.Is(err, queue.ErrTaskExpired) || errors.Is(err, queue.ErrAgentMissMatch) {
+			// the lease is gone, the agent stops its run on this error
+			log.Warn().Err(err).Int64("agentID", agent.ID).Str("workflowID", workflowID).Msg("agent lost the lease of the workflow while waiting")
+			return false, fmt.Errorf("%w: %w", ErrAgentLostLease, err)
 		}
 		// unknown error happened
 		log.Error().Err(err).Str("workflowID", workflowID).Msg("while waiting the queue returned an unexpected error")
@@ -198,6 +203,9 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
+	if err := s.checkAgentLease(c, agent, strWorkflowID); err != nil {
+		return err
+	}
 
 	// sanitize agent input: only allow step updates that the workflow state permits
 	if err := checkWorkflowAllowsStepUpdate(workflow.State, step, state); err != nil {
@@ -269,6 +277,9 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return err
+	}
+	if err := s.checkAgentLease(c, agent, strWorkflowID); err != nil {
 		return err
 	}
 
@@ -344,6 +355,9 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 
 	// check before agent can alter some state
 	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return err
+	}
+	if err := s.checkAgentLease(c, agent, strWorkflowID); err != nil {
 		return err
 	}
 
@@ -571,6 +585,19 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent.LastContact = time.Now().Unix()
 
 	return s.store.AgentUpdate(agent)
+}
+
+// checkAgentLease rejects an agent whose lease of the workflow's task expired
+// or moved to another agent, so a slow agent cannot act on a workflow that was
+// handed out again. A task the queue does not know, for example after a server
+// restart, is left to the store based ownership check.
+func (s *RPC) checkAgentLease(c context.Context, agent *model.Agent, workflowID string) error {
+	err := s.scheduler.Leased(c, agent.ID, workflowID)
+	if err == nil || errors.Is(err, queue.ErrNotFound) {
+		return nil
+	}
+	log.Warn().Err(err).Int64("agentID", agent.ID).Str("workflowID", workflowID).Msg("agent does not hold the lease of the workflow")
+	return fmt.Errorf("%w: %w", ErrAgentLostLease, err)
 }
 
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow, finished int64) {
