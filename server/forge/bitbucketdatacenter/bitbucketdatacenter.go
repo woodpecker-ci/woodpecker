@@ -409,7 +409,12 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		return nil, fmt.Errorf("unable to list pull-requests: %w", err)
 	}
 	for _, pr := range prs {
-		all = append(all, &model.PullRequest{Index: convertID(pr.ID), Title: pr.Title})
+		all = append(all, &model.PullRequest{
+			Index:        convertID(pr.ID),
+			Title:        pr.Title,
+			SourceBranch: pr.Source.DisplayID,
+			TargetBranch: pr.Target.DisplayID,
+		})
 	}
 
 	return all, nil

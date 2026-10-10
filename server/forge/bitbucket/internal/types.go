@@ -270,8 +270,18 @@ type PullRequestResp struct {
 }
 
 type PullRequest struct {
-	ID    uint   `json:"id"`
-	Title string `json:"title"`
+	ID     uint   `json:"id"`
+	Title  string `json:"title"`
+	Source struct {
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"source"`
+	Dest struct {
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"destination"`
 }
 
 type CommitsResp struct {

@@ -490,6 +490,12 @@ func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo
 			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].Index))),
 			Title: pullRequests[i].Title,
 		}
+		if pullRequests[i].Head != nil {
+			result[i].SourceBranch = pullRequests[i].Head.Ref
+		}
+		if pullRequests[i].Base != nil {
+			result[i].TargetBranch = pullRequests[i].Base.Ref
+		}
 	}
 	return result, err
 }

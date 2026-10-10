@@ -5249,6 +5249,12 @@ const docTemplate = `{
                 "index": {
                     "type": "string"
                 },
+                "source_branch": {
+                    "type": "string"
+                },
+                "target_branch": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }

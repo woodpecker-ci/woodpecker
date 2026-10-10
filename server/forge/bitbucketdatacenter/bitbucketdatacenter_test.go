@@ -92,6 +92,18 @@ func TestBitbucketDC(t *testing.T) {
 		IsUser: true,
 	}, org)
 
+	// pull requests
+	prs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &model.ListOptions{Page: 1, PerPage: 10})
+	assert.NoError(t, err)
+	assert.Equal(t, []*model.PullRequest{
+		{
+			Index:        model.ForgeRemoteID("42"),
+			Title:        "Add feature X",
+			SourceBranch: "feature/x",
+			TargetBranch: "develop",
+		},
+	}, prs)
+
 	// Execute the Status method
 	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 	assert.NoError(t, err)

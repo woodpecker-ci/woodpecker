@@ -15,6 +15,8 @@
 package model
 
 type PullRequest struct {
-	Index ForgeRemoteID `json:"index"`
-	Title string        `json:"title"`
+	Index        ForgeRemoteID `json:"index"`
+	Title        string        `json:"title"`
+	SourceBranch string        `json:"source_branch,omitempty"`
+	TargetBranch string        `json:"target_branch,omitempty"`
 } //	@name	PullRequest
