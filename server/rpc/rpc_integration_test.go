@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // newTestRPC creates an RPC instance with common test infrastructure.
@@ -907,6 +908,94 @@ func TestRPCLog(t *testing.T) {
 		})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "could not find step")
+	})
+}
+
+// publishRecorder is a logging.Log that records what gets published to the
+// live log streamer.
+type publishRecorder struct {
+	logging.Log
+	published chan []*model.LogEntry
+}
+
+func (r *publishRecorder) Write(_ context.Context, _ int64, entries []*model.LogEntry) error {
+	r.published <- entries
+	return nil
+}
+
+// noPublishWithin fails if anything gets published to the live log streamer
+// within a short grace period, enough for the background publish to run.
+func (r *publishRecorder) noPublishWithin(t *testing.T) {
+	t.Helper()
+	select {
+	case entries := <-r.published:
+		t.Errorf("published %d log entries that are not stored", len(entries))
+	case <-time.After(100 * time.Millisecond):
+	}
+}
+
+func TestRPCLogStoresBeforePublish(t *testing.T) {
+	setup := func(t *testing.T) (*RPC, *log_mocks.MockService, *publishRecorder) {
+		t.Helper()
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		mockStore.On("StepByUUID", "step-uuid-123").Return(defaultStep(model.StatusRunning), nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		recorder := &publishRecorder{published: make(chan []*model.LogEntry, 1)}
+		rpcInst.logger = recorder
+		return &rpcInst, mockLogStore, recorder
+	}
+	entries := []*rpc.LogEntry{
+		{StepUUID: "step-uuid-123", Line: 0, Data: []byte("hello")},
+		{StepUUID: "step-uuid-123", Line: 1, Data: []byte("world")},
+	}
+
+	t.Run("publish stored entries after storing them", func(t *testing.T) {
+		rpcInst, mockLogStore, recorder := setup(t)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).
+			Run(func(mock.Arguments) { recorder.noPublishWithin(t) }).
+			Return(nil)
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		require.NoError(t, rpcInst.Log(ctx, "step-uuid-123", entries))
+
+		select {
+		case published := <-recorder.published:
+			require.Len(t, published, 2)
+			assert.Equal(t, []byte("hello"), published[0].Data)
+			assert.Equal(t, []byte("world"), published[1].Data)
+		case <-time.After(5 * time.Second):
+			t.Fatal("stored log entries were not published")
+		}
+	})
+
+	t.Run("do not publish entries the store rejected", func(t *testing.T) {
+		rpcInst, mockLogStore, recorder := setup(t)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(errors.New("db down"))
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		assert.Error(t, rpcInst.Log(ctx, "step-uuid-123", entries))
+		recorder.noPublishWithin(t)
+	})
+
+	t.Run("accept a resent batch without publishing it again", func(t *testing.T) {
+		rpcInst, mockLogStore, recorder := setup(t)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(types.ErrInsertDuplicateDetected)
+
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+		assert.NoError(t, rpcInst.Log(ctx, "step-uuid-123", entries))
+		recorder.noPublishWithin(t)
 	})
 }
 

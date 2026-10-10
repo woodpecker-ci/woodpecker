@@ -21,6 +21,7 @@ import (
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // Maximum number of records to store in one PostgreSQL statement.
@@ -34,21 +35,55 @@ func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	return logEntries, s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
+// LogAppend stores the log entries. Entries whose line is already stored for
+// the step are skipped, so an agent can resend a batch that was only partly
+// stored. It returns types.ErrInsertDuplicateDetected if every entry was
+// already stored.
 func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 	var errs error
+	stored := 0
 
 	// TODO: adapted from slices.Chunk(); switch to it in Go 1.23+
 	for i := 0; i < len(logEntries); i += pgBatchSize {
 		end := min(pgBatchSize, len(logEntries[i:]))
 		chunk := logEntries[i : i+end]
 
-		if err := wrapInsert(s.engine.Insert(chunk)); err != nil {
+		err := wrapInsert(s.engine.Insert(chunk))
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			// the statement was rolled back, retry entry by entry and skip the stored ones
+			n, err := s.logAppendSkipStored(chunk)
+			stored += n
+			errs = errors.Join(errs, err)
+			continue
+		}
+		if err != nil {
 			log.Error().Err(err).Msg("could not store log entries to db")
 			errs = errors.Join(errs, err)
+			continue
 		}
+		stored += len(chunk)
 	}
 
+	if errs == nil && stored == 0 && len(logEntries) > 0 {
+		return types.ErrInsertDuplicateDetected
+	}
 	return errs
+}
+
+func (s storage) logAppendSkipStored(logEntries []*model.LogEntry) (stored int, errs error) {
+	for _, logEntry := range logEntries {
+		err := wrapInsert(s.engine.Insert(logEntry))
+		if errors.Is(err, types.ErrInsertDuplicateDetected) {
+			continue
+		}
+		if err != nil {
+			log.Error().Err(err).Msg("could not store log entry to db")
+			errs = errors.Join(errs, err)
+			continue
+		}
+		stored++
+	}
+	return stored, errs
 }
 
 func (s storage) LogDelete(step *model.Step) error {
