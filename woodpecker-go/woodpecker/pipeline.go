@@ -23,6 +23,7 @@ import (
 const (
 	pathPipelineQueue    = "%s/api/pipelines"
 	pathPipelineMetadata = "%s/api/repos/%d/pipelines/%d/metadata"
+	pathWorkflowAgent    = "%s/api/repos/%d/pipelines/%d/workflows/%d/agent"
 )
 
 // PipelineQueue returns a list of enqueued pipelines.
@@ -44,4 +45,15 @@ func (c *client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, err
 	defer body.Close()
 
 	return io.ReadAll(body)
+}
+
+// WorkflowAgent returns the snapshot of the agent the workflow got assigned to.
+// Instance admins can read every snapshot, organization admins the ones of their
+// organization's agents. The returned *ClientError has status 403 if the user may not
+// read it and 404 if no agent was recorded for the workflow.
+func (c *client) WorkflowAgent(repoID, pipeline, workflowID int64) (*AgentSnapshot, error) {
+	out := new(AgentSnapshot)
+	uri := fmt.Sprintf(pathWorkflowAgent, c.addr, repoID, pipeline, workflowID)
+	err := c.get(uri, out)
+	return out, err
 }

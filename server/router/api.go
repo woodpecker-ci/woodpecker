@@ -120,6 +120,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.GET("/pipelines/:pipeline_number", api.GetPipeline)
 					repo.GET("/pipelines/:pipeline_number/config", session.SetPipeline(), api.GetPipelineConfig)
 					repo.GET("/pipelines/:pipeline_number/metadata", session.MustPush, session.SetPipeline(), api.GetPipelineMetadata)
+					repo.GET("/pipelines/:pipeline_number/workflows/:workflow_id/agent", session.MustUser(), session.SetPipeline(), api.GetWorkflowAgent)
 
 					// requires push permissions
 					repo.POST("/pipelines/:pipeline_number", session.MustPush, session.SetPipeline(), api.PostPipeline)

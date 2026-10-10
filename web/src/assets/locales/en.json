@@ -231,6 +231,20 @@
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
+      "agent": {
+        "title": "Workflow agent",
+        "workflow": "Workflow",
+        "agent": "Agent",
+        "platform": "Platform",
+        "backend": "Backend",
+        "show_labels": "Show labels",
+        "hide_labels": "Hide labels",
+        "no_labels": "This agent has no custom labels",
+        "not_assigned": "No agent has been assigned to this workflow yet",
+        "loading": "Loading agent information…",
+        "unavailable": "No agent information is available for this workflow",
+        "no_permission": "You are not allowed to view the agent of this workflow"
+      },
       "log_delete_confirm": "Do you really want to delete the step logs?",
       "log_delete_error": "An error occurred when deleting the step logs",
       "actions": {

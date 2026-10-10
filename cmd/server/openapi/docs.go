@@ -3441,6 +3441,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/agent": {
+            "get": {
+                "description": "Returns the snapshot of the agent taken when it got the workflow assigned, so it is also available after the agent got deleted.\nLike agents themselves, instance admins can read every snapshot and organization admins the ones of the organization's agents, unless user agent registration is disabled.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Get the agent a workflow got assigned to",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the workflow id",
+                        "name": "workflow_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/AgentSnapshot"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -4727,6 +4778,33 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "AgentSnapshot": {
+            "type": "object",
+            "properties": {
+                "backend": {
+                    "type": "string"
+                },
+                "custom_labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "description": "AgentID is the id of the agent that got the workflow assigned. It is not stored with\nthe snapshot but taken from the workflow, so agents with the same metadata share one.",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "org_id": {
+                    "type": "integer"
+                },
+                "platform": {
                     "type": "string"
                 }
             }

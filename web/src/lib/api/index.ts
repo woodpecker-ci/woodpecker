@@ -1,6 +1,7 @@
 import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
+  AgentSnapshot,
   Cron,
   ExtensionSettings,
   Forge,
@@ -124,6 +125,13 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getPipelineConfig(repoId: number, pipelineNumber: number): Promise<PipelineConfig[]> {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
+  }
+
+  // Silent, as 403 and 404 are expected for users that may not see the agent and for old workflows.
+  async getWorkflowAgent(repoId: number, pipelineNumber: number, workflowId: number): Promise<AgentSnapshot> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/workflows/${workflowId}/agent`, {
+      silent: true,
+    }) as Promise<AgentSnapshot>;
   }
 
   async getPipelineMetadata(repoId: number, pipelineNumber: number): Promise<any> {

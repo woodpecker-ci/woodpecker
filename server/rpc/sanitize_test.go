@@ -15,14 +15,18 @@
 package rpc
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
@@ -104,6 +108,54 @@ func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
 		// No skip, no exit → CalcStepStatus produces Running (non-terminal)
 		state := rpc.StepState{Started: 100}
 		assert.ErrorIs(t, checkWorkflowAllowsStepUpdate(model.StatusSuccess, step, state), ErrAgentIllegalWorkflowReRunStateChange)
+	})
+}
+
+func TestLockAgentToWorkflow(t *testing.T) {
+	agent := orgAgent999()
+	agent.Token = "secret-token"
+	agent.Platform = "linux/arm64"
+	agent.Backend = "kubernetes"
+	agent.CustomLabels = map[string]string{"zone": "eu"}
+
+	t.Run("references a snapshot of the agent", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		rpcInst := newTestRPC(t, mockStore, nil)
+
+		// the workflow was given to another agent before (e.g. that agent got lost)
+		workflow := defaultWorkflow(model.StatusPending)
+		workflow.AgentSnapshotID = 41
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("AgentSnapshotPersist", &model.AgentSnapshot{
+			OrgID:        999,
+			Name:         "org-agent",
+			Platform:     "linux/arm64",
+			Backend:      "kubernetes",
+			CustomLabels: map[string]string{"zone": "eu"},
+		}).Return(&model.AgentSnapshot{ID: 42}, nil)
+		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(wf *model.Workflow) bool {
+			return wf.ID == 30 && wf.AgentID == agent.ID && wf.AgentSnapshotID == 42
+		})).Return(nil)
+
+		require.NoError(t, rpcInst.lockAgentToWorkflow(t.Context(), agent, "30"))
+	})
+
+	t.Run("still assigns the workflow when the snapshot cannot be stored", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		rpcInst := newTestRPC(t, mockStore, nil)
+
+		workflow := defaultWorkflow(model.StatusPending)
+		workflow.AgentSnapshotID = 41
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("AgentSnapshotPersist", mock.Anything).Return(nil, errors.New("db gone"))
+		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(wf *model.Workflow) bool {
+			// never keep the snapshot of the previous agent
+			return wf.ID == 30 && wf.AgentID == agent.ID && wf.AgentSnapshotID == 0
+		})).Return(nil)
+
+		require.NoError(t, rpcInst.lockAgentToWorkflow(t.Context(), agent, "30"))
 	})
 }
 

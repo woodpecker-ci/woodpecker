@@ -3,6 +3,21 @@ export interface ApiError {
   message: string;
 }
 
+export class ApiRequestError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+  }
+}
+
+interface RequestOptions {
+  // do not report errors to the error handler, as the caller handles them
+  silent?: boolean;
+}
+
 type QueryParams = Record<string, string | number | boolean>;
 
 export function encodeQueryString(_params: unknown = {}): string {
@@ -40,7 +55,7 @@ export default class ApiClient {
     this.csrf = csrf;
   }
 
-  private async _request(method: string, path: string, data?: unknown): Promise<unknown> {
+  private async _request(method: string, path: string, data?: unknown, opts?: RequestOptions): Promise<unknown> {
     const res = await fetch(`${this.server}${path}`, {
       method,
       headers: {
@@ -61,10 +76,10 @@ export default class ApiClient {
         status: res.status,
         message,
       };
-      if (this.onerror) {
+      if (this.onerror && !opts?.silent) {
         this.onerror(error);
       }
-      throw new Error(message);
+      throw new ApiRequestError(message, res.status);
     }
 
     const contentType = res.headers.get('Content-Type');
@@ -75,8 +90,8 @@ export default class ApiClient {
     return res.text();
   }
 
-  async _get(path: string) {
-    return this._request('GET', path);
+  async _get(path: string, opts?: RequestOptions) {
+    return this._request('GET', path, undefined, opts);
   }
 
   async _post(path: string, data?: unknown) {

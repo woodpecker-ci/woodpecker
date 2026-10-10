@@ -293,6 +293,16 @@ type (
 		CustomLabels map[string]string `json:"custom_labels"`
 	}
 
+	// AgentSnapshot is the state of the agent a workflow got assigned to, taken on assignment.
+	AgentSnapshot struct {
+		ID           int64             `json:"id"`
+		OrgID        int64             `json:"org_id"`
+		Name         string            `json:"name"`
+		Platform     string            `json:"platform"`
+		Backend      string            `json:"backend"`
+		CustomLabels map[string]string `json:"custom_labels"`
+	}
+
 	// Task is the JSON data for a task.
 	Task struct {
 		ID           string            `json:"id"`

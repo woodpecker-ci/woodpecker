@@ -83,6 +83,13 @@ func (s *RPC) lockAgentToWorkflow(_ context.Context, agent *model.Agent, strWork
 	}
 
 	workflow.AgentID = agent.ID
+	// the snapshot is only informational, so a failure must not block the workflow
+	workflow.AgentSnapshotID = 0
+	if snapshot, err := s.store.AgentSnapshotPersist(model.NewAgentSnapshot(agent)); err != nil {
+		log.Error().Err(err).Int64("agentID", agent.ID).Msgf("cannot store agent snapshot for workflow %d", workflowID)
+	} else {
+		workflow.AgentSnapshotID = snapshot.ID
+	}
 	return s.store.WorkflowUpdate(workflow)
 }
 

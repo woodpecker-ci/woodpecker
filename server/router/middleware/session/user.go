@@ -15,6 +15,8 @@
 package session
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -136,37 +138,20 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		// User can access his own, admin can access all
-		if (org.Name == user.Login && org.ForgeID == user.ForgeID) || user.Admin {
+		// admin can access all
+		if user.Admin {
 			c.Next()
 			return
 		}
 
-		// orgs of other forges can share a name with orgs of the user's
-		// forge, so a membership looked up on the user's forge proves
-		// nothing about them
-		if org.ForgeID != user.ForgeID {
-			c.String(http.StatusForbidden, "user not authorized")
-			c.Abort()
-			return
-		}
-
-		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
-		if err != nil {
-			log.Error().Err(err).Msg("Cannot get forge from user")
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-
-		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+		ok, err := IsOrgMember(c, user, org, admin)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
-
-		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
+		if !ok {
 			c.String(http.StatusForbidden, "user not authorized")
 			c.Abort()
 			return
@@ -174,4 +159,38 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// IsOrgMember reports whether the user is a member of the org, or an admin of it
+// if admin is set. Users are admins of their own user org. Instance admins are not
+// treated specially, callers decide about them.
+func IsOrgMember(ctx context.Context, user *model.User, org *model.Org, admin bool) (bool, error) {
+	if org.Name == user.Login && org.ForgeID == user.ForgeID {
+		return true, nil
+	}
+
+	// orgs of other forges can share a name with orgs of the user's
+	// forge, so a membership looked up on the user's forge proves
+	// nothing about them
+	if org.ForgeID != user.ForgeID {
+		return false, nil
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		return false, fmt.Errorf("cannot get forge from user: %w", err)
+	}
+
+	perm, err := server.Config.Services.Membership.Get(ctx, _forge, user, org.Name)
+	if err != nil {
+		return false, err
+	}
+
+	if perm == nil {
+		return false, nil
+	}
+	if admin {
+		return perm.Admin, nil
+	}
+	return perm.Member, nil
 }
