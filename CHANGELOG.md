@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-09
+## [3.19.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.1) - 2026-10-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,11 +12,13 @@
 
 ### 📚 Documentation
 
+- Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
 - Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
 - Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7266](https://github.com/woodpecker-ci/woodpecker/pull/7266)]
 - Update golang-packages [[#7260](https://github.com/woodpecker-ci/woodpecker/pull/7260)]
 - Update web npm deps non-major [[#7251](https://github.com/woodpecker-ci/woodpecker/pull/7251)]
 - Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
