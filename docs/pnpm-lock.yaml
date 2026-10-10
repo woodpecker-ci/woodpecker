@@ -167,6 +167,8 @@ overrides:
   uuid: ^14.0.0
   brace-expansion: ^5.0.0
   qs: ^6.16.0
+  tinypool: ^2.1.2
+  postcss-selector-parser: ^7.1.6
   image-size: npm:image-size-next@^2.1.1
 
 importers:
@@ -273,7 +275,7 @@ importers:
         version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       concurrently:
         specifier: ^10.0.0
-        version: 10.0.5
+        version: 10.0.6
       isomorphic-dompurify:
         specifier: ^4.0.0
         version: 4.5.0(@noble/hashes@1.8.0)
@@ -1293,13 +1295,13 @@ packages:
     resolution: {integrity: sha512-mf1LEW0tJLKfWyvn5KdDrhpxHyuxpbNwTIwOYLIvsTffeyOf85j5oIzfG0yosxDgx/sswlqBnESYUcQH0vgZ0g==}
     engines: {node: '>=18'}
     peerDependencies:
-      postcss-selector-parser: ^7.0.0
+      postcss-selector-parser: ^7.1.6
 
   '@csstools/selector-specificity@5.0.0':
     resolution: {integrity: sha512-PCqQV3c4CoVm3kdPhyeZ07VmBRdH2EpMFA/pd9OASpOEC3aXNGoqPDAZ80D0cLpMBxnmk0+yNhGsEx31hq7Gtw==}
     engines: {node: '>=18'}
     peerDependencies:
-      postcss-selector-parser: ^7.0.0
+      postcss-selector-parser: ^7.1.6
 
   '@csstools/utilities@2.0.0':
     resolution: {integrity: sha512-5VdOr0Z71u+Yp3ozOx8T11N703wIFGVRgOWbOZMKgglPJsWA54MRIoMNVMa7shUToIhx5J8vX4sOZgD2XiihiQ==}
@@ -2960,8 +2962,8 @@ packages:
     resolution: {integrity: sha512-o8vI5RE5A6EVVOd9o41jKp41aJom+QTEO/Bx8MYNjexMo/Bv2WOjUfZr+aL0WnYSgymUy6zeguqLTsIhV0gMvQ==}
     engines: {node: '>= 0.8.0'}
 
-  concurrently@10.0.5:
-    resolution: {integrity: sha512-JaP/CoftUrCcAFW/g//RbgEGwlelnEae6cfBLgH6ZdO6s8jPkn6p9SB9u6pdVxYXoiSnFqseOlHfrEfF82TVOg==}
+  concurrently@10.0.6:
+    resolution: {integrity: sha512-qgICXXFp2/3nAebRLmxcINKEXM1mLK3ij/y31P02VTs/KIkddIeC05n73DxOXsXMB9LFSqNU1/na3lDlOhcbIw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -5321,10 +5323,6 @@ packages:
     peerDependencies:
       postcss: ^8.4
 
-  postcss-selector-parser@6.1.4:
-    resolution: {integrity: sha512-bIoJLOmjCO1S9XdY/DcnR5hJxvrDir1PbGChrzXG3vw0/FOliy/fA3dmdhQ441kah4gKv+TwckGzex6wNS5cnQ==}
-    engines: {node: '>=4'}
-
   postcss-selector-parser@7.1.6:
     resolution: {integrity: sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==}
     engines: {node: '>=4'}
@@ -5771,10 +5769,6 @@ packages:
     resolution: {integrity: sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==}
     engines: {node: '>= 0.4'}
 
-  shell-quote@1.9.0:
-    resolution: {integrity: sha512-Iov+JwFv/2HcTpcwNMKd8+IWNb8tboQJNQTkAY/LLVK7gGH9jy+LGkVqPxfekHl+yMmiqXszdGWXgkfml7hjqA==}
-    engines: {node: '>= 0.4'}
-
   should-equal@2.0.0:
     resolution: {integrity: sha512-ZP36TMrK9euEuWQYBig9W55WPC7uo37qzAEmbjHz4gfyuXrEUgF8cUvQVO+w+d3OMfPvSRQJ22lSm8MQJ43LTA==}
 
@@ -6079,9 +6073,9 @@ packages:
   tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
 
-  tinypool@1.1.1:
-    resolution: {integrity: sha512-Zba82s87IFq9A9XmjiX5uZA/ARWDrB03OHlq+Vw1fSdt0I+4/Kutwy8BP4Y/y/aORMo61FQ0vIb5j44vSo5Pkg==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  tinypool@2.2.0:
+    resolution: {integrity: sha512-jBrmx4lYmaC9k/mgPbylxs7kBUxHtD8256up+HjLaDFfXScKJQyil+SWXSvhAtT7XHo+yTVlpB81PGmHP8oLSQ==}
+    engines: {node: ^20.0.0 || >=22.0.0}
 
   tldts-core@7.4.16:
     resolution: {integrity: sha512-MDolfaSJtlSK5Y0A1xl3277ekubZwobpBjugknDizI9O5Rm60a1m8k4ICK+MRsCDzPygT81mp3BBf5RKDlFRfA==}
@@ -7917,7 +7911,7 @@ snapshots:
       react-router-dom: 5.3.4(react@19.3.0)
       semver: 7.8.5
       serve-handler: 6.1.7
-      tinypool: 1.1.1
+      tinypool: 2.2.0
       tslib: 2.8.1
       update-notifier: 6.0.2
       webpack: 5.111.1(@swc/core@1.16.13)(@swc/html@1.16.13)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.28))(csso@5.0.5)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.28)(svgo@3.3.5)
@@ -10444,11 +10438,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  concurrently@10.0.5:
+  concurrently@10.0.6:
     dependencies:
       chalk: 5.6.2
       rxjs: 7.8.2
-      shell-quote: 1.9.0
+      shell-quote: 1.12.0
       supports-color: 10.2.2
       tree-kill: 1.2.2
       yargs: 18.0.0
@@ -12806,7 +12800,7 @@ snapshots:
   postcss-calc@9.0.1(postcss@8.5.28):
     dependencies:
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
       postcss-value-parser: 4.2.0
 
   postcss-clamp@4.1.0(postcss@8.5.28):
@@ -12898,7 +12892,7 @@ snapshots:
   postcss-discard-unused@6.0.5(postcss@8.5.28):
     dependencies:
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   postcss-double-position-gradients@6.0.4(postcss@8.5.28):
     dependencies:
@@ -12973,7 +12967,7 @@ snapshots:
       caniuse-api: 3.0.0
       cssnano-utils: 4.0.2(postcss@8.5.28)
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   postcss-minify-font-values@6.1.0(postcss@8.5.28):
     dependencies:
@@ -12997,7 +12991,7 @@ snapshots:
   postcss-minify-selectors@6.0.4(postcss@8.5.28):
     dependencies:
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   postcss-modules-extract-imports@3.1.0(postcss@8.5.28):
     dependencies:
@@ -13205,11 +13199,6 @@ snapshots:
       postcss: 8.5.28
       postcss-selector-parser: 7.1.6
 
-  postcss-selector-parser@6.1.4:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
-
   postcss-selector-parser@7.1.6:
     dependencies:
       cssesc: 3.0.0
@@ -13229,7 +13218,7 @@ snapshots:
   postcss-unique-selectors@6.0.4(postcss@8.5.28):
     dependencies:
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   postcss-value-parser@4.2.0: {}
 
@@ -13778,8 +13767,6 @@ snapshots:
 
   shell-quote@1.12.0: {}
 
-  shell-quote@1.9.0: {}
-
   should-equal@2.0.0:
     dependencies:
       should-type: 1.4.0
@@ -13999,7 +13986,7 @@ snapshots:
     dependencies:
       browserslist: 4.29.3
       postcss: 8.5.28
-      postcss-selector-parser: 6.1.4
+      postcss-selector-parser: 7.1.6
 
   stylis@4.3.6: {}
 
@@ -14085,7 +14072,7 @@ snapshots:
 
   tiny-warning@1.0.3: {}
 
-  tinypool@1.1.1: {}
+  tinypool@2.2.0: {}
 
   tldts-core@7.4.16: {}
 
