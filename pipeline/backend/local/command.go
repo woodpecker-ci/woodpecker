@@ -94,12 +94,6 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		return nil, ErrNoCmdSet
 	}
 
-	script := ""
-	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
-	}
-	script = strings.TrimSpace(script)
-
 	switch shellName {
 	default:
 		// assume posix shell
@@ -109,7 +103,12 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		fallthrough
 		// normal posix shells
 	case "sh", "bash", "zsh":
-		return []string{"-e", "-c", script}, nil
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-e", "-c", script.String()}, nil
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
@@ -141,14 +140,25 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "fish":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			fmt.Fprintf(&script, "echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + " || exit $status\n")
 		}
 		return []string{"-c", script.String()}, nil
 	case "nu":
-		return []string{"--commands", script}, nil
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"--commands", script.String()}, nil
 	case "powershell", "pwsh":
-		// cspell:disable-next-line
-		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
+		var script strings.Builder
+		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
+		for _, cmd := range cmdList {
+			script.WriteString("Write-Host " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
 	}
 }
 
