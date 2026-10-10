@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.10.1",
+  "packageManager": "pnpm@12.11.1",
   "type": "module",
   "engines": {
     "node": ">=24"
