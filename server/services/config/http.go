@@ -16,6 +16,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -91,11 +92,15 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 
 	// unexpected non-success status code
 	if status != http.StatusOK {
-		return oldConfigData, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
+		return nil, fmt.Errorf("unexpected status code %d from config endpoint (expected 200 or 204)", status)
 	}
 
 	fileMetaList := make([]*types.FileMeta, len(response.Configs))
 	for i, config := range response.Configs {
+		// the answer of an extension is foreign input and can contain anything
+		if config == nil {
+			return nil, errors.New("config extension returned an empty config")
+		}
 		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
 
