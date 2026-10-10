@@ -4,6 +4,7 @@
   "pull_request": {
     "html_url": "http://forgejo.golang.org/gordon/hello-world/pull/1",
     "state": "open",
+    "number": 1,
     "title": "Update the README with new information",
     "body": "please merge",
     "user": {

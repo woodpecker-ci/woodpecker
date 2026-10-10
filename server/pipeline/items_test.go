@@ -31,6 +31,7 @@ import (
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	store_types "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestSetPipelineStepsOnPipeline(t *testing.T) {
@@ -134,6 +135,9 @@ func TestParsePipeline(t *testing.T) {
 		AdditionalVariables: map[string]string{
 			"ADDITIONAL": "value",
 		},
+		Commit: &model.Commit{
+			SHA: "123",
+		},
 	}
 
 	user := &model.User{
@@ -176,7 +180,7 @@ steps:
 	forge.On("URL").Return("https://github.com")
 
 	store := store_mocks.NewMockStore(t)
-	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(nil, store_types.ErrRecordNotExist)
 
 	mockManager := manager_mocks.NewMockManager(t)
 	server.Config.Services.Manager = mockManager

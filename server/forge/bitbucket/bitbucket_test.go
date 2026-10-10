@@ -133,6 +133,7 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "branch_head_name", branchHead.SHA)
 	assert.Equal(t, "https://bitbucket.org/commitlink", branchHead.ForgeURL)
+	assert.Equal(t, int64(1700000000), branchHead.Timestamp)
 
 	_, err = c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
 	assert.Error(t, err)
@@ -210,8 +211,18 @@ func TestBitbucket(t *testing.T) {
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	assert.Equal(t, &model.Commit{
+		SHA:      "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		Message:  "a\n",
+		ForgeURL: "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		Author: model.CommitAuthor{
+			Name:  "Martin Herren",
+			Email: "martin.herren@yyy.com",
+		},
+		Timestamp: 1662581965,
+	}, b.Commit)
 	assert.Equal(t, "master", r.Branch)
-	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit.SHA)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
@@ -284,7 +295,7 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{SHA: "9ecad50"},
 	}
 
 	fakeWorkflow = &model.Workflow{

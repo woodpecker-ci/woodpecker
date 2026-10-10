@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -48,6 +49,7 @@ var fakePipeline = &model.Pipeline{
 	ID:     2,
 	Number: 2,
 	Status: model.StatusSuccess,
+	Commit: &model.Commit{},
 }
 
 func TestGetPipelines(t *testing.T) {
@@ -202,6 +204,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 		ID:     1,
 		Number: 1,
 		Status: model.StatusFailure,
+		Commit: &model.Commit{},
 	}
 
 	fakeRepo := &model.Repo{ID: 1}
@@ -274,6 +277,21 @@ func TestCancelPipeline(t *testing.T) {
 		CancelPipeline(c)
 
 		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+}
+
+func TestCreateTmpPipelineCommitTime(t *testing.T) {
+	user := &model.User{Login: "octocat"}
+
+	t.Run("keeps the commit time of the branch head", func(t *testing.T) {
+		pl := createTmpPipeline(model.EventManual, &model.Commit{SHA: "abc123", Timestamp: 1700000000}, user, &model.PipelineOptions{Branch: "main"})
+		assert.Equal(t, int64(1700000000), pl.Commit.Timestamp)
+	})
+
+	t.Run("uses the current time if the forge reports no commit time", func(t *testing.T) {
+		before := time.Now().Unix()
+		pl := createTmpPipeline(model.EventManual, &model.Commit{SHA: "abc123"}, user, &model.PipelineOptions{Branch: "main"})
+		assert.GreaterOrEqual(t, pl.Commit.Timestamp, before)
 	})
 }
 

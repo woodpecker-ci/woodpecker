@@ -42,6 +42,8 @@ func TestGetWorkflowMetadata(t *testing.T) {
 	}{
 		{
 			name:             "Test with empty info",
+			pipeline:         &model.Pipeline{Commit: &model.Commit{}},
+			prev:             &model.Pipeline{Commit: &model.Commit{}},
 			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}},
 			expectedEnviron: map[string]string{
 				"CI":                        "woodpecker",
@@ -74,8 +76,8 @@ func TestGetWorkflowMetadata(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			pipeline: &model.Pipeline{Number: 3, Timestamp: 1722617519, ChangedFiles: []string{"test.go", "markdown file.md"}},
-			prev:     &model.Pipeline{Number: 2, Timestamp: 1722610173},
+			pipeline: &model.Pipeline{Number: 3, ChangedFiles: []string{"test.go", "markdown file.md"}, Commit: &model.Commit{Timestamp: 1722617519}},
+			prev:     &model.Pipeline{Number: 2, Commit: &model.Commit{Timestamp: 1722610173}},
 			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
@@ -166,7 +168,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		},
 		{
 			name:     "Test with pull request draft",
-			pipeline: &model.Pipeline{Number: 3, Event: model.EventPull, Ref: "refs/pull/1/head", PullRequestDraft: true},
+			pipeline: &model.Pipeline{Number: 3, Event: model.EventPull, Ref: "refs/pull/1/head", PullRequest: &model.PullRequest{Draft: true}},
 		},
 	}
 

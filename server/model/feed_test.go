@@ -48,10 +48,22 @@ func TestFeedToAPIModel(t *testing.T) {
 			wantMessage: "created release My Release",
 		},
 		{
+			name:        "manual without message keeps commit message",
+			feed:        Feed{Event: EventManual, Commit: &Commit{Message: "head commit"}},
+			wantTitle:   "head commit",
+			wantMessage: "head commit",
+		},
+		{
+			name:        "manual with message uses custom message",
+			feed:        Feed{Event: EventManual, Branch: "main", ManualMessage: "redeploy", Commit: &Commit{Message: "head commit"}},
+			wantTitle:   "head commit",
+			wantMessage: "MANUAL: redeploy @ main",
+		},
+		{
 			name:        "push leaves derived fields untouched",
-			feed:        Feed{Event: EventPush, Title: "some commit"},
+			feed:        Feed{Event: EventPush, Commit: &Commit{Message: "some commit"}},
 			wantTitle:   "some commit",
-			wantMessage: "",
+			wantMessage: "some commit",
 		},
 	}
 
