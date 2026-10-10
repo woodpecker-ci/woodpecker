@@ -77,14 +77,18 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 		})
 
 		t.Run("powershell", func(t *testing.T) {
-			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "echo test"}, t.TempDir())
+			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "Write-Output 'test'", "echo test"}, t.TempDir())
 			require.NoError(t, err)
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
-			assert.EqualValues(t, `$ErrorActionPreference = "Stop"; echo '▶  Write-Host '"'"'test'"'"''
+			assert.EqualValues(t, `$ErrorActionPreference = "Stop"
+Write-Host '▶  Write-Host '"'"'test'"'"''
 Write-Host 'test'
-echo '▶  echo test'
-echo test`, args[3])
+Write-Host '▶  Write-Output '"'"'test'"'"''
+Write-Output 'test'
+Write-Host '▶  echo test'
+echo test
+`, args[3])
 
 			args, err = e.genCmdByShell("pwsh", "pwsh", []string{"Get-Process"}, t.TempDir())
 			require.NoError(t, err)
