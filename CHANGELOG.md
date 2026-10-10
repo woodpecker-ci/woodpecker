@@ -23,6 +23,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7270](https://github.com/woodpecker-ci/woodpecker/pull/7270)]
 - Update web npm deps non-major [[#7266](https://github.com/woodpecker-ci/woodpecker/pull/7266)]
 - Update golang-packages [[#7260](https://github.com/woodpecker-ci/woodpecker/pull/7260)]
 - Update web npm deps non-major [[#7251](https://github.com/woodpecker-ci/woodpecker/pull/7251)]
