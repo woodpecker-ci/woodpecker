@@ -16,6 +16,7 @@
 
 ### 📚 Documentation
 
+- Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
 - Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
 - Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
