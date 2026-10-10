@@ -256,6 +256,80 @@ func TestStartStep(t *testing.T) {
 		assert.Equal(t, int32(1), logCalled.Load())
 	})
 
+	t.Run("ImagePullOutputBeforeStepLogs", func(t *testing.T) {
+		t.Parallel()
+		var logs atomic.Value
+		engine := mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).
+			Run(func(args mock.Arguments) {
+				ctx, _ := args.Get(0).(context.Context)
+				out, ok := ctx.Value(backend_types.ImagePullOutput).(io.Writer)
+				require.True(t, ok, "runtime must pass a writer for the image pull progress")
+				_, _ = io.WriteString(out, "pull progress\n")
+			}).Return(nil)
+		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(io.NopCloser(strings.NewReader("log line\n")), nil)
+
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)),
+			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
+				b, err := io.ReadAll(rc)
+				logs.Store(string(b))
+				return err
+			})))
+
+		waitForLogs, _, err := r.startStep(dummyStep("s1"))
+		require.NoError(t, err)
+
+		waitForLogs()
+		assert.Equal(t, "pull progress\nlog line\n", logs.Load())
+	})
+
+	t.Run("ImagePullOutputOnStartStepError", func(t *testing.T) {
+		t.Parallel()
+		var logs atomic.Value
+		engine := mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).
+			Run(func(args mock.Arguments) {
+				ctx, _ := args.Get(0).(context.Context)
+				out, _ := ctx.Value(backend_types.ImagePullOutput).(io.Writer)
+				_, _ = io.WriteString(out, "pull failed\n")
+			}).Return(errors.New("no such image"))
+
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)),
+			WithLogger(logging.Logger(func(_ *backend_types.Step, rc io.ReadCloser) error {
+				b, err := io.ReadAll(rc)
+				logs.Store(string(b))
+				return err
+			})))
+
+		_, _, err := r.startStep(dummyStep("s1"))
+
+		// the pull output must be logged before the start failure is reported
+		assert.EqualError(t, err, "no such image")
+		assert.Equal(t, "pull failed\n", logs.Load())
+	})
+
+	t.Run("LoggerStopsReadingEarly", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).
+			Run(func(args mock.Arguments) {
+				ctx, _ := args.Get(0).(context.Context)
+				out, _ := ctx.Value(backend_types.ImagePullOutput).(io.Writer)
+				// must not block forever if nobody reads the logs
+				_, _ = io.WriteString(out, "pull progress\n")
+			}).Return(nil)
+		engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(io.NopCloser(strings.NewReader("log line\n")), nil)
+
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)),
+			WithLogger(logging.Logger(func(_ *backend_types.Step, _ io.ReadCloser) error { return nil })))
+
+		waitForLogs, _, err := r.startStep(dummyStep("s1"))
+		require.NoError(t, err)
+		waitForLogs()
+	})
+
 	t.Run("LoggerError", func(t *testing.T) {
 		t.Parallel()
 		logErr := errors.New("log stream broken")
