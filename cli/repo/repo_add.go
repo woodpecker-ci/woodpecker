@@ -48,7 +48,7 @@ func repoAdd(ctx context.Context, c *cli.Command) error {
 		ForgeRemoteID: int64(forgeRemoteID),
 	}
 
-	repo, err := client.RepoPost(opt)
+	repo, err := client.RepoPost(ctx, opt)
 	if err != nil {
 		return err
 	}

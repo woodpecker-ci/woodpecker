@@ -71,6 +71,6 @@ func registryCreate(ctx context.Context, c *cli.Command) error {
 		registry.Password = string(out)
 	}
 
-	_, err = client.GlobalRegistryCreate(registry)
+	_, err = client.GlobalRegistryCreate(ctx, registry)
 	return err
 }

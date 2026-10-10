@@ -52,12 +52,12 @@ func registryShow(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	registry, err := client.Registry(repoID, hostname)
+	registry, err := client.Registry(ctx, repoID, hostname)
 	if err != nil {
 		return err
 	}

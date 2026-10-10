@@ -79,7 +79,7 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	_, err = client.GlobalSecretCreate(secret)
+	_, err = client.GlobalSecretCreate(ctx, secret)
 	return err
 }
 

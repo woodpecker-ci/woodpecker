@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 )
@@ -26,10 +27,10 @@ const (
 )
 
 // AgentCreate creates a new agent.
-func (c *client) AgentCreate(in *Agent) (*Agent, error) {
+func (c *client) AgentCreate(ctx context.Context, in *Agent) (*Agent, error) {
 	out := new(Agent)
 	uri := fmt.Sprintf(pathAgents, c.addr)
-	return out, c.post(uri, in, out)
+	return out, c.post(ctx, uri, in, out)
 }
 
 // AgentListOptions represents the options for the agent list.
@@ -37,46 +38,37 @@ type AgentListOptions struct {
 	ListOptions
 }
 
-// AgentList returns the first page of registered agents.
-//
-// Deprecated: use AgentListWithOpts instead, which can ask for any page.
-func (c *client) AgentList() ([]*Agent, error) {
-	out := make([]*Agent, 0, 5)
-	uri := fmt.Sprintf(pathAgents, c.addr)
-	return out, c.get(uri, &out)
-}
-
-// AgentListWithOpts returns a page of registered agents.
-func (c *client) AgentListWithOpts(opt AgentListOptions) ([]*Agent, error) {
+// AgentList returns a page of registered agents.
+func (c *client) AgentList(ctx context.Context, opt AgentListOptions) ([]*Agent, error) {
 	out := make([]*Agent, 0, 5)
 	uri, _ := url.Parse(fmt.Sprintf(pathAgents, c.addr))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	return out, c.get(uri.String(), &out)
+	return out, c.get(ctx, uri.String(), &out)
 }
 
 // Agent returns an agent by id.
-func (c *client) Agent(agentID int64) (*Agent, error) {
+func (c *client) Agent(ctx context.Context, agentID int64) (*Agent, error) {
 	out := new(Agent)
 	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
-	return out, c.get(uri, out)
+	return out, c.get(ctx, uri, out)
 }
 
 // AgentUpdate updates the agent with the provided Agent struct.
-func (c *client) AgentUpdate(in *Agent) (*Agent, error) {
+func (c *client) AgentUpdate(ctx context.Context, in *Agent) (*Agent, error) {
 	out := new(Agent)
 	uri := fmt.Sprintf(pathAgent, c.addr, in.ID)
-	return out, c.patch(uri, in, out)
+	return out, c.patch(ctx, uri, in, out)
 }
 
 // AgentDelete deletes the agent with the given id.
-func (c *client) AgentDelete(agentID int64) error {
+func (c *client) AgentDelete(ctx context.Context, agentID int64) error {
 	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }
 
 // AgentTasksList returns a list of all tasks for the agent with the given id.
-func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
+func (c *client) AgentTasksList(ctx context.Context, agentID int64) ([]*Task, error) {
 	out := make([]*Task, 0, 5)
 	uri := fmt.Sprintf(pathAgentTasks, c.addr, agentID)
-	return out, c.get(uri, &out)
+	return out, c.get(ctx, uri, &out)
 }

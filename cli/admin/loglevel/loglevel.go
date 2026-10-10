@@ -46,14 +46,14 @@ func logLevel(ctx context.Context, c *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		ll, err = client.SetLogLevel(&woodpecker.LogLevel{
+		ll, err = client.SetLogLevel(ctx, &woodpecker.LogLevel{
 			Level: lvl.String(),
 		})
 		if err != nil {
 			return err
 		}
 	} else {
-		ll, err = client.LogLevel()
+		ll, err = client.LogLevel(ctx)
 		if err != nil {
 			return err
 		}

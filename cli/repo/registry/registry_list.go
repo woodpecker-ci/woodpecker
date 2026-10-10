@@ -45,14 +45,14 @@ func registryList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
 	opt := woodpecker.RegistryListOptions{}
 
-	list, err := client.RegistryList(repoID, opt)
+	list, err := client.RegistryList(ctx, repoID, opt)
 	if err != nil {
 		return err
 	}

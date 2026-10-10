@@ -37,7 +37,7 @@ func pipelineStop(ctx context.Context, c *cli.Command) (err error) {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func pipelineStop(ctx context.Context, c *cli.Command) (err error) {
 		return err
 	}
 
-	err = client.PipelineStop(repoID, number)
+	err = client.PipelineStop(ctx, repoID, number)
 	if err != nil {
 		return err
 	}

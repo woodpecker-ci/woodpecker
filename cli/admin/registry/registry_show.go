@@ -50,7 +50,7 @@ func registryShow(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	registry, err := client.GlobalRegistry(hostname)
+	registry, err := client.GlobalRegistry(ctx, hostname)
 	if err != nil {
 		return err
 	}

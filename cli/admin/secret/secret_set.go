@@ -76,6 +76,6 @@ func secretUpdate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	_, err = client.GlobalSecretUpdate(secret)
+	_, err = client.GlobalSecretUpdate(ctx, secret)
 	return err
 }

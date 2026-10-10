@@ -42,7 +42,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
@@ -52,7 +52,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
+		pipeline, err := client.PipelineLast(ctx, repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	pipeline, err := client.Pipeline(repoID, number)
+	pipeline, err := client.Pipeline(ctx, repoID, number)
 	if err != nil {
 		return err
 	}

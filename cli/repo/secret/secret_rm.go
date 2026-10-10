@@ -45,10 +45,10 @@ func secretDelete(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	return client.SecretDelete(repoID, secretName)
+	return client.SecretDelete(ctx, repoID, secretName)
 }

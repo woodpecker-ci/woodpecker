@@ -43,5 +43,5 @@ func registryDelete(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	return client.GlobalRegistryDelete(hostname)
+	return client.GlobalRegistryDelete(ctx, hostname)
 }

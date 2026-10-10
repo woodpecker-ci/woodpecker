@@ -44,7 +44,7 @@ func pipelineLast(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func pipelineLast(ctx context.Context, c *cli.Command) error {
 		Branch: c.String("branch"),
 	}
 
-	pipeline, err := client.PipelineLast(repoID, opt)
+	pipeline, err := client.PipelineLast(ctx, repoID, opt)
 	if err != nil {
 		return err
 	}

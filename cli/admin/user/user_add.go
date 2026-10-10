@@ -39,7 +39,7 @@ func userAdd(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	user, err := client.UserPost(&woodpecker.User{Login: login})
+	user, err := client.UserPost(ctx, &woodpecker.User{Login: login})
 	if err != nil {
 		return err
 	}

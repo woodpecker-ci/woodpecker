@@ -43,12 +43,12 @@ func pipelineKill(ctx context.Context, c *cli.Command) (err error) {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	err = client.PipelineDelete(repoID, number)
+	err = client.PipelineDelete(ctx, repoID, number)
 	if err != nil {
 		return err
 	}
