@@ -1,5 +1,38 @@
 # Changelog
 
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-10
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @Sawarz, @YouCD
+
+### 📈 Enhancement
+
+- Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
+
+### 🐛 Bug Fixes
+
+- 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
+
+### 📚 Documentation
+
+- Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
+- Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
+- Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
+- Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
+
+### 📦️ Dependency
+
+- Update web npm deps non-major [[#7270](https://github.com/woodpecker-ci/woodpecker/pull/7270)]
+- Update web npm deps non-major [[#7266](https://github.com/woodpecker-ci/woodpecker/pull/7266)]
+- Update golang-packages [[#7260](https://github.com/woodpecker-ci/woodpecker/pull/7260)]
+- Update web npm deps non-major [[#7251](https://github.com/woodpecker-ci/woodpecker/pull/7251)]
+- Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
+
+### Misc
+
+- Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
+
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
 
 ### ❤️ Thanks to all contributors! ❤️
