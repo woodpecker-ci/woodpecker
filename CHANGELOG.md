@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
 - Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
 - Update web npm deps non-major [[#7273](https://github.com/woodpecker-ci/woodpecker/pull/7273)]
 - Update web npm deps non-major [[#7270](https://github.com/woodpecker-ci/woodpecker/pull/7270)]
