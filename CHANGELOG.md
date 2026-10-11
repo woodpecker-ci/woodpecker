@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
 - Update web npm deps non-major [[#7273](https://github.com/woodpecker-ci/woodpecker/pull/7273)]
 - Update web npm deps non-major [[#7270](https://github.com/woodpecker-ci/woodpecker/pull/7270)]
 - Update web npm deps non-major [[#7266](https://github.com/woodpecker-ci/woodpecker/pull/7266)]
