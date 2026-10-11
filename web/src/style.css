@@ -78,8 +78,8 @@
   --wp-primary-text-100: var(--color-white);
 
   --wp-control-neutral-100: var(--color-int-wp-secondary-400);
-  --wp-control-neutral-200: var(--color-int-wp-secondary-300);
-  --wp-control-neutral-300: var(--color-int-wp-secondary-200);
+  --wp-control-neutral-200: var(--color-int-wp-secondary-200);
+  --wp-control-neutral-300: var(--color-int-wp-secondary-100);
 
   --wp-control-info-100: var(--color-int-wp-control-info-dark-100);
   --wp-control-info-200: var(--color-int-wp-control-info-dark-200);
