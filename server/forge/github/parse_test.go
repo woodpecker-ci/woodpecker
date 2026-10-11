@@ -57,6 +57,19 @@ func TestParseHook(t *testing.T) {
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 	})
 
+	t.Run("reject null payload", func(t *testing.T) {
+		for _, event := range []string{hookDeploy, hookPush, hookPull, hookRelease} {
+			req := testHookRequest([]byte("null"), event)
+			p, r, b, cc, pc, err := parseHook(req, false)
+			assert.Empty(t, pc, event)
+			assert.Empty(t, cc, event)
+			assert.Nil(t, r, event)
+			assert.Nil(t, b, event)
+			assert.Nil(t, p, event)
+			assert.Error(t, err, event)
+		}
+	})
+
 	t.Run("skip skip push hook when action is deleted", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPushDeleted), hookPush)
 		p, r, b, cc, pc, err := parseHook(req, false)
