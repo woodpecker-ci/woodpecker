@@ -217,7 +217,7 @@ importers:
         version: 3.10.2(@swc/core@1.16.13)(@swc/html@1.16.13)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.28))(csso@5.0.5)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.28)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@10.2.2)(svgo@3.3.5)
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.7.1
-        version: 4.7.1(@vue/compiler-sfc@3.5.43)(prettier@3.9.9)(supports-color@10.2.2)
+        version: 4.7.1(@vue/compiler-sfc@3.5.43)(prettier@3.9.10)(supports-color@10.2.2)
       '@types/node':
         specifier: ^25.3.3
         version: 25.9.9
@@ -235,7 +235,7 @@ importers:
         version: 3.5.43
       prettier:
         specifier: ^3.8.1
-        version: 3.9.9
+        version: 3.9.10
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -5358,8 +5358,8 @@ packages:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.9.9:
-    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
+  prettier@3.9.10:
+    resolution: {integrity: sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -8905,13 +8905,13 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.43)(prettier@3.9.9)(supports-color@10.2.2)':
+  '@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.43)(prettier@3.9.10)(supports-color@10.2.2)':
     dependencies:
       '@babel/generator': 7.29.8
       '@babel/parser': 7.29.9
       '@babel/traverse': 7.29.8(supports-color@10.2.2)
       '@babel/types': 7.29.8
-      prettier: 3.9.9
+      prettier: 3.9.10
       semver: 7.8.5
     optionalDependencies:
       '@vue/compiler-sfc': 3.5.43
@@ -13232,7 +13232,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
-  prettier@3.9.9: {}
+  prettier@3.9.10: {}
 
   pretty-error@4.0.0:
     dependencies:
