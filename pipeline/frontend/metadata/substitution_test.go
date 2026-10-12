@@ -17,7 +17,7 @@ package metadata
 import (
 	"testing"
 
-	xyaml "codeberg.org/6543/xyaml/v2"
+	"codeberg.org/6543/xyaml/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
