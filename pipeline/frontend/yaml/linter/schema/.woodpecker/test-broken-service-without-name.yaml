@@ -1,0 +1,8 @@
+steps:
+  - name: build
+    image: golang
+    commands:
+      - go build
+
+services:
+  - image: mysql

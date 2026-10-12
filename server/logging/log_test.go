@@ -77,3 +77,34 @@ func TestLogging(t *testing.T) {
 	wg.Wait()
 	cancel(nil)
 }
+
+// A step killed before it ran never opened a stream.
+func TestCloseUnopenedStreamReturnsErrNotFound(t *testing.T) {
+	t.Parallel()
+
+	err := New().Close(t.Context(), int64(123))
+
+	assert.ErrorIs(t, err, ErrNotFound)
+}
+
+func TestCloseOpenStreamSucceeds(t *testing.T) {
+	t.Parallel()
+
+	stepID := int64(456)
+	logger := New()
+	assert.NoError(t, logger.Open(t.Context(), stepID))
+
+	assert.NoError(t, logger.Close(t.Context(), stepID))
+
+	// Closing again finds the stream already retired.
+	assert.ErrorIs(t, logger.Close(t.Context(), stepID), ErrNotFound)
+}
+
+func TestTailUnopenedStreamReturnsErrNotFound(t *testing.T) {
+	t.Parallel()
+
+	receiver := make(LogChan, 1)
+	err := New().Tail(t.Context(), int64(789), receiver)
+
+	assert.ErrorIs(t, err, ErrNotFound)
+}

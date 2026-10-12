@@ -83,8 +83,8 @@ func Dial(authCtx context.Context, cfg DialConfig) (*AgentConn, error) {
 		Timeout: cfg.KeepaliveTimeout,
 	})
 
-	if strings.HasPrefix(cfg.ServerAddr, "unix://") {
-		addr, _ := filepath.Abs(strings.TrimPrefix(cfg.ServerAddr, "unix://"))
+	if after, ok := strings.CutPrefix(cfg.ServerAddr, "unix://"); ok {
+		addr, _ := filepath.Abs(after)
 		if _, err := os.Stat(addr); err != nil {
 			if os.IsNotExist(err) {
 				return nil, fmt.Errorf("can not connect to unix socket, %q not exist", addr)

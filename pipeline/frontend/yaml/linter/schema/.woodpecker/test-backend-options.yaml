@@ -1,8 +1,64 @@
 steps:
   - name: Build Container
-    image: woodpeckerci/plugin-kaniko:1.2.1
+    image: alpine
+    commands: echo building
     backend_options:
+      docker:
+        user: 1000:1000
       kubernetes:
+        resources:
+          requests:
+            memory: 200Mi
+            cpu: 100m
+          limits:
+            memory: 400Mi
+            cpu: 1000m
+        runtimeClassName: gvisor
+        serviceAccountName: builder
+        workspaceVolume: false
+        hostUsers: false
+        nodeSelector:
+          kubernetes.io/arch: arm64
+          node.kubernetes.io/instance-type: c3-standard-8
+          topology.kubernetes.io/region: europe-west1
+          topology.kubernetes.io/zone: europe-west1-b
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/component: runner
+                  matchExpressions:
+                    - key: workload-tier
+                      operator: In
+                      values:
+                        - ci
+                        - batch
+                namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: woodpecker
+                namespaces:
+                  - woodpecker
+                topologyKey: topology.kubernetes.io/zone
+                matchLabelKeys:
+                  - woodpecker-ci.org/task-uuid
+                mismatchLabelKeys:
+                  - pod-template-hash
+        securityContext:
+          privileged: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+          fsGroupChangePolicy: OnRootMismatch
+          seccompProfile:
+            type: RuntimeDefault
+          apparmorProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         secrets:
           - name: aws-secret
             key: credentials

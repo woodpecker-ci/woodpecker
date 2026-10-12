@@ -101,6 +101,7 @@ func runScenario(t *testing.T, sc Scenario) {
 			continue
 		}
 		assert.Equalf(t, want.Status, wf.State, "workflow %q status", want.Name)
+		assert.Equalf(t, want.Error, wf.Error, "workflow %q error", want.Name)
 	}
 }
 

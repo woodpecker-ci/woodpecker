@@ -138,7 +138,6 @@ func TestBitbucket(t *testing.T) {
 	assert.Error(t, err)
 
 	listOpts := model.ListOptions{
-		All:     false,
 		Page:    1,
 		PerPage: 10,
 	}
@@ -174,6 +173,9 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = c.Deactivate(ctx, fakeUser, fakeRepoEmptyHook, "http://127.0.0.1")
+	assert.NoError(t, err)
+
+	err = c.Deactivate(ctx, fakeUser, fakeRepoHooksNoNext, "http://127.0.0.1")
 	assert.NoError(t, err)
 
 	hooks := []*internal.Hook{
@@ -266,6 +268,12 @@ var (
 		Owner:    "test_name",
 		Name:     "hook_empty",
 		FullName: "test_name/hook_empty",
+	}
+
+	fakeRepoHooksNoNext = &model.Repo{
+		Owner:    "test_name",
+		Name:     "repo_hooks_no_next",
+		FullName: "test_name/repo_hooks_no_next",
 	}
 
 	fakeRepoFromHook = &model.Repo{

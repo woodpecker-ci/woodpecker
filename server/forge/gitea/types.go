@@ -15,7 +15,12 @@
 
 package gitea
 
-import "code.gitea.io/sdk/gitea"
+import (
+	"errors"
+	"strings"
+
+	"code.gitea.io/sdk/gitea"
+)
 
 type pushHook struct {
 	Sha     string `json:"sha"`
@@ -49,4 +54,30 @@ type releaseHook struct {
 	Repo    *gitea.Repository `json:"repository"`
 	Sender  *gitea.User       `json:"sender"`
 	Release *gitea.Release
+}
+
+var errIncompleteHook = errors.New("incomplete webhook payload")
+
+// validate checks that all objects dereferenced during hook conversion are
+// present, so malformed payloads are rejected instead of causing panics.
+func (h *pushHook) validate() error {
+	if h.Repo == nil || h.Repo.Owner == nil || !strings.Contains(h.Repo.FullName, "/") || h.Sender == nil {
+		return errIncompleteHook
+	}
+	return nil
+}
+
+func (h *pullRequestHook) validate() error {
+	if h.Repo == nil || h.Repo.Owner == nil || !strings.Contains(h.Repo.FullName, "/") || h.Sender == nil ||
+		h.PullRequest == nil || h.PullRequest.Poster == nil || h.PullRequest.Head == nil || h.PullRequest.Base == nil {
+		return errIncompleteHook
+	}
+	return nil
+}
+
+func (h *releaseHook) validate() error {
+	if h.Repo == nil || h.Repo.Owner == nil || !strings.Contains(h.Repo.FullName, "/") || h.Sender == nil || h.Release == nil {
+		return errIncompleteHook
+	}
+	return nil
 }

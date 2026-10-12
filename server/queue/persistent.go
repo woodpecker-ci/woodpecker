@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/rs/zerolog/log"
 
@@ -27,19 +28,72 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+// serverConfigQueuePaused stores whether the global queue is paused so the
+// state survives server restarts.
+const serverConfigQueuePaused = "queue-paused"
+
 // WithTaskStore returns a queue that is backed by the TaskStore. This
-// ensures the task Queue can be restored when the system starts.
+// ensures pending tasks and the paused flag can be restored when the system
+// starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
-	return &persistentQueue{q, s}
+	pq := &persistentQueue{q, s}
+	pq.restorePausedState()
+	return pq
 }
 
 type persistentQueue struct {
 	Queue
 	store store.Store
+}
+
+// Pause stops handing out new work and persists that state so a server
+// restart keeps the queue paused.
+func (q *persistentQueue) Pause() {
+	q.Queue.Pause()
+	if err := q.store.ServerConfigSet(serverConfigQueuePaused, "true"); err != nil {
+		log.Error().Err(err).Msg("failed to persist queue paused state")
+	}
+}
+
+// Resume starts handing out work again and clears the persisted paused flag.
+func (q *persistentQueue) Resume() {
+	q.Queue.Resume()
+	if err := q.store.ServerConfigSet(serverConfigQueuePaused, "false"); err != nil {
+		log.Error().Err(err).Msg("failed to persist queue resumed state")
+	}
+}
+
+func (q *persistentQueue) restorePausedState() {
+	value, err := q.store.ServerConfigGet(serverConfigQueuePaused)
+	if err != nil {
+		if !errors.Is(err, types.ErrRecordNotExist) {
+			log.Error().Err(err).Msg("failed to load persisted queue paused state")
+		}
+		return
+	}
+	if value == "true" {
+		log.Warn().Msg("restoring paused queue state from server config")
+		q.Queue.Pause()
+	}
+}
+
+func isTerminalWorkflowState(state model.StatusValue) bool {
+	switch state {
+	case model.StatusSuccess,
+		model.StatusFailure,
+		model.StatusKilled,
+		model.StatusCanceled,
+		model.StatusSkipped,
+		model.StatusError,
+		model.StatusDeclined:
+		return true
+	default:
+		return false
+	}
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
@@ -81,9 +135,58 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.T
 			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
 		} else {
 			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
+
+			workflowID, parseErr := strconv.ParseInt(task.ID, 10, 64)
+			if parseErr != nil {
+				log.Error().Err(parseErr).Msgf("pull queue item: %s: invalid workflow id", task.ID)
+				return task, err
+			}
+
+			workflow, loadErr := q.store.WorkflowLoad(workflowID)
+			if loadErr != nil {
+				if errors.Is(loadErr, types.ErrRecordNotExist) {
+					// A queued task without its workflow can never be initialized.
+					// Drop it now instead of letting the agent reject and later
+					// re-poll the same task after its lease expires.
+					log.Error().Err(loadErr).Msgf("pull queue item: %s: workflow missing, dropping stale task", task.ID)
+					if dropErr := q.Queue.Error(c, task.ID, loadErr); dropErr != nil {
+						log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
+					}
+					return nil, nil
+				}
+				log.Error().Err(loadErr).Msgf("pull queue item: %s: failed to load workflow", task.ID)
+				return task, err
+			}
+
+			if isTerminalWorkflowState(workflow.State) {
+				// The task can still exist in the persistent queue while its
+				// workflow was completed through another path. Returning it to an
+				// agent makes RPC.Init reject it as already finished, while the
+				// in-memory task remains running and is resubmitted after timeout.
+				log.Warn().Str("state", string(workflow.State)).Msgf("pull queue item: %s: workflow already terminal, dropping stale task", task.ID)
+				if dropErr := q.Queue.Done(c, task.ID, workflow.State); dropErr != nil {
+					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop terminal task", task.ID)
+				}
+				return nil, nil
+			}
 		}
 	}
 	return task, err
+}
+
+// Done signals the task is complete.
+func (q *persistentQueue) Done(c context.Context, id string, exitStatus model.StatusValue) error {
+	if err := q.Queue.Done(c, id, exitStatus); err != nil {
+		return err
+	}
+
+	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
+		if !errors.Is(deleteErr, types.ErrRecordNotExist) {
+			return deleteErr
+		}
+		log.Debug().Msgf("task %s already removed from store", id)
+	}
+	return nil
 }
 
 // Error signals the task is done with an error.

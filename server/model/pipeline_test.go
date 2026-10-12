@@ -64,14 +64,14 @@ func TestPipelineToAPIModel(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			p := tc.pipeline
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := tt.pipeline
 			ap := p.ToAPIModel()
-			assert.Equal(t, tc.wantTitle, ap.Title)
-			assert.Equal(t, tc.wantMessage, ap.Message)
-			assert.Equal(t, tc.wantSender, ap.Sender)
-			assert.Equal(t, tc.wantIsPrerelease, ap.IsPrerelease)
+			assert.Equal(t, tt.wantTitle, ap.Title)
+			assert.Equal(t, tt.wantMessage, ap.Message)
+			assert.Equal(t, tt.wantSender, ap.Sender)
+			assert.Equal(t, tt.wantIsPrerelease, ap.IsPrerelease)
 		})
 	}
 }

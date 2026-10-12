@@ -18,13 +18,13 @@ type (
 	// Metadata defines runtime m.
 	Metadata struct {
 		ID       string   `json:"id,omitempty"`
-		Repo     Repo     `json:"repo,omitempty"`
-		Curr     Pipeline `json:"curr,omitempty"`
-		Prev     Pipeline `json:"prev,omitempty"`
-		Workflow Workflow `json:"workflow,omitempty"`
-		Step     Step     `json:"step,omitempty"`
-		Sys      System   `json:"sys,omitempty"`
-		Forge    Forge    `json:"forge,omitempty"`
+		Repo     Repo     `json:"repo"`
+		Curr     Pipeline `json:"curr"`
+		Prev     Pipeline `json:"prev"`
+		Workflow Workflow `json:"workflow"`
+		Step     Step     `json:"step"`
+		Sys      System   `json:"sys"`
+		Forge    Forge    `json:"forge"`
 	}
 
 	// Repo defines runtime metadata for a repository.
@@ -39,7 +39,7 @@ type (
 		CloneSSHURL string               `json:"clone_url_ssh,omitempty"`
 		Private     bool                 `json:"private,omitempty"`
 		Branch      string               `json:"default_branch,omitempty"`
-		Trusted     TrustedConfiguration `json:"trusted,omitempty"`
+		Trusted     TrustedConfiguration `json:"trusted"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -58,7 +58,7 @@ type (
 		Parent      int64    `json:"parent,omitempty"`
 		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`
-		Release     Release  `json:"release,omitempty"`
+		Release     Release  `json:"release"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`
 	}

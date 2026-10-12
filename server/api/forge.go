@@ -36,7 +36,7 @@ import (
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetForges(c *gin.Context) {
-	forges, err := store.FromContext(c).ForgeList(session.Pagination(c))
+	forges, err := store.FromContext(c).ForgeList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting forge list. %s", err)
 		return
@@ -122,6 +122,7 @@ func PatchForge(c *gin.Context) {
 	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
+	forge.Orgs = in.Orgs
 	forge.AdditionalOptions = in.AdditionalOptions
 	if in.OAuthClientSecret != "" {
 		forge.OAuthClientSecret = in.OAuthClientSecret
@@ -161,6 +162,7 @@ func PostForge(c *gin.Context) {
 		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
 		SkipVerify:        in.SkipVerify,
+		Orgs:              in.Orgs,
 		AdditionalOptions: in.AdditionalOptions,
 	}
 	if err = store.FromContext(c).ForgeCreate(forge); err != nil {

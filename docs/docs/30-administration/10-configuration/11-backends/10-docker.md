@@ -95,6 +95,15 @@ certificates installed on host and host timezone use `/etc/ssl/certs:/etc/ssl/ce
 
 ---
 
+### BACKEND_DOCKER_APPARMOR_PROFILE
+
+- Name: `WOODPECKER_BACKEND_DOCKER_APPARMOR_PROFILE`
+- Default: none
+
+Set an AppArmor profile for pipeline containers (steps). If unset, Docker applies its default AppArmor behavior.
+
+---
+
 ### BACKEND_DOCKER_LIMIT_MEM_SWAP
 
 - Name: `WOODPECKER_BACKEND_DOCKER_LIMIT_MEM_SWAP`

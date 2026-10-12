@@ -36,7 +36,7 @@ import (
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalSecretList(c *gin.Context) {
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.GlobalSecretList(session.Pagination(c))
+	list, err := secretService.GlobalSecretList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return

@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -32,13 +32,16 @@ func TestGetStatus(t *testing.T) {
 	}{
 		{model.StatusPending, gitlab.Pending},
 		{model.StatusBlocked, gitlab.Pending},
+		{model.StatusCreated, gitlab.Pending},
 		{model.StatusRunning, gitlab.Running},
 		{model.StatusSuccess, gitlab.Success},
 		{model.StatusFailure, gitlab.Failed},
 		{model.StatusError, gitlab.Failed},
 		{model.StatusKilled, gitlab.Canceled},
-		// unknown statuses fall back to failed
 		{model.StatusDeclined, gitlab.Failed},
+		{model.StatusSkipped, gitlab.Failed},
+		{model.StatusCanceled, gitlab.Failed},
+		{model.StatusValue("bogus"), gitlab.Failed},
 	}
 
 	for _, tt := range tests {

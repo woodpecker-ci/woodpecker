@@ -24,4 +24,6 @@ var (
 
 	ErrAgentIllegalRepo            = errors.New("agent is not allowed to interact with repo")
 	ErrAgentIllegalWorkflowAgentID = errors.New("agent is not allowed to interact with workflow where it's id is not already locked")
+
+	ErrAgentImpossibleWorkflowState = errors.New("agent reported an impossible workflow state, the agent is probably outdated and speaks an incompatible protocol")
 )

@@ -18,7 +18,12 @@ import (
 	"encoding/base64"
 )
 
-func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string) {
+// CommandMarker prefixes the echoed command line before each step command runs.
+// The web UI (PipelineLog.vue) uses it to detect and collapse command output,
+// and plugins are documented to print it too, so every backend must use it.
+const CommandMarker = "▶  "
+
+func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
@@ -31,5 +36,5 @@ func GenerateContainerConf(commands []string, osType, workDir string) (env map[s
 		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
-	return env, entry
+	return env, entry, nil
 }

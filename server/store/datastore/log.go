@@ -27,9 +27,11 @@ import (
 // Too large a value results in `pq: got XX parameters but PostgreSQL only supports 65535 parameters`.
 const pgBatchSize = 1000
 
+// LogFind returns the log entries of a step in the order the agent produced
+// them, which is the order their line numbers carry.
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
+	return logEntries, s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
 func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {

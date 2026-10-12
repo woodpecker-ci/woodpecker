@@ -108,8 +108,8 @@ func TestSetGatedState(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		setApprovalState(tc.repo, tc.pipeline)
-		assert.Equal(t, tc.expectBlocked, tc.pipeline.Status == model.StatusBlocked)
+	for _, tt := range testCases {
+		setApprovalState(tt.repo, tt.pipeline)
+		assert.Equal(t, tt.expectBlocked, tt.pipeline.Status == model.StatusBlocked)
 	}
 }

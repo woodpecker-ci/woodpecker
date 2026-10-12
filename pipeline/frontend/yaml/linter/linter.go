@@ -19,10 +19,10 @@ import (
 	"regexp"
 	"slices"
 
-	"codeberg.org/6543/xyaml/v2"
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -99,6 +99,9 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	if err := l.lintContainers(config, "services"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
+	if err := l.lintServiceNames(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
 
 	if err := l.lintSchema(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
@@ -135,6 +138,30 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 			)
 		}
 	}
+	return linterErr
+}
+
+// lintServiceNames rejects services sharing a name. A service's name becomes
+// the network alias other containers address it by, so two services with the
+// same name make that hostname resolve to either of them at random.
+func (l *Linter) lintServiceNames(config *WorkflowConfig) error {
+	var linterErr error
+
+	seen := make(map[string]struct{}, len(config.Workflow.Services.ContainerList))
+	for _, container := range config.Workflow.Services.ContainerList {
+		if _, ok := seen[container.Name]; ok {
+			linterErr = multierr.Append(
+				linterErr,
+				newLinterError(
+					fmt.Sprintf("Service names must be unique, `%s` is used more than once", container.Name),
+					config.File, fmt.Sprintf("services.%s", container.Name), false,
+				),
+			)
+			continue
+		}
+		seen[container.Name] = struct{}{}
+	}
+
 	return linterErr
 }
 
@@ -311,7 +338,7 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 
 func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err := yaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
@@ -374,7 +401,7 @@ func deprecatedEnvVarRefRegexp(name string) *regexp.Regexp {
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err = yaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error
 	).Get(secret))
 }
 
-func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
+func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	var secrets []*model.Secret
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
@@ -65,7 +65,7 @@ func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) 
 	).Get(secret))
 }
 
-func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
+func (s storage) OrgSecretList(orgID int64, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
 	return secrets, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderSecretsBy).Find(&secrets)
 }
@@ -77,7 +77,7 @@ func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
 	).Get(secret))
 }
 
-func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+func (s storage) GlobalSecretList(p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
 	return secrets, s.paginate(p).Where(
 		builder.Eq{"org_id": 0, "repo_id": 0},

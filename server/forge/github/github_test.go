@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v89/github"
+	"github.com/google/go-github/v92/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.SkipVerify)
 }
 
-func Test_github(t *testing.T) {
+func TestGithub(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
@@ -119,7 +119,7 @@ func TestStatusDeployment(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	gh, err := github.NewClient(
-		github.WithURLs(github.Ptr(server.URL+"/"), nil),
+		github.WithURLs(new(server.URL+"/"), nil),
 		github.WithHTTPClient(server.Client()),
 	)
 	require.NoError(t, err)
@@ -177,8 +177,8 @@ func TestHook(t *testing.T) {
 			github_mock.GetReposCommitsByOwnerByRepoByRef,
 			github.RepositoryCommit{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("README.md")},
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("README.md")},
+					{Filename: new("main.go")},
 				},
 			},
 		),
@@ -186,15 +186,15 @@ func TestHook(t *testing.T) {
 			github_mock.GetReposCompareByOwnerByRepoByBasehead,
 			github.CommitsComparison{
 				Files: []*github.CommitFile{
-					{Filename: github.Ptr("main.go")},
+					{Filename: new("main.go")},
 				},
 			},
 		),
 		github_mock.WithRequestMatch(
 			github_mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
 			[]*github.CommitFile{
-				{Filename: github.Ptr("README.md")},
-				{Filename: github.Ptr("main.go")},
+				{Filename: new("README.md")},
+				{Filename: new("main.go")},
 			},
 		),
 	)
@@ -204,7 +204,7 @@ func TestHook(t *testing.T) {
 	require.NoError(t, err)
 
 	// Use the custom type as the key
-	ctx := context.WithValue(context.Background(), githubClientKey, gh)
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
 
 	// Create a mock store using the proper mocking pattern
 	mockStore := store_mocks.NewMockStore(t)
@@ -323,5 +323,59 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
+	})
+}
+
+func TestGetTagCommitSHA(t *testing.T) {
+	// Tags API paginates 30 per page; put the target tag on the second page
+	// to exercise pagination instead of a first-page match.
+	mockedHTTPClient := github_mock.NewMockedHTTPClient(
+		github_mock.WithRequestMatchPages(
+			github_mock.GetReposTagsByOwnerByRepo,
+			[]github.RepositoryTag{
+				{Name: new("v1.0.0")},
+				{Name: new("v1.0.1")},
+			},
+			[]github.RepositoryTag{
+				{Name: new("v1.0.2")},
+				{
+					Name:   new("v1.0.3"),
+					Commit: &github.Commit{SHA: new("deadbeefcafe")},
+				},
+			},
+		),
+	)
+
+	gh, err := github.NewClient(github.WithHTTPClient(mockedHTTPClient))
+	require.NoError(t, err)
+
+	ctx := context.WithValue(t.Context(), githubClientKey, gh)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{
+		ID:          1,
+		Login:       "6543",
+		AccessToken: "token",
+	}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "6543",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	t.Run("finds a tag beyond the first page", func(t *testing.T) {
+		sha, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		require.NoError(t, err)
+		assert.Equal(t, "deadbeefcafe", sha)
+	})
+
+	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
+		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		require.Error(t, err)
 	})
 }

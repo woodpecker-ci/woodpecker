@@ -45,7 +45,7 @@ func testHookRequest(payload []byte, event string) *http.Request {
 	return req
 }
 
-func Test_parseHook(t *testing.T) {
+func TestParseHook(t *testing.T) {
 	t.Run("ignore unsupported hook events", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
 		p, r, b, cc, pc, err := parseHook(req, false)
@@ -55,6 +55,19 @@ func Test_parseHook(t *testing.T) {
 		assert.Nil(t, b)
 		assert.Nil(t, p)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+	})
+
+	t.Run("reject null payload", func(t *testing.T) {
+		for _, event := range []string{hookDeploy, hookPush, hookPull, hookRelease} {
+			req := testHookRequest([]byte("null"), event)
+			p, r, b, cc, pc, err := parseHook(req, false)
+			assert.Empty(t, pc, event)
+			assert.Empty(t, cc, event)
+			assert.Nil(t, r, event)
+			assert.Nil(t, b, event)
+			assert.Nil(t, p, event)
+			assert.Error(t, err, event)
+		}
 	})
 
 	t.Run("skip skip push hook when action is deleted", func(t *testing.T) {
@@ -280,9 +293,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			assert.Nil(t, p.Milestone)
@@ -322,13 +335,13 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 2) {
-				assert.Equal(t, int64(9024465376), *p.Labels[0].ID)
-				assert.Equal(t, "documentation", *p.Labels[0].Name)
-				assert.Equal(t, "0075ca", *p.Labels[0].Color)
-				assert.Equal(t, "Improvements or additions to documentation", *p.Labels[0].Description)
-				assert.Equal(t, int64(9024465382), *p.Labels[1].ID)
-				assert.Equal(t, "enhancement", *p.Labels[1].Name)
-				assert.Equal(t, "a2eeef", *p.Labels[1].Color)
+				assert.Equal(t, int64(9024465376), p.Labels[0].ID)
+				assert.Equal(t, "documentation", p.Labels[0].Name)
+				assert.Equal(t, "0075ca", p.Labels[0].Color)
+				assert.Equal(t, "Improvements or additions to documentation", p.Labels[0].GetDescription())
+				assert.Equal(t, int64(9024465382), p.Labels[1].ID)
+				assert.Equal(t, "enhancement", p.Labels[1].Name)
+				assert.Equal(t, "a2eeef", p.Labels[1].Color)
 				assert.Equal(t, "New feature or request", *p.Labels[1].Description)
 			}
 			if assert.NotNil(t, p.Milestone) {
@@ -369,9 +382,9 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
-				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", p.Labels[0].Color)
 				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
 			}
 			if assert.NotNil(t, p.Head) {
@@ -435,17 +448,13 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			if assert.NotNil(t, p.Assignee) {
-				assert.Equal(t, "demoaccount2-commits", *p.Assignee.Login)
-				assert.Equal(t, int64(223550959), *p.Assignee.ID)
-			}
 			if assert.Len(t, p.Assignees, 1) {
 				assert.Equal(t, "demoaccount2-commits", *p.Assignees[0].Login)
 				assert.Equal(t, int64(223550959), *p.Assignees[0].ID)
 			}
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {
@@ -480,11 +489,10 @@ func Test_parseHook(t *testing.T) {
 				assert.Equal(t, "6543", *p.User.Login)
 				assert.Equal(t, int64(24977596), *p.User.ID)
 			}
-			assert.Nil(t, p.Assignee)
 			assert.Empty(t, p.Assignees)
 			if assert.Len(t, p.Labels, 1) {
-				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
-				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, int64(9024465370), p.Labels[0].ID)
+				assert.Equal(t, "bug", p.Labels[0].Name)
 			}
 			assert.Nil(t, p.Milestone)
 			if assert.NotNil(t, p.Head) {

@@ -65,6 +65,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 		}
 
 		base.GET("/metrics", metrics.PromHandler())
+		// TODO: remove in v4.0.0, use the ones in apiRoutes
 		base.GET("/version", api.Version)
 		base.GET("/healthz", api.Health)
 	}

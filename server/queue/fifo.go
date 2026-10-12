@@ -299,7 +299,6 @@ func (q *fifo) filterWaiting() {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if q.depsInQueue(task) {
-			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
 			filtered = append(filtered, element)
 		}
@@ -317,12 +316,10 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
-		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		// skip tasks that would exceed their workflow concurrency limit, they
 		// stay pending and are retried on the next process tick.
 		if !q.canRunConcurrent(task) {
-			log.Debug().Msgf("queue: task %v deferred due to concurrency group %q", task.ID, task.ConcurrencyGroup)
 			continue
 		}
 
@@ -334,7 +331,11 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 			}
 		}
 		if bestWorker != nil {
-			log.Debug().Msgf("queue: assigned task: %v with deps %v to worker with score %d", task.ID, task.Dependencies, bestScore)
+			log.Debug().
+				Str("task_id", task.ID).
+				Strs("dependencies", task.Dependencies).
+				Int("score", bestScore).
+				Msg("queue: assigned task to worker")
 			return element, bestWorker
 		}
 	}
@@ -421,7 +422,7 @@ func taskOrderLess(a, b *model.Task) bool {
 func (q *fifo) resubmitExpiredPipelines() {
 	for taskID, taskState := range q.running {
 		if time.Now().After(taskState.deadline) {
-			log.Info().Msgf("queue: resubmitting expired task %s", taskID)
+			log.Info().Str("task_id", taskID).Msg("queue: resubmitting expired task")
 			taskState.error = ErrTaskExpired
 			q.pending.PushFront(taskState.item)
 			delete(q.running, taskID)
@@ -433,7 +434,6 @@ func (q *fifo) resubmitExpiredPipelines() {
 func (q *fifo) depsInQueue(task *model.Task) bool {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		possibleDep, ok := element.Value.(*model.Task)
-		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
 				return true
@@ -441,7 +441,6 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 		}
 	}
 	for possibleDepID := range q.running {
-		log.Debug().Msgf("queue: running right now: %v", possibleDepID)
 		if slices.Contains(task.Dependencies, possibleDepID) {
 			return true
 		}
@@ -480,13 +479,11 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 
 // expects the q to be currently owned e.g. locked by caller!
 func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
-	log.Debug().Msgf("queue: trying to remove %s", taskID)
-
 	// we assume pending first
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
-			log.Debug().Msgf("queue: %s is removed from pending", taskID)
+			log.Debug().Str("task_id", taskID).Msg("queue: task removed from pending")
 			_ = q.pending.Remove(element)
 			return nil
 		}
@@ -496,7 +493,7 @@ func (q *fifo) removeFromPendingAndWaiting(taskID string) error {
 	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
-			log.Debug().Msgf("queue: %s is removed from waitingOnDeps", taskID)
+			log.Debug().Str("task_id", taskID).Msg("queue: task removed from waitingOnDeps")
 			_ = q.waitingOnDeps.Remove(element)
 			return nil
 		}

@@ -237,12 +237,12 @@ func TestUnmarshalContainers(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range testdata {
-		in := []byte(test.from)
+	for _, tt := range testdata {
+		in := []byte(tt.from)
 		got := ContainerList{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.ContainerList, "problem parsing containers %q", test.from)
+		assert.EqualValues(t, tt.want, got.ContainerList, "problem parsing containers %q", tt.from)
 	}
 }
 
@@ -253,11 +253,11 @@ func TestUnmarshalContainersErr(t *testing.T) {
 		"foo: { name: [ foo, bar] }",
 		"- foo",
 	}
-	for _, test := range testdata {
-		in := []byte(test)
+	for _, tt := range testdata {
+		in := []byte(tt)
 		containers := new(ContainerList)
 		err := yaml.Unmarshal(in, &containers)
-		assert.Error(t, err, "wanted error for containers %q", test)
+		assert.Error(t, err, "wanted error for containers %q", tt)
 	}
 }
 

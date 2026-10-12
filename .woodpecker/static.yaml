@@ -3,7 +3,7 @@ when:
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.3.3
+    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.3.4
     depends_on: []
     when:
       - event: pull_request
@@ -33,6 +33,15 @@ steps:
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "feature"'
+
+  - name: check-breaking-migrations
+    image: docker.io/alpine:3.24
+    depends_on: []
+    commands:
+      - apk add --no-cache -q jq && ./.woodpecker/check-breaking-migrations.sh
+    when:
+      - event: pull_request
+        evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "breaking"'
 
   - name: agentscan
     image: docker.io/woodpeckerci/plugin-agentscan:latest

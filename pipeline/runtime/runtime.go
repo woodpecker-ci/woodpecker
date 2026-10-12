@@ -68,6 +68,18 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	return r
 }
 
+// Err returns the error the workflow ended with, including step failures that
+// Run does not report as runtime errors. It is nil if the workflow succeeded.
+func (r *Runtime) Err() error {
+	return r.err.Get()
+}
+
+// canceled reports whether the workflow context is done, meaning the workflow
+// was canceled or timed out and everything still running is being torn down.
+func (r *Runtime) canceled() bool {
+	return r.ctx.Err() != nil
+}
+
 // makeLogger returns a logger enriched with all runtime description fields.
 func (r *Runtime) makeLogger() zerolog.Logger {
 	logCtx := log.With()

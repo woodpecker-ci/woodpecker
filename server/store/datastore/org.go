@@ -99,12 +99,12 @@ func (s storage) OrgLookup(name string) (*model.Org, error) {
 	return orgs[0], nil
 }
 
-func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
+func (s storage) OrgRepoList(org *model.Org, p *model.ListOptionsWithAll) ([]*model.Repo, error) {
 	var repos []*model.Repo
 	return repos, s.paginate(p).OrderBy("id").Where("org_id = ?", org.ID).Find(&repos)
 }
 
-func (s storage) OrgList(p *model.ListOptions) ([]*model.Org, error) {
+func (s storage) OrgList(p *model.ListOptionsWithAll) ([]*model.Org, error) {
 	var orgs []*model.Org
 	return orgs, s.paginate(p).Where("is_user = ?", false).OrderBy("id").Find(&orgs)
 }

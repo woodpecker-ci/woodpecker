@@ -333,9 +333,9 @@ func TestWorkflowBuildFailSkipsSubsequentStages(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err, "a failing step is not a runtime error")
 	var exitErr *pipeline_errors.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.True(t, errors.As(r.Err(), &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 
 	traces := getTracerStates(tracer)
@@ -372,7 +372,8 @@ func TestWorkflowOnFailureStepRuns(t *testing.T) {
 	err := r.Run(t.Context())
 	traces := getTracerStates(tracer)
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 	assert.NotNil(t, findStartedTrace(traces, "notify-failure"), "OnFailure step should have started")
 
 	last := findLastTraceByName(traces, "notify-failure")
@@ -509,8 +510,9 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 
 	err := r.Run(t.Context())
 
+	assert.NoError(t, err, "an OOM killed step is not a runtime error")
 	var oomErr *pipeline_errors.OomError
-	assert.True(t, errors.As(err, &oomErr))
+	assert.True(t, errors.As(r.Err(), &oomErr))
 
 	last := findLastTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, last)
@@ -561,7 +563,8 @@ func TestWorkflowParallelStepOneFailsOthersComplete(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	assert.Error(t, r.Run(t.Context()))
+	assert.NoError(t, r.Run(t.Context()))
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 
 	assert.Len(t, getTracerStates(tracer), 4, "both parallel steps should complete and be traced")
 
@@ -675,7 +678,8 @@ func TestWorkflowServiceWithParallelBuildAndOnFailure(t *testing.T) {
 		WithLogger(newTestLogger(t)),
 	)
 
-	assert.Error(t, r.Run(t.Context()))
+	assert.NoError(t, r.Run(t.Context()))
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 
 	traces := getTracerStates(tracer)
 
@@ -761,9 +765,9 @@ func TestPluginStepFailure(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err, "a failing step is not a runtime error")
 	var exitErr *pipeline_errors.ExitError
-	require.True(t, errors.As(err, &exitErr))
+	require.True(t, errors.As(r.Err(), &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 
 	last := findLastTraceByName(getTracerStates(tracer), "publish")
@@ -904,7 +908,8 @@ func TestPluginOnFailureStepRuns(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "notify"),
 		"plugin OnFailure step should have started")
 
@@ -955,7 +960,8 @@ func TestDetachedOnFailureStepRuns(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "cleanup"),
 		"detached OnFailure step should have started")
 }
@@ -1033,7 +1039,8 @@ func TestAlwaysRunStepRunsOnFailure(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
 		"always-run step should start even when pipeline is failing")
 
@@ -1060,7 +1067,8 @@ func TestAlwaysRunPluginRunsOnFailure(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	assert.NoError(t, err)
+	assert.True(t, pipeline_errors.IsStepFailure(r.Err()), "workflow should have failed")
 	assert.NotNil(t, findStartedTrace(getTracerStates(tracer), "report"),
 		"always-run plugin step should start even when pipeline is failing")
 }

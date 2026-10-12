@@ -108,7 +108,7 @@
               class="hover:bg-wp-control-neutral-200 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
               :class="{
                 'bg-wp-control-neutral-200': selectedStepId && selectedStepId === step.pid,
-                'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
+                'mt-1': !singleConfig || step.pid !== workflow.children?.[0]?.pid,
               }"
               @click="$emit('update:selectedStepId', step.pid)"
             >
@@ -157,7 +157,7 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
           ...collapsed,
           [workflow.id]:
             ['success', 'skipped', 'blocked'].includes(workflow.state) &&
-            !workflow.children.some((child) => child.pid === selectedStepId.value),
+            !(workflow.children ?? []).some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )

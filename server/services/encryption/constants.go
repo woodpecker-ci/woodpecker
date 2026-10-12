@@ -91,6 +91,8 @@ const (
 
 // AES.
 const (
+	keyIDDomainSeparation = "woodpecker-encryption-key-id/v1"
+
 	// Error wrapping templates.
 	errTemplateAesFailedLoadingCipher   = "failed loading encryption cipher: %w"
 	errTemplateAesFailedCalculatingHash = "failed calculating hash: %w"

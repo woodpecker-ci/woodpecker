@@ -1,28 +1,10 @@
 # Getting started
 
-You can develop on your local computer by following the [steps below](#preparation-for-local-development) or you can start with a fully prepared online setup using [Gitpod](https://github.com/gitpod-io/gitpod) and [Gitea](https://github.com/go-gitea/gitea).
-
-## Gitpod
-
-If you want to start development or updating docs as easy as possible, you can use our pre-configured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
-
-- An IDE in the browser or bridged to your local VS-Code or Jetbrains
-- A pre-configured [Gitea](https://github.com/go-gitea/gitea) instance as forge
-- A pre-configured Woodpecker server
-- A single pre-configured Woodpecker agent node
-- Our docs preview server
-
-Start Woodpecker in Gitpod by clicking on the following badge. You can log in with `woodpecker` and `password`.
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
-
-## Preparation for local development
-
-### Install Go
+## Install Go
 
 Install Golang as described by [this guide](https://go.dev/doc/install).
 
-### Install make
+## Install make
 
 > GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files (<https://www.gnu.org/software/make/>).
 
@@ -32,19 +14,19 @@ Install make on:
 - [Windows](https://stackoverflow.com/a/32127632/8461267)
 - Mac OS: `brew install make`
 
-### Install Node.js & `pnpm`
+## Install Node.js & `pnpm`
 
 Install [Node.js](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
 [This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
 
-### Install `pre-commit` (optional)
+## Install `pre-commit` (optional)
 
 Woodpecker uses [`pre-commit`](https://pre-commit.com/) to allow you to easily autofix your code.
 To apply it during local development, take a look at [`pre-commit`s documentation](https://pre-commit.com/#usage).
 
-### Create a `.env` file with your development configuration
+## Create a `.env` file with your development configuration
 
 Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` file in the root of the Woodpecker project and add any needed config to it.
 
@@ -79,7 +61,7 @@ WOODPECKER_HEALTHCHECK=false
 # WOODPECKER_LOG_LEVEL=trace
 ```
 
-### Setup OAuth
+## Setup OAuth
 
 Create an OAuth app for your forge as described in the [forges documentation](../30-administration/10-configuration/12-forges/11-overview.md).
 
@@ -102,26 +84,31 @@ The Woodpecker source code already includes launch configurations for the Woodpe
 
 To test or lint parts of Woodpecker, you can run one of the following commands:
 
-```bash
-# test server code
+```bash title="test server code"
 make test-server
+```
 
-# test agent code
+```bash title="test agent code"
 make test-agent
+```
 
-# test cli code
+```bash title="test cli code"
 make test-cli
+```
 
-# test datastore / database related code like migrations of the server
+```bash title="test datastore/database related code like migrations of the server"
 make test-server-datastore
+```
 
-# lint go code
+```bash title="lint go code"
 make lint
+```
 
-# lint UI code
+```bash title="lint UI code"
 make lint-frontend
+```
 
-# test UI code
+```bash title="test UI code"
 make test-frontend
 ```
 

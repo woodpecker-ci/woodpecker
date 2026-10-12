@@ -283,6 +283,10 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
+		if repo.Timeout < 1 {
+			c.String(http.StatusBadRequest, "Timeout must be at least 1 minute")
+			return
+		}
 	}
 	if in.Config != nil {
 		repo.Config = *in.Config
@@ -679,7 +683,7 @@ func GetAllRepos(c *gin.Context) {
 
 	active, _ := strconv.ParseBool(c.Query("active"))
 
-	repos, err := _store.RepoListAll(active, session.Pagination(c))
+	repos, err := _store.RepoListAll(active, session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return
@@ -700,7 +704,7 @@ func GetAllRepos(c *gin.Context) {
 func RepairAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	repos, err := _store.RepoListAll(true, &model.ListOptions{All: true})
+	repos, err := _store.RepoListAll(true, &model.ListOptionsWithAll{All: true})
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
 		return

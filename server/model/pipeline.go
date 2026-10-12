@@ -125,6 +125,7 @@ func (p Pipeline) IsPullRequest() bool {
 }
 
 type PipelineOptions struct {
+	Message   string            `json:"message"`
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name	PipelineOptions

@@ -137,9 +137,9 @@ func TestConstraintMap(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		c := parseConstraintMap(t, test.conf)
-		assert.Equal(t, test.want, c.Match(test.with), "config: '%s', with: '%s'", test.conf, test.with)
+	for _, tt := range testdata {
+		c := parseConstraintMap(t, tt.conf)
+		assert.Equal(t, tt.want, c.Match(tt.with), "config: '%s', with: '%s'", tt.conf, tt.with)
 	}
 }
 

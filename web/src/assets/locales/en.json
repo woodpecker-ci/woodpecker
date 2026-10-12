@@ -48,6 +48,10 @@
         "name": "Variable name",
         "value": "Variable value"
       },
+      "message": {
+        "title": "Message",
+        "desc": "This message is added to the pipeline's message as additional information."
+      },
       "show_pipelines": "Show pipelines",
       "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
@@ -227,7 +231,6 @@
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
-      "log_download_error": "An error occurred while downloading the log file",
       "log_delete_confirm": "Do you really want to delete the step logs?",
       "log_delete_error": "An error occurred when deleting the step logs",
       "actions": {
@@ -282,6 +285,8 @@
       "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, an error occurred!",
+      "parse_errors": "Parse errors",
+      "runtime_errors": "Runtime errors",
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
       "version": "The Woodpecker version this pipeline was executed on.",
@@ -377,7 +382,14 @@
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",
-        "delete_agent": "Delete agent"
+        "delete_agent": "Delete agent",
+        "filters": {
+          "name": "Filters",
+          "desc": "Server side enforced labels of agents to filter workflows",
+          "key": "Label name",
+          "value": "Filter value",
+          "delete": "Delete filter"
+        }
       },
       "queue": {
         "queue": "Queue",
@@ -610,6 +622,10 @@
   "executable_desc": "Path to the addon executable.",
   "save": "Save",
   "add": "Add",
+  "delete": "Delete",
+  "allowed_orgs": "Allowed organizations",
+  "allowed_orgs_desc": "Organizations whose members may log in using this forge, in addition to the global WOODPECKER_ORGS setting.",
+  "allowed_orgs_placeholder": "Organization name",
   "skip_verify": "Skip SSL verification",
   "skip_verify_desc": "Skip SSL verification for the API connection. This is not recommended for production use.",
   "url": "URL",

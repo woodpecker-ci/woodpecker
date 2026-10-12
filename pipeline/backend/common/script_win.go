@@ -46,6 +46,7 @@ func generateScriptWindows(commands []string, workDir string) string {
 }
 
 const setupScriptWinProto = `
+$LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
 if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
@@ -66,6 +67,6 @@ var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('+ %s');
+Write-Output ('` + CommandMarker + `%s');
 & %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `

@@ -36,13 +36,13 @@ func TestDeduplicateStrings(t *testing.T) {
 		out: nil,
 	}}
 
-	for _, tc := range tests {
-		result := DeduplicateStrings(tc.in)
+	for _, tt := range tests {
+		result := DeduplicateStrings(tt.in)
 		sort.Strings(result)
-		if len(tc.out) == 0 {
+		if len(tt.out) == 0 {
 			assert.Len(t, result, 0)
 		} else {
-			assert.EqualValues(t, tc.out, result, "could not correctly process input '%#v'", tc.in)
+			assert.EqualValues(t, tt.out, result, "could not correctly process input '%#v'", tt.in)
 		}
 	}
 }

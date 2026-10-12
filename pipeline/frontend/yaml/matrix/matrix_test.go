@@ -37,6 +37,14 @@ func TestMatrixEmpty(t *testing.T) {
 	assert.Empty(t, axis)
 }
 
+func TestMatrixEmptyAxis(t *testing.T) {
+	axis, err := ParseString("matrix:\n  A: [a1, a2]\n  EMPTY:")
+	assert.NoError(t, err)
+	assert.Len(t, axis, 2)
+	assert.Equal(t, "a1", axis[0]["A"])
+	assert.Equal(t, "a2", axis[1]["A"])
+}
+
 func TestMatrixIncluded(t *testing.T) {
 	axis, err := ParseString(fakeMatrixInclude)
 	assert.NoError(t, err)
@@ -80,7 +88,7 @@ func TestMatrixDeterministicOrder(t *testing.T) {
 	first, err := ParseString(fakeMatrix)
 	assert.NoError(t, err)
 
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		again, err := ParseString(fakeMatrix)
 		assert.NoError(t, err)
 		assert.EqualValues(t, first, again)

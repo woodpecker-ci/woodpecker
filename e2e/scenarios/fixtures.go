@@ -82,6 +82,9 @@ type ExpectedStep struct {
 type ExpectedWorkflow struct {
 	Name   string            `json:"name"`
 	Status model.StatusValue `json:"status"`
+	// Error is the runtime error reported by the agent. A failing step must not
+	// produce one, so it is empty for everything but real runtime failures.
+	Error string `json:"error"`
 }
 
 // LoadScenarios reads all fixture pairs and subdirectories from the embedded

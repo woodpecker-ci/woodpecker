@@ -213,7 +213,11 @@
             "enabled": "Déjà activé",
             "list_reloaded": "Liste des dépôts actualisée",
             "reload": "Actualiser les dépôts",
-            "success": "Dépôt activé"
+            "success": "Dépôt activé",
+            "new_forge_repo": "nouveau dépôt sur la forge",
+            "stale_wp_repo": "dépôt Woodpecker obsolète",
+            "conflict": "Conflit",
+            "forge_repo_missing": "Le dépôt de la forge est manquant !"
         },
         "manual_pipeline": {
             "select_branch": "Sélectionner une branche",
@@ -227,7 +231,11 @@
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
             },
-            "show_pipelines": "Afficher les pipelines"
+            "show_pipelines": "Afficher les pipelines",
+            "message": {
+                "title": "Message",
+                "desc": "Ce message est ajouté aux messages du pipeline comme information supplémentaire."
+            }
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
@@ -375,13 +383,15 @@
                 "general": "Général",
                 "netrc_only_trusted": {
                     "desc": "Les plugins listés ici auront accès aux identifiants netrc qui peuvent être utiliser pour cloner des dépôts depuis la forge, ou pour pousser vers celle-ci.",
-                    "netrc_only_trusted": "Plugins de clonage personnalisés de confiance"
+                    "netrc_only_trusted": "Plugins de clonage personnalisés de confiance",
+                    "placeholder": "Image du plugin"
                 },
                 "pipeline_path": {
                     "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
                     "desc_path_example": "mon/chemin/",
-                    "path": "Chemin vers le pipeline"
+                    "path": "Chemin vers le pipeline",
+                    "by_default": "Par défaut : {paths}"
                 },
                 "project": "Paramètres du projet",
                 "protected": {

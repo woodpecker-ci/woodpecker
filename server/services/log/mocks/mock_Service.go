@@ -15,10 +15,19 @@ func NewMockService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -61,7 +70,7 @@ type MockService_LogAppend_Call struct {
 // LogAppend is a helper method to define mock.On call
 //   - step *model.Step
 //   - logEntries []*model.LogEntry
-func (_e *MockService_Expecter) LogAppend(step interface{}, logEntries interface{}) *MockService_LogAppend_Call {
+func (_e *MockService_Expecter) LogAppend(step any, logEntries any) *MockService_LogAppend_Call {
 	return &MockService_LogAppend_Call{Call: _e.mock.On("LogAppend", step, logEntries)}
 }
 
@@ -117,7 +126,7 @@ type MockService_LogDelete_Call struct {
 
 // LogDelete is a helper method to define mock.On call
 //   - step *model.Step
-func (_e *MockService_Expecter) LogDelete(step interface{}) *MockService_LogDelete_Call {
+func (_e *MockService_Expecter) LogDelete(step any) *MockService_LogDelete_Call {
 	return &MockService_LogDelete_Call{Call: _e.mock.On("LogDelete", step)}
 }
 
@@ -179,7 +188,7 @@ type MockService_LogFind_Call struct {
 
 // LogFind is a helper method to define mock.On call
 //   - step *model.Step
-func (_e *MockService_Expecter) LogFind(step interface{}) *MockService_LogFind_Call {
+func (_e *MockService_Expecter) LogFind(step any) *MockService_LogFind_Call {
 	return &MockService_LogFind_Call{Call: _e.mock.On("LogFind", step)}
 }
 
@@ -219,7 +228,7 @@ type MockService_StepFinished_Call struct {
 
 // StepFinished is a helper method to define mock.On call
 //   - step *model.Step
-func (_e *MockService_Expecter) StepFinished(step interface{}) *MockService_StepFinished_Call {
+func (_e *MockService_Expecter) StepFinished(step any) *MockService_StepFinished_Call {
 	return &MockService_StepFinished_Call{Call: _e.mock.On("StepFinished", step)}
 }
 

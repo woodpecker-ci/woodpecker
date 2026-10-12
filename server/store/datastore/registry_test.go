@@ -61,7 +61,7 @@ func TestRegistryList(t *testing.T) {
 		Password: "bar",
 	}))
 
-	list, err := store.RegistryList(&model.Repo{ID: 1}, false, &model.ListOptions{Page: 1, PerPage: 50})
+	list, err := store.RegistryList(&model.Repo{ID: 1}, false, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
 }
@@ -164,7 +164,7 @@ func TestOrgRegistryList(t *testing.T) {
 
 	createTestRegistries(t, store)
 
-	list, err := store.OrgRegistryList(12, &model.ListOptions{All: true})
+	list, err := store.OrgRegistryList(12, &model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	require.Len(t, list, 1)
 
@@ -195,7 +195,7 @@ func TestGlobalRegistryList(t *testing.T) {
 
 	createTestRegistries(t, store)
 
-	list, err := store.GlobalRegistryList(&model.ListOptions{All: true})
+	list, err := store.GlobalRegistryList(&model.ListOptionsWithAll{All: true})
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 

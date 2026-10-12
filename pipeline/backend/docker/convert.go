@@ -33,7 +33,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) (*container.Config, error) {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -52,7 +52,10 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		env, entry, err := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
+		if err != nil {
+			return config, err
+		}
 		maps.Copy(configEnv, env)
 		config.Entrypoint = entry
 
@@ -66,7 +69,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	if len(configEnv) != 0 {
 		config.Env = toEnv(configEnv)
 	}
-	return config
+	return config, nil
 }
 
 func toContainerName(step *types.Step) string {
@@ -76,20 +79,21 @@ func toContainerName(step *types.Step) string {
 // returns a container host configuration.
 func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
 	config := &container.HostConfig{
-		Resources: container.Resources{
-			CPUQuota:   conf.resourceLimit.CPUQuota,
-			CPUShares:  conf.resourceLimit.CPUShares,
-			CpusetCpus: conf.resourceLimit.CPUSet,
-			Memory:     conf.resourceLimit.MemLimit,
-			MemorySwap: conf.resourceLimit.MemSwapLimit,
-		},
-		ShmSize: conf.resourceLimit.ShmSize,
+		CPUQuota:   conf.resourceLimit.CPUQuota,
+		CPUShares:  conf.resourceLimit.CPUShares,
+		CpusetCpus: conf.resourceLimit.CPUSet,
+		Memory:     conf.resourceLimit.MemLimit,
+		MemorySwap: conf.resourceLimit.MemSwapLimit,
+		ShmSize:    conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
 		Privileged: step.Privileged,
 	}
 
+	if conf.apparmor != "" {
+		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
+	}
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
 	}
@@ -231,8 +235,4 @@ func splitVolumeParts(volumeParts string) ([]string, error) {
 		return cleanResults, nil
 	}
 	return strings.Split(volumeParts, ":"), nil
-}
-
-func toRef[T any](v T) *T {
-	return &v
 }

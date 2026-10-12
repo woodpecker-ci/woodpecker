@@ -15,10 +15,21 @@
         devShells.default =
           with pkgs;
           let
-            go = go_1_26;
+            go = go_1_27;
+
+            # rebuild Go based tools with the go version above
+            buildGoModule = pkgs.buildGoModule.override { inherit go; };
+            withGo =
+              pkg:
+              let
+                builderArgs = lib.filterAttrs (name: _: lib.hasPrefix "buildGo" name) (
+                  if pkg ? override then lib.functionArgs pkg.override else { }
+                );
+              in
+              if builderArgs == { } then pkg else pkg.override (lib.mapAttrs (_: _: buildGoModule) builderArgs);
           in
           pkgs.mkShell {
-            buildInputs = [
+            buildInputs = map withGo [
               # generic
               gnumake
               gnutar
@@ -34,7 +45,6 @@
 
               # backend
               go
-              glibc.static
               gofumpt
               golangci-lint
               go-mockery
@@ -53,6 +63,8 @@
             LDFLAGS = "-L${pkgs.glibc}/lib";
             GO = "${go}/bin/go";
             GOROOT = "${go}/share/go";
+            STATIC_BUILD = "false";
+            pnpm_config_pm_on_fail = "ignore";
           };
       }
     );

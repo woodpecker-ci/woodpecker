@@ -18,9 +18,8 @@ import (
 	"sort"
 	"strings"
 
-	"codeberg.org/6543/xyaml/v2"
-
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
 
 const (
@@ -74,6 +73,11 @@ func calc(matrix Matrix) []Axis {
 	var perm int
 	var tags []string
 	for k, v := range matrix {
+		// an axis without values contributes no permutations and would
+		// cause a division by zero below
+		if len(v) == 0 {
+			continue
+		}
 		perm *= len(v)
 		if perm == 0 {
 			perm = len(v)
@@ -120,7 +124,7 @@ func parse(raw []byte) (Matrix, error) {
 	data := struct {
 		Matrix map[string][]string
 	}{}
-	if err := xyaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix, nil
@@ -133,7 +137,7 @@ func parseList(raw []byte) ([]Axis, error) {
 		}
 	}{}
 
-	if err := xyaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(raw, &data); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix.Include, nil

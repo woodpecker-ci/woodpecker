@@ -100,6 +100,16 @@
         </InputField>
       </template>
 
+      <InputField v-slot="{ id }" :label="$t('allowed_orgs')">
+        <p>{{ $t('allowed_orgs_desc') }}</p>
+        <ListEditor
+          :id="id"
+          ref="allowedOrgsEditor"
+          v-model="allowedOrgs"
+          :placeholder="$t('allowed_orgs_placeholder')"
+        />
+      </InputField>
+
       <InputField :label="$t('skip_verify')">
         <Checkbox
           :label="$t('skip_verify_desc')"
@@ -118,13 +128,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import ListEditor from '~/components/form/ListEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
@@ -250,6 +261,15 @@ function setAdditionalOptions<T extends keyof Record<string, unknown>>(
   };
 }
 
+const allowedOrgsEditor = useTemplateRef<InstanceType<typeof ListEditor>>('allowedOrgsEditor');
+
+const allowedOrgs = computed({
+  get: () => forge.value?.orgs ?? [],
+  set: (value) => {
+    forge.value = { ...forge.value, orgs: value };
+  },
+});
+
 const replaceRegex = /\/$/;
 
 const oauthAppForgeUrl = computed(() => {
@@ -292,6 +312,9 @@ const forgeType = computed({
 const redirectUri = computed(() => [window.location.origin, config.rootPath, 'authorize'].filter((a) => !!a).join('/'));
 
 async function submit() {
+  // an org the user typed without confirming it should still be saved
+  allowedOrgsEditor.value?.commitPendingItem();
+
   if (!forge.value.url?.startsWith('http')) {
     forge.value.url = `https://${forge.value.url}`;
   }

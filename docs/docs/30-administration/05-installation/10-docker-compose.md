@@ -74,7 +74,7 @@ If the agents establish a connection via the Internet, TLS encryption should be 
      environment:
        - [...]
 +      - WOODPECKER_GRPC_SECURE=true # defaults to false
-+      - WOODPECKER_GRPC_VERIFY=true # default
++      - WOODPECKER_GRPC_SKIP_VERIFY=false # default
 ```
 
 As agents execute pipeline steps as Docker containers, they require access to the Docker daemon of the host machine:
