@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Sawarz, @YouCD, @aniketatgithub
+@6543, @Sawarz, @YouCD, @aniketatgithub, @arcaartem
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- Force oauth2 token exchange in forge Refresh for Gitea, GitLab, Forgejo and GitHub [[#7167](https://github.com/woodpecker-ci/woodpecker/pull/7167)]
 - Fix 'Repair Repository' failing for Bitbucket Datacenter repos with spaces in their name [[#7261](https://github.com/woodpecker-ci/woodpecker/pull/7261)]
 - 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
 
