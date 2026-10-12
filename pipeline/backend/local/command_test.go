@@ -91,6 +91,27 @@ echo test`, args[3])
 			assert.Len(t, args, 4)
 			assert.Equal(t, "-noprofile", args[0])
 		})
+
+		t.Run("csharp scripts", func(t *testing.T) {
+			for _, shell := range []string{"csi", "dotnet-script", "csharp"} {
+				t.Run(shell, func(t *testing.T) {
+					args, err := e.genCmdByShell(shell, shell, []string{
+						`#r "System.Xml"`,
+						"using System;",
+						`Console.WriteLine("hello");`,
+					}, t.TempDir())
+					require.NoError(t, err)
+					require.Len(t, args, 1)
+					assert.True(t, strings.HasSuffix(args[0], ".csx"))
+
+					content, err := os.ReadFile(args[0])
+					require.NoError(t, err)
+					assert.Equal(t, `#r "System.Xml"
+using System;
+Console.WriteLine("hello");`, string(content))
+				})
+			}
+		})
 	})
 
 	t.Run("unix shells", func(t *testing.T) {

@@ -53,6 +53,25 @@ For example, to use Bash from a custom location:
 WOODPECKER_SHELL_PATH_bash=/custom/path/bash
 ```
 
+C# scripts can be executed using `csi`, `dotnet-script`, or `csharp`:
+
+```yaml title=".woodpecker.yaml"
+steps:
+  - name: build
+    image: csi
+    commands:
+      - |
+        using System;
+        Console.WriteLine("Hello from C#");
+```
+
+The commands are combined into a temporary `.csx` file which is passed to the
+script runner. `csi` is provided by Visual Studio, `dotnet-script` is
+cross-platform, and `csharp` is provided by Mono.
+
+As with other shells, a custom executable location can be configured using
+`WOODPECKER_SHELL_PATH_<shell>`.
+
 ### Plugins
 
 ```yaml
