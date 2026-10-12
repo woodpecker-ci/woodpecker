@@ -115,7 +115,7 @@ func SetPerm() gin.HandlerFunc {
 
 		perm := new(model.Perm)
 
-		if user != nil {
+		if user != nil && !user.Admin {
 			var err error
 			perm, err = _store.PermFind(user, repo)
 			if err != nil {
