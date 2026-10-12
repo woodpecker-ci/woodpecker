@@ -38,6 +38,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -116,7 +117,7 @@ func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 		return nil, backend_types.ErrNoCliContextFound
 	}
 
-	var dockerClientOpts []client.Opt
+	dockerClientOpts := []client.Opt{client.WithUserAgent(httputil.UserAgent("backend-docker"))}
 	if httpClient := httpClientOfOpts(c.String("backend-docker-cert"), c.Bool("backend-docker-tls-verify")); httpClient != nil {
 		dockerClientOpts = append(dockerClientOpts, client.WithHTTPClient(httpClient))
 	}
