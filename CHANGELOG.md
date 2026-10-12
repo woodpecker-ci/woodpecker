@@ -6,6 +6,10 @@
 
 @6543, @Sawarz, @YouCD, @aniketatgithub
 
+### 🔒 Security
+
+- Quote all YAML line breaks in environment substitution [[#7283](https://github.com/woodpecker-ci/woodpecker/pull/7283)]
+
 ### 📈 Enhancement
 
 - Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
