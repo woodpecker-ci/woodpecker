@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Sawarz, @YouCD, @aniketatgithub, @arcaartem
+@6543, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @fredrikblau
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix Docker backend with TLS and a custom host [[#7269](https://github.com/woodpecker-ci/woodpecker/pull/7269)]
 - Force oauth2 token exchange in forge Refresh for Gitea, GitLab, Forgejo and GitHub [[#7167](https://github.com/woodpecker-ci/woodpecker/pull/7167)]
 - Fix 'Repair Repository' failing for Bitbucket Datacenter repos with spaces in their name [[#7261](https://github.com/woodpecker-ci/woodpecker/pull/7261)]
 - 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
