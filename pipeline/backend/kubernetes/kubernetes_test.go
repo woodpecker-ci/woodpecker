@@ -27,7 +27,9 @@ import (
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube_runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
+	kube_testing "k8s.io/client-go/testing"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
@@ -128,13 +130,13 @@ func TestSetupWorkflow(t *testing.T) {
 		},
 	}
 
-	err := engine.SetupWorkflow(context.Background(), conf, taskUUID)
+	err := engine.SetupWorkflow(t.Context(), conf, taskUUID)
 	assert.NoError(t, err, "SetupWorkflow should not error with minimal config and fake client")
 
-	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(t.Context(), "volume-name", kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "persistent volume should be created during workflow setup")
 
-	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().Services(namespace).Get(t.Context(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
 }
 
@@ -177,7 +179,7 @@ func TestAffinityFromCliContext(t *testing.T) {
 			return nil
 		},
 	}
-	err := cmd.Run(context.Background(), []string{"test"})
+	err := cmd.Run(t.Context(), []string{"test"})
 	require.NoError(t, err)
 }
 
@@ -215,9 +217,7 @@ func createPod(
 			Phase: kube_core_v1.PodPending,
 		},
 	}
-	_, err = client.CoreV1().Pods(namespace).Create(
-		context.Background(), pod, kube_meta_v1.CreateOptions{},
-	)
+	_, err = client.CoreV1().Pods(namespace).Create(t.Context(), pod, kube_meta_v1.CreateOptions{})
 	require.NoError(t, err)
 	return podName
 }
@@ -230,7 +230,7 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 
 	createPod(t, client, step, namespace)
 
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 
 	type result struct {
 		state *types.State
@@ -266,7 +266,7 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	podName := createPod(t, client, step, namespace)
 
 	// Delete before WaitStep starts
-	err := client.CoreV1().Pods(namespace).Delete(context.Background(), podName, kube_meta_v1.DeleteOptions{})
+	err := client.CoreV1().Pods(namespace).Delete(t.Context(), podName, kube_meta_v1.DeleteOptions{})
 	require.NoError(t, err)
 
 	type result struct {
@@ -275,7 +275,7 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	}
 	ch := make(chan result, 1)
 	go func() {
-		s, err := engine.WaitStep(context.Background(), step, "task-1")
+		s, err := engine.WaitStep(t.Context(), step, "task-1")
 		ch <- result{s, err}
 	}()
 
@@ -288,6 +288,72 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	case <-time.After(3 * time.Second):
 		t.Fatal("WaitStep did not return for already-deleted pod")
 	}
+}
+
+func TestWaitStepReturnsOnPodDeletedBeforeInformerSync(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-delete-03")
+	namespace := "test-ns"
+
+	podName := createPod(t, client, step, namespace)
+
+	// Delete the pod inside the informer's initial List, so it never enters the
+	// cache and no delete event can arrive; only the guard Get can end the wait.
+	deleted := false
+	client.PrependReactor("list", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+		if deleted {
+			return false, nil, nil
+		}
+		deleted = true
+		if err := client.Tracker().Delete(action.GetResource(), namespace, podName); err != nil {
+			return true, nil, err
+		}
+		return false, nil, nil
+	})
+
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	require.True(t, deleted, "the informer's List should have removed the pod")
+	require.NotNil(t, state)
+	assert.True(t, state.Exited)
+	assert.Equal(t, 0, state.ExitCode)
+}
+
+func TestWaitStepReturnsOnAlreadyTerminatedPod(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-done-01")
+	namespace := "test-ns"
+
+	podName, err := stepToPodName(step)
+	require.NoError(t, err)
+	_, err = client.CoreV1().Pods(namespace).Create(t.Context(), &kube_core_v1.Pod{
+		Name:      podName,
+		Namespace: namespace,
+		Status: kube_core_v1.PodStatus{
+			Phase: kube_core_v1.PodFailed,
+			ContainerStatuses: []kube_core_v1.ContainerStatus{{
+				State: kube_core_v1.ContainerState{
+					Terminated: &kube_core_v1.ContainerStateTerminated{ExitCode: 1},
+				},
+			}},
+		},
+	}, kube_meta_v1.CreateOptions{})
+	require.NoError(t, err)
+
+	// Below defaultResyncDuration, so a resync Update cannot end the wait instead.
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	assert.True(t, state.Exited)
+	assert.Equal(t, 1, state.ExitCode)
 }
 
 func TestWaitStepNoGoroutineLeak(t *testing.T) {
@@ -309,7 +375,7 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := range numSteps {
 		wg.Go(func() {
-			ctx, cancel := context.WithCancelCause(context.Background())
+			ctx, cancel := context.WithCancelCause(t.Context())
 
 			go func() {
 				_, _ = engine.WaitStep(ctx, steps[i], fmt.Sprintf("task-%d", i))

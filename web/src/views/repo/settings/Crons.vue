@@ -102,19 +102,19 @@
         >
           <TextField
             :id="id"
-            v-model="selectedCron.schedule"
+            v-model="selectedCron!.schedule"
             :placeholder="$t('repo.settings.crons.schedule.placeholder')"
             required
           />
         </InputField>
 
         <div v-if="isEditingCron && selectedCronEnabled" class="mb-4 ml-auto">
-          <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
+          <span v-if="selectedCron!.next_exec && selectedCron!.next_exec > 0" class="text-wp-text-100">
             {{
               $t('repo.settings.crons.next_exec_both', {
-                local: date.toLocaleString(new Date(selectedCron.next_exec * 1000)),
-                zoned: date.toLocaleString(new Date(selectedCron.next_exec * 1000), selectedCron.timezone),
-                timezone: selectedCron.timezone,
+                local: date.toLocaleString(new Date(selectedCron!.next_exec * 1000)),
+                zoned: date.toLocaleString(new Date(selectedCron!.next_exec * 1000), selectedCron!.timezone),
+                timezone: selectedCron!.timezone,
               })
             }}
           </span>

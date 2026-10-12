@@ -50,7 +50,7 @@ func load(config string) *GitLab {
 	return &gitlab
 }
 
-func Test_GitLab(t *testing.T) {
+func TestGitLab(t *testing.T) {
 	// setup a dummy gitlab server
 	server := fixtures.NewServer(t)
 	defer server.Close()
@@ -627,21 +627,21 @@ func TestExtractFromPath(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			owner, name, err := extractFromPath(tc.input)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			owner, name, err := extractFromPath(tt.input)
 
 			// Check error expectations
-			if tc.errContains != "" {
+			if tt.errContains != "" {
 				if assert.Error(t, err) {
-					assert.Contains(t, err.Error(), tc.errContains)
+					assert.Contains(t, err.Error(), tt.errContains)
 				}
 				return
 			}
 
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.wantOwner, owner)
-			assert.EqualValues(t, tc.wantName, name)
+			assert.EqualValues(t, tt.wantOwner, owner)
+			assert.EqualValues(t, tt.wantName, name)
 		})
 	}
 }
@@ -693,7 +693,7 @@ func TestGitLabReposUsesEmbeddedPermissions(t *testing.T) {
 	assert.False(t, repos[1].Perm.Admin)
 }
 
-func TestGitLabReposSkipsProjectOnMembershipLookupNotFound(t *testing.T) {
+func TestGitLabReposResolvesGroupInheritedProjectOnMembershipLookupNotFound(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`[` +
@@ -705,6 +705,12 @@ func TestGitLabReposSkipsProjectOnMembershipLookupNotFound(t *testing.T) {
 	mux.HandleFunc("/api/v4/projects/7/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 	})
+	// project 7 has no direct membership, but the full-project endpoint
+	// reports the access inherited from a parent group (Developer).
+	mux.HandleFunc("/api/v4/projects/7", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":7,"path_with_namespace":"other/personal-project","visibility":"private","permissions":` +
+			`{"project_access":null,"group_access":{"access_level":30}}}`))
+	})
 
 	server := httptest.NewServer(mux)
 	defer server.Close()
@@ -714,7 +720,97 @@ func TestGitLabReposSkipsProjectOnMembershipLookupNotFound(t *testing.T) {
 
 	repos, err := client.Repos(t.Context(), &user, &model.ListOptions{Page: 1, PerPage: 10})
 	require.NoError(t, err)
-	require.Len(t, repos, 1)
+	require.Len(t, repos, 2)
 
 	assert.Equal(t, "diaspora/diaspora-client", repos[0].FullName)
+	assert.Equal(t, "other/personal-project", repos[1].FullName)
+	// project 7: group-inherited Developer -> read and write, no admin
+	assert.True(t, repos[1].Perm.Pull)
+	assert.True(t, repos[1].Perm.Push)
+	assert.False(t, repos[1].Perm.Admin)
+}
+
+func TestGitLabReposKeepsProjectWhenFullProjectLookupFails(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v4/projects", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`[` +
+			`{"id":4,"path_with_namespace":"diaspora/diaspora-client","visibility":"private","permissions":` +
+			`{"project_access":{"access_level":40},"group_access":null}},` +
+			`{"id":7,"path_with_namespace":"other/personal-project","visibility":"private","permissions":null}` +
+			`]`))
+	})
+	mux.HandleFunc("/api/v4/projects/7/members/all/3", func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "404 Not Found", http.StatusNotFound)
+	})
+	// no handler for /api/v4/projects/7 -> GetProject 404s; the project must
+	// still be returned (with zero access) instead of failing the whole page.
+
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := model.User{Login: "test_user", AccessToken: "token", ForgeRemoteID: "3"}
+
+	repos, err := client.Repos(t.Context(), &user, &model.ListOptions{Page: 1, PerPage: 10})
+	require.NoError(t, err)
+	require.Len(t, repos, 2)
+
+	assert.Equal(t, "other/personal-project", repos[1].FullName)
+	assert.False(t, repos[1].Perm.Push)
+}
+
+func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
+	tests := []struct {
+		name    string
+		code    int
+		body    string
+		wantErr bool
+	}{
+		{
+			name: "transition from running",
+			code: http.StatusBadRequest,
+			body: `{"message":"Cannot transition status via :enqueue from :running (Reason(s): Status cannot transition via \"enqueue\")"}`,
+		},
+		{
+			name: "transition from pending",
+			code: http.StatusBadRequest,
+			body: `{"message":"Cannot transition status via :enqueue from :pending (Reason(s): Status cannot transition via \"enqueue\")"}`,
+		},
+		{
+			name:    "other bad request",
+			code:    http.StatusBadRequest,
+			body:    `{"message":"state is missing"}`,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mux := http.NewServeMux()
+			mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
+				_, _ = w.Write([]byte(`{"id":4,"path_with_namespace":"diaspora/diaspora-client"}`))
+			})
+			mux.HandleFunc("/api/v4/projects/4/statuses/abc123", func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(tt.code)
+				_, _ = w.Write([]byte(tt.body))
+			})
+
+			server := httptest.NewServer(mux)
+			defer server.Close()
+
+			client := load(server.URL + "?client_id=test&client_secret=test")
+			user := &model.User{Login: "test_user", AccessToken: "token"}
+			repo := &model.Repo{ForgeRemoteID: "4", Owner: "diaspora", Name: "diaspora-client", FullName: "diaspora/diaspora-client"}
+			pipeline := &model.Pipeline{Number: 1, Commit: "abc123", Event: model.EventPush}
+			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
+
+			err := client.Status(t.Context(), user, repo, pipeline, workflow)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
 }

@@ -83,6 +83,7 @@ type config struct {
 	PriorityClassName               string
 	StopTimeout                     int64
 	PermissionInitImage             string
+	EnableUserNamespaces            bool
 }
 
 func (c *config) GetNamespace(orgID int64) string {
@@ -93,8 +94,9 @@ func (c *config) GetNamespace(orgID int64) string {
 }
 
 type SecurityContextConfig struct {
-	RunAsNonRoot bool
-	FSGroup      *int64
+	RunAsNonRoot                    bool
+	FSGroup                         *int64
+	OverrideNonRootInUserNamespaces bool
 }
 
 func (c *config) newDefaultDeleteOptions() kube_meta_v1.DeleteOptions {
@@ -128,9 +130,11 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				RuntimeClassAllowFromStep:    c.Bool("backend-k8s-runtime-class-allow-from-step"),
 				ImagePullSecretNames:         c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
-					FSGroup:      newInt64(defaultFSGroup),
+					RunAsNonRoot:                    c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:                         newInt64(defaultFSGroup),
+					OverrideNonRootInUserNamespaces: c.Bool("backend-k8s-user-namespaces-override-secctx-nonroot"), // cspell:words secctx nonroot
 				},
+				EnableUserNamespaces:            c.Bool("backend-k8s-user-namespaces"),
 				NativeSecretsAllowFromStep:      c.Bool("backend-k8s-allow-native-secrets"),
 				ServiceAccountNameAllowFromStep: c.Bool("backend-k8s-service-account-name-allow-from-step"),
 				StopTimeout:                     c.Int64("backend-k8s-stop-timeout"),
@@ -304,10 +308,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	finished := make(chan struct{})
 	var finishedOnce sync.Once
 
-	podUpdated := func(_, newPod any) {
-		pod, ok := newPod.(*kube_core_v1.Pod)
+	podChanged := func(obj any) {
+		pod, ok := obj.(*kube_core_v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", newPod)
+			log.Error().Msgf("could not parse pod: %v", obj)
 			return
 		}
 
@@ -341,9 +345,12 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
-	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
+	podInformer := si.Core().V1().Pods().Informer()
+	if _, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
-			UpdateFunc: podUpdated,
+			// A pod already terminal at the initial List only produces an Add event.
+			AddFunc:    podChanged,
+			UpdateFunc: func(_, newPod any) { podChanged(newPod) },
 			DeleteFunc: podDeleted,
 		},
 	); err != nil {
@@ -354,7 +361,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// If the pod was deleted before the informer started, no events will
+	// Wait for the informer's initial list before the check below. A pod deleted
+	// before that list never enters the cache, so its deletion is never delivered.
+	if !cache.WaitForCacheSync(ctx.Done(), podInformer.HasSynced) {
+		return nil, ctx.Err()
+	}
+
+	// If the pod was deleted before the informer synced, no events will
 	// ever arrive. Check explicitly so we don't hang forever.
 	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
 		return &types.State{ExitCode: 0, Exited: true}, nil

@@ -320,7 +320,7 @@ func TestWithOptions(t *testing.T) {
 	t.Parallel()
 	engine := dummy.New()
 	tracer := newTestTracer(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	desc := map[string]string{"repo": "test"}
 
 	r := New(
@@ -377,7 +377,7 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 		}).Return(nil)
 
 	// Pass a pre-canceled runnerCtx so ctx.Err() != nil in the defer.
-	runnerCtx, cancel := context.WithCancelCause(context.Background())
+	runnerCtx, cancel := context.WithCancelCause(t.Context())
 	cancel(nil)
 
 	r := New(

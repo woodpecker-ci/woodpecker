@@ -122,6 +122,8 @@ steps:
           runAsUser: 0
 ```
 
+You can use [WOODPECKER_BACKEND_K8S_USER_NAMESPACES](#backend_k8s_user_namespaces) to run all pods in a dedicated user namespace by default.
+
 :::note
 User namespaces require Kubernetes v1.25+ with the `UserNamespacesSupport` feature gate enabled, and a compatible container runtime (e.g. CRI-O, containerd v2.0+).
 :::
@@ -637,6 +639,24 @@ Determines if the Pod `nodeSelector` can be defined from a step's backend option
 - Default: `false`
 
 Determines if containers must be required to run as non-root users.
+
+---
+
+### BACKEND_K8S_USER_NAMESPACES
+
+- Name: `WOODPECKER_BACKEND_K8S_USER_NAMESPACES`
+- Default: `false`
+
+Default to running containers in a dedicated user namespace (i.e. `hostUsers: false`) where `root` is mapped to a `non-root` user on the host.
+
+---
+
+### BACKEND_K8S_USER_NAMESPACES_OVERRIDE_SECCTX_NONROOT <!-- cspell:ignore SECCTX -->
+
+- Name: `WOODPECKER_BACKEND_K8S_USER_NAMESPACES_OVERRIDE_SECCTX_NONROOT`
+- Default: `false`
+
+Allow containers running in a custom user namespace to override `BACKEND_K8S_SECCTX_NONROOT` and run as `root`.
 
 ---
 

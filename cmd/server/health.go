@@ -44,7 +44,7 @@ func pinger(_ context.Context, c *cli.Command) error {
 	}
 
 	// create the health url
-	healthURL := fmt.Sprintf("%s://%s/healthz", scheme, serverAddr)
+	healthURL := fmt.Sprintf("%s://%s/api/healthz", scheme, serverAddr)
 	log.Trace().Msgf("try to ping with url '%s'", healthURL)
 
 	// ask server if all is healthy

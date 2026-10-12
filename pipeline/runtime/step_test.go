@@ -409,7 +409,7 @@ func TestCompleteStep(t *testing.T) {
 		t.Parallel()
 		// WaitStep succeeds (no context.Canceled from the engine),
 		// but r.ctx is already canceled — the re-check at the bottom catches it.
-		canceledCtx, cancel := context.WithCancelCause(context.Background())
+		canceledCtx, cancel := context.WithCancelCause(t.Context())
 		cancel(nil) // pre-cancel
 
 		engine := mocks.NewMockBackend(t)

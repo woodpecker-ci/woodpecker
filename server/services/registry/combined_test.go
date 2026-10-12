@@ -30,11 +30,11 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
-		name          string
-		repoName      string
-		dbRegs        []*model.Registry
-		expected      []*model.Registry
-		expectedError bool
+		name     string
+		repoName string
+		dbRegs   []*model.Registry
+		expected []*model.Registry
+		wantErr  bool
 	}{
 		{
 			name:     "DB registries override file registry",
@@ -48,7 +48,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 				{ID: 1, RepoID: 1, Address: "docker.io", Username: "shared", Password: "db-value"},
 				{ID: 2, RepoID: 1, Address: "quay.io", Username: "db-only", Password: "only-in-db"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:     "No overriding, but merged",
@@ -61,7 +61,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 				{Address: "example.com", Username: "user", Password: "password-encoded", ReadOnly: true},
 				{ID: 1, RepoID: 1, Address: "quay.io", Username: "db-secret", Password: "db-value"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 	}
 
@@ -87,7 +87,7 @@ func TestCombinedRegistryListPipeline(t *testing.T) {
 				&model.Pipeline{},
 				nil,
 			)
-			if tt.expectedError {
+			if tt.wantErr {
 				require.Error(t, err, "expected an error")
 			} else {
 				require.NoError(t, err, "error fetching registries")

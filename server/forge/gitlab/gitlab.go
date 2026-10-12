@@ -311,9 +311,20 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 			projectMember, resp, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
 			if err != nil {
 				if resp != nil && resp.StatusCode == http.StatusNotFound {
-					continue
+					// User is not directly listed as a member, but may have access
+					// via group inheritance (e.g. maintainer of a parent group).
+					// The projects list API may not return the effective permissions,
+					// so fetch the full project to get the embedded
+					// group_access/project_access. If this lookup fails we keep the
+					// list data (access level 0) rather than failing the whole page;
+					// such a repo will simply be filtered out later for lacking write access.
+					if projectDetails, _, getErr := client.Projects.GetProject(project.ID, nil, gitlab.WithContext(ctx)); getErr == nil {
+						project = projectDetails
+					}
+					// projectMember stays nil; permissions come from project.Permissions
+				} else {
+					return nil, err
 				}
-				return nil, err
 			}
 		}
 
@@ -446,8 +457,21 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
+	if isRejectedStatusTransition(err) {
+		// GitLab refuses to move a pending/running status back to pending; this is
+		// harmless, the next update for this context still goes through.
+		log.Debug().Err(err).Msgf("gitlab rejected commit status transition for %s", repo.FullName)
+		return nil
+	}
 
 	return err
+}
+
+func isRejectedStatusTransition(err error) bool {
+	var errResp *gitlab.ErrorResponse
+	return errors.As(err, &errResp) &&
+		errResp.StatusCode == http.StatusBadRequest &&
+		strings.Contains(errResp.Message, "Cannot transition status")
 }
 
 // Netrc returns a netrc file capable of authenticating Gitlab requests and

@@ -64,15 +64,15 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tc.item})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tt.item})
 			require.NoError(t, err)
 			require.Len(t, tasks, 1)
 
 			task := tasks[0]
-			assert.Equal(t, tc.expectedLimit, task.ConcurrencyLimit)
-			assert.Equal(t, tc.expectedGroup, task.ConcurrencyGroup)
+			assert.Equal(t, tt.expectedLimit, task.ConcurrencyLimit)
+			assert.Equal(t, tt.expectedGroup, task.ConcurrencyGroup)
 		})
 	}
 }

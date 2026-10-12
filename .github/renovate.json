@@ -14,6 +14,11 @@
   ],
   "packageRules": [
     {
+      "matchManagers": ["npm"],
+      "minimumReleaseAge": "1 day",
+      "internalChecksFilter": "strict"
+    },
+    {
       "matchCurrentVersion": "<1.0.0",
       "matchPackageNames": ["github.com/distribution/reference"],
       "matchUpdateTypes": ["major", "minor"],
@@ -22,11 +27,6 @@
     {
       "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
       "enabled": false
-    },
-    {
-      "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yaml"],
-      "addLabels": ["devx"]
     },
     {
       "groupName": "golang-lang",

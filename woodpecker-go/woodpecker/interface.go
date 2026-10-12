@@ -222,6 +222,9 @@ type Client interface {
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
 
+	// Version returns the version of the server.
+	Version() (*Version, error)
+
 	// LogLevel returns the current logging level.
 	LogLevel() (*LogLevel, error)
 

@@ -15,7 +15,6 @@
 package forge_test
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -66,7 +65,7 @@ func TestRefresh_NonExpiredToken(t *testing.T) {
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 	user := freshUser(1)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	// Refresher.Refresh should NOT be called since token is still valid
 	mockRefresher.AssertNotCalled(t, "Refresh", mock.Anything, mock.Anything)
@@ -80,6 +79,7 @@ func TestRefresh_ExpiredToken(t *testing.T) {
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 	user := expiredUser(1)
 
+	mockStore.On("GetUser", int64(1)).Return(expiredUser(1), nil)
 	mockRefresher.On("Refresh", mock.Anything, user).Return(true, nil).Run(func(args mock.Arguments) {
 		u, ok := args.Get(1).(*model.User)
 		if !ok {
@@ -91,7 +91,7 @@ func TestRefresh_ExpiredToken(t *testing.T) {
 	})
 	mockStore.On("UpdateUser", user).Return(nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	assert.Equal(t, "new-access-token", user.AccessToken)
 	assert.Equal(t, "new-refresh-token", user.RefreshToken)
@@ -107,10 +107,11 @@ func TestRefresh_ExpiredTokenNoUpdate(t *testing.T) {
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 	user := expiredUser(2)
 
+	mockStore.On("GetUser", int64(2)).Return(expiredUser(2), nil)
 	// Refresh returns false (no update needed), e.g. token was already refreshed
 	mockRefresher.On("Refresh", mock.Anything, user).Return(false, nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	mockRefresher.AssertCalled(t, "Refresh", mock.Anything, user)
 	// UpdateUser should NOT be called when Refresh returns false
@@ -125,6 +126,7 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 
 	var refreshCount atomic.Int32
+	mockStore.On("GetUser", int64(42)).Return(expiredUser(42), nil)
 
 	mockRefresher.On("Refresh", mock.Anything, mock.Anything).Return(true, nil).Run(func(args mock.Arguments) {
 		refreshCount.Add(1)
@@ -152,7 +154,7 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
-			forge.Refresh(context.Background(), f, mockStore, u)
+			forge.Refresh(t.Context(), f, mockStore, u)
 		}(users[i])
 	}
 	wg.Wait()
@@ -174,6 +176,7 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 
+	mockStore.On("GetUser", int64(99)).Return(expiredUser(99), nil)
 	mockRefresher.On("Refresh", mock.Anything, mock.Anything).Return(false, fmt.Errorf("token was already used")).Run(func(_ mock.Arguments) {
 		time.Sleep(50 * time.Millisecond)
 	})
@@ -190,7 +193,7 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
-			forge.Refresh(context.Background(), f, mockStore, u)
+			forge.Refresh(t.Context(), f, mockStore, u)
 		}(users[i])
 	}
 	wg.Wait()
@@ -204,6 +207,52 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 	mockStore.AssertNotCalled(t, "UpdateUser", mock.Anything)
 }
 
+func TestRefresh_StaleCopyUsesStoredToken(t *testing.T) {
+	mockForge := forge_mocks.NewMockForge(t)
+	mockRefresher := forge_mocks.NewMockRefresher(t)
+	mockStore := store_mocks.NewMockStore(t)
+
+	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
+	// Loaded before another request refreshed and stored a new token pair.
+	user := expiredUser(7)
+
+	mockStore.On("GetUser", int64(7)).Return(freshUser(7), nil)
+
+	forge.Refresh(t.Context(), f, mockStore, user)
+
+	// Refreshing again would reuse a rotated (single-use) refresh token.
+	mockRefresher.AssertNotCalled(t, "Refresh", mock.Anything, mock.Anything)
+	mockStore.AssertNotCalled(t, "UpdateUser", mock.Anything)
+	assert.Equal(t, "valid-access-token", user.AccessToken)
+	assert.Equal(t, "valid-refresh-token", user.RefreshToken)
+}
+
+func TestRefresh_StoreReloadFails(t *testing.T) {
+	mockForge := forge_mocks.NewMockForge(t)
+	mockRefresher := forge_mocks.NewMockRefresher(t)
+	mockStore := store_mocks.NewMockStore(t)
+
+	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
+	user := expiredUser(8)
+
+	mockStore.On("GetUser", int64(8)).Return(nil, fmt.Errorf("db unavailable"))
+	mockRefresher.On("Refresh", mock.Anything, user).Return(true, nil).Run(func(args mock.Arguments) {
+		u, ok := args.Get(1).(*model.User)
+		if !ok {
+			return
+		}
+		assert.Equal(t, "old-refresh-token", u.RefreshToken)
+		u.AccessToken = "new-access-token"
+		u.RefreshToken = "new-refresh-token"
+		u.Expiry = time.Now().UTC().Unix() + 3600
+	})
+	mockStore.On("UpdateUser", user).Return(nil)
+
+	forge.Refresh(t.Context(), f, mockStore, user)
+
+	assert.Equal(t, "new-access-token", user.AccessToken)
+}
+
 func TestRefresh_NonRefresherForge(t *testing.T) {
 	// MockForge does NOT implement Refresher, so the type assertion should fail
 	// and Refresh should be a no-op
@@ -212,7 +261,7 @@ func TestRefresh_NonRefresherForge(t *testing.T) {
 
 	user := expiredUser(1)
 
-	forge.Refresh(context.Background(), mockForge, mockStore, user)
+	forge.Refresh(t.Context(), mockForge, mockStore, user)
 
 	// Token should be unchanged
 	assert.Equal(t, "old-access-token", user.AccessToken)

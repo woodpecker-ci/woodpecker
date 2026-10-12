@@ -34,7 +34,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
-	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -353,15 +352,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 		return fmt.Errorf("repo online check failed: %w", err)
 	}
 
-	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
-		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
-			Page: page,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return hooks.Values, nil
-	}, -1)
+	hooks, err := client.ListHooksAll(r.Owner, r.Name)
 	if err != nil {
 		return err
 	}

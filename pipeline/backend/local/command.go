@@ -29,6 +29,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
@@ -95,7 +96,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 
 	script := ""
 	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
@@ -121,7 +122,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		for _, cmd := range cmdList {
 			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
 			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
-			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
+			encodedCmd := base64.StdEncoding.EncodeToString([]byte(common.CommandMarker + cmd + "\n"))
 
 			script.WriteString("\n")
 			script.WriteString(agentPath + " decode-base64 " + encodedCmd + "\n")
@@ -140,7 +141,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "fish":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			fmt.Fprintf(&script, "echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			fmt.Fprintf(&script, "echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
 		}
 		return []string{"-c", script.String()}, nil
 	case "nu":

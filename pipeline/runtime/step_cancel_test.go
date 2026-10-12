@@ -43,7 +43,7 @@ func transportCancelErr(cause error) error {
 
 func canceledRuntime(t *testing.T, engine backend_types.Backend) *Runtime {
 	t.Helper()
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 	cancel(pipeline_errors.ErrCancel)
 	return New(&backend_types.Config{}, engine,
 		WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)), WithContext(ctx))
@@ -54,7 +54,7 @@ func canceledRuntime(t *testing.T, engine backend_types.Backend) *Runtime {
 func TestCompleteStepCancelFallout(t *testing.T) {
 	t.Parallel()
 
-	for _, tc := range []struct {
+	for _, tt := range []struct {
 		name    string
 		waitErr error
 	}{
@@ -62,10 +62,10 @@ func TestCompleteStepCancelFallout(t *testing.T) {
 		{"TransportErrorWrappingContextCanceled", transportCancelErr(context.Canceled)},
 		{"BareContextCanceled", context.Canceled},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			engine := mocks.NewMockBackend(t)
-			engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).Return(nil, tc.waitErr)
+			engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).Return(nil, tt.waitErr)
 			engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			r := canceledRuntime(t, engine)
 

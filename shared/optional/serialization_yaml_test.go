@@ -89,11 +89,11 @@ optional_two_string: null
 `,
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			b, err := yaml.Marshal(tc.obj)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b, err := yaml.Marshal(tt.obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "yaml module returned unexpected")
+			assert.EqualValues(t, tt.want, string(b), "yaml module returned unexpected")
 		})
 	}
 }
@@ -137,12 +137,12 @@ optional_twostring: null
 			},
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			var obj testSerializationStruct
-			err := yaml.Unmarshal([]byte(tc.data), &obj)
+			err := yaml.Unmarshal([]byte(tt.data), &obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj, "yaml module returned unexpected")
+			assert.EqualValues(t, tt.want, obj, "yaml module returned unexpected")
 		})
 	}
 }
