@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-11
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7278](https://github.com/woodpecker-ci/woodpecker/pull/7278)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
 - Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
 - Update web npm deps non-major [[#7273](https://github.com/woodpecker-ci/woodpecker/pull/7273)]
