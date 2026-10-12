@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Fall back to read only if the forge permission sync fails [[#7282](https://github.com/woodpecker-ci/woodpecker/pull/7282)]
 - Quote all YAML line breaks in environment substitution [[#7283](https://github.com/woodpecker-ci/woodpecker/pull/7283)]
 
 ### 📈 Enhancement
