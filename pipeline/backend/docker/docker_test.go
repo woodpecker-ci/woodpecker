@@ -174,11 +174,12 @@ func load(t *testing.T, args ...string) (*backend_types.BackendInfo, error) {
 func TestHTTPClientOfOptsWithHost(t *testing.T) {
 	ca := newTestCert(t, &x509.Certificate{Subject: pkix.Name{CommonName: "ca"}}, nil)
 
-	httpClient := httpClientOfOpts(writeTestCerts(t, ca), true)
+	httpClient, err := httpClientOfOpts(writeTestCerts(t, ca), true)
+	require.NoError(t, err)
 	require.NotNil(t, httpClient)
 
 	// client.WithHost has to configure the transport of the TLS client for the given host.
-	_, err := client.New(client.WithHTTPClient(httpClient), client.WithHost("tcp://127.0.0.1:2376"))
+	_, err = client.New(client.WithHTTPClient(httpClient), client.WithHost("tcp://127.0.0.1:2376"))
 	assert.NoError(t, err)
 }
 
@@ -221,6 +222,16 @@ func TestLoad(t *testing.T) {
 		_, err := load(t, "--backend-docker-host="+host, "--backend-docker-cert="+writeTestCerts(t, ca), "--backend-docker-tls-verify=false")
 		require.NoError(t, err)
 		assert.NotEmpty(t, daemon.clientCerts)
+	})
+
+	t.Run("unusable certificates do not fall back to plain connection", func(t *testing.T) {
+		daemon := &fakeDaemon{}
+		srv := httptest.NewServer(daemon)
+		t.Cleanup(srv.Close)
+
+		_, err := load(t, "--backend-docker-host=tcp://"+srv.Listener.Addr().String(), "--backend-docker-cert="+t.TempDir())
+		assert.ErrorContains(t, err, "ca.pem")
+		assert.Empty(t, daemon.userAgents)
 	})
 
 	t.Run("plain custom host", func(t *testing.T) {
