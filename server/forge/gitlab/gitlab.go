@@ -160,6 +160,7 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
 		RefreshToken: user.RefreshToken,
 	})
