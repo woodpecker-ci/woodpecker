@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Sawarz, @YouCD
+@6543, @Sawarz, @YouCD, @aniketatgithub
 
 ### 📈 Enhancement
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix 'Repair Repository' failing for Bitbucket Datacenter repos with spaces in their name [[#7261](https://github.com/woodpecker-ci/woodpecker/pull/7261)]
 - 🐛 fix(gitlab): resolve group-inherited project permissions in Repos() [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
 
 ### 📚 Documentation
