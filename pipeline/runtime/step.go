@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"time"
@@ -117,25 +118,43 @@ func (r *Runtime) setStepEnv(step *backend_types.Step) error {
 //   - startTime: unix timestamp recorded right after the container started, used
 //     later to fill waitState.Started.
 //
+// The image is pulled while the step starts, before its log stream exists. So
+// the logger reads from a pipe, which gets the pull progress first and the step
+// logs afterwards.
+//
 // If StartStep or TailStep fail, startStep returns a non-nil error and the caller
 // must not call waitForLogs.
 func (r *Runtime) startStep(step *backend_types.Step) (func(), int64, error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+	logs, out := io.Pipe()
+
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		logger := r.makeLogger()
+		if err := r.logger(step, logs); err != nil {
+			logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
+		}
+		// unblock the writers if the logger stopped reading
+		_ = logs.Close()
+	})
+
+	ctx := context.WithValue(r.ctx, backend_types.ImagePullOutput, out)
+	if err := r.engine.StartStep(ctx, step, r.taskUUID); err != nil {
+		_ = out.Close()
+		wg.Wait()
 		return nil, 0, err
 	}
 	startTime := time.Now().Unix()
 
 	rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
 	if err != nil {
+		_ = out.Close()
+		wg.Wait()
 		return nil, 0, err
 	}
 
-	var wg sync.WaitGroup
 	wg.Go(func() {
-		logger := r.makeLogger()
-		if err := r.logger(step, rc); err != nil {
-			logger.Error().Err(err).Str("step", step.Name).Msg("step log streaming failed")
-		}
+		_, _ = io.Copy(out, rc)
+		_ = out.Close()
 		_ = rc.Close()
 	})
 
@@ -220,7 +239,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types.Step) error {
 	logger := r.makeLogger()
 
-	waitForLogs, startTime, err := r.startStep(step)
+	waitForLogs, startTime, err := r.startStep(step) //nolint:contextcheck
 	if err != nil {
 		// The step never ran — trace the start failure and surface it.
 		if r.cancelFallout(err) {
@@ -249,7 +268,7 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 // Any error that occurs after setup is logged but not propagated — it cannot
 // influence the pipeline outcome at that point.
 func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types.Step) error {
-	waitForLogs, startTime, err := r.startStep(step)
+	waitForLogs, startTime, err := r.startStep(step) //nolint:contextcheck
 	if err != nil {
 		// Setup failed before the container was running — treat it like a
 		// blocking failure so the pipeline is aware.
