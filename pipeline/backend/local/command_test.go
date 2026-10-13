@@ -51,6 +51,8 @@ func TestQuotePowerShell(t *testing.T) {
 		{"backtick", "echo `test", "'echo `test'"},
 		{"left smart quote", "echo ‘test", "'echo ‘‘test'"},
 		{"right smart quote", "echo test’", "'echo test’’'"},
+		{"low-9 quote", "echo ‚test", "'echo ‚‚test'"},
+		{"reversed quote", "echo ‛test", "'echo ‛‛test'"},
 		{"mixed quotes", "it's ‘quoted’", "'it''s ‘‘quoted’’'"},
 	}
 
