@@ -31,9 +31,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -58,6 +58,7 @@ const props = defineProps<{
 const notifications = useNotifications();
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
@@ -118,5 +119,15 @@ onMounted(async () => {
       return;
     }
   }
+});
+
+// back on the list the linked agent is left, so a reload must not open it again
+watch(selectedAgent, async (agent) => {
+  if (agent || route.query.agent === undefined) {
+    return;
+  }
+  const query = { ...route.query };
+  delete query.agent;
+  await router.replace({ query });
 });
 </script>

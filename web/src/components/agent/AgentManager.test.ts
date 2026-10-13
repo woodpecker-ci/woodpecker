@@ -7,9 +7,11 @@ import type { Agent } from '~/lib/api/types';
 import AgentManager from './AgentManager.vue';
 
 const route = { query: {} as Record<string, string> };
+const replace = vi.fn();
 
 vi.mock('vue-router', () => ({
   useRoute: () => route,
+  useRouter: () => ({ replace }),
 }));
 
 const i18n = createI18n({
@@ -47,7 +49,12 @@ function mountManager() {
         Settings: { template: '<div><slot /></div>' },
         Button: true,
         AgentList: { name: 'AgentList', template: '<div data-list />' },
-        AgentForm: { name: 'AgentForm', props: ['modelValue'], template: '<div data-form />' },
+        AgentForm: {
+          name: 'AgentForm',
+          props: ['modelValue'],
+          emits: ['cancel'],
+          template: `<div data-form><button data-cancel @click="$emit('cancel')" /></div>`,
+        },
       },
     },
   });
@@ -75,6 +82,19 @@ describe('agentManager', () => {
     await flushPromises();
 
     expect(wrapper.findComponent({ name: 'AgentForm' }).props('modelValue')).toStrictEqual(makeAgent(5));
+  });
+
+  it('drops the agent from the url when going back to the list, so a reload shows the list', async () => {
+    route.query = { agent: '5', other: 'kept' };
+    const wrapper = mountManager();
+    await flushPromises();
+    expect(replace).not.toHaveBeenCalled();
+
+    await wrapper.get('[data-cancel]').trigger('click');
+    await flushPromises();
+
+    expect(wrapper.find('[data-list]').exists()).toBe(true);
+    expect(replace).toHaveBeenCalledWith({ query: { other: 'kept' } });
   });
 
   it('stays on the list when the agent from the url does not exist', async () => {
