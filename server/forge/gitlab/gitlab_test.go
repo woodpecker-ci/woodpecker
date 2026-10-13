@@ -186,6 +186,20 @@ func TestGitLab(t *testing.T) {
 			}
 		})
 
+		t.Run("tag deleted", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookTagDeleted),
+			)
+			req.Header = fixtures.ServiceHookHeaders
+
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
+		})
+
 		t.Run("merge request", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
