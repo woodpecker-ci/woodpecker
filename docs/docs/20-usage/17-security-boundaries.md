@@ -18,6 +18,8 @@ If the forge reports something wrong, the boundaries on this page are wrong too.
 ## Permissions
 
 - Instance admins ([`WOODPECKER_ADMIN`](../30-administration/10-configuration/10-server.md#admin)) are admins of every org and repository.
+  The admin flag is stored on the user. The list sets it when a listed user signs in, but removing a user from the list does not clear it.
+  Revoke it in the admin settings or with the users API.
 - Admins of a repository on the forge can change its [project settings](./75-project-settings.md).
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
 - Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.

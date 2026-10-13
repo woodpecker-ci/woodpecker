@@ -702,6 +702,15 @@ Enable step-level metrics, including failed step counters and step duration hist
 - Default: none
 
 Comma-separated list of admin accounts.
+Users in this list become server admins when they sign in.
+
+:::warning
+The list only grants admin access, it never revokes it.
+The admin flag is stored on the user, so removing a user from the list does not remove it.
+To revoke it, first remove the user from the list, then remove the flag in the admin settings or with the users API.
+:::
+
+Admins granted in the admin settings or with the users API also stay admins when they sign in.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 
