@@ -28,19 +28,57 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+// serverConfigQueuePaused stores whether the global queue is paused so the
+// state survives server restarts.
+const serverConfigQueuePaused = "queue-paused"
+
 // WithTaskStore returns a queue that is backed by the TaskStore. This
-// ensures the task Queue can be restored when the system starts.
+// ensures pending tasks and the paused flag can be restored when the system
+// starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
-	return &persistentQueue{q, s}
+	pq := &persistentQueue{q, s}
+	pq.restorePausedState()
+	return pq
 }
 
 type persistentQueue struct {
 	Queue
 	store store.Store
+}
+
+// Pause stops handing out new work and persists that state so a server
+// restart keeps the queue paused.
+func (q *persistentQueue) Pause() {
+	q.Queue.Pause()
+	if err := q.store.ServerConfigSet(serverConfigQueuePaused, "true"); err != nil {
+		log.Error().Err(err).Msg("failed to persist queue paused state")
+	}
+}
+
+// Resume starts handing out work again and clears the persisted paused flag.
+func (q *persistentQueue) Resume() {
+	q.Queue.Resume()
+	if err := q.store.ServerConfigSet(serverConfigQueuePaused, "false"); err != nil {
+		log.Error().Err(err).Msg("failed to persist queue resumed state")
+	}
+}
+
+func (q *persistentQueue) restorePausedState() {
+	value, err := q.store.ServerConfigGet(serverConfigQueuePaused)
+	if err != nil {
+		if !errors.Is(err, types.ErrRecordNotExist) {
+			log.Error().Err(err).Msg("failed to load persisted queue paused state")
+		}
+		return
+	}
+	if value == "true" {
+		log.Warn().Msg("restoring paused queue state from server config")
+		q.Queue.Pause()
+	}
 }
 
 func isTerminalWorkflowState(state model.StatusValue) bool {

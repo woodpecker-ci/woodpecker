@@ -115,7 +115,7 @@ func SetPerm() gin.HandlerFunc {
 
 		perm := new(model.Perm)
 
-		if user != nil {
+		if user != nil && !user.Admin {
 			var err error
 			perm, err = _store.PermFind(user, repo)
 			if err != nil {
@@ -133,6 +133,19 @@ func SetPerm() gin.HandlerFunc {
 					perm.RepoID = repo.ID
 					perm.UserID = user.ID
 					perm.Synced = time.Now().Unix()
+					if err := _store.PermUpsert(perm); err != nil {
+						_ = c.AbortWithError(http.StatusInternalServerError, err)
+						return
+					}
+				} else if perm.Push || perm.Admin {
+					// the forge could not confirm the permission, so only keep read access;
+					// Synced stays old, so the next request asks the forge again
+					log.Warn().Err(err).Msgf("could not sync user permission for %s %s, falling back to read only",
+						user.Login, repo.FullName)
+					perm.Push = false
+					perm.Admin = false
+					perm.RepoID = repo.ID
+					perm.UserID = user.ID
 					if err := _store.PermUpsert(perm); err != nil {
 						_ = c.AbortWithError(http.StatusInternalServerError, err)
 						return
