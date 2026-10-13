@@ -48,9 +48,8 @@ func (c *client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, err
 }
 
 // WorkflowAgent returns the snapshot of the agent the workflow got assigned to.
-// Instance admins can read every snapshot, organization admins the ones of their
-// organization's agents. The returned *ClientError has status 403 if the user may not
-// read it and 404 if no agent was recorded for the workflow.
+// Every logged in user who can see the pipeline can read it. The returned *ClientError
+// has status 404 if no agent was recorded for the workflow.
 func (c *client) WorkflowAgent(repoID, pipeline, workflowID int64) (*AgentSnapshot, error) {
 	out := new(AgentSnapshot)
 	uri := fmt.Sprintf(pathWorkflowAgent, c.addr, repoID, pipeline, workflowID)

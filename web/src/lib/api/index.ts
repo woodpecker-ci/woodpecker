@@ -127,7 +127,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
-  // Silent, as 403 and 404 are expected for users that may not see the agent and for old workflows.
+  // Silent, as 404 is expected for workflows without agent information.
   async getWorkflowAgent(repoId: number, pipelineNumber: number, workflowId: number): Promise<AgentSnapshot> {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/workflows/${workflowId}/agent`, {
       silent: true,
