@@ -14,7 +14,7 @@ function updateTheme() {
     document.documentElement.classList.remove('light');
     document.documentElement.classList.add('dark');
     document.documentElement.setAttribute('data-theme', 'dark');
-    document.querySelector('meta[name=theme-color]')?.setAttribute('content', '#248438'); // internal-wp-primary-500 (brand green navbar)
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', '#242526'); // neutral dark navbar (internal-wp-secondary-400)
   } else {
     document.documentElement.classList.remove('dark');
     document.documentElement.classList.add('light');

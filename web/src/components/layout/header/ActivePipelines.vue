@@ -63,4 +63,9 @@ onMounted(async () => {
   border-radius: calc(0.375rem - 0.125rem);
   content: '';
 }
+
+:root[data-theme='dark'] .spinner::before,
+:root[data-theme='dark'] .spinner::after {
+  @apply bg-wp-primary-300;
+}
 </style>

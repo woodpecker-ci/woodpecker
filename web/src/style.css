@@ -22,6 +22,7 @@
   --wp-control-neutral-100: var(--color-gray-100);
   --wp-control-neutral-200: var(--color-gray-200);
   --wp-control-neutral-300: var(--color-gray-300);
+  --wp-control-neutral-400: var(--color-gray-400);
 
   --wp-control-info-100: var(--color-int-wp-control-info-100);
   --wp-control-info-200: var(--color-int-wp-control-info-200);
@@ -72,14 +73,15 @@
   --wp-text-200: var(--color-gray-100);
   --wp-text-alt-100: var(--color-gray-400);
 
-  --wp-primary-100: var(--color-int-wp-primary-300);
-  --wp-primary-200: var(--color-int-wp-primary-400);
-  --wp-primary-300: var(--color-int-wp-primary-500);
+  --wp-primary-100: var(--color-int-wp-secondary-200);
+  --wp-primary-200: var(--color-int-wp-secondary-300);
+  --wp-primary-300: var(--color-int-wp-secondary-400);
   --wp-primary-text-100: var(--color-white);
 
   --wp-control-neutral-100: var(--color-int-wp-secondary-400);
-  --wp-control-neutral-200: var(--color-int-wp-secondary-200);
-  --wp-control-neutral-300: var(--color-int-wp-secondary-100);
+  --wp-control-neutral-200: var(--color-int-wp-secondary-300);
+  --wp-control-neutral-300: var(--color-int-wp-secondary-200);
+  --wp-control-neutral-400: var(--color-int-wp-secondary-100);
 
   --wp-control-info-100: var(--color-int-wp-control-info-dark-100);
   --wp-control-info-200: var(--color-int-wp-control-info-dark-200);

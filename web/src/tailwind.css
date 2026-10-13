@@ -47,7 +47,7 @@
   --color-int-wp-error-200: #991b1b;
   --color-int-wp-error-300: #7f1d1d;
 
-  --color-int-wp-error-dark-100: #ef4444;
+  --color-int-wp-error-dark-100: #dc2626;
   --color-int-wp-error-dark-200: #b91c1c;
   --color-int-wp-error-dark-300: #7f1d1d;
 
@@ -92,6 +92,7 @@
   --color-wp-control-neutral-100: var(--wp-control-neutral-100);
   --color-wp-control-neutral-200: var(--wp-control-neutral-200);
   --color-wp-control-neutral-300: var(--wp-control-neutral-300);
+  --color-wp-control-neutral-400: var(--wp-control-neutral-400);
 
   --color-wp-control-info-100: var(--wp-control-info-100);
   --color-wp-control-info-200: var(--wp-control-info-200);
