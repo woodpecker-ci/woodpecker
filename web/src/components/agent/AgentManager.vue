@@ -31,8 +31,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -56,6 +57,7 @@ const props = defineProps<{
 
 const notifications = useNotifications();
 const { t } = useI18n();
+const route = useRoute();
 
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
@@ -98,4 +100,23 @@ function editAgent(agent: Agent) {
 function showAddAgent() {
   selectedAgent.value = { name: '' };
 }
+
+// a link to ?agent=<id>, e.g. from the agent information of a workflow, opens that agent
+onMounted(async () => {
+  const agentId = Number(route.query.agent);
+  if (!agentId) {
+    return;
+  }
+  for (let page = 1; ; page++) {
+    const agents = await props.loadAgents(page);
+    if (!agents?.length) {
+      return;
+    }
+    const agent = agents.find((a) => a.id === agentId);
+    if (agent) {
+      editAgent(agent);
+      return;
+    }
+  }
+});
 </script>
