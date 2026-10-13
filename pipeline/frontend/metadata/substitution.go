@@ -24,7 +24,11 @@ import (
 func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
 	return envsubst.Eval(yaml, func(name string) string {
 		env := environ[name]
-		if strings.Contains(env, "\n") {
+		// Quote values containing a YAML line break so a user-controlled value
+		// (commit message, branch name, PR title, …) cannot break out of its
+		// scalar and inject new YAML structure. YAML 1.1 treats LF, CR, NEL,
+		// LS and PS as line breaks, so all of them must trigger quoting.
+		if strings.ContainsAny(env, "\n\r\u0085  ") {
 			env = fmt.Sprintf("%q", env)
 		}
 		return env
