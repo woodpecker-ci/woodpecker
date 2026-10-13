@@ -57,8 +57,18 @@ func TestPipelineToAPIModel(t *testing.T) {
 			wantIsPrerelease: true,
 		},
 		{
+			name:        "manual without message uses default message",
+			pipeline:    Pipeline{Event: EventManual, Branch: "main", Commit: &Commit{Message: "head commit"}},
+			wantMessage: "MANUAL PIPELINE @ main",
+		},
+		{
+			name:        "manual with message uses custom message",
+			pipeline:    Pipeline{Event: EventManual, Branch: "main", ManualMessage: "redeploy", Commit: &Commit{Message: "head commit"}},
+			wantMessage: "MANUAL: redeploy @ main",
+		},
+		{
 			name:     "push leaves derived fields untouched",
-			pipeline: Pipeline{Event: EventPush, Message: "fix bug"},
+			pipeline: Pipeline{Event: EventPush, Commit: &Commit{Message: "fix bug"}},
 			// message is the stored commit message, not overwritten
 			wantMessage: "fix bug",
 		},

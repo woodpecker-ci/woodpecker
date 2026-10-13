@@ -71,10 +71,11 @@ func (env *ServerEnv) DummyPipeline(event model.WebhookEvent) *model.Pipeline {
 	return &model.Pipeline{
 		Event:  event,
 		Branch: "main",
-		Commit: "deadbeef",
+		Commit: &model.Commit{
+			SHA: "deadbeef",
+		},
 		Ref:    "refs/heads/main",
 		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
 	}
 }
 

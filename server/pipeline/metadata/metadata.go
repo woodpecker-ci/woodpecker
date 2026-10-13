@@ -137,29 +137,34 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		EventReason: pipeline.EventReason,
 		ForgeURL:    pipeline.ForgeURL,
 		RerunCount:  pipeline.RerunCount,
-		DeployTo:    pipeline.DeployTo,
-		DeployTask:  pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:       pipeline.Commit,
-			Ref:       pipeline.Ref,
-			Refspec:   pipeline.Refspec,
-			Branch:    pipeline.Branch,
-			Message:   pipeline.Message,
-			Timestamp: pipeline.Timestamp,
-			Author: metadata.Author{
-				Name:  pipeline.Author,
-				Email: pipeline.Email,
-			},
-			ChangedFiles:         pipeline.ChangedFiles,
-			PullRequestLabels:    pipeline.PullRequestLabels,
-			PullRequestMilestone: pipeline.PullRequestMilestone,
-			PullRequestDraft:     pipeline.PullRequestDraft,
+			Ref:          pipeline.Ref,
+			Refspec:      pipeline.Refspec,
+			Branch:       pipeline.Branch,
+			ChangedFiles: pipeline.ChangedFiles,
 		},
 		Cron:   pipeline.Cron,
 		Author: pipeline.Author,
-		Avatar: pipeline.Avatar,
+		Avatar: pipeline.AuthorAvatar,
 	}
 
+	if pipeline.Commit != nil {
+		metadata.Commit.Sha = pipeline.Commit.SHA
+		metadata.Commit.Message = pipeline.Commit.Message
+		metadata.Commit.Author.Name = pipeline.Commit.Author.Name
+		metadata.Commit.Author.Email = pipeline.Commit.Author.Email
+		metadata.Commit.Timestamp = pipeline.Commit.Timestamp
+	}
+
+	if pipeline.PullRequest != nil {
+		metadata.Commit.PullRequestLabels = pipeline.PullRequest.Labels
+		metadata.Commit.PullRequestMilestone = pipeline.PullRequest.Milestone
+		metadata.Commit.PullRequestDraft = pipeline.PullRequest.Draft
+	}
+	if pipeline.Deployment != nil {
+		metadata.DeployTo = pipeline.Deployment.Target
+		metadata.DeployTask = pipeline.Deployment.Task
+	}
 	if pipeline.Release != nil {
 		metadata.Release.Title = pipeline.Release.Title
 		metadata.Release.IsPrerelease = pipeline.Release.IsPrerelease

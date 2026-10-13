@@ -158,6 +158,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/heads/main", pipeline.Ref)
 				assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
+				assert.Equal(t, int64(1632717974), pipeline.Commit.Timestamp)
 				assert.Equal(t, model.EventPush, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
 			}
@@ -179,6 +180,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
 				assert.Equal(t, "develop", hookRepo.Branch)
 				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+				assert.Equal(t, "http://10.40.8.5:3200/test/woodpecker/-/tags/v22", pipeline.ForgeURL)
 				assert.Equal(t, "v22", pipeline.TagTitle)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventTag, pipeline.Event)
@@ -216,7 +218,8 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker", hookRepo.Name)
-				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
+				assert.Equal(t, "Update client.go 🎉", pipeline.PullRequest.Title)
+				assert.Equal(t, int64(1642434458), pipeline.Commit.Timestamp)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
@@ -238,11 +241,11 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README.md for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README.md for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPull, pipeline.Event)
 				assert.Empty(t, pipeline.EventReason)
-				assert.False(t, pipeline.PullRequestDraft)
+				assert.False(t, pipeline.PullRequest.Draft)
 			}
 		})
 
@@ -261,8 +264,8 @@ func TestGitLab(t *testing.T) {
 
 			_, pipeline, err := client.Hook(ctx, req)
 			assert.NoError(t, err)
-			if assert.NotNil(t, pipeline) {
-				assert.True(t, pipeline.PullRequestDraft)
+			if assert.NotNil(t, pipeline) && assert.NotNil(t, pipeline.PullRequest) {
+				assert.True(t, pipeline.PullRequest.Draft)
 			}
 		})
 
@@ -317,7 +320,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "Add new file", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullClosed, pipeline.Event)
 			}
@@ -337,7 +340,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+				assert.Equal(t, "Some ned more AAAA", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPull, pipeline.Event)
 			}
@@ -358,7 +361,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "anbraten", hookRepo.Owner)
 				assert.Equal(t, "woodpecker-test", hookRepo.Name)
-				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Equal(t, "Add new file", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullClosed, pipeline.Event)
 			}
@@ -379,7 +382,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"title_edited", "description_edited"}, pipeline.EventReason)
@@ -400,6 +403,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 				assert.Equal(t, "ci", hookRepo.Name)
 				assert.Equal(t, "Awesome version 0.0.2", pipeline.Release.Title)
+				assert.Equal(t, int64(1641206391), pipeline.Commit.Timestamp)
 				assert.Equal(t, model.EventRelease, pipeline.Event)
 			}
 		})
@@ -432,7 +436,7 @@ func TestGitLab(t *testing.T) {
 				assert.Equal(t, "main", hookRepo.Branch)
 				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
 				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
-				assert.Equal(t, "Edit README for more text to read", pipeline.Title)
+				assert.Equal(t, "Edit README for more text to read", pipeline.PullRequest.Title)
 				assert.Len(t, pipeline.ChangedFiles, 0)
 				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
 				assert.Equal(t, []string{"review_requested"}, pipeline.EventReason)
@@ -816,7 +820,7 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 			client := load(server.URL + "?client_id=test&client_secret=test")
 			user := &model.User{Login: "test_user", AccessToken: "token"}
 			repo := &model.Repo{ForgeRemoteID: "4", Owner: "diaspora", Name: "diaspora-client", FullName: "diaspora/diaspora-client"}
-			pipeline := &model.Pipeline{Number: 1, Commit: "abc123", Event: model.EventPush}
+			pipeline := &model.Pipeline{Number: 1, Commit: &model.Commit{SHA: "abc123"}, Event: model.EventPush}
 			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
 
 			err := client.Status(t.Context(), user, repo, pipeline, workflow)

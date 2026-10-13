@@ -17,6 +17,7 @@ package github
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/google/go-github/v92/github"
 	"github.com/rs/zerolog/log"
@@ -163,6 +164,17 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	return repo
 }
 
+func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:     model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
+		Title:     pr.GetTitle(),
+		Labels:    convertLabels(pr.GetLabels()),
+		Milestone: pr.GetMilestone().GetTitle(),
+		FromFork:  pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
+		Draft:     pr.GetDraft(),
+	}
+}
+
 // convertLabels is a helper function used to convert a GitHub label list to
 // the common Woodpecker label structure.
 func convertLabels(from []*github.Label) []string {
@@ -171,4 +183,28 @@ func convertLabels(from []*github.Label) []string {
 		labels[i] = label.GetName()
 	}
 	return labels
+}
+
+// convertCommit converts a GitHub repository commit to the common Woodpecker
+// commit structure. The API only sets the sha and the link on the repository
+// commit, the nested git commit carries the message and the author.
+func convertCommit(from *github.RepositoryCommit) *model.Commit {
+	return &model.Commit{
+		SHA:      from.GetSHA(),
+		ForgeURL: from.GetHTMLURL(),
+		Message:  from.GetCommit().GetMessage(),
+		Author: model.CommitAuthor{
+			Name:  from.GetCommit().GetAuthor().GetName(),
+			Email: from.GetCommit().GetAuthor().GetEmail(),
+		},
+		Timestamp: unixTime(from.GetCommit().GetAuthor().GetDate()),
+	}
+}
+
+// unixTime returns the unix time of a GitHub timestamp, zero if it is not set.
+func unixTime(t github.Timestamp) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
 }

@@ -57,8 +57,8 @@ func TestSetGatedState(t *testing.T) {
 				RequireApproval: model.RequireApprovalForks,
 			},
 			pipeline: &model.Pipeline{
-				Event:    model.EventPull,
-				FromFork: true,
+				Event:       model.EventPull,
+				PullRequest: &model.PullRequest{FromFork: true},
 			},
 			expectBlocked: true,
 		},
@@ -68,8 +68,8 @@ func TestSetGatedState(t *testing.T) {
 				RequireApproval: model.RequireApprovalPullRequests,
 			},
 			pipeline: &model.Pipeline{
-				Event:    model.EventPull,
-				FromFork: false,
+				Event:       model.EventPull,
+				PullRequest: &model.PullRequest{FromFork: false},
 			},
 			expectBlocked: true,
 		},
@@ -79,8 +79,8 @@ func TestSetGatedState(t *testing.T) {
 				RequireApproval: model.RequireApprovalPullRequests,
 			},
 			pipeline: &model.Pipeline{
-				Event:    model.EventPullMetadata,
-				FromFork: false,
+				Event:       model.EventPullMetadata,
+				PullRequest: &model.PullRequest{FromFork: false},
 			},
 			expectBlocked: true,
 		},
