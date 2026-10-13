@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-// eslint-disable-next-line antfu/no-top-level-await
+// eslint-disable-next-line antfu/no-top-level-await, unused-imports/no-unused-vars
 const config = JSON.parse(await readFile(new URL('../.prettierrc.json', import.meta.url)));
 
 export default {
