@@ -31,7 +31,7 @@ type Workflow struct {
 	DependsOn       []string          `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
 	AxisID          int               `json:"-"                    xorm:"axis_id"`
 	Children        []*Step           `json:"children,omitempty"   xorm:"-"`
-	AgentSnapshotID int64             `json:"-" xorm:"agent_snapshot_id"`
+	AgentSnapshotID int64             `json:"-"                    xorm:"agent_snapshot_id"`
 }
 
 // TableName return database table name for xorm.
