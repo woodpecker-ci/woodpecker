@@ -293,7 +293,7 @@ func TestDeletePipeline(t *testing.T) {
 	assert.NoError(t, err)
 
 	// delete non existing pipeline
-	assert.ErrorIs(t, types.ErrRecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+	assert.ErrorIs(t, store.DeletePipeline(&model.Pipeline{ID: 1}), types.ErrRecordNotExist)
 
 	// delete pipeline with shares config
 	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))

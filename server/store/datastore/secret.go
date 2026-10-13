@@ -50,12 +50,16 @@ func (s storage) SecretCreate(secret *model.Secret) error {
 }
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
-	return err
+	return retryWrite(func() error {
+		_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
+		return wrapUpdate(err)
+	})
 }
 
 func (s storage) SecretDelete(secret *model.Secret) error {
-	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
+	})
 }
 
 func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {

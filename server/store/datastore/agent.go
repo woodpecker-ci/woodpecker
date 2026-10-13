@@ -46,12 +46,16 @@ func (s storage) AgentCreate(agent *model.Agent) error {
 }
 
 func (s storage) AgentUpdate(agent *model.Agent) error {
-	_, err := s.engine.ID(agent.ID).AllCols().Update(agent)
-	return err
+	return retryWrite(func() error {
+		_, err := s.engine.ID(agent.ID).AllCols().Update(agent)
+		return wrapUpdate(err)
+	})
 }
 
 func (s storage) AgentDelete(agent *model.Agent) error {
-	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
+	})
 }
 
 func (s storage) AgentListForOrg(orgID int64, p *model.ListOptionsWithAll) (agents []*model.Agent, _ error) {

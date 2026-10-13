@@ -46,12 +46,16 @@ func (s storage) OrgUpdate(org *model.Org) error {
 
 func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
 	// update
-	_, err := sess.ID(org.ID).AllCols().Update(org)
-	return err
+	return retryWrite(func() error {
+		_, err := sess.ID(org.ID).AllCols().Update(org)
+		return wrapUpdate(err)
+	})
 }
 
 func (s storage) OrgDelete(id int64) error {
-	return s.orgDelete(s.engine.NewSession(), id)
+	return retryWrite(func() error {
+		return s.orgDelete(s.engine.NewSession(), id)
+	})
 }
 
 func (s storage) orgDelete(sess *xorm.Session, id int64) error {

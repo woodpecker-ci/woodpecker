@@ -50,12 +50,16 @@ func (s storage) RegistryCreate(registry *model.Registry) error {
 }
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {
-	_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
-	return err
+	return retryWrite(func() error {
+		_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
+		return wrapUpdate(err)
+	})
 }
 
 func (s storage) RegistryDelete(registry *model.Registry) error {
-	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
+	})
 }
 
 func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {
