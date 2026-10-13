@@ -167,3 +167,8 @@ func TestIntegration_UserAgentInRealRequest(t *testing.T) {
 	assert.Contains(t, userAgent, "Woodpecker/")
 	assert.Contains(t, userAgent, "(integration-test)")
 }
+
+func TestUserAgent(t *testing.T) {
+	assert.Equal(t, fmt.Sprintf("Woodpecker/%s (backend-docker)", version.String()), UserAgent("backend-docker"))
+	assert.Equal(t, fmt.Sprintf("Woodpecker/%s", version.String()), UserAgent(""))
+}

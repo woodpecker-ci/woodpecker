@@ -25,7 +25,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
@@ -161,10 +160,9 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -680,6 +678,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
+		// GitLab sends tag_push events for tag creation and deletion.
+		// A deletion is indicated by a zero after SHA and can never result
+		// in a valid pipeline, as the commit is gone.
+		if event.After == "0000000000000000000000000000000000000000" {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "tag deleted"}
+		}
 		repo, pipeline, cmID, err := convertTagHook(event)
 		if err != nil || pipeline.Message != "" {
 			return repo, pipeline, err
