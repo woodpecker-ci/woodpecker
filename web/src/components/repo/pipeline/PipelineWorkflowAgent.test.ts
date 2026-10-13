@@ -1,17 +1,19 @@
-import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { DOMWrapper, enableAutoUnmount, flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import PipelineWorkflowAgent from '~/components/repo/pipeline/PipelineWorkflowAgent.vue';
 import { ApiRequestError } from '~/lib/api/client';
-import type { AgentSnapshot, PipelineWorkflow, User } from '~/lib/api/types';
+import type { AgentSnapshot, OrgPermissions, PipelineWorkflow, User } from '~/lib/api/types';
 
 const getWorkflowAgent =
   vi.fn<(repoId: number, pipelineNumber: number, workflowId: number) => Promise<AgentSnapshot>>();
 
+const getOrgPermissions = vi.fn<(orgId: number) => Promise<OrgPermissions>>();
+
 vi.mock('~/compositions/useApiClient', () => ({
-  default: () => ({ getWorkflowAgent }),
+  default: () => ({ getWorkflowAgent, getOrgPermissions }),
 }));
 
 const i18n = createI18n({
@@ -44,7 +46,7 @@ function mountAgent(workflow: PipelineWorkflow | undefined = makeWorkflow()) {
   return mount(PipelineWorkflowAgent, {
     props: { workflow, pipelineNumber: 7 },
     attachTo: document.body,
-    global: { plugins: [i18n], provide: { repo } },
+    global: { plugins: [i18n], provide: { repo }, stubs: { RouterLink: RouterLinkStub } },
   });
 }
 
@@ -68,12 +70,15 @@ enableAutoUnmount(afterEach);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  window.WOODPECKER_USER = { id: 1, login: 'admin', admin: true } as User;
+  window.WOODPECKER_USER = { id: 1, login: 'admin', admin: true, org_id: 1 } as User;
+  window.WOODPECKER_USER_REGISTERED_AGENTS = true;
   getWorkflowAgent.mockResolvedValue(makeAgent());
+  getOrgPermissions.mockResolvedValue({ member: false, admin: false });
 });
 
 afterEach(() => {
   window.WOODPECKER_USER = undefined;
+  window.WOODPECKER_USER_REGISTERED_AGENTS = undefined;
 });
 
 describe('pipelineWorkflowAgent', () => {
@@ -298,6 +303,75 @@ describe('pipelineWorkflowAgent', () => {
       popover().element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await flushPromises();
       expect(popover().exists()).toBe(true);
+    });
+  });
+
+  describe('agent link', () => {
+    async function openPopover(agent: AgentSnapshot) {
+      getWorkflowAgent.mockResolvedValue(agent);
+      const wrapper = mountAgent();
+      await flushPromises();
+      await infoButton(wrapper).trigger('click');
+      return wrapper;
+    }
+
+    const agentLink = (wrapper: Wrapper) => wrapper.findComponent(RouterLinkStub);
+
+    it('links a global agent to the admin agents settings for instance admins, in a new tab', async () => {
+      const wrapper = await openPopover(makeAgent());
+
+      expect(agentLink(wrapper).props('to')).toStrictEqual({ name: 'admin-settings-agents', query: { agent: 3 } });
+      expect(agentLink(wrapper).attributes('target')).toBe('_blank');
+      expect(agentLink(wrapper).text()).toBe('builder-03');
+    });
+
+    it('does not link a global agent for other users', async () => {
+      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false, org_id: 2 } as User;
+      const wrapper = await openPopover(makeAgent());
+
+      expect(agentLink(wrapper).exists()).toBe(false);
+      expect(popover().text()).toContain('builder-03');
+    });
+
+    it('links an org agent to the org agents settings for org admins', async () => {
+      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false, org_id: 2 } as User;
+      getOrgPermissions.mockResolvedValue({ member: true, admin: true });
+      const wrapper = await openPopover(makeAgent({ org_id: 5 }));
+
+      expect(getOrgPermissions).toHaveBeenCalledWith(5);
+      expect(agentLink(wrapper).props('to')).toStrictEqual({
+        name: 'org-settings-agents',
+        params: { orgId: 5 },
+        query: { agent: 3 },
+      });
+      expect(agentLink(wrapper).attributes('target')).toBe('_blank');
+    });
+
+    it('does not link an org agent for org members without admin', async () => {
+      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false, org_id: 2 } as User;
+      getOrgPermissions.mockResolvedValue({ member: true, admin: false });
+      const wrapper = await openPopover(makeAgent({ org_id: 5 }));
+
+      expect(agentLink(wrapper).exists()).toBe(false);
+    });
+
+    it('links an agent of the own user org to the user agents settings', async () => {
+      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false, org_id: 2 } as User;
+      const wrapper = await openPopover(makeAgent({ org_id: 2 }));
+
+      expect(getOrgPermissions).not.toHaveBeenCalled();
+      expect(agentLink(wrapper).props('to')).toStrictEqual({ name: 'user-agents', query: { agent: 3 } });
+    });
+
+    it('does not link org or user agents when user agent registration is disabled, like the settings tabs', async () => {
+      window.WOODPECKER_USER_REGISTERED_AGENTS = false;
+      getOrgPermissions.mockResolvedValue({ member: true, admin: true });
+      const wrapper = await openPopover(makeAgent({ org_id: 1 }));
+      expect(agentLink(wrapper).exists()).toBe(false);
+
+      const other = await openPopover(makeAgent({ org_id: 5 }));
+      expect(agentLink(other).exists()).toBe(false);
+      expect(getOrgPermissions).not.toHaveBeenCalled();
     });
   });
 });

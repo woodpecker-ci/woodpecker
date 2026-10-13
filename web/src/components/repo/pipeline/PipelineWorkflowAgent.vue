@@ -39,7 +39,12 @@
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.workflow') }}</dt>
             <dd class="break-words">{{ workflow?.name }}</dd>
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.agent') }}</dt>
-            <dd class="break-words">{{ agent.name || `#${agent.id}` }}</dd>
+            <dd class="break-words">
+              <router-link v-if="agentLink" :to="agentLink" target="_blank" class="text-wp-link-100 hover:underline">
+                {{ agentName }}
+              </router-link>
+              <template v-else>{{ agentName }}</template>
+            </dd>
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.platform') }}</dt>
             <dd class="break-words">{{ agent.platform }}</dd>
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.backend') }}</dt>
@@ -74,6 +79,7 @@
 import { onClickOutside, onKeyStroke, useEventListener } from '@vueuse/core';
 import { computed, ref, useId, useTemplateRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { RouteLocationRaw } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -92,7 +98,7 @@ const VIEWPORT_MARGIN = 16;
 const ARROW_HALF_WIDTH = 6;
 
 const apiClient = useApiClient();
-const { user } = useConfig();
+const { user, userRegisteredAgents } = useConfig();
 const repo = requiredInject('repo');
 const { t } = useI18n();
 
@@ -104,9 +110,11 @@ const popoverId = useId();
 const open = ref(false);
 const showLabels = ref(false);
 const agent = ref<AgentSnapshot>();
+const agentLink = ref<RouteLocationRaw>();
 const loading = ref(false);
 const position = ref({ top: 0, right: VIEWPORT_MARGIN, maxHeight: 0, arrowRight: 12 });
 
+const agentName = computed(() => agent.value?.name || `#${agent.value?.id}`);
 const labels = computed(() => Object.entries(agent.value?.custom_labels ?? {}));
 
 const title = computed(() => {
@@ -163,9 +171,42 @@ watch(
   { immediate: true },
 );
 
-watch(agent, (newAgent) => {
+// The agent settings page with this agent, if the user may open that settings page.
+async function agentSettingsLink(snapshot: AgentSnapshot): Promise<RouteLocationRaw | undefined> {
+  const query = { agent: snapshot.id };
+  // global agent
+  if (snapshot.org_id === -1) {
+    return user?.admin ? { name: 'admin-settings-agents', query } : undefined;
+  }
+  // like the settings tabs, org and user agents are only shown with user agent registration
+  if (!userRegisteredAgents) {
+    return undefined;
+  }
+  if (snapshot.org_id === user?.org_id) {
+    return { name: 'user-agents', query };
+  }
+  const permissions = await apiClient.getOrgPermissions(snapshot.org_id);
+  return permissions.admin ? { name: 'org-settings-agents', params: { orgId: snapshot.org_id }, query } : undefined;
+}
+
+watch(agent, async (newAgent, _, onCleanup) => {
+  agentLink.value = undefined;
   if (!newAgent) {
     open.value = false;
+    return;
+  }
+
+  let stale = false;
+  onCleanup(() => {
+    stale = true;
+  });
+  try {
+    const link = await agentSettingsLink(newAgent);
+    if (!stale) {
+      agentLink.value = link;
+    }
+  } catch {
+    // without permissions the name is shown without link
   }
 });
 
