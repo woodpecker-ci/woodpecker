@@ -125,13 +125,18 @@ onMounted(async () => {
   }
 });
 
-// back on the list the linked agent is left, so a reload must not open it again
+// keep the shown agent in the url, so a reload opens it again and back on the list it does not
 watch(selectedAgent, async (agent) => {
-  if (agent || route.query.agent === undefined) {
+  const agentId = agent?.id?.toString();
+  if (route.query.agent === agentId) {
     return;
   }
   const query = { ...route.query };
-  delete query.agent;
+  if (agentId) {
+    query.agent = agentId;
+  } else {
+    delete query.agent;
+  }
   await router.replace({ query });
 });
 </script>

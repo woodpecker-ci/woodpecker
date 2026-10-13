@@ -103,6 +103,17 @@ describe('agentManager', () => {
     expect(replace).toHaveBeenCalledWith({ query: { other: 'kept' } });
   });
 
+  it('puts an agent opened from the list into the url, so a reload opens it again', async () => {
+    route.query = { other: 'kept' };
+    const wrapper = mountManager();
+    await flushPromises();
+
+    await wrapper.get('[data-edit]').trigger('click');
+    await flushPromises();
+
+    expect(replace).toHaveBeenCalledWith({ query: { other: 'kept', agent: '9' } });
+  });
+
   it('keeps an agent the user picked while the linked one is still searched', async () => {
     let resolvePage2!: (agents: Agent[]) => void;
     loadAgents.mockImplementation(async (page: number) =>
