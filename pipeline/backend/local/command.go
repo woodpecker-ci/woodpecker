@@ -89,6 +89,16 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
+// PowerShell treats typographic single quotes as string delimiters too.
+func quotePowerShell(value string) string {
+	replacer := strings.NewReplacer(
+		"'", "''",
+		"‘", "‘‘",
+		"’", "’’",
+	)
+	return "'" + replacer.Replace(value) + "'"
+}
+
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
@@ -155,7 +165,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		var script strings.Builder
 		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
 		for _, cmd := range cmdList {
-			script.WriteString("Write-Host " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString("Write-Host " + quotePowerShell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
