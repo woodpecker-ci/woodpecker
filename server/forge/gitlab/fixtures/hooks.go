@@ -53,6 +53,11 @@ var HookPush []byte
 //go:embed HookTag.json
 var HookTag []byte
 
+// HookTagDeleted is payload of a TAG event deleting a tag
+//
+//go:embed HookTagDeleted.json
+var HookTagDeleted []byte
+
 // HookPullRequest is payload of a PULL_REQUEST event
 //
 //go:embed HookPullRequestUpdated.json
