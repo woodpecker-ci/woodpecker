@@ -678,6 +678,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
+		// GitLab sends tag_push events for tag creation and deletion.
+		// A deletion is indicated by a zero after SHA and can never result
+		// in a valid pipeline, as the commit is gone.
+		if event.After == "0000000000000000000000000000000000000000" {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "tag deleted"}
+		}
 		repo, pipeline, cmID, err := convertTagHook(event)
 		if err != nil || pipeline.Message != "" {
 			return repo, pipeline, err
