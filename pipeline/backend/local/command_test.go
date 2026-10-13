@@ -36,6 +36,33 @@ func TestLookupShellPath(t *testing.T) {
 	})
 }
 
+func TestQuotePowerShell(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"empty", "", "''"},
+		{"plain", "hello", "'hello'"},
+		{"single quote", "it's working", "'it''s working'"},
+		{"double quote", `echo "hello"`, `'echo "hello"'`},
+		{"variable", `echo $HOME`, `'echo $HOME'`},
+		{"expression", `echo $(Get-Date)`, `'echo $(Get-Date)'`},
+		{"backtick", "echo `test", "'echo `test'"},
+		{"left smart quote", "echo ‘test", "'echo ‘‘test'"},
+		{"right smart quote", "echo test’", "'echo test’’'"},
+		{"low-9 quote", "echo ‚test", "'echo ‚‚test'"},
+		{"reversed quote", "echo ‛test", "'echo ‛‛test'"},
+		{"mixed quotes", "it's ‘quoted’", "'it''s ‘‘quoted’’'"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, quotePowerShell(tt.input))
+		})
+	}
+}
+
 func TestGenCmdByShell(t *testing.T) {
 	tmpDir := t.TempDir()
 	e := local{tempDir: tmpDir}
@@ -82,9 +109,9 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
 			assert.EqualValues(t, `$ErrorActionPreference = "Stop"
-Write-Host '▶  Write-Host '"'"'test'"'"''
+Write-Host '▶  Write-Host ''test'''
 Write-Host 'test'
-Write-Host '▶  Write-Output '"'"'test'"'"''
+Write-Host '▶  Write-Output ''test'''
 Write-Output 'test'
 Write-Host '▶  echo test'
 echo test
