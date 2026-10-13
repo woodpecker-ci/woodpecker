@@ -24,7 +24,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7279](https://github.com/woodpecker-ci/woodpecker/pull/7279)]
 - Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
 - Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
@@ -33,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
 - Update golang-packages [[#7278](https://github.com/woodpecker-ci/woodpecker/pull/7278)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
 - Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
