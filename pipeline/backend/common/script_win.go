@@ -45,6 +45,20 @@ func generateScriptWindows(commands []string, workDir string) string {
 	return buf.String()
 }
 
+// QuotePowerShell returns value as a PowerShell single-quoted string.
+// PowerShell treats U+0027, U+2018, U+2019, U+201A and U+201B as single quotes:
+// https://github.com/PowerShell/PowerShell/blob/5d871eb5e02cbcc8ecb03fce4b24d7f48bf97c26/src/System.Management.Automation/engine/parser/CharTraits.cs#L265-L272
+func QuotePowerShell(value string) string {
+	replacer := strings.NewReplacer(
+		"'", "''",
+		"‘", "‘‘",
+		"’", "’’",
+		"‚", "‚‚",
+		"‛", "‛‛",
+	)
+	return "'" + replacer.Replace(value) + "'"
+}
+
 const setupScriptWinProto = `
 $LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
