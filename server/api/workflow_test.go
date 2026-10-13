@@ -26,7 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -36,9 +35,7 @@ func TestGetWorkflowAgent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	repo := &model.Repo{ID: 1, OrgID: 5}
-	org := &model.Org{ID: 5, Name: "acme", ForgeID: 1}
 	pipeline := &model.Pipeline{ID: 10, RepoID: 1, Number: 3}
-	admin := &model.User{ID: 1, Login: "root", ForgeID: 1, Admin: true}
 	user := &model.User{ID: 2, Login: "alice", ForgeID: 1}
 
 	globalAgent := &model.AgentSnapshot{ID: 101, OrgID: model.IDNotSet, Name: "global-builder", CustomLabels: map[string]string{}}
@@ -50,112 +47,58 @@ func TestGetWorkflowAgent(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		user       *model.User
 		workflowID string
 		workflow   *model.Workflow
 		loadErr    error
-		orgPerm    *model.OrgPerm
-		// server.Config.Agent.DisableUserRegisteredAgentRegistration
-		disableOrgAPI bool
-		wantStatus    int
-		wantAgent     *model.AgentSnapshot
-		// org admin membership must only be checked for agents of the repo's org
-		wantMembershipCall bool
+		wantStatus int
+		wantAgent  *model.AgentSnapshot
 	}{
 		{
-			name:       "instance admin reads a global agent",
-			user:       admin,
+			name:       "user reads a global agent",
 			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 7, AgentSnapshotID: globalAgent.ID},
 			wantStatus: http.StatusOK,
 			wantAgent:  globalAgent,
 		},
 		{
 			name:       "the snapshot is shared, the agent id comes from the workflow",
-			user:       admin,
 			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 70, AgentSnapshotID: globalAgent.ID},
 			wantStatus: http.StatusOK,
 			wantAgent:  globalAgent,
 		},
 		{
-			name:       "instance admin gets not found without a snapshot",
-			user:       admin,
+			name:       "user reads an agent of the repo's org",
+			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8, AgentSnapshotID: orgAgent.ID},
+			wantStatus: http.StatusOK,
+			wantAgent:  orgAgent,
+		},
+		{
+			name:       "user reads an agent of another org",
+			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 9, AgentSnapshotID: otherOrgAgent.ID},
+			wantStatus: http.StatusOK,
+			wantAgent:  otherOrgAgent,
+		},
+		{
+			name:       "not found without a snapshot",
 			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 7},
 			wantStatus: http.StatusNotFound,
 		},
 		{
-			name:               "org admin reads an agent of the repo's org",
-			user:               user,
-			workflow:           &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8, AgentSnapshotID: orgAgent.ID},
-			orgPerm:            &model.OrgPerm{Member: true, Admin: true},
-			wantStatus:         http.StatusOK,
-			wantAgent:          orgAgent,
-			wantMembershipCall: true,
-		},
-		{
-			name:               "org member without admin is forbidden",
-			user:               user,
-			workflow:           &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8, AgentSnapshotID: orgAgent.ID},
-			orgPerm:            &model.OrgPerm{Member: true},
-			wantStatus:         http.StatusForbidden,
-			wantMembershipCall: true,
-		},
-		{
-			name:          "org admin is forbidden when user agent registration is disabled, like the org agent api",
-			user:          user,
-			disableOrgAPI: true,
-			workflow:      &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8, AgentSnapshotID: orgAgent.ID},
-			orgPerm:       &model.OrgPerm{Member: true, Admin: true},
-			wantStatus:    http.StatusForbidden,
-		},
-		{
-			name:       "org admin is forbidden to read a global agent",
-			user:       user,
-			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 7, AgentSnapshotID: globalAgent.ID},
-			orgPerm:    &model.OrgPerm{Member: true, Admin: true},
-			wantStatus: http.StatusForbidden,
-		},
-		{
-			name:       "org admin is forbidden to read an agent of another org",
-			user:       user,
-			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 9, AgentSnapshotID: otherOrgAgent.ID},
-			orgPerm:    &model.OrgPerm{Member: true, Admin: true},
-			wantStatus: http.StatusForbidden,
-		},
-		{
-			name:       "non admin cannot tell a missing snapshot from a forbidden one",
-			user:       user,
-			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8},
-			orgPerm:    &model.OrgPerm{Member: true, Admin: true},
-			wantStatus: http.StatusForbidden,
-		},
-		{
-			name:       "instance admin gets not found for a dangling snapshot reference",
-			user:       admin,
+			name:       "not found for a dangling snapshot reference",
 			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 7, AgentSnapshotID: danglingSnapshotID},
 			wantStatus: http.StatusNotFound,
 		},
 		{
-			name:       "non admin gets forbidden for a dangling snapshot reference",
-			user:       user,
-			workflow:   &model.Workflow{ID: 20, PipelineID: 10, AgentID: 8, AgentSnapshotID: danglingSnapshotID},
-			orgPerm:    &model.OrgPerm{Member: true, Admin: true},
-			wantStatus: http.StatusForbidden,
-		},
-		{
-			name:       "workflow of another pipeline is not found, even for admins",
-			user:       admin,
+			name:       "workflow of another pipeline is not found",
 			workflow:   &model.Workflow{ID: 20, PipelineID: 11, AgentID: 7, AgentSnapshotID: globalAgent.ID},
 			wantStatus: http.StatusNotFound,
 		},
 		{
 			name:       "unknown workflow is not found",
-			user:       admin,
 			loadErr:    types.ErrRecordNotExist,
 			wantStatus: http.StatusNotFound,
 		},
 		{
 			name:       "invalid workflow id",
-			user:       admin,
 			workflowID: "abc",
 			wantStatus: http.StatusBadRequest,
 		},
@@ -163,18 +106,11 @@ func TestGetWorkflowAgent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			installOrgForgeManager(t)
-			membership := &fakeMembership{perm: tt.orgPerm}
-			server.Config.Services.Membership = membership
-			server.Config.Agent.DisableUserRegisteredAgentRegistration = tt.disableOrgAPI
-			t.Cleanup(func() { server.Config.Agent.DisableUserRegisteredAgentRegistration = false })
-
 			mockStore := store_mocks.NewMockStore(t)
 			if tt.workflowID == "" {
 				tt.workflowID = "20"
 				mockStore.On("WorkflowLoad", int64(20)).Return(tt.workflow, tt.loadErr)
 			}
-			mockStore.On("OrgGet", int64(5)).Return(org, nil).Maybe()
 			for id, snapshot := range snapshots {
 				mockStore.On("AgentSnapshotFind", id).Return(snapshot, nil).Maybe()
 			}
@@ -186,14 +122,13 @@ func TestGetWorkflowAgent(t *testing.T) {
 			c.Set("store", mockStore)
 			c.Set("repo", repo)
 			c.Set("pipeline", pipeline)
-			c.Set("user", tt.user)
+			c.Set("user", user)
 			c.Params = gin.Params{{Key: "workflow_id", Value: tt.workflowID}}
 
 			GetWorkflowAgent(c)
 			c.Writer.WriteHeaderNow()
 
 			assert.Equal(t, tt.wantStatus, w.Code, w.Body.String())
-			assert.Equal(t, tt.wantMembershipCall, membership.called)
 			if tt.wantAgent != nil {
 				var got model.AgentSnapshot
 				require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))

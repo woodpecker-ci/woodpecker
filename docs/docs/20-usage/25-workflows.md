@@ -84,10 +84,8 @@ Select a step and click the information icon in the **Step Logs** toolbar to see
 
 The server stores this information when the agent gets the workflow assigned, so it stays available after the agent was changed or deleted.
 
-The icon is grayed out while no agent is assigned yet, when no agent information is available, or when you are not allowed to see it:
-
-- Instance admins can see every agent.
-- Organization admins can see the agents registered for the repository's organization, unless [user agent registration](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is disabled. Global agents stay hidden for them.
+The information holds no secrets, so every logged in user who can see the pipeline can see it.
+The icon is grayed out while no agent is assigned yet or no agent information is available.
 
 ## Flow control
 

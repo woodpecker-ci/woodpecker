@@ -79,7 +79,6 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
-import { ApiRequestError } from '~/lib/api/client';
 import type { AgentSnapshot, PipelineWorkflow } from '~/lib/api/types';
 
 const props = defineProps<{
@@ -106,7 +105,6 @@ const open = ref(false);
 const showLabels = ref(false);
 const agent = ref<AgentSnapshot>();
 const loading = ref(false);
-const forbidden = ref(false);
 const position = ref({ top: 0, right: VIEWPORT_MARGIN, maxHeight: 0, arrowRight: 12 });
 
 const labels = computed(() => Object.entries(agent.value?.custom_labels ?? {}));
@@ -115,7 +113,7 @@ const title = computed(() => {
   if (!props.workflow?.agent_id) {
     return t('repo.pipeline.agent.not_assigned');
   }
-  if (!user || forbidden.value) {
+  if (!user) {
     return t('repo.pipeline.agent.no_permission');
   }
   if (loading.value) {
@@ -127,8 +125,8 @@ const title = computed(() => {
   return t('repo.pipeline.agent.title');
 });
 
-// The server keeps a snapshot of the agent per assignment and decides who may read it,
-// so it is only loaded again for another workflow or a new assignment.
+// The server keeps a snapshot of the agent per assignment, so it is only loaded again
+// for another workflow or a new assignment.
 watch(
   [() => props.workflow?.id, () => props.workflow?.agent_id],
   async ([workflowId, agentId], [oldWorkflowId], onCleanup) => {
@@ -142,7 +140,6 @@ watch(
       showLabels.value = false;
     }
     agent.value = undefined;
-    forbidden.value = false;
     loading.value = false;
 
     if (!user || workflowId === undefined || !agentId) {
@@ -155,10 +152,8 @@ watch(
       if (!stale) {
         agent.value = result;
       }
-    } catch (error) {
-      if (!stale) {
-        forbidden.value = error instanceof ApiRequestError && error.status === 403;
-      }
+    } catch {
+      // no agent information was recorded, the icon stays grayed out
     } finally {
       if (!stale) {
         loading.value = false;

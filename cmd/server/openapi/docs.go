@@ -3443,7 +3443,7 @@ const docTemplate = `{
         },
         "/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/agent": {
             "get": {
-                "description": "Returns the snapshot of the agent taken when it got the workflow assigned, so it is also available after the agent got deleted.\nLike agents themselves, instance admins can read every snapshot and organization admins the ones of the organization's agents, unless user agent registration is disabled.",
+                "description": "Returns the snapshot of the agent taken when it got the workflow assigned, so it is also available after the agent got deleted.\nIt holds no secrets, so every logged in user who can see the pipeline may read it.",
                 "produces": [
                     "application/json"
                 ],

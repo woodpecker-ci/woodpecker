@@ -88,25 +88,15 @@ describe('pipelineWorkflowAgent', () => {
       expect(getWorkflowAgent).not.toHaveBeenCalled();
     });
 
-    it('lets the server decide for logged in users and grays out the icon when it forbids access', async () => {
+    it('shows the agent to every logged in user', async () => {
       window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      getWorkflowAgent.mockRejectedValue(new ApiRequestError('Forbidden', 403));
+      getWorkflowAgent.mockResolvedValue(makeAgent({ org_id: 6, name: 'other-org-builder' }));
       const wrapper = mountAgent();
       await flushPromises();
 
       expect(getWorkflowAgent).toHaveBeenCalledWith(1, 7, 1);
-      expect(infoButton(wrapper).attributes('disabled')).toBeDefined();
-      expect(infoButton(wrapper).attributes('title')).toBe('repo.pipeline.agent.no_permission');
-    });
-
-    it('shows the agent to a non admin the server allows, e.g. an org admin', async () => {
-      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false } as User;
-      getWorkflowAgent.mockResolvedValue(makeAgent({ org_id: 5, name: 'org-builder' }));
-      const wrapper = mountAgent();
-      await flushPromises();
-
       await infoButton(wrapper).trigger('click');
-      expect(popover().text()).toContain('org-builder');
+      expect(popover().text()).toContain('other-org-builder');
     });
   });
 
@@ -175,7 +165,7 @@ describe('pipelineWorkflowAgent', () => {
 
       await wrapper.setProps({ workflow: makeWorkflow({ id: 2, agent_id: 4 }) });
       await flushPromises();
-      slow.reject(new ApiRequestError('Forbidden', 403));
+      slow.reject(new ApiRequestError('Not Found', 404));
       await flushPromises();
 
       expect(infoButton(wrapper).attributes('disabled')).toBeUndefined();

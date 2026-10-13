@@ -20,9 +20,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -33,7 +31,7 @@ import (
 //
 //	@Summary		Get the agent a workflow got assigned to
 //	@Description	Returns the snapshot of the agent taken when it got the workflow assigned, so it is also available after the agent got deleted.
-//	@Description	Like agents themselves, instance admins can read every snapshot and organization admins the ones of the organization's agents, unless user agent registration is disabled.
+//	@Description	It holds no secrets, so every logged in user who can see the pipeline may read it.
 //	@Router			/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/agent [get]
 //	@Produce		json
 //	@Success		200	{object}	AgentSnapshot
@@ -44,9 +42,7 @@ import (
 //	@Param			workflow_id		path	int		true	"the workflow id"
 func GetWorkflowAgent(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo := session.Repo(c)
 	pl := session.Pipeline(c)
-	user := session.User(c)
 
 	workflowID, err := strconv.ParseInt(c.Param("workflow_id"), 10, 64)
 	if err != nil {
@@ -71,19 +67,6 @@ func GetWorkflowAgent(c *gin.Context) {
 		return
 	}
 
-	if !user.Admin {
-		allowed, err := canReadOrgAgent(c, user, repo, snapshot)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to check permission to read workflow agent")
-			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-			return
-		}
-		if !allowed {
-			c.String(http.StatusForbidden, "User not authorized")
-			return
-		}
-	}
-
 	if snapshot == nil {
 		c.String(http.StatusNotFound, "No agent recorded for this workflow")
 		return
@@ -106,23 +89,4 @@ func workflowAgentSnapshot(_store store.Store, workflow *model.Workflow) (*model
 		return nil, nil
 	}
 	return snapshot, err
-}
-
-// canReadOrgAgent reports whether a user, who is not an instance admin, may read the
-// agent snapshot: like with the org agent api, only agents of the repo's org are visible,
-// only to admins of it and only while user agent registration is enabled.
-func canReadOrgAgent(c *gin.Context, user *model.User, repo *model.Repo, agent *model.AgentSnapshot) (bool, error) {
-	if server.Config.Agent.DisableUserRegisteredAgentRegistration {
-		return false, nil
-	}
-	if agent == nil || agent.OrgID == model.IDNotSet || agent.OrgID != repo.OrgID {
-		return false, nil
-	}
-
-	org, err := store.FromContext(c).OrgGet(repo.OrgID)
-	if err != nil {
-		return false, err
-	}
-
-	return session.IsOrgMember(c, user, org, true)
 }
