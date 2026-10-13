@@ -32,7 +32,8 @@ const pages: Record<number, Agent[]> = {
   2: [makeAgent(3), makeAgent(4)],
   3: [makeAgent(5)],
 };
-const loadAgents = vi.fn(async (page: number) => pages[page] ?? []);
+const loadPage = async (page: number) => pages[page] ?? [];
+const loadAgents = vi.fn(loadPage);
 
 function mountManager() {
   return mount(AgentManager, {
@@ -48,7 +49,11 @@ function mountManager() {
       stubs: {
         Settings: { template: '<div><slot /></div>' },
         Button: true,
-        AgentList: { name: 'AgentList', template: '<div data-list />' },
+        AgentList: {
+          name: 'AgentList',
+          emits: ['edit'],
+          template: `<div data-list><button data-edit @click="$emit('edit', { id: 9, name: 'picked' })" /></div>`,
+        },
         AgentForm: {
           name: 'AgentForm',
           props: ['modelValue'],
@@ -64,6 +69,7 @@ enableAutoUnmount(afterEach);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  loadAgents.mockImplementation(loadPage);
   route.query = {};
 });
 
@@ -95,6 +101,23 @@ describe('agentManager', () => {
 
     expect(wrapper.find('[data-list]').exists()).toBe(true);
     expect(replace).toHaveBeenCalledWith({ query: { other: 'kept' } });
+  });
+
+  it('keeps an agent the user picked while the linked one is still searched', async () => {
+    let resolvePage2!: (agents: Agent[]) => void;
+    loadAgents.mockImplementation(async (page: number) =>
+      page === 2 ? new Promise<Agent[]>((resolve) => (resolvePage2 = resolve)) : loadPage(page),
+    );
+    route.query = { agent: '5' };
+    const wrapper = mountManager();
+    await flushPromises();
+
+    await wrapper.get('[data-edit]').trigger('click');
+    resolvePage2(pages[2]);
+    await flushPromises();
+
+    expect(wrapper.findComponent({ name: 'AgentForm' }).props('modelValue')).toStrictEqual({ id: 9, name: 'picked' });
+    expect(loadAgents).not.toHaveBeenCalledWith(3);
   });
 
   it('stays on the list when the agent from the url does not exist', async () => {

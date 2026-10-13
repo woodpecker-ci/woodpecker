@@ -110,6 +110,10 @@ onMounted(async () => {
   }
   for (let page = 1; ; page++) {
     const agents = await props.loadAgents(page);
+    // the user picked an agent (or add) meanwhile, keep that
+    if (selectedAgent.value) {
+      return;
+    }
     if (!agents?.length) {
       return;
     }
