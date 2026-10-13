@@ -38,6 +38,19 @@ By default this is the case for pull requests from forks.
 - An approved pipeline runs the configuration it was created with, but gets the current secrets and the Git credentials of the user who approved it.
   <!-- https://github.com/woodpecker-ci/woodpecker/blob/1182744d09b1c097b47749ed813cc7e0549c25c9/server/pipeline/approve.go#L60 -->
 
+## Workflow configuration
+
+Woodpecker reads the workflow files from the commit a pipeline runs for, so a pull request runs the workflow of its own branch.
+Everybody who can push or open a pull request that runs without approval controls the workflow.
+
+Values from the forge, like the commit message, the author or the pull request labels, are untrusted input.
+[String substitution](./50-environment.md#string-substitution) puts them into the YAML text before it is parsed.
+Woodpecker quotes values with line breaks, so they cannot add steps or other YAML structure.
+Where the commit data is not written by the one who wrote the workflow, treat it with care:
+
+- A workflow that runs after a merge uses the commit message of the merge, which can be written by the contributor.
+- A [config extension](./72-extensions/index.md) returns the workflow, but the commit data is still substituted into it.
+
 ## Secrets
 
 Secrets are only passed to pipelines of the [events](./40-secrets.md#events-filter) they are enabled for.
