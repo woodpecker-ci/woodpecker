@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-13
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7297](https://github.com/woodpecker-ci/woodpecker/pull/7297)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
 - Update golang-packages [[#7278](https://github.com/woodpecker-ci/woodpecker/pull/7278)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
