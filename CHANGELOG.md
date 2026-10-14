@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @confusedsushi, @fredrikblau
+@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @confusedsushi, @fredrikblau, @xoxys
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Rework dark theme [[#7263](https://github.com/woodpecker-ci/woodpecker/pull/7263)]
 - Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
 
 ### 🐛 Bug Fixes
@@ -34,12 +35,9 @@
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7297](https://github.com/woodpecker-ci/woodpecker/pull/7297)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
-- Update golang-packages [[#7278](https://github.com/woodpecker-ci/woodpecker/pull/7278)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
 - Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
-- Update golang-packages [[#7260](https://github.com/woodpecker-ci/woodpecker/pull/7260)]
 - Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
 
 ### Misc
