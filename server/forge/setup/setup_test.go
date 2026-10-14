@@ -86,16 +86,18 @@ func TestForgeBitbucketDatacenterMissingOptions(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("missing oauth-enable-project-admin-scope", func(t *testing.T) {
+	t.Run("no oauth-enable-project-admin-scope needed", func(t *testing.T) {
 		t.Parallel()
 		_, err := Forge(&model.Forge{
-			Type: model.ForgeTypeBitbucketDatacenter,
+			Type:              model.ForgeTypeBitbucketDatacenter,
+			OAuthClientID:     "id",
+			OAuthClientSecret: "secret",
 			AdditionalOptions: map[string]any{
 				"git-username": "u",
 				"git-password": "p",
 			},
 		})
-		assert.Error(t, err)
+		assert.NoError(t, err)
 	})
 }
 
