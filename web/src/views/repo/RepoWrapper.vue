@@ -139,8 +139,8 @@ watch([repositoryId], () => {
   loadRepo();
 });
 
-// the server syncs permissions older than the interval with the forge on every request,
-// so a still outdated timestamp means that sync failed
+// the server re-syncs permissions older than the interval with the forge on every request,
+// so a still-outdated timestamp means the sync failed
 const permSyncFailed = computed(() => {
   if (!user || user.admin || !repo.value || !repoPermissions.value || user.forge_id !== repo.value.forge_id) {
     return false;
