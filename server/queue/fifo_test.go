@@ -15,6 +15,7 @@
 package queue
 
 import (
+	"container/list"
 	"context"
 	"errors"
 	"fmt"
@@ -666,6 +667,96 @@ func TestFifoDependencies(t *testing.T) {
 		assert.NoError(t, q.Done(ctx, gotChild.ID, model.StatusSuccess))
 		waitForProcess()
 	})
+}
+
+func TestFifoFilterWaiting(t *testing.T) {
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		waiting []*model.Task
+		running []string
+		ready   []string
+		blocked []string
+	}{
+		{
+			name: "independent tasks keep their order",
+			pending: []*model.Task{
+				{ID: "first"},
+				{ID: "second"},
+			},
+			ready: []string{"first", "second"},
+		},
+		{
+			name: "chain checks the full pending snapshot",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+				{ID: "parent", Dependencies: []string{"grandparent"}},
+				{ID: "grandparent"},
+			},
+			ready:   []string{"grandparent"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "waiting tasks can be dependencies",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+			},
+			waiting: []*model.Task{
+				{ID: "parent", Dependencies: []string{"root"}},
+			},
+			running: []string{"root"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "missing dependencies release waiting tasks at the tail",
+			pending: []*model.Task{
+				{ID: "ready"},
+			},
+			waiting: []*model.Task{
+				{ID: "released", Dependencies: []string{"finished"}},
+			},
+			ready: []string{"ready", "released"},
+		},
+		{
+			name: "cycles remain blocked",
+			pending: []*model.Task{
+				{ID: "first", Dependencies: []string{"second"}},
+				{ID: "second", Dependencies: []string{"first"}},
+			},
+			blocked: []string{"first", "second"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.waiting {
+				q.waitingOnDeps.PushBack(task)
+			}
+			for _, id := range tt.running {
+				q.running[id] = &entry{item: &model.Task{ID: id}}
+			}
+			ids := func(tasks *list.List) []string {
+				var result []string
+				for element := tasks.Front(); element != nil; element = element.Next() {
+					task, _ := element.Value.(*model.Task)
+					result = append(result, task.ID)
+				}
+				return result
+			}
+			for range 2 {
+				q.filterWaiting()
+				assert.Equal(t, tt.ready, ids(q.pending))
+				assert.Equal(t, tt.blocked, ids(q.waitingOnDeps))
+			}
+		})
+	}
 }
 
 func TestFifoConcurrency(t *testing.T) {
