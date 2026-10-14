@@ -41,10 +41,10 @@ type User struct {
 	// Login is the username for this user.
 	//
 	// required: true
-	Login string `json:"login"  xorm:"'login' UNIQUE(forge_login)"`
+	Login string `json:"login" xorm:"'login' UNIQUE(forge_login)"`
 
 	// AccessToken is the oauth2 access token.
-	AccessToken string `json:"-"  xorm:"TEXT 'access_token'"`
+	AccessToken string `json:"-" xorm:"TEXT 'access_token'"`
 
 	// RefreshToken is the oauth2 refresh token.
 	RefreshToken string `json:"-" xorm:"TEXT 'refresh_token'"`

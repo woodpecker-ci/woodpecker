@@ -52,7 +52,7 @@ type Secret struct {
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'value'"`
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
-	Note   string         `json:"note" xorm:"note"`
+	Note   string         `json:"note"            xorm:"note"`
 } //	@name	Secret
 
 // TableName return database table name for xorm.
@@ -141,9 +141,9 @@ func sortEvents(wel WebhookEventList) WebhookEventList {
 }
 
 type SecretPatch struct {
-	Name   *string        `json:"name"            `
-	Value  *string        `json:"value,omitempty" `
-	Images []string       `json:"images"          `
-	Events []WebhookEvent `json:"events"          `
-	Note   *string        `json:"note" `
+	Name   *string        `json:"name"`
+	Value  *string        `json:"value,omitempty"`
+	Images []string       `json:"images"`
+	Events []WebhookEvent `json:"events"`
+	Note   *string        `json:"note"`
 } //	@name	SecretPatch

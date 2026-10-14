@@ -155,7 +155,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		var script strings.Builder
 		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
 		for _, cmd := range cmdList {
-			script.WriteString("Write-Host " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString("Write-Host " + common.QuotePowerShell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil

@@ -82,9 +82,9 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
 			assert.EqualValues(t, `$ErrorActionPreference = "Stop"
-Write-Host '▶  Write-Host '"'"'test'"'"''
+Write-Host '▶  Write-Host ''test'''
 Write-Host 'test'
-Write-Host '▶  Write-Output '"'"'test'"'"''
+Write-Host '▶  Write-Output ''test'''
 Write-Output 'test'
 Write-Host '▶  echo test'
 echo test
