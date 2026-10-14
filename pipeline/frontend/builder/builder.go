@@ -177,7 +177,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		DependsOn:        parsed.DependsOn,
 		ConcurrencyLimit: parsed.Concurrency.Limit,
 		ConcurrencyGroup: parsed.Concurrency.Group,
-		// TODO: remove in next major.
+		// TODO: remove in 4.x.
 		RunsOn: parsed.RunsOn, //nolint:staticcheck
 	}
 	if len(item.Labels) == 0 {

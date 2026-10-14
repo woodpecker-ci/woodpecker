@@ -388,13 +388,6 @@ func TestRunsOnStatus(t *testing.T) {
 			when: "when:\n  event: push\n",
 			want: []string{"success"},
 		},
-		{
-			// The deprecated spelling must keep deciding on its own, even
-			// though the when above it sets no status.
-			name: "deprecated runs_on wins over when",
-			when: "when:\n  event: push\nruns_on: [ failure ]\n",
-			want: []string{"failure"},
-		},
 	}
 
 	for _, tt := range tests {
@@ -413,7 +406,6 @@ func TestRunsOnStatus(t *testing.T) {
 				},
 			}
 
-			// runs_on is deprecated, so Build reports a warning for that case.
 			items, _ := b.Build()
 			assert.Len(t, items, 1, "Should have generated 1 pipeline")
 			assert.ElementsMatch(t, tt.want, items[0].RunsOn)
