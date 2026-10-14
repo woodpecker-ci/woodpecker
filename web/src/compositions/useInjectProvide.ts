@@ -8,6 +8,7 @@ import type { Tab } from './useTabs';
 export interface InjectKeys {
   repo: Ref<Repo>;
   'repo-permissions': Ref<RepoPermissions>;
+  'badge-token': Ref<string>;
   org: Ref<Org>;
   'org-permissions': Ref<OrgPermissions>;
   pipeline: Ref<Pipeline>;

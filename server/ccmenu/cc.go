@@ -43,6 +43,18 @@ type CCProject struct {
 	WebURL          string   `xml:"webUrl,attr"`
 }
 
+// NewPlaceholder returns a project carrying no repo information at all. It is
+// served for repos whose state may not be shown, so the response looks the same
+// as for a repo that does not exist.
+func NewPlaceholder(name string) *CCProjects {
+	return &CCProjects{Project: &CCProject{
+		Name:            name,
+		Activity:        "Sleeping",
+		LastBuildStatus: "Unknown",
+		LastBuildLabel:  "Unknown",
+	}}
+}
+
 func New(r *model.Repo, b *model.Pipeline, url string) *CCProjects {
 	proj := &CCProject{
 		Name:            r.FullName,

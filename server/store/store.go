@@ -168,6 +168,11 @@ type Store interface {
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Token
+	TokenCreate(*model.Token) error
+	TokenFind(*model.Repo, model.TokenType) (*model.Token, error)
+	TokenReplace(*model.Repo, []*model.Token) error
+
 	// Forge
 	ForgeCreate(*model.Forge) error
 	ForgeGet(int64) (*model.Forge, error)
