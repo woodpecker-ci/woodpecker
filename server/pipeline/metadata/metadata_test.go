@@ -74,8 +74,8 @@ func TestGetWorkflowMetadata(t *testing.T) {
 			name:     "Test with forge",
 			forge:    forge,
 			repo:     &model.Repo{FullName: "testUser/testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", Clone: "https://gitea.com/testUser/testRepo.git", CloneSSH: "git@gitea.com:testUser/testRepo.git", Branch: "main", IsSCMPrivate: true},
-			pipeline: &model.Pipeline{Number: 3, Timestamp: 1722617519, ChangedFiles: []string{"test.go", "markdown file.md"}},
-			prev:     &model.Pipeline{Number: 2, Timestamp: 1722610173},
+			pipeline: &model.Pipeline{Number: 3, Commit: &model.Commit{Timestamp: 1722617519}, ChangedFiles: []string{"test.go", "markdown file.md"}},
+			prev:     &model.Pipeline{Number: 2, Commit: &model.Commit{Timestamp: 1722610173}},
 			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{

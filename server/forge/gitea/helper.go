@@ -72,6 +72,26 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 	}
 }
 
+// convertPayloadCommit converts a commit of a webhook payload or a branch to the
+// common Woodpecker commit structure.
+func convertPayloadCommit(from *gitea.PayloadCommit) *model.Commit {
+	commit := &model.Commit{
+		SHA:      from.ID,
+		Message:  from.Message,
+		ForgeURL: from.URL,
+	}
+	if from.Author != nil {
+		commit.Author = model.CommitAuthor{
+			Name:  from.Author.Name,
+			Email: from.Author.Email,
+		}
+	}
+	if !from.Timestamp.IsZero() {
+		commit.Timestamp = from.Timestamp.Unix()
+	}
+	return commit
+}
+
 // pipelineFromPush extracts the Pipeline data from a Gitea push hook.
 func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
@@ -79,29 +99,31 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	var message string
+	headCommit := hook.HeadCommit
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
-		message = hook.Commits[0].Message
+		headCommit = hook.Commits[0]
 		if len(hook.Commits) == 1 {
 			link = hook.Commits[0].URL
 		}
 	} else {
-		message = hook.HeadCommit.Message
 		link = hook.HeadCommit.URL
+	}
+
+	commit := convertPayloadCommit(&headCommit)
+	commit.SHA = hook.After
+	if commit.Timestamp == 0 {
+		commit.Timestamp = time.Now().UTC().Unix()
 	}
 
 	return &model.Pipeline{
 		Event:        model.EventPush,
-		Commit:       hook.After,
+		Commit:       commit,
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Message:      message,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
-		Timestamp:    time.Now().UTC().Unix(),
 		Sender:       hook.Sender.UserName,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
@@ -132,16 +154,20 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
 	return &model.Pipeline{
-		Event:     model.EventTag,
-		TagTitle:  ref,
-		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Avatar:    avatar,
-		Author:    hook.Sender.UserName,
-		Sender:    hook.Sender.UserName,
-		Email:     hook.Sender.Email,
-		Timestamp: time.Now().UTC().Unix(),
+		Event: model.EventTag,
+		Commit: &model.Commit{
+			SHA:       hook.Sha,
+			Timestamp: time.Now().UTC().Unix(),
+			Author: model.CommitAuthor{
+				Email: hook.Sender.Email,
+			},
+		},
+		TagTitle: ref,
+		Ref:      fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		Avatar:   avatar,
+		Author:   hook.Sender.UserName,
+		Sender:   hook.Sender.UserName,
 	}
 }
 
@@ -167,16 +193,20 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
+		Event: event,
+		Commit: &model.Commit{
+			SHA:     hook.PullRequest.Head.Sha,
+			Message: hook.PullRequest.Title,
+			Author: model.CommitAuthor{
+				Email: hook.Sender.Email,
+			},
+		},
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
-		Message:  hook.PullRequest.Title,
 		Author:   hook.PullRequest.Poster.UserName,
 		Avatar:   avatar,
 		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
 		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf(
 			"%s:%s",
@@ -210,14 +240,18 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:    model.EventRelease,
+		Event: model.EventRelease,
+		Commit: &model.Commit{
+			Author: model.CommitAuthor{
+				Email: hook.Sender.Email,
+			},
+		},
 		Ref:      fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL: hook.Release.HTMLURL,
 		Branch:   hook.Release.Target,
 		Avatar:   avatar,
 		Author:   hook.Sender.UserName,
 		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
 		Release: &model.Release{
 			Title:        hook.Release.Title,
 			IsPrerelease: hook.Release.IsPrerelease,

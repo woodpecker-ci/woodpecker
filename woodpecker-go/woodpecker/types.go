@@ -106,34 +106,35 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID          int64            `json:"id"`
-		Number      int64            `json:"number"`
-		Parent      int64            `json:"parent"`
-		Event       string           `json:"event"`
-		EventReason []string         `json:"event_reason"`
-		Status      string           `json:"status"`
-		Errors      []*PipelineError `json:"errors"`
-		Created     int64            `json:"created"`
-		Updated     int64            `json:"updated"`
-		Started     int64            `json:"started"`
-		Finished    int64            `json:"finished"`
-		Deploy      string           `json:"deploy_to"`
-		Commit      string           `json:"commit"`
-		Branch      string           `json:"branch"`
-		Ref         string           `json:"ref"`
-		Refspec     string           `json:"refspec"`
-		Title       string           `json:"title"`
-		Message     string           `json:"message"`
-		Timestamp   int64            `json:"timestamp"`
-		Sender      string           `json:"sender"`
-		Author      string           `json:"author"`
-		Avatar      string           `json:"author_avatar"`
-		Email       string           `json:"author_email"`
-		ForgeURL    string           `json:"forge_url"`
-		Reviewer    string           `json:"reviewed_by"`
-		Reviewed    int64            `json:"reviewed"`
-		Workflows   []*Workflow      `json:"workflows,omitempty"`
-		Release     *Release         `json:"release,omitempty"`
+		ID             int64            `json:"id"`
+		Number         int64            `json:"number"`
+		Parent         int64            `json:"parent"`
+		Event          string           `json:"event"`
+		EventReason    []string         `json:"event_reason"`
+		Status         string           `json:"status"`
+		Errors         []*PipelineError `json:"errors"`
+		Created        int64            `json:"created"`
+		Updated        int64            `json:"updated"`
+		Started        int64            `json:"started"`
+		Finished       int64            `json:"finished"`
+		Deploy         string           `json:"deploy_to"`
+		Commit         string           `json:"commit"` // deprecated, use CommitPipeline.SHA
+		CommitPipeline *Commit          `json:"commit_pipeline,omitempty"`
+		Branch         string           `json:"branch"`
+		Ref            string           `json:"ref"`
+		Refspec        string           `json:"refspec"`
+		Title          string           `json:"title"`
+		Message        string           `json:"message"`   // deprecated for commits, use CommitPipeline.Message
+		Timestamp      int64            `json:"timestamp"` // deprecated, use CommitPipeline.Timestamp
+		Sender         string           `json:"sender"`
+		Author         string           `json:"author"`
+		Avatar         string           `json:"author_avatar"`
+		Email          string           `json:"author_email"` // deprecated, use CommitPipeline.Author.Email
+		ForgeURL       string           `json:"forge_url"`
+		Reviewer       string           `json:"reviewed_by"`
+		Reviewed       int64            `json:"reviewed"`
+		Workflows      []*Workflow      `json:"workflows,omitempty"`
+		Release        *Release         `json:"release,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -181,6 +182,21 @@ type (
 		IsPrerelease bool   `json:"is_prerelease,omitempty"`
 	}
 
+	// Commit represents the commit a pipeline runs for.
+	Commit struct {
+		SHA       string       `json:"sha"`
+		Message   string       `json:"message"`
+		ForgeURL  string       `json:"forge_url"`
+		Author    CommitAuthor `json:"author"`
+		Timestamp int64        `json:"timestamp"`
+	}
+
+	// CommitAuthor represents the author of a commit.
+	CommitAuthor struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
 		ID     int64    `json:"id"`
@@ -195,25 +211,26 @@ type (
 
 	// Feed represents an item in the user's feed or timeline.
 	Feed struct {
-		RepoID   int64  `json:"repo_id"`
-		FullName string `json:"full_name,omitempty"`
-		ID       int64  `json:"id,omitempty"`
-		Number   int64  `json:"number,omitempty"`
-		Event    string `json:"event,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Commit   string `json:"commit,omitempty"`
-		Branch   string `json:"branch,omitempty"`
-		Ref      string `json:"ref,omitempty"`
-		Refspec  string `json:"refspec,omitempty"`
-		Remote   string `json:"remote,omitempty"`
-		Title    string `json:"title,omitempty"`
-		Message  string `json:"message,omitempty"`
-		Author   string `json:"author,omitempty"`
-		Avatar   string `json:"author_avatar,omitempty"`
-		Email    string `json:"author_email,omitempty"`
+		RepoID         int64   `json:"repo_id"`
+		FullName       string  `json:"full_name,omitempty"`
+		ID             int64   `json:"id,omitempty"`
+		Number         int64   `json:"number,omitempty"`
+		Event          string  `json:"event,omitempty"`
+		Status         string  `json:"status,omitempty"`
+		Created        int64   `json:"created,omitempty"`
+		Started        int64   `json:"started,omitempty"`
+		Finished       int64   `json:"finished,omitempty"`
+		Commit         string  `json:"commit,omitempty"` // deprecated, use CommitPipeline.SHA
+		CommitPipeline *Commit `json:"commit_pipeline,omitempty"`
+		Branch         string  `json:"branch,omitempty"`
+		Ref            string  `json:"ref,omitempty"`
+		Refspec        string  `json:"refspec,omitempty"`
+		Remote         string  `json:"remote,omitempty"`
+		Title          string  `json:"title,omitempty"`
+		Message        string  `json:"message,omitempty"` // deprecated for commits, use CommitPipeline.Message
+		Author         string  `json:"author,omitempty"`
+		Avatar         string  `json:"author_avatar,omitempty"`
+		Email          string  `json:"author_email,omitempty"` // deprecated, use CommitPipeline.Author.Email
 	}
 
 	// Version provides system version details.

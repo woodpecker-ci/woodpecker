@@ -163,6 +163,30 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	return repo
 }
 
+// convertCommit is a helper function used to convert a GitHub commit to the
+// common Woodpecker commit structure.
+func convertCommit(from *github.RepositoryCommit) *model.Commit {
+	author := from.GetCommit().GetAuthor()
+	return &model.Commit{
+		SHA:      from.GetSHA(),
+		Message:  from.GetCommit().GetMessage(),
+		ForgeURL: from.GetHTMLURL(),
+		Author: model.CommitAuthor{
+			Name:  author.GetName(),
+			Email: author.GetEmail(),
+		},
+		Timestamp: unixTime(author.GetDate()),
+	}
+}
+
+// unixTime returns the unix time of a GitHub timestamp, zero if it is not set.
+func unixTime(t github.Timestamp) int64 {
+	if t.IsZero() {
+		return 0
+	}
+	return t.Unix()
+}
+
 // convertLabels is a helper function used to convert a GitHub label list to
 // the common Woodpecker label structure.
 func convertLabels(from []*github.Label) []string {

@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"time"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
 	"github.com/neticdk/go-bitbucket/mock"
@@ -72,6 +73,22 @@ func Server() *httptest.Server {
 			ID:        "refs/head/main",
 			DisplayID: "main",
 			Default:   true,
+		}),
+		mock.WithRequestMatch(mock.SearchBranches, bitbucket.BranchList{
+			LastPage: true,
+			Branches: []*bitbucket.Branch{
+				{
+					ID:           "refs/heads/main",
+					DisplayID:    "main",
+					LatestCommit: "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+				},
+			},
+		}),
+		mock.WithRequestMatch(mock.GetCommit, bitbucket.Commit{
+			ID:       "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+			Message:  "Fix the thing",
+			Author:   bitbucket.GitUser{Name: "Jane Doe", Email: "jane@example.com"},
+			Authored: bitbucket.DateTime(time.Unix(1700000000, 0)),
 		}),
 
 		mock.WithRequestMatchHandler(PostBuildStatus, ExpectedContentHandler(
