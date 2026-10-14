@@ -32,17 +32,29 @@ func generateScriptWindows(commands []string, workDir string) string {
 	}
 
 	for _, command := range commands {
-		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		fmt.Fprintf(
 			&buf,
 			traceScriptWin,
-			escaped,
+			QuotePowerShell(CommandMarker+command),
 			command,
 		)
 	}
 
 	return buf.String()
+}
+
+// QuotePowerShell returns value as a PowerShell single-quoted string.
+// PowerShell treats U+0027, U+2018, U+2019, U+201A and U+201B as single quotes:
+// https://github.com/PowerShell/PowerShell/blob/5d871eb5e02cbcc8ecb03fce4b24d7f48bf97c26/src/System.Management.Automation/engine/parser/CharTraits.cs#L265-L272
+func QuotePowerShell(value string) string {
+	replacer := strings.NewReplacer(
+		"'", "''",
+		"‘", "‘‘",
+		"’", "’’",
+		"‚", "‚‚",
+		"‛", "‛‛",
+	)
+	return "'" + replacer.Replace(value) + "'"
 }
 
 const setupScriptWinProto = `
@@ -67,6 +79,6 @@ var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('` + CommandMarker + `%s');
+Write-Output (%s);
 & %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `

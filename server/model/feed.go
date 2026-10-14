@@ -39,10 +39,10 @@ type Feed struct {
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
-	Release  *Release `json:"release,omitempty"    xorm:"json 'pipeline_release'"`
-	TagTitle string   `json:"tag_title,omitempty"  xorm:"pipeline_tag_title"`
+	Release  *Release `json:"release,omitempty"   xorm:"json 'pipeline_release'"`
+	TagTitle string   `json:"tag_title,omitempty" xorm:"pipeline_tag_title"`
 	// // Deprecated
-	Message string `json:"message,omitempty"       xorm:"pipeline_message"`
+	Message string `json:"message,omitempty" xorm:"pipeline_message"`
 }
 
 func (f *Feed) ToAPIModel() *APIFeed {

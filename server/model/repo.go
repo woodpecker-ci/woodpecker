@@ -43,9 +43,9 @@ func (mode ApprovalMode) Valid() bool {
 
 // Repo represents a repository.
 type Repo struct {
-	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
-	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
-	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
+	ID      int64 `json:"id,omitempty"       xorm:"pk autoincr 'id'"`
+	UserID  int64 `json:"-"                  xorm:"INDEX 'user_id'"`
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
 	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
@@ -75,21 +75,21 @@ type Repo struct {
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
 	ConfigExtensionNetrc         bool                 `json:"config_extension_netrc"          xorm:"DEFAULT FALSE 'config_extension_netrc'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
-	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"          xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
+	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"        xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
 
 	// Rest API Only
 
 	// HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id
-	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty"    xorm:"-"`
+	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty" xorm:"-"`
 
 	// HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore
-	HasNoForgeRepo bool `      json:"has_no_forge_repo,omitempty"          xorm:"-"`
+	HasNoForgeRepo bool `json:"has_no_forge_repo,omitempty" xorm:"-"`
 
 	// internal usage
 
-	Perm *Perm `json:"-"    xorm:"-"`
+	Perm *Perm `json:"-" xorm:"-"`
 } //	@name	Repo
 
 // TableName return database table name for xorm.

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-wp-hint-warn-200 bg-wp-hint-warn-100 flex items-center gap-4 rounded-md border border-l-4 border-solid p-4 font-bold text-gray-700"
+    class="border-wp-hint-warn-200 bg-wp-hint-warn-100 text-wp-text-100 flex items-center gap-4 rounded-md border border-l-4 border-solid p-4 font-bold"
   >
     <Icon v-if="!textOnly" name="alert" class="shrink-0" />
     <slot>
