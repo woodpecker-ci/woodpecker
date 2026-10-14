@@ -21,7 +21,7 @@ type Org struct {
 	Name    string `json:"name"               xorm:"'name' UNIQUE(s)"`
 	IsUser  bool   `json:"is_user"            xorm:"is_user"`
 	// if name lookup has to check for membership or not
-	Private bool `json:"-"                    xorm:"private"`
+	Private bool `json:"-" xorm:"private"`
 } //	@name	Org
 
 // TableName return database table name for xorm.
