@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @confusedsushi, @fredrikblau
+@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @confusedsushi, @fredrikblau
 
 ### 🔒 Security
 
@@ -44,6 +44,7 @@
 
 ### Misc
 
+- Add Asyntai AI Chatbot Docs Sync plugin to plugins.json [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
