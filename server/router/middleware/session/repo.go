@@ -30,8 +30,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-// PermSyncInterval is how long stored repo permissions of a user are trusted
-// before they are synced with the forge again.
+// PermSyncInterval defines how long stored repo permissions of a user are
+// trusted before they are re-synced with the forge.
 const PermSyncInterval = time.Hour
 
 func Repo(c *gin.Context) *model.Repo {
