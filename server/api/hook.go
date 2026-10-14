@@ -260,20 +260,10 @@ func PostHook(c *gin.Context) {
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
-	if t.Get("repo-forge-remote-id") != "" {
-		forgeID, err := strconv.ParseInt(t.Get("forge-id"), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-
-		return store.GetRepoForgeID(forgeID, model.ForgeRemoteID(t.Get("repo-forge-remote-id")))
-	}
-
-	// get the repo by the repo-id
-	// TODO: remove in next major
-	repoID, err := strconv.ParseInt(t.Get("repo-id"), 10, 64)
+	forgeID, err := strconv.ParseInt(t.Get("forge-id"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
-	return store.GetRepo(repoID)
+
+	return store.GetRepoForgeID(forgeID, model.ForgeRemoteID(t.Get("repo-forge-remote-id")))
 }
