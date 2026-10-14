@@ -13,11 +13,13 @@
 
 ### 📈 Enhancement
 
+- lint against tag align in golang [[#7292](https://github.com/woodpecker-ci/woodpecker/pull/7292)]
 - Rework dark theme [[#7263](https://github.com/woodpecker-ci/woodpecker/pull/7263)]
 - Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
 
 ### 🐛 Bug Fixes
 
+- Fix quoting windows container [[#7293](https://github.com/woodpecker-ci/woodpecker/pull/7293)]
 - Fix PowerShell-specific quoting for commands in local backend [[#7290](https://github.com/woodpecker-ci/woodpecker/pull/7290)]
 - Ignore GitLab tag deletion webhooks [[#7289](https://github.com/woodpecker-ci/woodpecker/pull/7289)]
 - Fix Docker backend with TLS and a custom host [[#7269](https://github.com/woodpecker-ci/woodpecker/pull/7269)]
