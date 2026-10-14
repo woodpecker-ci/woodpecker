@@ -170,16 +170,16 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
-			if testCase.expectedMetadata.Sys.Name != "" || testCase.expectedMetadata.Forge.Type != "" || testCase.expectedMetadata.Curr.Number != 0 {
-				assert.EqualValues(t, testCase.expectedMetadata, result)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NewServerMetadata(tt.forge, tt.repo, tt.pipeline, tt.prev, tt.sysURL).GetWorkflowMetadata(tt.workflow)
+			if tt.expectedMetadata.Sys.Name != "" || tt.expectedMetadata.Forge.Type != "" || tt.expectedMetadata.Curr.Number != 0 {
+				assert.EqualValues(t, tt.expectedMetadata, result)
 			}
-			if testCase.expectedEnviron != nil {
-				assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
+			if tt.expectedEnviron != nil {
+				assert.EqualValues(t, tt.expectedEnviron, result.Environ())
 			}
-			if testCase.name == "Test with pull request draft" {
+			if tt.name == "Test with pull request draft" {
 				assert.True(t, result.Curr.Commit.PullRequestDraft)
 				assert.Equal(t, "true", result.Environ()["CI_COMMIT_PULL_REQUEST_DRAFT"])
 			}

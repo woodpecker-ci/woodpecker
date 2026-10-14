@@ -56,7 +56,7 @@ func TestServerVersion(t *testing.T) {
 	t.Parallel()
 
 	srv := newTestServer(t, store_mocks.NewMockStore(t))
-	res, err := srv.Version(context.Background(), new(proto.Empty))
+	res, err := srv.Version(t.Context(), new(proto.Empty))
 
 	require.NoError(t, err)
 	assert.Equal(t, proto.Version, res.GetGrpcVersion())
@@ -94,7 +94,7 @@ func TestServerReportHealth(t *testing.T) {
 	t.Run("missing agent id in context errors", func(t *testing.T) {
 		t.Parallel()
 		srv := newTestServer(t, store_mocks.NewMockStore(t))
-		_, err := srv.ReportHealth(context.Background(), &proto.ReportHealthRequest{Status: "I am alive!"})
+		_, err := srv.ReportHealth(t.Context(), &proto.ReportHealthRequest{Status: "I am alive!"})
 		assert.Error(t, err)
 	})
 }

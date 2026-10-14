@@ -191,6 +191,11 @@
       "verified": true
     },
     {
+      "name": "Mastodon Profile",
+      "docs": "https://codeberg.org/woodpecker-plugins/mastodon-profile/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
       "name": "Bluesky Post",
       "docs": "https://codeberg.org/woodpecker-plugins/bluesky-post/raw/branch/main/docs.md",
       "verified": true

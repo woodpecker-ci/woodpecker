@@ -7,6 +7,7 @@ package hostmatcher
 import (
 	"net"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -39,7 +40,7 @@ func isBuiltin(s string) bool {
 // ParseHostMatchList parses the host list HostMatchList.
 func ParseHostMatchList(settingKeyHint, hostList string) *HostMatchList {
 	hl := &HostMatchList{SettingKeyHint: settingKeyHint, SettingValue: hostList}
-	for _, s := range strings.Split(hostList, ",") {
+	for s := range strings.SplitSeq(hostList, ",") {
 		s = strings.ToLower(strings.TrimSpace(s))
 		if s == "" {
 			continue
@@ -63,7 +64,7 @@ func ParseSimpleMatchList(settingKeyHint, matchList string) *HostMatchList {
 		SettingKeyHint: settingKeyHint,
 		SettingValue:   matchList,
 	}
-	for _, s := range strings.Split(matchList, ",") {
+	for s := range strings.SplitSeq(matchList, ",") {
 		s = strings.ToLower(strings.TrimSpace(s))
 		if s == "" {
 			continue
@@ -100,10 +101,8 @@ func (hl *HostMatchList) checkPattern(host string) bool {
 }
 
 func (hl *HostMatchList) checkIP(ip net.IP) bool {
-	for _, pattern := range hl.patterns {
-		if pattern == "*" {
-			return true
-		}
+	if slices.Contains(hl.patterns, "*") {
+		return true
 	}
 	for _, builtin := range hl.builtins {
 		switch builtin {

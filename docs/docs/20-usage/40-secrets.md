@@ -1,9 +1,9 @@
 # Secrets
 
-Woodpecker provides the ability to store named variables in a central secret store.
+Woodpecker can store named variables in a central secret store.
 These secrets can be securely passed on to individual pipeline steps using the keyword `from_secret`.
 
-There are three different levels of secrets available. If a secret is defined in multiple levels, the following order of priority applies (last wins):
+Secrets exist at three scopes, listed below from highest to lowest priority. When the same secret is defined at multiple scopes, the highest-priority value is used:
 
 1. **Repository secrets**: Available for all pipelines of a repository.
 1. **Organization secrets**: Available for all pipelines of an organization.
@@ -13,14 +13,14 @@ There are three different levels of secrets available. If a secret is defined in
 In addition to the native integration of secrets, external providers of secrets can also be used by interacting with them directly within pipeline steps. Access to these providers can be configured with Woodpecker secrets, which enables the retrieval of secrets from the respective external sources.
 
 :::warning
-Woodpecker can mask secrets from its own secrets store, but it cannot apply the same protection to external secrets. As a result, these external secrets can be exposed in the pipeline logs.
+Woodpecker can mask secrets from its own secret store, but it cannot apply the same protection to external secrets. As a result, these external secrets can be exposed in the pipeline logs.
 :::
 
 ## Usage
 
-You can set a setting or environment value from Woodpecker secrets by using the `from_secret` syntax.
+You can pass values to settings or environment variables from Woodpecker secrets using the `from_secret` syntax.
 
-The following example passes a secret called `secret_token` which is stored in an environment variable called `TOKEN_ENV`:
+The following example passes a secret called `secret_token`, which is stored in an environment variable called `TOKEN_ENV`:
 
 ```diff
  steps:
@@ -113,7 +113,7 @@ Create the secret and limit it to a single image:
    --value <value>
 ```
 
-Create the secrets and limit it to a set of images:
+Create the secret and limit it to a set of images:
 
 ```diff
  woodpecker-cli repo secret add \
@@ -141,8 +141,8 @@ Secrets can be loaded from a file using the syntax `@`.
 This method is recommended for loading secrets from a file, as it ensures that line breaks are preserved (this is important for SSH keys, for example):
 
 ```diff
- woodpecker-cli repo secret add \
-   -repository octocat/hello-world \
-   -name ssh_key \
-+  -value @/root/ssh/id_rsa
+  woodpecker-cli repo secret add \
+    --repository octocat/hello-world \
+    --name ssh_key \
++   --value @/root/ssh/id_rsa
 ```

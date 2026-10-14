@@ -43,8 +43,8 @@ func TestEqualSliceValues(t *testing.T) {
 		out: false,
 	}}
 
-	for _, tc := range tests {
-		assert.EqualValues(t, tc.out, EqualSliceValues(tc.in1, tc.in2), "could not correctly process input: '%#v', %#v", tc.in1, tc.in2)
+	for _, tt := range tests {
+		assert.EqualValues(t, tt.out, EqualSliceValues(tt.in1, tt.in2), "could not correctly process input: '%#v', %#v", tt.in1, tt.in2)
 	}
 
 	assert.True(t, EqualSliceValues([]bool{true, false, false}, []bool{false, false, true}))
@@ -76,8 +76,8 @@ func TestStringSliceDeleteEmpty(t *testing.T) {
 		out: []string{},
 	}}
 
-	for _, tc := range tests {
-		exp := StringSliceDeleteEmpty(tc.in)
-		assert.EqualValues(t, tc.out, exp, "got '%#v', expects %#v", exp, tc.out)
+	for _, tt := range tests {
+		exp := StringSliceDeleteEmpty(tt.in)
+		assert.EqualValues(t, tt.out, exp, "got '%#v', expects %#v", exp, tt.out)
 	}
 }

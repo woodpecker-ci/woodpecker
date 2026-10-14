@@ -45,7 +45,7 @@ func testHookRequest(payload []byte, event string) *http.Request {
 	return req
 }
 
-func Test_parseHook(t *testing.T) {
+func TestParseHook(t *testing.T) {
 	t.Run("ignore unsupported hook events", func(t *testing.T) {
 		req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
 		p, r, b, cc, pc, err := parseHook(req, false)
@@ -55,6 +55,19 @@ func Test_parseHook(t *testing.T) {
 		assert.Nil(t, b)
 		assert.Nil(t, p)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+	})
+
+	t.Run("reject null payload", func(t *testing.T) {
+		for _, event := range []string{hookDeploy, hookPush, hookPull, hookRelease} {
+			req := testHookRequest([]byte("null"), event)
+			p, r, b, cc, pc, err := parseHook(req, false)
+			assert.Empty(t, pc, event)
+			assert.Empty(t, cc, event)
+			assert.Nil(t, r, event)
+			assert.Nil(t, b, event)
+			assert.Nil(t, p, event)
+			assert.Error(t, err, event)
+		}
 	})
 
 	t.Run("skip skip push hook when action is deleted", func(t *testing.T) {

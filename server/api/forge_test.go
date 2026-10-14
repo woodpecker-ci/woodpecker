@@ -415,11 +415,9 @@ func TestPatchForge(t *testing.T) {
 
 	t.Run("should update the allowed orgs of the forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-				Orgs: []string{"org2"},
-			},
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Orgs: []string{"org2"},
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
 
@@ -447,10 +445,8 @@ func TestPatchForge(t *testing.T) {
 
 	t.Run("should clear the allowed orgs of the forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-			},
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
 

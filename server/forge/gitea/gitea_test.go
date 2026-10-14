@@ -43,7 +43,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, f.skipVerify)
 }
 
-func Test_gitea(t *testing.T) {
+func TestGitea(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())

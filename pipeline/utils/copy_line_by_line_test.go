@@ -114,13 +114,11 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		err := utils.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
-	}()
+	})
 
 	// write 4 bytes without newline
 	if _, err := w.Write([]byte("12345")); err != nil {
