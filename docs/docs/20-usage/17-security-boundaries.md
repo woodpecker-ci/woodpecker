@@ -24,7 +24,7 @@ If the forge reports something wrong, the boundaries on this page are wrong too.
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
 - Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.
 
-Woodpecker caches the permissions of a user for up to [one hour](https://github.com/woodpecker-ci/woodpecker/blob/1182744d09b1c097b47749ed813cc7e0549c25c9/server/router/middleware/session/repo.go#L127).
+Woodpecker caches the permissions of a user for up to [one hour](https://github.com/woodpecker-ci/woodpecker/blob/5d41af5c30bc11f52bbaee298d387191e16192c8/server/router/middleware/session/repo.go#L35).
 If fetching permissions failed, the user is downgraded to read access till fetching works again.
 
 ## Approval of pipelines
