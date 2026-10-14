@@ -27,3 +27,19 @@ Please note that Woodpecker mounts volumes on the host machine. This means you m
 -volumes: [ ./certs:/etc/ssl/certs ]
 +volumes: [ /etc/ssl/certs:/etc/ssl/certs ]
 ```
+
+## Environment variable expansion
+
+Variable references in volume paths are expanded against the environment of the step the volume is used in, e.g. `${CI_WORKSPACE}`:
+
+```diff
+ steps:
+   - name: install
+     image: node:16
+     commands:
+       - yarn install
+     volumes:
++      - /root/node_modules:${CI_WORKSPACE}/node_modules
+```
+
+`CI_WORKSPACE` is available in volume paths of every step, so the destination can point into the workspace that the step runs in. Any other variable that is part of the step environment (built-in `CI_*` variables, workflow and step `environment` values) can be used as well. Unknown `${VAR}` references expand to an empty string, mirroring `envsubst` semantics.
