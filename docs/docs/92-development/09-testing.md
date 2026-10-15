@@ -133,7 +133,7 @@ There are also environment variables to alter step behavior:
 
 - `SLEEP: 10` will let the step wait 10 seconds
 - `EXPECT_TYPE` allows to check if a step is a `clone`, `service`, `plugin` or `commands`
-- `STEP_START_FAIL: true` if set will simulate a step to fail before actually being started (e.g. happens when the container image can not be pulled)
+- `STEP_START_FAIL: true` if set will simulate a step to fail before actually being started (e.g. happens when the container image cannot be pulled)
 - `STEP_TAIL_FAIL: true` if set will error when we simulate to read from stdout for logs
 - `STEP_EXIT_CODE: 2` if set will be used as exit code, default is 0
 - `STEP_OOM_KILLED: true` simulates a step being killed by memory constrains
