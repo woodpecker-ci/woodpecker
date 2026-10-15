@@ -472,6 +472,95 @@ func TestHandleAuth(t *testing.T) {
 	})
 }
 
+func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	now := time.Now()
+	server.Config.Server.SessionExpires = time.Hour
+
+	tests := []struct {
+		name         string
+		storedExpiry int64
+		newExpiry    int64
+		refreshToken string
+	}{
+		{
+			name:         "replaces later stored expiry",
+			storedExpiry: now.Add(7 * 24 * time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "replaces expired token",
+			storedExpiry: now.Add(-time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "enables expiring tokens",
+			storedExpiry: 0,
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "clears expiry for non-expiring tokens",
+			storedExpiry: now.Add(time.Hour).Unix(),
+			newExpiry:    time.Time{}.Unix(),
+			refreshToken: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_manager := manager_mocks.NewMockManager(t)
+			_forge := forge_mocks.NewMockForge(t)
+			_store := store_mocks.NewMockStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+
+			stored := &model.User{
+				ID: 1, OrgID: 1, ForgeID: 1, ForgeRemoteID: "remote-id-1",
+				Login: "test", Email: "test@example.com",
+				AccessToken: "old-access-token", RefreshToken: "old-refresh-token", Expiry: tt.storedExpiry,
+			}
+			// The forge result and database record must be separate objects: a
+			// successful login returns a new credential set for an existing user.
+			fromForge := *stored
+			fromForge.AccessToken = "new-access-token"
+			fromForge.RefreshToken = tt.refreshToken
+			fromForge.Expiry = tt.newExpiry
+
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(&fromForge, "", nil)
+			_store.On("GetUserByRemoteID", stored.ForgeID, stored.ForgeRemoteID).Return(stored, nil)
+			_store.On("OrgGet", stored.OrgID).Return(&model.Org{ID: stored.OrgID, Name: stored.Login}, nil)
+			_store.On("UpdateUser", mock.Anything).Run(func(args mock.Arguments) {
+				updated, ok := args.Get(0).(*model.User)
+				assert.True(t, ok)
+				assert.Equal(t, fromForge.AccessToken, updated.AccessToken)
+				assert.Equal(t, fromForge.RefreshToken, updated.RefreshToken)
+				assert.Equal(t, fromForge.Expiry, updated.Expiry, "persist the expiry belonging to the new tokens")
+			}).Return(nil).Once()
+			_store.On("PermPrune", stored.ID, []int64(nil)).Return(nil)
+			_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{Header: make(http.Header), URL: &url.URL{Scheme: "https"}}
+
+			api.HandleAuth(c)
+
+			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(t, "/", w.Header().Get("Location"))
+			assert.NotEmpty(t, w.Header().Get("Set-Cookie"))
+		})
+	}
+}
+
 // TestHandleAuthAllowedOrgs walks through the combinations of WOODPECKER_ORGS
 // and the orgs of the forge a user logs in with. The global list applies to
 // every forge, the orgs of a forge are allowed in addition to it. Org names are
