@@ -60,7 +60,7 @@
         </InputField>
 
         <InputField
-          v-if="selectedUser!.forge_id !== undefined && forgesMap.has(selectedUser!.forge_id)"
+          v-if="isEditingUser && selectedUser!.forge_id !== undefined && forgesMap.has(selectedUser!.forge_id)"
           v-slot="{ id }"
           :label="$t('admin.settings.users.forge')"
         >
