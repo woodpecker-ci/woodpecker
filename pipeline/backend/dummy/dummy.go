@@ -225,12 +225,14 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 	if withErr, _ := strconv.ParseBool(step.Environment[EnvKeyStepStateError]); withErr {
 		stateErr = fmt.Errorf("expected step state error")
 	}
+	if oomKilled {
+		stateErr = backend_types.ErrStepOOMKilled
+	}
 
 	return &backend_types.State{
-		ExitCode:  exitCode,
-		Exited:    true,
-		OOMKilled: oomKilled,
-		Error:     stateErr,
+		ExitCode: exitCode,
+		Exited:   true,
+		Error:    stateErr,
 	}, nil
 }
 

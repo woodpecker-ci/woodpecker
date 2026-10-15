@@ -420,9 +420,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	cs := pod.Status.ContainerStatuses[0]
 
 	bs := &types.State{
-		ExitCode:  int(cs.State.Terminated.ExitCode),
-		Exited:    true,
-		OOMKilled: false,
+		ExitCode: int(cs.State.Terminated.ExitCode),
+		Exited:   true,
 	}
 
 	return bs, nil
