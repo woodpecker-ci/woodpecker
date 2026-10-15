@@ -27,8 +27,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 ### Admin-facing migrations
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
-- changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
-- `WOODPECKER_GRPC_SKIP_VERIFY` now defaults to `false`, so an agent using `WOODPECKER_GRPC_SECURE=true` verifies the gRPC server's TLS certificate by default. ⚠️ Agents that relied on the previous default (verification disabled), e.g. with a self-signed server certificate that has no trust anchor, must now set `WOODPECKER_GRPC_SKIP_VERIFY=true` explicitly or install the CA on the agent.
+- changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`, which now defaults to `false`, so an agent using `WOODPECKER_GRPC_SECURE=true` verifies the gRPC server's TLS certificate by default. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification. Agents that relied on the previous default (verification disabled), e.g. with a self-signed server certificate that has no trust anchor, must now set `WOODPECKER_GRPC_SKIP_VERIFY=true` explicitly or install the CA on the agent.
 
 #### Extensions
 
