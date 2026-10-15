@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Allow selecting the forge when creating a user [[#7314](https://github.com/woodpecker-ci/woodpecker/pull/7314)]
 - Do not keep the reviewer when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
 - Indicate permission fallback in webui [[#7285](https://github.com/woodpecker-ci/woodpecker/pull/7285)]
 - lint against tag align in golang [[#7292](https://github.com/woodpecker-ci/woodpecker/pull/7292)]
