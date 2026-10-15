@@ -1,3 +1,4 @@
+import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import Fuse from 'fuse.js';
 import React, { useRef, useState } from 'react';
@@ -57,9 +58,14 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
           <div style={{ display: 'flex', flexFlow: 'column', alignItems: 'center' }}>
             <h1>Woodpecker CI plugins</h1>
             <p>This list contains plugins which you can use to easily execute usual pipeline tasks.</p>
-            <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="button button--primary">
-              🎉 Add your plugin
-            </a>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
+              <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="button button--primary">
+                🎉 Add your plugin
+              </a>
+              <Link to="/docs/usage/plugins/creating-plugins" className="button button--secondary">
+                🛠️ Developer guide
+              </Link>
+            </div>
           </div>
           <div className="container" style={{ display: 'flex', flexFlow: 'column', marginTop: '4rem' }}>
             <input
