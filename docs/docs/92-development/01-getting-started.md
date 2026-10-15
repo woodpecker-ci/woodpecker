@@ -46,7 +46,7 @@ They are installed with `go install`, so make sure that the `bin` folder of your
 
 If a tool is not installed, `make lint`, `make format` and `make generate` start it with `go run` instead. This works too, but is slower.
 
-To generate the gRPC code, which is a part of `make generate`, you also need [`protoc`](https://protobuf.dev/installation/). It is not installed by `make install-tools`.
+To generate the gRPC code, which is part of `make generate`, you also need [`protoc`](https://protobuf.dev/installation/). It is not installed by `make install-tools`.
 
 ## Install Node.js & `pnpm`
 
@@ -171,13 +171,13 @@ go run ./cmd/server
 ```
 
 :::info
-The server embeds the web UI from `web/dist/` at compile time. If not build jet compiling and go runs will fail with:
+The server embeds the web UI from `web/dist/` at compile time. If the UI is not built yet, compiling and running the server with `go run` will fail with:
 
 ```none
 web/web.go:26:12: pattern all:dist/*: no matching files found
 ```
 
-Either build the UI once with `make build-ui` or create placeholder with:
+Either build the UI once with `make build-ui` or create a placeholder with:
 
 ```bash
 mkdir -p web/dist/ && echo "test" > web/dist/index.html

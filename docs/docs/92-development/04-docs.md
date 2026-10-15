@@ -21,7 +21,7 @@ pnpm build
 
 ## Versions
 
-The folder `docs/docs/` contains the documentation of the upcoming version (`next`). This is where changes normally go. The documentation of each released version is a snapshot in `docs/versioned_docs/`. Only change it in addition if a fix should also show up for an already released version.
+The folder `docs/docs/` contains the documentation of the upcoming version (`next`). This is where changes normally go. The documentation of each released version is a snapshot in `docs/versioned_docs/`. Only change it as well if a fix should also show up in an already released version.
 
 ### Creating a new version
 
