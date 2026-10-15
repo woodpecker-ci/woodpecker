@@ -413,6 +413,26 @@ func TestRunsOnStatus(t *testing.T) {
 	}
 }
 
+func TestRunsOnDeprecatedFails(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Data: []byte("runs_on: [ failure ]\nsteps:\n  - name: deploy\n    image: scratch\n")},
+		},
+	}
+
+	items, err := b.Build()
+	assert.True(t, errors.HasBlockingErrors(err))
+	assert.Empty(t, items)
+}
+
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
