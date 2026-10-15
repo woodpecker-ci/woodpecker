@@ -120,6 +120,16 @@ func TestGitLab(t *testing.T) {
 		assert.Equal(t, []string{"woodpecker", "eve/woodpecker"}, logins)
 	})
 
+	// Test pull requests method
+	t.Run("pull request list", func(t *testing.T) {
+		prs, err := client.PullRequests(ctx, &user, &repo, &model.ListOptions{Page: 1, PerPage: 10})
+		assert.NoError(t, err)
+		assert.Len(t, prs, 1)
+		// the project scoped IID is used, as in the pipeline ref "refs/merge-requests/<iid>/head"
+		assert.Equal(t, model.ForgeRemoteID("7"), prs[0].Index)
+		assert.Equal(t, "Add feature X", prs[0].Title)
+	})
+
 	// Test activate method
 	t.Run("Activate, success", func(t *testing.T) {
 		err := client.Activate(ctx, &user, &repo, "http://example.com/api/hook?access_token=token")
