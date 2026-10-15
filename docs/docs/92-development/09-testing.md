@@ -137,5 +137,8 @@ There are also environment variables to alter step behavior:
 - `STEP_TAIL_FAIL: true` if set will error when we simulate to read from stdout for logs
 - `STEP_EXIT_CODE: 2` if set will be used as exit code, default is 0
 - `STEP_OOM_KILLED: true` simulates a step being killed by memory constrains
+- `STEP_WAIT_FAIL: true` if set will error when we wait for the step to finish (e.g. happens when the kubernetes backend cannot pull the image)
+- `STEP_STATE_ERROR: true` if set will report an error in the step state next to its exit code
+- `STEP_DESTROY_FAIL: true` if set will error when we remove the finished step
 
 You can let the setup of a whole workflow fail by setting it's UUID to `WorkflowSetupShouldFail`.
