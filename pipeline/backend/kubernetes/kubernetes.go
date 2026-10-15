@@ -273,7 +273,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
-		log.Error().Err(err).Msg("could not parse backend options")
+		return fmt.Errorf("could not parse backend options: %w", err)
 	}
 
 	if needsRegistrySecret(step) {
