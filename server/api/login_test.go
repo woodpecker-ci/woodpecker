@@ -475,23 +475,46 @@ func TestHandleAuth(t *testing.T) {
 func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	now := time.Now()
-	for _, tt := range []struct {
+	server.Config.Server.SessionExpires = time.Hour
+
+	tests := []struct {
 		name         string
 		storedExpiry int64
 		newExpiry    int64
 		refreshToken string
 	}{
-		{"replaces later stored expiry", now.Add(7 * 24 * time.Hour).Unix(), now.Add(8 * time.Hour).Unix(), "new-refresh-token"},
-		{"replaces expired token", now.Add(-time.Hour).Unix(), now.Add(8 * time.Hour).Unix(), "new-refresh-token"},
-		{"enables expiring tokens", 0, now.Add(8 * time.Hour).Unix(), "new-refresh-token"},
-		{"clears expiry for non-expiring tokens", now.Add(time.Hour).Unix(), time.Time{}.Unix(), ""},
-	} {
+		{
+			name:         "replaces later stored expiry",
+			storedExpiry: now.Add(7 * 24 * time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "replaces expired token",
+			storedExpiry: now.Add(-time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "enables expiring tokens",
+			storedExpiry: 0,
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "clears expiry for non-expiring tokens",
+			storedExpiry: now.Add(time.Hour).Unix(),
+			newExpiry:    time.Time{}.Unix(),
+			refreshToken: "",
+		},
+	}
+
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_manager := manager_mocks.NewMockManager(t)
 			_forge := forge_mocks.NewMockForge(t)
 			_store := store_mocks.NewMockStore(t)
 			server.Config.Services.Manager = _manager
-			server.Config.Server.SessionExpires = time.Hour
 			server.Config.Permissions.Open = true
 			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
 			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
