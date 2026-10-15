@@ -65,7 +65,7 @@ func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
 	t.Run("workflow finished allows canceled step update", func(t *testing.T) {
 		t.Parallel()
 		step := &model.Step{State: model.StatusRunning}
-		state := rpc.StepState{Canceled: true}
+		state := rpc.StepState{ErrorKind: "canceled"}
 		assert.NoError(t, checkWorkflowAllowsStepUpdate(model.StatusKilled, step, state))
 	})
 
