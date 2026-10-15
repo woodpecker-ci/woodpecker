@@ -149,6 +149,15 @@ Example request:
 The extension should respond with a JSON payload containing the new configuration files in Woodpecker's official YAML format.
 If the extension wants to keep the existing configuration files, it can respond with HTTP status `204 No Content`.
 
+The following HTTP status codes are interpreted by Woodpecker:
+
+| Status code                | Meaning                                                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `200 OK`                   | Use the configuration files from the response body.                                                                                                    |
+| `204 No Content`           | Keep the existing configuration files, the response body is ignored.                                                                                   |
+| `422 Unprocessable Entity` | Reject the pipeline. The pipeline fails with an error of type `config_extension` and the plain-text response body is shown as error message in the UI. |
+| any other code             | Treated as a generic failure, the pipeline fails with an error containing the response body.                                                           |
+
 ```ts
 class Response {
   configs: {

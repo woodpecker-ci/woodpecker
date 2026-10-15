@@ -99,3 +99,21 @@ func TestRetry(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rr)
 	assert.Equal(t, 6, numRetry)
 }
+
+func TestSendClientErrorReturnsHTTPStatusError(t *testing.T) {
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte("some reason"))
+	}))
+	defer server.Close()
+
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
+	require.NoError(t, err)
+
+	status, err := client.Send(t.Context(), http.MethodPost, server.URL+"/", bytes.NewBufferString("{}"), nil)
+	assert.Equal(t, http.StatusUnprocessableEntity, status)
+	assert.Equal(t, "response: some reason", err.Error())
+}

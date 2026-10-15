@@ -16,6 +16,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -76,6 +77,17 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 	}
 
 	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)
+
+	// handle 422 - extension explicitly rejected the pipeline, response body is the error message
+	if status == http.StatusUnprocessableEntity {
+		message := ""
+		var statusErr *utils.HTTPStatusError
+		if errors.As(err, &statusErr) {
+			message = statusErr.Body
+		}
+		return nil, &ErrConfigExtension{Message: message}
+	}
+
 	if err != nil && status != http.StatusNoContent {
 		return nil, fmt.Errorf("failed to fetch config via http (status: %d): %w", status, err)
 	}
