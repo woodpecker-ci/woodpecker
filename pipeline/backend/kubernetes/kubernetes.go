@@ -423,6 +423,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		ExitCode: int(cs.State.Terminated.ExitCode),
 		Exited:   true,
 	}
+	if cs.State.Terminated.Reason == "OOMKilled" {
+		bs.Error = types.ErrStepOOMKilled
+	}
 
 	return bs, nil
 }
