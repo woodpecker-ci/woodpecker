@@ -424,6 +424,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		Exited:    true,
 		OOMKilled: false,
 	}
+	if cs.State.Terminated.Reason == "OOMKilled" {
+		bs.OOMKilled = true
+	}
 
 	return bs, nil
 }
