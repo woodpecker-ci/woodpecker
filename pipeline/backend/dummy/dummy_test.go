@@ -205,6 +205,27 @@ echo nein
 		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 
+	t.Run("step oom killed", func(t *testing.T) {
+		step := &types.Step{
+			Name:        "dummy",
+			UUID:        "SID_2",
+			Environment: map[string]string{dummy.EnvKeyStepOOMKilled: "true"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		assert.NoError(t, err)
+		require.NotNil(t, state)
+		assert.EqualValues(t, 0, state.ExitCode)
+		assert.ErrorIs(t, state.Error, types.ErrStepOOMKilled)
+
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
+
 	t.Run("step destroy fail", func(t *testing.T) {
 		step := &types.Step{
 			Name:        "dummy",

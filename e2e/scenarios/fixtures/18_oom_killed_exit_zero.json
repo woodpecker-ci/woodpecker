@@ -4,7 +4,7 @@
   "expected_status": "failure",
   "expected_workflows": [{ "name": "woodpecker", "status": "failure", "error": "" }],
   "expected_steps": [
-    { "name": "hungry", "status": "failure", "exit_code": 0, "error": "received oom kill" },
+    { "name": "hungry", "status": "failure", "exit_code": 0, "error": "oom_killed" },
     { "name": "deploy", "status": "skipped", "exit_code": 0 },
     { "name": "notify", "status": "success", "exit_code": 0 }
   ]

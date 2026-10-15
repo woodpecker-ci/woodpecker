@@ -23,12 +23,14 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"math/big"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -248,4 +250,49 @@ func TestLoad(t *testing.T) {
 			assert.Equal(t, userAgent, ua)
 		}
 	})
+}
+
+// A container docker reports as OOM killed ends with ErrStepOOMKilled, whatever
+// its exit code, so the kill is not mistaken for an ordinary exit.
+func TestWaitStepReportsOOMKill(t *testing.T) {
+	for name, tc := range map[string]struct {
+		oomKilled bool
+		exitCode  int
+		wantErr   error
+	}{
+		"oom killed exit 0":   {oomKilled: true, exitCode: 0, wantErr: backend_types.ErrStepOOMKilled},
+		"oom killed exit 137": {oomKilled: true, exitCode: 137, wantErr: backend_types.ErrStepOOMKilled},
+		"plain exit":          {oomKilled: false, exitCode: 2, wantErr: nil},
+	} {
+		t.Run(name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Api-Version", "1.51")
+				w.Header().Set("Content-Type", "application/json")
+				switch {
+				case strings.HasSuffix(r.URL.Path, "/containers/wp_step-1/wait"):
+					_, _ = w.Write([]byte(`{"StatusCode":` + strconv.Itoa(tc.exitCode) + `}`))
+				case strings.HasSuffix(r.URL.Path, "/containers/wp_step-1/json"):
+					_, _ = fmt.Fprintf(w, `{"Id":"wp_step-1","State":{"OOMKilled":%t,"ExitCode":%d}}`, tc.oomKilled, tc.exitCode)
+				default:
+					_, _ = w.Write([]byte("OK"))
+				}
+			}))
+			t.Cleanup(srv.Close)
+
+			cli, err := client.New(client.WithHost("tcp://" + srv.Listener.Addr().String()))
+			require.NoError(t, err)
+			engine := &docker{client: cli}
+
+			state, err := engine.WaitStep(t.Context(), &backend_types.Step{Name: "step", UUID: "step-1"}, "task-1")
+			require.NoError(t, err)
+			require.NotNil(t, state)
+			assert.True(t, state.Exited)
+			assert.Equal(t, tc.exitCode, state.ExitCode)
+			if tc.wantErr == nil {
+				assert.NoError(t, state.Error)
+			} else {
+				assert.ErrorIs(t, state.Error, tc.wantErr)
+			}
+		})
+	}
 }
