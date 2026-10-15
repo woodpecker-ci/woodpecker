@@ -303,6 +303,17 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		}
 	case processState != nil:
 		s.CurrStepState = *processState
+		if s.CurrStepState.Error == nil {
+			var oomErr *pipeline_errors.OomError
+			if errors.As(err, &oomErr) {
+				s.CurrStepState.Error = err
+			} else if processState.OOMKilled {
+				s.CurrStepState.Error = &pipeline_errors.OomError{
+					UUID: step.UUID,
+					Code: processState.ExitCode,
+				}
+			}
+		}
 		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
 	}
 

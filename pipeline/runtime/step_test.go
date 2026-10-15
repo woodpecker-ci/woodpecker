@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
 const testWorkflowID = "WID_test"
@@ -678,4 +679,49 @@ func TestRunDetachedStep(t *testing.T) {
 			return traced.Load() >= 1
 		}, time.Second, 10*time.Millisecond)
 	})
+}
+
+func TestTraceStep_OomKilledPreservesErrorWhenExitCodeZero(t *testing.T) {
+	t.Parallel()
+
+	engine := mocks.NewMockBackend(t)
+	engine.On("StartStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	engine.On("TailStep", mock.Anything, mock.Anything, mock.Anything).
+		Return(io.NopCloser(strings.NewReader("")), nil)
+	// Simulate OOMKilled=true with ExitCode=0 (issue #7302)
+	engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+		Return(&backend_types.State{Exited: true, ExitCode: 0, OOMKilled: true}, nil)
+	engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	var finalStepState backend_types.State
+	tracer := tracer_mocks.NewMockTracer(t)
+	tracer.On("Trace", mock.Anything).
+		Run(func(args mock.Arguments) {
+			s := args.Get(0).(*state.State)
+			if s.CurrStepState.Exited {
+				finalStepState = s.CurrStepState
+			}
+		}).
+		Return(nil)
+
+	r := New(
+		&backend_types.Config{},
+		engine,
+		WithTracer(tracer),
+		WithLogger(newTestLogger(t)),
+	)
+
+	step := dummyStep("oom-step")
+	err := r.runBlockingStep(t.Context(), step)
+	require.Error(t, err)
+
+	var oomErr *pipeline_errors.OomError
+	require.True(t, errors.As(err, &oomErr))
+
+	// Verify the traced final step state has Error populated even when ExitCode is 0
+	assert.Equal(t, 0, finalStepState.ExitCode)
+	assert.True(t, finalStepState.Exited)
+	assert.True(t, finalStepState.OOMKilled)
+	require.NotNil(t, finalStepState.Error, "CurrStepState.Error must be populated for OOM kills")
+	assert.True(t, errors.As(finalStepState.Error, &oomErr))
 }
