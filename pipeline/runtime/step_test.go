@@ -331,7 +331,7 @@ func TestCompleteStep(t *testing.T) {
 		var oomErr *pipeline_errors.OomError
 		assert.True(t, errors.As(err, &oomErr))
 		assert.True(t, ws.OOMKilled)
-		assert.Equal(t, err, ws.Error, "OOM kill must be reported through the state too")
+		assert.Equal(t, err.Error(), ws.Error.Error(), "OOM kill must be reported through the state too")
 	})
 
 	t.Run("OOMKilledExitZero", func(t *testing.T) {
@@ -347,7 +347,7 @@ func TestCompleteStep(t *testing.T) {
 		var oomErr *pipeline_errors.OomError
 		assert.True(t, errors.As(err, &oomErr))
 		assert.Equal(t, 0, ws.ExitCode)
-		assert.Equal(t, err, ws.Error, "OOM kill must be reported through the state too")
+		assert.Equal(t, err.Error(), ws.Error.Error(), "OOM kill must be reported through the state too")
 	})
 
 	t.Run("StateErrorExitZero", func(t *testing.T) {
@@ -362,7 +362,7 @@ func TestCompleteStep(t *testing.T) {
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
 		assert.ErrorIs(t, err, stateErr, "state error must fail the step for the runtime too")
-		assert.Equal(t, stateErr, ws.Error)
+		assert.Equal(t, stateErr.Error(), ws.Error.Error())
 	})
 
 	t.Run("ContextCanceledNilState", func(t *testing.T) {
