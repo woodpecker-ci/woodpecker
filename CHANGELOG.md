@@ -21,6 +21,7 @@
 
 ### 🐛 Bug Fixes
 
+- Return an error when Kubernetes backend options cannot be parsed [[#7312](https://github.com/woodpecker-ci/woodpecker/pull/7312)]
 - Persist token expiry when existing users sign in [[#7304](https://github.com/woodpecker-ci/woodpecker/pull/7304)]
 - Fix quoting windows container [[#7293](https://github.com/woodpecker-ci/woodpecker/pull/7293)]
 - Fix PowerShell-specific quoting for commands in local backend [[#7290](https://github.com/woodpecker-ci/woodpecker/pull/7290)]
@@ -33,6 +34,7 @@
 ### 📚 Documentation
 
 - Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
+- Add Asyntai AI Chatbot Docs Sync plugin to plugins.json [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
 - Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
 - Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
@@ -48,7 +50,6 @@
 
 ### Misc
 
-- Add Asyntai AI Chatbot Docs Sync plugin to plugins.json [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
