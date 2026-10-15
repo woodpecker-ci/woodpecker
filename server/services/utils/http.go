@@ -38,6 +38,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 )
 
+// maxResponseBytes is the size up to which the answer of an extension is read.
+const maxResponseBytes = 10 << 20
+
 type Client struct {
 	*httpsign.Client
 }
@@ -156,8 +159,11 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 
 			statusCode := resp.StatusCode
 			// Read body immediately to ensure proper resource cleanup for retries
-			respBody, readErr := io.ReadAll(resp.Body)
+			respBody, readErr := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 			resp.Body.Close()
+			if readErr == nil && len(respBody) > maxResponseBytes {
+				return statusCode, backoff.Permanent(fmt.Errorf("response is larger than %d bytes", maxResponseBytes))
+			}
 			if readErr != nil {
 				// Check if this is a retryable error
 				if !isRetryableError(readErr) {

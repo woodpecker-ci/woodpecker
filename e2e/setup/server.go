@@ -78,6 +78,31 @@ func (env *ServerEnv) DummyPipeline(event model.WebhookEvent) *model.Pipeline {
 	}
 }
 
+// ServerOption configures the server before it starts.
+type ServerOption func(*serverConfig)
+
+type serverConfig struct {
+	// configExtensionWasm is the path of a wasm module used as global configuration extension.
+	configExtensionWasm string
+
+	// pipelineConfigExtensions are the file extensions the config service accepts in a config directory.
+	pipelineConfigExtensions []string
+}
+
+// WithConfigExtensionWasm runs the wasm module at path as global configuration
+// extension, like WOODPECKER_CONFIG_EXTENSION_WASM does. Every file the mock
+// forge serves is handed to it before the pipeline gets compiled.
+func WithConfigExtensionWasm(path string) ServerOption {
+	return func(c *serverConfig) { c.configExtensionWasm = path }
+}
+
+// WithPipelineConfigExtensions sets which files of the config directory are
+// used (default: ".yaml" and ".yml"), like WOODPECKER_DEFAULT_PIPELINE_CONFIG_EXTENSIONS does.
+// Use it to let files in a format only a configuration extension understands through.
+func WithPipelineConfigExtensions(extensions ...string) ServerOption {
+	return func(c *serverConfig) { c.pipelineConfigExtensions = extensions }
+}
+
 // StartServer wires up the full in-process server stack:
 //   - in-memory sqlite store (fully migrated) with seeded fixtures
 //   - in-memory queue, pubsub, and logging
@@ -89,16 +114,21 @@ func (env *ServerEnv) DummyPipeline(event model.WebhookEvent) *model.Pipeline {
 // named ".woodpecker/foo.yaml" etc. The repo's Config path is set accordingly.
 //
 // All resources are cleaned up via t.Cleanup.
-func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMeta) *ServerEnv {
+func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMeta, opts ...ServerOption) *ServerEnv {
 	t.Helper()
 	configLock.Lock()
 	defer configLock.Unlock()
+
+	cfg := &serverConfig{pipelineConfigExtensions: []string{".yaml", ".yml"}}
+	for _, o := range opts {
+		o(cfg)
+	}
 
 	memStore := newStore(ctx, t)
 	fixtures := seedFixtures(t, memStore)
 	mockForge := newMockForge(t, files)
 
-	mgr, err := newTestManager(memStore, mockForge)
+	mgr, err := newTestManager(ctx, memStore, mockForge, cfg)
 	require.NoError(t, err, "create services manager")
 
 	memQueue, err := queue.New(ctx, queue.Config{Backend: queue.TypeMemory})
@@ -150,7 +180,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 
 // newTestManager builds a services.Manager whose SetupForge always returns
 // the provided MockForge, bypassing real forge instantiation.
-func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.Manager, error) {
+func newTestManager(ctx context.Context, s store.Store, mockForge *forge_mocks.MockForge, cfg *serverConfig) (services.Manager, error) {
 	cmd := &cli.Command{
 		Flags: []cli.Flag{
 			// Config fetch tuning.
@@ -164,7 +194,8 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 			&cli.BoolFlag{Name: string(TestForgeType), Value: true},
 			&cli.StringFlag{Name: "forge-url", Value: "https://forge.example.test"},
 			&cli.StringSliceFlag{Name: "default-pipeline-configs", Value: constant.DefaultConfigOrder},
-			&cli.StringSliceFlag{Name: "default-pipeline-config-extensions", Value: []string{".yaml", ".yml"}},
+			&cli.StringSliceFlag{Name: "default-pipeline-config-extensions", Value: cfg.pipelineConfigExtensions},
+			&cli.StringFlag{Name: "config-extension-wasm", Value: cfg.configExtensionWasm},
 		},
 	}
 
@@ -172,7 +203,7 @@ func newTestManager(s store.Store, mockForge *forge_mocks.MockForge) (services.M
 		return mockForge, nil
 	})
 
-	return services.NewManager(cmd, s, setupForge)
+	return services.NewManager(ctx, cmd, s, setupForge)
 }
 
 // startGRPCServer binds to a random TCP port and serves Woodpecker's gRPC
