@@ -78,6 +78,32 @@ describe('adminUsers', () => {
     expect(options[1].text()).toBe('gitlab.com');
   });
 
+  it('keeps the forge select after picking a forge for a new user', async () => {
+    const wrapper = await mountAdminUsers();
+    await openAddUserForm(wrapper);
+
+    await wrapper.find('select').setValue('2');
+
+    const forgeSelect = wrapper.find('select');
+    expect(forgeSelect.exists()).toBe(true);
+    expect(forgeSelect.element.value).toBe('2');
+  });
+
+  it('shows the forge of an existing user read-only', async () => {
+    getUsers.mockResolvedValue([{ id: 7, login: 'octocat', forge_id: 2 } as User]);
+    const wrapper = await mountAdminUsers();
+
+    const editButton = wrapper.find('button[title="Edit user"]');
+    expect(editButton.exists()).toBe(true);
+    await editButton.trigger('click');
+    await nextTick();
+
+    expect(wrapper.find('select').exists()).toBe(false);
+    const forgeInput = wrapper.findAll('input').find((input) => input.element.value === 'gitlab.com');
+    expect(forgeInput).toBeDefined();
+    expect(forgeInput!.element.disabled).toBe(true);
+  });
+
   it('creates the user on the forge picked in the form', async () => {
     const wrapper = await mountAdminUsers();
     await openAddUserForm(wrapper);
