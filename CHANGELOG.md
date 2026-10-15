@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @confusedsushi, @fredrikblau, @xoxys
+@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @xoxys
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Do not keep the reviewer when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
 - Indicate permission fallback in webui [[#7285](https://github.com/woodpecker-ci/woodpecker/pull/7285)]
 - lint against tag align in golang [[#7292](https://github.com/woodpecker-ci/woodpecker/pull/7292)]
 - Rework dark theme [[#7263](https://github.com/woodpecker-ci/woodpecker/pull/7263)]
@@ -20,6 +21,7 @@
 
 ### 🐛 Bug Fixes
 
+- Persist token expiry when existing users sign in [[#7304](https://github.com/woodpecker-ci/woodpecker/pull/7304)]
 - Fix quoting windows container [[#7293](https://github.com/woodpecker-ci/woodpecker/pull/7293)]
 - Fix PowerShell-specific quoting for commands in local backend [[#7290](https://github.com/woodpecker-ci/woodpecker/pull/7290)]
 - Ignore GitLab tag deletion webhooks [[#7289](https://github.com/woodpecker-ci/woodpecker/pull/7289)]
