@@ -514,7 +514,8 @@ func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
 			_store.On("GetUserByRemoteID", stored.ForgeID, stored.ForgeRemoteID).Return(stored, nil)
 			_store.On("OrgGet", stored.OrgID).Return(&model.Org{ID: stored.OrgID, Name: stored.Login}, nil)
 			_store.On("UpdateUser", mock.Anything).Run(func(args mock.Arguments) {
-				updated := args.Get(0).(*model.User)
+				updated, ok := args.Get(0).(*model.User)
+				assert.True(t, ok)
 				assert.Equal(t, fromForge.AccessToken, updated.AccessToken)
 				assert.Equal(t, fromForge.RefreshToken, updated.RefreshToken)
 				assert.Equal(t, fromForge.Expiry, updated.Expiry, "persist the expiry belonging to the new tokens")
