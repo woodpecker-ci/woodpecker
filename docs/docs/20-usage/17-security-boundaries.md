@@ -104,5 +104,7 @@ Woodpecker signs its requests and only calls hosts allowed by [`WOODPECKER_EXTEN
 Agents connect with a [system or agent token](../30-administration/10-configuration/30-agent.md#agent-registration),
 using TLS only with [`WOODPECKER_GRPC_SECURE`](../30-administration/10-configuration/30-agent.md#grpc_secure).
 Organization admins can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
+Every admin of an organization can see the tokens of all its agents, also of the ones other admins added, and can edit and remove them.
+This gives no more access than adding an own agent, as [organization agents](../30-administration/10-configuration/30-agent.md#agent-filters) only get workflows of their organization.
 
 The backend isolates the steps from the agent. The [local backend](../30-administration/10-configuration/11-backends/30-local.md) has no isolation at all.
