@@ -89,6 +89,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	// Current Pipeline
 	metadataFileAndOverrideOrDefault(c, "pipeline-number", func(i int64) { m.Curr.Number = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-parent", func(i int64) { m.Curr.Parent = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "pipeline-orig-parent", func(i int64) { m.Curr.OrigParent = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-created", func(i int64) { m.Curr.Created = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-started", func(i int64) { m.Curr.Started = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-finished", func(i int64) { m.Curr.Finished = i }, c.Int64)
