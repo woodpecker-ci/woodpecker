@@ -16,14 +16,9 @@ package queue
 
 import (
 	"container/list"
-	"context"
 	"fmt"
-	"slices"
-	"sync"
 	"testing"
 	"time"
-
-	"github.com/rs/zerolog"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -73,92 +68,94 @@ func BenchmarkFilterWaiting(b *testing.B) {
 	}
 }
 
-// BenchmarkQueueDispatchUnderBacklog includes the real scheduling interval and
-// concurrent polling/completions. A running parent keeps the backlog blocked,
-// while four independent workflows are dispatched and completed in each batch.
-func BenchmarkQueueDispatchUnderBacklog(b *testing.B) {
-	const workers = 4
-	level := zerolog.GlobalLevel()
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	b.Cleanup(func() { zerolog.SetGlobalLevel(level) })
-	for _, size := range []int{1000, 10000} {
-		b.Run(fmt.Sprint(size), func(b *testing.B) {
-			ctx, cancel := context.WithCancelCause(b.Context())
-			b.Cleanup(func() { cancel(nil) })
-			q, ok := NewMemoryQueue(ctx).(*fifo)
-			if !ok {
-				b.Fatal("expected an in-memory FIFO queue")
-			}
-			q.Lock()
-			q.running["root"] = &entry{
-				item:     &model.Task{ID: "root"},
-				done:     make(chan bool),
-				deadline: time.Now().Add(time.Hour),
-			}
-			for i := range size {
-				q.pending.PushBack(&model.Task{
-					ID:           fmt.Sprintf("blocked-%d", i),
-					Dependencies: []string{"root"},
-					DepStatus:    make(map[string]model.StatusValue),
-				})
-			}
-			q.filterWaiting()
-			q.Unlock()
-
-			type sample struct {
-				dispatch   time.Duration
-				completion time.Duration
-			}
-			results := make(chan sample, workers)
-			var dispatch, completion []time.Duration
-			batch := 0
-			b.ReportAllocs()
-			for b.Loop() {
-				tasks := make([]*model.Task, workers)
-				for i := range tasks {
-					tasks[i] = &model.Task{ID: fmt.Sprintf("ready-%d-%d", batch, i)}
+// BenchmarkAssignToWorker measures one scheduling attempt on a concurrency
+// group backlog that cannot be served: either no idle worker matches its
+// labels, or an earlier pipeline still waiting on dependencies holds the slot.
+func BenchmarkAssignToWorker(b *testing.B) {
+	for _, shape := range []string{"unmatched", "reserved"} {
+		for _, size := range []int{100, 1000, 10000} {
+			b.Run(fmt.Sprintf("%s/%d", shape, size), func(b *testing.B) {
+				matched := shape == "reserved"
+				q := &fifo{
+					pending:       list.New(),
+					waitingOnDeps: list.New(),
+					running:       make(map[string]*entry),
+					workers:       make(map[*worker]struct{}),
 				}
-				batch++
-				pollCtx, stop := context.WithTimeout(ctx, 5*time.Second)
-				started := time.Now()
-				if err := q.PushAtOnce(ctx, tasks); err != nil {
-					b.Fatal(err)
-				}
-				var wg sync.WaitGroup
-				for i := range workers {
-					wg.Go(func() {
-						task, err := q.Poll(pollCtx, int64(i+1), filterFnTrue)
-						if err != nil {
-							b.Error(err)
-							return
-						}
-						dispatched := time.Now()
-						if err := q.Done(ctx, task.ID, model.StatusSuccess); err != nil {
-							b.Error(err)
-						}
-						results <- sample{dispatched.Sub(started), time.Since(dispatched)}
+				q.workers[&worker{filter: func(*model.Task) (bool, int) { return matched, 1 }}] = struct{}{}
+				q.waitingOnDeps.PushBack(&model.Task{ID: "early", ConcurrencyGroup: "deploy", ConcurrencyLimit: 1})
+				for i := range size {
+					q.pending.PushBack(&model.Task{
+						ID:               fmt.Sprintf("task-%d", i),
+						PipelineID:       int64(i + 1),
+						Created:          int64(i + 1),
+						ConcurrencyGroup: "deploy",
+						ConcurrencyLimit: 1,
 					})
 				}
-				wg.Wait()
-				stop()
-				if b.Failed() {
-					b.FailNow()
+				b.ReportAllocs()
+				for b.Loop() {
+					if element, _ := q.assignToWorker(); element != nil {
+						b.Fatal("the backlog must stay blocked")
+					}
 				}
-				for range workers {
-					s := <-results
-					dispatch = append(dispatch, s.dispatch)
-					completion = append(completion, s.completion)
-				}
-			}
-			b.ReportMetric(float64(len(dispatch))/b.Elapsed().Seconds(), "workflows/s")
-			for name, samples := range map[string][]time.Duration{"dispatch": dispatch, "completion": completion} {
-				slices.Sort(samples)
-				for _, percentile := range []int{50, 95, 99} {
-					// Nearest-rank percentile, rounded up to a sample index.
-					index := (len(samples)*percentile+99)/100 - 1
-					b.ReportMetric(float64(samples[index].Nanoseconds())/1e6, fmt.Sprintf("%s-p%d-ms", name, percentile))
-				}
-			}
-		})
+			})
+		}
 	}
+}
+
+// newPipelineBacklog returns a queue that already ran a scheduling pass over
+// the given number of pipelines, with the given number of idle agents.
+func newPipelineBacklog(pipelines, idle int) *fifo {
+	platform := func(i int) string { return []string{"amd64", "arm64"}[i%2] }
+	q := &fifo{
+		pending:       list.New(),
+		waitingOnDeps: list.New(),
+		running:       make(map[string]*entry),
+		workers:       make(map[*worker]struct{}),
+		extension:     time.Hour,
+	}
+	q.running["deploy-old"] = &entry{
+		item:     &model.Task{ID: "deploy-old", Name: "deploy", ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+		done:     make(chan bool),
+		deadline: time.Now().Add(time.Hour),
+	}
+	for i := range idle {
+		want := platform(i)
+		q.workers[&worker{
+			agentID: int64(i + 1),
+			channel: make(chan *model.Task, 1),
+			filter:  func(task *model.Task) (bool, int) { return task.Labels["platform"] == want, 1 },
+		}] = struct{}{}
+	}
+	for p := range pipelines {
+		id := func(name string) string { return fmt.Sprintf("%d-%s", p, name) }
+		for _, w := range []struct {
+			name string
+			deps []string
+		}{
+			{"build", nil},
+			{"lint", nil},
+			{"test", []string{id("build")}},
+			{"deploy", []string{id("test"), id("lint")}},
+			{"notify", []string{id("deploy")}},
+		} {
+			task := &model.Task{
+				ID:           id(w.name),
+				Name:         w.name,
+				PipelineID:   int64(p + 1),
+				Created:      int64(p + 1),
+				Labels:       map[string]string{"platform": platform(p)},
+				Dependencies: w.deps,
+				DepStatus:    make(map[string]model.StatusValue),
+			}
+			if w.name == "deploy" {
+				task.ConcurrencyGroup = "deploy"
+				task.ConcurrencyLimit = 1
+			}
+			q.pending.PushBack(task)
+		}
+	}
+	q.filterWaiting()
+	return q
 }
