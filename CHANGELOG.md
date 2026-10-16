@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Only link http(s) error URIs on the login page [[#7318](https://github.com/woodpecker-ci/woodpecker/pull/7318)]
 - Do not log bearer credentials at trace level [[#7317](https://github.com/woodpecker-ci/woodpecker/pull/7317)]
 - Fall back to read only if the forge permission sync fails [[#7282](https://github.com/woodpecker-ci/woodpecker/pull/7282)]
 - Quote all YAML line breaks in environment substitution [[#7283](https://github.com/woodpecker-ci/woodpecker/pull/7283)]
