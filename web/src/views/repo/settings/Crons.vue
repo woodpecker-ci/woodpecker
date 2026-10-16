@@ -121,6 +121,8 @@
           <span v-else class="text-wp-text-100">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </div>
 
+        <WorkflowSelect v-model="selectedCronWorkflows" :repo-id="repo.id" :branch="selectedCron.branch" />
+
         <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
           <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <KeyValueEditor
@@ -133,7 +135,7 @@
           />
         </InputField>
 
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2">
           <Button type="button" color="gray" :text="$t('cancel')" @click="selectedCron = undefined" />
           <Button
             type="submit"
@@ -142,6 +144,7 @@
             :text="isEditingCron ? $t('repo.settings.crons.save') : $t('repo.settings.crons.add')"
             :disabled="!isFormValid"
           />
+          <span class="text-wp-text-alt-100 text-sm">{{ workflowSummary }}</span>
         </div>
       </form>
     </div>
@@ -162,12 +165,14 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
+import WorkflowSelect from '~/components/repo/WorkflowSelect.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWorkflowSummary } from '~/compositions/useWorkflowSummary';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Cron } from '~/lib/api/types';
 import router from '~/router';
@@ -194,6 +199,17 @@ const selectedCronTimezone = computed<string>({
     return selectedCron.value!.timezone ?? 'UTC';
   },
 });
+const selectedCronWorkflows = computed<string[]>({
+  set(workflows) {
+    selectedCron.value!.workflows = workflows;
+  },
+  get() {
+    return selectedCron.value!.workflows ?? [];
+  },
+});
+
+const workflowSummary = useWorkflowSummary(selectedCronWorkflows);
+
 const selectedCronVariables = computed<Record<string, string>>({
   async set(_vars) {
     selectedCron.value!.variables = _vars;

@@ -109,12 +109,13 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	b := builder.PipelineBuilder{
-		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
-		Envs:                envs,
-		AdditionalEnvs:      currentPipeline.AdditionalVariables,
-		Yamls:               yamls,
-		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
-		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
+		GetWorkflowMetadata:       serverMetadata.GetWorkflowMetadata,
+		Envs:                      envs,
+		AdditionalEnvs:            currentPipeline.AdditionalVariables,
+		Yamls:                     yamls,
+		TrustedClonePlugins:       append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
+		PrivilegedPlugins:         server.Config.Pipeline.PrivilegedPlugins,
+		IgnoreMissingDependencies: namesExcludedBySelection(currentPipeline.SelectedWorkflows, forgeYamls),
 		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
 			Network:  repo.Trusted.Network,
 			Volumes:  repo.Trusted.Volumes,
