@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @xoxys
+@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @xoxys
 
 ### 🔒 Security
 
@@ -15,6 +15,7 @@
 
 ### 📈 Enhancement
 
+- Speed up queue scheduling calculations [[#7303](https://github.com/woodpecker-ci/woodpecker/pull/7303)]
 - Allow selecting the forge when creating a user [[#7314](https://github.com/woodpecker-ci/woodpecker/pull/7314)]
 - Drop reviewer metadata when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
 - Indicate permission fallback in webui [[#7285](https://github.com/woodpecker-ci/woodpecker/pull/7285)]
