@@ -79,7 +79,11 @@ const authErrorMessages = {
 
 const errorMessage = ref<string>();
 const errorDescription = ref<string>(route.query.error_description as string);
-const errorUri = ref<string>(route.query.error_uri as string);
+// only link http(s) URIs, anything else (e.g. javascript:) could run code on click
+const errorUri = computed(() => {
+  const uri = route.query.error_uri as string | undefined;
+  return uri?.startsWith('http') ? uri : undefined;
+});
 
 onMounted(async () => {
   forges.value = (await apiClient.getForges()) ?? [];
