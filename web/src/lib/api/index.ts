@@ -431,10 +431,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/repair`);
   }
 
-  // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): EventSource {
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void, onReconnect?: () => void): EventSource {
     return this._subscribe('/api/stream/events', callback, {
       reconnect: true,
+      onReconnect,
     });
   }
 
