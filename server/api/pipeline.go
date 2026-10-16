@@ -636,7 +636,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := server.Config.Services.LogStore.LogDelete(step); err != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(step); lErr != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

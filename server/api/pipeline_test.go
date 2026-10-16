@@ -632,3 +632,44 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, "pipeline definition not found", got.Errors[0].Message)
 	})
 }
+
+func TestDeletePipelineLogs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	pipeline := &model.Pipeline{ID: 2, Status: model.StatusFailure}
+	steps := []*model.Step{{ID: 3, PipelineID: 2}, {ID: 4, PipelineID: 2}}
+
+	run := func(t *testing.T, firstErr, secondErr error) int {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", pipeline.ID).Return(steps, nil)
+
+		mockLogStore := log_mocks.NewMockService(t)
+		mockLogStore.On("LogDelete", steps[0]).Return(firstErr)
+		mockLogStore.On("LogDelete", steps[1]).Return(secondErr)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", mockStore)
+		c.Set("pipeline", pipeline)
+
+		DeletePipelineLogs(c)
+
+		return c.Writer.Status()
+	}
+
+	t.Run("deletes the logs of every step", func(t *testing.T) {
+		assert.Equal(t, http.StatusNoContent, run(t, nil, nil))
+	})
+
+	t.Run("reports a failed delete and still tries every step", func(t *testing.T) {
+		assert.Equal(t, http.StatusInternalServerError, run(t, assert.AnError, nil))
+	})
+
+	t.Run("reports a failed delete of the last step", func(t *testing.T) {
+		assert.Equal(t, http.StatusInternalServerError, run(t, nil, assert.AnError))
+	})
+}
