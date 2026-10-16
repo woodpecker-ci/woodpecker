@@ -746,6 +746,7 @@ func TestFifoFilterWaiting(t *testing.T) {
 				pending:       list.New(),
 				waitingOnDeps: list.New(),
 				running:       make(map[string]*entry),
+				queuedIDs:     make(map[string]struct{}),
 			}
 			for _, task := range tt.pending {
 				q.pending.PushBack(task)
@@ -778,6 +779,7 @@ func TestFifoFilterWaitingAllocs(t *testing.T) {
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
 		running:       map[string]*entry{"root": {item: &model.Task{ID: "root"}}},
+		queuedIDs:     make(map[string]struct{}),
 	}
 	for i := range 100 {
 		q.pending.PushBack(&model.Task{ID: fmt.Sprintf("ready-%d", i)})
@@ -851,6 +853,7 @@ func TestFifoAssignToWorker(t *testing.T) {
 				waitingOnDeps: list.New(),
 				running:       make(map[string]*entry),
 				workers:       make(map[*worker]struct{}),
+				queuedIDs:     make(map[string]struct{}),
 			}
 			for _, task := range tt.pending {
 				q.pending.PushBack(task)
@@ -944,6 +947,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 				waitingOnDeps: list.New(),
 				running:       make(map[string]*entry),
 				workers:       map[*worker]struct{}{{filter: filterFnTrue}: {}},
+				queuedIDs:     make(map[string]struct{}),
 			}
 			for _, task := range tt.pending {
 				q.pending.PushBack(task)

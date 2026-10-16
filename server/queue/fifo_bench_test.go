@@ -33,6 +33,7 @@ func BenchmarkFilterWaiting(b *testing.B) {
 					pending:       list.New(),
 					waitingOnDeps: list.New(),
 					running:       make(map[string]*entry),
+					queuedIDs:     make(map[string]struct{}, 128),
 				}
 				q.running["root"] = &entry{item: &model.Task{ID: "root"}}
 				ready := 0
@@ -150,6 +151,7 @@ func newPipelineBacklog(pipelines, idle int) *fifo {
 		running:       make(map[string]*entry),
 		workers:       make(map[*worker]struct{}),
 		extension:     time.Hour,
+		queuedIDs:     make(map[string]struct{}, 128),
 	}
 	q.running["deploy-old"] = &entry{
 		item:     &model.Task{ID: "deploy-old", Name: "deploy", ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
