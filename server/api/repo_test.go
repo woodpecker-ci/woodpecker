@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -183,5 +184,82 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, target.ID, stored.OrgID)
 		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
+	})
+}
+
+func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
+	s := newTestStore(t)
+
+	seed := func(t *testing.T, name string) (*model.User, *model.Repo, []*model.Step) {
+		t.Helper()
+		user := &model.User{Login: "bob-" + name, ForgeID: 1, ForgeRemoteID: model.ForgeRemoteID("u-" + name), Hash: "userhash-" + name}
+		require.NoError(t, s.CreateUser(user))
+		repo := &model.Repo{
+			ForgeID:       1,
+			ForgeRemoteID: model.ForgeRemoteID("r-" + name),
+			Owner:         "acme",
+			Name:          name,
+			FullName:      "acme/" + name,
+			UserID:        user.ID,
+			Hash:          "hash-" + name,
+			IsActive:      true,
+		}
+		require.NoError(t, s.CreateRepo(repo))
+
+		var steps []*model.Step
+		for i := range 2 {
+			pipelineSteps := []*model.Step{{PID: 1, Name: "build"}, {PID: 2, Name: "test"}}
+			require.NoError(t, s.CreatePipeline(&model.Pipeline{RepoID: repo.ID, Number: int64(i + 1), Status: model.StatusSuccess}, pipelineSteps...))
+			steps = append(steps, pipelineSteps...)
+		}
+		return user, repo, steps
+	}
+
+	deleteRepo := func(t *testing.T, user *model.User, repo *model.Repo) int {
+		t.Helper()
+		mockForge := moveRepoForge(t)
+		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodDelete, "/repos/1?remove=true", nil)
+		DeleteRepo(tc.Ctx)
+		return tc.Ctx.Writer.Status()
+	}
+
+	setLogStore := func(t *testing.T) *log_mocks.MockService {
+		t.Helper()
+		mockLogStore := log_mocks.NewMockService(t)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+		return mockLogStore
+	}
+
+	t.Run("removing a repo deletes the logs of every step", func(t *testing.T) {
+		user, repo, steps := seed(t, "rocket")
+		mockLogStore := setLogStore(t)
+		for _, step := range steps {
+			mockLogStore.On("LogDelete", mock.MatchedBy(func(s *model.Step) bool { return s.ID == step.ID })).Return(nil).Once()
+		}
+
+		require.Equal(t, http.StatusOK, deleteRepo(t, user, repo))
+
+		_, err := s.GetRepo(repo.ID)
+		assert.ErrorIs(t, err, types.ErrRecordNotExist)
+	})
+
+	t.Run("a failed log delete keeps the repo", func(t *testing.T) {
+		user, repo, _ := seed(t, "probe")
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", mock.Anything).Return(assert.AnError)
+
+		assert.Equal(t, http.StatusInternalServerError, deleteRepo(t, user, repo))
+
+		_, err := s.GetRepo(repo.ID)
+		assert.NoError(t, err)
 	})
 }

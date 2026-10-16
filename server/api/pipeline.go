@@ -214,13 +214,36 @@ func DeletePipeline(c *gin.Context) {
 		return
 	}
 
-	err := store.FromContext(c).DeletePipeline(pl)
+	_store := store.FromContext(c)
+
+	if err := deleteStoredLogs(_store, pl.ID); err != nil {
+		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
+		return
+	}
+
+	err := _store.DeletePipeline(pl)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
 		return
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// deleteStoredLogs deletes the logs of every step of a pipeline from the log store.
+// Deleting steps from the database only removes logs kept in the database,
+// so logs kept by other log stores would stay behind.
+func deleteStoredLogs(_store store.Store, pipelineID int64) error {
+	steps, err := _store.StepList(pipelineID)
+	if err != nil {
+		return err
+	}
+
+	var errs error
+	for _, step := range steps {
+		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(step))
+	}
+	return errs
 }
 
 // GetPipeline

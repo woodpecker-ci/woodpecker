@@ -220,9 +220,27 @@ func TestDeleteStepLogs(t *testing.T) {
 func TestDeletePipeline(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	steps := []*model.Step{{ID: 3, PipelineID: fakePipeline.ID}, {ID: 4, PipelineID: fakePipeline.ID}}
+
+	setLogStore := func(t *testing.T) *log_mocks.MockService {
+		mockLogStore := log_mocks.NewMockService(t)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+		return mockLogStore
+	}
+
 	t.Run("should delete pipeline", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
+
+		// the logs may live outside the database, so they are deleted through the log store
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", steps[0]).Return(nil)
+		mockLogStore.On("LogDelete", steps[1]).Return(nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
@@ -232,6 +250,24 @@ func TestDeletePipeline(t *testing.T) {
 
 		mockStore.AssertCalled(t, "DeletePipeline", mock.Anything)
 		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+
+	t.Run("should keep the pipeline if its logs cannot be deleted", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
+
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", steps[0]).Return(assert.AnError)
+		mockLogStore.On("LogDelete", steps[1]).Return(nil)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", mockStore)
+		c.Set("pipeline", fakePipeline)
+
+		DeletePipeline(c)
+
+		mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
+		assert.Equal(t, http.StatusInternalServerError, c.Writer.Status())
 	})
 
 	t.Run("should not delete pending", func(t *testing.T) {
