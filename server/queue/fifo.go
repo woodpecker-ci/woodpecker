@@ -71,6 +71,7 @@ func NewMemoryQueue(ctx context.Context) Queue {
 		waitingOnDeps: list.New(),
 		extension:     constant.TaskTimeout,
 		paused:        false,
+		queuedIDs:     make(map[string]struct{}, 128),
 	}
 	go q.process()
 	return q
@@ -306,11 +307,9 @@ func (q *fifo) filterWaiting() {
 			// Snapshot all queued IDs before moving any task. Waiting tasks
 			// can themselves be dependencies.
 			indexed = true
-			if q.queuedIDs == nil {
-				q.queuedIDs = make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
-			} else {
-				clear(q.queuedIDs)
-			}
+
+			clear(q.queuedIDs)
+
 			for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
 				for element := tasks.Front(); element != nil; element = element.Next() {
 					task, _ := element.Value.(*model.Task)
