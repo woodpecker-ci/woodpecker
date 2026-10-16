@@ -222,6 +222,31 @@ func createPod(
 	return podName
 }
 
+func TestStartStepReturnsBackendOptionsParseError(t *testing.T) {
+	client := fake.NewClientset()
+	engine := kube{
+		client: client,
+		config: &config{
+			Namespace: "default",
+		},
+	}
+
+	step := &types.Step{
+		Name:  "bad-backend-options",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		// a plain string cannot be decoded into the kubernetes BackendOptions struct
+		BackendOptions: map[string]any{"kubernetes": "not-a-map"},
+	}
+
+	err := engine.StartStep(context.Background(), step, "11301")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "could not parse backend options")
+
+	// the step must not be started if the backend options cannot be parsed
+	assert.Empty(t, client.Actions())
+}
+
 func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 	client := fake.NewClientset()
 	engine := makeEngine(client)

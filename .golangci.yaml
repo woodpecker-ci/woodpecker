@@ -37,6 +37,7 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
+    - tagalign
     - unconvert
     - unparam
     - unused

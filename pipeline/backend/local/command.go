@@ -89,19 +89,6 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
-// PowerShell treats U+0027, U+2018, U+2019, U+201A and U+201B as single quotes:
-// https://github.com/PowerShell/PowerShell/blob/5d871eb5e02cbcc8ecb03fce4b24d7f48bf97c26/src/System.Management.Automation/engine/parser/CharTraits.cs#L265-L272
-func quotePowerShell(value string) string {
-	replacer := strings.NewReplacer(
-		"'", "''",
-		"‘", "‘‘",
-		"’", "’’",
-		"‚", "‚‚",
-		"‛", "‛‛",
-	)
-	return "'" + replacer.Replace(value) + "'"
-}
-
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
@@ -168,7 +155,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		var script strings.Builder
 		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
 		for _, cmd := range cmdList {
-			script.WriteString("Write-Host " + quotePowerShell(common.CommandMarker+cmd) + "\n")
+			script.WriteString("Write-Host " + common.QuotePowerShell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil

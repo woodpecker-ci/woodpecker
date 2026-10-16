@@ -27,7 +27,7 @@ func TestGenerateScriptWin(t *testing.T) {
 		want string
 	}{
 		{
-			from: []string{"echo %PATH%", "go build", "go test"},
+			from: []string{"echo %PATH%", "go build", "go test", "echo 'it''s' \"$HOME\" ‘a’ ‚b‛"},
 			want: `
 $LASTEXITCODE = 0
 $ErrorActionPreference = 'Stop';
@@ -44,20 +44,50 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
 cd "/woodpecker/some";
 
-Write-Output ('▶  "echo %PATH%"');
+Write-Output ('▶  echo %PATH%');
 & echo %PATH%; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
-Write-Output ('▶  "go build"');
+Write-Output ('▶  go build');
 & go build; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 
-Write-Output ('▶  "go test"');
+Write-Output ('▶  go test');
 & go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+
+Write-Output ('▶  echo ''it''''s'' "$HOME" ‘‘a’’ ‚‚b‛‛');
+& echo 'it''s' "$HOME" ‘a’ ‚b‛; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `,
 		},
 	}
 	for _, tt := range testdata {
 		script := generateScriptWindows(tt.from, "/woodpecker/some")
 		assert.EqualValues(t, tt.want, script, "Want encoded script for %s", tt.from)
+	}
+}
+
+func TestQuotePowerShell(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"empty", "", "''"},
+		{"plain", "hello", "'hello'"},
+		{"single quote", "it's working", "'it''s working'"},
+		{"double quote", `echo "hello"`, `'echo "hello"'`},
+		{"variable", `echo $HOME`, `'echo $HOME'`},
+		{"expression", `echo $(Get-Date)`, `'echo $(Get-Date)'`},
+		{"backtick", "echo `test", "'echo `test'"},
+		{"left smart quote", "echo ‘test", "'echo ‘‘test'"},
+		{"right smart quote", "echo test’", "'echo test’’'"},
+		{"low-9 quote", "echo ‚test", "'echo ‚‚test'"},
+		{"reversed quote", "echo ‛test", "'echo ‛‛test'"},
+		{"mixed quotes", "it's ‘quoted’", "'it''s ‘‘quoted’’'"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, QuotePowerShell(tt.input))
+		})
 	}
 }
 

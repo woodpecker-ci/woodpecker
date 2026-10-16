@@ -34,9 +34,9 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 		}
 
 		type pipelines struct {
-			ID     int64            `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
-			Error  string           `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
-			Errors []*pipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
+			ID     int64            `json:"id"     xorm:"pk autoincr 'pipeline_id'"`
+			Error  string           `json:"error"  xorm:"LONGTEXT 'pipeline_error'"` // old error format
+			Errors []*pipelineError `json:"errors" xorm:"json 'pipeline_errors'"`    // new error format
 		}
 
 		// make sure pipeline_error column exists
