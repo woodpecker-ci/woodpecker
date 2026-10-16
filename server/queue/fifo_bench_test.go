@@ -18,7 +18,6 @@ import (
 	"container/list"
 	"fmt"
 	"testing"
-	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
