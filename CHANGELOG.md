@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- Do not retry extensions that respond with 204 No Content [[#7320](https://github.com/woodpecker-ci/woodpecker/pull/7320)]
 - Return an error when Kubernetes backend options cannot be parsed [[#7312](https://github.com/woodpecker-ci/woodpecker/pull/7312)]
 - Persist token expiry when existing users sign in [[#7304](https://github.com/woodpecker-ci/woodpecker/pull/7304)]
 - Fix quoting windows container [[#7293](https://github.com/woodpecker-ci/woodpecker/pull/7293)]
