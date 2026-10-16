@@ -366,7 +366,6 @@ func sanitizeDownloadFilename(filename string) string {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
-	_store := store.FromContext(c)
 	_step := session.Step(c)
 
 	switch _step.State {
@@ -375,7 +374,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err := _store.LogDelete(_step)
+	err := server.Config.Services.LogStore.LogDelete(_step)
 	if err != nil {
 		handleDBError(c, err)
 		return

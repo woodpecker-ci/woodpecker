@@ -161,6 +161,62 @@ func TestDownloadStepLogs(t *testing.T) {
 	assert.Equal(t, "first line\n\x1b[31msecond line\x1b[0m", w.Body.String())
 }
 
+func TestDeleteStepLogs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	setLogStore := func(t *testing.T) *log_mocks.MockService {
+		mockLogStore := log_mocks.NewMockService(t)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+		return mockLogStore
+	}
+
+	t.Run("deletes through the log store", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusSuccess}
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", step).Return(nil)
+
+		// the store must not be used to delete logs, the configured log store may not be the database
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+
+	t.Run("returns the log store error", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusFailure}
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", step).Return(assert.AnError)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusInternalServerError, c.Writer.Status())
+	})
+
+	t.Run("does not delete logs of a running step", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusRunning}
+		setLogStore(t)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, c.Writer.Status())
+	})
+}
+
 func TestDeletePipeline(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
