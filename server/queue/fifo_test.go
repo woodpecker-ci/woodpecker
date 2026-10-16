@@ -773,6 +773,24 @@ func TestFifoFilterWaiting(t *testing.T) {
 	}
 }
 
+func TestFifoFilterWaitingAllocs(t *testing.T) {
+	q := &fifo{
+		pending:       list.New(),
+		waitingOnDeps: list.New(),
+		running:       map[string]*entry{"root": {item: &model.Task{ID: "root"}}},
+	}
+	for i := range 100 {
+		q.pending.PushBack(&model.Task{ID: fmt.Sprintf("ready-%d", i)})
+		q.pending.PushBack(&model.Task{ID: fmt.Sprintf("blocked-%d", i), Dependencies: []string{"root"}})
+	}
+	q.filterWaiting()
+
+	// a steady queue must not produce garbage on every scheduling tick.
+	assert.Zero(t, testing.AllocsPerRun(10, q.filterWaiting))
+	assert.Equal(t, 100, q.pending.Len())
+	assert.Equal(t, 100, q.waitingOnDeps.Len())
+}
+
 func TestFifoAssignToWorker(t *testing.T) {
 	group := func(id string, pipeline int64) *model.Task {
 		return &model.Task{ID: id, PipelineID: pipeline, Created: pipeline, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1}
