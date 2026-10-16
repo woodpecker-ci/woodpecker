@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-15
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,7 +14,7 @@
 ### 📈 Enhancement
 
 - Allow selecting the forge when creating a user [[#7314](https://github.com/woodpecker-ci/woodpecker/pull/7314)]
-- Do not keep the reviewer when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
+- Drop reviewer metadata when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
 - Indicate permission fallback in webui [[#7285](https://github.com/woodpecker-ci/woodpecker/pull/7285)]
 - lint against tag align in golang [[#7292](https://github.com/woodpecker-ci/woodpecker/pull/7292)]
 - Rework dark theme [[#7263](https://github.com/woodpecker-ci/woodpecker/pull/7263)]
@@ -35,7 +35,7 @@
 ### 📚 Documentation
 
 - Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
-- Add Asyntai AI Chatbot Docs Sync plugin to plugins.json [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
+- Add Asyntai AI Chatbot Docs Sync to plugins [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
 - Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
 - Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7321](https://github.com/woodpecker-ci/woodpecker/pull/7321)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
 - Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
