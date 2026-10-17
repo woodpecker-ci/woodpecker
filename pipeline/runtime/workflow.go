@@ -65,7 +65,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		stageChan := r.runStage(runnerCtx, stage.Steps)
 		select {
 		case <-r.ctx.Done():
-			<-stageChan
+			_ = <-stageChan
 			return pipeline_errors.ErrCancel
 		case err := <-stageChan:
 			if err != nil {
