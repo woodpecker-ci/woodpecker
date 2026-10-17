@@ -53,6 +53,14 @@ func newTestRPC(t *testing.T, mockStore *store_mocks.MockStore, q queue.Queue) R
 		Name:      "pipeline_count_" + t.Name(),
 	}, []string{"repo", "branch", "status", "pipeline"})
 
+	if q == nil {
+		// Init, Update and Done ask the queue who holds the lease; a queue that
+		// does not know the workflow leaves it to the store based ownership check.
+		mockQueue := queue_mocks.NewMockQueue(t)
+		mockQueue.On("Leased", mock.Anything, mock.Anything, mock.Anything).Return(queue.ErrNotFound).Maybe()
+		q = mockQueue
+	}
+
 	return RPC{
 		store:         mockStore,
 		scheduler:     scheduler.NewScheduler(t.Context(), mockStore, q, memory.New()),
@@ -475,6 +483,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		mockQueue.On("Leased", mock.Anything, mock.Anything, mock.Anything).Return(queue.ErrNotFound).Maybe()
 
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
