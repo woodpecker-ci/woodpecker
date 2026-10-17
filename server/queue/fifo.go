@@ -324,8 +324,9 @@ func (q *fifo) filterWaiting() {
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
+	var bestElement *list.Element
+	var bestTask *model.Task
 	var bestWorker *worker
-	var bestScore int
 
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
@@ -336,24 +337,30 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 			continue
 		}
 
+		var candidateWorker *worker
+		var candidateScore int
 		for worker := range q.workers {
 			matched, score := worker.filter(task)
-			if matched && score > bestScore {
-				bestWorker = worker
-				bestScore = score
+			if matched && score > candidateScore {
+				candidateWorker = worker
+				candidateScore = score
 			}
 		}
-		if bestWorker != nil {
-			log.Debug().
-				Str("task_id", task.ID).
-				Strs("dependencies", task.Dependencies).
-				Int("score", bestScore).
-				Msg("queue: assigned task to worker")
-			return element, bestWorker
+		if candidateWorker == nil {
+			continue
+		}
+
+		if bestTask == nil || queueOrderLess(task, bestTask) {
+			bestElement = element
+			bestTask = task
+			bestWorker = candidateWorker
 		}
 	}
 
-	return nil, nil
+	if bestTask != nil {
+		log.Debug().Msgf("queue: assigned task: %v with deps %v to worker", bestTask.ID, bestTask.Dependencies)
+	}
+	return bestElement, bestWorker
 }
 
 // canRunConcurrent reports whether the given task may currently start without
@@ -430,6 +437,14 @@ func taskOrderLess(a, b *model.Task) bool {
 		return a.Created < b.Created
 	}
 	return a.Name < b.Name
+}
+
+// queueOrderLess reports whether task a should be assigned before task b.
+// Higher priority runs first. Equal priorities are not reordered: assignToWorker
+// scans pending in queue order and keeps the first best candidate, so the
+// existing pending order (creation order) decides ties.
+func queueOrderLess(a, b *model.Task) bool {
+	return a.Priority > b.Priority
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
