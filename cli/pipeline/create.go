@@ -52,7 +52,7 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 		Variables: variables,
 	}
 
-	pipeline, err := client.PipelineCreate(repoID, options)
+	pipeline, err := client.PipelineCreate(ctx, repoID, options)
 	if err != nil {
 		return err
 	}

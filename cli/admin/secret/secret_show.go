@@ -54,7 +54,7 @@ func secretShow(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	secret, err := client.GlobalSecret(secretName)
+	secret, err := client.GlobalSecret(ctx, secretName)
 	if err != nil {
 		return err
 	}

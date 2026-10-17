@@ -23,6 +23,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `tag_title` for tag events
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
+- The woodpecker-go api-client now takes a `context.Context` as first argument for all functions that send a request. Canceling it also cancels the request.
+- The woodpecker-go api-client function `AgentList` now takes `AgentListOptions` to select the page, like the other list functions. It replaces `AgentListWithOpts`, which was removed.
 
 ### Admin-facing migrations
 

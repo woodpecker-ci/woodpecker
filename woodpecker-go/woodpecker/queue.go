@@ -14,14 +14,17 @@
 
 package woodpecker
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 const pathQueue = "%s/api/queue"
 
 // QueueInfo returns queue info.
-func (c *client) QueueInfo() (*Info, error) {
+func (c *client) QueueInfo(ctx context.Context) (*Info, error) {
 	out := new(Info)
 	uri := fmt.Sprintf(pathQueue+"/info", c.addr)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }

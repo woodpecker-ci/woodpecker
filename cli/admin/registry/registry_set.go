@@ -74,6 +74,6 @@ func registryUpdate(ctx context.Context, c *cli.Command) error {
 		registry.Password = string(out)
 	}
 
-	_, err = client.GlobalRegistryUpdate(registry)
+	_, err = client.GlobalRegistryUpdate(ctx, registry)
 	return err
 }

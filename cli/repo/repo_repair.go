@@ -36,12 +36,12 @@ func repoRepair(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	if err := client.RepoRepair(repoID); err != nil {
+	if err := client.RepoRepair(ctx, repoID); err != nil {
 		return err
 	}
 

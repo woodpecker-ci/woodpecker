@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,18 +27,18 @@ const (
 )
 
 // PipelineQueue returns a list of enqueued pipelines.
-func (c *client) PipelineQueue() ([]*Feed, error) {
+func (c *client) PipelineQueue(ctx context.Context) ([]*Feed, error) {
 	var out []*Feed
 	uri := fmt.Sprintf(pathPipelineQueue, c.addr)
-	err := c.get(uri, &out)
+	err := c.get(ctx, uri, &out)
 	return out, err
 }
 
 // PipelineMetadata returns metadata for a pipeline, workflow name is optional.
-func (c *client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error) {
+func (c *client) PipelineMetadata(ctx context.Context, repoID int64, pipelineNumber int) ([]byte, error) {
 	uri := fmt.Sprintf(pathPipelineMetadata, c.addr, repoID, pipelineNumber)
 
-	body, err := c.open(uri, http.MethodGet, nil)
+	body, err := c.open(ctx, uri, http.MethodGet, nil)
 	if err != nil {
 		return nil, err
 	}

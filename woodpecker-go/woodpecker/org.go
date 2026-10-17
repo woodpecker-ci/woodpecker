@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 )
@@ -30,103 +31,103 @@ const (
 )
 
 // Org returns an organization by id.
-func (c *client) Org(orgID int64) (*Org, error) {
+func (c *client) Org(ctx context.Context, orgID int64) (*Org, error) {
 	out := new(Org)
 	uri := fmt.Sprintf(pathOrg, c.addr, orgID)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // OrgLookup returns a organization by its name.
-func (c *client) OrgLookup(name string) (*Org, error) {
+func (c *client) OrgLookup(ctx context.Context, name string) (*Org, error) {
 	out := new(Org)
 	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
-func (c *client) OrgList(opt ListOptions) ([]*Org, error) {
+func (c *client) OrgList(ctx context.Context, opt ListOptions) ([]*Org, error) {
 	var out []*Org
 	uri, _ := url.Parse(fmt.Sprintf(pathOrgList, c.addr))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // OrgSecret returns an organization secret by name.
-func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
+func (c *client) OrgSecret(ctx context.Context, orgID int64, secret string) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // OrgSecretList returns a list of all organization secrets.
-func (c *client) OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error) {
+func (c *client) OrgSecretList(ctx context.Context, orgID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
 	uri, _ := url.Parse(fmt.Sprintf(pathOrgSecrets, c.addr, orgID))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // OrgSecretCreate creates an organization secret.
-func (c *client) OrgSecretCreate(orgID int64, in *Secret) (*Secret, error) {
+func (c *client) OrgSecretCreate(ctx context.Context, orgID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
 // OrgSecretUpdate updates an organization secret.
-func (c *client) OrgSecretUpdate(orgID int64, in *Secret) (*Secret, error) {
+func (c *client) OrgSecretUpdate(ctx context.Context, orgID int64, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, in.Name)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // OrgSecretDelete deletes an organization secret.
-func (c *client) OrgSecretDelete(orgID int64, secret string) error {
+func (c *client) OrgSecretDelete(ctx context.Context, orgID int64, secret string) error {
 	uri := fmt.Sprintf(pathOrgSecret, c.addr, orgID, secret)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }
 
 // OrgRegistry returns an organization registry by address.
-func (c *client) OrgRegistry(orgID int64, registry string) (*Registry, error) {
+func (c *client) OrgRegistry(ctx context.Context, orgID int64, registry string) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, registry)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // OrgRegistryList returns a list of all organization registries.
-func (c *client) OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error) {
+func (c *client) OrgRegistryList(ctx context.Context, orgID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
 	uri, _ := url.Parse(fmt.Sprintf(pathOrgRegistries, c.addr, orgID))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // OrgRegistryCreate creates an organization registry.
-func (c *client) OrgRegistryCreate(orgID int64, in *Registry) (*Registry, error) {
+func (c *client) OrgRegistryCreate(ctx context.Context, orgID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathOrgRegistries, c.addr, orgID)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
 // OrgRegistryUpdate updates an organization registry.
-func (c *client) OrgRegistryUpdate(orgID int64, in *Registry) (*Registry, error) {
+func (c *client) OrgRegistryUpdate(ctx context.Context, orgID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
 	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, in.Address)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // OrgRegistryDelete deletes an organization registry.
-func (c *client) OrgRegistryDelete(orgID int64, registry string) error {
+func (c *client) OrgRegistryDelete(ctx context.Context, orgID int64, registry string) error {
 	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, registry)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }

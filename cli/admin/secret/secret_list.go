@@ -46,7 +46,7 @@ func secretList(ctx context.Context, c *cli.Command) error {
 
 	opt := woodpecker.SecretListOptions{}
 
-	list, err := client.GlobalSecretList(opt)
+	list, err := client.GlobalSecretList(ctx, opt)
 	if err != nil {
 		return err
 	}

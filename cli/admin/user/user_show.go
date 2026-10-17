@@ -45,7 +45,7 @@ func userShow(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("missing or invalid user login")
 	}
 
-	user, err := client.User(login)
+	user, err := client.User(ctx, login)
 	if err != nil {
 		return err
 	}

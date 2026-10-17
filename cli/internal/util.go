@@ -129,7 +129,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 }
 
 // ParseRepo parses the repository owner and name from a string.
-func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
+func ParseRepo(ctx context.Context, client woodpecker.Client, str string) (repoID int64, err error) {
 	if str == "" {
 		str, err = getRepoFromGit("upstream")
 		if err != nil {
@@ -149,7 +149,7 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 	}
 
 	if strings.Contains(str, "/") {
-		repo, err := client.RepoLookup(str)
+		repo, err := client.RepoLookup(ctx, str)
 		if err != nil {
 			return 0, err
 		}
@@ -181,8 +181,8 @@ These rules apply:
 
 Strictly speaking, this is not parsing, but a lookup.
 */
-func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
-	pipeline, err := client.Pipeline(repoID, number)
+func ParseStep(ctx context.Context, client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
+	pipeline, err := client.Pipeline(ctx, repoID, number)
 	if err != nil {
 		return 0, err
 	}

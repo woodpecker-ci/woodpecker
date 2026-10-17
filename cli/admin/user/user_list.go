@@ -42,7 +42,7 @@ func userList(ctx context.Context, c *cli.Command) error {
 
 	opt := woodpecker.UserListOptions{}
 
-	users, err := client.UserList(opt)
+	users, err := client.UserList(ctx, opt)
 	if err != nil || len(users) == 0 {
 		return err
 	}

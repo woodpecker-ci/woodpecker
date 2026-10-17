@@ -85,7 +85,7 @@ func TestPipelineList(t *testing.T) {
 
 			client := NewClient(ts.URL, http.DefaultClient)
 
-			pipelines, err := client.PipelineList(123, tt.opts)
+			pipelines, err := client.PipelineList(t.Context(), 123, tt.opts)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, pipelines)
@@ -166,7 +166,7 @@ func TestClientDeploy(t *testing.T) {
 
 			client := NewClient(ts.URL, http.DefaultClient)
 
-			pipeline, err := client.Deploy(tt.repoID, tt.pipelineID, tt.opts)
+			pipeline, err := client.Deploy(t.Context(), tt.repoID, tt.pipelineID, tt.opts)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -243,7 +243,7 @@ func TestClientPipelineStart(t *testing.T) {
 
 			client := NewClient(ts.URL, http.DefaultClient)
 
-			pipeline, err := client.PipelineStart(tt.repoID, tt.pipelineID, tt.opts)
+			pipeline, err := client.PipelineStart(t.Context(), tt.repoID, tt.pipelineID, tt.opts)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -313,7 +313,7 @@ func TestClient_PipelineLast(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			pipeline, err := client.PipelineLast(tt.repoID, tt.opts)
+			pipeline, err := client.PipelineLast(t.Context(), tt.repoID, tt.opts)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -384,7 +384,7 @@ func TestClientRepoPost(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			repo, err := client.RepoPost(tt.opts)
+			repo, err := client.RepoPost(t.Context(), tt.opts)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -445,7 +445,7 @@ func TestClientRepoMove(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			err := client.RepoMove(tt.repoID, tt.opts)
+			err := client.RepoMove(t.Context(), tt.repoID, tt.opts)
 
 			if tt.wantErr {
 				assert.Error(t, err)

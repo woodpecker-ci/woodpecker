@@ -15,12 +15,14 @@
 package woodpecker
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,13 +48,67 @@ func TestLogLevel(t *testing.T) {
 
 	client := NewClient(ts.URL, http.DefaultClient)
 
-	curLvl, err := client.LogLevel()
+	curLvl, err := client.LogLevel(t.Context())
 	assert.NoError(t, err)
 	assert.True(t, strings.EqualFold(curLvl.Level, logLevel))
 
-	newLvl, err := client.SetLogLevel(&LogLevel{Level: "trace"})
+	newLvl, err := client.SetLogLevel(t.Context(), &LogLevel{Level: "trace"})
 	assert.NoError(t, err)
 	assert.True(t, strings.EqualFold(newLvl.Level, logLevel))
+}
+
+func TestRequestCanceledByContext(t *testing.T) {
+	started := make(chan struct{}, 1)
+	release := make(chan struct{})
+	ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+		started <- struct{}{}
+		// never answer on our own, so only the context can end the request
+		<-release
+	}))
+	defer ts.Close()
+	defer close(release)
+
+	client := NewClient(ts.URL, http.DefaultClient)
+
+	tests := []struct {
+		name string
+		call func(ctx context.Context) error
+	}{
+		{
+			name: "json response",
+			call: func(ctx context.Context) error {
+				_, err := client.LogLevel(ctx)
+				return err
+			},
+		},
+		{
+			name: "raw response",
+			call: func(ctx context.Context) error {
+				_, err := client.PipelineMetadata(ctx, 1, 1)
+				return err
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(t.Context())
+			defer cancel(nil)
+
+			errCh := make(chan error, 1)
+			go func() { errCh <- tt.call(ctx) }()
+
+			<-started
+			cancel(nil)
+
+			select {
+			case err := <-errCh:
+				assert.ErrorIs(t, err, context.Canceled)
+			case <-time.After(5 * time.Second):
+				t.Fatal("request was not canceled together with the context")
+			}
+		})
+	}
 }
 
 func TestVersion(t *testing.T) {
@@ -67,7 +123,7 @@ func TestVersion(t *testing.T) {
 
 	client := NewClient(ts.URL, http.DefaultClient)
 
-	version, err := client.Version()
+	version, err := client.Version(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, &Version{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",

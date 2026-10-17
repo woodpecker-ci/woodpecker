@@ -54,12 +54,12 @@ func cronShow(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	cron, err := client.CronGet(repoID, cronID)
+	cron, err := client.CronGet(ctx, repoID, cronID)
 	if err != nil {
 		return err
 	}

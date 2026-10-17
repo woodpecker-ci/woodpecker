@@ -76,7 +76,7 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func cronUpdate(ctx context.Context, c *cli.Command) error {
 		Schedule: schedule,
 		Enabled:  enabled,
 	}
-	cron, err = client.CronUpdate(repoID, cron)
+	cron, err = client.CronUpdate(ctx, repoID, cron)
 	if err != nil {
 		return err
 	}

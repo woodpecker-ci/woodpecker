@@ -80,7 +80,7 @@ func TestPipelineList(t *testing.T) {
 	for _, tt := range testtases {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewMockClient(t)
-			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+			mockClient.On("PipelineList", mock.Anything, mock.Anything, mock.Anything).Return(func(_ context.Context, _ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
 				if tt.pipelineErr != nil {
 					return nil, tt.pipelineErr
 				}
@@ -89,12 +89,12 @@ func TestPipelineList(t *testing.T) {
 				}
 				return []*woodpecker.Pipeline{}, nil
 			}).Maybe()
-			mockClient.On("RepoLookup", mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
+			mockClient.On("RepoLookup", mock.Anything, mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
 			command := buildPipelineListCmd()
 			command.Writer = io.Discard
-			command.Action = func(_ context.Context, c *cli.Command) error {
-				pipelines, err := pipelineList(c, mockClient)
+			command.Action = func(ctx context.Context, c *cli.Command) error {
+				pipelines, err := pipelineList(ctx, c, mockClient)
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
 					return nil

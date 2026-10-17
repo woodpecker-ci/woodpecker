@@ -55,7 +55,7 @@ func orgList(ctx context.Context, c *cli.Command) error {
 
 	opt := woodpecker.ListOptions{}
 
-	list, err := client.OrgList(opt)
+	list, err := client.OrgList(ctx, opt)
 	if err != nil {
 		return err
 	}
