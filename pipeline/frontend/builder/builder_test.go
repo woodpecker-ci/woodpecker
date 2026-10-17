@@ -420,6 +420,8 @@ func TestRunsOnStatus(t *testing.T) {
 			assert.ElementsMatch(t, tt.want, items[0].RunsOn)
 		})
 	}
+}
+
 func TestWorkflowPriority(t *testing.T) {
 	t.Parallel()
 
