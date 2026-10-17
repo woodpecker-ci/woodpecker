@@ -22,9 +22,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
-
-const queuePriorityConfigPath = ".woodpecker/queue-priority.yml"
 
 func loadQueuePriorityRules(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline) ([]model.QueuePriorityRule, error) {
 	if repo.Branch == "" {
@@ -38,17 +37,17 @@ func loadQueuePriorityRules(ctx context.Context, forge forge.Forge, user *model.
 
 	configPipeline := *pipeline
 	configPipeline.Commit = defaultHead.SHA
-	data, err := forge.File(ctx, user, repo, &configPipeline, queuePriorityConfigPath)
+	data, err := forge.File(ctx, user, repo, &configPipeline, constant.QueuePriorityConfigPath)
 	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("could not load queue priority config %q: %w", queuePriorityConfigPath, err)
+		return nil, fmt.Errorf("could not load queue priority config %q: %w", constant.QueuePriorityConfigPath, err)
 	}
 
 	rules, err := model.ParseQueuePriorityRuleFile(data)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse queue priority config %q: %w", queuePriorityConfigPath, err)
+		return nil, fmt.Errorf("could not parse queue priority config %q: %w", constant.QueuePriorityConfigPath, err)
 	}
 	return rules, nil
 }
