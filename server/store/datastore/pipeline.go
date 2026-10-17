@@ -152,12 +152,12 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		sess := s.engine.NewSession()
 		defer sess.Close()
 		if err := sess.Begin(); err != nil {
-			return err
+			return wrapUpdate(0, err)
 		}
 
 		repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
 		if err != nil {
-			return err
+			return wrapUpdate(0, err)
 		}
 
 		if !repoExist {
@@ -170,7 +170,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			Table(new(model.Pipeline)).
 			Where("repo_id = ?", pipeline.RepoID).
 			Get(&number); err != nil {
-			return err
+			return wrapUpdate(0, err)
 		}
 		pipeline.Number = number + 1
 
@@ -188,7 +188,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			}
 		}
 
-		return sess.Commit()
+		return wrapUpdate(0, sess.Commit())
 	})
 }
 
