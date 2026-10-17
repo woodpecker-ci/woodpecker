@@ -54,6 +54,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency golangci/golangci-lint to v2.15.0 [[#7328](https://github.com/woodpecker-ci/woodpecker/pull/7328)]
 - Update pre-commit hook golangci/golangci-lint to v2.15.0 [[#7329](https://github.com/woodpecker-ci/woodpecker/pull/7329)]
 - Update web npm deps non-major [[#7327](https://github.com/woodpecker-ci/woodpecker/pull/7327)]
 - Update golang-packages [[#7321](https://github.com/woodpecker-ci/woodpecker/pull/7321)]
