@@ -53,6 +53,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7327](https://github.com/woodpecker-ci/woodpecker/pull/7327)]
 - Update golang-packages [[#7321](https://github.com/woodpecker-ci/woodpecker/pull/7321)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
