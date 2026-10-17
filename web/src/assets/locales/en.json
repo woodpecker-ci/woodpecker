@@ -75,6 +75,7 @@
     "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
+    "perm_sync_failed": "Your permissions for this repository could not be synced with the forge. Your access is temporarily degraded to read-only.",
     "enable": {
       "enable": "Enable",
       "enabled": "Already enabled",
