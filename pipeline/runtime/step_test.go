@@ -322,15 +322,45 @@ func TestCompleteStep(t *testing.T) {
 		t.Parallel()
 		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend_types.State{Exited: true, OOMKilled: true, ExitCode: 137}, nil)
+			Return(&backend_types.State{Exited: true, ExitCode: 137, Error: backend_types.ErrStepOOMKilled}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
 
-		var oomErr *pipeline_errors.OomError
-		assert.True(t, errors.As(err, &oomErr))
-		assert.True(t, ws.OOMKilled)
+		assert.ErrorIs(t, err, backend_types.ErrStepOOMKilled, "the OOM kill tells more than its exit code")
+		assert.Equal(t, 137, ws.ExitCode)
+		assert.ErrorIs(t, ws.Error, backend_types.ErrStepOOMKilled)
+	})
+
+	t.Run("OOMKilledExitZero", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, ExitCode: 0, Error: backend_types.ErrStepOOMKilled}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+
+		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
+
+		assert.ErrorIs(t, err, backend_types.ErrStepOOMKilled)
+		assert.Equal(t, 0, ws.ExitCode)
+		assert.ErrorIs(t, ws.Error, backend_types.ErrStepOOMKilled)
+	})
+
+	t.Run("StateErrorExitZero", func(t *testing.T) {
+		t.Parallel()
+		stateErr := errors.New("backend reported failure")
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, ExitCode: 0, Error: stateErr}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+
+		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
+
+		assert.ErrorIs(t, err, stateErr, "state error must fail the step for the runtime too")
+		assert.Equal(t, stateErr.Error(), ws.Error.Error())
 	})
 
 	t.Run("ContextCanceledNilState", func(t *testing.T) {

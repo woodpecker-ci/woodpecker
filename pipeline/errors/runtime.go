@@ -17,6 +17,8 @@ package errors
 import (
 	"errors"
 	"fmt"
+
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 var (
@@ -25,8 +27,9 @@ var (
 	ErrSkip = errors.New("Skipped")
 
 	// ErrCancel is used as a return value when the container execution receives
-	// a cancellation signal from the context.
-	ErrCancel = errors.New("Canceled")
+	// a cancellation signal from the context. It is the well known step error,
+	// so a canceled step reaches the server as such.
+	ErrCancel error = backend_types.ErrStepCanceled
 )
 
 // An ExitError reports an unsuccessful exit.
@@ -40,22 +43,10 @@ func (e *ExitError) Error() string {
 	return fmt.Sprintf("uuid=%s: exit code %d", e.UUID, e.Code)
 }
 
-// An OomError reports the process received an OOMKill from the kernel.
-type OomError struct {
-	UUID string
-	Code int
-}
-
-// Error returns the error message in string format.
-func (e *OomError) Error() string {
-	return fmt.Sprintf("uuid=%s: received oom kill", e.UUID)
-}
-
 // IsStepFailure reports whether err was caused by a step itself terminating
 // unsuccessfully (non-zero exit code or oom kill), as opposed to the runtime
 // or backend failing to execute the workflow.
 func IsStepFailure(err error) bool {
 	var exitErr *ExitError
-	var oomErr *OomError
-	return errors.As(err, &exitErr) || errors.As(err, &oomErr)
+	return errors.As(err, &exitErr) || errors.Is(err, backend_types.ErrStepOOMKilled)
 }

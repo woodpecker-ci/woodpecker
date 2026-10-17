@@ -165,8 +165,8 @@ func (r *Runtime) cancelErr(err error, step *backend_types.Step) error {
 }
 
 // completeStep drains the log stream, waits for the process to exit, destroys
-// the container, and maps exit conditions (OOM kill, non-zero exit code, context
-// cancellation) to typed errors.
+// the container, and maps exit conditions (state error such as an OOM kill,
+// non-zero exit code, context cancellation) to typed errors.
 //
 // The runnerCtx is intentionally used for DestroyStep so that container cleanup can
 // still reach the backend even after the workflow context (r.ctx) is canceled.
@@ -198,11 +198,11 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 		waitState.Error = pipeline_errors.ErrCancel
 	}
 
-	if waitState.OOMKilled {
-		return waitState, &pipeline_errors.OomError{
-			UUID: step.UUID,
-			Code: waitState.ExitCode,
-		}
+	// The runtime acts on the returned error, the server on the state, so a
+	// state error must be returned too. It tells more than the exit code, e.g.
+	// an OOM killed step can end with any code. A cancellation is no failure.
+	if waitState.Error != nil && !errors.Is(waitState.Error, pipeline_errors.ErrCancel) {
+		return waitState, waitState.Error
 	}
 	if waitState.ExitCode != 0 {
 		return waitState, &pipeline_errors.ExitError{
@@ -297,9 +297,8 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 	case processState == nil && err != nil:
 		// Step failed to start — create an dummy exited process state.
 		s.CurrStepState = backend_types.State{
-			Error:     err,
-			Exited:    true,
-			OOMKilled: false,
+			Error:  err,
+			Exited: true,
 		}
 	case processState != nil:
 		s.CurrStepState = *processState

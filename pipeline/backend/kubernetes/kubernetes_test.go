@@ -381,6 +381,54 @@ func TestWaitStepReturnsOnAlreadyTerminatedPod(t *testing.T) {
 	assert.Equal(t, 1, state.ExitCode)
 }
 
+// Kubernetes reports an OOM kill only as the reason the container terminated,
+// next to exit code 137. It must reach the runtime as ErrStepOOMKilled.
+func TestWaitStepReportsOOMKill(t *testing.T) {
+	for name, tc := range map[string]struct {
+		reason  string
+		wantErr error
+	}{
+		"oom killed": {reason: "OOMKilled", wantErr: types.ErrStepOOMKilled},
+		"error":      {reason: "Error", wantErr: nil},
+	} {
+		t.Run(name, func(t *testing.T) {
+			client := fake.NewClientset()
+			engine := makeEngine(client)
+			step := makeStep("pod-oom-01")
+			namespace := "test-ns"
+
+			podName, err := stepToPodName(step)
+			require.NoError(t, err)
+			_, err = client.CoreV1().Pods(namespace).Create(t.Context(), &kube_core_v1.Pod{
+				Name:      podName,
+				Namespace: namespace,
+				Status: kube_core_v1.PodStatus{
+					Phase: kube_core_v1.PodFailed,
+					ContainerStatuses: []kube_core_v1.ContainerStatus{{
+						State: kube_core_v1.ContainerState{
+							Terminated: &kube_core_v1.ContainerStateTerminated{ExitCode: 137, Reason: tc.reason},
+						},
+					}},
+				},
+			}, kube_meta_v1.CreateOptions{})
+			require.NoError(t, err)
+
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+
+			state, err := engine.WaitStep(ctx, step, "task-1")
+			require.NoError(t, err)
+			require.NotNil(t, state)
+			assert.Equal(t, 137, state.ExitCode)
+			if tc.wantErr == nil {
+				assert.NoError(t, state.Error)
+			} else {
+				assert.ErrorIs(t, state.Error, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	client := fake.NewClientset()
 	engine := makeEngine(client)

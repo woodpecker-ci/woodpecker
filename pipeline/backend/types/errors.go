@@ -17,3 +17,19 @@ package types
 import "errors"
 
 var ErrNoCliContextFound = errors.New("no CliContext in context found")
+
+// StepError is a well known reason a step ended, reported next to its exit
+// code. It is a plain string so it passes gRPC as it is and can be asserted
+// with errors.Is on both ends.
+type StepError string
+
+const (
+	// ErrStepCanceled reports that the step was canceled.
+	ErrStepCanceled StepError = "canceled"
+	// ErrStepOOMKilled reports that the step was killed for running out of memory.
+	ErrStepOOMKilled StepError = "oom_killed"
+)
+
+func (e StepError) Error() string {
+	return string(e)
+}
