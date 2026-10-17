@@ -49,15 +49,8 @@ var flags = []cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SKIP_VERIFY"),
 		Name:    "grpc-skip-insecure",
-		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		Value:   true, // TODO change to false in next major to enable verification by default
-	},
-	// TODO remove this flag in next major
-	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_GRPC_VERIFY"),
-		Name:    "grpc-skip-insecure-deprecated",
-		Usage:   "should the grpc server certificate be verified, only valid when WOODPECKER_GRPC_SECURE is true",
-		Value:   true,
+		Usage:   "skip verification of the grpc server certificate, only valid when WOODPECKER_GRPC_SECURE is true",
+		Value:   false,
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_RETRY_TIMEOUT"),

@@ -250,9 +250,9 @@ Configures if the connection to `WOODPECKER_SERVER` should be made using a secur
 ### GRPC_SKIP_VERIFY
 
 - Name: `WOODPECKER_GRPC_SKIP_VERIFY`
-- Default: `true`
+- Default: `false`
 
-Configures if the gRPC server certificate should be verified, only valid when `WOODPECKER_GRPC_SECURE` is `true`.
+If `true`, the agent does **not** verify the gRPC server's TLS certificate (only relevant when `WOODPECKER_GRPC_SECURE` is `true`). The default is `false`, so the certificate is verified; set it to `true` only for self-signed certificates without a trust anchor, which exposes the agent token to an on-path attacker.
 
 ---
 
