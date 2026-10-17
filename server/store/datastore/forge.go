@@ -35,8 +35,7 @@ func (s storage) ForgeCreate(forge *model.Forge) error {
 
 func (s storage) ForgeUpdate(forge *model.Forge) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(forge.ID).AllCols().Update(forge)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(forge.ID).AllCols().Update(forge))
 	})
 }
 

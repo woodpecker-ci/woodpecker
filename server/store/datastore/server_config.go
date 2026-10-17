@@ -46,8 +46,7 @@ func (s storage) ServerConfigSet(key, value string) error {
 		if count == 0 {
 			err = wrapInsert(sess.Insert(config))
 		} else {
-			_, err = sess.Where("`key` = ?", config.Key).Cols("value").Update(config)
-			err = wrapUpdate(err)
+			err = wrapUpdate(sess.Where("`key` = ?", config.Key).Cols("value").Update(config))
 		}
 		if err != nil {
 			return err

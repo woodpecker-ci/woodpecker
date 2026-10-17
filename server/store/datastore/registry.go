@@ -51,8 +51,7 @@ func (s storage) RegistryCreate(registry *model.Registry) error {
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(registry.ID).AllCols().Update(registry))
 	})
 }
 

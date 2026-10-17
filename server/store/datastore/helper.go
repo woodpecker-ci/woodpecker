@@ -85,7 +85,7 @@ func wrapDelete(c int64, err error) error {
 }
 
 // wrapUpdate wraps an update error and detects transient "database is locked" errors.
-func wrapUpdate(err error) error {
+func wrapUpdate(_ int64, err error) error {
 	if isErrDatabaseLocked(err) {
 		return types.ErrDatabaseLocked
 	}

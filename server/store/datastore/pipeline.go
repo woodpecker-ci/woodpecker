@@ -194,8 +194,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(pipeline.ID).AllCols().Update(pipeline)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(pipeline.ID).AllCols().Update(pipeline))
 	})
 }
 

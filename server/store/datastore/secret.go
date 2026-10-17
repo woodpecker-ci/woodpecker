@@ -51,8 +51,7 @@ func (s storage) SecretCreate(secret *model.Secret) error {
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(secret.ID).AllCols().Update(secret))
 	})
 }
 

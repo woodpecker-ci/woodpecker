@@ -52,7 +52,7 @@ func TestWrapDelete(t *testing.T) {
 }
 
 func TestWrapUpdate(t *testing.T) {
-	assert.NoError(t, wrapUpdate(nil))
+	assert.NoError(t, wrapUpdate(0, nil))
 
 	// Database locked errors must surface as ErrDatabaseLocked.
 	for _, driverErr := range []string{
@@ -60,12 +60,12 @@ func TestWrapUpdate(t *testing.T) {
 		"database is locked",
 		"database table is locked",
 	} {
-		assert.ErrorIs(t, wrapUpdate(errors.New(driverErr)), types.ErrDatabaseLocked, driverErr)
+		assert.ErrorIs(t, wrapUpdate(0, errors.New(driverErr)), types.ErrDatabaseLocked, driverErr)
 	}
 
 	// Everything else passes through untouched.
 	other := errors.New("connection refused")
-	assert.Equal(t, other, wrapUpdate(other))
+	assert.Equal(t, other, wrapUpdate(0, other))
 }
 
 func TestWrapInsert(t *testing.T) {
@@ -133,7 +133,7 @@ func TestWrapErrDatabaseLocked(t *testing.T) {
 	// all these should fail with "database is locked".
 	assert.ErrorIs(t, wrapInsert(eng2.Insert(&model.Cron{RepoID: 2, CreatorID: 1, Name: "second", NextExec: 10000, Schedule: "@every 1h"})), types.ErrDatabaseLocked)
 	_, err = eng2.ID(1).AllCols().Update(&model.Cron{RepoID: 1, CreatorID: 1, Name: "updated", NextExec: 10000, Schedule: "@every 1h"})
-	assert.ErrorIs(t, wrapUpdate(err), types.ErrDatabaseLocked)
+	assert.ErrorIs(t, wrapUpdate(0, err), types.ErrDatabaseLocked)
 	assert.ErrorIs(t, wrapDelete(eng2.ID(1).Delete(new(model.Cron))), types.ErrDatabaseLocked)
 
 	require.NoError(t, sess1.Commit())

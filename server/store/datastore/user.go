@@ -82,8 +82,7 @@ func (s storage) CreateUser(user *model.User) error {
 
 func (s storage) UpdateUser(user *model.User) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(user.ID).AllCols().Update(user)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(user.ID).AllCols().Update(user))
 	})
 }
 

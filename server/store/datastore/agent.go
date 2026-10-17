@@ -47,8 +47,7 @@ func (s storage) AgentCreate(agent *model.Agent) error {
 
 func (s storage) AgentUpdate(agent *model.Agent) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(agent.ID).AllCols().Update(agent)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(agent.ID).AllCols().Update(agent))
 	})
 }
 

@@ -47,8 +47,7 @@ func (s storage) CronList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*mod
 
 func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(cron.ID).AllCols().Update(cron)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(cron.ID).AllCols().Update(cron))
 	})
 }
 
@@ -71,7 +70,7 @@ func (s storage) CronGetLock(cron *model.Cron, newNextExec int64) (bool, error) 
 		cols, e := s.engine.ID(cron.ID).Where(builder.Eq{"next_exec": cron.NextExec}).
 			Cols("next_exec").Update(&model.Cron{NextExec: newNextExec})
 		gotLock = cols != 0
-		return wrapUpdate(e)
+		return wrapUpdate(cols, e)
 	})
 	if err == nil && gotLock {
 		cron.NextExec = newNextExec

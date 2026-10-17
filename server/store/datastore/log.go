@@ -60,8 +60,7 @@ func (s storage) LogDelete(step *model.Step) error {
 }
 
 func logDelete(sess *xorm.Session, stepID int64) error {
-	_, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry))
-	return wrapUpdate(err)
+	return wrapUpdate(sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)))
 }
 
 func (s storage) StepFinished(_ *model.Step) {}

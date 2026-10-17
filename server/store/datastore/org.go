@@ -47,8 +47,7 @@ func (s storage) OrgUpdate(org *model.Org) error {
 func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
 	// update
 	return retryWrite(func() error {
-		_, err := sess.ID(org.ID).AllCols().Update(org)
-		return wrapUpdate(err)
+		return wrapUpdate(sess.ID(org.ID).AllCols().Update(org))
 	})
 }
 

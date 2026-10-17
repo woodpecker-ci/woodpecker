@@ -95,8 +95,7 @@ func (s storage) CreateRepo(repo *model.Repo) error {
 
 func (s storage) UpdateRepo(repo *model.Repo) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(repo.ID).AllCols().Update(repo)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(repo.ID).AllCols().Update(repo))
 	})
 }
 

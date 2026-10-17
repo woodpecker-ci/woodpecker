@@ -139,7 +139,6 @@ func (s storage) WorkflowByStep(step *model.Step) (*model.Workflow, error) {
 
 func (s storage) WorkflowUpdate(workflow *model.Workflow) error {
 	return retryWrite(func() error {
-		_, err := s.engine.ID(workflow.ID).AllCols().Update(workflow)
-		return wrapUpdate(err)
+		return wrapUpdate(s.engine.ID(workflow.ID).AllCols().Update(workflow))
 	})
 }
