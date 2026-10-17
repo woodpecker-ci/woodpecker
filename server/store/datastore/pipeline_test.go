@@ -420,7 +420,7 @@ func TestCreatePipelineRetriesSQLiteLocks(t *testing.T) {
 			defer other.Close()
 			holder, err := other.BeginTx(ctx, nil)
 			require.NoError(t, err)
-			defer holder.Rollback()
+			defer holder.Rollback() //nolint:errcheck
 			if phase == "commit" {
 				// Keep a shared read lock while CreatePipeline writes and commits.
 				var count int
