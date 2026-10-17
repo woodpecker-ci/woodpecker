@@ -151,11 +151,6 @@
       "verified": false
     },
     {
-      "name": "Codeberg Pages Deploy",
-      "docs": "https://codeberg.org/sugar700/plugin-codeberg-pages-deploy/raw/branch/master/README.md",
-      "verified": false
-    },
-    {
       "name": "Reviewdog golangci-lint",
       "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
       "verified": true
