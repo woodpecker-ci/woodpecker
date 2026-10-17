@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @xoxys
+@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @sugar700, @xoxys
 
 ### 🔒 Security
 
@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
 - Update docs npm deps non-major [[#7326](https://github.com/woodpecker-ci/woodpecker/pull/7326)]
 - Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
 - Add Asyntai AI Chatbot Docs Sync to plugins [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
