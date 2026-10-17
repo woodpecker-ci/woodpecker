@@ -10,9 +10,19 @@
       <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pullRequest.index }}</span>
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
-      <span class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline">{{
-        pullRequest.title
-      }}</span>
+      <span class="text-wp-text-100 min-w-0 flex-1 truncate underline md:no-underline">{{ pullRequest.title }}</span>
+      <div
+        v-if="pullRequest.source_branch && pullRequest.target_branch"
+        class="text-wp-text-alt-100 hidden max-w-1/2 shrink-0 items-center gap-2 pl-4 md:flex"
+        :title="branchesLabel(pullRequest)"
+        :aria-label="branchesLabel(pullRequest)"
+      >
+        <Icon name="branch" class="shrink-0" aria-hidden="true" />
+        <span class="truncate">{{ pullRequest.source_branch }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <span class="shrink-0" aria-hidden="true">&rarr;</span>
+        <span class="truncate">{{ pullRequest.target_branch }}</span>
+      </div>
     </ListItem>
     <div v-if="loading" class="text-wp-text-100 flex justify-center">
       <Icon name="spinner" />
@@ -52,5 +62,9 @@ const { resetPage, data: pullRequests, loading } = usePagination(loadPullRequest
 watch(repo, resetPage);
 
 const { t } = useI18n();
+
+function branchesLabel(pullRequest: PullRequest): string {
+  return t('repo.pull_request_branches', { source: pullRequest.source_branch, target: pullRequest.target_branch });
+}
 useWPTitle(computed(() => [t('repo.pull_requests'), repo.value.full_name]));
 </script>

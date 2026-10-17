@@ -68,6 +68,23 @@ func Server() *httptest.Server {
 				Key: "PRJ",
 			},
 		}),
+		mock.WithRequestMatch(mock.SearchPullRequests, bitbucket.PullRequestList{
+			LastPage: true,
+			PullRequests: []*bitbucket.PullRequest{
+				{
+					ID:    uint64(42),
+					Title: "Add feature X",
+					Source: bitbucket.PullRequestRef{
+						ID:        "refs/heads/feature/x",
+						DisplayID: "feature/x",
+					},
+					Target: bitbucket.PullRequestRef{
+						ID:        "refs/heads/develop",
+						DisplayID: "develop",
+					},
+				},
+			},
+		}),
 		mock.WithRequestMatch(mock.GetDefaultBranch, bitbucket.Branch{
 			ID:        "refs/head/main",
 			DisplayID: "main",

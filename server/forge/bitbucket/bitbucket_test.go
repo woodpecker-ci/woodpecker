@@ -146,6 +146,8 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "PRs title", repoPRs[0].Title)
 	assert.Equal(t, model.ForgeRemoteID("123"), repoPRs[0].Index)
+	assert.Equal(t, "feature/x", repoPRs[0].SourceBranch)
+	assert.Equal(t, "main", repoPRs[0].TargetBranch)
 
 	_, err = c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
 	assert.Error(t, err)

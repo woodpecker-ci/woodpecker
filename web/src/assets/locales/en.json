@@ -71,6 +71,7 @@
     "activity": "Activity",
     "branches": "Branches",
     "pull_requests": "Pull requests",
+    "pull_request_branches": "Merge {source} into {target}",
     "add": "Add repository",
     "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
