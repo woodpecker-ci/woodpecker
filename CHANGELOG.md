@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-16
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -42,6 +42,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7326](https://github.com/woodpecker-ci/woodpecker/pull/7326)]
 - Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
 - Add Asyntai AI Chatbot Docs Sync to plugins [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
 - Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
