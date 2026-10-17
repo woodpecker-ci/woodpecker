@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -28,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 type forgeFetcher struct {
@@ -119,10 +121,20 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 	}
 }
 
-func (f *forgeFetcherContext) filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {
+func (f *forgeFetcherContext) filterPipelineFiles(files []*types.FileMeta, folder string) []*types.FileMeta {
 	var res []*types.FileMeta
 
 	for _, file := range files {
+		// forges name folder entries differently (bitbucket only returns the
+		// basename instead of the full path), so normalize to the full repo path
+		// before checking against the reserved queue priority config
+		name := file.Name
+		if !strings.Contains(name, "/") {
+			name = path.Join(folder, name)
+		}
+		if name == constant.QueuePriorityConfigPath {
+			continue
+		}
 		if slices.Contains(f.configExtensions, filepath.Ext(file.Name)) {
 			res = append(res, file)
 		}
@@ -167,7 +179,7 @@ func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs
 				}
 				continue
 			}
-			files = f.filterPipelineFiles(files)
+			files = f.filterPipelineFiles(files, cut)
 			if len(files) != 0 {
 				log.Trace().Msgf("configFetcher[%s]: found %d files in '%s'", f.repo.FullName, len(files), fileOrFolder)
 				return files, nil

@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestLoadQueuePriorityRulesUsesDefaultBranchHead(t *testing.T) {
@@ -39,7 +40,7 @@ func TestLoadQueuePriorityRulesUsesDefaultBranchHead(t *testing.T) {
 		Return(&model.Commit{SHA: "master-head"}, nil)
 	forge.On("File", mock.Anything, user, repo, mock.MatchedBy(func(p *model.Pipeline) bool {
 		return p.Commit == "master-head"
-	}), queuePriorityConfigPath).
+	}), constant.QueuePriorityConfigPath).
 		Return([]byte("rules:\n  - priority: -20\n    event: pull_request\n    event_reason: synchroniz*\n"), nil)
 
 	rules, err := loadQueuePriorityRules(t.Context(), forge, user, repo, pipeline)
