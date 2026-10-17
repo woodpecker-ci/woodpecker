@@ -51,6 +51,27 @@ func TestReprioritizeRepoUpdatesPendingAndWaitingTasks(t *testing.T) {
 	require.NoError(t, scheduler.ReprioritizeRepo(t.Context(), repo, rules))
 }
 
+func TestReprioritizeRepoResetsPrioritiesWhenRulesAreEmpty(t *testing.T) {
+	repo := &model.Repo{ID: 7}
+	pendingTask := &model.Task{ID: "pending", RepoID: 7, PipelineID: 1}
+	waitingTask := &model.Task{ID: "waiting", RepoID: 7, PipelineID: 2}
+	otherRepoTask := &model.Task{ID: "other", RepoID: 8, PipelineID: 3}
+
+	store := store_mocks.NewMockStore(t)
+	store.EXPECT().GetPipeline(int64(1)).Return(&model.Pipeline{}, nil).Once()
+	store.EXPECT().GetPipeline(int64(2)).Return(&model.Pipeline{}, nil).Once()
+
+	queue := queue_mocks.NewMockQueue(t)
+	queue.EXPECT().Info(mock.Anything).Return(queueInfo(pendingTask, waitingTask, otherRepoTask)).Once()
+	queue.EXPECT().Reprioritize(mock.Anything, map[string]int{
+		"pending": 0,
+		"waiting": 0,
+	}).Return(nil).Once()
+
+	scheduler := &impl{store: store, q: queue}
+	require.NoError(t, scheduler.ReprioritizeRepo(t.Context(), repo, nil))
+}
+
 func queueInfo(pending, waiting, other *model.Task) queue.InfoT {
 	return queue.InfoT{
 		Pending:       []*model.Task{pending, other},
