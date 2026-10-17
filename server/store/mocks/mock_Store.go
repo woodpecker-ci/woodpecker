@@ -403,6 +403,130 @@ func (_c *MockStore_AgentListForOrg_Call) RunAndReturn(run func(orgID int64, opt
 	return _c
 }
 
+// AgentSnapshotFind provides a mock function for the type MockStore
+func (_mock *MockStore) AgentSnapshotFind(n int64) (*model.AgentSnapshot, error) {
+	ret := _mock.Called(n)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentSnapshotFind")
+	}
+
+	var r0 *model.AgentSnapshot
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64) (*model.AgentSnapshot, error)); ok {
+		return returnFunc(n)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64) *model.AgentSnapshot); ok {
+		r0 = returnFunc(n)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.AgentSnapshot)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = returnFunc(n)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_AgentSnapshotFind_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentSnapshotFind'
+type MockStore_AgentSnapshotFind_Call struct {
+	*mock.Call
+}
+
+// AgentSnapshotFind is a helper method to define mock.On call
+//   - n int64
+func (_e *MockStore_Expecter) AgentSnapshotFind(n any) *MockStore_AgentSnapshotFind_Call {
+	return &MockStore_AgentSnapshotFind_Call{Call: _e.mock.On("AgentSnapshotFind", n)}
+}
+
+func (_c *MockStore_AgentSnapshotFind_Call) Run(run func(n int64)) *MockStore_AgentSnapshotFind_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_AgentSnapshotFind_Call) Return(agentSnapshot *model.AgentSnapshot, err error) *MockStore_AgentSnapshotFind_Call {
+	_c.Call.Return(agentSnapshot, err)
+	return _c
+}
+
+func (_c *MockStore_AgentSnapshotFind_Call) RunAndReturn(run func(n int64) (*model.AgentSnapshot, error)) *MockStore_AgentSnapshotFind_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// AgentSnapshotPersist provides a mock function for the type MockStore
+func (_mock *MockStore) AgentSnapshotPersist(agentSnapshot *model.AgentSnapshot) (*model.AgentSnapshot, error) {
+	ret := _mock.Called(agentSnapshot)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentSnapshotPersist")
+	}
+
+	var r0 *model.AgentSnapshot
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.AgentSnapshot) (*model.AgentSnapshot, error)); ok {
+		return returnFunc(agentSnapshot)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.AgentSnapshot) *model.AgentSnapshot); ok {
+		r0 = returnFunc(agentSnapshot)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.AgentSnapshot)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.AgentSnapshot) error); ok {
+		r1 = returnFunc(agentSnapshot)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_AgentSnapshotPersist_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentSnapshotPersist'
+type MockStore_AgentSnapshotPersist_Call struct {
+	*mock.Call
+}
+
+// AgentSnapshotPersist is a helper method to define mock.On call
+//   - agentSnapshot *model.AgentSnapshot
+func (_e *MockStore_Expecter) AgentSnapshotPersist(agentSnapshot any) *MockStore_AgentSnapshotPersist_Call {
+	return &MockStore_AgentSnapshotPersist_Call{Call: _e.mock.On("AgentSnapshotPersist", agentSnapshot)}
+}
+
+func (_c *MockStore_AgentSnapshotPersist_Call) Run(run func(agentSnapshot *model.AgentSnapshot)) *MockStore_AgentSnapshotPersist_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.AgentSnapshot
+		if args[0] != nil {
+			arg0 = args[0].(*model.AgentSnapshot)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_AgentSnapshotPersist_Call) Return(agentSnapshot1 *model.AgentSnapshot, err error) *MockStore_AgentSnapshotPersist_Call {
+	_c.Call.Return(agentSnapshot1, err)
+	return _c
+}
+
+func (_c *MockStore_AgentSnapshotPersist_Call) RunAndReturn(run func(agentSnapshot *model.AgentSnapshot) (*model.AgentSnapshot, error)) *MockStore_AgentSnapshotPersist_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AgentUpdate provides a mock function for the type MockStore
 func (_mock *MockStore) AgentUpdate(agent *model.Agent) error {
 	ret := _mock.Called(agent)
