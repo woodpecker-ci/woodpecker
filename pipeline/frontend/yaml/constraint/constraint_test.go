@@ -74,6 +74,18 @@ func TestConstraintPriority(t *testing.T) {
 			want: 0,
 		},
 		{
+			desc: "unprioritized expression is not evaluated",
+			conf: "[{ event: push }, { event: tag, evaluate: 'int(CI_COMMIT_TAG) > 0' }]",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
+			want: 0,
+		},
+		{
+			desc: "nonmatching prioritized expression is not evaluated",
+			conf: "[{ event: push }, { event: tag, evaluate: 'int(CI_COMMIT_TAG) > 0', priority: 10 }]",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
+			want: 0,
+		},
+		{
 			desc: "matching priority is returned",
 			conf: "{ event: push, priority: 10 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}},
