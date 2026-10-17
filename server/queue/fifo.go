@@ -440,12 +440,11 @@ func taskOrderLess(a, b *model.Task) bool {
 }
 
 // queueOrderLess reports whether task a should be assigned before task b.
-// Higher priority runs first; equal priorities retain FIFO task ordering.
+// Higher priority runs first. Equal priorities are not reordered: assignToWorker
+// scans pending in queue order and keeps the first best candidate, so the
+// existing pending order (creation order) decides ties.
 func queueOrderLess(a, b *model.Task) bool {
-	if a.Priority != b.Priority {
-		return a.Priority > b.Priority
-	}
-	return taskOrderLess(a, b)
+	return a.Priority > b.Priority
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
