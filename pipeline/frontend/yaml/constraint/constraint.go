@@ -119,11 +119,14 @@ func (when *When) Priority(metadata metadata.Metadata, global bool, env map[stri
 	priority := 0
 	hasPriority := false
 	for _, c := range when.Constraints {
+		if !c.Priority.Has() {
+			continue
+		}
 		matches, err := c.Match(metadata, global, env)
 		if err != nil {
 			return 0, err
 		}
-		if !matches || !c.Priority.Has() {
+		if !matches {
 			continue
 		}
 
@@ -216,6 +219,10 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 
 	if m.Curr.Event == metadata.EventCron {
 		match = match && c.Cron.Match(m.Curr.Cron)
+	}
+
+	if !match {
+		return false, nil
 	}
 
 	if c.Evaluate != "" {
