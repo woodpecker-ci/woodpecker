@@ -61,6 +61,42 @@ func TestConvertPortWrong(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestVolumePathVariableExpansion(t *testing.T) {
+	compiler := New(
+		WithPrefix("test"),
+		WithWorkspace("/woodpecker", "src"),
+		WithLocal(true),
+	)
+
+	workflow := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{{
+				Name:     "test",
+				Image:    "alpine",
+				Commands: []string{"echo hello"},
+				Volumes: yaml_types.Volumes{
+					Volumes: []*yaml_types.Volume{
+						{Source: "/host/cache", Destination: "${CI_WORKSPACE}/cache"},
+						{Source: "/host/data", Destination: "${UNKNOWN_VARIABLE}/data"},
+					},
+				},
+			}},
+		},
+	}
+
+	config, err := compiler.Compile(workflow)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, config.Stages, "expected at least one stage")
+	assert.NotEmpty(t, config.Stages[0].Steps, "expected at least one step")
+
+	assert.Contains(t, config.Stages[0].Steps[0].Volumes, "/host/cache:/woodpecker/src/cache",
+		"volume path variables must be expanded against the step environment")
+	assert.Contains(t, config.Stages[0].Steps[0].Volumes, "/host/data:/data",
+		"unknown volume path variables must expand to an empty string")
+}
+
 func TestWorkspaceVolumeAlwaysAdded(t *testing.T) {
 	compiler := New(
 		WithPrefix("test"),
