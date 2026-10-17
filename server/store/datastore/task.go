@@ -28,6 +28,11 @@ func (s storage) TaskInsert(task *model.Task) error {
 	return wrapInsert(s.engine.Insert(task))
 }
 
+func (s storage) TaskUpdatePriority(id string, priority int) error {
+	_, err := s.engine.Where("id = ?", id).Cols("priority").Update(&model.Task{Priority: priority})
+	return err
+}
+
 func (s storage) TaskDelete(id string) error {
 	return wrapDelete(s.engine.Where("id = ?", id).Delete(new(model.Task)))
 }

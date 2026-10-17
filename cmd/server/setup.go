@@ -225,7 +225,6 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 		labels[name] = value
 	}
 	server.Config.Pipeline.DefaultWorkflowLabels = labels
-
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")

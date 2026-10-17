@@ -43,6 +43,9 @@ type Task struct {
 	// Created is the unix timestamp the task's pipeline was created at. It
 	// defines the queue ordering across pipelines.
 	Created int64 `json:"created" xorm:"NOT NULL DEFAULT 0 'created'"`
+	// Priority controls queue ordering. Higher priority tasks run before lower
+	// priority tasks, with Created and Name preserving FIFO behavior for ties.
+	Priority int `json:"priority" xorm:"NOT NULL DEFAULT 0 'priority'"`
 } //	@name	Task
 
 // TableName return database table name for xorm.
