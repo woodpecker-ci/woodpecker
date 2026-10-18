@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @sugar700, @xoxys
+@6543, @AhmadNajiKam, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @sugar700, @xoxys
 
 ### 🔒 Security
 
@@ -70,6 +70,7 @@
 
 ### Misc
 
+- Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
