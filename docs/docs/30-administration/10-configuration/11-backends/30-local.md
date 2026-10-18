@@ -72,3 +72,12 @@ In the context of the local backend, plugins are simply executable binaries, whi
 - Default: default temp directory
 
 Directory to create folders for workflows.
+
+---
+
+### BACKEND_LOCAL_ISOLATED_HOME
+
+- Name: `WOODPECKER_BACKEND_LOCAL_ISOLATED_HOME`
+- Default: `true`
+
+Sets `HOME`, `USERPROFILE` and related variables to an isolated directory for each workflow. If set to `false`, the user's own home directory is used and no netrc file is written.
