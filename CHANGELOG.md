@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @qwerty287, @sugar700, @xoxys
+@6543, @AhmadNajiKam, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @qwerty287, @sugar700, @xoxys
 
 ### 🔒 Security
 
@@ -26,6 +26,7 @@
 
 ### 🐛 Bug Fixes
 
+- Enable crons created without `enabled` field [[#7339](https://github.com/woodpecker-ci/woodpecker/pull/7339)]
 - Fix file based logstore related bugs [[#7323](https://github.com/woodpecker-ci/woodpecker/pull/7323)]
 - Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
 - Retry pipeline creation on SQLite database lock [[#7264](https://github.com/woodpecker-ci/woodpecker/pull/7264)]
@@ -60,6 +61,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency vue-i18n to v11.4.15 [[#7340](https://github.com/woodpecker-ci/woodpecker/pull/7340)]
 - Update module github.com/google/go-github/v92 to v93 [[#7334](https://github.com/woodpecker-ci/woodpecker/pull/7334)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.27.0 [[#7333](https://github.com/woodpecker-ci/woodpecker/pull/7333)]
 - Update dependency eslint to v10.13.0 [[#7331](https://github.com/woodpecker-ci/woodpecker/pull/7331)]
