@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-17
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @fredrikblau, @sugar700, @xoxys
+@6543, @AhmadNajiKam, @Mihir-Rabari, @Sawarz, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @sugar700, @xoxys
 
 ### 🔒 Security
 
@@ -25,6 +25,7 @@
 
 ### 🐛 Bug Fixes
 
+- Retry pipeline creation on SQLite database lock [[#7264](https://github.com/woodpecker-ci/woodpecker/pull/7264)]
 - Do not retry extensions that respond with 204 No Content [[#7320](https://github.com/woodpecker-ci/woodpecker/pull/7320)]
 - Return an error when Kubernetes backend options cannot be parsed [[#7312](https://github.com/woodpecker-ci/woodpecker/pull/7312)]
 - Persist token expiry when existing users sign in [[#7304](https://github.com/woodpecker-ci/woodpecker/pull/7304)]
