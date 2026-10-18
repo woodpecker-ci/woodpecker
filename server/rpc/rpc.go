@@ -79,7 +79,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	// enforce labels from server by overwriting agent labels
 	if agentFilter.Labels == nil {
-		agentFilter.Labels = map[string]string{}
+		agentFilter.Labels = make(map[string]string)
 	}
 	maps.Copy(agentFilter.Labels, agentServerLabels)
 
