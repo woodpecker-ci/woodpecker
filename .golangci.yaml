@@ -240,7 +240,7 @@ linters:
           alias: log_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/rpc/mocks
           alias: rpc_mocks
-        - pkg: go.woodpecker-ci.org/woodpecker/v3/scheduler/mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks
           alias: scheduler_mocks
 
         # kubernetes
