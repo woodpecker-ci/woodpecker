@@ -1055,7 +1055,7 @@ Specify the default pipeline config extensions when scanning a pipeline config d
 
 ### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_EXTENSION_EXCLUSIVE`
+- Name: `WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.
