@@ -15,6 +15,7 @@
 package queue
 
 import (
+	"container/list"
 	"context"
 	"errors"
 	"fmt"
@@ -666,6 +667,286 @@ func TestFifoDependencies(t *testing.T) {
 		assert.NoError(t, q.Done(ctx, gotChild.ID, model.StatusSuccess))
 		waitForProcess()
 	})
+}
+
+func TestFifoFilterWaiting(t *testing.T) {
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		waiting []*model.Task
+		running []string
+		ready   []string
+		blocked []string
+	}{
+		{
+			name: "independent tasks keep their order",
+			pending: []*model.Task{
+				{ID: "first"},
+				{ID: "second"},
+			},
+			ready: []string{"first", "second"},
+		},
+		{
+			name: "chain checks the full pending snapshot",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+				{ID: "parent", Dependencies: []string{"grandparent"}},
+				{ID: "grandparent"},
+			},
+			ready:   []string{"grandparent"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "waiting tasks can be dependencies",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+			},
+			waiting: []*model.Task{
+				{ID: "parent", Dependencies: []string{"root"}},
+			},
+			running: []string{"root"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "missing dependencies release waiting tasks at the tail",
+			pending: []*model.Task{
+				{ID: "ready"},
+			},
+			waiting: []*model.Task{
+				{ID: "released", Dependencies: []string{"finished"}},
+			},
+			ready: []string{"ready", "released"},
+		},
+		{
+			name: "only changed tasks move and keep their order",
+			pending: []*model.Task{
+				{ID: "ready"},
+				{ID: "newly-blocked", Dependencies: []string{"root"}},
+			},
+			waiting: []*model.Task{
+				{ID: "still-blocked", Dependencies: []string{"root"}},
+				{ID: "released", Dependencies: []string{"finished"}},
+			},
+			running: []string{"root"},
+			ready:   []string{"ready", "released"},
+			blocked: []string{"newly-blocked", "still-blocked"},
+		},
+		{
+			name: "cycles remain blocked",
+			pending: []*model.Task{
+				{ID: "first", Dependencies: []string{"second"}},
+				{ID: "second", Dependencies: []string{"first"}},
+			},
+			blocked: []string{"first", "second"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.waiting {
+				q.waitingOnDeps.PushBack(task)
+			}
+			for _, id := range tt.running {
+				q.running[id] = &entry{item: &model.Task{ID: id}}
+			}
+			ids := func(tasks *list.List) []string {
+				var result []string
+				for element := tasks.Front(); element != nil; element = element.Next() {
+					task, _ := element.Value.(*model.Task)
+					result = append(result, task.ID)
+				}
+				return result
+			}
+			for range 2 {
+				q.filterWaiting()
+				assert.Equal(t, tt.ready, ids(q.pending))
+				assert.Equal(t, tt.blocked, ids(q.waitingOnDeps))
+			}
+		})
+	}
+}
+
+func TestFifoAssignToWorker(t *testing.T) {
+	group := func(id string, pipeline int64) *model.Task {
+		return &model.Task{ID: id, PipelineID: pipeline, Created: pipeline, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1}
+	}
+	only := func(id string, score int) func(*model.Task) (bool, int) {
+		return func(task *model.Task) (bool, int) { return task.ID == id, score }
+	}
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		running []*model.Task
+		workers map[int64]func(*model.Task) (bool, int)
+		task    string
+		agent   int64
+	}{
+		{
+			name:    "no idle worker",
+			pending: []*model.Task{{ID: "free"}},
+		},
+		{
+			name:    "first task with a matching worker wins",
+			pending: []*model.Task{{ID: "unmatched"}, {ID: "matched"}},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("matched", 1)},
+			task:    "matched",
+			agent:   1,
+		},
+		{
+			name:    "highest score wins",
+			pending: []*model.Task{{ID: "free"}},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("free", 1), 2: only("free", 5)},
+			task:    "free",
+			agent:   2,
+		},
+		{
+			name:    "blocked task is skipped for the next one",
+			pending: []*model.Task{group("blocked", 2), {ID: "free"}},
+			running: []*model.Task{group("active", 1)},
+			workers: map[int64]func(*model.Task) (bool, int){1: filterFnTrue},
+			task:    "free",
+			agent:   1,
+		},
+		{
+			name:    "blocked task does not leak its worker",
+			pending: []*model.Task{group("blocked", 2), {ID: "unmatched"}},
+			running: []*model.Task{group("active", 1)},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("blocked", 1)},
+		},
+		{
+			name:    "earlier pipeline keeps its slot without a worker",
+			pending: []*model.Task{group("first", 1), group("second", 2)},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("second", 1)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+				workers:       make(map[*worker]struct{}),
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.running {
+				q.running[task.ID] = &entry{item: task}
+			}
+			for agent, filter := range tt.workers {
+				q.workers[&worker{agentID: agent, filter: filter}] = struct{}{}
+			}
+
+			element, worker := q.assignToWorker()
+			if tt.task == "" {
+				assert.Nil(t, element)
+				assert.Nil(t, worker)
+				return
+			}
+			require.NotNil(t, element)
+			require.NotNil(t, worker)
+			task, _ := element.Value.(*model.Task)
+			assert.Equal(t, tt.task, task.ID)
+			assert.Equal(t, tt.agent, worker.agentID)
+		})
+	}
+}
+
+func TestFifoConcurrencySlots(t *testing.T) {
+	member := func(id string, pipeline, created int64, limit int) *model.Task {
+		return &model.Task{ID: id, Name: id, PipelineID: pipeline, Created: created, ConcurrencyGroup: "deploy", ConcurrencyLimit: limit}
+	}
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		waiting []*model.Task
+		running []*model.Task
+		task    string
+	}{
+		{
+			name:    "same pipeline does not reserve slots",
+			pending: []*model.Task{member("b", 1, 2, 1), member("a", 1, 1, 1)},
+			task:    "b",
+		},
+		{
+			name:    "earlier waiting pipeline reserves the slot",
+			pending: []*model.Task{member("late", 2, 2, 1)},
+			waiting: []*model.Task{member("early", 1, 1, 1)},
+		},
+		{
+			name:    "later waiting pipeline does not reserve the slot",
+			pending: []*model.Task{member("early", 1, 1, 1)},
+			waiting: []*model.Task{member("late", 2, 2, 1)},
+			task:    "early",
+		},
+		{
+			name:    "name breaks a creation tie",
+			pending: []*model.Task{member("b", 1, 5, 1), member("a", 2, 5, 1)},
+			task:    "a",
+		},
+		{
+			name: "equal order does not reserve the slot",
+			pending: []*model.Task{
+				{ID: "x", Name: "deploy", PipelineID: 1, Created: 5, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+				{ID: "y", Name: "deploy", PipelineID: 2, Created: 5, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+			},
+			task: "x",
+		},
+		{
+			name:    "running and reserved slots add up",
+			pending: []*model.Task{member("late", 3, 3, 2)},
+			waiting: []*model.Task{member("early", 1, 1, 2)},
+			running: []*model.Task{member("active", 2, 2, 2)},
+		},
+		{
+			name:    "free slot is granted",
+			pending: []*model.Task{member("next", 3, 3, 2)},
+			running: []*model.Task{member("active", 2, 2, 2)},
+			task:    "next",
+		},
+		{
+			name:    "other groups do not count",
+			pending: []*model.Task{member("deploy", 2, 2, 1)},
+			waiting: []*model.Task{{ID: "build", PipelineID: 1, Created: 1, ConcurrencyGroup: "build", ConcurrencyLimit: 1}},
+			running: []*model.Task{{ID: "test", PipelineID: 1, Created: 1, ConcurrencyGroup: "test", ConcurrencyLimit: 1}},
+			task:    "deploy",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+				workers:       map[*worker]struct{}{{filter: filterFnTrue}: {}},
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.waiting {
+				q.waitingOnDeps.PushBack(task)
+			}
+			for _, task := range tt.running {
+				q.running[task.ID] = &entry{item: task}
+			}
+
+			element, _ := q.assignToWorker()
+			if tt.task == "" {
+				assert.Nil(t, element)
+				return
+			}
+			require.NotNil(t, element)
+			task, _ := element.Value.(*model.Task)
+			assert.Equal(t, tt.task, task.ID)
+		})
+	}
 }
 
 func TestFifoConcurrency(t *testing.T) {
