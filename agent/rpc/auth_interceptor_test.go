@@ -104,8 +104,7 @@ func TestAuthInterceptorPreservesErrors(t *testing.T) {
 		})
 		permissionErr := status.Error(codes.PermissionDenied, "denied")
 
-		err := interceptor.Unary()(
-			t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
+		err := interceptor.Unary()(t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
 			func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
 				return permissionErr
 			},
@@ -122,8 +121,7 @@ func TestAuthInterceptorPreservesErrors(t *testing.T) {
 		})
 		unauthenticatedErr := status.Error(codes.Unauthenticated, "expired token")
 
-		err := interceptor.Unary()(
-			t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
+		err := interceptor.Unary()(t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
 			func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
 				return unauthenticatedErr
 			},

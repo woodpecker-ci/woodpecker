@@ -70,8 +70,7 @@ func TestServeReleasesPollingAgentsOnShutdown(t *testing.T) {
 		})
 	}()
 
-	conn, err := grpc.NewClient(
-		"passthrough:///bufnet",
+	conn, err := grpc.NewClient("passthrough:///bufnet",
 		grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
 			return lis.DialContext(ctx)
 		}),
