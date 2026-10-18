@@ -142,6 +142,6 @@ func TestLogDeleteMissingFile(t *testing.T) {
 	s, err := NewLogStore(t.TempDir())
 	require.NoError(t, err)
 
-	// removing a non-existent log file surfaces the os.Remove error
-	assert.Error(t, s.LogDelete(&model.Step{ID: 12345}))
+	// a step without log file has nothing to delete
+	assert.NoError(t, s.LogDelete(&model.Step{ID: 12345}))
 }

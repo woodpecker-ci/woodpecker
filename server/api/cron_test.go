@@ -206,6 +206,36 @@ func TestPostCron(t *testing.T) {
 		assert.Positive(t, got.NextExec)
 	})
 
+	t.Run("missing enabled defaults to true", func(t *testing.T) {
+		cronForgeManager(t)
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, map[string]any{"name": "no-enabled", "schedule": "@every 1h"})(tc)
+
+		PostCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.True(t, got.Enabled)
+	})
+
+	t.Run("explicit enabled false is kept", func(t *testing.T) {
+		cronForgeManager(t)
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{})(tc)
+		withRequest(http.MethodPost, map[string]any{"name": "disabled", "schedule": "@every 1h", "enabled": false})(tc)
+
+		PostCron(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		var got model.Cron
+		tc.decodeJSON(t, &got)
+		assert.False(t, got.Enabled)
+	})
+
 	t.Run("validation fails on empty name", func(t *testing.T) {
 		cronForgeManager(t)
 		tc := newTestContext(t, s)

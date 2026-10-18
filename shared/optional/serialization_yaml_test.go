@@ -19,9 +19,9 @@ type testBoolStruct struct {
 	OptBoolOmitEmpty1 optional.Option[bool] `json:"opt_bool_omit_empty_1,omitempty" yaml:"opt_bool_omit_empty_1,omitempty"`
 	OptBoolOmitEmpty2 optional.Option[bool] `json:"opt_bool_omit_empty_2,omitempty" yaml:"opt_bool_omit_empty_2,omitempty"`
 	OptBoolOmitEmpty3 optional.Option[bool] `json:"opt_bool_omit_empty_3,omitempty" yaml:"opt_bool_omit_empty_3,omitempty"`
-	OptBool4          optional.Option[bool] `json:"opt_bool_4" yaml:"opt_bool_4"`
-	OptBool5          optional.Option[bool] `json:"opt_bool_5" yaml:"opt_bool_5"`
-	OptBool6          optional.Option[bool] `json:"opt_bool_6" yaml:"opt_bool_6"`
+	OptBool4          optional.Option[bool] `json:"opt_bool_4"                      yaml:"opt_bool_4"`
+	OptBool5          optional.Option[bool] `json:"opt_bool_5"                      yaml:"opt_bool_5"`
+	OptBool6          optional.Option[bool] `json:"opt_bool_6"                      yaml:"opt_bool_6"`
 }
 
 func TestOptionalBoolYaml(t *testing.T) {

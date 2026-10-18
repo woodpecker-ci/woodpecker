@@ -21,7 +21,7 @@ import type {
   User,
 } from './types';
 
-const DEFAULT_FORGE_ID = 1;
+export const DEFAULT_FORGE_ID = 1;
 
 interface RepoListOptions {
   all?: boolean;
