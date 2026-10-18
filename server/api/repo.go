@@ -519,6 +519,11 @@ func DeleteRepo(c *gin.Context) {
 	}
 
 	if remove {
+		if err := deleteStoredRepoLogs(_store, repo); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
 		if err := _store.DeleteRepo(repo); err != nil {
 			handleDBError(c, err)
 			return
@@ -534,6 +539,30 @@ func DeleteRepo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, repo)
+}
+
+// deleteStoredRepoLogs deletes the logs of every step of a repo from the log store,
+// see deleteStoredLogs.
+func deleteStoredRepoLogs(_store store.Store, repo *model.Repo) error {
+	const perPage = 50
+	opts := &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: perPage}}
+	for {
+		pipelines, err := _store.GetPipelineList(repo, opts, nil)
+		if err != nil {
+			return err
+		}
+
+		for _, pipeline := range pipelines {
+			if err := deleteStoredLogs(_store, pipeline.ID); err != nil {
+				return err
+			}
+		}
+
+		if len(pipelines) < perPage {
+			return nil
+		}
+		opts.Page++
+	}
 }
 
 // RepairRepo
