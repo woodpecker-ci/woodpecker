@@ -18,10 +18,13 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v93/github"
@@ -378,4 +381,39 @@ func TestGetTagCommitSHA(t *testing.T) {
 		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
 		require.Error(t, err)
 	})
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*client)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }
