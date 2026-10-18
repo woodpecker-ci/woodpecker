@@ -43,11 +43,13 @@
 
 ### 🧪 Tests
 
+- Require `scheduler_mocks` import name [[#7341](https://github.com/woodpecker-ci/woodpecker/pull/7341)]
 - Increase test coverage of `server/forge` and `server/servies` [[#7319](https://github.com/woodpecker-ci/woodpecker/pull/7319)]
 - Count cross-package coverage in all Go test targets [[#7316](https://github.com/woodpecker-ci/woodpecker/pull/7316)]
 
 ### 📚 Documentation
 
+- Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
 - Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
 - Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
 - Update docs npm deps non-major [[#7326](https://github.com/woodpecker-ci/woodpecker/pull/7326)]
@@ -76,7 +78,6 @@
 
 ### Misc
 
-- Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
