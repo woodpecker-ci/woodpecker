@@ -81,6 +81,7 @@ steps:
   check-test-file-map-source-file:
     image: docker.io/alpine:3.24
     commands:
+      - ls .woodpecker
       - sh .woodpecker/check-test-file-map-source-file.sh
     when: *when
 
