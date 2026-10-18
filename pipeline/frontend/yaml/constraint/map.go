@@ -73,6 +73,14 @@ func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 
 	c.Include = out1.Include
 	c.Exclude = out1.Exclude
+	if c.Include == nil {
+		c.Include = map[string]string{}
+	}
+	if c.Exclude == nil {
+		c.Exclude = map[string]string{}
+	}
+	delete(out2, "include")
+	delete(out2, "exclude")
 	maps.Copy(c.Include, out2)
 	return nil
 }
