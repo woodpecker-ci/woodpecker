@@ -41,6 +41,7 @@
 
 ### 🧪 Tests
 
+- Increase test coverage of `server/forge` and `server/servies` [[#7319](https://github.com/woodpecker-ci/woodpecker/pull/7319)]
 - Count cross-package coverage in all Go test targets [[#7316](https://github.com/woodpecker-ci/woodpecker/pull/7316)]
 
 ### 📚 Documentation
