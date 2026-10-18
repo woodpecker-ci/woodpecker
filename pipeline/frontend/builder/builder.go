@@ -38,15 +38,16 @@ import (
 
 // PipelineBuilder Takes the yaml configs and some metadata and returns the internal data model to execute a pipeline.
 type PipelineBuilder struct {
-	Yamls               []*YamlFile
-	Envs                map[string]string
-	AdditionalEnvs      map[string]string
-	DefaultLabels       map[string]string
-	RepoTrusted         *metadata.TrustedConfiguration
-	TrustedClonePlugins []string
-	PrivilegedPlugins   []string
-	CompilerOptions     []compiler.Option
-	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
+	Yamls                   []*YamlFile
+	Envs                    map[string]string
+	AdditionalEnvs          map[string]string
+	DefaultLabels           map[string]string
+	RepoTrusted             *metadata.TrustedConfiguration
+	TrustedClonePlugins     []string
+	PrivilegedPlugins       []string
+	DisableWorkflowPriority bool
+	CompilerOptions         []compiler.Option
+	GetWorkflowMetadata     func(workflow *Workflow) metadata.Metadata
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -139,6 +140,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		}),
 		linter.PrivilegedPlugins(b.PrivilegedPlugins),
 		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
+		linter.WithWorkflowPriorityDisabled(b.DisableWorkflowPriority),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -193,6 +195,14 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		if parsed.When.IncludesStatusSuccess(workflowMetadata, true, environ) {
 			item.RunsOn = append(item.RunsOn, "success")
 		}
+	}
+
+	priority, err := parsed.When.Priority(workflowMetadata, true, environ)
+	if err != nil {
+		return nil, multierr.Append(errorsAndWarnings, err)
+	}
+	if !b.DisableWorkflowPriority {
+		item.Priority = priority
 	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use — drop any

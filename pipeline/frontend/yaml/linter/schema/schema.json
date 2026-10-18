@@ -318,6 +318,10 @@
         "evaluate": {
           "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
           "type": "string"
+        },
+        "priority": {
+          "description": "Queue priority for matching workflows. Higher priority workflows run before lower priority workflows.",
+          "type": "integer"
         }
       }
     },
