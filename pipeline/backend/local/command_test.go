@@ -36,6 +36,33 @@ func TestLookupShellPath(t *testing.T) {
 	})
 }
 
+func TestQuoteNushell(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"empty", "", "r#''#"},
+		{"plain", "hello", "r#'hello'#"},
+		{"single quote", "it's working", "r#'it's working'#"},
+		{"double quote", `echo "hello"`, `r#'echo "hello"'#`},
+		{"variable", `echo $env.HOME`, `r#'echo $env.HOME'#`},
+		{"expression", `echo (date now)`, `r#'echo (date now)'#`},
+		{"backslash", `C:\Users\test`, `r#'C:\Users\test'#`},
+		{"backtick", "echo `test", "r#'echo `test'#"},
+		{"delimiter", "echo '# test", "r##'echo '# test'##"},
+		{"nested delimiter", "echo '## test", "r###'echo '## test'###"},
+		{"multiple delimiters", "echo '# and '##", "r###'echo '# and '##'###"},
+		{"newline", "hello\nworld", "r#'hello\nworld'#"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, quoteNushell(tt.input))
+		})
+	}
+}
+
 func TestGenCmdByShell(t *testing.T) {
 	tmpDir := t.TempDir()
 	e := local{tempDir: tmpDir}
@@ -128,11 +155,21 @@ echo test
 	})
 
 	t.Run("nu shell", func(t *testing.T) {
-		args, err := e.genCmdByShell("nu", "nu", []string{"echo test"}, t.TempDir())
+		args, err := e.genCmdByShell("nu", "nu", []string{
+			"echo test",
+			`echo "hello"`,
+			`echo "text '# test"`,
+		}, t.TempDir())
 		require.NoError(t, err)
-		assert.Len(t, args, 2)
+		require.Len(t, args, 2)
 		assert.Equal(t, "--commands", args[0])
-		assert.Contains(t, args[1], "echo test")
+		assert.Equal(t, `echo r#'▶  echo test'#
+echo test
+echo r#'▶  echo "hello"'#
+echo "hello"
+echo r##'▶  echo "text '# test"'##
+echo "text '# test"
+`, args[1])
 	})
 
 	t.Run("command escaping", func(t *testing.T) {

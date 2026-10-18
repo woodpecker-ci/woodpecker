@@ -89,6 +89,16 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
+// Use a delimiter not present in the value to preserve its contents.
+func quoteNushell(value string) string {
+	for n := 1; ; n++ {
+		hashes := strings.Repeat("#", n)
+		if !strings.Contains(value, "'"+hashes) {
+			return "r" + hashes + "'" + value + "'" + hashes
+		}
+	}
+}
+
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
@@ -147,7 +157,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "nu":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString("echo " + quoteNushell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"--commands", script.String()}, nil
