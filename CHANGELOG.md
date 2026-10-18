@@ -56,6 +56,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.27.0 [[#7333](https://github.com/woodpecker-ci/woodpecker/pull/7333)]
 - Update dependency eslint to v10.13.0 [[#7331](https://github.com/woodpecker-ci/woodpecker/pull/7331)]
 - Update dependency golangci/golangci-lint to v2.15.0 [[#7328](https://github.com/woodpecker-ci/woodpecker/pull/7328)]
 - Update pre-commit hook golangci/golangci-lint to v2.15.0 [[#7329](https://github.com/woodpecker-ci/woodpecker/pull/7329)]
