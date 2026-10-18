@@ -25,6 +25,8 @@
 
 ### 🐛 Bug Fixes
 
+- Fix file based logstore related bugs [[#7323](https://github.com/woodpecker-ci/woodpecker/pull/7323)]
+- Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
 - Retry pipeline creation on SQLite database lock [[#7264](https://github.com/woodpecker-ci/woodpecker/pull/7264)]
 - Do not retry extensions that respond with 204 No Content [[#7320](https://github.com/woodpecker-ci/woodpecker/pull/7320)]
 - Return an error when Kubernetes backend options cannot be parsed [[#7312](https://github.com/woodpecker-ci/woodpecker/pull/7312)]
@@ -70,7 +72,6 @@
 
 ### Misc
 
-- Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
