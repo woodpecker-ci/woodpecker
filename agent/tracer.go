@@ -21,7 +21,7 @@ import (
 
 	"github.com/rs/zerolog"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
@@ -42,11 +42,13 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			Exited:   state.CurrStepState.Exited,
 			ExitCode: state.CurrStepState.ExitCode,
 			Started:  state.CurrStepState.Started,
-			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel),
 			Skipped:  state.CurrStepState.Skipped,
 		}
 		if state.CurrStepState.Error != nil {
 			stepState.Error = state.CurrStepState.Error.Error()
+		}
+		if kind, ok := errors.AsType[backend_types.StepError](state.CurrStepState.Error); ok {
+			stepState.ErrorKind = string(kind)
 		}
 		if state.CurrStepState.Exited {
 			stepState.Finished = time.Now().Unix()

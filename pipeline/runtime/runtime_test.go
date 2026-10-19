@@ -194,7 +194,7 @@ func TestWorkflowCloneBuildDeploy(t *testing.T) {
 		require.NotNil(t, last, "%s should have a final trace", name)
 		assert.True(t, last.CurrStepState.Exited, "%s last trace should be exited", name)
 		assert.Equal(t, 0, last.CurrStepState.ExitCode, "%s should exit with code 0", name)
-		assert.False(t, last.CurrStepState.OOMKilled, "%s should not be OOM killed", name)
+		assert.NoError(t, last.CurrStepState.Error, "%s should end without error", name)
 	}
 }
 
@@ -511,13 +511,12 @@ func TestWorkflowOOMKilledStep(t *testing.T) {
 	err := r.Run(t.Context())
 
 	assert.NoError(t, err, "an OOM killed step is not a runtime error")
-	var oomErr *pipeline_errors.OomError
-	assert.True(t, errors.As(r.Err(), &oomErr))
+	assert.ErrorIs(t, r.Err(), backend_types.ErrStepOOMKilled)
 
 	last := findLastTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, last)
 	assert.True(t, last.CurrStepState.Exited)
-	assert.True(t, last.CurrStepState.OOMKilled)
+	assert.ErrorIs(t, last.CurrStepState.Error, backend_types.ErrStepOOMKilled)
 	assert.Equal(t, 137, last.CurrStepState.ExitCode)
 }
 

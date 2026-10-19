@@ -310,11 +310,14 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 		exitCode = -1
 	}
 
-	return &backend_types.State{
-		Exited:    true,
-		ExitCode:  exitCode,
-		OOMKilled: info.Container.State.OOMKilled,
-	}, nil
+	state := &backend_types.State{
+		Exited:   true,
+		ExitCode: exitCode,
+	}
+	if info.Container.State.OOMKilled {
+		state.Error = backend_types.ErrStepOOMKilled
+	}
+	return state, nil
 }
 
 func (e *docker) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {

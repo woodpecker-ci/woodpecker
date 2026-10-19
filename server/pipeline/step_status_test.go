@@ -194,7 +194,7 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("WithoutFinishTime", func(t *testing.T) {
 			t.Parallel()
 			step := &model.Step{State: model.StatusRunning, Started: 42}
-			state := rpc.StepState{Canceled: true}
+			state := rpc.StepState{ErrorKind: "canceled"}
 
 			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 
@@ -206,7 +206,7 @@ func TestUpdateStepStatus(t *testing.T) {
 		t.Run("WithExitedAndFinishTime", func(t *testing.T) {
 			t.Parallel()
 			step := &model.Step{State: model.StatusRunning, Started: 42}
-			state := rpc.StepState{Canceled: true, Exited: true, Finished: 100, ExitCode: 1, Error: "canceled"}
+			state := rpc.StepState{ErrorKind: "canceled", Exited: true, Finished: 100, ExitCode: 1, Error: "canceled"}
 
 			err := UpdateStepStatus(t.Context(), mockStoreStep(t), step, state)
 

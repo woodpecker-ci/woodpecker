@@ -48,8 +48,9 @@ message StepState {
   bool   exited = 4;
   int32  exit_code = 5;
   string error = 6;
-  bool   canceled = 7;
+  reserved 7; // was: bool canceled, now error_kind "canceled"
   bool   skipped = 8;
+  string error_kind = 9; // well known StepError, e.g. "canceled"
 }
 
 message WorkflowState {

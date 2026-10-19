@@ -98,7 +98,7 @@ func CalcStepStatus(step model.Step, state rpc.StepState) (_ *model.Step, cancel
 	}
 
 	// Handle cancellation across both cases
-	if state.Canceled && step.State != model.StatusKilled {
+	if state.Canceled() && step.State != model.StatusKilled {
 		step.State = model.StatusKilled
 		if step.Finished == 0 {
 			step.Finished = time.Now().Unix()
