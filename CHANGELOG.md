@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-18
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -63,6 +63,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.29.0 [[#7342](https://github.com/woodpecker-ci/woodpecker/pull/7342)]
 - Update dependency vue-i18n to v11.4.15 [[#7340](https://github.com/woodpecker-ci/woodpecker/pull/7340)]
 - Update module github.com/google/go-github/v92 to v93 [[#7334](https://github.com/woodpecker-ci/woodpecker/pull/7334)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.27.0 [[#7333](https://github.com/woodpecker-ci/woodpecker/pull/7333)]
