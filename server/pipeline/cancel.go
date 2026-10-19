@@ -130,8 +130,8 @@ func cancelPreviousPipelines(
 	}
 
 	for _, active := range activeBuilds {
-		if active.ID == pipeline.ID {
-			// same pipeline. e.g. self
+		if active.Number >= pipeline.Number {
+			// Concurrent starts can see each other as active. Only cancel older pipelines.
 			continue
 		}
 
