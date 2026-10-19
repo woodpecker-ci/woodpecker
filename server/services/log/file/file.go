@@ -123,4 +123,4 @@ func (l logStore) LogDelete(step *model.Step) error {
 	return err
 }
 
-func (l logStore) StepFinished(_ *model.Step) {}
+func (l logStore) StepFinished(_ *model.Step) error { return nil }
