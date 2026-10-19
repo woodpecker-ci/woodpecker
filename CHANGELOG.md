@@ -26,6 +26,7 @@
 
 ### 🐛 Bug Fixes
 
+- Forward OOM error correctly [[#7313](https://github.com/woodpecker-ci/woodpecker/pull/7313)]
 - Enable crons created without `enabled` field [[#7339](https://github.com/woodpecker-ci/woodpecker/pull/7339)]
 - Fix file based logstore related bugs [[#7323](https://github.com/woodpecker-ci/woodpecker/pull/7323)]
 - Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
@@ -49,7 +50,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7343](https://github.com/woodpecker-ci/woodpecker/pull/7343)]
 - Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
 - Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
 - Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
