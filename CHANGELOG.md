@@ -49,6 +49,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7343](https://github.com/woodpecker-ci/woodpecker/pull/7343)]
 - Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
 - Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
 - Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
