@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
+	scheduler_mocks "go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -122,7 +122,7 @@ func TestRPCNext(t *testing.T) {
 
 		store := store_mocks.NewMockStore(t)
 		store.On("AgentFind", agent.ID).Once().Return(agent, nil)
-		sched := mocks.NewMockScheduler(t)
+		sched := scheduler_mocks.NewMockScheduler(t)
 		sched.On("Poll", mock.Anything, agent.ID, rpc.Filter{Labels: serverLabels}, mock.Anything).Once().Return(nil, nil)
 		grpc := RPC{
 			store:     store,

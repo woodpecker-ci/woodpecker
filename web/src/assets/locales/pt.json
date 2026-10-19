@@ -356,7 +356,8 @@
                 "internal": "Interno"
             }
         },
-        "refresh": "Atualizar lista de repositórios"
+        "refresh": "Atualizar lista de repositórios",
+        "perm_sync_failed": "Não foi possível sincronizar suas permissões para este repositório com a plataforma. Seu acesso foi temporariamente reduzido para apenas leitura."
     },
     "repos": "Repos",
     "repositories": {
