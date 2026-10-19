@@ -554,7 +554,8 @@
                 "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
             }
         },
-        "refresh": "Repository-Liste neu laden"
+        "refresh": "Repository-Liste neu laden",
+        "perm_sync_failed": "Deine Berechtigungen für dieses Repository konnten nicht mit der Code-Plattform synchronisiert werden. Du hast derzeit nur lesenden Zugriff."
     },
     "repos": "Repos",
     "repositories": {

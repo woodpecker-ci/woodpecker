@@ -115,7 +115,12 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 }
 
 func (l logStore) LogDelete(step *model.Step) error {
-	return os.Remove(l.filePath(step.ID))
+	err := os.Remove(l.filePath(step.ID))
+	if os.IsNotExist(err) {
+		// a step that never wrote a log has nothing to delete
+		return nil
+	}
+	return err
 }
 
-func (l logStore) StepFinished(_ *model.Step) {}
+func (l logStore) StepFinished(_ *model.Step) error { return nil }

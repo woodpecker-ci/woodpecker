@@ -17,20 +17,23 @@ package github
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v92/github"
+	"github.com/google/go-github/v93/github"
 	github_mock "github.com/migueleliasweb/go-github-mock/src/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -378,4 +381,300 @@ func TestGetTagCommitSHA(t *testing.T) {
 		_, err := c.getTagCommitSHA(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
 		require.Error(t, err)
 	})
+}
+
+// mockedContext returns a context whose GitHub client talks to a mock API.
+func mockedContext(t *testing.T, ctx context.Context, opts ...github_mock.MockBackendOption) context.Context {
+	t.Helper()
+	gh, err := github.NewClient(github.WithHTTPClient(github_mock.NewMockedHTTPClient(opts...)))
+	require.NoError(t, err)
+	return context.WithValue(ctx, githubClientKey, gh)
+}
+
+func writeJSON(t *testing.T, w http.ResponseWriter, v any) {
+	t.Helper()
+	w.Header().Set("Content-Type", "application/json")
+	assert.NoError(t, json.NewEncoder(w).Encode(v))
+}
+
+func TestMatchingEmail(t *testing.T) {
+	primaryUnverified := &github.UserEmail{Email: new("unverified@example.com"), Primary: new(true), Verified: new(false)}
+	secondary := &github.UserEmail{Email: new("secondary@example.com"), Primary: new(false), Verified: new(true)}
+	primary := &github.UserEmail{Email: new("primary@example.com"), Primary: new(true), Verified: new(true)}
+	incomplete := &github.UserEmail{Email: new("incomplete@example.com")}
+
+	assert.Equal(t, primary, matchingEmail([]*github.UserEmail{incomplete, primaryUnverified, secondary, primary}, defaultAPI))
+	// github.com requires a verified primary address
+	assert.Nil(t, matchingEmail([]*github.UserEmail{primaryUnverified, secondary}, defaultAPI))
+	assert.Nil(t, matchingEmail(nil, defaultAPI))
+	// GitHub Enterprise does not verify addresses, the first one is used
+	assert.Equal(t, primaryUnverified, matchingEmail([]*github.UserEmail{primaryUnverified, secondary}, "https://github.example.com/api/v3/"))
+	assert.Nil(t, matchingEmail(nil, "https://github.example.com/api/v3/"))
+}
+
+func TestMatchingHooks(t *testing.T) {
+	hookWithoutID := &github.Hook{Config: &github.HookConfig{URL: new("https://ci.example.com/api/hook")}}
+	otherHost := &github.Hook{ID: new(int64(1)), Config: &github.HookConfig{URL: new("https://other.example.com/api/hook")}}
+	ours := &github.Hook{ID: new(int64(2)), Config: &github.HookConfig{URL: new("https://ci.example.com/api/hook?access_token=old")}}
+
+	assert.Equal(t, ours, matchingHooks([]*github.Hook{hookWithoutID, otherHost, ours}, "https://ci.example.com/api/hook?access_token=new"))
+	assert.Nil(t, matchingHooks([]*github.Hook{hookWithoutID, otherHost}, "https://ci.example.com/api/hook"))
+	assert.Nil(t, matchingHooks([]*github.Hook{ours}, "://invalid"))
+}
+
+func TestPerPage(t *testing.T) {
+	assert.Equal(t, defaultPageSize, perPage(0))
+	assert.Equal(t, 10, perPage(10))
+	assert.Equal(t, defaultPageSize, perPage(defaultPageSize+1))
+}
+
+func TestActivate(t *testing.T) {
+	var deleted []string
+	var created *github.Hook
+
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
+			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
+		}),
+		github_mock.WithRequestMatch(github_mock.GetReposHooksByOwnerByRepo, []*github.Hook{
+			{ID: new(int64(1)), Config: &github.HookConfig{URL: new("https://other.example.com/hook")}},
+			{ID: new(int64(2)), Config: &github.HookConfig{URL: new("https://ci.example.com/api/hook?access_token=old")}},
+		}),
+		github_mock.WithRequestMatchHandler(github_mock.DeleteReposHooksByOwnerByRepoByHookId, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			deleted = append(deleted, r.URL.Path)
+			w.WriteHeader(http.StatusNoContent)
+		})),
+		github_mock.WithRequestMatchHandler(github_mock.PostReposHooksByOwnerByRepo, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			created = new(github.Hook)
+			assert.NoError(t, json.NewDecoder(r.Body).Decode(created))
+			w.WriteHeader(http.StatusCreated)
+			writeJSON(t, w, created)
+		})),
+	)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	err := c.Activate(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, "https://ci.example.com/api/hook?access_token=new")
+	require.NoError(t, err)
+
+	// the old hook of this server is replaced, hooks of others are kept
+	assert.Equal(t, []string{"/repos/octocat/hello-world/hooks/2"}, deleted)
+	require.NotNil(t, created)
+	assert.Equal(t, "https://ci.example.com/api/hook?access_token=new", created.GetConfig().GetURL())
+	assert.Equal(t, "form", created.GetConfig().GetContentType())
+	assert.ElementsMatch(t, []string{"push", "pull_request", "pull_request_review", "deployment"}, created.Events)
+}
+
+func TestDeactivateWithoutMatchingHook(t *testing.T) {
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
+			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
+		}),
+		github_mock.WithRequestMatch(github_mock.GetReposHooksByOwnerByRepo, []*github.Hook{
+			{ID: new(int64(1)), Config: &github.HookConfig{URL: new("https://other.example.com/hook")}},
+		}),
+		github_mock.WithRequestMatchHandler(github_mock.DeleteReposHooksByOwnerByRepoByHookId, http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+			t.Errorf("unexpected hook deletion %s", r.URL.Path)
+		})),
+	)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	assert.NoError(t, c.Deactivate(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, "https://ci.example.com/api/hook"))
+}
+
+func TestLoadChangedFilesFromCommits(t *testing.T) {
+	const (
+		prev = "1111111111111111111111111111111111111111"
+		curr = "2222222222222222222222222222222222222222"
+	)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID: 1, ForgeRemoteID: "1", Owner: "octocat", Name: "hello-world", UserID: 1,
+	}, nil).Maybe()
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{ID: 1, AccessToken: "token"}, nil).Maybe()
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	repo := &model.Repo{ForgeRemoteID: "1", FullName: "octocat/hello-world"}
+
+	t.Run("same commit before and after has no changes", func(t *testing.T) {
+		// no API route is mocked, a forge call would fail the test
+		ctx := store.InjectToContext(mockedContext(t, t.Context()), mockStore)
+		p, err := c.loadChangedFilesFromCommits(ctx, repo, &model.Pipeline{}, curr, curr)
+		require.NoError(t, err)
+		assert.Empty(t, p.ChangedFiles)
+	})
+
+	t.Run("new branch lists the files of the current commit on all pages", func(t *testing.T) {
+		ctx := store.InjectToContext(mockedContext(t, t.Context(),
+			github_mock.WithRequestMatchPages(github_mock.GetReposCommitsByOwnerByRepoByRef,
+				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("a.go")}}},
+				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("b.go")}}},
+			),
+		), mockStore)
+		p, err := c.loadChangedFilesFromCommits(ctx, repo, &model.Pipeline{}, curr, "0000000000000000000000000000000000000000")
+		require.NoError(t, err)
+		assert.Equal(t, []string{"a.go", "b.go"}, p.ChangedFiles)
+	})
+
+	t.Run("push compares both commits and keeps renamed paths once", func(t *testing.T) {
+		ctx := store.InjectToContext(mockedContext(t, t.Context(),
+			github_mock.WithRequestMatchHandler(github_mock.GetReposCompareByOwnerByRepoByBasehead, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/repos/octocat/hello-world/compare/"+prev+"..."+curr, r.URL.Path)
+				writeJSON(t, w, github.CommitsComparison{Files: []*github.CommitFile{
+					{Filename: new("new.go"), PreviousFilename: new("old.go")},
+					{Filename: new("main.go")},
+					{Filename: new("main.go")},
+				}})
+			})),
+		), mockStore)
+		p, err := c.loadChangedFilesFromCommits(ctx, repo, &model.Pipeline{}, curr, prev)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"new.go", "old.go", "main.go"}, p.ChangedFiles)
+	})
+
+	t.Run("without store the pipeline is unchanged", func(t *testing.T) {
+		p, err := c.loadChangedFilesFromCommits(t.Context(), repo, &model.Pipeline{Commit: curr}, curr, prev)
+		require.NoError(t, err)
+		assert.Equal(t, &model.Pipeline{Commit: curr}, p)
+	})
+}
+
+func TestRepos(t *testing.T) {
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatchPages(github_mock.GetUserRepos,
+			[]github.Repository{
+				{ID: new(int64(1)), FullName: new("octocat/active"), Name: new("active"), Owner: &github.User{Login: new("octocat")}},
+				{ID: new(int64(2)), FullName: new("octocat/archived"), Name: new("archived"), Owner: &github.User{Login: new("octocat")}, Archived: new(true)},
+			},
+			[]github.Repository{
+				{ID: new(int64(3)), FullName: new("octocat/second-page"), Name: new("second-page"), Owner: &github.User{Login: new("octocat")}},
+			},
+		),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token"}
+
+	repos, err := c.Repos(ctx, user, &model.ListOptions{Page: 1})
+	require.NoError(t, err)
+	require.Len(t, repos, 2)
+	assert.Equal(t, "octocat/active", repos[0].FullName)
+	assert.Equal(t, "octocat/second-page", repos[1].FullName)
+
+	// all repos come with the first page
+	repos, err = c.Repos(ctx, user, &model.ListOptions{Page: 2})
+	require.NoError(t, err)
+	assert.Empty(t, repos)
+}
+
+func TestFileAndDir(t *testing.T) {
+	encoded := func(s string) *string { return new(base64.StdEncoding.EncodeToString([]byte(s))) }
+
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "abc", r.URL.Query().Get("ref"))
+			switch r.URL.Path {
+			case "/repos/octocat/hello-world/contents/.woodpecker/a.yaml":
+				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: a")})
+			case "/repos/octocat/hello-world/contents/.woodpecker/b.yaml":
+				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: b")})
+			case "/repos/octocat/hello-world/contents/.woodpecker":
+				writeJSON(t, w, []github.RepositoryContent{
+					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("file"), Name: new("b.yaml")},
+				})
+			default:
+				w.WriteHeader(http.StatusNotFound)
+				writeJSON(t, w, map[string]string{"message": "Not Found"})
+			}
+		})),
+	)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{Owner: "octocat", Name: "hello-world"}
+	pipeline := &model.Pipeline{Commit: "abc"}
+
+	data, err := c.File(ctx, user, repo, pipeline, ".woodpecker/a.yaml")
+	require.NoError(t, err)
+	assert.Equal(t, "steps: a", string(data))
+
+	_, err = c.File(ctx, user, repo, pipeline, ".woodpecker.yaml")
+	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+
+	_, err = c.File(ctx, user, repo, pipeline, ".woodpecker")
+	assert.ErrorContains(t, err, "is a folder not a file")
+
+	metas, err := c.Dir(ctx, user, repo, pipeline, ".woodpecker")
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []*forge_types.FileMeta{
+		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
+		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
+	}, metas)
+
+	_, err = c.Dir(ctx, user, repo, pipeline, ".missing")
+	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+}
+
+func TestOrgMembership(t *testing.T) {
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatch(github_mock.GetOrgsMembershipsByOrgByUsername,
+			github.Membership{State: new("active"), Role: new("admin")},
+			github.Membership{State: new("pending"), Role: new("member")},
+		),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{Login: "octocat", AccessToken: "token"}
+
+	perm, err := c.OrgMembership(ctx, user, "org")
+	require.NoError(t, err)
+	assert.Equal(t, &model.OrgPerm{Member: true, Admin: true}, perm)
+
+	// an invitation that is not accepted yet is no membership
+	perm, err = c.OrgMembership(ctx, user, "org")
+	require.NoError(t, err)
+	assert.Equal(t, &model.OrgPerm{Member: false, Admin: false}, perm)
+}
+
+func TestOrg(t *testing.T) {
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.GetOrgsByOrg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/orgs/org" {
+				writeJSON(t, w, github.Organization{Login: new("org")})
+				return
+			}
+			w.WriteHeader(http.StatusNotFound)
+			writeJSON(t, w, map[string]string{"message": "Not Found"})
+		})),
+		github_mock.WithRequestMatchHandler(github_mock.GetUsersByUsername, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/users/octocat" {
+				writeJSON(t, w, github.User{Login: new("octocat")})
+				return
+			}
+			w.WriteHeader(http.StatusNotFound)
+			writeJSON(t, w, map[string]string{"message": "Not Found"})
+		})),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token"}
+
+	org, err := c.Org(ctx, user, "org")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "org"}, org)
+
+	org, err = c.Org(ctx, user, "octocat")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "octocat", IsUser: true}, org)
+
+	_, err = c.Org(ctx, user, "missing")
+	assert.Error(t, err)
+}
+
+func TestRefreshWithoutRefreshToken(t *testing.T) {
+	// OAuth apps do not issue refresh tokens, so there is nothing to refresh
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token", Expiry: time.Now().Unix()}
+	refreshed, err := c.Refresh(t.Context(), user)
+	require.NoError(t, err)
+	assert.False(t, refreshed)
+	assert.Equal(t, "token", user.AccessToken)
 }
