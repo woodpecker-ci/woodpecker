@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @pcbeingused333, @qwerty287, @sugar700, @xoxys
+@6543, @AhmadNajiKam, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @sugar700, @xoxys
 
 ### 🔒 Security
 
@@ -81,6 +81,7 @@
 
 ### Misc
 
+- Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
