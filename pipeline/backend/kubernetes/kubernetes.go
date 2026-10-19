@@ -425,6 +425,11 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		OOMKilled: false,
 	}
 
+	// https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/#exceed-a-container-s-memory-limit
+	if cs.State.Terminated.Reason == "OOMKilled" {
+		bs.OOMKilled = true
+	}
+
 	return bs, nil
 }
 
