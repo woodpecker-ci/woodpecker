@@ -85,8 +85,6 @@ var Config = struct {
 		}
 		ConfigPaths      []string
 		ConfigExtensions []string
-		// TODO: remove with version 4.x
-		ForceIgnoreServiceFailure bool
 	}
 	Permissions struct {
 		Open            bool
