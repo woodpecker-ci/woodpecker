@@ -24,7 +24,7 @@ import (
 
 const (
 	limitVariables = 10
-	limitAxis      = 25
+	maxAxes        = 64
 )
 
 // Matrix represents the pipeline matrix.
@@ -59,7 +59,7 @@ func Parse(data []byte) ([]Axis, error) {
 		return []Axis{}, nil
 	}
 
-	return calcAxes(matrix), nil
+	return calcAxes(matrix)
 }
 
 // ParseString parses the Yaml string matrix definition.
@@ -67,7 +67,7 @@ func ParseString(data string) ([]Axis, error) {
 	return Parse([]byte(data))
 }
 
-func calcAxes(matrix Matrix) []Axis {
+func calcAxes(matrix Matrix) ([]Axis, error) {
 	// calculate number of permutations and extract the list of variable
 	// names (ie go_version, redis_version, etc)
 	var axisCount int
@@ -112,13 +112,14 @@ func calcAxes(matrix Matrix) []Axis {
 		// append to the list of axis.
 		axes = append(axes, axis)
 
-		// enforce a maximum number of axis that should be calculated.
-		if axisIndex > limitAxis {
-			break
+		// enforce limit
+		if axisIndex >= maxAxes {
+			return nil, ErrorMaxAxesReached
 		}
+
 	}
 
-	return axes
+	return axes, nil
 }
 
 func parseMatrix(data []byte) (Matrix, error) {

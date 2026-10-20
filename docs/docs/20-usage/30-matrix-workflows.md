@@ -3,8 +3,8 @@
 Woodpecker has integrated support for matrix workflows. Woodpecker executes a separate workflow for each combination in the matrix, allowing you to build and test against multiple configurations.
 
 :::warning
-Woodpecker currently supports a maximum of **27 matrix axes** per workflow.
-If your matrix exceeds this number, any additional axes will be silently ignored.
+Woodpecker generates at most **64 workflows** per matrix.
+If your matrix has more combinations, you will get an error.
 :::
 
 Example matrix definition:
