@@ -165,5 +165,11 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		metadata.Release.IsPrerelease = pipeline.Release.IsPrerelease
 	}
 
+	// Like Parent, this is only set for the current pipeline, not for the
+	// previous one.
+	if includeParent {
+		metadata.ReusedWorkflows = pipeline.ReusedWorkflows
+	}
+
 	return metadata
 }

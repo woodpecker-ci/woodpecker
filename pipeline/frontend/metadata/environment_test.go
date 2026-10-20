@@ -96,3 +96,12 @@ func TestEnviron(t *testing.T) {
 	envs = m.Environ()
 	assert.Equal(t, "false", envs["CI_COMMIT_PULL_REQUEST_DRAFT"])
 }
+
+func TestEnvironReusedWorkflows(t *testing.T) {
+	m := &Metadata{}
+	_, ok := m.Environ()["CI_PIPELINE_REUSED_WORKFLOWS"]
+	assert.False(t, ok, "only set for a partial restart")
+
+	m = &Metadata{Curr: Pipeline{ReusedWorkflows: map[string]int64{"lint": 5, "build": 3}}}
+	assert.Equal(t, "build=3,lint=5", m.Environ()["CI_PIPELINE_REUSED_WORKFLOWS"])
+}

@@ -36,6 +36,7 @@ const (
 	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
+	pathRestartFailed  = "%s/api/repos/%d/pipelines/%d/restart-failed"
 	pathRepoSecrets    = "%s/api/repos/%d/secrets"
 	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%d/registries"
@@ -371,6 +372,16 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 func (c *client) PipelineStart(repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
+	return out, err
+}
+
+// PipelineRestartFailed re-starts the failed workflows of a pipeline and the
+// workflows depending on them.
+func (c *client) PipelineRestartFailed(repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
+	out := new(Pipeline)
+	uri, _ := url.Parse(fmt.Sprintf(pathRestartFailed, c.addr, repoID, pipeline))
 	uri.RawQuery = opt.QueryEncode()
 	err := c.post(uri.String(), nil, out)
 	return out, err

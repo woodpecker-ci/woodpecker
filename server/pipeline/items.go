@@ -175,14 +175,20 @@ func handleParseErrors(pipeline *model.Pipeline, parseErr error) (blocking bool)
 // their own way. The second error, err, signals a hard failure (e.g. persisting
 // workflows) that always aborts the run. When the pipeline already has
 // persisted workflows (a gated pipeline being approved), setting replaceExisting
-// swaps them out for the freshly built ones.
+// swaps them out for the freshly built ones. A non-nil itemFilter picks the
+// items to keep before anything is persisted.
 func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string, replaceExisting bool,
+	itemFilter func([]*builder.Item) []*builder.Item,
 ) (pipeline *model.Pipeline, items []*builder.Item, parseErr, err error) {
 	pipelineItems, parseErr := parsePipeline(ctx, forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		return currentPipeline, nil, parseErr, nil
+	}
+
+	if itemFilter != nil {
+		pipelineItems = itemFilter(pipelineItems)
 	}
 
 	// An empty pipeline (e.g. everything filtered out) has no workflows to

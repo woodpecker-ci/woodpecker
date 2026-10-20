@@ -669,6 +669,70 @@ func TestPostPipeline(t *testing.T) {
 	})
 }
 
+func TestPostPipelineRestartFailed(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo"}
+	fakeUser := &model.User{ID: 1, Login: "testuser"}
+
+	post := func(t *testing.T, parent *model.Pipeline, workflows []*model.Workflow) *httptest.ResponseRecorder {
+		mockForge := forge_mocks.NewMockForge(t)
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		mockManager.On("ForgeFromUser", fakeUser).Return(mockForge, nil).Maybe()
+		server.Config.Services.Manager = mockManager
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockStore.On("WorkflowGetTree", parent).Return(workflows, nil).Maybe()
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		c.Set("pipeline", parent)
+		c.Request, _ = http.NewRequest(http.MethodPost, "", nil)
+
+		PostPipelineRestartFailed(c)
+		return w
+	}
+
+	t.Run("nothing failed", func(t *testing.T) {
+		w := post(t, &model.Pipeline{ID: 2, Number: 2, Status: model.StatusSuccess}, []*model.Workflow{
+			{Name: "build", State: model.StatusSuccess},
+		})
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "no failed workflows")
+	})
+
+	t.Run("still running", func(t *testing.T) {
+		w := post(t, &model.Pipeline{ID: 2, Number: 2, Status: model.StatusRunning}, []*model.Workflow{
+			{Name: "build", State: model.StatusFailure},
+			{Name: "test", State: model.StatusRunning},
+		})
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "still running")
+	})
+
+	t.Run("blocked", func(t *testing.T) {
+		w := post(t, &model.Pipeline{ID: 2, Number: 2, Status: model.StatusBlocked}, nil)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "blocked")
+	})
+
+	t.Run("event can't be changed", func(t *testing.T) {
+		for _, query := range []string{"event=deployment", "deploy_to=production", "deploy_task=migrate"} {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Request, _ = http.NewRequest(http.MethodPost, "/?"+query, nil)
+
+			PostPipelineRestartFailed(c)
+			assert.Equal(t, http.StatusBadRequest, w.Code, query)
+		}
+	})
+}
+
 func TestDeletePipelineLogs(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

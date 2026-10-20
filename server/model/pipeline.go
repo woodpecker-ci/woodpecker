@@ -41,6 +41,8 @@ type Pipeline struct {
 	Commit               string                  `json:"commit"                  xorm:"commit"`
 	Branch               string                  `json:"branch"                  xorm:"branch"`
 	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
+	PartialRestart       bool                    `json:"partial_restart"         xorm:"partial_restart"` // set if the pipeline only reruns the failed workflows of its parent
+	ReusedWorkflows      map[string]int64        `json:"-"                       xorm:"-"`               // set while a partial restart is created: workflow name -> number of the pipeline it ran in
 	Ref                  string                  `json:"ref"                     xorm:"ref"`
 	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
 	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"` // TODO: only & rename to AuthorAvatar // Avatar URL of the author of the commit

@@ -57,7 +57,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	// must already be pending when the new workflows are persisted.
 	currentPipeline.Status = model.StatusPending
 
-	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil, true)
+	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil, true, nil)
 	if handleParseErrors(currentPipeline, parseErr) {
 		if err := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); err != nil {
 			log.Error().Err(err).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
@@ -77,7 +77,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 
 	publishPipeline(ctx, forge, currentPipeline, repo, user)
 
-	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
+	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
