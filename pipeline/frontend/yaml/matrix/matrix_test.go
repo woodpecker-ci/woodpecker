@@ -39,6 +39,38 @@ func TestMatrixEmpty(t *testing.T) {
 	assert.Empty(t, axis)
 }
 
+func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
+	tests := []struct {
+		name   string
+		matrix string
+	}{
+		{name: "empty matrix mapping", matrix: "matrix: {}"},
+		{name: "null matrix", matrix: "matrix:"},
+		{name: "null matrix alias", matrix: "empty: &empty null\nmatrix: *empty"},
+		{name: "empty include", matrix: "matrix:\n  include: []"},
+		{
+			name:   "empty include takes precedence over axes",
+			matrix: "matrix:\n  A: [a, b]\n  include: []",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			axes, err := ParseString(tt.matrix)
+			assert.NoError(t, err)
+			assert.Empty(t, axes)
+		})
+	}
+}
+
+func TestMatrixAlias(t *testing.T) {
+	axis, err := ParseString(`axes: &axes
+  A: [a, b]
+matrix: *axes`)
+	assert.NoError(t, err)
+	assert.Len(t, axis, 2)
+}
+
 func TestMatrixEmptyAxis(t *testing.T) {
 	axis, err := ParseString("matrix:\n  A: [a1, a2]\n  EMPTY:")
 	assert.NoError(t, err)

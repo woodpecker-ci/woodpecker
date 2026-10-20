@@ -18,6 +18,8 @@ import (
 	"sort"
 	"strings"
 
+	go_yaml "go.yaml.in/yaml/v4"
+
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 )
@@ -45,20 +47,38 @@ func (a Axis) String() string {
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
-	includedAxes, err := parseInclude(data)
-	if err == nil && len(includedAxes) != 0 {
-		return includedAxes, nil
+	document := new(go_yaml.Node)
+	if err := yaml.Unmarshal(data, document); err != nil {
+		return nil, compilerError(err)
 	}
 
-	matrix, err := parseMatrix(data)
-	if err != nil {
-		return nil, err
+	root := documentRoot(document)
+	if root == nil {
+		return []Axis{}, nil
+	}
+	if root.Kind != go_yaml.MappingNode {
+		return nil, &pipeline_errors.PipelineError{
+			Message: "expected pipeline configuration to be a mapping",
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+		}
 	}
 
-	if len(matrix) == 0 {
+	matrixNode := dereferenceAlias(mappingValue(root, "matrix"))
+	if matrixNode == nil || (matrixNode.Kind == go_yaml.ScalarNode && matrixNode.Tag == "!!null") {
+		return []Axis{}, nil
+	}
+	if matrixNode.Kind == go_yaml.MappingNode && len(matrixNode.Content) == 0 {
 		return []Axis{}, nil
 	}
 
+	if includeNode := mappingValue(matrixNode, "include"); includeNode != nil {
+		return parseInclude(includeNode)
+	}
+
+	matrix, err := parseMatrix(matrixNode)
+	if err != nil {
+		return nil, err
+	}
 	return calcAxes(matrix)
 }
 
@@ -121,36 +141,90 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 	return axes, nil
 }
 
-func parseMatrix(data []byte) (Matrix, error) {
-	config := struct {
-		Matrix map[string][]string
-	}{}
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+func parseMatrix(node *go_yaml.Node) (Matrix, error) {
+	matrix := make(Matrix)
+	if err := node.Decode(&matrix); err != nil {
+		return nil, compilerError(err)
 	}
-	return config.Matrix, nil
+	return matrix, nil
 }
 
-func parseInclude(data []byte) ([]Axis, error) {
-	config := struct {
-		Matrix struct {
-			Include []Axis
-		}
-	}{}
-
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+func parseInclude(node *go_yaml.Node) ([]Axis, error) {
+	var axes []Axis
+	if err := node.Decode(&axes); err != nil {
+		return nil, compilerError(err)
 	}
 
-	if len(config.Matrix.Include) > maxAxes {
+	if len(axes) > maxAxes {
 		return nil, ErrorMaxAxesReached
 	}
 
-	for _, values := range config.Matrix.Include {
+	for _, values := range axes {
 		if len(values) > limitVariables {
 			return nil, ErrorMaxAxisVariablesReached
 		}
 	}
 
-	return config.Matrix.Include, nil
+	return uniqueAxes(axes), nil
+}
+
+func uniqueAxes(axes []Axis) []Axis {
+	unique := make([]Axis, 0, len(axes))
+	for _, axis := range axes {
+		duplicate := false
+		for _, existing := range unique {
+			if equalAxes(axis, existing) {
+				duplicate = true
+				break
+			}
+		}
+		if !duplicate {
+			unique = append(unique, axis)
+		}
+	}
+	return unique
+}
+
+func equalAxes(left, right Axis) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for name, value := range left {
+		otherValue, ok := right[name]
+		if !ok || otherValue != value {
+			return false
+		}
+	}
+	return true
+}
+
+func documentRoot(document *go_yaml.Node) *go_yaml.Node {
+	if document == nil || document.Kind != go_yaml.DocumentNode || len(document.Content) == 0 {
+		return nil
+	}
+	return dereferenceAlias(document.Content[0])
+}
+
+func mappingValue(node *go_yaml.Node, key string) *go_yaml.Node {
+	node = dereferenceAlias(node)
+	if node == nil || node.Kind != go_yaml.MappingNode {
+		return nil
+	}
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		if node.Content[i].Value == key {
+			return node.Content[i+1]
+		}
+	}
+	return nil
+}
+
+func dereferenceAlias(node *go_yaml.Node) *go_yaml.Node {
+	for node != nil && node.Kind == go_yaml.AliasNode {
+		node = node.Alias
+	}
+	return node
+}
+
+func compilerError(err error) error {
+	return &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 }
