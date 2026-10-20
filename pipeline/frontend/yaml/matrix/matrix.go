@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	limitTags = 10
-	limitAxis = 25
+	limitVariables = 10
+	limitAxis      = 25
 )
 
 // Matrix represents the pipeline matrix.
@@ -37,20 +37,20 @@ type Axis map[string]string
 // of environment variables.
 func (a Axis) String() string {
 	var envs []string
-	for k, v := range a {
-		envs = append(envs, k+"="+v)
+	for name, value := range a {
+		envs = append(envs, name+"="+value)
 	}
 	return strings.Join(envs, " ")
 }
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
-	axis, err := parseList(data)
-	if err == nil && len(axis) != 0 {
-		return axis, nil
+	includedAxes, err := parseInclude(data)
+	if err == nil && len(includedAxes) != 0 {
+		return includedAxes, nil
 	}
 
-	matrix, err := parse(data)
+	matrix, err := parseMatrix(data)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func Parse(data []byte) ([]Axis, error) {
 		return []Axis{}, nil
 	}
 
-	return calc(matrix), nil
+	return calcAxes(matrix), nil
 }
 
 // ParseString parses the Yaml string matrix definition.
@@ -67,78 +67,79 @@ func ParseString(data string) ([]Axis, error) {
 	return Parse([]byte(data))
 }
 
-func calc(matrix Matrix) []Axis {
-	// calculate number of permutations and extract the list of tags
-	// (ie go_version, redis_version, etc)
-	var perm int
-	var tags []string
-	for k, v := range matrix {
-		// an axis without values contributes no permutations and would
+func calcAxes(matrix Matrix) []Axis {
+	// calculate number of permutations and extract the list of variable
+	// names (ie go_version, redis_version, etc)
+	var axisCount int
+	var names []string
+	for name, values := range matrix {
+		// a variable without values contributes no permutations and would
 		// cause a division by zero below
-		if len(v) == 0 {
+		if len(values) == 0 {
 			continue
 		}
-		perm *= len(v)
-		if perm == 0 {
-			perm = len(v)
+		axisCount *= len(values)
+		if axisCount == 0 {
+			axisCount = len(values)
 		}
-		tags = append(tags, k)
+		names = append(names, name)
 	}
-	// map iteration order is random: sort the tags so the permutation order
+	// map iteration order is random: sort the names so the permutation order
 	// is deterministic and derived workflow numbering is stable across
 	// repeated compilations of the same pipeline.
-	sort.Strings(tags)
+	sort.Strings(names)
 
 	// structure to hold the transformed result set
-	var axisList []Axis
+	var axes []Axis
 
 	// for each axis calculate the unique set of values that should be used.
-	for p := 0; p < perm; p++ {
+	for axisIndex := 0; axisIndex < axisCount; axisIndex++ {
 		axis := map[string]string{}
-		decrease := perm
-		for i, tag := range tags {
-			elems := matrix[tag]
-			decrease /= len(elems)
-			elem := p / decrease % len(elems)
-			axis[tag] = elems[elem]
+		// number of consecutive axes that share the same value of a variable
+		axesPerValue := axisCount
+		for variableIndex, name := range names {
+			values := matrix[name]
+			axesPerValue /= len(values)
+			valueIndex := axisIndex / axesPerValue % len(values)
+			axis[name] = values[valueIndex]
 
-			// enforce a maximum number of tags in the pipeline matrix.
-			if i > limitTags {
+			// enforce a maximum number of variables in the pipeline matrix.
+			if variableIndex > limitVariables {
 				break
 			}
 		}
 
 		// append to the list of axis.
-		axisList = append(axisList, axis)
+		axes = append(axes, axis)
 
 		// enforce a maximum number of axis that should be calculated.
-		if p > limitAxis {
+		if axisIndex > limitAxis {
 			break
 		}
 	}
 
-	return axisList
+	return axes
 }
 
-func parse(raw []byte) (Matrix, error) {
-	data := struct {
+func parseMatrix(data []byte) (Matrix, error) {
+	config := struct {
 		Matrix map[string][]string
 	}{}
-	if err := yaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
-	return data.Matrix, nil
+	return config.Matrix, nil
 }
 
-func parseList(raw []byte) ([]Axis, error) {
-	data := struct {
+func parseInclude(data []byte) ([]Axis, error) {
+	config := struct {
 		Matrix struct {
 			Include []Axis
 		}
 	}{}
 
-	if err := yaml.Unmarshal(raw, &data); err != nil {
+	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
-	return data.Matrix.Include, nil
+	return config.Matrix.Include, nil
 }
