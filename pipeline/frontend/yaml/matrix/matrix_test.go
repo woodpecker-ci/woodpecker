@@ -209,3 +209,49 @@ func includeMatrixHelper(entries int) string {
 	}
 	return b.String()
 }
+
+// largeMatrix returns a matrix with the given number of axes, each with the
+// given number of values.
+func largeMatrix(axes, values int) string {
+	var b strings.Builder
+	b.WriteString("matrix:\n")
+	for i := range axes {
+		fmt.Fprintf(&b, "  A%02d: [", i)
+		for j := range values {
+			if j > 0 {
+				b.WriteString(", ")
+			}
+			fmt.Fprintf(&b, "v%d", j)
+		}
+		b.WriteString("]\n")
+	}
+	return b.String()
+}
+
+func TestMatrixLargePermutationCount(t *testing.T) {
+	// Permutation overflow and excessive axes must return a limit error rather
+	// than panic or silently produce an empty matrix.
+	tests := []struct {
+		axes, values int
+		wantErr      error
+	}{
+		{axes: 10, values: 128, wantErr: ErrorMaxAxesReached},
+		{axes: 63, values: 2, wantErr: ErrorMaxAxisVariablesReached},
+		{axes: 64, values: 2, wantErr: ErrorMaxAxisVariablesReached},
+		{axes: 65, values: 2, wantErr: ErrorMaxAxisVariablesReached},
+		{axes: 32, values: 4, wantErr: ErrorMaxAxisVariablesReached},
+		{axes: 40, values: 3, wantErr: ErrorMaxAxisVariablesReached},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%dx%d", tt.axes, tt.values), func(t *testing.T) {
+			var axes []Axis
+			var err error
+			assert.NotPanics(t, func() {
+				axes, err = ParseString(largeMatrix(tt.axes, tt.values))
+			})
+			assert.Nil(t, axes)
+			assert.ErrorIs(t, err, tt.wantErr)
+		})
+	}
+}
