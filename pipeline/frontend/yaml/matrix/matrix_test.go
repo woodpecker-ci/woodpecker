@@ -139,6 +139,11 @@ func TestMatrixMaxAxes(t *testing.T) {
 			matrix: includeMatrixHelper(65),
 			err:    ErrorMaxAxesReached,
 		},
+		{
+			name:   "no duplication",
+			matrix: "matrix:\n  include:\n    - A: c\n    - A: c\n",
+			axes:   1,
+		},
 	}
 
 	for _, tt := range tests {
