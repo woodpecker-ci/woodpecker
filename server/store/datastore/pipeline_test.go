@@ -16,11 +16,16 @@
 package datastore
 
 import (
+	"context"
+	"database/sql"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"xorm.io/xorm"
+	"xorm.io/xorm/contexts"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -293,7 +298,7 @@ func TestDeletePipeline(t *testing.T) {
 	assert.NoError(t, err)
 
 	// delete non existing pipeline
-	assert.ErrorIs(t, types.ErrRecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+	assert.ErrorIs(t, store.DeletePipeline(&model.Pipeline{ID: 1}), types.ErrRecordNotExist)
 
 	// delete pipeline with shares config
 	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
@@ -360,4 +365,87 @@ func TestGetPipelineLastBeforeUsesNumber(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, 2, previous.Number)
 	assert.EqualValues(t, model.StatusFailure, previous.Status)
+}
+
+// pipelineLockHook releases a competing transaction after the first failed
+// attempt, so retries can succeed without timing-dependent sleeps.
+type pipelineLockHook struct {
+	releaseOn string
+	release   func() error
+	released  bool
+	attempts  int
+	commitErr error
+}
+
+func (h *pipelineLockHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
+	if c.SQL == "BEGIN TRANSACTION" {
+		h.attempts++
+	}
+	return c.Ctx, nil
+}
+
+func (h *pipelineLockHook) AfterProcess(c *contexts.ContextHook) error {
+	if c.SQL != h.releaseOn || h.released {
+		return nil
+	}
+	h.commitErr = c.Err
+	h.released = true
+	return h.release()
+}
+
+func TestCreatePipelineRetriesSQLiteLocks(t *testing.T) {
+	for _, phase := range []string{"read", "commit"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx := context.Background()
+			// Rollback journaling lets a reader block COMMIT after INSERT succeeds.
+			dsn := "file:" + filepath.Join(t.TempDir(), "pipeline.db") + "?_busy_timeout=0&_journal_mode=DELETE"
+			engine, err := xorm.NewEngine("sqlite3", dsn)
+			require.NoError(t, err)
+			defer engine.Close()
+			require.NoError(t, engine.Sync(new(model.Repo), new(model.Pipeline)))
+
+			s := storage{engine: engine}
+			repo := &model.Repo{Name: "test", Owner: "test", FullName: "test/test"}
+			require.NoError(t, s.CreateRepo(repo))
+
+			lockDSN := dsn
+			releaseOn := "COMMIT"
+			if phase == "read" {
+				// An exclusive transaction blocks CreatePipeline's initial reads.
+				lockDSN += "&_txlock=exclusive"
+				releaseOn = "ROLLBACK"
+			}
+			other, err := sql.Open("sqlite3", lockDSN)
+			require.NoError(t, err)
+			defer other.Close()
+			holder, err := other.BeginTx(ctx, nil)
+			require.NoError(t, err)
+			defer holder.Rollback() //nolint:errcheck
+			if phase == "commit" {
+				// Keep a shared read lock while CreatePipeline writes and commits.
+				var count int
+				require.NoError(t, holder.QueryRowContext(ctx, "SELECT COUNT(*) FROM repos").Scan(&count))
+			}
+
+			hook := &pipelineLockHook{releaseOn: releaseOn, release: holder.Rollback}
+			engine.AddHook(hook)
+			pipeline := &model.Pipeline{RepoID: repo.ID, Status: model.StatusPending}
+			err = s.CreatePipeline(pipeline)
+
+			require.True(t, hook.released, "the first failed attempt must release the competing lock")
+			if phase == "commit" {
+				require.ErrorContains(t, hook.commitErr, "database is locked", "the lock must occur at COMMIT")
+			}
+			require.NoError(t, err, "pipeline creation must retry after a transient %s lock", phase)
+			require.Greater(t, hook.attempts, 1, "retry must start a fresh transaction")
+
+			count, err := s.GetPipelineCount()
+			require.NoError(t, err)
+			require.EqualValues(t, 1, count, "retry must create exactly one pipeline")
+			stored, err := s.GetPipeline(pipeline.ID)
+			require.NoError(t, err)
+			require.Equal(t, repo.ID, stored.RepoID)
+			require.EqualValues(t, 1, stored.Number)
+		})
+	}
 }

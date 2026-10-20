@@ -66,25 +66,29 @@ func TestGenCmdByShell(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, fmt.Sprintf(`@echo off
 
-%s decode-base64 KyBlY2hvIGhpCg==
+%s decode-base64 4pa2ICBlY2hvIGhpCg==
 echo hi
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 
-%s decode-base64 KyBjYWxsIGJ1aWxkLmJhdAo=
+%s decode-base64 4pa2ICBjYWxsIGJ1aWxkLmJhdAo=
 call build.bat
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 `, agentPath, agentPath), string(content))
 		})
 
 		t.Run("powershell", func(t *testing.T) {
-			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "echo test"}, t.TempDir())
+			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "Write-Output 'test'", "echo test"}, t.TempDir())
 			require.NoError(t, err)
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
-			assert.EqualValues(t, `$ErrorActionPreference = "Stop"; echo '+ Write-Host '"'"'test'"'"''
+			assert.EqualValues(t, `$ErrorActionPreference = "Stop"
+Write-Host '▶  Write-Host ''test'''
 Write-Host 'test'
-echo '+ echo test'
-echo test`, args[3])
+Write-Host '▶  Write-Output ''test'''
+Write-Output 'test'
+Write-Host '▶  echo test'
+echo test
+`, args[3])
 
 			args, err = e.genCmdByShell("pwsh", "pwsh", []string{"Get-Process"}, t.TempDir())
 			require.NoError(t, err)
@@ -140,11 +144,11 @@ echo test`, args[3])
 		require.NoError(t, err)
 		assert.EqualValues(t, fmt.Sprintf(`@echo off
 
-%s decode-base64 KyBlY2hvICd0ZXN0IHdpdGggfCBwaXBlJwo=
+%s decode-base64 4pa2ICBlY2hvICd0ZXN0IHdpdGggfCBwaXBlJwo=
 echo 'test with | pipe'
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 
-%s decode-base64 KyBlY2hvICd0ZXN0ICYgYW1wZXJzYW5kJwoKZWNobyBuZXcgbGluZQo=
+%s decode-base64 4pa2ICBlY2hvICd0ZXN0ICYgYW1wZXJzYW5kJwoKZWNobyBuZXcgbGluZQo=
 echo 'test & ampersand'
 
 echo new line

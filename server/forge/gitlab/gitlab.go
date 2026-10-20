@@ -25,10 +25,9 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
-	gitlab "gitlab.com/gitlab-org/api/client-go/v2"
+	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -161,10 +160,9 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -188,12 +186,10 @@ func (g *GitLab) Teams(ctx context.Context, user *model.User, p *model.ListOptio
 	perPage := min(p.PerPage, defaultPerPage)
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    int64(p.Page),
-			PerPage: int64(perPage),
-		},
-		AllAvailable:   gitlab.Ptr(false),
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		Page:           int64(p.Page),
+		PerPage:        int64(perPage),
+		AllAvailable:   new(false),
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -287,14 +283,12 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 	perPage := min(p.PerPage, defaultPerPage)
 
 	opts := &gitlab.ListProjectsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    int64(p.Page),
-			PerPage: int64(perPage),
-		},
-		MinAccessLevel: gitlab.Ptr(gitlab.DeveloperPermissions), // TODO: check what's best here
+		Page:           int64(p.Page),
+		PerPage:        int64(perPage),
+		MinAccessLevel: new(gitlab.DeveloperPermissions), // TODO: check what's best here
 	}
 	if g.hideArchives {
-		opts.Archived = gitlab.Ptr(false)
+		opts.Archived = new(false)
 	}
 	intUserID, err := strconv.Atoi(string(user.ForgeRemoteID))
 	if err != nil {
@@ -318,9 +312,20 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 			projectMember, resp, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
 			if err != nil {
 				if resp != nil && resp.StatusCode == http.StatusNotFound {
-					continue
+					// User is not directly listed as a member, but may have access
+					// via group inheritance (e.g. maintainer of a parent group).
+					// The projects list API may not return the effective permissions,
+					// so fetch the full project to get the embedded
+					// group_access/project_access. If this lookup fails we keep the
+					// list data (access level 0) rather than failing the whole page;
+					// such a repo will simply be filtered out later for lacking write access.
+					if projectDetails, _, getErr := client.Projects.GetProject(project.ID, nil, gitlab.WithContext(ctx)); getErr == nil {
+						project = projectDetails
+					}
+					// projectMember stays nil; permissions come from project.Permissions
+				} else {
+					return nil, err
 				}
-				return nil, err
 			}
 		}
 
@@ -349,8 +354,8 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	state := "opened"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
-		ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)},
-		State:       &state,
+		Page: int64(p.Page), PerPage: int64(p.PerPage),
+		State: &state,
 	})
 	if err != nil {
 		return nil, err
@@ -359,7 +364,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].IID))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -397,10 +402,10 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 	}
 
 	opts := &gitlab.ListTreeOptions{
-		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
-		Path:        &path,
-		Ref:         &pipeline.Commit,
-		Recursive:   gitlab.Ptr(false),
+		PerPage:   defaultPerPage,
+		Path:      &path,
+		Ref:       &pipeline.Commit,
+		Recursive: new(false),
 	}
 
 	for i := 1; true; i++ {
@@ -449,12 +454,25 @@ func (g *GitLab) Status(ctx context.Context, user *model.User, repo *model.Repo,
 
 	_, _, err = client.Commits.SetCommitStatus(_repo.ID, pipeline.Commit, &gitlab.SetCommitStatusOptions{
 		State:       getStatus(workflow.State),
-		Description: gitlab.Ptr(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   gitlab.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
-		Context:     gitlab.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		Description: new(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 	}, gitlab.WithContext(ctx))
+	if isRejectedStatusTransition(err) {
+		// GitLab refuses to move a pending/running status back to pending; this is
+		// harmless, the next update for this context still goes through.
+		log.Debug().Err(err).Msgf("gitlab rejected commit status transition for %s", repo.FullName)
+		return nil
+	}
 
 	return err
+}
+
+func isRejectedStatusTransition(err error) bool {
+	var errResp *gitlab.ErrorResponse
+	return errors.As(err, &errResp) &&
+		errResp.StatusCode == http.StatusBadRequest &&
+		strings.Contains(errResp.Message, "Cannot transition status")
 }
 
 // Netrc returns a netrc file capable of authenticating Gitlab requests and
@@ -515,13 +533,13 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
-		URL:                   gitlab.Ptr(webURL),
-		Token:                 gitlab.Ptr(token),
-		PushEvents:            gitlab.Ptr(true),
-		TagPushEvents:         gitlab.Ptr(true),
-		MergeRequestsEvents:   gitlab.Ptr(true),
-		DeploymentEvents:      gitlab.Ptr(true),
-		EnableSSLVerification: gitlab.Ptr(!g.skipVerify),
+		URL:                   new(webURL),
+		Token:                 new(token),
+		PushEvents:            new(true),
+		TagPushEvents:         new(true),
+		MergeRequestsEvents:   new(true),
+		DeploymentEvents:      new(true),
+		EnableSSLVerification: new(!g.skipVerify),
 	}, gitlab.WithContext(ctx))
 
 	return err
@@ -546,10 +564,8 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
-		ListOptions: gitlab.ListOptions{
-			PerPage: defaultPerPage,
-			Page:    1,
-		},
+		PerPage: defaultPerPage,
+		Page:    1,
 	}
 	for {
 		hooks, resp, err := client.Projects.ListProjectHooks(_repo.ID, listProjectHooksOptions, gitlab.WithContext(ctx))
@@ -592,7 +608,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	}
 
 	gitlabBranches, _, err := client.Branches.ListBranches(_repo.ID,
-		&gitlab.ListBranchesOptions{ListOptions: gitlab.ListOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)}},
+		&gitlab.ListBranchesOptions{Page: int64(p.Page), PerPage: int64(p.PerPage)},
 		gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -662,6 +678,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
+		// GitLab sends tag_push events for tag creation and deletion.
+		// A deletion is indicated by a zero after SHA and can never result
+		// in a valid pipeline, as the commit is gone.
+		if event.After == "0000000000000000000000000000000000000000" {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "tag deleted"}
+		}
 		repo, pipeline, cmID, err := convertTagHook(event)
 		if err != nil || pipeline.Message != "" {
 			return repo, pipeline, err
@@ -695,11 +717,9 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
-		Search: gitlab.Ptr(owner),
+		Page:    1,
+		PerPage: defaultPerPage,
+		Search:  new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
@@ -716,10 +736,8 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	}
 
 	opts := &gitlab.ListGroupMembersOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
+		Page:    1,
+		PerPage: defaultPerPage,
 	}
 
 	for i := 1; true; i++ {
@@ -749,11 +767,9 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	users, _, err := client.Users.ListUsers(&gitlab.ListUsersOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: 1,
-		},
-		Username: gitlab.Ptr(owner),
+		Page:     1,
+		PerPage:  1,
+		Username: new(owner),
 	})
 	if len(users) == 1 && err == nil {
 		return &model.Org{
@@ -764,11 +780,9 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
-		ListOptions: gitlab.ListOptions{
-			Page:    1,
-			PerPage: defaultPerPage,
-		},
-		Search: gitlab.Ptr(owner),
+		Page:    1,
+		PerPage: defaultPerPage,
+		Search:  new(owner),
 	}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err

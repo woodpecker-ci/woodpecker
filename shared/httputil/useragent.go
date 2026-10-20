@@ -35,15 +35,19 @@ func NewUserAgentRoundTripper(base http.RoundTripper, component string) *UserAge
 		base = http.DefaultTransport
 	}
 
+	return &UserAgentRoundTripper{
+		base:      base,
+		userAgent: UserAgent(component),
+	}
+}
+
+// UserAgent returns the Woodpecker User-Agent, with the component appended if given.
+func UserAgent(component string) string {
 	userAgent := fmt.Sprintf("Woodpecker/%s", version.String())
 	if component != "" {
 		userAgent = fmt.Sprintf("%s (%s)", userAgent, component)
 	}
-
-	return &UserAgentRoundTripper{
-		base:      base,
-		userAgent: userAgent,
-	}
+	return userAgent
 }
 
 // RoundTrip implements the http.RoundTripper interface.

@@ -27,6 +27,9 @@ import (
 func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
+		apiBase.GET("/version", api.Version)
+		apiBase.GET("/healthz", api.Health)
+
 		user := apiBase.Group("/user")
 		{
 			user.Use(session.MustUser())

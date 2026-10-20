@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"codeberg.org/6543/xyaml/v2"
-	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/multierr"
@@ -43,6 +42,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	pipeline_runtime "go.woodpecker-ci.org/woodpecker/v3/pipeline/runtime"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/shared"
 	pipeline_utils "go.woodpecker-ci.org/woodpecker/v3/pipeline/utils"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -169,9 +169,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 
-	// prefix for the local-execution workspace volume name
-	prefix := "wp_" + ulid.Make().String()
-
 	// build compiler options — mirrors server behavior
 	compilerOpts := []compiler.Option{
 		compiler.WithEscalated(privilegedPlugins...),
@@ -203,7 +200,6 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		)
 		volumes = append(
 			volumes,
-			prefix+"_default:"+c.String("workspace-base"),
 			repoPath+":"+c.String("workspace-base")+"/"+c.String("workspace-path"),
 		)
 	} else {
@@ -285,7 +281,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 		runtime := pipeline_runtime.New(
 			item.Config, backendEngine,
 			pipeline_runtime.WithContext(pipelineCtx), //nolint:contextcheck
-			pipeline_runtime.WithLogger(defaultLogger),
+			pipeline_runtime.WithLogger(newLogger(item.Config)),
 			pipeline_runtime.WithDescription(map[string]string{
 				"CLI": "exec",
 			}),
@@ -325,7 +321,16 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
-	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
-})
+// newLogger builds a logger that masks the pipeline's secret values in the
+// streamed step output by wrapping the line writer in a shared secrets writer.
+func newLogger(config *backend_types.Config) logging.Logger {
+	var secrets []string
+	for _, s := range config.Secrets {
+		secrets = append(secrets, s.Value)
+	}
+	return func(step *backend_types.Step, rc io.ReadCloser) error {
+		logWriter := NewLineWriter(step.Name, step.UUID)
+		masked := shared.NewSecretsReplaceWriter(logWriter, secrets)
+		return pipeline_utils.CopyLineByLine(masked, rc, pipeline.MaxLogLineLength)
+	}
+}

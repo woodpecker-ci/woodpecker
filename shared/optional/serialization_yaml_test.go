@@ -19,9 +19,9 @@ type testBoolStruct struct {
 	OptBoolOmitEmpty1 optional.Option[bool] `json:"opt_bool_omit_empty_1,omitempty" yaml:"opt_bool_omit_empty_1,omitempty"`
 	OptBoolOmitEmpty2 optional.Option[bool] `json:"opt_bool_omit_empty_2,omitempty" yaml:"opt_bool_omit_empty_2,omitempty"`
 	OptBoolOmitEmpty3 optional.Option[bool] `json:"opt_bool_omit_empty_3,omitempty" yaml:"opt_bool_omit_empty_3,omitempty"`
-	OptBool4          optional.Option[bool] `json:"opt_bool_4" yaml:"opt_bool_4"`
-	OptBool5          optional.Option[bool] `json:"opt_bool_5" yaml:"opt_bool_5"`
-	OptBool6          optional.Option[bool] `json:"opt_bool_6" yaml:"opt_bool_6"`
+	OptBool4          optional.Option[bool] `json:"opt_bool_4"                      yaml:"opt_bool_4"`
+	OptBool5          optional.Option[bool] `json:"opt_bool_5"                      yaml:"opt_bool_5"`
+	OptBool6          optional.Option[bool] `json:"opt_bool_6"                      yaml:"opt_bool_6"`
 }
 
 func TestOptionalBoolYaml(t *testing.T) {
@@ -89,11 +89,11 @@ optional_two_string: null
 `,
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			b, err := yaml.Marshal(tc.obj)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b, err := yaml.Marshal(tt.obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, string(b), "yaml module returned unexpected")
+			assert.EqualValues(t, tt.want, string(b), "yaml module returned unexpected")
 		})
 	}
 }
@@ -137,12 +137,12 @@ optional_twostring: null
 			},
 		},
 	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			var obj testSerializationStruct
-			err := yaml.Unmarshal([]byte(tc.data), &obj)
+			err := yaml.Unmarshal([]byte(tt.data), &obj)
 			assert.NoError(t, err)
-			assert.EqualValues(t, tc.want, obj, "yaml module returned unexpected")
+			assert.EqualValues(t, tt.want, obj, "yaml module returned unexpected")
 		})
 	}
 }

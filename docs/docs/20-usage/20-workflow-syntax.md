@@ -645,7 +645,7 @@ Workflow labels with an empty value are ignored.
 By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
 
 :::warning
-Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and can not be set as part of the pipeline definition.
+Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and cannot be set as part of the pipeline definition.
 :::
 
 You can add additional labels as a key value map:

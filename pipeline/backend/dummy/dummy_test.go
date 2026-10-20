@@ -163,6 +163,66 @@ echo nein
 
 		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
+
+	t.Run("step wait fail", func(t *testing.T) {
+		step := &types.Step{
+			Name:        "dummy",
+			UUID:        "SID_2",
+			Environment: map[string]string{dummy.EnvKeyStepWaitFail: "true"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		assert.EqualError(t, err, "expected fail to wait for step")
+		assert.Nil(t, state)
+
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
+
+	t.Run("step state error", func(t *testing.T) {
+		step := &types.Step{
+			Name:        "dummy",
+			UUID:        "SID_2",
+			Environment: map[string]string{dummy.EnvKeyStepStateError: "true"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		assert.NoError(t, err)
+		require.NotNil(t, state)
+		assert.True(t, state.Exited)
+		assert.EqualValues(t, 0, state.ExitCode)
+		assert.EqualError(t, state.Error, "expected step state error")
+
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
+
+	t.Run("step destroy fail", func(t *testing.T) {
+		step := &types.Step{
+			Name:        "dummy",
+			UUID:        "SID_2",
+			Environment: map[string]string{dummy.EnvKeyStepDestroyFail: "true"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		assert.NoError(t, err)
+		assert.NoError(t, state.Error)
+
+		assert.EqualError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID), "expected fail to destroy step")
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
 }
 
 func TestWaitStepCanceledBySleep(t *testing.T) {

@@ -15,7 +15,6 @@
 package main
 
 import (
-	"context"
 	"os"
 	"os/exec"
 	"testing"
@@ -37,7 +36,7 @@ func TestNewAppHasDecodeBase64Command(t *testing.T) {
 
 func TestNewAppRunsDecodeBase64WithoutConfig(t *testing.T) {
 	if os.Getenv("WOODPECKER_DECODE_BASE64_HELPER") == "1" {
-		err := newApp().Run(context.Background(), []string{"woodpecker-cli", "decode-base64", "KyBlY2hvIGhpCg=="})
+		err := newApp().Run(t.Context(), []string{"woodpecker-cli", "decode-base64", "KyBlY2hvIGhpCg=="})
 		if err != nil {
 			os.Exit(1)
 		}

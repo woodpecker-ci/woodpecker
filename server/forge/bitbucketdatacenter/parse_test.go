@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_parseHook(t *testing.T) {
+func TestParseHook(t *testing.T) {
 	t.Run("pull-request opened", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPull)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
