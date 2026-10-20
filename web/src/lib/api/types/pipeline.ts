@@ -23,6 +23,9 @@ export interface Pipeline {
 
   parent: number;
 
+  // Set if the pipeline only reruns the failed workflows of its parent.
+  partial_restart?: boolean;
+
   event: WebhookEvents;
 
   event_reason: string[];

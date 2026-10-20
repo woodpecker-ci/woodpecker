@@ -155,6 +155,11 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
+  async restartFailedWorkflows(repoId: number, pipeline: string, opts?: { fork?: boolean }): Promise<Pipeline> {
+    const query = encodeQueryString(opts);
+    return this._post(`/api/repos/${repoId}/pipelines/${pipeline}/restart-failed?${query}`) as Promise<Pipeline>;
+  }
+
   async getLogs(repoId: number, pipeline: number, step: number): Promise<PipelineLog[]> {
     return this._get(`/api/repos/${repoId}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }

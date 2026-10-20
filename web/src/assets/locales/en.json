@@ -237,6 +237,8 @@
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
+        "restart_failed": "Restart failed",
+        "restart_failed_desc": "Restart only the failed workflows and the workflows depending on them",
         "canceled": "This step has been canceled.",
         "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",
@@ -290,6 +292,10 @@
       "runtime_errors": "Runtime errors",
       "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
+      "restart_of": "Restart of #{pipelineId}",
+      "restart_failed_of": "Restart of the failed workflows of #{pipelineId}",
+      "reused_workflows": "Passed in #{pipelineId}",
+      "reused_workflows_desc": "These workflows were not rerun, they passed in pipeline #{pipelineId}",
       "version": "The Woodpecker version this pipeline was executed on.",
       "version_header": "Woodpecker version",
       "cancel_info": {
