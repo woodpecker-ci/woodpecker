@@ -15,7 +15,10 @@
 package matrix
 
 import (
+	"errors"
 	"fmt"
 )
 
-var ErrorMaxAxesReached = fmt.Errorf("your matrix config produced more than %d workflows", maxAxes)
+var ErrorMaxAxesReached = fmt.Errorf("matrix config produced more than %d workflows", maxAxes)
+
+var ErrorMaxAxisVariablesReached = fmt.Errorf("matrix config has more than %d in an axis", limitVariables)

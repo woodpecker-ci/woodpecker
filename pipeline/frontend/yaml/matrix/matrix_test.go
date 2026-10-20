@@ -16,6 +16,7 @@ package matrix
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -123,6 +124,21 @@ func TestMatrixMaxAxes(t *testing.T) {
 			matrix: "matrix:\n  A: [1, 2, 3]\n  B: [1, 2, 3]\n  C: [1, 2, 3]\n  D: [1, 2, 3]",
 			err:    ErrorMaxAxesReached,
 		},
+		{
+			name:   "include below limit",
+			matrix: includeMatrixHelper(5),
+			axes:   5,
+		},
+		{
+			name:   "include at limit",
+			matrix: includeMatrixHelper(64),
+			axes:   64,
+		},
+		{
+			name:   "include above limit",
+			matrix: includeMatrixHelper(65),
+			err:    ErrorMaxAxesReached,
+		},
 	}
 
 	for _, tt := range tests {
@@ -146,4 +162,13 @@ func TestMatrixMaxAxes(t *testing.T) {
 			assert.Len(t, distinct, tt.axes)
 		})
 	}
+}
+
+func includeMatrixHelper(entries int) string {
+	var b strings.Builder
+	b.WriteString("matrix:\n  include:\n")
+	for i := range entries {
+		fmt.Fprintf(&b, "    - A: %d\n", i)
+	}
+	return b.String()
 }

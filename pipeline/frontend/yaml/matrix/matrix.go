@@ -73,8 +73,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 	var axisCount int
 	var names []string
 	for name, values := range matrix {
-		// a variable without values contributes no permutations and would
-		// cause a division by zero below
+		// an axis without values contributes no permutations
 		if len(values) == 0 {
 			continue
 		}
@@ -104,8 +103,8 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 			axis[name] = values[valueIndex]
 
 			// enforce a maximum number of variables in the pipeline matrix.
-			if variableIndex > limitVariables {
-				break
+			if variableIndex >= limitVariables {
+				return nil, ErrorMaxAxisVariablesReached
 			}
 		}
 
@@ -142,5 +141,16 @@ func parseInclude(data []byte) ([]Axis, error) {
 	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
+
+	if len(config.Matrix.Include) > maxAxes {
+		return nil, ErrorMaxAxesReached
+	}
+
+	for _, values := range config.Matrix.Include {
+		if len(values) > limitVariables {
+			return nil, ErrorMaxAxisVariablesReached
+		}
+	}
+
 	return config.Matrix.Include, nil
 }
