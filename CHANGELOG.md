@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-19
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -27,6 +27,7 @@
 
 ### 🐛 Bug Fixes
 
+- Make agent respect keepalive time and timeout flags [[#7351](https://github.com/woodpecker-ci/woodpecker/pull/7351)]
 - Forward OOM error correctly [[#7313](https://github.com/woodpecker-ci/woodpecker/pull/7313)]
 - Enable crons created without `enabled` field [[#7339](https://github.com/woodpecker-ci/woodpecker/pull/7339)]
 - Fix file based logstore related bugs [[#7323](https://github.com/woodpecker-ci/woodpecker/pull/7323)]
@@ -51,6 +52,7 @@
 
 ### 📚 Documentation
 
+- Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
 - Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
 - Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
 - Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
@@ -81,7 +83,6 @@
 
 ### Misc
 
-- Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
 - Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
 
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
