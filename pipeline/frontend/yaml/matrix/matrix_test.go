@@ -15,6 +15,7 @@
 package matrix
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,5 +93,57 @@ func TestMatrixDeterministicOrder(t *testing.T) {
 		again, err := ParseString(fakeMatrix)
 		assert.NoError(t, err)
 		assert.EqualValues(t, first, again)
+	}
+}
+
+func TestMatrixMaxAxes(t *testing.T) {
+	tests := []struct {
+		name   string
+		matrix string
+		axes   int
+		err    error
+	}{
+		{
+			name:   "below limit",
+			matrix: "matrix:\n  A: [1, 2, 3, 4]\n  B: [1, 2, 3, 4]\n  C: [1, 2, 3]",
+			axes:   48,
+		},
+		{
+			name:   "at limit",
+			matrix: "matrix:\n  A: [1, 2]\n  B: [1, 2]\n  C: [1, 2]\n  D: [1, 2]\n  E: [1, 2]\n  F: [1, 2]",
+			axes:   64,
+		},
+		{
+			name:   "one above limit",
+			matrix: "matrix:\n  A: [1, 2, 3, 4, 5]\n  B: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]",
+			err:    ErrorMaxAxesReached,
+		},
+		{
+			name:   "above limit",
+			matrix: "matrix:\n  A: [1, 2, 3]\n  B: [1, 2, 3]\n  C: [1, 2, 3]\n  D: [1, 2, 3]",
+			err:    ErrorMaxAxesReached,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			axes, err := ParseString(tt.matrix)
+
+			assert.Len(t, axes, tt.axes)
+
+			if tt.err != nil {
+				assert.ErrorIs(t, err, tt.err)
+				return
+			}
+
+			assert.NoError(t, err)
+
+			// every generated workflow gets its own combination
+			distinct := map[string]bool{}
+			for _, axis := range axes {
+				distinct[fmt.Sprint(map[string]string(axis))] = true
+			}
+			assert.Len(t, distinct, tt.axes)
+		})
 	}
 }

@@ -4,7 +4,7 @@ Woodpecker has integrated support for matrix workflows. Woodpecker executes a se
 
 :::warning
 Woodpecker generates at most **64 workflows** per matrix.
-If your matrix has more combinations, you will get an error.
+A matrix with more combinations is rejected with an error.
 :::
 
 Example matrix definition:
