@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Switch to the woodpecker-ci envsubst fork [[#7349](https://github.com/woodpecker-ci/woodpecker/pull/7349)]
 - StepFinished of log store return error now [[#7346](https://github.com/woodpecker-ci/woodpecker/pull/7346)]
 - Speed up queue scheduling calculations [[#7303](https://github.com/woodpecker-ci/woodpecker/pull/7303)]
 - Allow selecting the forge when creating a user [[#7314](https://github.com/woodpecker-ci/woodpecker/pull/7314)]
