@@ -109,7 +109,7 @@ func TestQueuePipelineOrgAgentsOnly(t *testing.T) {
 	newItem := func() *builder.Item {
 		return &builder.Item{
 			Workflow: &builder.Workflow{ID: 1, Name: "build"},
-			Labels:   map[string]string{pipeline.LabelOrgAgentsOnly: "true"},
+			Labels:   map[string]string{"platform": "linux"},
 		}
 	}
 

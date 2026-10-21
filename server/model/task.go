@@ -68,14 +68,13 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 
 // ApplyLabelsFromOrg marks the task to only run on agents of the organization if it requires that.
 func (t *Task) ApplyLabelsFromOrg(o *Org) {
+	if o == nil || !o.RequireOrgAgents {
+		return
+	}
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)
 	}
-	if o != nil && o.RequireOrgAgents {
-		t.Labels[pipeline.LabelOrgAgentsOnly] = "true"
-	} else {
-		delete(t.Labels, pipeline.LabelOrgAgentsOnly)
-	}
+	t.Labels[pipeline.LabelOrgAgentsOnly] = "true"
 }
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies.

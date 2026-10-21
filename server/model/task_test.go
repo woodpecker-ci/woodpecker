@@ -99,8 +99,7 @@ func TestTask_ApplyLabelsFromOrg(t *testing.T) {
 	t.Run("Org agents not required", func(t *testing.T) {
 		task := &Task{
 			Labels: map[string]string{
-				"existing":                  "label",
-				pipeline.LabelOrgAgentsOnly: "true",
+				"existing": "label",
 			},
 		}
 		task.ApplyLabelsFromOrg(&Org{ID: 456})
