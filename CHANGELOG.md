@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @sugar700, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -34,6 +34,7 @@
 
 ### 🐛 Bug Fixes
 
+- For kubernetes do not report unknown deleted pods as successful [[#7357](https://github.com/woodpecker-ci/woodpecker/pull/7357)]
 - Make agent respect keepalive time and timeout flags [[#7351](https://github.com/woodpecker-ci/woodpecker/pull/7351)]
 - Forward OOM error correctly [[#7313](https://github.com/woodpecker-ci/woodpecker/pull/7313)]
 - Enable crons created without `enabled` field [[#7339](https://github.com/woodpecker-ci/woodpecker/pull/7339)]
