@@ -115,7 +115,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 			FullName:      owner + "/" + name,
 			OrgID:         oldOrg.ID,
 			UserID:        user.ID,
-			Hash:          "hash-" + name,
+			WebhookSecret: "hash-" + name,
 			IsActive:      true,
 		}
 		require.NoError(t, s.CreateRepo(repo))
@@ -206,7 +206,7 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 			Name:          name,
 			FullName:      "acme/" + name,
 			UserID:        user.ID,
-			Hash:          "hash-" + name,
+			WebhookSecret: "hash-" + name,
 			IsActive:      true,
 		}
 		require.NoError(t, s.CreateRepo(repo))
@@ -298,7 +298,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			require.NoError(t, s.CreateUser(user))
 			repo := &model.Repo{
 				Owner: "owner", Name: "repo", FullName: "owner/repo", ForgeID: user.ForgeID,
-				ForgeRemoteID: "123", Hash: "old-secret", UserID: user.ID, IsActive: true,
+				ForgeRemoteID: "123", WebhookSecret: "old-secret", UserID: user.ID, IsActive: true,
 			}
 			require.NoError(t, s.CreateRepo(repo))
 			from := &model.Repo{
@@ -321,20 +321,20 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 					RunAndReturn(func(_ context.Context, _ *model.User, repairing *model.Repo, _ string) error {
 						stored, err := s.GetRepo(repairing.ID)
 						require.NoError(t, err)
-						assert.NotEqual(t, oldSecret, stored.Hash, "persist the new secret before replacing the webhook")
-						assert.Equal(t, repairing.Hash, stored.Hash)
+						assert.NotEqual(t, oldSecret, stored.WebhookSecret, "persist the new secret before replacing the webhook")
+						assert.Equal(t, repairing.WebhookSecret, stored.WebhookSecret)
 						return test.deactivateErr
 					})
 				driver.EXPECT().Activate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 					RunAndReturn(func(_ context.Context, _ *model.User, activated *model.Repo, hookURL string) error {
 						stored, err := s.GetRepo(activated.ID)
 						require.NoError(t, err)
-						assert.Equal(t, stored.Hash, activated.Hash)
+						assert.Equal(t, stored.WebhookSecret, activated.WebhookSecret)
 						uri, err := url.Parse(hookURL)
 						require.NoError(t, err)
 						signed := uri.Query().Get("access_token")
 						parsed, err := token.Parse([]token.Type{token.HookToken}, signed, func(*token.Token) (string, error) {
-							return stored.Hash, nil
+							return stored.WebhookSecret, nil
 						})
 						require.NoError(t, err)
 						assert.Equal(t, string(from.ForgeRemoteID), parsed.Get("repo-forge-remote-id"))
@@ -351,7 +351,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			for range 2 {
 				stored, err := s.GetRepo(repo.ID)
 				require.NoError(t, err)
-				oldSecret = stored.Hash
+				oldSecret = stored.WebhookSecret
 				oldToken := token.New(token.HookToken)
 				oldToken.Set("repo-forge-remote-id", string(stored.ForgeRemoteID))
 				oldToken.Set("forge-id", strconv.FormatInt(stored.ForgeID, 10))
@@ -374,13 +374,13 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 				stored, err = s.GetRepo(repo.ID)
 				require.NoError(t, err)
 				_, err = token.Parse([]token.Type{token.HookToken}, oldSigned, func(*token.Token) (string, error) {
-					return stored.Hash, nil
+					return stored.WebhookSecret, nil
 				})
 				if test.lookupErr != nil {
-					assert.Equal(t, oldSecret, stored.Hash)
+					assert.Equal(t, oldSecret, stored.WebhookSecret)
 					assert.NoError(t, err, "failed preflight must leave the existing webhook usable")
 				} else {
-					assert.NotEqual(t, oldSecret, stored.Hash)
+					assert.NotEqual(t, oldSecret, stored.WebhookSecret)
 					assert.Error(t, err, "old URLs must remain revoked even when activation fails")
 				}
 			}
