@@ -40,7 +40,7 @@ func pipelineQueue(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	pipelines, err := client.PipelineQueue()
+	pipelines, err := client.PipelineQueue(ctx)
 	if err != nil {
 		return err
 	}

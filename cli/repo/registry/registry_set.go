@@ -75,11 +75,11 @@ func registryUpdate(ctx context.Context, c *cli.Command) error {
 		registry.Password = string(out)
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.RegistryUpdate(repoID, registry)
+	_, err = client.RegistryUpdate(ctx, repoID, registry)
 	return err
 }

@@ -66,7 +66,7 @@ func TestClient_UserList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			users, err := client.UserList(UserListOptions{})
+			users, err := client.UserList(t.Context(), UserListOptions{})
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -124,7 +124,7 @@ func TestClient_UserPost(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			user, err := client.UserPost(tt.input)
+			user, err := client.UserPost(t.Context(), tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -206,7 +206,7 @@ func TestClient_UserPatch(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			user, err := client.UserPatch(tt.input)
+			user, err := client.UserPatch(t.Context(), tt.input)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -269,7 +269,7 @@ func TestClient_UserDel(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			err := client.UserDel(tt.login)
+			err := client.UserDel(t.Context(), tt.login)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -339,7 +339,7 @@ func TestClient_RepoList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			repos, err := client.RepoList(tt.opt)
+			repos, err := client.RepoList(t.Context(), tt.opt)
 
 			if tt.wantErr {
 				assert.Error(t, err)

@@ -15,6 +15,8 @@
 package secret
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
@@ -34,11 +36,11 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(client woodpecker.Client, c *cli.Command) (repoID int64, err error) {
+func parseTargetArgs(ctx context.Context, client woodpecker.Client, c *cli.Command) (repoID int64, err error) {
 	repoIDOrFullName := c.String("repository")
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
 
-	return internal.ParseRepo(client, repoIDOrFullName)
+	return internal.ParseRepo(ctx, client, repoIDOrFullName)
 }

@@ -51,11 +51,11 @@ func cronDelete(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
-	err = client.CronDelete(repoID, cronID)
+	err = client.CronDelete(ctx, repoID, cronID)
 	if err != nil {
 		return err
 	}

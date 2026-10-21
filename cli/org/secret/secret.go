@@ -15,6 +15,7 @@
 package secret
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/urfave/cli/v3"
@@ -35,7 +36,7 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(client woodpecker.Client, c *cli.Command) (orgID int64, err error) {
+func parseTargetArgs(ctx context.Context, client woodpecker.Client, c *cli.Command) (orgID int64, err error) {
 	orgIDOrName := c.String("organization")
 	if orgIDOrName == "" {
 		orgIDOrName = c.Args().First()
@@ -51,7 +52,7 @@ func parseTargetArgs(client woodpecker.Client, c *cli.Command) (orgID int64, err
 		return orgID, nil
 	}
 
-	org, err := client.OrgLookup(orgIDOrName)
+	org, err := client.OrgLookup(ctx, orgIDOrName)
 	if err != nil {
 		return -1, err
 	}

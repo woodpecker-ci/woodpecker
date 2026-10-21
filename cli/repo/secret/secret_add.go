@@ -82,12 +82,12 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.SecretCreate(repoID, secret)
+	_, err = client.SecretCreate(ctx, repoID, secret)
 	return err
 }
 

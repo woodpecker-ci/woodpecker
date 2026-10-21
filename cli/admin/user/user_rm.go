@@ -38,7 +38,7 @@ func userRemove(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	if err := client.UserDel(login); err != nil {
+	if err := client.UserDel(ctx, login); err != nil {
 		return err
 	}
 	fmt.Printf("Successfully removed user %s\n", login)

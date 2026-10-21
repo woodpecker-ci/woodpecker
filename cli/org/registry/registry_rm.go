@@ -46,10 +46,10 @@ func registryDelete(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	orgID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	return client.OrgRegistryDelete(orgID, hostname)
+	return client.OrgRegistryDelete(ctx, orgID, hostname)
 }

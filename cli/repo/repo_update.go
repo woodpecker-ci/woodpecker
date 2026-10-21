@@ -85,7 +85,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		patch.PipelineCounter = &pipelineCounter
 	}
 
-	repo, err := client.RepoPatch(repoID, patch)
+	repo, err := client.RepoPatch(ctx, repoID, patch)
 	if err != nil {
 		return err
 	}

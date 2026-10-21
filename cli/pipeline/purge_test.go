@@ -85,9 +85,9 @@ func TestPipelinePurge(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewMockClient(t)
-			mockClient.On("RepoLookup", mock.Anything).Maybe().Return(&woodpecker.Repo{ID: tt.repoID}, nil)
+			mockClient.On("RepoLookup", mock.Anything, mock.Anything).Maybe().Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
-			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+			mockClient.On("PipelineList", mock.Anything, mock.Anything, mock.Anything).Return(func(_ context.Context, _ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
 				// Return keep pipelines for first call
 				if opt.Before.IsZero() {
 					if opt.Page == 1 {
@@ -108,15 +108,15 @@ func TestPipelinePurge(t *testing.T) {
 			}).Maybe()
 
 			if tt.mockDeleteError != nil {
-				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(tt.mockDeleteError)
+				mockClient.On("PipelineDelete", mock.Anything, tt.repoID, mock.Anything).Return(tt.mockDeleteError)
 			} else if tt.wantDelete > 0 {
-				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
+				mockClient.On("PipelineDelete", mock.Anything, tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
 			}
 
 			command := pipelinePurgeCmd
 			command.Writer = io.Discard
-			command.Action = func(_ context.Context, c *cli.Command) error {
-				err := pipelinePurge(c, mockClient, time.Unix(1, 1))
+			command.Action = func(ctx context.Context, c *cli.Command) error {
+				err := pipelinePurge(ctx, c, mockClient, time.Unix(1, 1))
 
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())

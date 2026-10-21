@@ -40,7 +40,7 @@ func logPurge(ctx context.Context, c *cli.Command) (err error) {
 	if len(repoIDOrFullName) == 0 {
 		return fmt.Errorf("missing required argument repo-id / repo-full-name")
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
@@ -57,7 +57,7 @@ func logPurge(ctx context.Context, c *cli.Command) (err error) {
 	stepArg := c.Args().Get(2) //nolint:mnd
 	var stepID int64
 	if len(stepArg) != 0 {
-		stepID, err = internal.ParseStep(client, repoID, number, stepArg)
+		stepID, err = internal.ParseStep(ctx, client, repoID, number, stepArg)
 		if err != nil {
 			return err
 		}
@@ -65,10 +65,10 @@ func logPurge(ctx context.Context, c *cli.Command) (err error) {
 
 	if stepID > 0 {
 		fmt.Printf("Purging logs for pipeline %s#%d step %d\n", repoIDOrFullName, number, stepID)
-		err = client.StepLogsPurge(repoID, number, stepID)
+		err = client.StepLogsPurge(ctx, repoID, number, stepID)
 	} else {
 		fmt.Printf("Purging logs for pipeline %s#%d\n", repoIDOrFullName, number)
-		err = client.LogsPurge(repoID, number)
+		err = client.LogsPurge(ctx, repoID, number)
 	}
 	if err != nil {
 		return err

@@ -56,12 +56,12 @@ func secretShow(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	secret, err := client.Secret(repoID, secretName)
+	secret, err := client.Secret(ctx, repoID, secretName)
 	if err != nil {
 		return err
 	}

@@ -37,7 +37,7 @@ func pipelineApprove(ctx context.Context, c *cli.Command) (err error) {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func pipelineApprove(ctx context.Context, c *cli.Command) (err error) {
 		return err
 	}
 
-	_, err = client.PipelineApprove(repoID, number)
+	_, err = client.PipelineApprove(ctx, repoID, number)
 	if err != nil {
 		return err
 	}

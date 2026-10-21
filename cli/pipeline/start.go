@@ -49,7 +49,7 @@ func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
+		pipeline, err := client.PipelineLast(ctx, repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 		Params: internal.ParseKeyPair(c.StringSlice("param")),
 	}
 
-	pipeline, err := client.PipelineStart(repoID, number, opt)
+	pipeline, err := client.PipelineStart(ctx, repoID, number, opt)
 	if err != nil {
 		return err
 	}

@@ -74,7 +74,7 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 		Schedule: schedule,
 		Enabled:  enabled,
 	}
-	cron, err = client.CronCreate(repoID, cron)
+	cron, err = client.CronCreate(ctx, repoID, cron)
 	if err != nil {
 		return err
 	}

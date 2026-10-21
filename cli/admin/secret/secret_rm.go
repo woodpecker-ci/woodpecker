@@ -42,5 +42,5 @@ func secretDelete(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	return client.GlobalSecretDelete(secretName)
+	return client.GlobalSecretDelete(ctx, secretName)
 }

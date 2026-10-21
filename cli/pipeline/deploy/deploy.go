@@ -68,7 +68,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	}
 
 	repo := c.Args().First()
-	repoID, err := internal.ParseRepo(client, repo)
+	repoID, err := internal.ParseRepo(ctx, client, repo)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	status := c.String("status")
 
 	if branch == "" {
-		repo, err := client.Repo(repoID)
+		repo, err := client.Repo(ctx, repoID)
 		if err != nil {
 			return err
 		}
@@ -90,7 +90,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, err := client.PipelineList(repoID, woodpecker.PipelineListOptions{})
+		pipelines, err := client.PipelineList(ctx, repoID, woodpecker.PipelineListOptions{})
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 		Params:   internal.ParseKeyPair(c.StringSlice("param")),
 	}
 
-	deploy, err := client.Deploy(repoID, number, opt)
+	deploy, err := client.Deploy(ctx, repoID, number, opt)
 	if err != nil {
 		return err
 	}

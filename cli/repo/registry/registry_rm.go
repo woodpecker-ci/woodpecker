@@ -46,10 +46,10 @@ func registryDelete(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	return client.RegistryDelete(repoID, hostname)
+	return client.RegistryDelete(ctx, repoID, hostname)
 }

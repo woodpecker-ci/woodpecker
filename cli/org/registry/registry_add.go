@@ -74,11 +74,11 @@ func registryCreate(ctx context.Context, c *cli.Command) error {
 		registry.Password = string(out)
 	}
 
-	orgID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(ctx, client, c)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.OrgRegistryCreate(orgID, registry)
+	_, err = client.OrgRegistryCreate(ctx, orgID, registry)
 	return err
 }

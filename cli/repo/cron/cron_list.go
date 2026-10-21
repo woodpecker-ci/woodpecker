@@ -49,12 +49,12 @@ func cronList(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	repoID, err := internal.ParseRepo(ctx, client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 	opt := woodpecker.CronListOptions{}
-	list, err := client.CronList(repoID, opt)
+	list, err := client.CronList(ctx, repoID, opt)
 	if err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@
 package woodpecker
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 )
@@ -25,40 +26,40 @@ const (
 )
 
 // GlobalSecret returns an global secret by name.
-func (c *client) GlobalSecret(secret string) (*Secret, error) {
+func (c *client) GlobalSecret(ctx context.Context, secret string) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
-	err := c.get(uri, out)
+	err := c.get(ctx, uri, out)
 	return out, err
 }
 
 // GlobalSecretList returns a list of all global secrets.
-func (c *client) GlobalSecretList(opt SecretListOptions) ([]*Secret, error) {
+func (c *client) GlobalSecretList(ctx context.Context, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
 	uri, _ := url.Parse(fmt.Sprintf(pathGlobalSecrets, c.addr))
 	uri.RawQuery = opt.getURLQuery().Encode()
-	err := c.get(uri.String(), &out)
+	err := c.get(ctx, uri.String(), &out)
 	return out, err
 }
 
 // GlobalSecretCreate creates a global secret.
-func (c *client) GlobalSecretCreate(in *Secret) (*Secret, error) {
+func (c *client) GlobalSecretCreate(ctx context.Context, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
-	err := c.post(uri, in, out)
+	err := c.post(ctx, uri, in, out)
 	return out, err
 }
 
 // GlobalSecretUpdate updates a global secret.
-func (c *client) GlobalSecretUpdate(in *Secret) (*Secret, error) {
+func (c *client) GlobalSecretUpdate(ctx context.Context, in *Secret) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathGlobalSecret, c.addr, in.Name)
-	err := c.patch(uri, in, out)
+	err := c.patch(ctx, uri, in, out)
 	return out, err
 }
 
 // GlobalSecretDelete deletes a global secret.
-func (c *client) GlobalSecretDelete(secret string) error {
+func (c *client) GlobalSecretDelete(ctx context.Context, secret string) error {
 	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
-	return c.delete(uri)
+	return c.delete(ctx, uri)
 }

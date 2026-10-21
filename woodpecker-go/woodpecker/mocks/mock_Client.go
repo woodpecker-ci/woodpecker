@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	"context"
 	"net/http"
 
 	mock "github.com/stretchr/testify/mock"
@@ -48,8 +49,8 @@ func (_m *MockClient) EXPECT() *MockClient_Expecter {
 }
 
 // Agent provides a mock function for the type MockClient
-func (_mock *MockClient) Agent(n int64) (*woodpecker.Agent, error) {
-	ret := _mock.Called(n)
+func (_mock *MockClient) Agent(ctx context.Context, agentID int64) (*woodpecker.Agent, error) {
+	ret := _mock.Called(ctx, agentID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Agent")
@@ -57,18 +58,18 @@ func (_mock *MockClient) Agent(n int64) (*woodpecker.Agent, error) {
 
 	var r0 *woodpecker.Agent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*woodpecker.Agent, error)); ok {
-		return returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*woodpecker.Agent, error)); ok {
+		return returnFunc(ctx, agentID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *woodpecker.Agent); ok {
-		r0 = returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *woodpecker.Agent); ok {
+		r0 = returnFunc(ctx, agentID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Agent)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(n)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, agentID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -81,19 +82,25 @@ type MockClient_Agent_Call struct {
 }
 
 // Agent is a helper method to define mock.On call
-//   - n int64
-func (_e *MockClient_Expecter) Agent(n any) *MockClient_Agent_Call {
-	return &MockClient_Agent_Call{Call: _e.mock.On("Agent", n)}
+//   - ctx context.Context
+//   - agentID int64
+func (_e *MockClient_Expecter) Agent(ctx any, agentID any) *MockClient_Agent_Call {
+	return &MockClient_Agent_Call{Call: _e.mock.On("Agent", ctx, agentID)}
 }
 
-func (_c *MockClient_Agent_Call) Run(run func(n int64)) *MockClient_Agent_Call {
+func (_c *MockClient_Agent_Call) Run(run func(ctx context.Context, agentID int64)) *MockClient_Agent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -104,14 +111,14 @@ func (_c *MockClient_Agent_Call) Return(agent *woodpecker.Agent, err error) *Moc
 	return _c
 }
 
-func (_c *MockClient_Agent_Call) RunAndReturn(run func(n int64) (*woodpecker.Agent, error)) *MockClient_Agent_Call {
+func (_c *MockClient_Agent_Call) RunAndReturn(run func(ctx context.Context, agentID int64) (*woodpecker.Agent, error)) *MockClient_Agent_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AgentCreate provides a mock function for the type MockClient
-func (_mock *MockClient) AgentCreate(agent *woodpecker.Agent) (*woodpecker.Agent, error) {
-	ret := _mock.Called(agent)
+func (_mock *MockClient) AgentCreate(ctx context.Context, agent *woodpecker.Agent) (*woodpecker.Agent, error) {
+	ret := _mock.Called(ctx, agent)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentCreate")
@@ -119,18 +126,18 @@ func (_mock *MockClient) AgentCreate(agent *woodpecker.Agent) (*woodpecker.Agent
 
 	var r0 *woodpecker.Agent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Agent) (*woodpecker.Agent, error)); ok {
-		return returnFunc(agent)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Agent) (*woodpecker.Agent, error)); ok {
+		return returnFunc(ctx, agent)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Agent) *woodpecker.Agent); ok {
-		r0 = returnFunc(agent)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Agent) *woodpecker.Agent); ok {
+		r0 = returnFunc(ctx, agent)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Agent)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Agent) error); ok {
-		r1 = returnFunc(agent)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Agent) error); ok {
+		r1 = returnFunc(ctx, agent)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -143,19 +150,25 @@ type MockClient_AgentCreate_Call struct {
 }
 
 // AgentCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - agent *woodpecker.Agent
-func (_e *MockClient_Expecter) AgentCreate(agent any) *MockClient_AgentCreate_Call {
-	return &MockClient_AgentCreate_Call{Call: _e.mock.On("AgentCreate", agent)}
+func (_e *MockClient_Expecter) AgentCreate(ctx any, agent any) *MockClient_AgentCreate_Call {
+	return &MockClient_AgentCreate_Call{Call: _e.mock.On("AgentCreate", ctx, agent)}
 }
 
-func (_c *MockClient_AgentCreate_Call) Run(run func(agent *woodpecker.Agent)) *MockClient_AgentCreate_Call {
+func (_c *MockClient_AgentCreate_Call) Run(run func(ctx context.Context, agent *woodpecker.Agent)) *MockClient_AgentCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Agent
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Agent)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Agent
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Agent)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -166,22 +179,22 @@ func (_c *MockClient_AgentCreate_Call) Return(agent1 *woodpecker.Agent, err erro
 	return _c
 }
 
-func (_c *MockClient_AgentCreate_Call) RunAndReturn(run func(agent *woodpecker.Agent) (*woodpecker.Agent, error)) *MockClient_AgentCreate_Call {
+func (_c *MockClient_AgentCreate_Call) RunAndReturn(run func(ctx context.Context, agent *woodpecker.Agent) (*woodpecker.Agent, error)) *MockClient_AgentCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AgentDelete provides a mock function for the type MockClient
-func (_mock *MockClient) AgentDelete(n int64) error {
-	ret := _mock.Called(n)
+func (_mock *MockClient) AgentDelete(ctx context.Context, agentID int64) error {
+	ret := _mock.Called(ctx, agentID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64) error); ok {
-		r0 = returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, agentID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -194,19 +207,25 @@ type MockClient_AgentDelete_Call struct {
 }
 
 // AgentDelete is a helper method to define mock.On call
-//   - n int64
-func (_e *MockClient_Expecter) AgentDelete(n any) *MockClient_AgentDelete_Call {
-	return &MockClient_AgentDelete_Call{Call: _e.mock.On("AgentDelete", n)}
+//   - ctx context.Context
+//   - agentID int64
+func (_e *MockClient_Expecter) AgentDelete(ctx any, agentID any) *MockClient_AgentDelete_Call {
+	return &MockClient_AgentDelete_Call{Call: _e.mock.On("AgentDelete", ctx, agentID)}
 }
 
-func (_c *MockClient_AgentDelete_Call) Run(run func(n int64)) *MockClient_AgentDelete_Call {
+func (_c *MockClient_AgentDelete_Call) Run(run func(ctx context.Context, agentID int64)) *MockClient_AgentDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -217,14 +236,14 @@ func (_c *MockClient_AgentDelete_Call) Return(err error) *MockClient_AgentDelete
 	return _c
 }
 
-func (_c *MockClient_AgentDelete_Call) RunAndReturn(run func(n int64) error) *MockClient_AgentDelete_Call {
+func (_c *MockClient_AgentDelete_Call) RunAndReturn(run func(ctx context.Context, agentID int64) error) *MockClient_AgentDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AgentList provides a mock function for the type MockClient
-func (_mock *MockClient) AgentList() ([]*woodpecker.Agent, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) AgentList(ctx context.Context, opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentList")
@@ -232,18 +251,18 @@ func (_mock *MockClient) AgentList() ([]*woodpecker.Agent, error) {
 
 	var r0 []*woodpecker.Agent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() ([]*woodpecker.Agent, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func() []*woodpecker.Agent); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.AgentListOptions) []*woodpecker.Agent); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Agent)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.AgentListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -256,13 +275,26 @@ type MockClient_AgentList_Call struct {
 }
 
 // AgentList is a helper method to define mock.On call
-func (_e *MockClient_Expecter) AgentList() *MockClient_AgentList_Call {
-	return &MockClient_AgentList_Call{Call: _e.mock.On("AgentList")}
+//   - ctx context.Context
+//   - opt woodpecker.AgentListOptions
+func (_e *MockClient_Expecter) AgentList(ctx any, opt any) *MockClient_AgentList_Call {
+	return &MockClient_AgentList_Call{Call: _e.mock.On("AgentList", ctx, opt)}
 }
 
-func (_c *MockClient_AgentList_Call) Run(run func()) *MockClient_AgentList_Call {
+func (_c *MockClient_AgentList_Call) Run(run func(ctx context.Context, opt woodpecker.AgentListOptions)) *MockClient_AgentList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.AgentListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.AgentListOptions)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -272,76 +304,14 @@ func (_c *MockClient_AgentList_Call) Return(agents []*woodpecker.Agent, err erro
 	return _c
 }
 
-func (_c *MockClient_AgentList_Call) RunAndReturn(run func() ([]*woodpecker.Agent, error)) *MockClient_AgentList_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// AgentListWithOpts provides a mock function for the type MockClient
-func (_mock *MockClient) AgentListWithOpts(opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error) {
-	ret := _mock.Called(opt)
-
-	if len(ret) == 0 {
-		panic("no return value specified for AgentListWithOpts")
-	}
-
-	var r0 []*woodpecker.Agent
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)); ok {
-		return returnFunc(opt)
-	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.AgentListOptions) []*woodpecker.Agent); ok {
-		r0 = returnFunc(opt)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*woodpecker.Agent)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.AgentListOptions) error); ok {
-		r1 = returnFunc(opt)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_AgentListWithOpts_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentListWithOpts'
-type MockClient_AgentListWithOpts_Call struct {
-	*mock.Call
-}
-
-// AgentListWithOpts is a helper method to define mock.On call
-//   - opt woodpecker.AgentListOptions
-func (_e *MockClient_Expecter) AgentListWithOpts(opt any) *MockClient_AgentListWithOpts_Call {
-	return &MockClient_AgentListWithOpts_Call{Call: _e.mock.On("AgentListWithOpts", opt)}
-}
-
-func (_c *MockClient_AgentListWithOpts_Call) Run(run func(opt woodpecker.AgentListOptions)) *MockClient_AgentListWithOpts_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.AgentListOptions
-		if args[0] != nil {
-			arg0 = args[0].(woodpecker.AgentListOptions)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_AgentListWithOpts_Call) Return(agents []*woodpecker.Agent, err error) *MockClient_AgentListWithOpts_Call {
-	_c.Call.Return(agents, err)
-	return _c
-}
-
-func (_c *MockClient_AgentListWithOpts_Call) RunAndReturn(run func(opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)) *MockClient_AgentListWithOpts_Call {
+func (_c *MockClient_AgentList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.AgentListOptions) ([]*woodpecker.Agent, error)) *MockClient_AgentList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AgentTasksList provides a mock function for the type MockClient
-func (_mock *MockClient) AgentTasksList(n int64) ([]*woodpecker.Task, error) {
-	ret := _mock.Called(n)
+func (_mock *MockClient) AgentTasksList(ctx context.Context, agentID int64) ([]*woodpecker.Task, error) {
+	ret := _mock.Called(ctx, agentID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentTasksList")
@@ -349,18 +319,18 @@ func (_mock *MockClient) AgentTasksList(n int64) ([]*woodpecker.Task, error) {
 
 	var r0 []*woodpecker.Task
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*woodpecker.Task, error)); ok {
-		return returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) ([]*woodpecker.Task, error)); ok {
+		return returnFunc(ctx, agentID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*woodpecker.Task); ok {
-		r0 = returnFunc(n)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) []*woodpecker.Task); ok {
+		r0 = returnFunc(ctx, agentID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Task)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(n)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, agentID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -373,19 +343,25 @@ type MockClient_AgentTasksList_Call struct {
 }
 
 // AgentTasksList is a helper method to define mock.On call
-//   - n int64
-func (_e *MockClient_Expecter) AgentTasksList(n any) *MockClient_AgentTasksList_Call {
-	return &MockClient_AgentTasksList_Call{Call: _e.mock.On("AgentTasksList", n)}
+//   - ctx context.Context
+//   - agentID int64
+func (_e *MockClient_Expecter) AgentTasksList(ctx any, agentID any) *MockClient_AgentTasksList_Call {
+	return &MockClient_AgentTasksList_Call{Call: _e.mock.On("AgentTasksList", ctx, agentID)}
 }
 
-func (_c *MockClient_AgentTasksList_Call) Run(run func(n int64)) *MockClient_AgentTasksList_Call {
+func (_c *MockClient_AgentTasksList_Call) Run(run func(ctx context.Context, agentID int64)) *MockClient_AgentTasksList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -396,14 +372,14 @@ func (_c *MockClient_AgentTasksList_Call) Return(tasks []*woodpecker.Task, err e
 	return _c
 }
 
-func (_c *MockClient_AgentTasksList_Call) RunAndReturn(run func(n int64) ([]*woodpecker.Task, error)) *MockClient_AgentTasksList_Call {
+func (_c *MockClient_AgentTasksList_Call) RunAndReturn(run func(ctx context.Context, agentID int64) ([]*woodpecker.Task, error)) *MockClient_AgentTasksList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // AgentUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) AgentUpdate(agent *woodpecker.Agent) (*woodpecker.Agent, error) {
-	ret := _mock.Called(agent)
+func (_mock *MockClient) AgentUpdate(ctx context.Context, agent *woodpecker.Agent) (*woodpecker.Agent, error) {
+	ret := _mock.Called(ctx, agent)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AgentUpdate")
@@ -411,18 +387,18 @@ func (_mock *MockClient) AgentUpdate(agent *woodpecker.Agent) (*woodpecker.Agent
 
 	var r0 *woodpecker.Agent
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Agent) (*woodpecker.Agent, error)); ok {
-		return returnFunc(agent)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Agent) (*woodpecker.Agent, error)); ok {
+		return returnFunc(ctx, agent)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Agent) *woodpecker.Agent); ok {
-		r0 = returnFunc(agent)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Agent) *woodpecker.Agent); ok {
+		r0 = returnFunc(ctx, agent)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Agent)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Agent) error); ok {
-		r1 = returnFunc(agent)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Agent) error); ok {
+		r1 = returnFunc(ctx, agent)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -435,19 +411,25 @@ type MockClient_AgentUpdate_Call struct {
 }
 
 // AgentUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - agent *woodpecker.Agent
-func (_e *MockClient_Expecter) AgentUpdate(agent any) *MockClient_AgentUpdate_Call {
-	return &MockClient_AgentUpdate_Call{Call: _e.mock.On("AgentUpdate", agent)}
+func (_e *MockClient_Expecter) AgentUpdate(ctx any, agent any) *MockClient_AgentUpdate_Call {
+	return &MockClient_AgentUpdate_Call{Call: _e.mock.On("AgentUpdate", ctx, agent)}
 }
 
-func (_c *MockClient_AgentUpdate_Call) Run(run func(agent *woodpecker.Agent)) *MockClient_AgentUpdate_Call {
+func (_c *MockClient_AgentUpdate_Call) Run(run func(ctx context.Context, agent *woodpecker.Agent)) *MockClient_AgentUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Agent
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Agent)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Agent
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Agent)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -458,14 +440,14 @@ func (_c *MockClient_AgentUpdate_Call) Return(agent1 *woodpecker.Agent, err erro
 	return _c
 }
 
-func (_c *MockClient_AgentUpdate_Call) RunAndReturn(run func(agent *woodpecker.Agent) (*woodpecker.Agent, error)) *MockClient_AgentUpdate_Call {
+func (_c *MockClient_AgentUpdate_Call) RunAndReturn(run func(ctx context.Context, agent *woodpecker.Agent) (*woodpecker.Agent, error)) *MockClient_AgentUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CronCreate provides a mock function for the type MockClient
-func (_mock *MockClient) CronCreate(repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error) {
-	ret := _mock.Called(repoID, cron)
+func (_mock *MockClient) CronCreate(ctx context.Context, repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error) {
+	ret := _mock.Called(ctx, repoID, cron)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronCreate")
@@ -473,18 +455,18 @@ func (_mock *MockClient) CronCreate(repoID int64, cron *woodpecker.Cron) (*woodp
 
 	var r0 *woodpecker.Cron
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Cron) (*woodpecker.Cron, error)); ok {
-		return returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Cron) (*woodpecker.Cron, error)); ok {
+		return returnFunc(ctx, repoID, cron)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Cron) *woodpecker.Cron); ok {
-		r0 = returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Cron) *woodpecker.Cron); ok {
+		r0 = returnFunc(ctx, repoID, cron)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Cron)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Cron) error); ok {
-		r1 = returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Cron) error); ok {
+		r1 = returnFunc(ctx, repoID, cron)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -497,25 +479,31 @@ type MockClient_CronCreate_Call struct {
 }
 
 // CronCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - cron *woodpecker.Cron
-func (_e *MockClient_Expecter) CronCreate(repoID any, cron any) *MockClient_CronCreate_Call {
-	return &MockClient_CronCreate_Call{Call: _e.mock.On("CronCreate", repoID, cron)}
+func (_e *MockClient_Expecter) CronCreate(ctx any, repoID any, cron any) *MockClient_CronCreate_Call {
+	return &MockClient_CronCreate_Call{Call: _e.mock.On("CronCreate", ctx, repoID, cron)}
 }
 
-func (_c *MockClient_CronCreate_Call) Run(run func(repoID int64, cron *woodpecker.Cron)) *MockClient_CronCreate_Call {
+func (_c *MockClient_CronCreate_Call) Run(run func(ctx context.Context, repoID int64, cron *woodpecker.Cron)) *MockClient_CronCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Cron
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Cron)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Cron
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Cron)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -526,22 +514,22 @@ func (_c *MockClient_CronCreate_Call) Return(cron1 *woodpecker.Cron, err error) 
 	return _c
 }
 
-func (_c *MockClient_CronCreate_Call) RunAndReturn(run func(repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error)) *MockClient_CronCreate_Call {
+func (_c *MockClient_CronCreate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error)) *MockClient_CronCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CronDelete provides a mock function for the type MockClient
-func (_mock *MockClient) CronDelete(repoID int64, cronID int64) error {
-	ret := _mock.Called(repoID, cronID)
+func (_mock *MockClient) CronDelete(ctx context.Context, repoID int64, cronID int64) error {
+	ret := _mock.Called(ctx, repoID, cronID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) error); ok {
-		r0 = returnFunc(repoID, cronID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = returnFunc(ctx, repoID, cronID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -554,25 +542,31 @@ type MockClient_CronDelete_Call struct {
 }
 
 // CronDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - cronID int64
-func (_e *MockClient_Expecter) CronDelete(repoID any, cronID any) *MockClient_CronDelete_Call {
-	return &MockClient_CronDelete_Call{Call: _e.mock.On("CronDelete", repoID, cronID)}
+func (_e *MockClient_Expecter) CronDelete(ctx any, repoID any, cronID any) *MockClient_CronDelete_Call {
+	return &MockClient_CronDelete_Call{Call: _e.mock.On("CronDelete", ctx, repoID, cronID)}
 }
 
-func (_c *MockClient_CronDelete_Call) Run(run func(repoID int64, cronID int64)) *MockClient_CronDelete_Call {
+func (_c *MockClient_CronDelete_Call) Run(run func(ctx context.Context, repoID int64, cronID int64)) *MockClient_CronDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -583,14 +577,14 @@ func (_c *MockClient_CronDelete_Call) Return(err error) *MockClient_CronDelete_C
 	return _c
 }
 
-func (_c *MockClient_CronDelete_Call) RunAndReturn(run func(repoID int64, cronID int64) error) *MockClient_CronDelete_Call {
+func (_c *MockClient_CronDelete_Call) RunAndReturn(run func(ctx context.Context, repoID int64, cronID int64) error) *MockClient_CronDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CronGet provides a mock function for the type MockClient
-func (_mock *MockClient) CronGet(repoID int64, cronID int64) (*woodpecker.Cron, error) {
-	ret := _mock.Called(repoID, cronID)
+func (_mock *MockClient) CronGet(ctx context.Context, repoID int64, cronID int64) (*woodpecker.Cron, error) {
+	ret := _mock.Called(ctx, repoID, cronID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronGet")
@@ -598,18 +592,18 @@ func (_mock *MockClient) CronGet(repoID int64, cronID int64) (*woodpecker.Cron, 
 
 	var r0 *woodpecker.Cron
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) (*woodpecker.Cron, error)); ok {
-		return returnFunc(repoID, cronID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) (*woodpecker.Cron, error)); ok {
+		return returnFunc(ctx, repoID, cronID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) *woodpecker.Cron); ok {
-		r0 = returnFunc(repoID, cronID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) *woodpecker.Cron); ok {
+		r0 = returnFunc(ctx, repoID, cronID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Cron)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
-		r1 = returnFunc(repoID, cronID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64) error); ok {
+		r1 = returnFunc(ctx, repoID, cronID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -622,25 +616,31 @@ type MockClient_CronGet_Call struct {
 }
 
 // CronGet is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - cronID int64
-func (_e *MockClient_Expecter) CronGet(repoID any, cronID any) *MockClient_CronGet_Call {
-	return &MockClient_CronGet_Call{Call: _e.mock.On("CronGet", repoID, cronID)}
+func (_e *MockClient_Expecter) CronGet(ctx any, repoID any, cronID any) *MockClient_CronGet_Call {
+	return &MockClient_CronGet_Call{Call: _e.mock.On("CronGet", ctx, repoID, cronID)}
 }
 
-func (_c *MockClient_CronGet_Call) Run(run func(repoID int64, cronID int64)) *MockClient_CronGet_Call {
+func (_c *MockClient_CronGet_Call) Run(run func(ctx context.Context, repoID int64, cronID int64)) *MockClient_CronGet_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -651,14 +651,14 @@ func (_c *MockClient_CronGet_Call) Return(cron *woodpecker.Cron, err error) *Moc
 	return _c
 }
 
-func (_c *MockClient_CronGet_Call) RunAndReturn(run func(repoID int64, cronID int64) (*woodpecker.Cron, error)) *MockClient_CronGet_Call {
+func (_c *MockClient_CronGet_Call) RunAndReturn(run func(ctx context.Context, repoID int64, cronID int64) (*woodpecker.Cron, error)) *MockClient_CronGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CronList provides a mock function for the type MockClient
-func (_mock *MockClient) CronList(repoID int64, opt woodpecker.CronListOptions) ([]*woodpecker.Cron, error) {
-	ret := _mock.Called(repoID, opt)
+func (_mock *MockClient) CronList(ctx context.Context, repoID int64, opt woodpecker.CronListOptions) ([]*woodpecker.Cron, error) {
+	ret := _mock.Called(ctx, repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronList")
@@ -666,18 +666,18 @@ func (_mock *MockClient) CronList(repoID int64, opt woodpecker.CronListOptions) 
 
 	var r0 []*woodpecker.Cron
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.CronListOptions) ([]*woodpecker.Cron, error)); ok {
-		return returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.CronListOptions) ([]*woodpecker.Cron, error)); ok {
+		return returnFunc(ctx, repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.CronListOptions) []*woodpecker.Cron); ok {
-		r0 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.CronListOptions) []*woodpecker.Cron); ok {
+		r0 = returnFunc(ctx, repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Cron)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.CronListOptions) error); ok {
-		r1 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.CronListOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -690,25 +690,31 @@ type MockClient_CronList_Call struct {
 }
 
 // CronList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opt woodpecker.CronListOptions
-func (_e *MockClient_Expecter) CronList(repoID any, opt any) *MockClient_CronList_Call {
-	return &MockClient_CronList_Call{Call: _e.mock.On("CronList", repoID, opt)}
+func (_e *MockClient_Expecter) CronList(ctx any, repoID any, opt any) *MockClient_CronList_Call {
+	return &MockClient_CronList_Call{Call: _e.mock.On("CronList", ctx, repoID, opt)}
 }
 
-func (_c *MockClient_CronList_Call) Run(run func(repoID int64, opt woodpecker.CronListOptions)) *MockClient_CronList_Call {
+func (_c *MockClient_CronList_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.CronListOptions)) *MockClient_CronList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.CronListOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.CronListOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.CronListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.CronListOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -719,14 +725,14 @@ func (_c *MockClient_CronList_Call) Return(crons []*woodpecker.Cron, err error) 
 	return _c
 }
 
-func (_c *MockClient_CronList_Call) RunAndReturn(run func(repoID int64, opt woodpecker.CronListOptions) ([]*woodpecker.Cron, error)) *MockClient_CronList_Call {
+func (_c *MockClient_CronList_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.CronListOptions) ([]*woodpecker.Cron, error)) *MockClient_CronList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // CronUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) CronUpdate(repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error) {
-	ret := _mock.Called(repoID, cron)
+func (_mock *MockClient) CronUpdate(ctx context.Context, repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error) {
+	ret := _mock.Called(ctx, repoID, cron)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronUpdate")
@@ -734,18 +740,18 @@ func (_mock *MockClient) CronUpdate(repoID int64, cron *woodpecker.Cron) (*woodp
 
 	var r0 *woodpecker.Cron
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Cron) (*woodpecker.Cron, error)); ok {
-		return returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Cron) (*woodpecker.Cron, error)); ok {
+		return returnFunc(ctx, repoID, cron)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Cron) *woodpecker.Cron); ok {
-		r0 = returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Cron) *woodpecker.Cron); ok {
+		r0 = returnFunc(ctx, repoID, cron)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Cron)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Cron) error); ok {
-		r1 = returnFunc(repoID, cron)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Cron) error); ok {
+		r1 = returnFunc(ctx, repoID, cron)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -758,25 +764,31 @@ type MockClient_CronUpdate_Call struct {
 }
 
 // CronUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - cron *woodpecker.Cron
-func (_e *MockClient_Expecter) CronUpdate(repoID any, cron any) *MockClient_CronUpdate_Call {
-	return &MockClient_CronUpdate_Call{Call: _e.mock.On("CronUpdate", repoID, cron)}
+func (_e *MockClient_Expecter) CronUpdate(ctx any, repoID any, cron any) *MockClient_CronUpdate_Call {
+	return &MockClient_CronUpdate_Call{Call: _e.mock.On("CronUpdate", ctx, repoID, cron)}
 }
 
-func (_c *MockClient_CronUpdate_Call) Run(run func(repoID int64, cron *woodpecker.Cron)) *MockClient_CronUpdate_Call {
+func (_c *MockClient_CronUpdate_Call) Run(run func(ctx context.Context, repoID int64, cron *woodpecker.Cron)) *MockClient_CronUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Cron
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Cron)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Cron
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Cron)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -787,14 +799,14 @@ func (_c *MockClient_CronUpdate_Call) Return(cron1 *woodpecker.Cron, err error) 
 	return _c
 }
 
-func (_c *MockClient_CronUpdate_Call) RunAndReturn(run func(repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error)) *MockClient_CronUpdate_Call {
+func (_c *MockClient_CronUpdate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, cron *woodpecker.Cron) (*woodpecker.Cron, error)) *MockClient_CronUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Deploy provides a mock function for the type MockClient
-func (_mock *MockClient) Deploy(repoID int64, pipeline int64, opt woodpecker.DeployOptions) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, pipeline, opt)
+func (_mock *MockClient) Deploy(ctx context.Context, repoID int64, pipeline int64, opt woodpecker.DeployOptions) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, pipeline, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Deploy")
@@ -802,18 +814,18 @@ func (_mock *MockClient) Deploy(repoID int64, pipeline int64, opt woodpecker.Dep
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.DeployOptions) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, pipeline, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, woodpecker.DeployOptions) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, pipeline, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.DeployOptions) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, pipeline, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, woodpecker.DeployOptions) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, pipeline, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64, woodpecker.DeployOptions) error); ok {
-		r1 = returnFunc(repoID, pipeline, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64, woodpecker.DeployOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, pipeline, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -826,31 +838,37 @@ type MockClient_Deploy_Call struct {
 }
 
 // Deploy is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
 //   - opt woodpecker.DeployOptions
-func (_e *MockClient_Expecter) Deploy(repoID any, pipeline any, opt any) *MockClient_Deploy_Call {
-	return &MockClient_Deploy_Call{Call: _e.mock.On("Deploy", repoID, pipeline, opt)}
+func (_e *MockClient_Expecter) Deploy(ctx any, repoID any, pipeline any, opt any) *MockClient_Deploy_Call {
+	return &MockClient_Deploy_Call{Call: _e.mock.On("Deploy", ctx, repoID, pipeline, opt)}
 }
 
-func (_c *MockClient_Deploy_Call) Run(run func(repoID int64, pipeline int64, opt woodpecker.DeployOptions)) *MockClient_Deploy_Call {
+func (_c *MockClient_Deploy_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64, opt woodpecker.DeployOptions)) *MockClient_Deploy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
-		var arg2 woodpecker.DeployOptions
+		var arg2 int64
 		if args[2] != nil {
-			arg2 = args[2].(woodpecker.DeployOptions)
+			arg2 = args[2].(int64)
+		}
+		var arg3 woodpecker.DeployOptions
+		if args[3] != nil {
+			arg3 = args[3].(woodpecker.DeployOptions)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -861,14 +879,14 @@ func (_c *MockClient_Deploy_Call) Return(pipeline1 *woodpecker.Pipeline, err err
 	return _c
 }
 
-func (_c *MockClient_Deploy_Call) RunAndReturn(run func(repoID int64, pipeline int64, opt woodpecker.DeployOptions) (*woodpecker.Pipeline, error)) *MockClient_Deploy_Call {
+func (_c *MockClient_Deploy_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64, opt woodpecker.DeployOptions) (*woodpecker.Pipeline, error)) *MockClient_Deploy_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalRegistry provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalRegistry(registry string) (*woodpecker.Registry, error) {
-	ret := _mock.Called(registry)
+func (_mock *MockClient) GlobalRegistry(ctx context.Context, registry string) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistry")
@@ -876,18 +894,18 @@ func (_mock *MockClient) GlobalRegistry(registry string) (*woodpecker.Registry, 
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*woodpecker.Registry, error)); ok {
-		return returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *woodpecker.Registry); ok {
-		r0 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -900,19 +918,25 @@ type MockClient_GlobalRegistry_Call struct {
 }
 
 // GlobalRegistry is a helper method to define mock.On call
+//   - ctx context.Context
 //   - registry string
-func (_e *MockClient_Expecter) GlobalRegistry(registry any) *MockClient_GlobalRegistry_Call {
-	return &MockClient_GlobalRegistry_Call{Call: _e.mock.On("GlobalRegistry", registry)}
+func (_e *MockClient_Expecter) GlobalRegistry(ctx any, registry any) *MockClient_GlobalRegistry_Call {
+	return &MockClient_GlobalRegistry_Call{Call: _e.mock.On("GlobalRegistry", ctx, registry)}
 }
 
-func (_c *MockClient_GlobalRegistry_Call) Run(run func(registry string)) *MockClient_GlobalRegistry_Call {
+func (_c *MockClient_GlobalRegistry_Call) Run(run func(ctx context.Context, registry string)) *MockClient_GlobalRegistry_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -923,14 +947,14 @@ func (_c *MockClient_GlobalRegistry_Call) Return(registry1 *woodpecker.Registry,
 	return _c
 }
 
-func (_c *MockClient_GlobalRegistry_Call) RunAndReturn(run func(registry string) (*woodpecker.Registry, error)) *MockClient_GlobalRegistry_Call {
+func (_c *MockClient_GlobalRegistry_Call) RunAndReturn(run func(ctx context.Context, registry string) (*woodpecker.Registry, error)) *MockClient_GlobalRegistry_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalRegistryCreate provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalRegistryCreate(registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(registry)
+func (_mock *MockClient) GlobalRegistryCreate(ctx context.Context, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryCreate")
@@ -938,18 +962,18 @@ func (_mock *MockClient) GlobalRegistryCreate(registry *woodpecker.Registry) (*w
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Registry) error); ok {
-		r1 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -962,19 +986,25 @@ type MockClient_GlobalRegistryCreate_Call struct {
 }
 
 // GlobalRegistryCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) GlobalRegistryCreate(registry any) *MockClient_GlobalRegistryCreate_Call {
-	return &MockClient_GlobalRegistryCreate_Call{Call: _e.mock.On("GlobalRegistryCreate", registry)}
+func (_e *MockClient_Expecter) GlobalRegistryCreate(ctx any, registry any) *MockClient_GlobalRegistryCreate_Call {
+	return &MockClient_GlobalRegistryCreate_Call{Call: _e.mock.On("GlobalRegistryCreate", ctx, registry)}
 }
 
-func (_c *MockClient_GlobalRegistryCreate_Call) Run(run func(registry *woodpecker.Registry)) *MockClient_GlobalRegistryCreate_Call {
+func (_c *MockClient_GlobalRegistryCreate_Call) Run(run func(ctx context.Context, registry *woodpecker.Registry)) *MockClient_GlobalRegistryCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Registry
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Registry)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Registry
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Registry)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -985,22 +1015,22 @@ func (_c *MockClient_GlobalRegistryCreate_Call) Return(registry1 *woodpecker.Reg
 	return _c
 }
 
-func (_c *MockClient_GlobalRegistryCreate_Call) RunAndReturn(run func(registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_GlobalRegistryCreate_Call {
+func (_c *MockClient_GlobalRegistryCreate_Call) RunAndReturn(run func(ctx context.Context, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_GlobalRegistryCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalRegistryDelete provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalRegistryDelete(registry string) error {
-	ret := _mock.Called(registry)
+func (_mock *MockClient) GlobalRegistryDelete(ctx context.Context, registry string) error {
+	ret := _mock.Called(ctx, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
-		r0 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = returnFunc(ctx, registry)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1013,19 +1043,25 @@ type MockClient_GlobalRegistryDelete_Call struct {
 }
 
 // GlobalRegistryDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - registry string
-func (_e *MockClient_Expecter) GlobalRegistryDelete(registry any) *MockClient_GlobalRegistryDelete_Call {
-	return &MockClient_GlobalRegistryDelete_Call{Call: _e.mock.On("GlobalRegistryDelete", registry)}
+func (_e *MockClient_Expecter) GlobalRegistryDelete(ctx any, registry any) *MockClient_GlobalRegistryDelete_Call {
+	return &MockClient_GlobalRegistryDelete_Call{Call: _e.mock.On("GlobalRegistryDelete", ctx, registry)}
 }
 
-func (_c *MockClient_GlobalRegistryDelete_Call) Run(run func(registry string)) *MockClient_GlobalRegistryDelete_Call {
+func (_c *MockClient_GlobalRegistryDelete_Call) Run(run func(ctx context.Context, registry string)) *MockClient_GlobalRegistryDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1036,14 +1072,14 @@ func (_c *MockClient_GlobalRegistryDelete_Call) Return(err error) *MockClient_Gl
 	return _c
 }
 
-func (_c *MockClient_GlobalRegistryDelete_Call) RunAndReturn(run func(registry string) error) *MockClient_GlobalRegistryDelete_Call {
+func (_c *MockClient_GlobalRegistryDelete_Call) RunAndReturn(run func(ctx context.Context, registry string) error) *MockClient_GlobalRegistryDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalRegistryList provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalRegistryList(opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) GlobalRegistryList(ctx context.Context, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryList")
@@ -1051,18 +1087,18 @@ func (_mock *MockClient) GlobalRegistryList(opt woodpecker.RegistryListOptions) 
 
 	var r0 []*woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.RegistryListOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.RegistryListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1075,19 +1111,25 @@ type MockClient_GlobalRegistryList_Call struct {
 }
 
 // GlobalRegistryList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) GlobalRegistryList(opt any) *MockClient_GlobalRegistryList_Call {
-	return &MockClient_GlobalRegistryList_Call{Call: _e.mock.On("GlobalRegistryList", opt)}
+func (_e *MockClient_Expecter) GlobalRegistryList(ctx any, opt any) *MockClient_GlobalRegistryList_Call {
+	return &MockClient_GlobalRegistryList_Call{Call: _e.mock.On("GlobalRegistryList", ctx, opt)}
 }
 
-func (_c *MockClient_GlobalRegistryList_Call) Run(run func(opt woodpecker.RegistryListOptions)) *MockClient_GlobalRegistryList_Call {
+func (_c *MockClient_GlobalRegistryList_Call) Run(run func(ctx context.Context, opt woodpecker.RegistryListOptions)) *MockClient_GlobalRegistryList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.RegistryListOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.RegistryListOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.RegistryListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.RegistryListOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1098,14 +1140,14 @@ func (_c *MockClient_GlobalRegistryList_Call) Return(registrys []*woodpecker.Reg
 	return _c
 }
 
-func (_c *MockClient_GlobalRegistryList_Call) RunAndReturn(run func(opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_GlobalRegistryList_Call {
+func (_c *MockClient_GlobalRegistryList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_GlobalRegistryList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalRegistryUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalRegistryUpdate(registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(registry)
+func (_mock *MockClient) GlobalRegistryUpdate(ctx context.Context, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryUpdate")
@@ -1113,18 +1155,18 @@ func (_mock *MockClient) GlobalRegistryUpdate(registry *woodpecker.Registry) (*w
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Registry) error); ok {
-		r1 = returnFunc(registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1137,19 +1179,25 @@ type MockClient_GlobalRegistryUpdate_Call struct {
 }
 
 // GlobalRegistryUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) GlobalRegistryUpdate(registry any) *MockClient_GlobalRegistryUpdate_Call {
-	return &MockClient_GlobalRegistryUpdate_Call{Call: _e.mock.On("GlobalRegistryUpdate", registry)}
+func (_e *MockClient_Expecter) GlobalRegistryUpdate(ctx any, registry any) *MockClient_GlobalRegistryUpdate_Call {
+	return &MockClient_GlobalRegistryUpdate_Call{Call: _e.mock.On("GlobalRegistryUpdate", ctx, registry)}
 }
 
-func (_c *MockClient_GlobalRegistryUpdate_Call) Run(run func(registry *woodpecker.Registry)) *MockClient_GlobalRegistryUpdate_Call {
+func (_c *MockClient_GlobalRegistryUpdate_Call) Run(run func(ctx context.Context, registry *woodpecker.Registry)) *MockClient_GlobalRegistryUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Registry
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Registry)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Registry
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Registry)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1160,14 +1208,14 @@ func (_c *MockClient_GlobalRegistryUpdate_Call) Return(registry1 *woodpecker.Reg
 	return _c
 }
 
-func (_c *MockClient_GlobalRegistryUpdate_Call) RunAndReturn(run func(registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_GlobalRegistryUpdate_Call {
+func (_c *MockClient_GlobalRegistryUpdate_Call) RunAndReturn(run func(ctx context.Context, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_GlobalRegistryUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalSecret provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalSecret(secret string) (*woodpecker.Secret, error) {
-	ret := _mock.Called(secret)
+func (_mock *MockClient) GlobalSecret(ctx context.Context, secret string) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecret")
@@ -1175,18 +1223,18 @@ func (_mock *MockClient) GlobalSecret(secret string) (*woodpecker.Secret, error)
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*woodpecker.Secret, error)); ok {
-		return returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *woodpecker.Secret); ok {
-		r0 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1199,19 +1247,25 @@ type MockClient_GlobalSecret_Call struct {
 }
 
 // GlobalSecret is a helper method to define mock.On call
+//   - ctx context.Context
 //   - secret string
-func (_e *MockClient_Expecter) GlobalSecret(secret any) *MockClient_GlobalSecret_Call {
-	return &MockClient_GlobalSecret_Call{Call: _e.mock.On("GlobalSecret", secret)}
+func (_e *MockClient_Expecter) GlobalSecret(ctx any, secret any) *MockClient_GlobalSecret_Call {
+	return &MockClient_GlobalSecret_Call{Call: _e.mock.On("GlobalSecret", ctx, secret)}
 }
 
-func (_c *MockClient_GlobalSecret_Call) Run(run func(secret string)) *MockClient_GlobalSecret_Call {
+func (_c *MockClient_GlobalSecret_Call) Run(run func(ctx context.Context, secret string)) *MockClient_GlobalSecret_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1222,14 +1276,14 @@ func (_c *MockClient_GlobalSecret_Call) Return(secret1 *woodpecker.Secret, err e
 	return _c
 }
 
-func (_c *MockClient_GlobalSecret_Call) RunAndReturn(run func(secret string) (*woodpecker.Secret, error)) *MockClient_GlobalSecret_Call {
+func (_c *MockClient_GlobalSecret_Call) RunAndReturn(run func(ctx context.Context, secret string) (*woodpecker.Secret, error)) *MockClient_GlobalSecret_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalSecretCreate provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalSecretCreate(secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(secret)
+func (_mock *MockClient) GlobalSecretCreate(ctx context.Context, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretCreate")
@@ -1237,18 +1291,18 @@ func (_mock *MockClient) GlobalSecretCreate(secret *woodpecker.Secret) (*woodpec
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Secret) error); ok {
-		r1 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1261,19 +1315,25 @@ type MockClient_GlobalSecretCreate_Call struct {
 }
 
 // GlobalSecretCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) GlobalSecretCreate(secret any) *MockClient_GlobalSecretCreate_Call {
-	return &MockClient_GlobalSecretCreate_Call{Call: _e.mock.On("GlobalSecretCreate", secret)}
+func (_e *MockClient_Expecter) GlobalSecretCreate(ctx any, secret any) *MockClient_GlobalSecretCreate_Call {
+	return &MockClient_GlobalSecretCreate_Call{Call: _e.mock.On("GlobalSecretCreate", ctx, secret)}
 }
 
-func (_c *MockClient_GlobalSecretCreate_Call) Run(run func(secret *woodpecker.Secret)) *MockClient_GlobalSecretCreate_Call {
+func (_c *MockClient_GlobalSecretCreate_Call) Run(run func(ctx context.Context, secret *woodpecker.Secret)) *MockClient_GlobalSecretCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Secret
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Secret)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Secret
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1284,22 +1344,22 @@ func (_c *MockClient_GlobalSecretCreate_Call) Return(secret1 *woodpecker.Secret,
 	return _c
 }
 
-func (_c *MockClient_GlobalSecretCreate_Call) RunAndReturn(run func(secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_GlobalSecretCreate_Call {
+func (_c *MockClient_GlobalSecretCreate_Call) RunAndReturn(run func(ctx context.Context, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_GlobalSecretCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalSecretDelete provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalSecretDelete(secret string) error {
-	ret := _mock.Called(secret)
+func (_mock *MockClient) GlobalSecretDelete(ctx context.Context, secret string) error {
+	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(string) error); ok {
-		r0 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = returnFunc(ctx, secret)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1312,19 +1372,25 @@ type MockClient_GlobalSecretDelete_Call struct {
 }
 
 // GlobalSecretDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - secret string
-func (_e *MockClient_Expecter) GlobalSecretDelete(secret any) *MockClient_GlobalSecretDelete_Call {
-	return &MockClient_GlobalSecretDelete_Call{Call: _e.mock.On("GlobalSecretDelete", secret)}
+func (_e *MockClient_Expecter) GlobalSecretDelete(ctx any, secret any) *MockClient_GlobalSecretDelete_Call {
+	return &MockClient_GlobalSecretDelete_Call{Call: _e.mock.On("GlobalSecretDelete", ctx, secret)}
 }
 
-func (_c *MockClient_GlobalSecretDelete_Call) Run(run func(secret string)) *MockClient_GlobalSecretDelete_Call {
+func (_c *MockClient_GlobalSecretDelete_Call) Run(run func(ctx context.Context, secret string)) *MockClient_GlobalSecretDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1335,14 +1401,14 @@ func (_c *MockClient_GlobalSecretDelete_Call) Return(err error) *MockClient_Glob
 	return _c
 }
 
-func (_c *MockClient_GlobalSecretDelete_Call) RunAndReturn(run func(secret string) error) *MockClient_GlobalSecretDelete_Call {
+func (_c *MockClient_GlobalSecretDelete_Call) RunAndReturn(run func(ctx context.Context, secret string) error) *MockClient_GlobalSecretDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalSecretList provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalSecretList(opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) GlobalSecretList(ctx context.Context, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretList")
@@ -1350,18 +1416,18 @@ func (_mock *MockClient) GlobalSecretList(opt woodpecker.SecretListOptions) ([]*
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.SecretListOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.SecretListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1374,19 +1440,25 @@ type MockClient_GlobalSecretList_Call struct {
 }
 
 // GlobalSecretList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) GlobalSecretList(opt any) *MockClient_GlobalSecretList_Call {
-	return &MockClient_GlobalSecretList_Call{Call: _e.mock.On("GlobalSecretList", opt)}
+func (_e *MockClient_Expecter) GlobalSecretList(ctx any, opt any) *MockClient_GlobalSecretList_Call {
+	return &MockClient_GlobalSecretList_Call{Call: _e.mock.On("GlobalSecretList", ctx, opt)}
 }
 
-func (_c *MockClient_GlobalSecretList_Call) Run(run func(opt woodpecker.SecretListOptions)) *MockClient_GlobalSecretList_Call {
+func (_c *MockClient_GlobalSecretList_Call) Run(run func(ctx context.Context, opt woodpecker.SecretListOptions)) *MockClient_GlobalSecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.SecretListOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.SecretListOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.SecretListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.SecretListOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1397,14 +1469,14 @@ func (_c *MockClient_GlobalSecretList_Call) Return(secrets []*woodpecker.Secret,
 	return _c
 }
 
-func (_c *MockClient_GlobalSecretList_Call) RunAndReturn(run func(opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_GlobalSecretList_Call {
+func (_c *MockClient_GlobalSecretList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_GlobalSecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GlobalSecretUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) GlobalSecretUpdate(secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(secret)
+func (_mock *MockClient) GlobalSecretUpdate(ctx context.Context, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretUpdate")
@@ -1412,18 +1484,18 @@ func (_mock *MockClient) GlobalSecretUpdate(secret *woodpecker.Secret) (*woodpec
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.Secret) error); ok {
-		r1 = returnFunc(secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1436,19 +1508,25 @@ type MockClient_GlobalSecretUpdate_Call struct {
 }
 
 // GlobalSecretUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) GlobalSecretUpdate(secret any) *MockClient_GlobalSecretUpdate_Call {
-	return &MockClient_GlobalSecretUpdate_Call{Call: _e.mock.On("GlobalSecretUpdate", secret)}
+func (_e *MockClient_Expecter) GlobalSecretUpdate(ctx any, secret any) *MockClient_GlobalSecretUpdate_Call {
+	return &MockClient_GlobalSecretUpdate_Call{Call: _e.mock.On("GlobalSecretUpdate", ctx, secret)}
 }
 
-func (_c *MockClient_GlobalSecretUpdate_Call) Run(run func(secret *woodpecker.Secret)) *MockClient_GlobalSecretUpdate_Call {
+func (_c *MockClient_GlobalSecretUpdate_Call) Run(run func(ctx context.Context, secret *woodpecker.Secret)) *MockClient_GlobalSecretUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.Secret
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.Secret)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.Secret
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1459,14 +1537,14 @@ func (_c *MockClient_GlobalSecretUpdate_Call) Return(secret1 *woodpecker.Secret,
 	return _c
 }
 
-func (_c *MockClient_GlobalSecretUpdate_Call) RunAndReturn(run func(secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_GlobalSecretUpdate_Call {
+func (_c *MockClient_GlobalSecretUpdate_Call) RunAndReturn(run func(ctx context.Context, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_GlobalSecretUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LogLevel provides a mock function for the type MockClient
-func (_mock *MockClient) LogLevel() (*woodpecker.LogLevel, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) LogLevel(ctx context.Context) (*woodpecker.LogLevel, error) {
+	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogLevel")
@@ -1474,18 +1552,18 @@ func (_mock *MockClient) LogLevel() (*woodpecker.LogLevel, error) {
 
 	var r0 *woodpecker.LogLevel
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.LogLevel, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*woodpecker.LogLevel, error)); ok {
+		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func() *woodpecker.LogLevel); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *woodpecker.LogLevel); ok {
+		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.LogLevel)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1498,13 +1576,20 @@ type MockClient_LogLevel_Call struct {
 }
 
 // LogLevel is a helper method to define mock.On call
-func (_e *MockClient_Expecter) LogLevel() *MockClient_LogLevel_Call {
-	return &MockClient_LogLevel_Call{Call: _e.mock.On("LogLevel")}
+//   - ctx context.Context
+func (_e *MockClient_Expecter) LogLevel(ctx any) *MockClient_LogLevel_Call {
+	return &MockClient_LogLevel_Call{Call: _e.mock.On("LogLevel", ctx)}
 }
 
-func (_c *MockClient_LogLevel_Call) Run(run func()) *MockClient_LogLevel_Call {
+func (_c *MockClient_LogLevel_Call) Run(run func(ctx context.Context)) *MockClient_LogLevel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -1514,22 +1599,22 @@ func (_c *MockClient_LogLevel_Call) Return(logLevel *woodpecker.LogLevel, err er
 	return _c
 }
 
-func (_c *MockClient_LogLevel_Call) RunAndReturn(run func() (*woodpecker.LogLevel, error)) *MockClient_LogLevel_Call {
+func (_c *MockClient_LogLevel_Call) RunAndReturn(run func(ctx context.Context) (*woodpecker.LogLevel, error)) *MockClient_LogLevel_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LogsPurge provides a mock function for the type MockClient
-func (_mock *MockClient) LogsPurge(repoID int64, pipeline int64) error {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) LogsPurge(ctx context.Context, repoID int64, pipeline int64) error {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogsPurge")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) error); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1542,25 +1627,31 @@ type MockClient_LogsPurge_Call struct {
 }
 
 // LogsPurge is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) LogsPurge(repoID any, pipeline any) *MockClient_LogsPurge_Call {
-	return &MockClient_LogsPurge_Call{Call: _e.mock.On("LogsPurge", repoID, pipeline)}
+func (_e *MockClient_Expecter) LogsPurge(ctx any, repoID any, pipeline any) *MockClient_LogsPurge_Call {
+	return &MockClient_LogsPurge_Call{Call: _e.mock.On("LogsPurge", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_LogsPurge_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_LogsPurge_Call {
+func (_c *MockClient_LogsPurge_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_LogsPurge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1571,14 +1662,14 @@ func (_c *MockClient_LogsPurge_Call) Return(err error) *MockClient_LogsPurge_Cal
 	return _c
 }
 
-func (_c *MockClient_LogsPurge_Call) RunAndReturn(run func(repoID int64, pipeline int64) error) *MockClient_LogsPurge_Call {
+func (_c *MockClient_LogsPurge_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) error) *MockClient_LogsPurge_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Org provides a mock function for the type MockClient
-func (_mock *MockClient) Org(orgID int64) (*woodpecker.Org, error) {
-	ret := _mock.Called(orgID)
+func (_mock *MockClient) Org(ctx context.Context, orgID int64) (*woodpecker.Org, error) {
+	ret := _mock.Called(ctx, orgID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Org")
@@ -1586,18 +1677,18 @@ func (_mock *MockClient) Org(orgID int64) (*woodpecker.Org, error) {
 
 	var r0 *woodpecker.Org
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*woodpecker.Org, error)); ok {
-		return returnFunc(orgID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*woodpecker.Org, error)); ok {
+		return returnFunc(ctx, orgID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *woodpecker.Org); ok {
-		r0 = returnFunc(orgID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *woodpecker.Org); ok {
+		r0 = returnFunc(ctx, orgID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Org)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(orgID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, orgID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1610,19 +1701,25 @@ type MockClient_Org_Call struct {
 }
 
 // Org is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
-func (_e *MockClient_Expecter) Org(orgID any) *MockClient_Org_Call {
-	return &MockClient_Org_Call{Call: _e.mock.On("Org", orgID)}
+func (_e *MockClient_Expecter) Org(ctx any, orgID any) *MockClient_Org_Call {
+	return &MockClient_Org_Call{Call: _e.mock.On("Org", ctx, orgID)}
 }
 
-func (_c *MockClient_Org_Call) Run(run func(orgID int64)) *MockClient_Org_Call {
+func (_c *MockClient_Org_Call) Run(run func(ctx context.Context, orgID int64)) *MockClient_Org_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1633,14 +1730,14 @@ func (_c *MockClient_Org_Call) Return(org *woodpecker.Org, err error) *MockClien
 	return _c
 }
 
-func (_c *MockClient_Org_Call) RunAndReturn(run func(orgID int64) (*woodpecker.Org, error)) *MockClient_Org_Call {
+func (_c *MockClient_Org_Call) RunAndReturn(run func(ctx context.Context, orgID int64) (*woodpecker.Org, error)) *MockClient_Org_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgList provides a mock function for the type MockClient
-func (_mock *MockClient) OrgList(opt woodpecker.ListOptions) ([]*woodpecker.Org, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) OrgList(ctx context.Context, opt woodpecker.ListOptions) ([]*woodpecker.Org, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgList")
@@ -1648,18 +1745,18 @@ func (_mock *MockClient) OrgList(opt woodpecker.ListOptions) ([]*woodpecker.Org,
 
 	var r0 []*woodpecker.Org
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.ListOptions) ([]*woodpecker.Org, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.ListOptions) ([]*woodpecker.Org, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.ListOptions) []*woodpecker.Org); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.ListOptions) []*woodpecker.Org); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Org)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.ListOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.ListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1672,19 +1769,25 @@ type MockClient_OrgList_Call struct {
 }
 
 // OrgList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.ListOptions
-func (_e *MockClient_Expecter) OrgList(opt any) *MockClient_OrgList_Call {
-	return &MockClient_OrgList_Call{Call: _e.mock.On("OrgList", opt)}
+func (_e *MockClient_Expecter) OrgList(ctx any, opt any) *MockClient_OrgList_Call {
+	return &MockClient_OrgList_Call{Call: _e.mock.On("OrgList", ctx, opt)}
 }
 
-func (_c *MockClient_OrgList_Call) Run(run func(opt woodpecker.ListOptions)) *MockClient_OrgList_Call {
+func (_c *MockClient_OrgList_Call) Run(run func(ctx context.Context, opt woodpecker.ListOptions)) *MockClient_OrgList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.ListOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.ListOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.ListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.ListOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1695,14 +1798,14 @@ func (_c *MockClient_OrgList_Call) Return(orgs []*woodpecker.Org, err error) *Mo
 	return _c
 }
 
-func (_c *MockClient_OrgList_Call) RunAndReturn(run func(opt woodpecker.ListOptions) ([]*woodpecker.Org, error)) *MockClient_OrgList_Call {
+func (_c *MockClient_OrgList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.ListOptions) ([]*woodpecker.Org, error)) *MockClient_OrgList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgLookup provides a mock function for the type MockClient
-func (_mock *MockClient) OrgLookup(orgName string) (*woodpecker.Org, error) {
-	ret := _mock.Called(orgName)
+func (_mock *MockClient) OrgLookup(ctx context.Context, orgName string) (*woodpecker.Org, error) {
+	ret := _mock.Called(ctx, orgName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgLookup")
@@ -1710,18 +1813,18 @@ func (_mock *MockClient) OrgLookup(orgName string) (*woodpecker.Org, error) {
 
 	var r0 *woodpecker.Org
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*woodpecker.Org, error)); ok {
-		return returnFunc(orgName)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*woodpecker.Org, error)); ok {
+		return returnFunc(ctx, orgName)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *woodpecker.Org); ok {
-		r0 = returnFunc(orgName)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *woodpecker.Org); ok {
+		r0 = returnFunc(ctx, orgName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Org)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(orgName)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, orgName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1734,19 +1837,25 @@ type MockClient_OrgLookup_Call struct {
 }
 
 // OrgLookup is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgName string
-func (_e *MockClient_Expecter) OrgLookup(orgName any) *MockClient_OrgLookup_Call {
-	return &MockClient_OrgLookup_Call{Call: _e.mock.On("OrgLookup", orgName)}
+func (_e *MockClient_Expecter) OrgLookup(ctx any, orgName any) *MockClient_OrgLookup_Call {
+	return &MockClient_OrgLookup_Call{Call: _e.mock.On("OrgLookup", ctx, orgName)}
 }
 
-func (_c *MockClient_OrgLookup_Call) Run(run func(orgName string)) *MockClient_OrgLookup_Call {
+func (_c *MockClient_OrgLookup_Call) Run(run func(ctx context.Context, orgName string)) *MockClient_OrgLookup_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -1757,14 +1866,14 @@ func (_c *MockClient_OrgLookup_Call) Return(org *woodpecker.Org, err error) *Moc
 	return _c
 }
 
-func (_c *MockClient_OrgLookup_Call) RunAndReturn(run func(orgName string) (*woodpecker.Org, error)) *MockClient_OrgLookup_Call {
+func (_c *MockClient_OrgLookup_Call) RunAndReturn(run func(ctx context.Context, orgName string) (*woodpecker.Org, error)) *MockClient_OrgLookup_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgRegistry provides a mock function for the type MockClient
-func (_mock *MockClient) OrgRegistry(orgID int64, registry string) (*woodpecker.Registry, error) {
-	ret := _mock.Called(orgID, registry)
+func (_mock *MockClient) OrgRegistry(ctx context.Context, orgID int64, registry string) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, orgID, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistry")
@@ -1772,18 +1881,18 @@ func (_mock *MockClient) OrgRegistry(orgID int64, registry string) (*woodpecker.
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) (*woodpecker.Registry, error)); ok {
-		return returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, orgID, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, string) *woodpecker.Registry); ok {
-		r0 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, orgID, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = returnFunc(ctx, orgID, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1796,25 +1905,31 @@ type MockClient_OrgRegistry_Call struct {
 }
 
 // OrgRegistry is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - registry string
-func (_e *MockClient_Expecter) OrgRegistry(orgID any, registry any) *MockClient_OrgRegistry_Call {
-	return &MockClient_OrgRegistry_Call{Call: _e.mock.On("OrgRegistry", orgID, registry)}
+func (_e *MockClient_Expecter) OrgRegistry(ctx any, orgID any, registry any) *MockClient_OrgRegistry_Call {
+	return &MockClient_OrgRegistry_Call{Call: _e.mock.On("OrgRegistry", ctx, orgID, registry)}
 }
 
-func (_c *MockClient_OrgRegistry_Call) Run(run func(orgID int64, registry string)) *MockClient_OrgRegistry_Call {
+func (_c *MockClient_OrgRegistry_Call) Run(run func(ctx context.Context, orgID int64, registry string)) *MockClient_OrgRegistry_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1825,14 +1940,14 @@ func (_c *MockClient_OrgRegistry_Call) Return(registry1 *woodpecker.Registry, er
 	return _c
 }
 
-func (_c *MockClient_OrgRegistry_Call) RunAndReturn(run func(orgID int64, registry string) (*woodpecker.Registry, error)) *MockClient_OrgRegistry_Call {
+func (_c *MockClient_OrgRegistry_Call) RunAndReturn(run func(ctx context.Context, orgID int64, registry string) (*woodpecker.Registry, error)) *MockClient_OrgRegistry_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgRegistryCreate provides a mock function for the type MockClient
-func (_mock *MockClient) OrgRegistryCreate(orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(orgID, registry)
+func (_mock *MockClient) OrgRegistryCreate(ctx context.Context, orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, orgID, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryCreate")
@@ -1840,18 +1955,18 @@ func (_mock *MockClient) OrgRegistryCreate(orgID int64, registry *woodpecker.Reg
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, orgID, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, orgID, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Registry) error); ok {
-		r1 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, orgID, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1864,25 +1979,31 @@ type MockClient_OrgRegistryCreate_Call struct {
 }
 
 // OrgRegistryCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) OrgRegistryCreate(orgID any, registry any) *MockClient_OrgRegistryCreate_Call {
-	return &MockClient_OrgRegistryCreate_Call{Call: _e.mock.On("OrgRegistryCreate", orgID, registry)}
+func (_e *MockClient_Expecter) OrgRegistryCreate(ctx any, orgID any, registry any) *MockClient_OrgRegistryCreate_Call {
+	return &MockClient_OrgRegistryCreate_Call{Call: _e.mock.On("OrgRegistryCreate", ctx, orgID, registry)}
 }
 
-func (_c *MockClient_OrgRegistryCreate_Call) Run(run func(orgID int64, registry *woodpecker.Registry)) *MockClient_OrgRegistryCreate_Call {
+func (_c *MockClient_OrgRegistryCreate_Call) Run(run func(ctx context.Context, orgID int64, registry *woodpecker.Registry)) *MockClient_OrgRegistryCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Registry
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Registry)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Registry
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Registry)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1893,22 +2014,22 @@ func (_c *MockClient_OrgRegistryCreate_Call) Return(registry1 *woodpecker.Regist
 	return _c
 }
 
-func (_c *MockClient_OrgRegistryCreate_Call) RunAndReturn(run func(orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_OrgRegistryCreate_Call {
+func (_c *MockClient_OrgRegistryCreate_Call) RunAndReturn(run func(ctx context.Context, orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_OrgRegistryCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgRegistryDelete provides a mock function for the type MockClient
-func (_mock *MockClient) OrgRegistryDelete(orgID int64, registry string) error {
-	ret := _mock.Called(orgID, registry)
+func (_mock *MockClient) OrgRegistryDelete(ctx context.Context, orgID int64, registry string) error {
+	ret := _mock.Called(ctx, orgID, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) error); ok {
-		r0 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(ctx, orgID, registry)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1921,25 +2042,31 @@ type MockClient_OrgRegistryDelete_Call struct {
 }
 
 // OrgRegistryDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - registry string
-func (_e *MockClient_Expecter) OrgRegistryDelete(orgID any, registry any) *MockClient_OrgRegistryDelete_Call {
-	return &MockClient_OrgRegistryDelete_Call{Call: _e.mock.On("OrgRegistryDelete", orgID, registry)}
+func (_e *MockClient_Expecter) OrgRegistryDelete(ctx any, orgID any, registry any) *MockClient_OrgRegistryDelete_Call {
+	return &MockClient_OrgRegistryDelete_Call{Call: _e.mock.On("OrgRegistryDelete", ctx, orgID, registry)}
 }
 
-func (_c *MockClient_OrgRegistryDelete_Call) Run(run func(orgID int64, registry string)) *MockClient_OrgRegistryDelete_Call {
+func (_c *MockClient_OrgRegistryDelete_Call) Run(run func(ctx context.Context, orgID int64, registry string)) *MockClient_OrgRegistryDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -1950,14 +2077,14 @@ func (_c *MockClient_OrgRegistryDelete_Call) Return(err error) *MockClient_OrgRe
 	return _c
 }
 
-func (_c *MockClient_OrgRegistryDelete_Call) RunAndReturn(run func(orgID int64, registry string) error) *MockClient_OrgRegistryDelete_Call {
+func (_c *MockClient_OrgRegistryDelete_Call) RunAndReturn(run func(ctx context.Context, orgID int64, registry string) error) *MockClient_OrgRegistryDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgRegistryList provides a mock function for the type MockClient
-func (_mock *MockClient) OrgRegistryList(orgID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
-	ret := _mock.Called(orgID, opt)
+func (_mock *MockClient) OrgRegistryList(ctx context.Context, orgID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, orgID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryList")
@@ -1965,18 +2092,18 @@ func (_mock *MockClient) OrgRegistryList(orgID int64, opt woodpecker.RegistryLis
 
 	var r0 []*woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
-		return returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, orgID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
-		r0 = returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, orgID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.RegistryListOptions) error); ok {
-		r1 = returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.RegistryListOptions) error); ok {
+		r1 = returnFunc(ctx, orgID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1989,25 +2116,31 @@ type MockClient_OrgRegistryList_Call struct {
 }
 
 // OrgRegistryList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) OrgRegistryList(orgID any, opt any) *MockClient_OrgRegistryList_Call {
-	return &MockClient_OrgRegistryList_Call{Call: _e.mock.On("OrgRegistryList", orgID, opt)}
+func (_e *MockClient_Expecter) OrgRegistryList(ctx any, orgID any, opt any) *MockClient_OrgRegistryList_Call {
+	return &MockClient_OrgRegistryList_Call{Call: _e.mock.On("OrgRegistryList", ctx, orgID, opt)}
 }
 
-func (_c *MockClient_OrgRegistryList_Call) Run(run func(orgID int64, opt woodpecker.RegistryListOptions)) *MockClient_OrgRegistryList_Call {
+func (_c *MockClient_OrgRegistryList_Call) Run(run func(ctx context.Context, orgID int64, opt woodpecker.RegistryListOptions)) *MockClient_OrgRegistryList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.RegistryListOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.RegistryListOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.RegistryListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.RegistryListOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2018,14 +2151,14 @@ func (_c *MockClient_OrgRegistryList_Call) Return(registrys []*woodpecker.Regist
 	return _c
 }
 
-func (_c *MockClient_OrgRegistryList_Call) RunAndReturn(run func(orgID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_OrgRegistryList_Call {
+func (_c *MockClient_OrgRegistryList_Call) RunAndReturn(run func(ctx context.Context, orgID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_OrgRegistryList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgRegistryUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) OrgRegistryUpdate(orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(orgID, registry)
+func (_mock *MockClient) OrgRegistryUpdate(ctx context.Context, orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, orgID, registry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryUpdate")
@@ -2033,18 +2166,18 @@ func (_mock *MockClient) OrgRegistryUpdate(orgID int64, registry *woodpecker.Reg
 
 	var r0 *woodpecker.Registry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, orgID, registry)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, orgID, registry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Registry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Registry) error); ok {
-		r1 = returnFunc(orgID, registry)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, orgID, registry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2057,25 +2190,31 @@ type MockClient_OrgRegistryUpdate_Call struct {
 }
 
 // OrgRegistryUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) OrgRegistryUpdate(orgID any, registry any) *MockClient_OrgRegistryUpdate_Call {
-	return &MockClient_OrgRegistryUpdate_Call{Call: _e.mock.On("OrgRegistryUpdate", orgID, registry)}
+func (_e *MockClient_Expecter) OrgRegistryUpdate(ctx any, orgID any, registry any) *MockClient_OrgRegistryUpdate_Call {
+	return &MockClient_OrgRegistryUpdate_Call{Call: _e.mock.On("OrgRegistryUpdate", ctx, orgID, registry)}
 }
 
-func (_c *MockClient_OrgRegistryUpdate_Call) Run(run func(orgID int64, registry *woodpecker.Registry)) *MockClient_OrgRegistryUpdate_Call {
+func (_c *MockClient_OrgRegistryUpdate_Call) Run(run func(ctx context.Context, orgID int64, registry *woodpecker.Registry)) *MockClient_OrgRegistryUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Registry
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Registry)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Registry
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Registry)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2086,14 +2225,14 @@ func (_c *MockClient_OrgRegistryUpdate_Call) Return(registry1 *woodpecker.Regist
 	return _c
 }
 
-func (_c *MockClient_OrgRegistryUpdate_Call) RunAndReturn(run func(orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_OrgRegistryUpdate_Call {
+func (_c *MockClient_OrgRegistryUpdate_Call) RunAndReturn(run func(ctx context.Context, orgID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_OrgRegistryUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgSecret provides a mock function for the type MockClient
-func (_mock *MockClient) OrgSecret(orgID int64, secret string) (*woodpecker.Secret, error) {
-	ret := _mock.Called(orgID, secret)
+func (_mock *MockClient) OrgSecret(ctx context.Context, orgID int64, secret string) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, orgID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecret")
@@ -2101,18 +2240,18 @@ func (_mock *MockClient) OrgSecret(orgID int64, secret string) (*woodpecker.Secr
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) (*woodpecker.Secret, error)); ok {
-		return returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, orgID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, string) *woodpecker.Secret); ok {
-		r0 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, orgID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = returnFunc(ctx, orgID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2125,25 +2264,31 @@ type MockClient_OrgSecret_Call struct {
 }
 
 // OrgSecret is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - secret string
-func (_e *MockClient_Expecter) OrgSecret(orgID any, secret any) *MockClient_OrgSecret_Call {
-	return &MockClient_OrgSecret_Call{Call: _e.mock.On("OrgSecret", orgID, secret)}
+func (_e *MockClient_Expecter) OrgSecret(ctx any, orgID any, secret any) *MockClient_OrgSecret_Call {
+	return &MockClient_OrgSecret_Call{Call: _e.mock.On("OrgSecret", ctx, orgID, secret)}
 }
 
-func (_c *MockClient_OrgSecret_Call) Run(run func(orgID int64, secret string)) *MockClient_OrgSecret_Call {
+func (_c *MockClient_OrgSecret_Call) Run(run func(ctx context.Context, orgID int64, secret string)) *MockClient_OrgSecret_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2154,14 +2299,14 @@ func (_c *MockClient_OrgSecret_Call) Return(secret1 *woodpecker.Secret, err erro
 	return _c
 }
 
-func (_c *MockClient_OrgSecret_Call) RunAndReturn(run func(orgID int64, secret string) (*woodpecker.Secret, error)) *MockClient_OrgSecret_Call {
+func (_c *MockClient_OrgSecret_Call) RunAndReturn(run func(ctx context.Context, orgID int64, secret string) (*woodpecker.Secret, error)) *MockClient_OrgSecret_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgSecretCreate provides a mock function for the type MockClient
-func (_mock *MockClient) OrgSecretCreate(orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(orgID, secret)
+func (_mock *MockClient) OrgSecretCreate(ctx context.Context, orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, orgID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretCreate")
@@ -2169,18 +2314,18 @@ func (_mock *MockClient) OrgSecretCreate(orgID int64, secret *woodpecker.Secret)
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, orgID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, orgID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Secret) error); ok {
-		r1 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, orgID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2193,25 +2338,31 @@ type MockClient_OrgSecretCreate_Call struct {
 }
 
 // OrgSecretCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) OrgSecretCreate(orgID any, secret any) *MockClient_OrgSecretCreate_Call {
-	return &MockClient_OrgSecretCreate_Call{Call: _e.mock.On("OrgSecretCreate", orgID, secret)}
+func (_e *MockClient_Expecter) OrgSecretCreate(ctx any, orgID any, secret any) *MockClient_OrgSecretCreate_Call {
+	return &MockClient_OrgSecretCreate_Call{Call: _e.mock.On("OrgSecretCreate", ctx, orgID, secret)}
 }
 
-func (_c *MockClient_OrgSecretCreate_Call) Run(run func(orgID int64, secret *woodpecker.Secret)) *MockClient_OrgSecretCreate_Call {
+func (_c *MockClient_OrgSecretCreate_Call) Run(run func(ctx context.Context, orgID int64, secret *woodpecker.Secret)) *MockClient_OrgSecretCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Secret
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Secret)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Secret
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2222,22 +2373,22 @@ func (_c *MockClient_OrgSecretCreate_Call) Return(secret1 *woodpecker.Secret, er
 	return _c
 }
 
-func (_c *MockClient_OrgSecretCreate_Call) RunAndReturn(run func(orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_OrgSecretCreate_Call {
+func (_c *MockClient_OrgSecretCreate_Call) RunAndReturn(run func(ctx context.Context, orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_OrgSecretCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgSecretDelete provides a mock function for the type MockClient
-func (_mock *MockClient) OrgSecretDelete(orgID int64, secret string) error {
-	ret := _mock.Called(orgID, secret)
+func (_mock *MockClient) OrgSecretDelete(ctx context.Context, orgID int64, secret string) error {
+	ret := _mock.Called(ctx, orgID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) error); ok {
-		r0 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(ctx, orgID, secret)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -2250,25 +2401,31 @@ type MockClient_OrgSecretDelete_Call struct {
 }
 
 // OrgSecretDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - secret string
-func (_e *MockClient_Expecter) OrgSecretDelete(orgID any, secret any) *MockClient_OrgSecretDelete_Call {
-	return &MockClient_OrgSecretDelete_Call{Call: _e.mock.On("OrgSecretDelete", orgID, secret)}
+func (_e *MockClient_Expecter) OrgSecretDelete(ctx any, orgID any, secret any) *MockClient_OrgSecretDelete_Call {
+	return &MockClient_OrgSecretDelete_Call{Call: _e.mock.On("OrgSecretDelete", ctx, orgID, secret)}
 }
 
-func (_c *MockClient_OrgSecretDelete_Call) Run(run func(orgID int64, secret string)) *MockClient_OrgSecretDelete_Call {
+func (_c *MockClient_OrgSecretDelete_Call) Run(run func(ctx context.Context, orgID int64, secret string)) *MockClient_OrgSecretDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2279,14 +2436,14 @@ func (_c *MockClient_OrgSecretDelete_Call) Return(err error) *MockClient_OrgSecr
 	return _c
 }
 
-func (_c *MockClient_OrgSecretDelete_Call) RunAndReturn(run func(orgID int64, secret string) error) *MockClient_OrgSecretDelete_Call {
+func (_c *MockClient_OrgSecretDelete_Call) RunAndReturn(run func(ctx context.Context, orgID int64, secret string) error) *MockClient_OrgSecretDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgSecretList provides a mock function for the type MockClient
-func (_mock *MockClient) OrgSecretList(orgID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
-	ret := _mock.Called(orgID, opt)
+func (_mock *MockClient) OrgSecretList(ctx context.Context, orgID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, orgID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretList")
@@ -2294,18 +2451,18 @@ func (_mock *MockClient) OrgSecretList(orgID int64, opt woodpecker.SecretListOpt
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
-		return returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, orgID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
-		r0 = returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, orgID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.SecretListOptions) error); ok {
-		r1 = returnFunc(orgID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.SecretListOptions) error); ok {
+		r1 = returnFunc(ctx, orgID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2318,25 +2475,31 @@ type MockClient_OrgSecretList_Call struct {
 }
 
 // OrgSecretList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) OrgSecretList(orgID any, opt any) *MockClient_OrgSecretList_Call {
-	return &MockClient_OrgSecretList_Call{Call: _e.mock.On("OrgSecretList", orgID, opt)}
+func (_e *MockClient_Expecter) OrgSecretList(ctx any, orgID any, opt any) *MockClient_OrgSecretList_Call {
+	return &MockClient_OrgSecretList_Call{Call: _e.mock.On("OrgSecretList", ctx, orgID, opt)}
 }
 
-func (_c *MockClient_OrgSecretList_Call) Run(run func(orgID int64, opt woodpecker.SecretListOptions)) *MockClient_OrgSecretList_Call {
+func (_c *MockClient_OrgSecretList_Call) Run(run func(ctx context.Context, orgID int64, opt woodpecker.SecretListOptions)) *MockClient_OrgSecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.SecretListOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.SecretListOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.SecretListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.SecretListOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2347,14 +2510,14 @@ func (_c *MockClient_OrgSecretList_Call) Return(secrets []*woodpecker.Secret, er
 	return _c
 }
 
-func (_c *MockClient_OrgSecretList_Call) RunAndReturn(run func(orgID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_OrgSecretList_Call {
+func (_c *MockClient_OrgSecretList_Call) RunAndReturn(run func(ctx context.Context, orgID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_OrgSecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // OrgSecretUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) OrgSecretUpdate(orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(orgID, secret)
+func (_mock *MockClient) OrgSecretUpdate(ctx context.Context, orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, orgID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretUpdate")
@@ -2362,18 +2525,18 @@ func (_mock *MockClient) OrgSecretUpdate(orgID int64, secret *woodpecker.Secret)
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, orgID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, orgID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Secret) error); ok {
-		r1 = returnFunc(orgID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, orgID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2386,25 +2549,31 @@ type MockClient_OrgSecretUpdate_Call struct {
 }
 
 // OrgSecretUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - orgID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) OrgSecretUpdate(orgID any, secret any) *MockClient_OrgSecretUpdate_Call {
-	return &MockClient_OrgSecretUpdate_Call{Call: _e.mock.On("OrgSecretUpdate", orgID, secret)}
+func (_e *MockClient_Expecter) OrgSecretUpdate(ctx any, orgID any, secret any) *MockClient_OrgSecretUpdate_Call {
+	return &MockClient_OrgSecretUpdate_Call{Call: _e.mock.On("OrgSecretUpdate", ctx, orgID, secret)}
 }
 
-func (_c *MockClient_OrgSecretUpdate_Call) Run(run func(orgID int64, secret *woodpecker.Secret)) *MockClient_OrgSecretUpdate_Call {
+func (_c *MockClient_OrgSecretUpdate_Call) Run(run func(ctx context.Context, orgID int64, secret *woodpecker.Secret)) *MockClient_OrgSecretUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Secret
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Secret)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Secret
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2415,14 +2584,14 @@ func (_c *MockClient_OrgSecretUpdate_Call) Return(secret1 *woodpecker.Secret, er
 	return _c
 }
 
-func (_c *MockClient_OrgSecretUpdate_Call) RunAndReturn(run func(orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_OrgSecretUpdate_Call {
+func (_c *MockClient_OrgSecretUpdate_Call) RunAndReturn(run func(ctx context.Context, orgID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_OrgSecretUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Pipeline provides a mock function for the type MockClient
-func (_mock *MockClient) Pipeline(repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) Pipeline(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Pipeline")
@@ -2430,18 +2599,18 @@ func (_mock *MockClient) Pipeline(repoID int64, pipeline int64) (*woodpecker.Pip
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, pipeline)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
-		r1 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64) error); ok {
+		r1 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2454,25 +2623,31 @@ type MockClient_Pipeline_Call struct {
 }
 
 // Pipeline is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) Pipeline(repoID any, pipeline any) *MockClient_Pipeline_Call {
-	return &MockClient_Pipeline_Call{Call: _e.mock.On("Pipeline", repoID, pipeline)}
+func (_e *MockClient_Expecter) Pipeline(ctx any, repoID any, pipeline any) *MockClient_Pipeline_Call {
+	return &MockClient_Pipeline_Call{Call: _e.mock.On("Pipeline", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_Pipeline_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_Pipeline_Call {
+func (_c *MockClient_Pipeline_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_Pipeline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2483,14 +2658,14 @@ func (_c *MockClient_Pipeline_Call) Return(pipeline1 *woodpecker.Pipeline, err e
 	return _c
 }
 
-func (_c *MockClient_Pipeline_Call) RunAndReturn(run func(repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_Pipeline_Call {
+func (_c *MockClient_Pipeline_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_Pipeline_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineApprove provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineApprove(repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) PipelineApprove(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineApprove")
@@ -2498,18 +2673,18 @@ func (_mock *MockClient) PipelineApprove(repoID int64, pipeline int64) (*woodpec
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, pipeline)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
-		r1 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64) error); ok {
+		r1 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2522,25 +2697,31 @@ type MockClient_PipelineApprove_Call struct {
 }
 
 // PipelineApprove is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineApprove(repoID any, pipeline any) *MockClient_PipelineApprove_Call {
-	return &MockClient_PipelineApprove_Call{Call: _e.mock.On("PipelineApprove", repoID, pipeline)}
+func (_e *MockClient_Expecter) PipelineApprove(ctx any, repoID any, pipeline any) *MockClient_PipelineApprove_Call {
+	return &MockClient_PipelineApprove_Call{Call: _e.mock.On("PipelineApprove", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_PipelineApprove_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_PipelineApprove_Call {
+func (_c *MockClient_PipelineApprove_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_PipelineApprove_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2551,14 +2732,14 @@ func (_c *MockClient_PipelineApprove_Call) Return(pipeline1 *woodpecker.Pipeline
 	return _c
 }
 
-func (_c *MockClient_PipelineApprove_Call) RunAndReturn(run func(repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_PipelineApprove_Call {
+func (_c *MockClient_PipelineApprove_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_PipelineApprove_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineCreate provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineCreate(repoID int64, opts *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, opts)
+func (_mock *MockClient) PipelineCreate(ctx context.Context, repoID int64, opts *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, opts)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineCreate")
@@ -2566,18 +2747,18 @@ func (_mock *MockClient) PipelineCreate(repoID int64, opts *woodpecker.PipelineO
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, opts)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, opts)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.PipelineOptions) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, opts)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.PipelineOptions) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, opts)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.PipelineOptions) error); ok {
-		r1 = returnFunc(repoID, opts)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.PipelineOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opts)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2590,25 +2771,31 @@ type MockClient_PipelineCreate_Call struct {
 }
 
 // PipelineCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opts *woodpecker.PipelineOptions
-func (_e *MockClient_Expecter) PipelineCreate(repoID any, opts any) *MockClient_PipelineCreate_Call {
-	return &MockClient_PipelineCreate_Call{Call: _e.mock.On("PipelineCreate", repoID, opts)}
+func (_e *MockClient_Expecter) PipelineCreate(ctx any, repoID any, opts any) *MockClient_PipelineCreate_Call {
+	return &MockClient_PipelineCreate_Call{Call: _e.mock.On("PipelineCreate", ctx, repoID, opts)}
 }
 
-func (_c *MockClient_PipelineCreate_Call) Run(run func(repoID int64, opts *woodpecker.PipelineOptions)) *MockClient_PipelineCreate_Call {
+func (_c *MockClient_PipelineCreate_Call) Run(run func(ctx context.Context, repoID int64, opts *woodpecker.PipelineOptions)) *MockClient_PipelineCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.PipelineOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.PipelineOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.PipelineOptions
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.PipelineOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2619,14 +2806,14 @@ func (_c *MockClient_PipelineCreate_Call) Return(pipeline *woodpecker.Pipeline, 
 	return _c
 }
 
-func (_c *MockClient_PipelineCreate_Call) RunAndReturn(run func(repoID int64, opts *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineCreate_Call {
+func (_c *MockClient_PipelineCreate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opts *woodpecker.PipelineOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineDecline provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineDecline(repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) PipelineDecline(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineDecline")
@@ -2634,18 +2821,18 @@ func (_mock *MockClient) PipelineDecline(repoID int64, pipeline int64) (*woodpec
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, pipeline)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64) error); ok {
-		r1 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64) error); ok {
+		r1 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2658,25 +2845,31 @@ type MockClient_PipelineDecline_Call struct {
 }
 
 // PipelineDecline is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineDecline(repoID any, pipeline any) *MockClient_PipelineDecline_Call {
-	return &MockClient_PipelineDecline_Call{Call: _e.mock.On("PipelineDecline", repoID, pipeline)}
+func (_e *MockClient_Expecter) PipelineDecline(ctx any, repoID any, pipeline any) *MockClient_PipelineDecline_Call {
+	return &MockClient_PipelineDecline_Call{Call: _e.mock.On("PipelineDecline", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_PipelineDecline_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_PipelineDecline_Call {
+func (_c *MockClient_PipelineDecline_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_PipelineDecline_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2687,22 +2880,22 @@ func (_c *MockClient_PipelineDecline_Call) Return(pipeline1 *woodpecker.Pipeline
 	return _c
 }
 
-func (_c *MockClient_PipelineDecline_Call) RunAndReturn(run func(repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_PipelineDecline_Call {
+func (_c *MockClient_PipelineDecline_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) (*woodpecker.Pipeline, error)) *MockClient_PipelineDecline_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineDelete provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineDelete(repoID int64, pipeline int64) error {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) PipelineDelete(ctx context.Context, repoID int64, pipeline int64) error {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) error); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -2715,25 +2908,31 @@ type MockClient_PipelineDelete_Call struct {
 }
 
 // PipelineDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineDelete(repoID any, pipeline any) *MockClient_PipelineDelete_Call {
-	return &MockClient_PipelineDelete_Call{Call: _e.mock.On("PipelineDelete", repoID, pipeline)}
+func (_e *MockClient_Expecter) PipelineDelete(ctx any, repoID any, pipeline any) *MockClient_PipelineDelete_Call {
+	return &MockClient_PipelineDelete_Call{Call: _e.mock.On("PipelineDelete", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_PipelineDelete_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_PipelineDelete_Call {
+func (_c *MockClient_PipelineDelete_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_PipelineDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2744,14 +2943,14 @@ func (_c *MockClient_PipelineDelete_Call) Return(err error) *MockClient_Pipeline
 	return _c
 }
 
-func (_c *MockClient_PipelineDelete_Call) RunAndReturn(run func(repoID int64, pipeline int64) error) *MockClient_PipelineDelete_Call {
+func (_c *MockClient_PipelineDelete_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) error) *MockClient_PipelineDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineLast provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineLast(repoID int64, opt woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, opt)
+func (_mock *MockClient) PipelineLast(ctx context.Context, repoID int64, opt woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineLast")
@@ -2759,18 +2958,18 @@ func (_mock *MockClient) PipelineLast(repoID int64, opt woodpecker.PipelineLastO
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.PipelineLastOptions) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.PipelineLastOptions) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.PipelineLastOptions) error); ok {
-		r1 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.PipelineLastOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2783,25 +2982,31 @@ type MockClient_PipelineLast_Call struct {
 }
 
 // PipelineLast is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opt woodpecker.PipelineLastOptions
-func (_e *MockClient_Expecter) PipelineLast(repoID any, opt any) *MockClient_PipelineLast_Call {
-	return &MockClient_PipelineLast_Call{Call: _e.mock.On("PipelineLast", repoID, opt)}
+func (_e *MockClient_Expecter) PipelineLast(ctx any, repoID any, opt any) *MockClient_PipelineLast_Call {
+	return &MockClient_PipelineLast_Call{Call: _e.mock.On("PipelineLast", ctx, repoID, opt)}
 }
 
-func (_c *MockClient_PipelineLast_Call) Run(run func(repoID int64, opt woodpecker.PipelineLastOptions)) *MockClient_PipelineLast_Call {
+func (_c *MockClient_PipelineLast_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.PipelineLastOptions)) *MockClient_PipelineLast_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.PipelineLastOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.PipelineLastOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.PipelineLastOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.PipelineLastOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2812,14 +3017,14 @@ func (_c *MockClient_PipelineLast_Call) Return(pipeline *woodpecker.Pipeline, er
 	return _c
 }
 
-func (_c *MockClient_PipelineLast_Call) RunAndReturn(run func(repoID int64, opt woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineLast_Call {
+func (_c *MockClient_PipelineLast_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineLast_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineList provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineList(repoID int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, opt)
+func (_mock *MockClient) PipelineList(ctx context.Context, repoID int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineList")
@@ -2827,18 +3032,18 @@ func (_mock *MockClient) PipelineList(repoID int64, opt woodpecker.PipelineListO
 
 	var r0 []*woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.PipelineListOptions) []*woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.PipelineListOptions) []*woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.PipelineListOptions) error); ok {
-		r1 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.PipelineListOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2851,25 +3056,31 @@ type MockClient_PipelineList_Call struct {
 }
 
 // PipelineList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opt woodpecker.PipelineListOptions
-func (_e *MockClient_Expecter) PipelineList(repoID any, opt any) *MockClient_PipelineList_Call {
-	return &MockClient_PipelineList_Call{Call: _e.mock.On("PipelineList", repoID, opt)}
+func (_e *MockClient_Expecter) PipelineList(ctx any, repoID any, opt any) *MockClient_PipelineList_Call {
+	return &MockClient_PipelineList_Call{Call: _e.mock.On("PipelineList", ctx, repoID, opt)}
 }
 
-func (_c *MockClient_PipelineList_Call) Run(run func(repoID int64, opt woodpecker.PipelineListOptions)) *MockClient_PipelineList_Call {
+func (_c *MockClient_PipelineList_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.PipelineListOptions)) *MockClient_PipelineList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.PipelineListOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.PipelineListOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.PipelineListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.PipelineListOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2880,14 +3091,14 @@ func (_c *MockClient_PipelineList_Call) Return(pipelines []*woodpecker.Pipeline,
 	return _c
 }
 
-func (_c *MockClient_PipelineList_Call) RunAndReturn(run func(repoID int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error)) *MockClient_PipelineList_Call {
+func (_c *MockClient_PipelineList_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error)) *MockClient_PipelineList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineMetadata provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error) {
-	ret := _mock.Called(repoID, pipelineNumber)
+func (_mock *MockClient) PipelineMetadata(ctx context.Context, repoID int64, pipelineNumber int) ([]byte, error) {
+	ret := _mock.Called(ctx, repoID, pipelineNumber)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineMetadata")
@@ -2895,18 +3106,18 @@ func (_mock *MockClient) PipelineMetadata(repoID int64, pipelineNumber int) ([]b
 
 	var r0 []byte
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int) ([]byte, error)); ok {
-		return returnFunc(repoID, pipelineNumber)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int) ([]byte, error)); ok {
+		return returnFunc(ctx, repoID, pipelineNumber)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int) []byte); ok {
-		r0 = returnFunc(repoID, pipelineNumber)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int) []byte); ok {
+		r0 = returnFunc(ctx, repoID, pipelineNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int) error); ok {
-		r1 = returnFunc(repoID, pipelineNumber)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int) error); ok {
+		r1 = returnFunc(ctx, repoID, pipelineNumber)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2919,25 +3130,31 @@ type MockClient_PipelineMetadata_Call struct {
 }
 
 // PipelineMetadata is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipelineNumber int
-func (_e *MockClient_Expecter) PipelineMetadata(repoID any, pipelineNumber any) *MockClient_PipelineMetadata_Call {
-	return &MockClient_PipelineMetadata_Call{Call: _e.mock.On("PipelineMetadata", repoID, pipelineNumber)}
+func (_e *MockClient_Expecter) PipelineMetadata(ctx any, repoID any, pipelineNumber any) *MockClient_PipelineMetadata_Call {
+	return &MockClient_PipelineMetadata_Call{Call: _e.mock.On("PipelineMetadata", ctx, repoID, pipelineNumber)}
 }
 
-func (_c *MockClient_PipelineMetadata_Call) Run(run func(repoID int64, pipelineNumber int)) *MockClient_PipelineMetadata_Call {
+func (_c *MockClient_PipelineMetadata_Call) Run(run func(ctx context.Context, repoID int64, pipelineNumber int)) *MockClient_PipelineMetadata_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 int
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(int)
+			arg1 = args[1].(int64)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -2948,14 +3165,14 @@ func (_c *MockClient_PipelineMetadata_Call) Return(bytes []byte, err error) *Moc
 	return _c
 }
 
-func (_c *MockClient_PipelineMetadata_Call) RunAndReturn(run func(repoID int64, pipelineNumber int) ([]byte, error)) *MockClient_PipelineMetadata_Call {
+func (_c *MockClient_PipelineMetadata_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipelineNumber int) ([]byte, error)) *MockClient_PipelineMetadata_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineQueue provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineQueue() ([]*woodpecker.Feed, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) PipelineQueue(ctx context.Context) ([]*woodpecker.Feed, error) {
+	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineQueue")
@@ -2963,18 +3180,18 @@ func (_mock *MockClient) PipelineQueue() ([]*woodpecker.Feed, error) {
 
 	var r0 []*woodpecker.Feed
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() ([]*woodpecker.Feed, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]*woodpecker.Feed, error)); ok {
+		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func() []*woodpecker.Feed); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) []*woodpecker.Feed); ok {
+		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Feed)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2987,13 +3204,20 @@ type MockClient_PipelineQueue_Call struct {
 }
 
 // PipelineQueue is a helper method to define mock.On call
-func (_e *MockClient_Expecter) PipelineQueue() *MockClient_PipelineQueue_Call {
-	return &MockClient_PipelineQueue_Call{Call: _e.mock.On("PipelineQueue")}
+//   - ctx context.Context
+func (_e *MockClient_Expecter) PipelineQueue(ctx any) *MockClient_PipelineQueue_Call {
+	return &MockClient_PipelineQueue_Call{Call: _e.mock.On("PipelineQueue", ctx)}
 }
 
-func (_c *MockClient_PipelineQueue_Call) Run(run func()) *MockClient_PipelineQueue_Call {
+func (_c *MockClient_PipelineQueue_Call) Run(run func(ctx context.Context)) *MockClient_PipelineQueue_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -3003,14 +3227,14 @@ func (_c *MockClient_PipelineQueue_Call) Return(feeds []*woodpecker.Feed, err er
 	return _c
 }
 
-func (_c *MockClient_PipelineQueue_Call) RunAndReturn(run func() ([]*woodpecker.Feed, error)) *MockClient_PipelineQueue_Call {
+func (_c *MockClient_PipelineQueue_Call) RunAndReturn(run func(ctx context.Context) ([]*woodpecker.Feed, error)) *MockClient_PipelineQueue_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineStart provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineStart(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error) {
-	ret := _mock.Called(repoID, num, opt)
+func (_mock *MockClient) PipelineStart(ctx context.Context, repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(ctx, repoID, num, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineStart")
@@ -3018,18 +3242,18 @@ func (_mock *MockClient) PipelineStart(repoID int64, num int64, opt woodpecker.P
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)); ok {
-		return returnFunc(repoID, num, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(ctx, repoID, num, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) *woodpecker.Pipeline); ok {
-		r0 = returnFunc(repoID, num, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, woodpecker.PipelineStartOptions) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(ctx, repoID, num, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64, woodpecker.PipelineStartOptions) error); ok {
-		r1 = returnFunc(repoID, num, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64, woodpecker.PipelineStartOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, num, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3042,31 +3266,37 @@ type MockClient_PipelineStart_Call struct {
 }
 
 // PipelineStart is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - num int64
 //   - opt woodpecker.PipelineStartOptions
-func (_e *MockClient_Expecter) PipelineStart(repoID any, num any, opt any) *MockClient_PipelineStart_Call {
-	return &MockClient_PipelineStart_Call{Call: _e.mock.On("PipelineStart", repoID, num, opt)}
+func (_e *MockClient_Expecter) PipelineStart(ctx any, repoID any, num any, opt any) *MockClient_PipelineStart_Call {
+	return &MockClient_PipelineStart_Call{Call: _e.mock.On("PipelineStart", ctx, repoID, num, opt)}
 }
 
-func (_c *MockClient_PipelineStart_Call) Run(run func(repoID int64, num int64, opt woodpecker.PipelineStartOptions)) *MockClient_PipelineStart_Call {
+func (_c *MockClient_PipelineStart_Call) Run(run func(ctx context.Context, repoID int64, num int64, opt woodpecker.PipelineStartOptions)) *MockClient_PipelineStart_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
 			arg1 = args[1].(int64)
 		}
-		var arg2 woodpecker.PipelineStartOptions
+		var arg2 int64
 		if args[2] != nil {
-			arg2 = args[2].(woodpecker.PipelineStartOptions)
+			arg2 = args[2].(int64)
+		}
+		var arg3 woodpecker.PipelineStartOptions
+		if args[3] != nil {
+			arg3 = args[3].(woodpecker.PipelineStartOptions)
 		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -3077,22 +3307,22 @@ func (_c *MockClient_PipelineStart_Call) Return(pipeline *woodpecker.Pipeline, e
 	return _c
 }
 
-func (_c *MockClient_PipelineStart_Call) RunAndReturn(run func(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineStart_Call {
+func (_c *MockClient_PipelineStart_Call) RunAndReturn(run func(ctx context.Context, repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineStart_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // PipelineStop provides a mock function for the type MockClient
-func (_mock *MockClient) PipelineStop(repoID int64, pipeline int64) error {
-	ret := _mock.Called(repoID, pipeline)
+func (_mock *MockClient) PipelineStop(ctx context.Context, repoID int64, pipeline int64) error {
+	ret := _mock.Called(ctx, repoID, pipeline)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineStop")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64) error); ok {
-		r0 = returnFunc(repoID, pipeline)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64) error); ok {
+		r0 = returnFunc(ctx, repoID, pipeline)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -3105,17 +3335,512 @@ type MockClient_PipelineStop_Call struct {
 }
 
 // PipelineStop is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
-func (_e *MockClient_Expecter) PipelineStop(repoID any, pipeline any) *MockClient_PipelineStop_Call {
-	return &MockClient_PipelineStop_Call{Call: _e.mock.On("PipelineStop", repoID, pipeline)}
+func (_e *MockClient_Expecter) PipelineStop(ctx any, repoID any, pipeline any) *MockClient_PipelineStop_Call {
+	return &MockClient_PipelineStop_Call{Call: _e.mock.On("PipelineStop", ctx, repoID, pipeline)}
 }
 
-func (_c *MockClient_PipelineStop_Call) Run(run func(repoID int64, pipeline int64)) *MockClient_PipelineStop_Call {
+func (_c *MockClient_PipelineStop_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64)) *MockClient_PipelineStop_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_PipelineStop_Call) Return(err error) *MockClient_PipelineStop_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_PipelineStop_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64) error) *MockClient_PipelineStop_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// QueueInfo provides a mock function for the type MockClient
+func (_mock *MockClient) QueueInfo(ctx context.Context) (*woodpecker.Info, error) {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for QueueInfo")
+	}
+
+	var r0 *woodpecker.Info
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*woodpecker.Info, error)); ok {
+		return returnFunc(ctx)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *woodpecker.Info); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Info)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_QueueInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'QueueInfo'
+type MockClient_QueueInfo_Call struct {
+	*mock.Call
+}
+
+// QueueInfo is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockClient_Expecter) QueueInfo(ctx any) *MockClient_QueueInfo_Call {
+	return &MockClient_QueueInfo_Call{Call: _e.mock.On("QueueInfo", ctx)}
+}
+
+func (_c *MockClient_QueueInfo_Call) Run(run func(ctx context.Context)) *MockClient_QueueInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_QueueInfo_Call) Return(info *woodpecker.Info, err error) *MockClient_QueueInfo_Call {
+	_c.Call.Return(info, err)
+	return _c
+}
+
+func (_c *MockClient_QueueInfo_Call) RunAndReturn(run func(ctx context.Context) (*woodpecker.Info, error)) *MockClient_QueueInfo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Registry provides a mock function for the type MockClient
+func (_mock *MockClient) Registry(ctx context.Context, repoID int64, hostname string) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, repoID, hostname)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Registry")
+	}
+
+	var r0 *woodpecker.Registry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, repoID, hostname)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, repoID, hostname)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Registry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = returnFunc(ctx, repoID, hostname)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_Registry_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Registry'
+type MockClient_Registry_Call struct {
+	*mock.Call
+}
+
+// Registry is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - hostname string
+func (_e *MockClient_Expecter) Registry(ctx any, repoID any, hostname any) *MockClient_Registry_Call {
+	return &MockClient_Registry_Call{Call: _e.mock.On("Registry", ctx, repoID, hostname)}
+}
+
+func (_c *MockClient_Registry_Call) Run(run func(ctx context.Context, repoID int64, hostname string)) *MockClient_Registry_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_Registry_Call) Return(registry *woodpecker.Registry, err error) *MockClient_Registry_Call {
+	_c.Call.Return(registry, err)
+	return _c
+}
+
+func (_c *MockClient_Registry_Call) RunAndReturn(run func(ctx context.Context, repoID int64, hostname string) (*woodpecker.Registry, error)) *MockClient_Registry_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RegistryCreate provides a mock function for the type MockClient
+func (_mock *MockClient) RegistryCreate(ctx context.Context, repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, repoID, registry)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistryCreate")
+	}
+
+	var r0 *woodpecker.Registry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, repoID, registry)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, repoID, registry)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Registry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, repoID, registry)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_RegistryCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryCreate'
+type MockClient_RegistryCreate_Call struct {
+	*mock.Call
+}
+
+// RegistryCreate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - registry *woodpecker.Registry
+func (_e *MockClient_Expecter) RegistryCreate(ctx any, repoID any, registry any) *MockClient_RegistryCreate_Call {
+	return &MockClient_RegistryCreate_Call{Call: _e.mock.On("RegistryCreate", ctx, repoID, registry)}
+}
+
+func (_c *MockClient_RegistryCreate_Call) Run(run func(ctx context.Context, repoID int64, registry *woodpecker.Registry)) *MockClient_RegistryCreate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Registry
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Registry)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RegistryCreate_Call) Return(registry1 *woodpecker.Registry, err error) *MockClient_RegistryCreate_Call {
+	_c.Call.Return(registry1, err)
+	return _c
+}
+
+func (_c *MockClient_RegistryCreate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_RegistryCreate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RegistryDelete provides a mock function for the type MockClient
+func (_mock *MockClient) RegistryDelete(ctx context.Context, repoID int64, hostname string) error {
+	ret := _mock.Called(ctx, repoID, hostname)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistryDelete")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(ctx, repoID, hostname)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockClient_RegistryDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryDelete'
+type MockClient_RegistryDelete_Call struct {
+	*mock.Call
+}
+
+// RegistryDelete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - hostname string
+func (_e *MockClient_Expecter) RegistryDelete(ctx any, repoID any, hostname any) *MockClient_RegistryDelete_Call {
+	return &MockClient_RegistryDelete_Call{Call: _e.mock.On("RegistryDelete", ctx, repoID, hostname)}
+}
+
+func (_c *MockClient_RegistryDelete_Call) Run(run func(ctx context.Context, repoID int64, hostname string)) *MockClient_RegistryDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RegistryDelete_Call) Return(err error) *MockClient_RegistryDelete_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockClient_RegistryDelete_Call) RunAndReturn(run func(ctx context.Context, repoID int64, hostname string) error) *MockClient_RegistryDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RegistryList provides a mock function for the type MockClient
+func (_mock *MockClient) RegistryList(ctx context.Context, repoID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, repoID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistryList")
+	}
+
+	var r0 []*woodpecker.Registry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, repoID, opt)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, repoID, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.Registry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.RegistryListOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_RegistryList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryList'
+type MockClient_RegistryList_Call struct {
+	*mock.Call
+}
+
+// RegistryList is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - opt woodpecker.RegistryListOptions
+func (_e *MockClient_Expecter) RegistryList(ctx any, repoID any, opt any) *MockClient_RegistryList_Call {
+	return &MockClient_RegistryList_Call{Call: _e.mock.On("RegistryList", ctx, repoID, opt)}
+}
+
+func (_c *MockClient_RegistryList_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.RegistryListOptions)) *MockClient_RegistryList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.RegistryListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.RegistryListOptions)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RegistryList_Call) Return(registrys []*woodpecker.Registry, err error) *MockClient_RegistryList_Call {
+	_c.Call.Return(registrys, err)
+	return _c
+}
+
+func (_c *MockClient_RegistryList_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_RegistryList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RegistryUpdate provides a mock function for the type MockClient
+func (_mock *MockClient) RegistryUpdate(ctx context.Context, repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
+	ret := _mock.Called(ctx, repoID, registry)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistryUpdate")
+	}
+
+	var r0 *woodpecker.Registry
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
+		return returnFunc(ctx, repoID, registry)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Registry) *woodpecker.Registry); ok {
+		r0 = returnFunc(ctx, repoID, registry)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Registry)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Registry) error); ok {
+		r1 = returnFunc(ctx, repoID, registry)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_RegistryUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryUpdate'
+type MockClient_RegistryUpdate_Call struct {
+	*mock.Call
+}
+
+// RegistryUpdate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+//   - registry *woodpecker.Registry
+func (_e *MockClient_Expecter) RegistryUpdate(ctx any, repoID any, registry any) *MockClient_RegistryUpdate_Call {
+	return &MockClient_RegistryUpdate_Call{Call: _e.mock.On("RegistryUpdate", ctx, repoID, registry)}
+}
+
+func (_c *MockClient_RegistryUpdate_Call) Run(run func(ctx context.Context, repoID int64, registry *woodpecker.Registry)) *MockClient_RegistryUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Registry
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Registry)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_RegistryUpdate_Call) Return(registry1 *woodpecker.Registry, err error) *MockClient_RegistryUpdate_Call {
+	_c.Call.Return(registry1, err)
+	return _c
+}
+
+func (_c *MockClient_RegistryUpdate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_RegistryUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Repo provides a mock function for the type MockClient
+func (_mock *MockClient) Repo(ctx context.Context, repoID int64) (*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, repoID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Repo")
+	}
+
+	var r0 *woodpecker.Repo
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, repoID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, repoID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Repo)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, repoID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_Repo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Repo'
+type MockClient_Repo_Call struct {
+	*mock.Call
+}
+
+// Repo is a helper method to define mock.On call
+//   - ctx context.Context
+//   - repoID int64
+func (_e *MockClient_Expecter) Repo(ctx any, repoID any) *MockClient_Repo_Call {
+	return &MockClient_Repo_Call{Call: _e.mock.On("Repo", ctx, repoID)}
+}
+
+func (_c *MockClient_Repo_Call) Run(run func(ctx context.Context, repoID int64)) *MockClient_Repo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
@@ -3129,465 +3854,19 @@ func (_c *MockClient_PipelineStop_Call) Run(run func(repoID int64, pipeline int6
 	return _c
 }
 
-func (_c *MockClient_PipelineStop_Call) Return(err error) *MockClient_PipelineStop_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockClient_PipelineStop_Call) RunAndReturn(run func(repoID int64, pipeline int64) error) *MockClient_PipelineStop_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// QueueInfo provides a mock function for the type MockClient
-func (_mock *MockClient) QueueInfo() (*woodpecker.Info, error) {
-	ret := _mock.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for QueueInfo")
-	}
-
-	var r0 *woodpecker.Info
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.Info, error)); ok {
-		return returnFunc()
-	}
-	if returnFunc, ok := ret.Get(0).(func() *woodpecker.Info); ok {
-		r0 = returnFunc()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Info)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_QueueInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'QueueInfo'
-type MockClient_QueueInfo_Call struct {
-	*mock.Call
-}
-
-// QueueInfo is a helper method to define mock.On call
-func (_e *MockClient_Expecter) QueueInfo() *MockClient_QueueInfo_Call {
-	return &MockClient_QueueInfo_Call{Call: _e.mock.On("QueueInfo")}
-}
-
-func (_c *MockClient_QueueInfo_Call) Run(run func()) *MockClient_QueueInfo_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockClient_QueueInfo_Call) Return(info *woodpecker.Info, err error) *MockClient_QueueInfo_Call {
-	_c.Call.Return(info, err)
-	return _c
-}
-
-func (_c *MockClient_QueueInfo_Call) RunAndReturn(run func() (*woodpecker.Info, error)) *MockClient_QueueInfo_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// Registry provides a mock function for the type MockClient
-func (_mock *MockClient) Registry(repoID int64, hostname string) (*woodpecker.Registry, error) {
-	ret := _mock.Called(repoID, hostname)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Registry")
-	}
-
-	var r0 *woodpecker.Registry
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) (*woodpecker.Registry, error)); ok {
-		return returnFunc(repoID, hostname)
-	}
-	if returnFunc, ok := ret.Get(0).(func(int64, string) *woodpecker.Registry); ok {
-		r0 = returnFunc(repoID, hostname)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Registry)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = returnFunc(repoID, hostname)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_Registry_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Registry'
-type MockClient_Registry_Call struct {
-	*mock.Call
-}
-
-// Registry is a helper method to define mock.On call
-//   - repoID int64
-//   - hostname string
-func (_e *MockClient_Expecter) Registry(repoID any, hostname any) *MockClient_Registry_Call {
-	return &MockClient_Registry_Call{Call: _e.mock.On("Registry", repoID, hostname)}
-}
-
-func (_c *MockClient_Registry_Call) Run(run func(repoID int64, hostname string)) *MockClient_Registry_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_Registry_Call) Return(registry *woodpecker.Registry, err error) *MockClient_Registry_Call {
-	_c.Call.Return(registry, err)
-	return _c
-}
-
-func (_c *MockClient_Registry_Call) RunAndReturn(run func(repoID int64, hostname string) (*woodpecker.Registry, error)) *MockClient_Registry_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// RegistryCreate provides a mock function for the type MockClient
-func (_mock *MockClient) RegistryCreate(repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(repoID, registry)
-
-	if len(ret) == 0 {
-		panic("no return value specified for RegistryCreate")
-	}
-
-	var r0 *woodpecker.Registry
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(repoID, registry)
-	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(repoID, registry)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Registry)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Registry) error); ok {
-		r1 = returnFunc(repoID, registry)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_RegistryCreate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryCreate'
-type MockClient_RegistryCreate_Call struct {
-	*mock.Call
-}
-
-// RegistryCreate is a helper method to define mock.On call
-//   - repoID int64
-//   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) RegistryCreate(repoID any, registry any) *MockClient_RegistryCreate_Call {
-	return &MockClient_RegistryCreate_Call{Call: _e.mock.On("RegistryCreate", repoID, registry)}
-}
-
-func (_c *MockClient_RegistryCreate_Call) Run(run func(repoID int64, registry *woodpecker.Registry)) *MockClient_RegistryCreate_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		var arg1 *woodpecker.Registry
-		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Registry)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_RegistryCreate_Call) Return(registry1 *woodpecker.Registry, err error) *MockClient_RegistryCreate_Call {
-	_c.Call.Return(registry1, err)
-	return _c
-}
-
-func (_c *MockClient_RegistryCreate_Call) RunAndReturn(run func(repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_RegistryCreate_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// RegistryDelete provides a mock function for the type MockClient
-func (_mock *MockClient) RegistryDelete(repoID int64, hostname string) error {
-	ret := _mock.Called(repoID, hostname)
-
-	if len(ret) == 0 {
-		panic("no return value specified for RegistryDelete")
-	}
-
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) error); ok {
-		r0 = returnFunc(repoID, hostname)
-	} else {
-		r0 = ret.Error(0)
-	}
-	return r0
-}
-
-// MockClient_RegistryDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryDelete'
-type MockClient_RegistryDelete_Call struct {
-	*mock.Call
-}
-
-// RegistryDelete is a helper method to define mock.On call
-//   - repoID int64
-//   - hostname string
-func (_e *MockClient_Expecter) RegistryDelete(repoID any, hostname any) *MockClient_RegistryDelete_Call {
-	return &MockClient_RegistryDelete_Call{Call: _e.mock.On("RegistryDelete", repoID, hostname)}
-}
-
-func (_c *MockClient_RegistryDelete_Call) Run(run func(repoID int64, hostname string)) *MockClient_RegistryDelete_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_RegistryDelete_Call) Return(err error) *MockClient_RegistryDelete_Call {
-	_c.Call.Return(err)
-	return _c
-}
-
-func (_c *MockClient_RegistryDelete_Call) RunAndReturn(run func(repoID int64, hostname string) error) *MockClient_RegistryDelete_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// RegistryList provides a mock function for the type MockClient
-func (_mock *MockClient) RegistryList(repoID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
-	ret := _mock.Called(repoID, opt)
-
-	if len(ret) == 0 {
-		panic("no return value specified for RegistryList")
-	}
-
-	var r0 []*woodpecker.Registry
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
-		return returnFunc(repoID, opt)
-	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
-		r0 = returnFunc(repoID, opt)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*woodpecker.Registry)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.RegistryListOptions) error); ok {
-		r1 = returnFunc(repoID, opt)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_RegistryList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryList'
-type MockClient_RegistryList_Call struct {
-	*mock.Call
-}
-
-// RegistryList is a helper method to define mock.On call
-//   - repoID int64
-//   - opt woodpecker.RegistryListOptions
-func (_e *MockClient_Expecter) RegistryList(repoID any, opt any) *MockClient_RegistryList_Call {
-	return &MockClient_RegistryList_Call{Call: _e.mock.On("RegistryList", repoID, opt)}
-}
-
-func (_c *MockClient_RegistryList_Call) Run(run func(repoID int64, opt woodpecker.RegistryListOptions)) *MockClient_RegistryList_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		var arg1 woodpecker.RegistryListOptions
-		if args[1] != nil {
-			arg1 = args[1].(woodpecker.RegistryListOptions)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_RegistryList_Call) Return(registrys []*woodpecker.Registry, err error) *MockClient_RegistryList_Call {
-	_c.Call.Return(registrys, err)
-	return _c
-}
-
-func (_c *MockClient_RegistryList_Call) RunAndReturn(run func(repoID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)) *MockClient_RegistryList_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// RegistryUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) RegistryUpdate(repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error) {
-	ret := _mock.Called(repoID, registry)
-
-	if len(ret) == 0 {
-		panic("no return value specified for RegistryUpdate")
-	}
-
-	var r0 *woodpecker.Registry
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) (*woodpecker.Registry, error)); ok {
-		return returnFunc(repoID, registry)
-	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Registry) *woodpecker.Registry); ok {
-		r0 = returnFunc(repoID, registry)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Registry)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Registry) error); ok {
-		r1 = returnFunc(repoID, registry)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_RegistryUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistryUpdate'
-type MockClient_RegistryUpdate_Call struct {
-	*mock.Call
-}
-
-// RegistryUpdate is a helper method to define mock.On call
-//   - repoID int64
-//   - registry *woodpecker.Registry
-func (_e *MockClient_Expecter) RegistryUpdate(repoID any, registry any) *MockClient_RegistryUpdate_Call {
-	return &MockClient_RegistryUpdate_Call{Call: _e.mock.On("RegistryUpdate", repoID, registry)}
-}
-
-func (_c *MockClient_RegistryUpdate_Call) Run(run func(repoID int64, registry *woodpecker.Registry)) *MockClient_RegistryUpdate_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		var arg1 *woodpecker.Registry
-		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Registry)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockClient_RegistryUpdate_Call) Return(registry1 *woodpecker.Registry, err error) *MockClient_RegistryUpdate_Call {
-	_c.Call.Return(registry1, err)
-	return _c
-}
-
-func (_c *MockClient_RegistryUpdate_Call) RunAndReturn(run func(repoID int64, registry *woodpecker.Registry) (*woodpecker.Registry, error)) *MockClient_RegistryUpdate_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// Repo provides a mock function for the type MockClient
-func (_mock *MockClient) Repo(repoID int64) (*woodpecker.Repo, error) {
-	ret := _mock.Called(repoID)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Repo")
-	}
-
-	var r0 *woodpecker.Repo
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*woodpecker.Repo, error)); ok {
-		return returnFunc(repoID)
-	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *woodpecker.Repo); ok {
-		r0 = returnFunc(repoID)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Repo)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(repoID)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockClient_Repo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Repo'
-type MockClient_Repo_Call struct {
-	*mock.Call
-}
-
-// Repo is a helper method to define mock.On call
-//   - repoID int64
-func (_e *MockClient_Expecter) Repo(repoID any) *MockClient_Repo_Call {
-	return &MockClient_Repo_Call{Call: _e.mock.On("Repo", repoID)}
-}
-
-func (_c *MockClient_Repo_Call) Run(run func(repoID int64)) *MockClient_Repo_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
-		if args[0] != nil {
-			arg0 = args[0].(int64)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
 func (_c *MockClient_Repo_Call) Return(repo *woodpecker.Repo, err error) *MockClient_Repo_Call {
 	_c.Call.Return(repo, err)
 	return _c
 }
 
-func (_c *MockClient_Repo_Call) RunAndReturn(run func(repoID int64) (*woodpecker.Repo, error)) *MockClient_Repo_Call {
+func (_c *MockClient_Repo_Call) RunAndReturn(run func(ctx context.Context, repoID int64) (*woodpecker.Repo, error)) *MockClient_Repo_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoChown provides a mock function for the type MockClient
-func (_mock *MockClient) RepoChown(repoID int64) (*woodpecker.Repo, error) {
-	ret := _mock.Called(repoID)
+func (_mock *MockClient) RepoChown(ctx context.Context, repoID int64) (*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, repoID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoChown")
@@ -3595,18 +3874,18 @@ func (_mock *MockClient) RepoChown(repoID int64) (*woodpecker.Repo, error) {
 
 	var r0 *woodpecker.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*woodpecker.Repo, error)); ok {
-		return returnFunc(repoID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, repoID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *woodpecker.Repo); ok {
-		r0 = returnFunc(repoID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, repoID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = returnFunc(repoID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, repoID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3619,19 +3898,25 @@ type MockClient_RepoChown_Call struct {
 }
 
 // RepoChown is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoChown(repoID any) *MockClient_RepoChown_Call {
-	return &MockClient_RepoChown_Call{Call: _e.mock.On("RepoChown", repoID)}
+func (_e *MockClient_Expecter) RepoChown(ctx any, repoID any) *MockClient_RepoChown_Call {
+	return &MockClient_RepoChown_Call{Call: _e.mock.On("RepoChown", ctx, repoID)}
 }
 
-func (_c *MockClient_RepoChown_Call) Run(run func(repoID int64)) *MockClient_RepoChown_Call {
+func (_c *MockClient_RepoChown_Call) Run(run func(ctx context.Context, repoID int64)) *MockClient_RepoChown_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3642,22 +3927,22 @@ func (_c *MockClient_RepoChown_Call) Return(repo *woodpecker.Repo, err error) *M
 	return _c
 }
 
-func (_c *MockClient_RepoChown_Call) RunAndReturn(run func(repoID int64) (*woodpecker.Repo, error)) *MockClient_RepoChown_Call {
+func (_c *MockClient_RepoChown_Call) RunAndReturn(run func(ctx context.Context, repoID int64) (*woodpecker.Repo, error)) *MockClient_RepoChown_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoDel provides a mock function for the type MockClient
-func (_mock *MockClient) RepoDel(repoID int64) error {
-	ret := _mock.Called(repoID)
+func (_mock *MockClient) RepoDel(ctx context.Context, repoID int64) error {
+	ret := _mock.Called(ctx, repoID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoDel")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64) error); ok {
-		r0 = returnFunc(repoID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, repoID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -3670,19 +3955,25 @@ type MockClient_RepoDel_Call struct {
 }
 
 // RepoDel is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoDel(repoID any) *MockClient_RepoDel_Call {
-	return &MockClient_RepoDel_Call{Call: _e.mock.On("RepoDel", repoID)}
+func (_e *MockClient_Expecter) RepoDel(ctx any, repoID any) *MockClient_RepoDel_Call {
+	return &MockClient_RepoDel_Call{Call: _e.mock.On("RepoDel", ctx, repoID)}
 }
 
-func (_c *MockClient_RepoDel_Call) Run(run func(repoID int64)) *MockClient_RepoDel_Call {
+func (_c *MockClient_RepoDel_Call) Run(run func(ctx context.Context, repoID int64)) *MockClient_RepoDel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3693,14 +3984,14 @@ func (_c *MockClient_RepoDel_Call) Return(err error) *MockClient_RepoDel_Call {
 	return _c
 }
 
-func (_c *MockClient_RepoDel_Call) RunAndReturn(run func(repoID int64) error) *MockClient_RepoDel_Call {
+func (_c *MockClient_RepoDel_Call) RunAndReturn(run func(ctx context.Context, repoID int64) error) *MockClient_RepoDel_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoList provides a mock function for the type MockClient
-func (_mock *MockClient) RepoList(opt woodpecker.RepoListOptions) ([]*woodpecker.Repo, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) RepoList(ctx context.Context, opt woodpecker.RepoListOptions) ([]*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoList")
@@ -3708,18 +3999,18 @@ func (_mock *MockClient) RepoList(opt woodpecker.RepoListOptions) ([]*woodpecker
 
 	var r0 []*woodpecker.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RepoListOptions) ([]*woodpecker.Repo, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RepoListOptions) ([]*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RepoListOptions) []*woodpecker.Repo); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RepoListOptions) []*woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.RepoListOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.RepoListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3732,19 +4023,25 @@ type MockClient_RepoList_Call struct {
 }
 
 // RepoList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.RepoListOptions
-func (_e *MockClient_Expecter) RepoList(opt any) *MockClient_RepoList_Call {
-	return &MockClient_RepoList_Call{Call: _e.mock.On("RepoList", opt)}
+func (_e *MockClient_Expecter) RepoList(ctx any, opt any) *MockClient_RepoList_Call {
+	return &MockClient_RepoList_Call{Call: _e.mock.On("RepoList", ctx, opt)}
 }
 
-func (_c *MockClient_RepoList_Call) Run(run func(opt woodpecker.RepoListOptions)) *MockClient_RepoList_Call {
+func (_c *MockClient_RepoList_Call) Run(run func(ctx context.Context, opt woodpecker.RepoListOptions)) *MockClient_RepoList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.RepoListOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.RepoListOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.RepoListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.RepoListOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3755,14 +4052,14 @@ func (_c *MockClient_RepoList_Call) Return(repos []*woodpecker.Repo, err error) 
 	return _c
 }
 
-func (_c *MockClient_RepoList_Call) RunAndReturn(run func(opt woodpecker.RepoListOptions) ([]*woodpecker.Repo, error)) *MockClient_RepoList_Call {
+func (_c *MockClient_RepoList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.RepoListOptions) ([]*woodpecker.Repo, error)) *MockClient_RepoList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoLookup provides a mock function for the type MockClient
-func (_mock *MockClient) RepoLookup(repoFullName string) (*woodpecker.Repo, error) {
-	ret := _mock.Called(repoFullName)
+func (_mock *MockClient) RepoLookup(ctx context.Context, repoFullName string) (*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, repoFullName)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoLookup")
@@ -3770,18 +4067,18 @@ func (_mock *MockClient) RepoLookup(repoFullName string) (*woodpecker.Repo, erro
 
 	var r0 *woodpecker.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*woodpecker.Repo, error)); ok {
-		return returnFunc(repoFullName)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, repoFullName)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *woodpecker.Repo); ok {
-		r0 = returnFunc(repoFullName)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, repoFullName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
-		r1 = returnFunc(repoFullName)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, repoFullName)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3794,19 +4091,25 @@ type MockClient_RepoLookup_Call struct {
 }
 
 // RepoLookup is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoFullName string
-func (_e *MockClient_Expecter) RepoLookup(repoFullName any) *MockClient_RepoLookup_Call {
-	return &MockClient_RepoLookup_Call{Call: _e.mock.On("RepoLookup", repoFullName)}
+func (_e *MockClient_Expecter) RepoLookup(ctx any, repoFullName any) *MockClient_RepoLookup_Call {
+	return &MockClient_RepoLookup_Call{Call: _e.mock.On("RepoLookup", ctx, repoFullName)}
 }
 
-func (_c *MockClient_RepoLookup_Call) Run(run func(repoFullName string)) *MockClient_RepoLookup_Call {
+func (_c *MockClient_RepoLookup_Call) Run(run func(ctx context.Context, repoFullName string)) *MockClient_RepoLookup_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3817,22 +4120,22 @@ func (_c *MockClient_RepoLookup_Call) Return(repo *woodpecker.Repo, err error) *
 	return _c
 }
 
-func (_c *MockClient_RepoLookup_Call) RunAndReturn(run func(repoFullName string) (*woodpecker.Repo, error)) *MockClient_RepoLookup_Call {
+func (_c *MockClient_RepoLookup_Call) RunAndReturn(run func(ctx context.Context, repoFullName string) (*woodpecker.Repo, error)) *MockClient_RepoLookup_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoMove provides a mock function for the type MockClient
-func (_mock *MockClient) RepoMove(repoID int64, opt woodpecker.RepoMoveOptions) error {
-	ret := _mock.Called(repoID, opt)
+func (_mock *MockClient) RepoMove(ctx context.Context, repoID int64, opt woodpecker.RepoMoveOptions) error {
+	ret := _mock.Called(ctx, repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoMove")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.RepoMoveOptions) error); ok {
-		r0 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.RepoMoveOptions) error); ok {
+		r0 = returnFunc(ctx, repoID, opt)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -3845,25 +4148,31 @@ type MockClient_RepoMove_Call struct {
 }
 
 // RepoMove is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opt woodpecker.RepoMoveOptions
-func (_e *MockClient_Expecter) RepoMove(repoID any, opt any) *MockClient_RepoMove_Call {
-	return &MockClient_RepoMove_Call{Call: _e.mock.On("RepoMove", repoID, opt)}
+func (_e *MockClient_Expecter) RepoMove(ctx any, repoID any, opt any) *MockClient_RepoMove_Call {
+	return &MockClient_RepoMove_Call{Call: _e.mock.On("RepoMove", ctx, repoID, opt)}
 }
 
-func (_c *MockClient_RepoMove_Call) Run(run func(repoID int64, opt woodpecker.RepoMoveOptions)) *MockClient_RepoMove_Call {
+func (_c *MockClient_RepoMove_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.RepoMoveOptions)) *MockClient_RepoMove_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.RepoMoveOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.RepoMoveOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.RepoMoveOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.RepoMoveOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -3874,14 +4183,14 @@ func (_c *MockClient_RepoMove_Call) Return(err error) *MockClient_RepoMove_Call 
 	return _c
 }
 
-func (_c *MockClient_RepoMove_Call) RunAndReturn(run func(repoID int64, opt woodpecker.RepoMoveOptions) error) *MockClient_RepoMove_Call {
+func (_c *MockClient_RepoMove_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.RepoMoveOptions) error) *MockClient_RepoMove_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoPatch provides a mock function for the type MockClient
-func (_mock *MockClient) RepoPatch(repoID int64, repo *woodpecker.RepoPatch) (*woodpecker.Repo, error) {
-	ret := _mock.Called(repoID, repo)
+func (_mock *MockClient) RepoPatch(ctx context.Context, repoID int64, repo *woodpecker.RepoPatch) (*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, repoID, repo)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoPatch")
@@ -3889,18 +4198,18 @@ func (_mock *MockClient) RepoPatch(repoID int64, repo *woodpecker.RepoPatch) (*w
 
 	var r0 *woodpecker.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.RepoPatch) (*woodpecker.Repo, error)); ok {
-		return returnFunc(repoID, repo)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.RepoPatch) (*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, repoID, repo)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.RepoPatch) *woodpecker.Repo); ok {
-		r0 = returnFunc(repoID, repo)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.RepoPatch) *woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, repoID, repo)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.RepoPatch) error); ok {
-		r1 = returnFunc(repoID, repo)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.RepoPatch) error); ok {
+		r1 = returnFunc(ctx, repoID, repo)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3913,25 +4222,31 @@ type MockClient_RepoPatch_Call struct {
 }
 
 // RepoPatch is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - repo *woodpecker.RepoPatch
-func (_e *MockClient_Expecter) RepoPatch(repoID any, repo any) *MockClient_RepoPatch_Call {
-	return &MockClient_RepoPatch_Call{Call: _e.mock.On("RepoPatch", repoID, repo)}
+func (_e *MockClient_Expecter) RepoPatch(ctx any, repoID any, repo any) *MockClient_RepoPatch_Call {
+	return &MockClient_RepoPatch_Call{Call: _e.mock.On("RepoPatch", ctx, repoID, repo)}
 }
 
-func (_c *MockClient_RepoPatch_Call) Run(run func(repoID int64, repo *woodpecker.RepoPatch)) *MockClient_RepoPatch_Call {
+func (_c *MockClient_RepoPatch_Call) Run(run func(ctx context.Context, repoID int64, repo *woodpecker.RepoPatch)) *MockClient_RepoPatch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.RepoPatch
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.RepoPatch)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.RepoPatch
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.RepoPatch)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -3942,14 +4257,14 @@ func (_c *MockClient_RepoPatch_Call) Return(repo1 *woodpecker.Repo, err error) *
 	return _c
 }
 
-func (_c *MockClient_RepoPatch_Call) RunAndReturn(run func(repoID int64, repo *woodpecker.RepoPatch) (*woodpecker.Repo, error)) *MockClient_RepoPatch_Call {
+func (_c *MockClient_RepoPatch_Call) RunAndReturn(run func(ctx context.Context, repoID int64, repo *woodpecker.RepoPatch) (*woodpecker.Repo, error)) *MockClient_RepoPatch_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoPost provides a mock function for the type MockClient
-func (_mock *MockClient) RepoPost(opt woodpecker.RepoPostOptions) (*woodpecker.Repo, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) RepoPost(ctx context.Context, opt woodpecker.RepoPostOptions) (*woodpecker.Repo, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoPost")
@@ -3957,18 +4272,18 @@ func (_mock *MockClient) RepoPost(opt woodpecker.RepoPostOptions) (*woodpecker.R
 
 	var r0 *woodpecker.Repo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RepoPostOptions) (*woodpecker.Repo, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RepoPostOptions) (*woodpecker.Repo, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.RepoPostOptions) *woodpecker.Repo); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.RepoPostOptions) *woodpecker.Repo); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.RepoPostOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.RepoPostOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3981,19 +4296,25 @@ type MockClient_RepoPost_Call struct {
 }
 
 // RepoPost is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.RepoPostOptions
-func (_e *MockClient_Expecter) RepoPost(opt any) *MockClient_RepoPost_Call {
-	return &MockClient_RepoPost_Call{Call: _e.mock.On("RepoPost", opt)}
+func (_e *MockClient_Expecter) RepoPost(ctx any, opt any) *MockClient_RepoPost_Call {
+	return &MockClient_RepoPost_Call{Call: _e.mock.On("RepoPost", ctx, opt)}
 }
 
-func (_c *MockClient_RepoPost_Call) Run(run func(opt woodpecker.RepoPostOptions)) *MockClient_RepoPost_Call {
+func (_c *MockClient_RepoPost_Call) Run(run func(ctx context.Context, opt woodpecker.RepoPostOptions)) *MockClient_RepoPost_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.RepoPostOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.RepoPostOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.RepoPostOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.RepoPostOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -4004,22 +4325,22 @@ func (_c *MockClient_RepoPost_Call) Return(repo *woodpecker.Repo, err error) *Mo
 	return _c
 }
 
-func (_c *MockClient_RepoPost_Call) RunAndReturn(run func(opt woodpecker.RepoPostOptions) (*woodpecker.Repo, error)) *MockClient_RepoPost_Call {
+func (_c *MockClient_RepoPost_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.RepoPostOptions) (*woodpecker.Repo, error)) *MockClient_RepoPost_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // RepoRepair provides a mock function for the type MockClient
-func (_mock *MockClient) RepoRepair(repoID int64) error {
-	ret := _mock.Called(repoID)
+func (_mock *MockClient) RepoRepair(ctx context.Context, repoID int64) error {
+	ret := _mock.Called(ctx, repoID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoRepair")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64) error); ok {
-		r0 = returnFunc(repoID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) error); ok {
+		r0 = returnFunc(ctx, repoID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -4032,19 +4353,25 @@ type MockClient_RepoRepair_Call struct {
 }
 
 // RepoRepair is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
-func (_e *MockClient_Expecter) RepoRepair(repoID any) *MockClient_RepoRepair_Call {
-	return &MockClient_RepoRepair_Call{Call: _e.mock.On("RepoRepair", repoID)}
+func (_e *MockClient_Expecter) RepoRepair(ctx any, repoID any) *MockClient_RepoRepair_Call {
+	return &MockClient_RepoRepair_Call{Call: _e.mock.On("RepoRepair", ctx, repoID)}
 }
 
-func (_c *MockClient_RepoRepair_Call) Run(run func(repoID int64)) *MockClient_RepoRepair_Call {
+func (_c *MockClient_RepoRepair_Call) Run(run func(ctx context.Context, repoID int64)) *MockClient_RepoRepair_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -4055,14 +4382,14 @@ func (_c *MockClient_RepoRepair_Call) Return(err error) *MockClient_RepoRepair_C
 	return _c
 }
 
-func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(repoID int64) error) *MockClient_RepoRepair_Call {
+func (_c *MockClient_RepoRepair_Call) RunAndReturn(run func(ctx context.Context, repoID int64) error) *MockClient_RepoRepair_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Secret provides a mock function for the type MockClient
-func (_mock *MockClient) Secret(repoID int64, secret string) (*woodpecker.Secret, error) {
-	ret := _mock.Called(repoID, secret)
+func (_mock *MockClient) Secret(ctx context.Context, repoID int64, secret string) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, repoID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Secret")
@@ -4070,18 +4397,18 @@ func (_mock *MockClient) Secret(repoID int64, secret string) (*woodpecker.Secret
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) (*woodpecker.Secret, error)); ok {
-		return returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, repoID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, string) *woodpecker.Secret); ok {
-		r0 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, repoID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, string) error); ok {
+		r1 = returnFunc(ctx, repoID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4094,25 +4421,31 @@ type MockClient_Secret_Call struct {
 }
 
 // Secret is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - secret string
-func (_e *MockClient_Expecter) Secret(repoID any, secret any) *MockClient_Secret_Call {
-	return &MockClient_Secret_Call{Call: _e.mock.On("Secret", repoID, secret)}
+func (_e *MockClient_Expecter) Secret(ctx any, repoID any, secret any) *MockClient_Secret_Call {
+	return &MockClient_Secret_Call{Call: _e.mock.On("Secret", ctx, repoID, secret)}
 }
 
-func (_c *MockClient_Secret_Call) Run(run func(repoID int64, secret string)) *MockClient_Secret_Call {
+func (_c *MockClient_Secret_Call) Run(run func(ctx context.Context, repoID int64, secret string)) *MockClient_Secret_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -4123,14 +4456,14 @@ func (_c *MockClient_Secret_Call) Return(secret1 *woodpecker.Secret, err error) 
 	return _c
 }
 
-func (_c *MockClient_Secret_Call) RunAndReturn(run func(repoID int64, secret string) (*woodpecker.Secret, error)) *MockClient_Secret_Call {
+func (_c *MockClient_Secret_Call) RunAndReturn(run func(ctx context.Context, repoID int64, secret string) (*woodpecker.Secret, error)) *MockClient_Secret_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SecretCreate provides a mock function for the type MockClient
-func (_mock *MockClient) SecretCreate(repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(repoID, secret)
+func (_mock *MockClient) SecretCreate(ctx context.Context, repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, repoID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretCreate")
@@ -4138,18 +4471,18 @@ func (_mock *MockClient) SecretCreate(repoID int64, secret *woodpecker.Secret) (
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, repoID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, repoID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Secret) error); ok {
-		r1 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, repoID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4162,25 +4495,31 @@ type MockClient_SecretCreate_Call struct {
 }
 
 // SecretCreate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) SecretCreate(repoID any, secret any) *MockClient_SecretCreate_Call {
-	return &MockClient_SecretCreate_Call{Call: _e.mock.On("SecretCreate", repoID, secret)}
+func (_e *MockClient_Expecter) SecretCreate(ctx any, repoID any, secret any) *MockClient_SecretCreate_Call {
+	return &MockClient_SecretCreate_Call{Call: _e.mock.On("SecretCreate", ctx, repoID, secret)}
 }
 
-func (_c *MockClient_SecretCreate_Call) Run(run func(repoID int64, secret *woodpecker.Secret)) *MockClient_SecretCreate_Call {
+func (_c *MockClient_SecretCreate_Call) Run(run func(ctx context.Context, repoID int64, secret *woodpecker.Secret)) *MockClient_SecretCreate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Secret
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Secret)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Secret
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -4191,22 +4530,22 @@ func (_c *MockClient_SecretCreate_Call) Return(secret1 *woodpecker.Secret, err e
 	return _c
 }
 
-func (_c *MockClient_SecretCreate_Call) RunAndReturn(run func(repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_SecretCreate_Call {
+func (_c *MockClient_SecretCreate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_SecretCreate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SecretDelete provides a mock function for the type MockClient
-func (_mock *MockClient) SecretDelete(repoID int64, secret string) error {
-	ret := _mock.Called(repoID, secret)
+func (_mock *MockClient) SecretDelete(ctx context.Context, repoID int64, secret string) error {
+	ret := _mock.Called(ctx, repoID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, string) error); ok {
-		r0 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(ctx, repoID, secret)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -4219,25 +4558,31 @@ type MockClient_SecretDelete_Call struct {
 }
 
 // SecretDelete is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - secret string
-func (_e *MockClient_Expecter) SecretDelete(repoID any, secret any) *MockClient_SecretDelete_Call {
-	return &MockClient_SecretDelete_Call{Call: _e.mock.On("SecretDelete", repoID, secret)}
+func (_e *MockClient_Expecter) SecretDelete(ctx any, repoID any, secret any) *MockClient_SecretDelete_Call {
+	return &MockClient_SecretDelete_Call{Call: _e.mock.On("SecretDelete", ctx, repoID, secret)}
 }
 
-func (_c *MockClient_SecretDelete_Call) Run(run func(repoID int64, secret string)) *MockClient_SecretDelete_Call {
+func (_c *MockClient_SecretDelete_Call) Run(run func(ctx context.Context, repoID int64, secret string)) *MockClient_SecretDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -4248,14 +4593,14 @@ func (_c *MockClient_SecretDelete_Call) Return(err error) *MockClient_SecretDele
 	return _c
 }
 
-func (_c *MockClient_SecretDelete_Call) RunAndReturn(run func(repoID int64, secret string) error) *MockClient_SecretDelete_Call {
+func (_c *MockClient_SecretDelete_Call) RunAndReturn(run func(ctx context.Context, repoID int64, secret string) error) *MockClient_SecretDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SecretList provides a mock function for the type MockClient
-func (_mock *MockClient) SecretList(repoID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
-	ret := _mock.Called(repoID, opt)
+func (_mock *MockClient) SecretList(ctx context.Context, repoID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretList")
@@ -4263,18 +4608,18 @@ func (_mock *MockClient) SecretList(repoID int64, opt woodpecker.SecretListOptio
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
-		return returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, repoID, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
-		r0 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, woodpecker.SecretListOptions) error); ok {
-		r1 = returnFunc(repoID, opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, woodpecker.SecretListOptions) error); ok {
+		r1 = returnFunc(ctx, repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4287,25 +4632,31 @@ type MockClient_SecretList_Call struct {
 }
 
 // SecretList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - opt woodpecker.SecretListOptions
-func (_e *MockClient_Expecter) SecretList(repoID any, opt any) *MockClient_SecretList_Call {
-	return &MockClient_SecretList_Call{Call: _e.mock.On("SecretList", repoID, opt)}
+func (_e *MockClient_Expecter) SecretList(ctx any, repoID any, opt any) *MockClient_SecretList_Call {
+	return &MockClient_SecretList_Call{Call: _e.mock.On("SecretList", ctx, repoID, opt)}
 }
 
-func (_c *MockClient_SecretList_Call) Run(run func(repoID int64, opt woodpecker.SecretListOptions)) *MockClient_SecretList_Call {
+func (_c *MockClient_SecretList_Call) Run(run func(ctx context.Context, repoID int64, opt woodpecker.SecretListOptions)) *MockClient_SecretList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 woodpecker.SecretListOptions
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(woodpecker.SecretListOptions)
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.SecretListOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.SecretListOptions)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -4316,14 +4667,14 @@ func (_c *MockClient_SecretList_Call) Return(secrets []*woodpecker.Secret, err e
 	return _c
 }
 
-func (_c *MockClient_SecretList_Call) RunAndReturn(run func(repoID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_SecretList_Call {
+func (_c *MockClient_SecretList_Call) RunAndReturn(run func(ctx context.Context, repoID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)) *MockClient_SecretList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SecretUpdate provides a mock function for the type MockClient
-func (_mock *MockClient) SecretUpdate(repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
-	ret := _mock.Called(repoID, secret)
+func (_mock *MockClient) SecretUpdate(ctx context.Context, repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error) {
+	ret := _mock.Called(ctx, repoID, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretUpdate")
@@ -4331,18 +4682,18 @@ func (_mock *MockClient) SecretUpdate(repoID int64, secret *woodpecker.Secret) (
 
 	var r0 *woodpecker.Secret
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
-		return returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) (*woodpecker.Secret, error)); ok {
+		return returnFunc(ctx, repoID, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.Secret) *woodpecker.Secret); ok {
-		r0 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, *woodpecker.Secret) *woodpecker.Secret); ok {
+		r0 = returnFunc(ctx, repoID, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Secret)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.Secret) error); ok {
-		r1 = returnFunc(repoID, secret)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, *woodpecker.Secret) error); ok {
+		r1 = returnFunc(ctx, repoID, secret)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4355,25 +4706,31 @@ type MockClient_SecretUpdate_Call struct {
 }
 
 // SecretUpdate is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - secret *woodpecker.Secret
-func (_e *MockClient_Expecter) SecretUpdate(repoID any, secret any) *MockClient_SecretUpdate_Call {
-	return &MockClient_SecretUpdate_Call{Call: _e.mock.On("SecretUpdate", repoID, secret)}
+func (_e *MockClient_Expecter) SecretUpdate(ctx any, repoID any, secret any) *MockClient_SecretUpdate_Call {
+	return &MockClient_SecretUpdate_Call{Call: _e.mock.On("SecretUpdate", ctx, repoID, secret)}
 }
 
-func (_c *MockClient_SecretUpdate_Call) Run(run func(repoID int64, secret *woodpecker.Secret)) *MockClient_SecretUpdate_Call {
+func (_c *MockClient_SecretUpdate_Call) Run(run func(ctx context.Context, repoID int64, secret *woodpecker.Secret)) *MockClient_SecretUpdate_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 *woodpecker.Secret
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(*woodpecker.Secret)
+			arg1 = args[1].(int64)
+		}
+		var arg2 *woodpecker.Secret
+		if args[2] != nil {
+			arg2 = args[2].(*woodpecker.Secret)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -4384,14 +4741,14 @@ func (_c *MockClient_SecretUpdate_Call) Return(secret1 *woodpecker.Secret, err e
 	return _c
 }
 
-func (_c *MockClient_SecretUpdate_Call) RunAndReturn(run func(repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_SecretUpdate_Call {
+func (_c *MockClient_SecretUpdate_Call) RunAndReturn(run func(ctx context.Context, repoID int64, secret *woodpecker.Secret) (*woodpecker.Secret, error)) *MockClient_SecretUpdate_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Self provides a mock function for the type MockClient
-func (_mock *MockClient) Self() (*woodpecker.User, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) Self(ctx context.Context) (*woodpecker.User, error) {
+	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Self")
@@ -4399,18 +4756,18 @@ func (_mock *MockClient) Self() (*woodpecker.User, error) {
 
 	var r0 *woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.User, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*woodpecker.User, error)); ok {
+		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func() *woodpecker.User); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *woodpecker.User); ok {
+		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4423,13 +4780,20 @@ type MockClient_Self_Call struct {
 }
 
 // Self is a helper method to define mock.On call
-func (_e *MockClient_Expecter) Self() *MockClient_Self_Call {
-	return &MockClient_Self_Call{Call: _e.mock.On("Self")}
+//   - ctx context.Context
+func (_e *MockClient_Expecter) Self(ctx any) *MockClient_Self_Call {
+	return &MockClient_Self_Call{Call: _e.mock.On("Self", ctx)}
 }
 
-func (_c *MockClient_Self_Call) Run(run func()) *MockClient_Self_Call {
+func (_c *MockClient_Self_Call) Run(run func(ctx context.Context)) *MockClient_Self_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -4439,7 +4803,7 @@ func (_c *MockClient_Self_Call) Return(user *woodpecker.User, err error) *MockCl
 	return _c
 }
 
-func (_c *MockClient_Self_Call) RunAndReturn(run func() (*woodpecker.User, error)) *MockClient_Self_Call {
+func (_c *MockClient_Self_Call) RunAndReturn(run func(ctx context.Context) (*woodpecker.User, error)) *MockClient_Self_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4525,8 +4889,8 @@ func (_c *MockClient_SetClient_Call) RunAndReturn(run func(client *http.Client))
 }
 
 // SetLogLevel provides a mock function for the type MockClient
-func (_mock *MockClient) SetLogLevel(logLevel *woodpecker.LogLevel) (*woodpecker.LogLevel, error) {
-	ret := _mock.Called(logLevel)
+func (_mock *MockClient) SetLogLevel(ctx context.Context, logLevel *woodpecker.LogLevel) (*woodpecker.LogLevel, error) {
+	ret := _mock.Called(ctx, logLevel)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SetLogLevel")
@@ -4534,18 +4898,18 @@ func (_mock *MockClient) SetLogLevel(logLevel *woodpecker.LogLevel) (*woodpecker
 
 	var r0 *woodpecker.LogLevel
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.LogLevel) (*woodpecker.LogLevel, error)); ok {
-		return returnFunc(logLevel)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.LogLevel) (*woodpecker.LogLevel, error)); ok {
+		return returnFunc(ctx, logLevel)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.LogLevel) *woodpecker.LogLevel); ok {
-		r0 = returnFunc(logLevel)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.LogLevel) *woodpecker.LogLevel); ok {
+		r0 = returnFunc(ctx, logLevel)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.LogLevel)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.LogLevel) error); ok {
-		r1 = returnFunc(logLevel)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.LogLevel) error); ok {
+		r1 = returnFunc(ctx, logLevel)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4558,19 +4922,25 @@ type MockClient_SetLogLevel_Call struct {
 }
 
 // SetLogLevel is a helper method to define mock.On call
+//   - ctx context.Context
 //   - logLevel *woodpecker.LogLevel
-func (_e *MockClient_Expecter) SetLogLevel(logLevel any) *MockClient_SetLogLevel_Call {
-	return &MockClient_SetLogLevel_Call{Call: _e.mock.On("SetLogLevel", logLevel)}
+func (_e *MockClient_Expecter) SetLogLevel(ctx any, logLevel any) *MockClient_SetLogLevel_Call {
+	return &MockClient_SetLogLevel_Call{Call: _e.mock.On("SetLogLevel", ctx, logLevel)}
 }
 
-func (_c *MockClient_SetLogLevel_Call) Run(run func(logLevel *woodpecker.LogLevel)) *MockClient_SetLogLevel_Call {
+func (_c *MockClient_SetLogLevel_Call) Run(run func(ctx context.Context, logLevel *woodpecker.LogLevel)) *MockClient_SetLogLevel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.LogLevel
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.LogLevel)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.LogLevel
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.LogLevel)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -4581,14 +4951,14 @@ func (_c *MockClient_SetLogLevel_Call) Return(logLevel1 *woodpecker.LogLevel, er
 	return _c
 }
 
-func (_c *MockClient_SetLogLevel_Call) RunAndReturn(run func(logLevel *woodpecker.LogLevel) (*woodpecker.LogLevel, error)) *MockClient_SetLogLevel_Call {
+func (_c *MockClient_SetLogLevel_Call) RunAndReturn(run func(ctx context.Context, logLevel *woodpecker.LogLevel) (*woodpecker.LogLevel, error)) *MockClient_SetLogLevel_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // StepLogEntries provides a mock function for the type MockClient
-func (_mock *MockClient) StepLogEntries(repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error) {
-	ret := _mock.Called(repoID, pipeline, stepID)
+func (_mock *MockClient) StepLogEntries(ctx context.Context, repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error) {
+	ret := _mock.Called(ctx, repoID, pipeline, stepID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepLogEntries")
@@ -4596,18 +4966,18 @@ func (_mock *MockClient) StepLogEntries(repoID int64, pipeline int64, stepID int
 
 	var r0 []*woodpecker.LogEntry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) ([]*woodpecker.LogEntry, error)); ok {
-		return returnFunc(repoID, pipeline, stepID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64) ([]*woodpecker.LogEntry, error)); ok {
+		return returnFunc(ctx, repoID, pipeline, stepID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) []*woodpecker.LogEntry); ok {
-		r0 = returnFunc(repoID, pipeline, stepID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64) []*woodpecker.LogEntry); ok {
+		r0 = returnFunc(ctx, repoID, pipeline, stepID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.LogEntry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int64, int64, int64) error); ok {
-		r1 = returnFunc(repoID, pipeline, stepID)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int64, int64) error); ok {
+		r1 = returnFunc(ctx, repoID, pipeline, stepID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4620,18 +4990,19 @@ type MockClient_StepLogEntries_Call struct {
 }
 
 // StepLogEntries is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipeline int64
 //   - stepID int64
-func (_e *MockClient_Expecter) StepLogEntries(repoID any, pipeline any, stepID any) *MockClient_StepLogEntries_Call {
-	return &MockClient_StepLogEntries_Call{Call: _e.mock.On("StepLogEntries", repoID, pipeline, stepID)}
+func (_e *MockClient_Expecter) StepLogEntries(ctx any, repoID any, pipeline any, stepID any) *MockClient_StepLogEntries_Call {
+	return &MockClient_StepLogEntries_Call{Call: _e.mock.On("StepLogEntries", ctx, repoID, pipeline, stepID)}
 }
 
-func (_c *MockClient_StepLogEntries_Call) Run(run func(repoID int64, pipeline int64, stepID int64)) *MockClient_StepLogEntries_Call {
+func (_c *MockClient_StepLogEntries_Call) Run(run func(ctx context.Context, repoID int64, pipeline int64, stepID int64)) *MockClient_StepLogEntries_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
@@ -4641,10 +5012,15 @@ func (_c *MockClient_StepLogEntries_Call) Run(run func(repoID int64, pipeline in
 		if args[2] != nil {
 			arg2 = args[2].(int64)
 		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -4655,22 +5031,22 @@ func (_c *MockClient_StepLogEntries_Call) Return(logEntrys []*woodpecker.LogEntr
 	return _c
 }
 
-func (_c *MockClient_StepLogEntries_Call) RunAndReturn(run func(repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error)) *MockClient_StepLogEntries_Call {
+func (_c *MockClient_StepLogEntries_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipeline int64, stepID int64) ([]*woodpecker.LogEntry, error)) *MockClient_StepLogEntries_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // StepLogsPurge provides a mock function for the type MockClient
-func (_mock *MockClient) StepLogsPurge(repoID int64, pipelineNumber int64, stepID int64) error {
-	ret := _mock.Called(repoID, pipelineNumber, stepID)
+func (_mock *MockClient) StepLogsPurge(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64) error {
+	ret := _mock.Called(ctx, repoID, pipelineNumber, stepID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepLogsPurge")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(int64, int64, int64) error); ok {
-		r0 = returnFunc(repoID, pipelineNumber, stepID)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, int64) error); ok {
+		r0 = returnFunc(ctx, repoID, pipelineNumber, stepID)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -4683,18 +5059,19 @@ type MockClient_StepLogsPurge_Call struct {
 }
 
 // StepLogsPurge is a helper method to define mock.On call
+//   - ctx context.Context
 //   - repoID int64
 //   - pipelineNumber int64
 //   - stepID int64
-func (_e *MockClient_Expecter) StepLogsPurge(repoID any, pipelineNumber any, stepID any) *MockClient_StepLogsPurge_Call {
-	return &MockClient_StepLogsPurge_Call{Call: _e.mock.On("StepLogsPurge", repoID, pipelineNumber, stepID)}
+func (_e *MockClient_Expecter) StepLogsPurge(ctx any, repoID any, pipelineNumber any, stepID any) *MockClient_StepLogsPurge_Call {
+	return &MockClient_StepLogsPurge_Call{Call: _e.mock.On("StepLogsPurge", ctx, repoID, pipelineNumber, stepID)}
 }
 
-func (_c *MockClient_StepLogsPurge_Call) Run(run func(repoID int64, pipelineNumber int64, stepID int64)) *MockClient_StepLogsPurge_Call {
+func (_c *MockClient_StepLogsPurge_Call) Run(run func(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64)) *MockClient_StepLogsPurge_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 int64
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(int64)
+			arg0 = args[0].(context.Context)
 		}
 		var arg1 int64
 		if args[1] != nil {
@@ -4704,10 +5081,15 @@ func (_c *MockClient_StepLogsPurge_Call) Run(run func(repoID int64, pipelineNumb
 		if args[2] != nil {
 			arg2 = args[2].(int64)
 		}
+		var arg3 int64
+		if args[3] != nil {
+			arg3 = args[3].(int64)
+		}
 		run(
 			arg0,
 			arg1,
 			arg2,
+			arg3,
 		)
 	})
 	return _c
@@ -4718,18 +5100,18 @@ func (_c *MockClient_StepLogsPurge_Call) Return(err error) *MockClient_StepLogsP
 	return _c
 }
 
-func (_c *MockClient_StepLogsPurge_Call) RunAndReturn(run func(repoID int64, pipelineNumber int64, stepID int64) error) *MockClient_StepLogsPurge_Call {
+func (_c *MockClient_StepLogsPurge_Call) RunAndReturn(run func(ctx context.Context, repoID int64, pipelineNumber int64, stepID int64) error) *MockClient_StepLogsPurge_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // User provides a mock function for the type MockClient
-func (_mock *MockClient) User(login string, forgeID ...int64) (*woodpecker.User, error) {
+func (_mock *MockClient) User(ctx context.Context, login string, forgeID ...int64) (*woodpecker.User, error) {
 	var tmpRet mock.Arguments
 	if len(forgeID) > 0 {
-		tmpRet = _mock.Called(login, forgeID)
+		tmpRet = _mock.Called(ctx, login, forgeID)
 	} else {
-		tmpRet = _mock.Called(login)
+		tmpRet = _mock.Called(ctx, login)
 	}
 	ret := tmpRet
 
@@ -4739,18 +5121,18 @@ func (_mock *MockClient) User(login string, forgeID ...int64) (*woodpecker.User,
 
 	var r0 *woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string, ...int64) (*woodpecker.User, error)); ok {
-		return returnFunc(login, forgeID...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...int64) (*woodpecker.User, error)); ok {
+		return returnFunc(ctx, login, forgeID...)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string, ...int64) *woodpecker.User); ok {
-		r0 = returnFunc(login, forgeID...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...int64) *woodpecker.User); ok {
+		r0 = returnFunc(ctx, login, forgeID...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(string, ...int64) error); ok {
-		r1 = returnFunc(login, forgeID...)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, ...int64) error); ok {
+		r1 = returnFunc(ctx, login, forgeID...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4763,28 +5145,34 @@ type MockClient_User_Call struct {
 }
 
 // User is a helper method to define mock.On call
+//   - ctx context.Context
 //   - login string
 //   - forgeID ...int64
-func (_e *MockClient_Expecter) User(login any, forgeID ...any) *MockClient_User_Call {
+func (_e *MockClient_Expecter) User(ctx any, login any, forgeID ...any) *MockClient_User_Call {
 	return &MockClient_User_Call{Call: _e.mock.On("User",
-		append([]any{login}, forgeID...)...)}
+		append([]any{ctx, login}, forgeID...)...)}
 }
 
-func (_c *MockClient_User_Call) Run(run func(login string, forgeID ...int64)) *MockClient_User_Call {
+func (_c *MockClient_User_Call) Run(run func(ctx context.Context, login string, forgeID ...int64)) *MockClient_User_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 []int64
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []int64
 		var variadicArgs []int64
-		if len(args) > 1 {
-			variadicArgs = args[1].([]int64)
+		if len(args) > 2 {
+			variadicArgs = args[2].([]int64)
 		}
-		arg1 = variadicArgs
+		arg2 = variadicArgs
 		run(
 			arg0,
-			arg1...,
+			arg1,
+			arg2...,
 		)
 	})
 	return _c
@@ -4795,18 +5183,18 @@ func (_c *MockClient_User_Call) Return(user *woodpecker.User, err error) *MockCl
 	return _c
 }
 
-func (_c *MockClient_User_Call) RunAndReturn(run func(login string, forgeID ...int64) (*woodpecker.User, error)) *MockClient_User_Call {
+func (_c *MockClient_User_Call) RunAndReturn(run func(ctx context.Context, login string, forgeID ...int64) (*woodpecker.User, error)) *MockClient_User_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UserDel provides a mock function for the type MockClient
-func (_mock *MockClient) UserDel(login string, forgeID ...int64) error {
+func (_mock *MockClient) UserDel(ctx context.Context, login string, forgeID ...int64) error {
 	var tmpRet mock.Arguments
 	if len(forgeID) > 0 {
-		tmpRet = _mock.Called(login, forgeID)
+		tmpRet = _mock.Called(ctx, login, forgeID)
 	} else {
-		tmpRet = _mock.Called(login)
+		tmpRet = _mock.Called(ctx, login)
 	}
 	ret := tmpRet
 
@@ -4815,8 +5203,8 @@ func (_mock *MockClient) UserDel(login string, forgeID ...int64) error {
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(string, ...int64) error); ok {
-		r0 = returnFunc(login, forgeID...)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, ...int64) error); ok {
+		r0 = returnFunc(ctx, login, forgeID...)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -4829,28 +5217,34 @@ type MockClient_UserDel_Call struct {
 }
 
 // UserDel is a helper method to define mock.On call
+//   - ctx context.Context
 //   - login string
 //   - forgeID ...int64
-func (_e *MockClient_Expecter) UserDel(login any, forgeID ...any) *MockClient_UserDel_Call {
+func (_e *MockClient_Expecter) UserDel(ctx any, login any, forgeID ...any) *MockClient_UserDel_Call {
 	return &MockClient_UserDel_Call{Call: _e.mock.On("UserDel",
-		append([]any{login}, forgeID...)...)}
+		append([]any{ctx, login}, forgeID...)...)}
 }
 
-func (_c *MockClient_UserDel_Call) Run(run func(login string, forgeID ...int64)) *MockClient_UserDel_Call {
+func (_c *MockClient_UserDel_Call) Run(run func(ctx context.Context, login string, forgeID ...int64)) *MockClient_UserDel_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 string
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(string)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 []int64
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []int64
 		var variadicArgs []int64
-		if len(args) > 1 {
-			variadicArgs = args[1].([]int64)
+		if len(args) > 2 {
+			variadicArgs = args[2].([]int64)
 		}
-		arg1 = variadicArgs
+		arg2 = variadicArgs
 		run(
 			arg0,
-			arg1...,
+			arg1,
+			arg2...,
 		)
 	})
 	return _c
@@ -4861,14 +5255,14 @@ func (_c *MockClient_UserDel_Call) Return(err error) *MockClient_UserDel_Call {
 	return _c
 }
 
-func (_c *MockClient_UserDel_Call) RunAndReturn(run func(login string, forgeID ...int64) error) *MockClient_UserDel_Call {
+func (_c *MockClient_UserDel_Call) RunAndReturn(run func(ctx context.Context, login string, forgeID ...int64) error) *MockClient_UserDel_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UserList provides a mock function for the type MockClient
-func (_mock *MockClient) UserList(opt woodpecker.UserListOptions) ([]*woodpecker.User, error) {
-	ret := _mock.Called(opt)
+func (_mock *MockClient) UserList(ctx context.Context, opt woodpecker.UserListOptions) ([]*woodpecker.User, error) {
+	ret := _mock.Called(ctx, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UserList")
@@ -4876,18 +5270,18 @@ func (_mock *MockClient) UserList(opt woodpecker.UserListOptions) ([]*woodpecker
 
 	var r0 []*woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.UserListOptions) ([]*woodpecker.User, error)); ok {
-		return returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.UserListOptions) ([]*woodpecker.User, error)); ok {
+		return returnFunc(ctx, opt)
 	}
-	if returnFunc, ok := ret.Get(0).(func(woodpecker.UserListOptions) []*woodpecker.User); ok {
-		r0 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, woodpecker.UserListOptions) []*woodpecker.User); ok {
+		r0 = returnFunc(ctx, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(woodpecker.UserListOptions) error); ok {
-		r1 = returnFunc(opt)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, woodpecker.UserListOptions) error); ok {
+		r1 = returnFunc(ctx, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4900,19 +5294,25 @@ type MockClient_UserList_Call struct {
 }
 
 // UserList is a helper method to define mock.On call
+//   - ctx context.Context
 //   - opt woodpecker.UserListOptions
-func (_e *MockClient_Expecter) UserList(opt any) *MockClient_UserList_Call {
-	return &MockClient_UserList_Call{Call: _e.mock.On("UserList", opt)}
+func (_e *MockClient_Expecter) UserList(ctx any, opt any) *MockClient_UserList_Call {
+	return &MockClient_UserList_Call{Call: _e.mock.On("UserList", ctx, opt)}
 }
 
-func (_c *MockClient_UserList_Call) Run(run func(opt woodpecker.UserListOptions)) *MockClient_UserList_Call {
+func (_c *MockClient_UserList_Call) Run(run func(ctx context.Context, opt woodpecker.UserListOptions)) *MockClient_UserList_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 woodpecker.UserListOptions
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(woodpecker.UserListOptions)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 woodpecker.UserListOptions
+		if args[1] != nil {
+			arg1 = args[1].(woodpecker.UserListOptions)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -4923,14 +5323,14 @@ func (_c *MockClient_UserList_Call) Return(users []*woodpecker.User, err error) 
 	return _c
 }
 
-func (_c *MockClient_UserList_Call) RunAndReturn(run func(opt woodpecker.UserListOptions) ([]*woodpecker.User, error)) *MockClient_UserList_Call {
+func (_c *MockClient_UserList_Call) RunAndReturn(run func(ctx context.Context, opt woodpecker.UserListOptions) ([]*woodpecker.User, error)) *MockClient_UserList_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UserPatch provides a mock function for the type MockClient
-func (_mock *MockClient) UserPatch(user *woodpecker.User) (*woodpecker.User, error) {
-	ret := _mock.Called(user)
+func (_mock *MockClient) UserPatch(ctx context.Context, user *woodpecker.User) (*woodpecker.User, error) {
+	ret := _mock.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UserPatch")
@@ -4938,18 +5338,18 @@ func (_mock *MockClient) UserPatch(user *woodpecker.User) (*woodpecker.User, err
 
 	var r0 *woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.User) (*woodpecker.User, error)); ok {
-		return returnFunc(user)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.User) (*woodpecker.User, error)); ok {
+		return returnFunc(ctx, user)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.User) *woodpecker.User); ok {
-		r0 = returnFunc(user)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.User) *woodpecker.User); ok {
+		r0 = returnFunc(ctx, user)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.User) error); ok {
-		r1 = returnFunc(user)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.User) error); ok {
+		r1 = returnFunc(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -4962,19 +5362,25 @@ type MockClient_UserPatch_Call struct {
 }
 
 // UserPatch is a helper method to define mock.On call
+//   - ctx context.Context
 //   - user *woodpecker.User
-func (_e *MockClient_Expecter) UserPatch(user any) *MockClient_UserPatch_Call {
-	return &MockClient_UserPatch_Call{Call: _e.mock.On("UserPatch", user)}
+func (_e *MockClient_Expecter) UserPatch(ctx any, user any) *MockClient_UserPatch_Call {
+	return &MockClient_UserPatch_Call{Call: _e.mock.On("UserPatch", ctx, user)}
 }
 
-func (_c *MockClient_UserPatch_Call) Run(run func(user *woodpecker.User)) *MockClient_UserPatch_Call {
+func (_c *MockClient_UserPatch_Call) Run(run func(ctx context.Context, user *woodpecker.User)) *MockClient_UserPatch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.User
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.User)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.User
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.User)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -4985,14 +5391,14 @@ func (_c *MockClient_UserPatch_Call) Return(user1 *woodpecker.User, err error) *
 	return _c
 }
 
-func (_c *MockClient_UserPatch_Call) RunAndReturn(run func(user *woodpecker.User) (*woodpecker.User, error)) *MockClient_UserPatch_Call {
+func (_c *MockClient_UserPatch_Call) RunAndReturn(run func(ctx context.Context, user *woodpecker.User) (*woodpecker.User, error)) *MockClient_UserPatch_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UserPost provides a mock function for the type MockClient
-func (_mock *MockClient) UserPost(user *woodpecker.User) (*woodpecker.User, error) {
-	ret := _mock.Called(user)
+func (_mock *MockClient) UserPost(ctx context.Context, user *woodpecker.User) (*woodpecker.User, error) {
+	ret := _mock.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UserPost")
@@ -5000,18 +5406,18 @@ func (_mock *MockClient) UserPost(user *woodpecker.User) (*woodpecker.User, erro
 
 	var r0 *woodpecker.User
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.User) (*woodpecker.User, error)); ok {
-		return returnFunc(user)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.User) (*woodpecker.User, error)); ok {
+		return returnFunc(ctx, user)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*woodpecker.User) *woodpecker.User); ok {
-		r0 = returnFunc(user)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *woodpecker.User) *woodpecker.User); ok {
+		r0 = returnFunc(ctx, user)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.User)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*woodpecker.User) error); ok {
-		r1 = returnFunc(user)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *woodpecker.User) error); ok {
+		r1 = returnFunc(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5024,19 +5430,25 @@ type MockClient_UserPost_Call struct {
 }
 
 // UserPost is a helper method to define mock.On call
+//   - ctx context.Context
 //   - user *woodpecker.User
-func (_e *MockClient_Expecter) UserPost(user any) *MockClient_UserPost_Call {
-	return &MockClient_UserPost_Call{Call: _e.mock.On("UserPost", user)}
+func (_e *MockClient_Expecter) UserPost(ctx any, user any) *MockClient_UserPost_Call {
+	return &MockClient_UserPost_Call{Call: _e.mock.On("UserPost", ctx, user)}
 }
 
-func (_c *MockClient_UserPost_Call) Run(run func(user *woodpecker.User)) *MockClient_UserPost_Call {
+func (_c *MockClient_UserPost_Call) Run(run func(ctx context.Context, user *woodpecker.User)) *MockClient_UserPost_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *woodpecker.User
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*woodpecker.User)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *woodpecker.User
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.User)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -5047,14 +5459,14 @@ func (_c *MockClient_UserPost_Call) Return(user1 *woodpecker.User, err error) *M
 	return _c
 }
 
-func (_c *MockClient_UserPost_Call) RunAndReturn(run func(user *woodpecker.User) (*woodpecker.User, error)) *MockClient_UserPost_Call {
+func (_c *MockClient_UserPost_Call) RunAndReturn(run func(ctx context.Context, user *woodpecker.User) (*woodpecker.User, error)) *MockClient_UserPost_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Version provides a mock function for the type MockClient
-func (_mock *MockClient) Version() (*woodpecker.Version, error) {
-	ret := _mock.Called()
+func (_mock *MockClient) Version(ctx context.Context) (*woodpecker.Version, error) {
+	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Version")
@@ -5062,18 +5474,18 @@ func (_mock *MockClient) Version() (*woodpecker.Version, error) {
 
 	var r0 *woodpecker.Version
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.Version, error)); ok {
-		return returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*woodpecker.Version, error)); ok {
+		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func() *woodpecker.Version); ok {
-		r0 = returnFunc()
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *woodpecker.Version); ok {
+		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Version)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func() error); ok {
-		r1 = returnFunc()
+	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = returnFunc(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5086,13 +5498,20 @@ type MockClient_Version_Call struct {
 }
 
 // Version is a helper method to define mock.On call
-func (_e *MockClient_Expecter) Version() *MockClient_Version_Call {
-	return &MockClient_Version_Call{Call: _e.mock.On("Version")}
+//   - ctx context.Context
+func (_e *MockClient_Expecter) Version(ctx any) *MockClient_Version_Call {
+	return &MockClient_Version_Call{Call: _e.mock.On("Version", ctx)}
 }
 
-func (_c *MockClient_Version_Call) Run(run func()) *MockClient_Version_Call {
+func (_c *MockClient_Version_Call) Run(run func(ctx context.Context)) *MockClient_Version_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -5102,7 +5521,7 @@ func (_c *MockClient_Version_Call) Return(version *woodpecker.Version, err error
 	return _c
 }
 
-func (_c *MockClient_Version_Call) RunAndReturn(run func() (*woodpecker.Version, error)) *MockClient_Version_Call {
+func (_c *MockClient_Version_Call) RunAndReturn(run func(ctx context.Context) (*woodpecker.Version, error)) *MockClient_Version_Call {
 	_c.Call.Return(run)
 	return _c
 }
