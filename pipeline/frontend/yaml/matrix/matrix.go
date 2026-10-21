@@ -153,6 +153,8 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 		return nil, compilerError(err)
 	}
 
+	axes = uniqueAxes(axes)
+
 	if len(axes) > maxWorkflows {
 		return nil, ErrorMaxWorkflowsReached
 	}
@@ -163,7 +165,7 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 		}
 	}
 
-	return uniqueAxes(axes), nil
+	return axes, nil
 }
 
 func uniqueAxes(axes []Axis) []Axis {
