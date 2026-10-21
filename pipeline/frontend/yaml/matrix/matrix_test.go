@@ -177,6 +177,11 @@ func TestMatrixMaxAxes(t *testing.T) {
 			axes:   1,
 		},
 		{
+			name:   "normal matrix duplicates",
+			matrix: "matrix:\n  A: [c, c]\n",
+			axes:   1,
+		},
+		{
 			name:   "super too large",
 			matrix: largeMatrix(63, 128),
 			err:    ErrorMaxWorkflowsReached,
