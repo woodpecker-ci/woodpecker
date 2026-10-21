@@ -29,6 +29,12 @@ const (
 	maxWorkflows   = 64
 )
 
+var (
+	ErrorMaxWorkflowsReached = fmt.Errorf("matrix config produced more than %d workflows", maxWorkflows)
+
+	ErrorMaxAxisVariablesReached = fmt.Errorf("matrix config has more than %d variables in an axis", limitVariables)
+)
+
 // Matrix represents the pipeline matrix.
 type Matrix map[string][]string
 
