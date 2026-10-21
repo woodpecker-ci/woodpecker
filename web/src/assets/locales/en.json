@@ -319,7 +319,12 @@
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
       },
       "agents": {
-        "desc": "Agents registered for this organization."
+        "desc": "Agents registered for this organization.",
+        "require_org_agents": {
+          "require": "Run pipelines only on organization agents",
+          "desc": "Workflows of this organization's repositories are only picked up by agents registered for this organization, not by server-wide agents.",
+          "saved": "Organization settings saved"
+        }
       }
     }
   },

@@ -82,6 +82,16 @@ Changes to the filters of an agent apply the next time that agent requests a wor
 
 Organization and personal agents always get the `org-id` filter enforced on top of the configured filters, so they can never pick up workflows of another organization.
 
+### Organization agents only
+
+By default the workflows of an organization can also be picked up by instance-wide agents. To keep them on the organization's own agents, enable `Run pipelines only on organization agents` at `Organization settings -> Agents` (or set `require_org_agents` with `PATCH /api/orgs/{org_id}`).
+
+With this option enabled, workflows of the organization's repositories only match agents registered for that organization. Instance-wide agents and agents of other organizations never pick them up, regardless of their labels or filters. If the organization has no matching agent online, its workflows stay pending.
+
+:::info
+The option applies to pipelines started after it was changed. Workflows already waiting in the queue keep their previous behavior.
+:::
+
 ## Environment variables
 
 ### SERVER
