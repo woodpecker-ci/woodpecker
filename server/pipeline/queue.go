@@ -27,7 +27,7 @@ import (
 
 // pipelineTasks builds the queue tasks for a pipeline's workflow items.
 // Enqueuing happens via the scheduler (see scheduler.StartPipeline).
-func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
+func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item, priorityRules []model.QueuePriorityRule) ([]*model.Task, error) {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		task := &model.Task{
@@ -38,6 +38,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 			PipelineID: activePipeline.ID,
 			RepoID:     repo.ID,
 			Created:    activePipeline.Created,
+			Priority:   model.QueuePriority(repo, activePipeline, priorityRules),
 		}
 		// fall back to the current time if the pipeline has no creation
 		// timestamp, so the queue always has a defined ordering key.

@@ -187,7 +187,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
-	if pipeline.Event == model.EventPullMetadata {
+	if pipeline.Event == model.EventPullMetadata || hook.Action == actionSync {
 		pipeline.EventReason = []string{hook.Action}
 	}
 

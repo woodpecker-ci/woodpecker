@@ -27,14 +27,14 @@ import (
 )
 
 // start a pipeline, make sure it was stored persistent in the store before.
-func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item) (*model.Pipeline, error) {
+func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item, priorityRules []model.QueuePriorityRule) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {
 		// should be not breaking
 		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
 
-	tasks, err := pipelineTasks(repo, activePipeline, pipelineItems)
+	tasks, err := pipelineTasks(repo, activePipeline, pipelineItems, priorityRules)
 	if err != nil {
 		return nil, err
 	}

@@ -36,7 +36,10 @@ func TestFetch(t *testing.T) {
 
 	type file struct {
 		name string
-		data []byte
+		// dirName overrides the name used in the folder listing; bitbucket returns
+		// basenames instead of full paths
+		dirName string
+		data    []byte
 	}
 
 	dummyData := []byte("TEST")
@@ -58,11 +61,31 @@ func TestFetch(t *testing.T) {
 				name: ".woodpecker/release.yml",
 				data: dummyData,
 			}, {
+				name: ".woodpecker/queue-priority.yml",
+				data: dummyData,
+			}, {
 				name: ".woodpecker/image.png",
 				data: dummyData,
 			}},
 			expectedFileNames: []string{
 				".woodpecker/release.yml",
+			},
+			wantErr: false,
+		},
+		{
+			name:       "Default config - basename-only dir listing (bitbucket)",
+			repoConfig: "",
+			files: []file{{
+				name:    ".woodpecker/release.yml",
+				dirName: "release.yml",
+				data:    dummyData,
+			}, {
+				name:    ".woodpecker/queue-priority.yml",
+				dirName: "queue-priority.yml",
+				data:    dummyData,
+			}},
+			expectedFileNames: []string{
+				"release.yml",
 			},
 			wantErr: false,
 		},
@@ -291,8 +314,12 @@ func TestFetch(t *testing.T) {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
+					name := file.name
+					if file.dirName != "" {
+						name = file.dirName
+					}
 					dirs[path] = append(dirs[path], &forge_types.FileMeta{
-						Name: file.name,
+						Name: name,
 						Data: file.data,
 					})
 				}
