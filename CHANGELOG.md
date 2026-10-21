@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @sugar700, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @sugar700, @wolffberg, @xoxys
 
 ### 🔒 Security
 
+- Recover from config parsing panic in server [[#7348](https://github.com/woodpecker-ci/woodpecker/pull/7348)]
 - Fix server panics while parsing config [[#7336](https://github.com/woodpecker-ci/woodpecker/pull/7336)]
 - Only link http(s) error URIs on the login page [[#7318](https://github.com/woodpecker-ci/woodpecker/pull/7318)]
 - Do not log bearer credentials at trace level [[#7317](https://github.com/woodpecker-ci/woodpecker/pull/7317)]
@@ -20,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Replace pipeline author on deploy with session user [[#7358](https://github.com/woodpecker-ci/woodpecker/pull/7358)]
 - Switch to the woodpecker-ci envsubst fork [[#7349](https://github.com/woodpecker-ci/woodpecker/pull/7349)]
 - StepFinished of log store return error now [[#7346](https://github.com/woodpecker-ci/woodpecker/pull/7346)]
 - Speed up queue scheduling calculations [[#7303](https://github.com/woodpecker-ci/woodpecker/pull/7303)]
