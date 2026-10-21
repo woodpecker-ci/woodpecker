@@ -92,10 +92,18 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 		if len(values) == 0 {
 			continue
 		}
-		axisCount *= len(values)
+
 		if axisCount == 0 {
 			axisCount = len(values)
+		} else {
+			axisCount *= len(values)
 		}
+
+		// enforce limit
+		if axisCount >= maxAxes {
+			return nil, ErrorMaxAxesReached
+		}
+
 		names = append(names, name)
 	}
 
@@ -126,12 +134,6 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 
 		// append to the list of axis.
 		axes = append(axes, axis)
-
-		// enforce limit
-		if axisIndex >= maxAxes {
-			return nil, ErrorMaxAxesReached
-		}
-
 	}
 
 	return axes, nil
