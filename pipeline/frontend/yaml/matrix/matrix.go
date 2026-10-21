@@ -82,11 +82,6 @@ func Parse(data []byte) ([]Axis, error) {
 	return calcAxes(matrix)
 }
 
-// ParseString parses the Yaml string matrix definition.
-func ParseString(data string) ([]Axis, error) {
-	return Parse([]byte(data))
-}
-
 func calcAxes(matrix Matrix) ([]Axis, error) {
 	// calculate number of permutations and extract the list of variable
 	// names (ie go_version, redis_version, etc)
@@ -103,6 +98,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 		}
 		names = append(names, name)
 	}
+
 	// map iteration order is random: sort the names so the permutation order
 	// is deterministic and derived workflow numbering is stable across
 	// repeated compilations of the same pipeline.
@@ -116,14 +112,14 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 		axis := map[string]string{}
 		// number of consecutive axes that share the same value of a variable
 		axesPerValue := axisCount
-		for variableIndex, name := range names {
+		for _, name := range names {
 			values := matrix[name]
 			axesPerValue /= len(values)
 			valueIndex := axisIndex / axesPerValue % len(values)
 			axis[name] = values[valueIndex]
 
 			// enforce a maximum number of variables in the pipeline matrix.
-			if variableIndex >= limitVariables {
+			if len(values) > limitVariables {
 				return nil, ErrorMaxAxisVariablesReached
 			}
 		}

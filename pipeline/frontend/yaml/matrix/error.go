@@ -20,4 +20,4 @@ import (
 
 var ErrorMaxAxesReached = fmt.Errorf("matrix config produced more than %d workflows", maxAxes)
 
-var ErrorMaxAxisVariablesReached = fmt.Errorf("matrix config has more than %d in an axis", limitVariables)
+var ErrorMaxAxisVariablesReached = fmt.Errorf("matrix config has more than %d variables in an axis", limitVariables)

@@ -23,7 +23,7 @@ import (
 )
 
 func TestMatrix(t *testing.T) {
-	axis, _ := ParseString(fakeMatrix)
+	axis, _ := parseString(fakeMatrix)
 	assert.Len(t, axis, 24)
 
 	set := map[string]bool{}
@@ -34,7 +34,7 @@ func TestMatrix(t *testing.T) {
 }
 
 func TestMatrixEmpty(t *testing.T) {
-	axis, err := ParseString("")
+	axis, err := parseString("")
 	assert.NoError(t, err)
 	assert.Empty(t, axis)
 }
@@ -56,7 +56,7 @@ func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			axes, err := ParseString(tt.matrix)
+			axes, err := parseString(tt.matrix)
 			assert.NoError(t, err)
 			assert.Empty(t, axes)
 		})
@@ -64,7 +64,7 @@ func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
 }
 
 func TestMatrixAlias(t *testing.T) {
-	axis, err := ParseString(`axes: &axes
+	axis, err := parseString(`axes: &axes
   A: [a, b]
 matrix: *axes`)
 	assert.NoError(t, err)
@@ -72,7 +72,7 @@ matrix: *axes`)
 }
 
 func TestMatrixEmptyAxis(t *testing.T) {
-	axis, err := ParseString("matrix:\n  A: [a1, a2]\n  EMPTY:")
+	axis, err := parseString("matrix:\n  A: [a1, a2]\n  EMPTY:")
 	assert.NoError(t, err)
 	assert.Len(t, axis, 2)
 	assert.Equal(t, "a1", axis[0]["A"])
@@ -80,7 +80,7 @@ func TestMatrixEmptyAxis(t *testing.T) {
 }
 
 func TestMatrixIncluded(t *testing.T) {
-	axis, err := ParseString(fakeMatrixInclude)
+	axis, err := parseString(fakeMatrixInclude)
 	assert.NoError(t, err)
 	assert.Len(t, axis, 2)
 	assert.Equal(t, "1.5", axis[0]["go_version"])
@@ -119,11 +119,11 @@ func TestMatrixDeterministicOrder(t *testing.T) {
 	// the axis permutation order must be stable across parses: workflow
 	// PIDs derived from it have to match when a pipeline is compiled more
 	// than once (e.g. again at agent fetch time).
-	first, err := ParseString(fakeMatrix)
+	first, err := parseString(fakeMatrix)
 	assert.NoError(t, err)
 
 	for range 20 {
-		again, err := ParseString(fakeMatrix)
+		again, err := parseString(fakeMatrix)
 		assert.NoError(t, err)
 		assert.EqualValues(t, first, again)
 	}
@@ -180,7 +180,7 @@ func TestMatrixMaxAxes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			axes, err := ParseString(tt.matrix)
+			axes, err := parseString(tt.matrix)
 
 			assert.Len(t, axes, tt.axes)
 
@@ -248,10 +248,14 @@ func TestMatrixLargePermutationCount(t *testing.T) {
 			var axes []Axis
 			var err error
 			assert.NotPanics(t, func() {
-				axes, err = ParseString(largeMatrix(tt.axes, tt.values))
+				axes, err = parseString(largeMatrix(tt.axes, tt.values))
 			})
 			assert.Nil(t, axes)
 			assert.ErrorIs(t, err, tt.wantErr)
 		})
 	}
+}
+
+func parseString(data string) ([]Axis, error) {
+	return Parse([]byte(data))
 }
