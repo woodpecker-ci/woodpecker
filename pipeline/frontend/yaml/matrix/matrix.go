@@ -47,27 +47,23 @@ func (a Axis) String() string {
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
-	document := new(go_yaml.Node)
-	if err := yaml.Unmarshal(data, document); err != nil {
+	value := new(go_yaml.Node)
+	if err := yaml.Unmarshal(data, value); err != nil {
 		return nil, compilerError(err)
 	}
 
-	root := documentRoot(document)
-	if root == nil {
-		return []Axis{}, nil
-	}
-	if root.Kind != go_yaml.MappingNode {
-		return nil, &pipeline_errors.PipelineError{
-			Message: "expected pipeline configuration to be a mapping",
-			Type:    pipeline_errors.PipelineErrorTypeCompiler,
-		}
+	if value.Kind == go_yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
 	}
 
-	matrixNode := dereferenceAlias(mappingValue(root, "matrix"))
-	if matrixNode == nil || (matrixNode.Kind == go_yaml.ScalarNode && matrixNode.Tag == "!!null") {
+	if value == nil || value.Kind != go_yaml.MappingNode {
 		return []Axis{}, nil
 	}
-	if matrixNode.Kind == go_yaml.MappingNode && len(matrixNode.Content) == 0 {
+
+	matrixNode := dereferenceAlias(mappingValue(value, "matrix"))
+	if matrixNode == nil ||
+		(matrixNode.Kind == go_yaml.ScalarNode && matrixNode.Tag == "!!null") ||
+		matrixNode.Kind == go_yaml.MappingNode && len(matrixNode.Content) == 0 {
 		return []Axis{}, nil
 	}
 
@@ -136,7 +132,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 		axes = append(axes, axis)
 	}
 
-	return axes, nil
+	return uniqueAxes(axes), nil
 }
 
 func parseMatrix(node *go_yaml.Node) (Matrix, error) {
@@ -153,8 +149,6 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 		return nil, compilerError(err)
 	}
 
-	axes = uniqueAxes(axes)
-
 	if len(axes) > maxWorkflows {
 		return nil, ErrorMaxWorkflowsReached
 	}
@@ -165,7 +159,7 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 		}
 	}
 
-	return axes, nil
+	return uniqueAxes(axes), nil
 }
 
 func uniqueAxes(axes []Axis) []Axis {
@@ -196,13 +190,6 @@ func equalAxes(left, right Axis) bool {
 		}
 	}
 	return true
-}
-
-func documentRoot(document *go_yaml.Node) *go_yaml.Node {
-	if document == nil || document.Kind != go_yaml.DocumentNode || len(document.Content) == 0 {
-		return nil
-	}
-	return dereferenceAlias(document.Content[0])
 }
 
 func mappingValue(node *go_yaml.Node, key string) *go_yaml.Node {
