@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -575,6 +576,35 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Param			event			query	string	false	"override the event type"
 //	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {
+	restartPipeline(c, pipeline.Restart)
+}
+
+// PostPipelineRestartFailed
+//
+//	@Summary		Restart the failed workflows of a pipeline
+//	@Description	Creates a new pipeline that only runs the failed workflows and the workflows depending on them. Other query parameters are passed to the pipeline as variables, like for a restart.
+//	@Router			/repos/{repo_id}/pipelines/{pipeline_number}/restart-failed [post]
+//	@Produce		json
+//	@Success		200	{object}	Pipeline
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			pipeline_number	path	int		true	"the number of the pipeline"
+func PostPipelineRestartFailed(c *gin.Context) {
+	// Rerunning some workflows of a pipeline as a deployment would mix two
+	// different runs, so the event can't be changed here.
+	for _, key := range []string{"event", "deploy_to", "deploy_task"} {
+		if _, ok := c.GetQuery(key); ok {
+			c.String(http.StatusBadRequest, "%s can't be changed when restarting the failed workflows", key)
+			return
+		}
+	}
+	restartPipeline(c, pipeline.RestartFailed)
+}
+
+type restartFunc func(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error)
+
+func restartPipeline(c *gin.Context, restart restartFunc) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	pl := session.Pipeline(c)
@@ -625,7 +655,7 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	newPipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
+	newPipeline, err := restart(c, _store, pl, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

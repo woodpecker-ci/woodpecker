@@ -17,8 +17,10 @@ package metadata
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -80,6 +82,7 @@ func (m *Metadata) Environ() map[string]string {
 	if pipeline.RerunCount > 0 {
 		setNonEmptyEnvVar(params, "CI_PIPELINE_RERUNS", strconv.FormatInt(pipeline.RerunCount, 10))
 	}
+	setNonEmptyEnvVar(params, "CI_PIPELINE_REUSED_WORKFLOWS", reusedWorkflowsEnv(pipeline.ReusedWorkflows))
 
 	workflow := m.Workflow
 	setNonEmptyEnvVar(params, "CI_WORKFLOW_NAME", workflow.Name)
@@ -201,4 +204,14 @@ func setNonEmptyEnvVar(env map[string]string, key, value string) {
 	} else {
 		log.Trace().Str("variable", key).Msg("env var is filtered as it's empty")
 	}
+}
+
+// reusedWorkflowsEnv formats the workflows a partial restart did not rerun as
+// "name=pipeline-number" pairs, sorted by name and separated by commas.
+func reusedWorkflowsEnv(reused map[string]int64) string {
+	pairs := make([]string, 0, len(reused))
+	for _, name := range slices.Sorted(maps.Keys(reused)) {
+		pairs = append(pairs, name+"="+strconv.FormatInt(reused[name], 10))
+	}
+	return strings.Join(pairs, ",")
 }

@@ -27,7 +27,12 @@ import (
 
 // pipelineTasks builds the queue tasks for a pipeline's workflow items.
 // Enqueuing happens via the scheduler (see scheduler.StartPipeline).
-func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
+//
+// The depStatus argument holds, per workflow name, the state of dependencies
+// that already finished outside of this pipeline (see RestartFailed). They are
+// added to the task up front, so the task is gated on them as if they had just
+// finished.
+func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item, depStatus map[string]map[string]model.StatusValue) ([]*model.Task, error) {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		task := &model.Task{
@@ -52,6 +57,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 		task.Dependencies = getTaskDependencies(item.DependsOn.Names(), pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
+		maps.Copy(task.DepStatus, depStatus[item.Workflow.Name])
 
 		// Set up the concurrency limit if the workflow opted in.
 		if item.ConcurrencyLimit > 0 {

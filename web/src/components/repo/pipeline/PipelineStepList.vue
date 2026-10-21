@@ -118,6 +118,41 @@
             </button>
           </div>
         </div>
+
+        <template v-for="group in reusedWorkflowGroups" :key="group.pipelineNumber">
+          <router-link
+            :to="{ name: 'repo-pipeline', params: { pipelineId: group.pipelineNumber } }"
+            :title="$t('repo.pipeline.reused_workflows_desc', { pipelineId: group.pipelineNumber })"
+            class="text-wp-link-100 hover:text-wp-link-200 mt-2 flex items-center gap-1 px-1 text-sm"
+            data-test="reused-workflows-header"
+          >
+            <Icon name="status-success" class="h-4! w-4!" />
+            <span>{{ $t('repo.pipeline.reused_workflows', { pipelineId: group.pipelineNumber }) }}</span>
+          </router-link>
+          <router-link
+            v-for="{ workflow } in group.workflows"
+            :key="workflow.id"
+            :to="reusedWorkflowRoute(group.pipelineNumber, workflow)"
+            :title="workflow.name"
+            class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 hover:bg-wp-control-neutral-200 flex flex-col gap-2 rounded-md border border-dashed p-2 opacity-80"
+            data-test="reused-workflow"
+          >
+            <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pt-1 pr-1 text-xs">
+              <div v-for="(value, key) in workflow.environ" :key="key">
+                <Badge :label="key" :value="value" />
+              </div>
+            </div>
+            <div class="flex items-center gap-2 px-1 py-2">
+              <PipelineStatusIcon :status="workflow.state" class="h-4! w-4!" />
+              <span class="truncate">{{ workflow.name }}</span>
+              <PipelineStepDuration
+                v-if="workflow.started !== workflow.finished"
+                :workflow="workflow"
+                class="pr-2px mr-1"
+              />
+            </div>
+          </router-link>
+        </template>
       </div>
     </div>
   </div>
@@ -134,11 +169,14 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
-import type { Pipeline, PipelineStep } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { ReusedWorkflow } from '~/lib/pipeline';
 
 const props = defineProps<{
   pipeline: Pipeline;
   selectedStepId?: number | null;
+  // The workflows a partial restart took over from its ancestors.
+  reusedWorkflows?: ReusedWorkflow[];
 }>();
 
 defineEmits<{
@@ -163,6 +201,29 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
       )
     : {},
 );
+
+const reusedWorkflowGroups = computed(() => {
+  const groups: { pipelineNumber: number; workflows: ReusedWorkflow[] }[] = [];
+  for (const reused of props.reusedWorkflows ?? []) {
+    let group = groups.find((g) => g.pipelineNumber === reused.pipelineNumber);
+    if (!group) {
+      group = { pipelineNumber: reused.pipelineNumber, workflows: [] };
+      groups.push(group);
+    }
+    group.workflows.push(reused);
+  }
+  return groups;
+});
+
+// Opens the first step of a reused workflow in the pipeline it ran in.
+function reusedWorkflowRoute(pipelineNumber: number, workflow: PipelineWorkflow) {
+  const firstStep = workflow.children?.[0];
+  const params: Record<string, number> = { pipelineId: pipelineNumber };
+  if (firstStep) {
+    params.stepId = firstStep.pid;
+  }
+  return { name: 'repo-pipeline', params };
+}
 
 const singleConfig = computed(
   () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,

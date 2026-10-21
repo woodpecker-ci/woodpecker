@@ -66,7 +66,7 @@ func TestQueuePipelineConcurrency(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tt.item})
+			tasks, err := pipelineTasks(repo, activePipeline, []*builder.Item{tt.item}, nil)
 			require.NoError(t, err)
 			require.Len(t, tasks, 1)
 
@@ -83,7 +83,7 @@ func TestQueuePipelineCreated(t *testing.T) {
 
 	runOnce := func(t *testing.T, pipeline *model.Pipeline) *model.Task {
 		t.Helper()
-		tasks, err := pipelineTasks(repo, pipeline, []*builder.Item{item})
+		tasks, err := pipelineTasks(repo, pipeline, []*builder.Item{item}, nil)
 		require.NoError(t, err)
 		require.Len(t, tasks, 1)
 		return tasks[0]

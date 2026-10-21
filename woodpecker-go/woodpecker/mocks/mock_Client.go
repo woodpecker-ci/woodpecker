@@ -3008,6 +3008,80 @@ func (_c *MockClient_PipelineQueue_Call) RunAndReturn(run func() ([]*woodpecker.
 	return _c
 }
 
+// PipelineRestartFailed provides a mock function for the type MockClient
+func (_mock *MockClient) PipelineRestartFailed(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error) {
+	ret := _mock.Called(repoID, num, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PipelineRestartFailed")
+	}
+
+	var r0 *woodpecker.Pipeline
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)); ok {
+		return returnFunc(repoID, num, opt)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) *woodpecker.Pipeline); ok {
+		r0 = returnFunc(repoID, num, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Pipeline)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, int64, woodpecker.PipelineStartOptions) error); ok {
+		r1 = returnFunc(repoID, num, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_PipelineRestartFailed_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'PipelineRestartFailed'
+type MockClient_PipelineRestartFailed_Call struct {
+	*mock.Call
+}
+
+// PipelineRestartFailed is a helper method to define mock.On call
+//   - repoID int64
+//   - num int64
+//   - opt woodpecker.PipelineStartOptions
+func (_e *MockClient_Expecter) PipelineRestartFailed(repoID any, num any, opt any) *MockClient_PipelineRestartFailed_Call {
+	return &MockClient_PipelineRestartFailed_Call{Call: _e.mock.On("PipelineRestartFailed", repoID, num, opt)}
+}
+
+func (_c *MockClient_PipelineRestartFailed_Call) Run(run func(repoID int64, num int64, opt woodpecker.PipelineStartOptions)) *MockClient_PipelineRestartFailed_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 woodpecker.PipelineStartOptions
+		if args[2] != nil {
+			arg2 = args[2].(woodpecker.PipelineStartOptions)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_PipelineRestartFailed_Call) Return(pipeline *woodpecker.Pipeline, err error) *MockClient_PipelineRestartFailed_Call {
+	_c.Call.Return(pipeline, err)
+	return _c
+}
+
+func (_c *MockClient_PipelineRestartFailed_Call) RunAndReturn(run func(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)) *MockClient_PipelineRestartFailed_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // PipelineStart provides a mock function for the type MockClient
 func (_mock *MockClient) PipelineStart(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error) {
 	ret := _mock.Called(repoID, num, opt)

@@ -3441,6 +3441,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{pipeline_number}/restart-failed": {
+            "post": {
+                "description": "Creates a new pipeline that only runs the failed workflows and the workflows depending on them. Other query parameters are passed to the pipeline as variables, like for a restart.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Restart the failed workflows of a pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Pipeline"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -5151,6 +5195,10 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "partial_restart": {
+                    "description": "set if the pipeline only reruns the failed workflows of its parent",
+                    "type": "boolean"
+                },
                 "pr_draft": {
                     "type": "boolean"
                 },
@@ -6165,6 +6213,14 @@ const docTemplate = `{
                 },
                 "rerun_count": {
                     "type": "integer"
+                },
+                "reused_workflows": {
+                    "description": "ReusedWorkflows lists the workflows a partial restart did not rerun,\nwith the number of the pipeline they ran in.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
                 },
                 "started": {
                     "type": "integer"
