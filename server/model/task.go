@@ -66,7 +66,7 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 	return nil
 }
 
-// ApplyLabelsFromOrg marks the task to only run on agents of the organization if the it requires that.
+// ApplyLabelsFromOrg marks the task to only run on agents of the organization if it requires that.
 func (t *Task) ApplyLabelsFromOrg(o *Org) {
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)

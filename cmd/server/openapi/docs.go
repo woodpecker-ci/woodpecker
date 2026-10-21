@@ -5077,7 +5077,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "require_org_agents": {
-                    "description": "RequireOrgAgents restricts workflows of the organizations repos to agents of this organization",
+                    "description": "RequireOrgAgents restricts workflows of the organization's repos to agents of this organization",
                     "type": "boolean"
                 }
             }

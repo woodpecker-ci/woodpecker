@@ -22,7 +22,7 @@ type Org struct {
 	IsUser  bool   `json:"is_user"            xorm:"is_user"`
 	// if name lookup has to check for membership or not
 	Private bool `json:"-" xorm:"private"`
-	// RequireOrgAgents restricts workflows of the organizations repos to agents of this organization
+	// RequireOrgAgents restricts workflows of the organization's repos to agents of this organization
 	RequireOrgAgents bool `json:"require_org_agents" xorm:"DEFAULT FALSE 'require_org_agents'"`
 } //	@name	Org
 

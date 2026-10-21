@@ -310,4 +310,9 @@ type (
 		IsUser           bool   `json:"is_user"`
 		RequireOrgAgents bool   `json:"require_org_agents"`
 	}
+
+	// OrgPatch defines an organization patch request.
+	OrgPatch struct {
+		RequireOrgAgents *bool `json:"require_org_agents,omitempty"`
+	}
 )

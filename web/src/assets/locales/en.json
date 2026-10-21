@@ -503,7 +503,12 @@
         "swagger_ui": "Swagger UI"
       },
       "agents": {
-        "desc": "Agents registered to your account repos."
+        "desc": "Agents registered to your account repos.",
+        "require_user_agents": {
+          "require": "Run pipelines only on your agents",
+          "desc": "Workflows of your personal repositories are only picked up by agents registered to your account, not by server-wide agents.",
+          "saved": "User settings saved"
+        }
       }
     }
   },
