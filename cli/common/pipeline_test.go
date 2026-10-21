@@ -58,3 +58,44 @@ func TestFindPipelineConfig(t *testing.T) {
 		assert.Empty(t, config)
 	})
 }
+
+func TestResolvePath(t *testing.T) {
+	t.Run("FileArg", func(t *testing.T) {
+		file := filepath.Join(t.TempDir(), "pipeline.yaml")
+		require.NoError(t, os.WriteFile(file, []byte("steps: {}\n"), 0o644))
+
+		path, isDir, err := resolvePath(file)
+
+		require.NoError(t, err)
+		assert.False(t, isDir)
+		assert.Equal(t, file, path)
+	})
+
+	t.Run("DirWithConfig", func(t *testing.T) {
+		dir := t.TempDir()
+		require.NoError(t, os.Mkdir(filepath.Join(dir, ".woodpecker"), 0o755))
+
+		path, isDir, err := resolvePath(dir)
+
+		require.NoError(t, err)
+		assert.True(t, isDir)
+		assert.Equal(t, filepath.Join(dir, ".woodpecker"), path)
+	})
+
+	t.Run("DirWithoutConfig", func(t *testing.T) {
+		dir := t.TempDir()
+
+		path, isDir, err := resolvePath(dir)
+
+		require.NoError(t, err)
+		assert.True(t, isDir)
+		assert.Equal(t, dir, path)
+	})
+
+	t.Run("NonExistent", func(t *testing.T) {
+		_, _, err := resolvePath(filepath.Join(t.TempDir(), "does-not-exist"))
+
+		require.Error(t, err)
+		assert.True(t, os.IsNotExist(err))
+	})
+}

@@ -24,7 +24,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func TestLintDirPrefersDefaultWoodpeckerDirectory(t *testing.T) {
+func TestLintPrefersWoodpeckerDirectory(t *testing.T) {
 	repoRoot := t.TempDir()
 
 	writeFile(t, filepath.Join(repoRoot, ".woodpecker", "pipeline.yaml"), `steps:
@@ -38,12 +38,48 @@ func TestLintDirPrefersDefaultWoodpeckerDirectory(t *testing.T) {
     image: postgres
 `)
 
-	runLintCommand(t, func(c *cli.Command) {
-		require.NoError(t, lintDir(t.Context(), c, repoRoot))
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
 	})
 }
 
-func runLintCommand(t *testing.T, fn func(c *cli.Command)) {
+func TestLintWithFileConfig(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker.yml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo ok
+`)
+
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
+	})
+}
+
+func TestLintWalksAllYAMLWhenNoConfig(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	writeFile(t, filepath.Join(repoRoot, "pipeline-a.yaml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo a
+`)
+	writeFile(t, filepath.Join(repoRoot, "pipeline-b.yml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo b
+`)
+
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
+	})
+}
+
+func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) {
 	t.Helper()
 
 	command := &cli.Command{
@@ -53,7 +89,7 @@ func runLintCommand(t *testing.T, fn func(c *cli.Command)) {
 			return nil
 		},
 	}
-	require.NoError(t, command.Run(t.Context(), []string{"woodpecker-cli"}))
+	require.NoError(t, command.Run(t.Context(), []string{"woodpecker-cli", dir}))
 }
 
 func writeFile(t *testing.T, path, content string) {

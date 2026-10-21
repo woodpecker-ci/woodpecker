@@ -74,19 +74,19 @@ func RunPipelineFunc(ctx context.Context, c *cli.Command, fileFunc, dirFunc func
 
 	multiArgs := c.Args().Len() > 1
 	for _, arg := range c.Args().Slice() {
-		fi, err := os.Stat(arg)
+		path, isDir, err := resolvePath(arg)
 		if err != nil {
 			return err
 		}
 		if multiArgs {
-			fmt.Println("#", fi.Name())
+			fmt.Println("#", filepath.Base(path))
 		}
-		if fi.IsDir() {
-			if err := dirFunc(ctx, c, arg); err != nil {
+		if isDir {
+			if err := dirFunc(ctx, c, path); err != nil {
 				return err
 			}
 		} else {
-			if err := fileFunc(ctx, c, arg); err != nil {
+			if err := fileFunc(ctx, c, path); err != nil {
 				return err
 			}
 		}
@@ -96,4 +96,24 @@ func RunPipelineFunc(ctx context.Context, c *cli.Command, fileFunc, dirFunc func
 	}
 
 	return nil
+}
+
+// resolvePath returns the final path to process and whether it is a directory.
+func resolvePath(arg string) (path string, isDir bool, err error) {
+	fi, err := os.Stat(arg)
+	if err != nil {
+		return "", false, err
+	}
+	if !fi.IsDir() {
+		return arg, false, nil
+	}
+
+	configIsDir, config, found, err := FindPipelineConfig(arg)
+	if err != nil {
+		return "", false, err
+	}
+	if found {
+		return config, configIsDir, nil
+	}
+	return arg, true, nil
 }
