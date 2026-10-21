@@ -85,6 +85,11 @@ func Parse(data []byte) ([]Axis, error) {
 }
 
 func calcAxes(matrix Matrix) ([]Axis, error) {
+	// fail early if we know the outcome is more than allowed already
+	if len(matrix) > maxWorkflows {
+		return nil, ErrorMaxWorkflowsReached
+	}
+
 	// calculate number of permutations and extract the list of variable
 	// names (ie go_version, redis_version, etc)
 	var axisCount int
