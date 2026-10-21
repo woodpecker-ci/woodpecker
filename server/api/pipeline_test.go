@@ -424,6 +424,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -496,6 +497,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -625,6 +627,7 @@ func TestPostPipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
