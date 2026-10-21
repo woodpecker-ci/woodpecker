@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### ✨ Features
 
+- Add option to restrict organization and user to use its agents only [[#7359](https://github.com/woodpecker-ci/woodpecker/pull/7359)]
 - Make CLI lint prefer detected Woodpecker config [[#6634](https://github.com/woodpecker-ci/woodpecker/pull/6634)]
 
 ### 📈 Enhancement
