@@ -87,7 +87,7 @@ func TestLogStoreAppendFindDelete(t *testing.T) {
 	require.NoError(t, s.LogDelete(step))
 
 	// StepFinished is a no-op for the file store but part of the interface
-	s.StepFinished(step)
+	require.NoError(t, s.StepFinished(step))
 
 	// after delete the file is gone -> find returns no entries, no error
 	got, err = s.LogFind(step)
