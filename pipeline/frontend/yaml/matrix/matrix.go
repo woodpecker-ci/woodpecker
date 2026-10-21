@@ -26,7 +26,7 @@ import (
 
 const (
 	limitVariables = 10
-	maxAxes        = 64
+	maxWorkflows   = 64
 )
 
 // Matrix represents the pipeline matrix.
@@ -100,8 +100,8 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 		}
 
 		// enforce limit
-		if axisCount >= maxAxes {
-			return nil, ErrorMaxAxesReached
+		if axisCount > maxWorkflows {
+			return nil, ErrorMaxWorkflowsReached
 		}
 
 		names = append(names, name)
@@ -128,7 +128,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 
 			// enforce a maximum number of variables in the pipeline matrix.
 			if len(values) > limitVariables {
-				return nil, ErrorMaxAxisVariablesReached
+				return nil, ErrorMaxWorkflowsReached
 			}
 		}
 
@@ -153,13 +153,13 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 		return nil, compilerError(err)
 	}
 
-	if len(axes) > maxAxes {
-		return nil, ErrorMaxAxesReached
+	if len(axes) > maxWorkflows {
+		return nil, ErrorMaxWorkflowsReached
 	}
 
 	for _, values := range axes {
 		if len(values) > limitVariables {
-			return nil, ErrorMaxAxisVariablesReached
+			return nil, ErrorMaxWorkflowsReached
 		}
 	}
 

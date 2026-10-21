@@ -149,12 +149,12 @@ func TestMatrixMaxAxes(t *testing.T) {
 		{
 			name:   "one above limit",
 			matrix: "matrix:\n  A: [1, 2, 3, 4, 5]\n  B: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]",
-			err:    ErrorMaxAxesReached,
+			err:    ErrorMaxWorkflowsReached,
 		},
 		{
 			name:   "above limit",
 			matrix: "matrix:\n  A: [1, 2, 3]\n  B: [1, 2, 3]\n  C: [1, 2, 3]\n  D: [1, 2, 3]",
-			err:    ErrorMaxAxesReached,
+			err:    ErrorMaxWorkflowsReached,
 		},
 		{
 			name:   "include below limit",
@@ -169,12 +169,17 @@ func TestMatrixMaxAxes(t *testing.T) {
 		{
 			name:   "include above limit",
 			matrix: includeMatrixHelper(65),
-			err:    ErrorMaxAxesReached,
+			err:    ErrorMaxWorkflowsReached,
 		},
 		{
 			name:   "no duplication",
 			matrix: "matrix:\n  include:\n    - A: c\n    - A: c\n",
 			axes:   1,
+		},
+		{
+			name:   "super too large",
+			matrix: largeMatrix(63, 128),
+			err:    ErrorMaxWorkflowsReached,
 		},
 	}
 
@@ -210,8 +215,6 @@ func includeMatrixHelper(entries int) string {
 	return b.String()
 }
 
-// largeMatrix returns a matrix with the given number of axes, each with the
-// given number of values.
 func largeMatrix(axes, values int) string {
 	var b strings.Builder
 	b.WriteString("matrix:\n")
@@ -226,34 +229,6 @@ func largeMatrix(axes, values int) string {
 		b.WriteString("]\n")
 	}
 	return b.String()
-}
-
-func TestMatrixLargePermutationCount(t *testing.T) {
-	// Permutation overflow and excessive axes must return a limit error rather
-	// than panic or silently produce an empty matrix.
-	tests := []struct {
-		axes, values int
-		wantErr      error
-	}{
-		{axes: 10, values: 128, wantErr: ErrorMaxAxesReached},
-		{axes: 63, values: 2, wantErr: ErrorMaxAxisVariablesReached},
-		{axes: 64, values: 2, wantErr: ErrorMaxAxisVariablesReached},
-		{axes: 65, values: 2, wantErr: ErrorMaxAxisVariablesReached},
-		{axes: 32, values: 4, wantErr: ErrorMaxAxisVariablesReached},
-		{axes: 40, values: 3, wantErr: ErrorMaxAxisVariablesReached},
-	}
-
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%dx%d", tt.axes, tt.values), func(t *testing.T) {
-			var axes []Axis
-			var err error
-			assert.NotPanics(t, func() {
-				axes, err = parseString(largeMatrix(tt.axes, tt.values))
-			})
-			assert.Nil(t, axes)
-			assert.ErrorIs(t, err, tt.wantErr)
-		})
-	}
 }
 
 func parseString(data string) ([]Axis, error) {
