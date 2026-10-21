@@ -584,7 +584,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// fetchResult is what the config service serves on the fetch. The store is
 	// returned so callers can assert which persist calls ran.
-	setupPost := func(t *testing.T, parent *model.Pipeline, fetchResult []*forge_types.FileMeta) (*httptest.ResponseRecorder, *store_mocks.MockStore) {
+	setupPost := func(t *testing.T, parent *model.Pipeline, fetchResult []*forge_types.FileMeta, target string, sessionUser *model.User) (*httptest.ResponseRecorder, *store_mocks.MockStore) {
 		mockStore := store_mocks.NewMockStore(t)
 		mockConfigService := config_service_mocks.NewMockService(t)
 		mockSecretService := secret_service_mocks.NewMockService(t)
@@ -630,9 +630,9 @@ func TestPostPipeline(t *testing.T) {
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
-		c.Set("user", fakeUser)
+		c.Set("user", sessionUser)
 		c.Set("pipeline", parent)
-		c.Request, _ = http.NewRequest(http.MethodPost, "", nil)
+		c.Request, _ = http.NewRequest(http.MethodPost, target, nil)
 
 		PostPipeline(c)
 		return w, mockStore
@@ -640,7 +640,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// Before the fix, Restart guarded on the empty old config rows.
 	t.Run("restart of a config-less errored pipeline succeeds when the fetch yields config", func(t *testing.T) {
-		w, mockStore := setupPost(t, newErroredParent(), validConfig)
+		w, mockStore := setupPost(t, newErroredParent(), validConfig, "", fakeUser)
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var got model.Pipeline
@@ -658,7 +658,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// No old config and an empty fetch is a genuine "not found".
 	t.Run("restart still errors when no old config and the fetch is empty", func(t *testing.T) {
-		w, _ := setupPost(t, newErroredParent(), []*forge_types.FileMeta{})
+		w, _ := setupPost(t, newErroredParent(), []*forge_types.FileMeta{}, "", fakeUser)
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var got model.Pipeline
@@ -666,6 +666,29 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, model.StatusError, got.Status)
 		require.NotEmpty(t, got.Errors)
 		assert.Equal(t, "pipeline definition not found", got.Errors[0].Message)
+	})
+
+	t.Run("deployment is attributed to the session user, not the original author or repo owner", func(t *testing.T) {
+		fakeRepo.AllowDeploy = true
+		t.Cleanup(func() { fakeRepo.AllowDeploy = false })
+
+		parent := newErroredParent()
+		parent.Author, parent.Avatar, parent.Email, parent.Sender = "orig", "orig.png", "orig@example.com", "orig"
+		deployer := &model.User{ID: 2, Login: "deployer", Email: "deployer@example.com", Avatar: "deployer.png"}
+		deployConfig := []*forge_types.FileMeta{
+			{Name: ".woodpecker.yml", Data: []byte("when:\n  event: deployment\nsteps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
+		}
+
+		w, _ := setupPost(t, parent, deployConfig, "?event=deployment&deploy_to=prod", deployer)
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var got model.Pipeline
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))
+		assert.Equal(t, model.EventDeploy, got.Event)
+		assert.Equal(t, "deployer", got.Author)
+		assert.Equal(t, "deployer.png", got.Avatar)
+		assert.Equal(t, "deployer@example.com", got.Email)
+		assert.Equal(t, "deployer", got.Sender)
 	})
 }
 
