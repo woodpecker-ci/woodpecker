@@ -117,16 +117,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		log.Warn().Msg("WOODPECKER_GRPC_VERIFY is deprecated, use WOODPECKER_GRPC_SKIP_VERIFY")
 	}
 
-	agentConn, err := agent_rpc.Dial(grpcClientCtx, agent_rpc.DialConfig{ //nolint:contextcheck
-		ServerAddr:       c.String("server"),
-		AgentToken:       c.String("grpc-token"),
-		AgentID:          agentConfig.AgentID,
-		Secure:           c.Bool("grpc-secure"),
-		SkipTLSVerify:    skipInsecure,
-		KeepaliveTime:    c.Duration("grpc-keepalive-time"),
-		KeepaliveTimeout: c.Duration("grpc-keepalive-timeout"),
-		AuthRefreshEvery: authInterceptorRefreshInterval,
-	})
+	agentConn, err := agent_rpc.Dial(grpcClientCtx, grpcDialConfig(c, agentConfig, skipInsecure)) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
@@ -371,4 +362,17 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func grpcDialConfig(c *cli.Command, agentConfig AgentConfig, skipInsecure bool) agent_rpc.DialConfig {
+	return agent_rpc.DialConfig{
+		ServerAddr:       c.String("server"),
+		AgentToken:       c.String("grpc-token"),
+		AgentID:          agentConfig.AgentID,
+		Secure:           c.Bool("grpc-secure"),
+		SkipTLSVerify:    skipInsecure,
+		KeepaliveTime:    c.Duration("keepalive-time"),
+		KeepaliveTimeout: c.Duration("keepalive-timeout"),
+		AuthRefreshEvery: authInterceptorRefreshInterval,
+	}
 }
