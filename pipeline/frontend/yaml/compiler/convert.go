@@ -21,6 +21,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/drone/envsubst"
 	"github.com/oklog/ulid/v2"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
@@ -80,9 +81,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	// always mount the workspace volume: it references config.Volume, which the
 	// backend provisions, so steps mount the volume the backend actually creates
 	volumes := []string{workspaceVolume}
-	volumes = append(volumes, c.volumes...)
+
+	// user-defined volumes are kept apart: $VAR / ${VAR} references in their
+	// paths are expanded once the step environment is final, below.
+	userVolumes := append([]string(nil), c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
-		volumes = append(volumes, volume.String())
+		userVolumes = append(userVolumes, volume.String())
 	}
 
 	// append default environment variables
@@ -126,6 +130,20 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue, secretMapping); err != nil {
 		return nil, err
 	}
+
+	// expand variable references in volume paths against the step environment,
+	// e.g. `/root/node_modules:${CI_WORKSPACE}/node_modules`. Unknown ${VAR}
+	// references expand to an empty string, mirroring envsubst semantics.
+	for i, vol := range userVolumes {
+		expanded, err := envsubst.Eval(vol, func(name string) string {
+			return environment[name]
+		})
+		if err != nil {
+			return nil, err
+		}
+		userVolumes[i] = expanded
+	}
+	volumes = append(volumes, userVolumes...)
 
 	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true

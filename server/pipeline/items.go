@@ -19,6 +19,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"maps"
+	"net/url"
+	"path"
 
 	"github.com/rs/zerolog/log"
 
@@ -108,10 +111,20 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 		})
 	}
 
+	// make $CI_WORKSPACE available for YAML-level variable substitution (e.g. in
+	// volume paths): it mirrors the workspace the compiler assigns to steps.
+	additionalEnvs := map[string]string{
+		"CI_WORKSPACE": compiler.DefaultWorkspaceBase,
+	}
+	if u, err := url.Parse(repo.ForgeURL); err == nil {
+		additionalEnvs["CI_WORKSPACE"] = path.Join(compiler.DefaultWorkspaceBase, "src", u.Hostname(), u.Path)
+	}
+	maps.Copy(additionalEnvs, currentPipeline.AdditionalVariables)
+
 	b := builder.PipelineBuilder{
 		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
 		Envs:                envs,
-		AdditionalEnvs:      currentPipeline.AdditionalVariables,
+		AdditionalEnvs:      additionalEnvs,
 		Yamls:               yamls,
 		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
