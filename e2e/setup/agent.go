@@ -176,12 +176,11 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 
 	// If a non-global org is requested, update the agent's OrgID in the DB so
 	// the server's GetServerLabels returns the right org-id filter (score 10).
-	if cfg.orgID != model.IDNotSet {
-		// The server stores agents; we patch via the store after registration.
-		// This is done in WaitForAgentRegistered which the caller must invoke.
-		// We stash the requested orgID so the wait helper can apply it.
-		env.requestOrgID = cfg.orgID
-	}
+	// The server stores agents; we patch via the store after registration.
+	// This is done in WaitForAgentRegistered which the caller must invoke.
+	// We stash the requested orgID (model.IDNotSet for global agents, which
+	// the wait helper skips) so it can be applied.
+	env.requestOrgID = cfg.orgID
 
 	t.Cleanup(func() {
 		if err := client.UnregisterAgent(grpcCtx); err != nil {
