@@ -31,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
@@ -48,10 +49,6 @@ type AgentEnv struct {
 
 	// name is used for logging and as the hostname label.
 	name string
-
-	// requestOrgID is applied to the DB record by WaitForAgentRegistered.
-	// See WithOrgID. model.IDNotSet (-1) means global (default).
-	requestOrgID int64
 }
 
 // AgentOption configures an agent before it registers with the server.
@@ -67,6 +64,9 @@ type agentConfig struct {
 
 	// orgID pins the agent to a specific organization. See WithOrgID.
 	orgID int64
+
+	// store is used to create the org agent record. See WithOrgID.
+	store store.Store
 
 	// capacity is the number of workflows the agent runs in parallel
 	// (advertised to the server and number of runner goroutines).
@@ -93,12 +93,16 @@ func WithCustomLabels(labels map[string]string) AgentOption {
 	}
 }
 
-// WithOrgID restricts the agent to a specific organization. Org agents score
-// 10× higher than global agents (score 1) for tasks from the same org, so the
-// queue always prefers them when both are available. Pass model.IDNotSet (-1)
-// for a global agent (the default).
-func WithOrgID(id int64) AgentOption {
-	return func(c *agentConfig) { c.orgID = id }
+// WithOrgID restricts the agent to a specific organization. Like a real org
+// agent, the agent record is created in the store with the OrgID and its own
+// token before the agent connects, so every poll carries the org-id filter.
+// Org agents score 10× higher than global agents (score 1) for tasks from the
+// same org. Without this option the agent is a global agent.
+func WithOrgID(s store.Store, id int64) AgentOption {
+	return func(c *agentConfig) {
+		c.store = s
+		c.orgID = id
+	}
 }
 
 // WithCapacity sets how many workflows the agent runs in parallel. This is the
@@ -138,9 +142,23 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	agentCtx, agentCancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { agentCancel(nil) })
 
+	// Global agents authenticate with the shared system token, org agents with
+	// the individual token of their pre-created agent record.
+	agentToken := TestAgentToken
+	if cfg.orgID != model.IDNotSet {
+		agent := &model.Agent{
+			Name:    cfg.hostname,
+			OwnerID: model.IDNotSet,
+			OrgID:   cfg.orgID,
+			Token:   model.GenerateNewAgentToken(),
+		}
+		require.NoErrorf(t, cfg.store.AgentCreate(agent), "StartAgent(%s): create org agent", cfg.hostname)
+		agentToken = agent.Token
+	}
+
 	agentConn, err := agent_rpc.Dial(agentCtx, agent_rpc.DialConfig{
 		ServerAddr:       grpcAddr,
-		AgentToken:       TestAgentToken,
+		AgentToken:       agentToken,
 		AgentID:          -1,
 		Secure:           false,
 		KeepaliveTime:    defaultTimeout,
@@ -173,14 +191,6 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		CustomLabels: cfg.customLabels,
 	})
 	require.NoErrorf(t, err, "StartAgent(%s): register with server: %v", cfg.hostname, err)
-
-	// If a non-global org is requested, update the agent's OrgID in the DB so
-	// the server's GetServerLabels returns the right org-id filter (score 10).
-	// The server stores agents; we patch via the store after registration.
-	// This is done in WaitForAgentRegistered which the caller must invoke.
-	// We stash the requested orgID (model.IDNotSet for global agents, which
-	// the wait helper skips) so it can be applied.
-	env.requestOrgID = cfg.orgID
 
 	t.Cleanup(func() {
 		if err := client.UnregisterAgent(grpcCtx); err != nil {
