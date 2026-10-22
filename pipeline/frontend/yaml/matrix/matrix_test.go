@@ -28,7 +28,7 @@ func TestMatrix(t *testing.T) {
 
 	set := map[string]bool{}
 	for _, perm := range axis {
-		set[perm.String()] = true
+		set[fmt.Sprint(perm)] = true
 	}
 	assert.Len(t, set, 24)
 }

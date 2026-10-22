@@ -17,7 +17,6 @@ package matrix
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	go_yaml "go.yaml.in/yaml/v4"
 
@@ -41,16 +40,6 @@ type Matrix map[string][]string
 
 // Axis represents a single permutation of entries from the pipeline matrix.
 type Axis map[string]string
-
-// String returns a string representation of an Axis as a comma-separated list
-// of environment variables.
-func (a Axis) String() string {
-	var envs []string
-	for name, value := range a {
-		envs = append(envs, name+"="+value)
-	}
-	return strings.Join(envs, " ")
-}
 
 // Parse parses the Yaml matrix definition.
 func Parse(data []byte) ([]Axis, error) {
