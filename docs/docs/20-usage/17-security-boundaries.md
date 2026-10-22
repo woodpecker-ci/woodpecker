@@ -124,5 +124,6 @@ The server serves gRPC without TLS, so put it behind a [TLS proxy](../30-adminis
 Organization admins can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
 Every admin of an organization can see the tokens of all its agents, also of the ones other admins added, and can edit and remove them.
 This gives no more access than adding an own agent, as [organization agents](../30-administration/10-configuration/30-agent.md#agent-filters) only get workflows of their organization.
+Instance-wide agents run workflows of all organizations, unless an organization allows [only its own agents](../30-administration/10-configuration/30-agent.md#organization-agents-only).
 
 The backend isolates the steps from the agent. The [local backend](../30-administration/10-configuration/11-backends/30-local.md) has no isolation at all.
