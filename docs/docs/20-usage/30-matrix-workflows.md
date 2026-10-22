@@ -4,7 +4,7 @@ Woodpecker has integrated support for matrix workflows. Woodpecker executes a se
 
 :::warning
 Woodpecker generates at most **64 workflows** per matrix.
-The variables are also limmited to **10** per axis.
+The variables are also limited to **10** per axis.
 A matrix with more combinations is rejected with an error.
 :::
 
