@@ -79,10 +79,11 @@ func TestRefreshKeepsStillValidTokenWithoutExpiry(t *testing.T) {
 	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
 	assert.NoError(t, err)
 
-	// GitLab OAuth access tokens never expire: the stored expiry stays at
-	// zero. Refresh must not rotate the token, because GitLab revokes the
-	// previous access token on rotation, which would break the clone
-	// credentials of running pipelines.
+	// Non-expiring token (e.g. GitLab < 15.0 with "Expire access tokens"
+	// disabled): the token response carries no expires_in, so the stored
+	// expiry stays at zero. Refresh must not rotate the token, because
+	// GitLab revokes the previous access token on rotation, which would
+	// break the clone credentials of running pipelines.
 	user := &model.User{
 		AccessToken:  "old-access",
 		RefreshToken: "old-refresh",

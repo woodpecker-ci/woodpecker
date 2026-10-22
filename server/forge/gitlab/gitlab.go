@@ -157,12 +157,15 @@ func (g *GitLab) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
-	// GitLab OAuth access tokens never expire, and each refresh_token
-	// exchange invalidates the previous access_token and refresh_token,
-	// issuing a new pair.  Forcing the exchange on every refresh would
-	// therefore rotate the token and invalidate the clone credentials
-	// already baked into running pipelines.
-	// See https://docs.gitlab.com/ee/api/oauth2.html#retrieve-a-new-access-token-using-a-refresh-token
+	// Some forges issue non-expiring tokens, e.g. GitLab < 15.0 OAuth
+	// applications with "Expire access tokens" disabled: the token response
+	// then omits expires_in, so the stored expiry stays at or below zero.
+	// For such tokens every refresh_token exchange invalidates the previous
+	// access_token and refresh_token —
+	// https://docs.gitlab.com/api/oauth2/#authorization-code-flow — so
+	// forcing the exchange on every refresh would rotate the token and
+	// invalidate the clone credentials already baked into running pipelines.
+	// Keep the stored token whenever the forge reports no expiry for it.
 	if user.Expiry <= 0 {
 		return false, nil
 	}
