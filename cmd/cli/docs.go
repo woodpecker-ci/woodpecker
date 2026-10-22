@@ -22,6 +22,12 @@ import (
 	docs "github.com/urfave/cli-docs/v3"
 )
 
+const installationDocs = `:::tip
+See the [CLI installation guide](./30-administration/05-installation/40-cli.md) for how to install woodpecker-cli and connect it to your server.
+:::
+
+`
+
 const configurationDocs = `# CONFIGURATION
 
 woodpecker-cli stores named contexts in a ` + "`contexts.json`" + ` file under the user's configuration directory. ` + "`XDG_CONFIG_HOME`" + ` overrides the base directory. The default paths are:
@@ -79,7 +85,7 @@ func main() {
 		panic(err)
 	}
 	defer fi.Close()
-	if _, err := fi.WriteString("# CLI\n\n" + configurationDocs + md); err != nil {
+	if _, err := fi.WriteString("# CLI\n\n" + installationDocs + configurationDocs + md); err != nil {
 		panic(err)
 	}
 }

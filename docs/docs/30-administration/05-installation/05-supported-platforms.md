@@ -34,7 +34,7 @@ The table lists what is officially built and published by the Woodpecker project
 | openbsd / amd64                      | –              | Binary         | Binary         | Binary         |
 | openbsd / arm64                      | –              | Binary         | Binary         | Binary         |
 
-DEB and RPM packages are produced for `linux/amd64` and `linux/arm64`; see the [Distribution packages](./30-packages.md) page for download links and systemd unit examples.
+DEB and RPM packages are produced for `linux/amd64` and `linux/arm64`; see the [Distribution packages](./30-packages.md) page for download links and systemd unit examples. For installing the CLI, see the [CLI installation guide](./40-cli.md).
 
 ## Backend support per platform
 

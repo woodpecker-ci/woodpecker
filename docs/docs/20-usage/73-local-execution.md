@@ -4,7 +4,7 @@
 
 ## Requirements
 
-- Install `woodpecker-cli` from the [distribution packages](../30-administration/05-installation/30-packages.md) or a release archive.
+- Install `woodpecker-cli` as described in the [CLI installation guide](../30-administration/05-installation/40-cli.md).
 - Run the command from the repository checkout, or pass `--repo-path` to point at it.
 - Make sure the backend you want to use is available locally. The Docker backend needs access to a Docker daemon. The local backend runs commands directly on your host and does not reproduce the container image environment.
 

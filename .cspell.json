@@ -191,6 +191,7 @@
     "selfhosted",
     "sess",
     "sfnt",
+    "shasum",
     "shellescape",
     "shopt",
     "sigstore",
