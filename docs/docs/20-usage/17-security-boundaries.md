@@ -15,6 +15,23 @@ If the forge reports something wrong, the boundaries on this page are wrong too.
 
 <!-- TODO: document forge specific behavior, e.g. which login is used as pipeline author on each forge (GitLab releases use the name of the commit author). -->
 
+### Webhooks
+
+Woodpecker generates a random secret for every repository when it is activated.
+The webhook URL carries a non-expiring token signed with this secret, which names the forge and repository and is checked on each received hook.
+A secret only allows tokens for its own repository.
+
+The token does not cover the body, so keep the webhook URL private: whoever has it can send forged requests for its repository.
+Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret and Woodpecker verifies it, so do not leak the secret either.
+This only protects against a leaked URL, not against admins of the repository on the forge, who can read the URL and sometimes the secret.
+
+:::info
+If the webhook URL or secret got leaked, use **Repair repository** in the repository settings to rotate the secret.
+:::
+
+A valid token only proves which repository a webhook is for.
+What the pipeline can do then depends on the author the forge reports, the [approval](#approval-of-pipelines) rules and the [credentials](#git-credentials) it gets.
+
 ## Permissions
 
 - Instance admins ([`WOODPECKER_ADMIN`](../30-administration/10-configuration/10-server.md#admin)) are admins of every org and repository.
