@@ -125,7 +125,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 
 			// enforce a maximum number of variables in the pipeline matrix.
 			if len(values) > limitVariables {
-				return nil, ErrorMaxWorkflowsReached
+				return nil, ErrorMaxAxisVariablesReached
 			}
 		}
 
@@ -156,7 +156,7 @@ func parseInclude(node *go_yaml.Node) ([]Axis, error) {
 
 	for _, values := range axes {
 		if len(values) > limitVariables {
-			return nil, ErrorMaxWorkflowsReached
+			return nil, ErrorMaxAxisVariablesReached
 		}
 	}
 
