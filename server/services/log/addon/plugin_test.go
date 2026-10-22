@@ -78,9 +78,9 @@ func TestRPCRoundTrip(t *testing.T) {
 
 	t.Run("step finished", func(t *testing.T) {
 		impl := log_mocks.NewMockService(t)
-		impl.On("StepFinished", step).Return()
+		impl.On("StepFinished", step).Return(nil)
 
-		newRPCService(t, impl).StepFinished(step)
+		assert.NoError(t, newRPCService(t, impl).StepFinished(step))
 	})
 }
 
@@ -91,6 +91,7 @@ func TestRPCErrors(t *testing.T) {
 	impl.On("LogFind", mock.Anything).Return(nil, errStore)
 	impl.On("LogAppend", mock.Anything, mock.Anything).Return(errStore)
 	impl.On("LogDelete", mock.Anything).Return(errStore)
+	impl.On("StepFinished", mock.Anything).Return(errStore)
 
 	s := newRPCService(t, impl)
 	step := &model.Step{ID: 1}
@@ -100,4 +101,5 @@ func TestRPCErrors(t *testing.T) {
 	assert.ErrorContains(t, err, "log store unavailable")
 	assert.ErrorContains(t, s.LogAppend(step, []*model.LogEntry{{Line: 1}}), "log store unavailable")
 	assert.ErrorContains(t, s.LogDelete(step), "log store unavailable")
+	assert.ErrorContains(t, s.StepFinished(step), "log store unavailable")
 }
