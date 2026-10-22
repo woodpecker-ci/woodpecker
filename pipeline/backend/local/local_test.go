@@ -43,7 +43,7 @@ func TestIsAvailable(t *testing.T) {
 
 		t.Setenv("WOODPECKER_IN_CONTAINER", "true")
 
-		available := backend.IsAvailable(context.Background())
+		available := backend.IsAvailable(t.Context())
 		assert.False(t, available)
 	})
 
@@ -51,7 +51,7 @@ func TestIsAvailable(t *testing.T) {
 		backend := New()
 
 		os.Unsetenv("WOODPECKER_IN_CONTAINER")
-		available := backend.IsAvailable(context.Background())
+		available := backend.IsAvailable(t.Context())
 		assert.True(t, available)
 	})
 }
@@ -60,7 +60,7 @@ func TestLoad(t *testing.T) {
 	backend, _ := New().(*local)
 
 	t.Run("load without cli context", func(t *testing.T) {
-		ctx := context.Background()
+		ctx := t.Context()
 		info, err := backend.Load(ctx)
 
 		require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestLoad(t *testing.T) {
 				Value: tmpDir,
 			},
 		}
-		ctx := context.WithValue(context.Background(), types.CliCommand, cmd)
+		ctx := context.WithValue(t.Context(), types.CliCommand, cmd)
 
 		info, err := backend.Load(ctx)
 
@@ -92,7 +92,7 @@ func TestSetupWorkflow(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-task-uuid-123"
 	config := &types.Config{}
 
@@ -124,7 +124,7 @@ func TestDestroyWorkflow(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-destroy-task"
 	config := &types.Config{}
 
@@ -413,7 +413,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// Create multiple workflows concurrently
 	taskUUIDs := []string{"task-1", "task-2", "task-3"}

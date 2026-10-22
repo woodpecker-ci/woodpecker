@@ -167,7 +167,7 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 	// the entire process group, taking the grandchild with it.
 	cancel(nil)
 
-	_, _ = backend.WaitStep(context.Background(), step, taskUUID)
+	_, _ = backend.WaitStep(t.Context(), step, taskUUID)
 
 	require.Eventuallyf(t, func() bool {
 		return !pidAlive(grandchildPID)

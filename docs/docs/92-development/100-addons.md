@@ -55,7 +55,7 @@ type config struct {
 
 ### Addon types
 
-| Type      | Addon package                                                 | Service interface                                                 |
-| --------- | ------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Forge     | `go.woodpecker-ci.org/woodpecker/v3/server/forge/addon`       | `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`         |
-| Log store | `go.woodpecker-ci.org/woodpecker/v3/server/service/log/addon` | `"go.woodpecker-ci.org/woodpecker/v3/server/service/log".Service` |
+| Type      | Addon package                                                  | Service interface                                                  |
+| --------- | -------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Forge     | `go.woodpecker-ci.org/woodpecker/v3/server/forge/addon`        | `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`          |
+| Log store | `go.woodpecker-ci.org/woodpecker/v3/server/services/log/addon` | `"go.woodpecker-ci.org/woodpecker/v3/server/services/log".Service` |

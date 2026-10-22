@@ -15,7 +15,6 @@
 package forge_test
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -66,7 +65,7 @@ func TestRefresh_NonExpiredToken(t *testing.T) {
 	f := &refresherForge{MockForge: mockForge, MockRefresher: mockRefresher}
 	user := freshUser(1)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	// Refresher.Refresh should NOT be called since token is still valid
 	mockRefresher.AssertNotCalled(t, "Refresh", mock.Anything, mock.Anything)
@@ -92,7 +91,7 @@ func TestRefresh_ExpiredToken(t *testing.T) {
 	})
 	mockStore.On("UpdateUser", user).Return(nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	assert.Equal(t, "new-access-token", user.AccessToken)
 	assert.Equal(t, "new-refresh-token", user.RefreshToken)
@@ -112,7 +111,7 @@ func TestRefresh_ExpiredTokenNoUpdate(t *testing.T) {
 	// Refresh returns false (no update needed), e.g. token was already refreshed
 	mockRefresher.On("Refresh", mock.Anything, user).Return(false, nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	mockRefresher.AssertCalled(t, "Refresh", mock.Anything, user)
 	// UpdateUser should NOT be called when Refresh returns false
@@ -155,7 +154,7 @@ func TestRefresh_ConcurrentRefreshSerialized(t *testing.T) {
 	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
-			forge.Refresh(context.Background(), f, mockStore, u)
+			forge.Refresh(t.Context(), f, mockStore, u)
 		}(users[i])
 	}
 	wg.Wait()
@@ -194,7 +193,7 @@ func TestRefresh_ConcurrentRefreshError(t *testing.T) {
 	for i := range numGoroutines {
 		go func(u *model.User) {
 			defer wg.Done()
-			forge.Refresh(context.Background(), f, mockStore, u)
+			forge.Refresh(t.Context(), f, mockStore, u)
 		}(users[i])
 	}
 	wg.Wait()
@@ -219,7 +218,7 @@ func TestRefresh_StaleCopyUsesStoredToken(t *testing.T) {
 
 	mockStore.On("GetUser", int64(7)).Return(freshUser(7), nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	// Refreshing again would reuse a rotated (single-use) refresh token.
 	mockRefresher.AssertNotCalled(t, "Refresh", mock.Anything, mock.Anything)
@@ -249,7 +248,7 @@ func TestRefresh_StoreReloadFails(t *testing.T) {
 	})
 	mockStore.On("UpdateUser", user).Return(nil)
 
-	forge.Refresh(context.Background(), f, mockStore, user)
+	forge.Refresh(t.Context(), f, mockStore, user)
 
 	assert.Equal(t, "new-access-token", user.AccessToken)
 }
@@ -262,7 +261,7 @@ func TestRefresh_NonRefresherForge(t *testing.T) {
 
 	user := expiredUser(1)
 
-	forge.Refresh(context.Background(), mockForge, mockStore, user)
+	forge.Refresh(t.Context(), mockForge, mockStore, user)
 
 	// Token should be unchanged
 	assert.Equal(t, "old-access-token", user.AccessToken)

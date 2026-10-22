@@ -539,6 +539,15 @@ Time an active database connection is allowed to stay open.
 
 ---
 
+### DATABASE_MAX_RETRIES
+
+- Name: `WOODPECKER_DATABASE_MAX_RETRIES`
+- Default: `10`
+
+Maximum number of retries for the initial connection to the database.
+
+---
+
 ### DEBUG_PRETTY
 
 - Name: `WOODPECKER_DEBUG_PRETTY`
@@ -578,6 +587,15 @@ Examples:
 - Default: `:8000`
 
 Configures the HTTP listener, supports unix socket via unix:// prefix".
+
+---
+
+### UNIX_SOCKET_PERMISSION
+
+- Name: `WOODPECKER_UNIX_SOCKET_PERMISSION`
+- Default: none
+
+File mode for the HTTP unix socket when `WOODPECKER_SERVER_ADDR` uses the `unix://` prefix, for example `660` or `666`.
 
 ---
 
@@ -824,6 +842,24 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 
 ---
 
+### MAX_PIPELINE_LOG_LINE_COUNT
+
+- Name: `WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT`
+- Default: `5000`
+
+Maximum number of lines to show in a pipeline log.
+
+---
+
+### WEBHOOK_SYNC_TIMEOUT
+
+- Name: `WOODPECKER_WEBHOOK_SYNC_TIMEOUT`
+- Default: `5s`
+
+Maximum time to wait for the pipeline creation triggered by an incoming webhook. After that, the server responds with `202 Accepted` and finishes it in the background. `0` disables the fallback and always responds synchronously.
+
+---
+
 ### SESSION_EXPIRES
 
 - Name: `WOODPECKER_SESSION_EXPIRES`
@@ -1055,7 +1091,7 @@ Specify the default pipeline config extensions when scanning a pipeline config d
 
 ### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_EXTENSION_EXCLUSIVE`
+- Name: `WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.

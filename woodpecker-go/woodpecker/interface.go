@@ -186,6 +186,9 @@ type Client interface {
 	// OrgLookup returns an organization id by name.
 	OrgLookup(orgName string) (*Org, error)
 
+	// OrgPatch updates an organization.
+	OrgPatch(orgID int64, org *OrgPatch) (*Org, error)
+
 	// OrgList returns a list of all organizations.
 	OrgList(opt ListOptions) ([]*Org, error)
 
@@ -221,6 +224,9 @@ type Client interface {
 
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
+
+	// Version returns the version of the server.
+	Version() (*Version, error)
 
 	// LogLevel returns the current logging level.
 	LogLevel() (*LogLevel, error)

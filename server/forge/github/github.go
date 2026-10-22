@@ -25,9 +25,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v92/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -163,10 +162,9 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 	config := c.newConfig()
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()

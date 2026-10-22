@@ -320,12 +320,12 @@ func TestCompilerCompile(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			backConf, err := compiler.Compile(test.fronConf)
-			if test.expectedErr != "" {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			backConf, err := compiler.Compile(tt.fronConf)
+			if tt.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, test.expectedErr, err.Error())
+				assert.Equal(t, tt.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
@@ -338,7 +338,7 @@ func TestCompilerCompile(t *testing.T) {
 					}
 				}
 				// check if we get an expected backend config based on a frontend config
-				assert.EqualValues(t, *test.backConf, *backConf)
+				assert.EqualValues(t, *tt.backConf, *backConf)
 			}
 		})
 	}
@@ -430,12 +430,12 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			backConf, err := compiler.Compile(test.fronConf)
-			if test.expectedErr != "" {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			backConf, err := compiler.Compile(tt.fronConf)
+			if tt.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, test.expectedErr, err.Error())
+				assert.Equal(t, tt.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
@@ -451,7 +451,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 					}
 				}
 				// check if we get an expected backend config based on a frontend config
-				assert.EqualValues(t, *test.backConf, *backConf)
+				assert.EqualValues(t, *tt.backConf, *backConf)
 			}
 		})
 	}
@@ -496,9 +496,9 @@ func TestSecretMatch(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tcl {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
+	for _, tt := range tcl {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.match, tt.secret.Match(tt.event))
 		})
 	}
 }

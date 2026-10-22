@@ -25,7 +25,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
@@ -161,10 +160,9 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -314,9 +312,20 @@ func (g *GitLab) Repos(ctx context.Context, user *model.User, p *model.ListOptio
 			projectMember, resp, err = client.ProjectMembers.GetInheritedProjectMember(project.ID, int64(intUserID), gitlab.WithContext(ctx))
 			if err != nil {
 				if resp != nil && resp.StatusCode == http.StatusNotFound {
-					continue
+					// User is not directly listed as a member, but may have access
+					// via group inheritance (e.g. maintainer of a parent group).
+					// The projects list API may not return the effective permissions,
+					// so fetch the full project to get the embedded
+					// group_access/project_access. If this lookup fails we keep the
+					// list data (access level 0) rather than failing the whole page;
+					// such a repo will simply be filtered out later for lacking write access.
+					if projectDetails, _, getErr := client.Projects.GetProject(project.ID, nil, gitlab.WithContext(ctx)); getErr == nil {
+						project = projectDetails
+					}
+					// projectMember stays nil; permissions come from project.Permissions
+				} else {
+					return nil, err
 				}
-				return nil, err
 			}
 		}
 
@@ -355,7 +364,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].IID))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -669,6 +678,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 		return convertPushHook(event)
 	case *gitlab.TagEvent:
+		// GitLab sends tag_push events for tag creation and deletion.
+		// A deletion is indicated by a zero after SHA and can never result
+		// in a valid pipeline, as the commit is gone.
+		if event.After == "0000000000000000000000000000000000000000" {
+			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "tag deleted"}
+		}
 		repo, pipeline, cmID, err := convertTagHook(event)
 		if err != nil || pipeline.Message != "" {
 			return repo, pipeline, err

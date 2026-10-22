@@ -52,14 +52,15 @@ func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 }
 
 func (s storage) LogDelete(step *model.Step) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	return logDelete(sess, step.ID)
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		return logDelete(sess, step.ID)
+	})
 }
 
 func logDelete(sess *xorm.Session, stepID int64) error {
-	_, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry))
-	return err
+	return wrapUpdate(sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)))
 }
 
-func (s storage) StepFinished(_ *model.Step) {}
+func (s storage) StepFinished(_ *model.Step) error { return nil }

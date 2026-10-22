@@ -151,11 +151,6 @@
       "verified": false
     },
     {
-      "name": "Codeberg Pages Deploy",
-      "docs": "https://codeberg.org/sugar700/plugin-codeberg-pages-deploy/raw/branch/master/README.md",
-      "verified": false
-    },
-    {
       "name": "Reviewdog golangci-lint",
       "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
       "verified": true
@@ -343,6 +338,26 @@
     {
       "name": "NestGuard",
       "docs": "https://codeberg.org/woodpecker-community/nestguard/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Asyntai AI Chatbot Docs Sync",
+      "docs": "https://raw.githubusercontent.com/asyntai/woodpecker-ai-docs-sync/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPCS",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpcs/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPMD",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpmd/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPStan",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpstan/main/docs.md",
       "verified": false
     }
   ]

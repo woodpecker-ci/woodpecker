@@ -55,7 +55,7 @@ func TestMkNamespace(t *testing.T) {
 		name               string
 		namespace          string
 		setupMock          func(*mockNamespaceClient)
-		expectError        bool
+		wantErr            bool
 		errorContains      string
 		expectGetCalled    bool
 		expectCreateCalled bool
@@ -66,7 +66,7 @@ func TestMkNamespace(t *testing.T) {
 			setupMock: func(m *mockNamespaceClient) {
 				m.getError = nil // namespace exists
 			},
-			expectError:        false,
+			wantErr:            false,
 			expectGetCalled:    true,
 			expectCreateCalled: false,
 		},
@@ -77,7 +77,7 @@ func TestMkNamespace(t *testing.T) {
 				m.getError = kube_errors.NewNotFound(schema.GroupResource{Resource: "namespaces"}, "new-namespace")
 				m.createError = nil
 			},
-			expectError:        false,
+			wantErr:            false,
 			expectGetCalled:    true,
 			expectCreateCalled: true,
 		},
@@ -87,7 +87,7 @@ func TestMkNamespace(t *testing.T) {
 			setupMock: func(m *mockNamespaceClient) {
 				m.getError = errors.New("api server unavailable")
 			},
-			expectError:        true,
+			wantErr:            true,
 			errorContains:      "api server unavailable",
 			expectGetCalled:    true,
 			expectCreateCalled: false,
@@ -99,7 +99,7 @@ func TestMkNamespace(t *testing.T) {
 				m.getError = kube_errors.NewNotFound(schema.GroupResource{Resource: "namespaces"}, "create-fail-namespace")
 				m.createError = errors.New("insufficient permissions")
 			},
-			expectError:        true,
+			wantErr:            true,
 			errorContains:      "insufficient permissions",
 			expectGetCalled:    true,
 			expectCreateCalled: true,
@@ -113,7 +113,7 @@ func TestMkNamespace(t *testing.T) {
 
 			err := mkNamespace(t.Context(), client, tt.namespace)
 
-			if tt.expectError {
+			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.errorContains != "" {
 					assert.Contains(t, err.Error(), tt.errorContains)

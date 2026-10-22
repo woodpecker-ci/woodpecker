@@ -645,8 +645,8 @@ func TestSanitizePath(t *testing.T) {
 		},
 	}
 
-	for _, test := range testTable {
-		assert.Equal(t, test.sanitizedPath, SanitizePath(test.path), "Path hasn't been sanitized correctly")
+	for _, tt := range testTable {
+		assert.Equal(t, tt.sanitizedPath, SanitizePath(tt.path), "Path hasn't been sanitized correctly")
 	}
 }
 

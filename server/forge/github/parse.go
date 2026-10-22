@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v92/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -78,6 +78,9 @@ func parseHookPayload(webhookType string, raw []byte, merge bool) (_ *github.Pul
 	payload, err := github.ParseWebHook(webhookType, raw)
 	if err != nil {
 		return nil, nil, nil, "", "", err
+	}
+	if payload == nil {
+		return nil, nil, nil, "", "", fmt.Errorf("empty payload for webhook type %q", webhookType)
 	}
 
 	switch hook := payload.(type) {

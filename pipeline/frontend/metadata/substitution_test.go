@@ -17,7 +17,9 @@ package metadata
 import (
 	"testing"
 
+	"codeberg.org/6543/xyaml/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEnvVarSubst(t *testing.T) {
@@ -30,4 +32,33 @@ func TestEnvVarSubst(t *testing.T) {
 		step1:
 			image: hello-world
 			command: echo "some env\nwith newline"`, result)
+}
+
+// TestEnvVarSubstNoStructureInjection guards against a user-controlled value
+// (commit message, branch name, PR title, …) injecting new YAML structure
+// through a line break. YAML 1.1 treats LF, CR, NEL, LS and PS as line breaks,
+// so any of them left bare in a substituted plain scalar would end the scalar
+// and let the rest be parsed as sibling nodes. All must be quoted.
+func TestEnvVarSubstNoStructureInjection(t *testing.T) {
+	breaks := map[string]string{
+		"LF":  "\n",
+		"CR":  "\r",
+		"NEL": "\u0085",
+		"LS":  " ",
+		"PS":  " ",
+	}
+	for name, br := range breaks {
+		t.Run(name, func(t *testing.T) {
+			payload := "value" + br + "injected: owned"
+			result, err := EnvVarSubst("key: ${EVIL}", map[string]string{"EVIL": payload})
+			require.NoError(t, err)
+
+			var parsed map[string]any
+			require.NoError(t, xyaml.Unmarshal([]byte(result), &parsed))
+
+			_, injected := parsed["injected"]
+			assert.False(t, injected, "break char %q injected a top-level key: %q", br, result)
+			assert.Equal(t, payload, parsed["key"], "value must round-trip intact")
+		})
+	}
 }

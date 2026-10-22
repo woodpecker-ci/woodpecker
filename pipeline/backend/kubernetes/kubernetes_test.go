@@ -26,8 +26,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 	kube_core_v1 "k8s.io/api/core/v1"
+	kube_errors "k8s.io/apimachinery/pkg/api/errors"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kube_runtime "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes/fake"
 	kube_testing "k8s.io/client-go/testing"
 
@@ -130,13 +132,13 @@ func TestSetupWorkflow(t *testing.T) {
 		},
 	}
 
-	err := engine.SetupWorkflow(context.Background(), conf, taskUUID)
+	err := engine.SetupWorkflow(t.Context(), conf, taskUUID)
 	assert.NoError(t, err, "SetupWorkflow should not error with minimal config and fake client")
 
-	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(context.Background(), "volume-name", kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Get(t.Context(), "volume-name", kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "persistent volume should be created during workflow setup")
 
-	_, err = engine.client.CoreV1().Services(namespace).Get(context.Background(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
+	_, err = engine.client.CoreV1().Services(namespace).Get(t.Context(), "wp-hsvc-"+taskUUID, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "headless service should be created during workflow setup")
 }
 
@@ -179,7 +181,7 @@ func TestAffinityFromCliContext(t *testing.T) {
 			return nil
 		},
 	}
-	err := cmd.Run(context.Background(), []string{"test"})
+	err := cmd.Run(t.Context(), []string{"test"})
 	require.NoError(t, err)
 }
 
@@ -217,11 +219,34 @@ func createPod(
 			Phase: kube_core_v1.PodPending,
 		},
 	}
-	_, err = client.CoreV1().Pods(namespace).Create(
-		context.Background(), pod, kube_meta_v1.CreateOptions{},
-	)
+	_, err = client.CoreV1().Pods(namespace).Create(t.Context(), pod, kube_meta_v1.CreateOptions{})
 	require.NoError(t, err)
 	return podName
+}
+
+func TestStartStepReturnsBackendOptionsParseError(t *testing.T) {
+	client := fake.NewClientset()
+	engine := kube{
+		client: client,
+		config: &config{
+			Namespace: "default",
+		},
+	}
+
+	step := &types.Step{
+		Name:  "bad-backend-options",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		// a plain string cannot be decoded into the kubernetes BackendOptions struct
+		BackendOptions: map[string]any{"kubernetes": "not-a-map"},
+	}
+
+	err := engine.StartStep(context.Background(), step, "11301")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "could not parse backend options")
+
+	// the step must not be started if the backend options cannot be parsed
+	assert.Empty(t, client.Actions())
 }
 
 func TestWaitStepReturnsOnContextCancel(t *testing.T) {
@@ -232,7 +257,7 @@ func TestWaitStepReturnsOnContextCancel(t *testing.T) {
 
 	createPod(t, client, step, namespace)
 
-	ctx, cancel := context.WithCancelCause(context.Background())
+	ctx, cancel := context.WithCancelCause(t.Context())
 
 	type result struct {
 		state *types.State
@@ -268,7 +293,7 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	podName := createPod(t, client, step, namespace)
 
 	// Delete before WaitStep starts
-	err := client.CoreV1().Pods(namespace).Delete(context.Background(), podName, kube_meta_v1.DeleteOptions{})
+	err := client.CoreV1().Pods(namespace).Delete(t.Context(), podName, kube_meta_v1.DeleteOptions{})
 	require.NoError(t, err)
 
 	type result struct {
@@ -277,16 +302,15 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	}
 	ch := make(chan result, 1)
 	go func() {
-		s, err := engine.WaitStep(context.Background(), step, "task-1")
+		s, err := engine.WaitStep(t.Context(), step, "task-1")
 		ch <- result{s, err}
 	}()
 
 	select {
 	case r := <-ch:
-		require.NoError(t, r.err)
-		require.NotNil(t, r.state)
-		assert.True(t, r.state.Exited)
-		assert.Equal(t, 0, r.state.ExitCode)
+		require.Error(t, r.err)
+		assert.True(t, kube_errors.IsNotFound(r.err))
+		assert.Nil(t, r.state)
 	case <-time.After(3 * time.Second):
 		t.Fatal("WaitStep did not return for already-deleted pod")
 	}
@@ -318,11 +342,10 @@ func TestWaitStepReturnsOnPodDeletedBeforeInformerSync(t *testing.T) {
 	defer cancel()
 
 	state, err := engine.WaitStep(ctx, step, "task-1")
-	require.NoError(t, err)
+	require.Error(t, err)
+	assert.True(t, kube_errors.IsNotFound(err))
 	require.True(t, deleted, "the informer's List should have removed the pod")
-	require.NotNil(t, state)
-	assert.True(t, state.Exited)
-	assert.Equal(t, 0, state.ExitCode)
+	assert.Nil(t, state)
 }
 
 func TestWaitStepReturnsOnAlreadyTerminatedPod(t *testing.T) {
@@ -377,7 +400,7 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := range numSteps {
 		wg.Go(func() {
-			ctx, cancel := context.WithCancelCause(context.Background())
+			ctx, cancel := context.WithCancelCause(t.Context())
 
 			go func() {
 				_, _ = engine.WaitStep(ctx, steps[i], fmt.Sprintf("task-%d", i))
@@ -397,4 +420,191 @@ func TestWaitStepNoGoroutineLeak(t *testing.T) {
 	assert.Less(t, leaked, numSteps,
 		"goroutines leaked after canceling %d WaitStep calls: got %d leaked",
 		numSteps, leaked)
+}
+
+// TestWaitStepPodDisappears uses the real informer List/Watch and deletion
+// handler. The guard Get emits the event before subsequent Gets see NotFound.
+func TestWaitStepPodDisappears(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		terminated bool
+		exitCode   int32
+		reason     string
+		initial    bool
+		service    bool
+		guardOnly  bool
+	}{
+		{name: "UnobservedDeletion"},
+		{name: "ObservedSuccess", terminated: true},
+		{name: "ObservedFailure", terminated: true, exitCode: 42},
+		{name: "ObservedOOM", terminated: true, exitCode: 137, reason: "OOMKilled"},
+		{name: "InitialObservedSuccess", terminated: true, initial: true},
+		{name: "InitialObservedFailure", terminated: true, exitCode: 42, initial: true},
+		{name: "InitialObservedOOM", terminated: true, exitCode: 137, reason: "OOMKilled", initial: true},
+		{name: "ServiceObservedSuccess", terminated: true, service: true},
+		{name: "ServiceObservedFailure", terminated: true, exitCode: 42, service: true},
+		{name: "ServiceObservedOOM", terminated: true, exitCode: 137, reason: "OOMKilled", service: true},
+		{name: "GuardObservedSuccess", terminated: true, guardOnly: true},
+		{name: "GuardObservedFailure", terminated: true, exitCode: 42, guardOnly: true},
+		{name: "GuardObservedOOM", terminated: true, exitCode: 137, reason: "OOMKilled", guardOnly: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			client := fake.NewClientset()
+			engine := makeEngine(client)
+			step := makeStep("disappears")
+			if tt.service {
+				step.Type = types.StepTypeService
+			}
+			podName := createPod(t, client, step, "test-ns")
+			pod, err := client.CoreV1().Pods("test-ns").Get(t.Context(), podName, kube_meta_v1.GetOptions{})
+			require.NoError(t, err)
+			runningPod := pod.DeepCopy()
+			if tt.terminated {
+				pod.Status.Phase = kube_core_v1.PodFailed
+				if tt.exitCode == 0 {
+					pod.Status.Phase = kube_core_v1.PodSucceeded
+				}
+				pod.Status.ContainerStatuses = []kube_core_v1.ContainerStatus{{
+					State: kube_core_v1.ContainerState{Terminated: &kube_core_v1.ContainerStateTerminated{
+						ExitCode: tt.exitCode, Reason: tt.reason,
+					}},
+				}}
+			}
+			if tt.initial {
+				_, err = client.CoreV1().Pods("test-ns").Update(t.Context(), pod, kube_meta_v1.UpdateOptions{})
+				require.NoError(t, err)
+			}
+			watcher := watch.NewRaceFreeFake()
+			defer watcher.Stop()
+			watching := make(chan struct{})
+			client.PrependWatchReactor("pods", func(kube_testing.Action) (bool, watch.Interface, error) {
+				close(watching)
+				return true, watcher, nil
+			})
+			gets := 0
+			client.PrependReactor("get", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+				gets++
+				if gets == 1 && !tt.initial {
+					// The informer must be watching before we emit deletion.
+					<-watching
+					if tt.terminated && !tt.guardOnly {
+						watcher.Modify(pod.DeepCopy())
+					}
+					watcher.Delete(runningPod.DeepCopy())
+					watcher.Delete(runningPod.DeepCopy())
+					if tt.guardOnly {
+						return true, pod.DeepCopy(), nil
+					}
+					return true, runningPod.DeepCopy(), nil
+				}
+				return true, nil, kube_errors.NewNotFound(action.GetResource().GroupResource(), podName)
+			})
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+			state, err := engine.WaitStep(ctx, step, "task-1")
+			require.Positive(t, gets, "WaitStep must perform the API check")
+			if !tt.terminated {
+				require.Error(t, err)
+				assert.True(t, kube_errors.IsNotFound(err))
+				assert.Nil(t, state)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, state)
+			assert.Equal(t, &types.State{Exited: true, ExitCode: int(tt.exitCode), OOMKilled: tt.reason == "OOMKilled"}, state)
+		})
+	}
+}
+
+func TestWaitStepDelayedTerminatedStatus(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("delayed-status")
+	podName := createPod(t, client, step, "test-ns")
+	pod, err := client.CoreV1().Pods("test-ns").Get(t.Context(), podName, kube_meta_v1.GetOptions{})
+	require.NoError(t, err)
+	pod.Status.Phase = kube_core_v1.PodSucceeded
+	_, err = client.CoreV1().Pods("test-ns").Update(t.Context(), pod, kube_meta_v1.UpdateOptions{})
+	require.NoError(t, err)
+	gets := 0
+	client.PrependReactor("get", "pods", func(kube_testing.Action) (bool, kube_runtime.Object, error) {
+		gets++
+		result := pod.DeepCopy()
+		if gets == 3 {
+			result.Status.ContainerStatuses = []kube_core_v1.ContainerStatus{{}}
+		}
+		if gets >= 4 {
+			result.Status.ContainerStatuses = []kube_core_v1.ContainerStatus{{
+				State: kube_core_v1.ContainerState{Terminated: &kube_core_v1.ContainerStateTerminated{ExitCode: 42}},
+			}}
+		}
+		return true, result, nil
+	})
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	assert.Equal(t, 42, state.ExitCode)
+	assert.Equal(t, 4, gets, "the final status must come from the backoff retry")
+}
+
+func TestWaitStepServiceCancellation(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("service-cancel")
+	step.Type = types.StepTypeService
+	createPod(t, client, step, "test-ns")
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	client.PrependReactor("get", "pods", func(kube_testing.Action) (bool, kube_runtime.Object, error) {
+		cancel(nil)
+		return false, nil, nil
+	})
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	assert.Nil(t, state)
+	assert.ErrorIs(t, err, context.Canceled)
+}
+
+// TestWaitStepRelistDeletion makes the informer discover a missing pod during
+// relist, exercising its DeletedFinalStateUnknown path after an expired watch.
+func TestWaitStepRelistDeletion(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("relist-delete")
+	podName := createPod(t, client, step, "test-ns")
+	watcher := watch.NewRaceFreeFake()
+	defer watcher.Stop()
+	watching := make(chan struct{})
+	var watchingOnce sync.Once
+	client.PrependWatchReactor("pods", func(kube_testing.Action) (bool, watch.Interface, error) {
+		watchingOnce.Do(func() { close(watching) })
+		return true, watcher, nil
+	})
+	lists := 0
+	client.PrependReactor("list", "pods", func(kube_testing.Action) (bool, kube_runtime.Object, error) {
+		lists++
+		if lists > 1 {
+			return true, &kube_core_v1.PodList{}, nil
+		}
+		return false, nil, nil
+	})
+	gets := 0
+	client.PrependReactor("get", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+		gets++
+		if gets == 1 {
+			<-watching
+			watcher.Error(&kube_meta_v1.Status{Status: kube_meta_v1.StatusFailure, Reason: kube_meta_v1.StatusReasonExpired, Code: 410})
+			return false, nil, nil
+		}
+		return true, nil, kube_errors.NewNotFound(action.GetResource().GroupResource(), podName)
+	})
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.Error(t, err)
+	assert.True(t, kube_errors.IsNotFound(err))
+	assert.Nil(t, state)
+	assert.GreaterOrEqual(t, lists, 2, "the informer must relist to discover deletion")
+	assert.Equal(t, 2, gets, "completion must reach the post-event Get")
 }
