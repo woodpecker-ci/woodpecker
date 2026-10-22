@@ -122,11 +122,6 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 			axesPerValue /= len(values)
 			valueIndex := axisIndex / axesPerValue % len(values)
 			axis[name] = values[valueIndex]
-
-			// enforce a maximum number of variables in the pipeline matrix.
-			if len(values) > limitVariables {
-				return nil, ErrorMaxAxisVariablesReached
-			}
 		}
 
 		// append to the list of axis.
