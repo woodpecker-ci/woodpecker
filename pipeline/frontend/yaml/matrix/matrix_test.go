@@ -34,12 +34,14 @@ func TestMatrix(t *testing.T) {
 }
 
 func TestMatrixEmpty(t *testing.T) {
+	t.Parallel()
 	axis, err := parseString("")
 	assert.NoError(t, err)
 	assert.Empty(t, axis)
 }
 
 func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		matrix string
@@ -56,6 +58,7 @@ func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			axes, err := parseString(tt.matrix)
 			assert.NoError(t, err)
 			assert.Empty(t, axes)
@@ -64,6 +67,7 @@ func TestMatrixEmptyAndEmptyInclude(t *testing.T) {
 }
 
 func TestMatrixAlias(t *testing.T) {
+	t.Parallel()
 	axis, err := parseString(`axes: &axes
   A: [a, b]
 matrix: *axes`)
@@ -72,6 +76,7 @@ matrix: *axes`)
 }
 
 func TestMatrixEmptyAxis(t *testing.T) {
+	t.Parallel()
 	axis, err := parseString("matrix:\n  A: [a1, a2]\n  EMPTY:")
 	assert.NoError(t, err)
 	assert.Len(t, axis, 2)
@@ -80,6 +85,7 @@ func TestMatrixEmptyAxis(t *testing.T) {
 }
 
 func TestMatrixIncluded(t *testing.T) {
+	t.Parallel()
 	axis, err := parseString(fakeMatrixInclude)
 	assert.NoError(t, err)
 	assert.Len(t, axis, 2)
@@ -116,6 +122,7 @@ matrix:
 `
 
 func TestMatrixDeterministicOrder(t *testing.T) {
+	t.Parallel()
 	// the axis permutation order must be stable across parses: workflow
 	// PIDs derived from it have to match when a pipeline is compiled more
 	// than once (e.g. again at agent fetch time).
@@ -130,6 +137,7 @@ func TestMatrixDeterministicOrder(t *testing.T) {
 }
 
 func TestMatrixMaxAxes(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		matrix string
@@ -195,6 +203,7 @@ func TestMatrixMaxAxes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			axes, err := parseString(tt.matrix)
 
 			assert.Len(t, axes, tt.axes)
