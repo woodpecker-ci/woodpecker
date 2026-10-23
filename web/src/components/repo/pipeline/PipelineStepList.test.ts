@@ -147,7 +147,9 @@ describe('pipelineStepList', () => {
 
     expect(() => mountStepList(pipeline)).not.toThrow();
     const wrapper = mountStepList(pipeline);
-    expect(wrapper.findAll('button[title]').filter((b) => /^workflow-/.test(b.attributes('title') ?? ''))).toHaveLength(0);
+    expect(
+      wrapper.findAll('button[title]').filter((b) => (b.attributes('title') ?? '').startsWith('workflow-')),
+    ).toHaveLength(0);
   });
 
   it('hides the collapse button for a single workflow', () => {
@@ -156,7 +158,10 @@ describe('pipelineStepList', () => {
   });
 
   it('shows the collapse button for multiple workflows', () => {
-    const pipeline = makePipeline([makeWorkflow(1, [makeStep(1)], 'success'), makeWorkflow(2, [makeStep(2)], 'success')]);
+    const pipeline = makePipeline([
+      makeWorkflow(1, [makeStep(1)], 'success'),
+      makeWorkflow(2, [makeStep(2)], 'success'),
+    ]);
 
     const wrapper = mountStepList(pipeline);
     expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(true);
