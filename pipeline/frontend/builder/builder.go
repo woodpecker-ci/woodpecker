@@ -56,7 +56,7 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	for _, y := range b.Yamls {
 		// matrix axes
-		axes, err := matrix.ParseString(string(y.Data))
+		axes, err := matrix.Parse(y.Data)
 		if err != nil {
 			return nil, err
 		}
