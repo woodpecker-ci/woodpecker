@@ -149,7 +149,7 @@ export default class WoodpeckerClient extends ApiClient {
   async restartPipeline(
     repoId: number,
     pipeline: string,
-    opts?: { event?: string; deploy_to?: string; fork?: boolean },
+    opts?: { event?: string; deploy_to?: string; fork?: boolean, failed_only?: boolean },
   ): Promise<Pipeline> {
     const query = encodeQueryString(opts);
     return this._post(`/api/repos/${repoId}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;

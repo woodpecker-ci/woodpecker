@@ -55,6 +55,7 @@ type (
 		DeployTo    string   `json:"target,omitempty"`
 		DeployTask  string   `json:"task,omitempty"`
 		Commit      Commit   `json:"commit"`
+		OrigParent  int64    `json:"orig_parent,omitempty"`
 		Parent      int64    `json:"parent,omitempty"`
 		RerunCount  int64    `json:"rerun_count,omitempty"`
 		Cron        string   `json:"cron,omitempty"`

@@ -108,6 +108,7 @@ type (
 	Pipeline struct {
 		ID          int64            `json:"id"`
 		Number      int64            `json:"number"`
+		OrigParent  int64            `json:"orig_parent"`
 		Parent      int64            `json:"parent"`
 		Event       string           `json:"event"`
 		EventReason []string         `json:"event_reason"`
