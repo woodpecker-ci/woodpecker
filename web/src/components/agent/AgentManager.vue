@@ -34,8 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -59,6 +60,8 @@ const props = defineProps<{
 
 const notifications = useNotifications();
 const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
@@ -101,4 +104,42 @@ function editAgent(agent: Agent) {
 function showAddAgent() {
   selectedAgent.value = { name: '' };
 }
+
+// a link to ?agent=<id>, e.g. from the agent information of a workflow, opens that agent
+onMounted(async () => {
+  const agentId = Number(route.query.agent);
+  if (!agentId) {
+    return;
+  }
+  for (let page = 1; ; page++) {
+    const agents = await props.loadAgents(page);
+    // the user picked an agent (or add) meanwhile, keep that
+    if (selectedAgent.value) {
+      return;
+    }
+    if (!agents?.length) {
+      return;
+    }
+    const agent = agents.find((a) => a.id === agentId);
+    if (agent) {
+      editAgent(agent);
+      return;
+    }
+  }
+});
+
+// keep the shown agent in the url, so a reload opens it again and back on the list it does not
+watch(selectedAgent, async (agent) => {
+  const agentId = agent?.id?.toString();
+  if (route.query.agent === agentId) {
+    return;
+  }
+  const query = { ...route.query };
+  if (agentId) {
+    query.agent = agentId;
+  } else {
+    delete query.agent;
+  }
+  await router.replace({ query });
+});
 </script>
