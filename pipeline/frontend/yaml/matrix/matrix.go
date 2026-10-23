@@ -90,6 +90,9 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 			continue
 		}
 
+		if len(values) > limitVariables {
+			return nil, ErrorMaxAxisVariablesReached
+		}
 		if axisCount == 0 {
 			axisCount = len(values)
 		} else {
