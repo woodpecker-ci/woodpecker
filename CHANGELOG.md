@@ -23,6 +23,7 @@
 
 ### 📈 Enhancement
 
+- Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
 - Replace pipeline author on deploy with session user [[#7358](https://github.com/woodpecker-ci/woodpecker/pull/7358)]
 - Switch to the woodpecker-ci envsubst fork [[#7349](https://github.com/woodpecker-ci/woodpecker/pull/7349)]
 - StepFinished of log store return error now [[#7346](https://github.com/woodpecker-ci/woodpecker/pull/7346)]
@@ -75,25 +76,6 @@
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
 - Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
 - Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
-
-### 📦️ Dependency
-
-- Update golang-packages [[#7366](https://github.com/woodpecker-ci/woodpecker/pull/7366)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.30.1 [[#7363](https://github.com/woodpecker-ci/woodpecker/pull/7363)]
-- Update module github.com/docker/cli to v29.9.2+incompatible [[#7355](https://github.com/woodpecker-ci/woodpecker/pull/7355)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.29.0 [[#7342](https://github.com/woodpecker-ci/woodpecker/pull/7342)]
-- Update dependency vue-i18n to v11.4.15 [[#7340](https://github.com/woodpecker-ci/woodpecker/pull/7340)]
-- Update module github.com/google/go-github/v92 to v93 [[#7334](https://github.com/woodpecker-ci/woodpecker/pull/7334)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.27.0 [[#7333](https://github.com/woodpecker-ci/woodpecker/pull/7333)]
-- Update dependency eslint to v10.13.0 [[#7331](https://github.com/woodpecker-ci/woodpecker/pull/7331)]
-- Update dependency golangci/golangci-lint to v2.15.0 [[#7328](https://github.com/woodpecker-ci/woodpecker/pull/7328)]
-- Update pre-commit hook golangci/golangci-lint to v2.15.0 [[#7329](https://github.com/woodpecker-ci/woodpecker/pull/7329)]
-- Update web npm deps non-major [[#7327](https://github.com/woodpecker-ci/woodpecker/pull/7327)]
-- Update golang-packages [[#7321](https://github.com/woodpecker-ci/woodpecker/pull/7321)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.18.0 [[#7288](https://github.com/woodpecker-ci/woodpecker/pull/7288)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.9.10 [[#7277](https://github.com/woodpecker-ci/woodpecker/pull/7277)]
-- Update dependency @vitejs/plugin-vue to v6.0.10 [[#7274](https://github.com/woodpecker-ci/woodpecker/pull/7274)]
-- Update docker.io/woodpeckerci/plugin-surge-preview Docker tag to v1.5.0 [[#7246](https://github.com/woodpecker-ci/woodpecker/pull/7246)]
 
 ### Misc
 
