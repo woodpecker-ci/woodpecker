@@ -157,5 +157,6 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		Cron:                cron.Name,
 		ForgeURL:            commit.ForgeURL,
 		AdditionalVariables: cron.Variables,
+		SelectedWorkflows:   cron.Workflows,
 	}, nil
 }

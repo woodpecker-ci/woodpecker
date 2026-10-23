@@ -47,6 +47,14 @@ type PipelineBuilder struct {
 	PrivilegedPlugins   []string
 	CompilerOptions     []compiler.Option
 	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
+
+	// IgnoreMissingDependencies names workflows a depends_on may legitimately
+	// point at without being present in Yamls, because a trigger's workflow
+	// selection left them out rather than a `when` filter pruning them. A dep
+	// naming one of these is dropped like an optional one instead of causing
+	// the dependent item to be dropped. Nil (the default) changes nothing:
+	// every dep is still enforced exactly as it is for a `when`-filtered run.
+	IgnoreMissingDependencies map[string]bool
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -91,7 +99,7 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// depend on https://github.com/woodpecker-ci/woodpecker/issues/778
 	}
 
-	items = filterMissingDependencies(items)
+	items = filterMissingDependencies(items, b.IgnoreMissingDependencies)
 
 	return items, errorsAndWarnings
 }

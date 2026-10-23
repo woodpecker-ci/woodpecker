@@ -4024,6 +4024,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/workflows": {
+            "get": {
+                "description": "Returns the workflow configs currently defined on a branch, each with the workflows it requires. The names are those accepted by the workflows option of a manual pipeline or a cron job.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "List the workflows a trigger can select",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the branch to read the workflows from, defaults to the repo default branch",
+                        "name": "branch",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkflowInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "produces": [
@@ -4845,6 +4891,13 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "workflows": {
+                    "description": "Workflows optionally narrows the run to the named workflows. An empty\nlist runs every workflow config found in the repo.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -4869,6 +4922,12 @@ const docTemplate = `{
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
                         "type": "string"
                     }
                 }
@@ -5241,6 +5300,13 @@ const docTemplate = `{
                 "reviewed_by": {
                     "type": "string"
                 },
+                "selected_workflows": {
+                    "description": "workflow selection of a manual or cron trigger, empty means all",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "sender": {
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
@@ -5293,6 +5359,13 @@ const docTemplate = `{
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "workflows": {
+                    "description": "Workflows optionally narrows the run to the named workflows. An empty\nlist runs every workflow config found in the repo.",
+                    "type": "array",
+                    "items": {
                         "type": "string"
                     }
                 }
@@ -6009,6 +6082,21 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "WorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "depends_on": {
+                    "description": "DependsOn lists every workflow named in this one's depends_on, required\nor optional. A dependency left out of a selection no longer makes the\nselection invalid (see PipelineBuilder.IgnoreMissingDependencies), so\nthe distinction stops mattering here: this is purely informational, for\na caller that wants to show the dependency before the user picks.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "errors.PipelineError": {
             "type": "object",
