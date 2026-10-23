@@ -32,6 +32,12 @@ var logShowCmd = &cli.Command{
 	Usage:     "show pipeline logs",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
 	Action:    logShow,
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "follow",
+			Usage: "stream the logs of running steps",
+		},
+	},
 }
 
 func logShow(ctx context.Context, c *cli.Command) error {
@@ -48,6 +54,8 @@ func logShow(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("invalid repo '%s': %w ", repoIDOrFullName, err)
 	}
 
+	followArg := c.Bool("follow")
+
 	pipelineArg := c.Args().Get(1)
 	if len(pipelineArg) == 0 {
 		return fmt.Errorf("missing required argument pipeline")
@@ -59,12 +67,24 @@ func logShow(ctx context.Context, c *cli.Command) error {
 
 	stepArg := c.Args().Get(2) //nolint:mnd
 	if len(stepArg) == 0 {
+		if followArg {
+			return fmt.Errorf("follow flag requires argument step")
+		}
 		return pipelineLog(client, repoID, number)
 	}
 
 	step, err := internal.ParseStep(client, repoID, number, stepArg)
 	if err != nil {
 		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
+	}
+
+	if followArg {
+		err := streamLog(client, repoID, number, step)
+		if err != nil && err.Error() == "step not running (anymore)" {
+			return stepLog(client, repoID, number, step)
+		} else {
+			return err
+		}
 	}
 	return stepLog(client, repoID, number, step)
 }
@@ -106,6 +126,22 @@ func stepLog(client woodpecker.Client, repoID, number, step int64) error {
 	}
 
 	return nil
+}
+
+func streamLog(client woodpecker.Client, repoID, number, step int64) error {
+	logs, errs, err := client.StreamLogEntries(repoID, number, step)
+	if err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case log := <-logs:
+			fmt.Println(string(log.Data))
+		case err := <-errs:
+			return err
+		}
+	}
 }
 
 // template for pipeline ps information.
