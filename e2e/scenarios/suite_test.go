@@ -79,6 +79,11 @@ func runScenario(t *testing.T, sc Scenario) {
 		}
 		assert.Equalf(t, want.Status, step.State, "step %q status", want.Name)
 		assert.Equalf(t, want.ExitCode, step.ExitCode, "step %q exit code", want.Name)
+		if want.Error == "" {
+			assert.Emptyf(t, step.Error, "step %q error", want.Name)
+		} else {
+			assert.Containsf(t, step.Error, want.Error, "step %q error", want.Name)
+		}
 	}
 
 	if len(sc.ExpectedWorkflows) == 0 {

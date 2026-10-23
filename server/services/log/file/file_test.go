@@ -87,7 +87,7 @@ func TestLogStoreAppendFindDelete(t *testing.T) {
 	require.NoError(t, s.LogDelete(step))
 
 	// StepFinished is a no-op for the file store but part of the interface
-	s.StepFinished(step)
+	require.NoError(t, s.StepFinished(step))
 
 	// after delete the file is gone -> find returns no entries, no error
 	got, err = s.LogFind(step)
@@ -142,6 +142,6 @@ func TestLogDeleteMissingFile(t *testing.T) {
 	s, err := NewLogStore(t.TempDir())
 	require.NoError(t, err)
 
-	// removing a non-existent log file surfaces the os.Remove error
-	assert.Error(t, s.LogDelete(&model.Step{ID: 12345}))
+	// a step without log file has nothing to delete
+	assert.NoError(t, s.LogDelete(&model.Step{ID: 12345}))
 }

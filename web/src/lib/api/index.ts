@@ -20,7 +20,7 @@ import type {
   User,
 } from './types';
 
-const DEFAULT_FORGE_ID = 1;
+export const DEFAULT_FORGE_ID = 1;
 
 interface RepoListOptions {
   all?: boolean;
@@ -256,6 +256,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getOrg(orgId: number): Promise<Org> {
     return this._get(`/api/orgs/${orgId}`) as Promise<Org>;
+  }
+
+  async updateOrg(orgId: number, org: Partial<Org>): Promise<Org> {
+    return this._patch(`/api/orgs/${orgId}`, org) as Promise<Org>;
   }
 
   async lookupOrg(name: string): Promise<Org> {

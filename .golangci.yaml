@@ -37,6 +37,7 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
+    - tagalign
     - unconvert
     - unparam
     - unused
@@ -54,6 +55,8 @@ linters:
           deny:
             - pkg: golang.org/x/crypto/openpgp
               desc: deprecated and frozen, use github.com/ProtonMail/go-crypto/openpgp instead
+            - pkg: github.com/drone/envsubst
+              desc: unmaintained, use github.com/woodpecker-ci/envsubst instead
         agent:
           list-mode: lax
           files:
@@ -239,6 +242,8 @@ linters:
           alias: log_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/rpc/mocks
           alias: rpc_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks
+          alias: scheduler_mocks
 
         # kubernetes
         - pkg: k8s.io/api/core/v1

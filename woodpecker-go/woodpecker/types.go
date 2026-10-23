@@ -305,8 +305,14 @@ type (
 
 	// Org is the JSON data for an organization.
 	Org struct {
-		ID     int64  `json:"id"`
-		Name   string `json:"name"`
-		IsUser bool   `json:"is_user"`
+		ID               int64  `json:"id"`
+		Name             string `json:"name"`
+		IsUser           bool   `json:"is_user"`
+		RequireOrgAgents bool   `json:"require_org_agents"`
+	}
+
+	// OrgPatch defines an organization patch request.
+	OrgPatch struct {
+		RequireOrgAgents *bool `json:"require_org_agents,omitempty"`
 	}
 )

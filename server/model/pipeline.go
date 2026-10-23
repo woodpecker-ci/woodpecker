@@ -60,14 +60,14 @@ type Pipeline struct {
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
-	Release  *Release `json:"release,omitempty"       xorm:"json 'release'"`
-	TagTitle string   `json:"tag_title,omitempty"     xorm:"tag_title"`
+	Release  *Release `json:"release,omitempty"   xorm:"json 'release'"`
+	TagTitle string   `json:"tag_title,omitempty" xorm:"tag_title"`
 	// // Deprecated
-	Title     string `json:"title"                   xorm:"title"`
-	Message   string `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp int64  `json:"timestamp"               xorm:"'timestamp'"`
-	Sender    string `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Email     string `json:"author_email"            xorm:"varchar(500) email"`
+	Title     string `json:"title"        xorm:"title"`
+	Message   string `json:"message"      xorm:"TEXT 'message'"`
+	Timestamp int64  `json:"timestamp"    xorm:"'timestamp'"`
+	Sender    string `json:"sender"       xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
+	Email     string `json:"author_email" xorm:"varchar(500) email"`
 }
 
 // APIPipeline TODO remove deprecated properties in next major.

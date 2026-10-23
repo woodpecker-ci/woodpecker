@@ -216,9 +216,20 @@ func (_c *MockService_LogFind_Call) RunAndReturn(run func(step *model.Step) ([]*
 }
 
 // StepFinished provides a mock function for the type MockService
-func (_mock *MockService) StepFinished(step *model.Step) {
-	_mock.Called(step)
-	return
+func (_mock *MockService) StepFinished(step *model.Step) error {
+	ret := _mock.Called(step)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StepFinished")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Step) error); ok {
+		r0 = returnFunc(step)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
 }
 
 // MockService_StepFinished_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepFinished'
@@ -245,12 +256,12 @@ func (_c *MockService_StepFinished_Call) Run(run func(step *model.Step)) *MockSe
 	return _c
 }
 
-func (_c *MockService_StepFinished_Call) Return() *MockService_StepFinished_Call {
-	_c.Call.Return()
+func (_c *MockService_StepFinished_Call) Return(err error) *MockService_StepFinished_Call {
+	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *MockService_StepFinished_Call) RunAndReturn(run func(step *model.Step)) *MockService_StepFinished_Call {
-	_c.Run(run)
+func (_c *MockService_StepFinished_Call) RunAndReturn(run func(step *model.Step) error) *MockService_StepFinished_Call {
+	_c.Call.Return(run)
 	return _c
 }

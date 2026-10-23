@@ -143,6 +143,37 @@ func TestConstraintMap(t *testing.T) {
 	}
 }
 
+func TestConstraintMapUnmarshalNull(t *testing.T) {
+	testdata := []struct {
+		conf    string
+		include map[string]string
+	}{
+		{
+			conf:    "include: ~",
+			include: map[string]string{},
+		},
+		{
+			conf:    "exclude: ~",
+			include: map[string]string{},
+		},
+		{
+			conf:    "include: ~\nexclude: ~",
+			include: map[string]string{},
+		},
+		{
+			conf:    "exclude: ~\nGOLANG: 1.7",
+			include: map[string]string{"GOLANG": "1.7"},
+		},
+	}
+	for _, tt := range testdata {
+		t.Run(tt.conf, func(t *testing.T) {
+			c := parseConstraintMap(t, tt.conf)
+			assert.Equal(t, tt.include, c.Include)
+			assert.Empty(t, c.Exclude)
+		})
+	}
+}
+
 func parseConstraintMap(t *testing.T, s string) *Map {
 	c := &Map{}
 	assert.NoError(t, yaml.Unmarshal([]byte(s), c))

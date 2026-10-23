@@ -1072,7 +1072,7 @@
       "additionalProperties": true
     },
     "matrix": {
-      "description": "Execute pipeline for each matrix combination. Read more: https://woodpecker-ci.org/docs/usage/matrix-workflows",
+      "description": "Execute pipeline for each matrix combination. Each axis supports at most 10 values and the include list is limited to 64 entries; the total matrix combination count is checked when parsing. Read more: https://woodpecker-ci.org/docs/usage/matrix-workflows",
       "type": "object",
       "properties": {
         "include": {
@@ -1080,7 +1080,7 @@
           "items": {
             "type": "object"
           },
-          "minLength": 1
+          "maxItems": 64
         }
       },
       "additionalProperties": {
@@ -1088,7 +1088,7 @@
         "items": {
           "type": ["boolean", "string", "number"]
         },
-        "minLength": 1
+        "maxItems": 10
       }
     },
     "labels": {
