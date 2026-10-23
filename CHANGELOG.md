@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-22
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -76,6 +76,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7366](https://github.com/woodpecker-ci/woodpecker/pull/7366)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.30.1 [[#7363](https://github.com/woodpecker-ci/woodpecker/pull/7363)]
 - Update module github.com/docker/cli to v29.9.2+incompatible [[#7355](https://github.com/woodpecker-ci/woodpecker/pull/7355)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.29.0 [[#7342](https://github.com/woodpecker-ci/woodpecker/pull/7342)]
