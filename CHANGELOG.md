@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -23,6 +23,7 @@
 
 ### 📈 Enhancement
 
+- Harden store scoping for org-level secret and registry retrieval [[#7365](https://github.com/woodpecker-ci/woodpecker/pull/7365)]
 - Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
 - Replace pipeline author on deploy with session user [[#7358](https://github.com/woodpecker-ci/woodpecker/pull/7358)]
 - Switch to the woodpecker-ci envsubst fork [[#7349](https://github.com/woodpecker-ci/woodpecker/pull/7349)]
