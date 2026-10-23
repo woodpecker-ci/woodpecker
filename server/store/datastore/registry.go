@@ -34,7 +34,7 @@ func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *mod
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrg {
 		cond = cond.Or(builder.Eq{"org_id": repo.OrgID, "repo_id": 0}).
-Or(builder.Eq{"org_id": 0, "repo_id": 0})
+			Or(builder.Eq{"org_id": 0, "repo_id": 0})
 	}
 	return regs, s.paginate(p).Where(cond).OrderBy(orderRegistriesBy).Find(&regs)
 }

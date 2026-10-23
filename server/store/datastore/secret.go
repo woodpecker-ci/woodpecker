@@ -34,7 +34,7 @@ func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
 		cond = cond.Or(builder.Eq{"org_id": repo.OrgID, "repo_id": 0}).
-Or(builder.Eq{"org_id": 0, "repo_id": 0})
+			Or(builder.Eq{"org_id": 0, "repo_id": 0})
 	}
 	return secrets, s.paginate(p).Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
 }
