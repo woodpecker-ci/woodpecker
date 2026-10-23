@@ -1,10 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
-import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
 // usePipeline() calls useI18n(), which must resolve during setup.
 const i18n = createI18n({
@@ -16,14 +15,11 @@ const i18n = createI18n({
   messages: { en: {} },
 });
 
-const pipelineConfigs = ref<PipelineConfig[]>([{ hash: 'h', name: 'default', data: '' }]);
-
 function mountStepList(pipeline: Pipeline) {
   return shallowMount(PipelineStepList, {
     props: { pipeline },
     global: {
       plugins: [i18n],
-      provide: { 'pipeline-configs': pipelineConfigs },
       // router-link resolves globally, so shallowMount does not stub it.
       stubs: { 'router-link': true, RouterLink: true },
     },
@@ -144,5 +140,26 @@ describe('pipelineStepList', () => {
     const pipeline = makePipeline([makeWorkflow(1, undefined, 'skipped'), makeWorkflow(2, [makeStep(1)], 'success')]);
 
     expect(() => mountStepList(pipeline)).not.toThrow();
+  });
+
+  it('renders without crashing and shows no workflow buttons when there are no workflows', () => {
+    const pipeline = makePipeline([]);
+
+    expect(() => mountStepList(pipeline)).not.toThrow();
+    const wrapper = mountStepList(pipeline);
+    expect(wrapper.findAll('button[title]').filter((b) => /^workflow-/.test(b.attributes('title') ?? ''))).toHaveLength(0);
+  });
+
+  it('hides the collapse button for a single workflow', () => {
+    const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]));
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
+  });
+
+  it('shows the collapse button for multiple workflows', () => {
+    const pipeline = makePipeline([makeWorkflow(1, [makeStep(1)], 'success'), makeWorkflow(2, [makeStep(2)], 'success')]);
+
+    const wrapper = mountStepList(pipeline);
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(true);
+    expect(wrapper.find('button[title="workflow-2"]').exists()).toBe(true);
   });
 });
