@@ -161,7 +161,7 @@
     "cancel": "取消",
     "default": "默认",
     "docs": "文档",
-    "documentation_for": "\"{topic}\"的文档",
+    "documentation_for": "\"{topic}\" 的文档",
     "errors": {
         "not_found": "服务器找不到请求的对象"
     },
@@ -440,7 +440,7 @@
                     "desc": "流水线配置文件的路径（例如 {0}）。文件夹路径应以 {1} 结尾。",
                     "desc_path_example": "my/path/",
                     "path": "流水线路径",
-                    "by_default": "默认:{paths}"
+                    "by_default": "默认: {paths}"
                 },
                 "project": "项目设置",
                 "protected": {
@@ -540,15 +540,15 @@
             "visibility": "项目可见性",
             "public": {
                 "desc": "任何用户无需登录即可看到你的项目。",
-                "public": "公共的"
+                "public": "公共"
             },
             "private": {
-                "private": "私有的",
+                "private": "私有",
                 "desc": "只有你和其他仓库拥有者才能看到这个项目。"
             },
             "internal": {
-                "internal": "内部的",
-                "desc": "只有Woodpecker的登录用户可以看到这个项目。"
+                "internal": "内部",
+                "desc": "只有 Woodpecker 的登录用户可以看到这个项目。"
             }
         },
         "refresh": "刷新仓库列表"

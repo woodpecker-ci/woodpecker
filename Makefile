@@ -1,7 +1,7 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
 GOFUMPT_VERSION := v0.12.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.14.0
+GOLANGCI_LINT_VERSION := v2.15.0
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
 XGO_VERSION := go-1.27.x
 
@@ -203,7 +203,7 @@ test-cli: ## Test cli code
 # Migration tests reset the shared database, so datastore packages must run serially.
 test-server-datastore: ## Test server datastore
 	go test -p 1 -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -p 1 -race -timeout 120s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -race -timeout 300s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
 	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...

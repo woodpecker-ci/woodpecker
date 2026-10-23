@@ -62,3 +62,43 @@ func TestRefreshExchangesStillValidToken(t *testing.T) {
 	assert.Equal(t, "new-refresh", user.RefreshToken)
 	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }
+
+func TestRefreshKeepsStillValidTokenWithoutExpiry(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/oauth/token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	// Non-expiring token (e.g. GitLab < 15.0 with "Expire access tokens"
+	// disabled): the token response carries no expires_in, so the stored
+	// expiry stays at zero. Refresh must not rotate the token, because
+	// GitLab revokes the previous access token on rotation, which would
+	// break the clone credentials of running pipelines.
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       0,
+	}
+
+	f, ok := forge.(*GitLab)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.False(t, updated)
+
+	assert.Equal(t, int32(0), tokenRequests.Load(), "token endpoint must not be called for non-expiring tokens")
+	assert.Equal(t, "old-access", user.AccessToken)
+	assert.Equal(t, "old-refresh", user.RefreshToken)
+	assert.Equal(t, int64(0), user.Expiry)
+}

@@ -92,7 +92,7 @@ func WaitForPipelineStatus(t *testing.T, s store.Store, pipelineID int64, wantSt
 }
 
 // WaitForAgentRegistered polls until all provided agents appear in the store
-// (by AgentID), then applies any deferred DB patches (e.g. OrgID).
+// (by AgentID).
 // Pass every *AgentEnv returned by StartAgent before triggering pipelines.
 func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 	t.Helper()
@@ -110,18 +110,6 @@ func WaitForAgentRegistered(t *testing.T, s store.Store, agents ...*AgentEnv) {
 	}
 	if !pollUntil(shortTimeout, allRegistered) {
 		t.Fatal("timeout: not all agents registered with the server")
-	}
-
-	// Apply any deferred OrgID patches.
-	for _, env := range agents {
-		if env.requestOrgID == model.IDNotSet {
-			continue
-		}
-		agent, err := s.AgentFind(env.AgentID)
-		require.NoError(t, err, "find agent %d to patch OrgID", env.AgentID)
-		agent.OrgID = env.requestOrgID
-		require.NoError(t, s.AgentUpdate(agent),
-			"patch OrgID on agent %d", env.AgentID)
 	}
 }
 
@@ -196,10 +184,8 @@ func AssertWorkflowRanOnAgent(t *testing.T, s store.Store, pipeline *model.Pipel
 // WaitForWorkersReady polls the queue until at least minWorkers worker slots
 // are active (i.e. agents have connected and are blocking on Poll). Call this
 // after WaitForAgentRegistered and before pipeline.Create in tests that rely
-// on specific routing: the org-id label is read from the DB at Poll time, so
-// the org-agent must have started its poll loop *after* its OrgID has been
-// patched — otherwise the global agent can win the race and steal the task
-// before the org-agent advertises its exact org-id label.
+// on specific routing: otherwise an agent that is already polling can win the
+// race and steal the task before the preferred agent has connected.
 func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
 	t.Helper()
 
