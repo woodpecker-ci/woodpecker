@@ -149,7 +149,12 @@ func TestMatrixMaxAxes(t *testing.T) {
 		{
 			name:   "one above limit",
 			matrix: "matrix:\n  A: [1, 2, 3, 4, 5]\n  B: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]",
-			err:    ErrorMaxWorkflowsReached,
+			err:    ErrorMaxAxisVariablesReached,
+		},
+		{
+			name:   "to many vars",
+			matrix: "matrix:\n  A: [1, 2, 3, 4, 5]\n  B: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]",
+			err:    ErrorMaxAxisVariablesReached,
 		},
 		{
 			name:   "above limit",
@@ -184,7 +189,7 @@ func TestMatrixMaxAxes(t *testing.T) {
 		{
 			name:   "super too large",
 			matrix: largeMatrix(63, 128),
-			err:    ErrorMaxWorkflowsReached,
+			err:    ErrorMaxAxisVariablesReached,
 		},
 	}
 
