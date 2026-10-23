@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Enhance matrix feature [[#7353](https://github.com/woodpecker-ci/woodpecker/pull/7353)]
 - Recover from config parsing panic in server [[#7348](https://github.com/woodpecker-ci/woodpecker/pull/7348)]
 - Fix server panics while parsing config [[#7336](https://github.com/woodpecker-ci/woodpecker/pull/7336)]
 - Only link http(s) error URIs on the login page [[#7318](https://github.com/woodpecker-ci/woodpecker/pull/7318)]
