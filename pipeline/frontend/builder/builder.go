@@ -177,8 +177,6 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		DependsOn:        parsed.DependsOn,
 		ConcurrencyLimit: parsed.Concurrency.Limit,
 		ConcurrencyGroup: parsed.Concurrency.Group,
-		// TODO: remove in next major.
-		RunsOn: parsed.RunsOn, //nolint:staticcheck
 	}
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
@@ -186,13 +184,11 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	if len(item.RunsOn) == 0 {
-		if parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
-			item.RunsOn = append(item.RunsOn, "failure")
-		}
-		if parsed.When.IncludesStatusSuccess(workflowMetadata, true, environ) {
-			item.RunsOn = append(item.RunsOn, "success")
-		}
+	if parsed.When.IncludesStatusFailure(workflowMetadata, true, environ) {
+		item.RunsOn = append(item.RunsOn, "failure")
+	}
+	if parsed.When.IncludesStatusSuccess(workflowMetadata, true, environ) {
+		item.RunsOn = append(item.RunsOn, "success")
 	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use — drop any

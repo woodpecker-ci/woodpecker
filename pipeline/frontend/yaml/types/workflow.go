@@ -30,7 +30,8 @@ type (
 		DependsOn   constraint.DependsOn `yaml:"depends_on,omitempty"`
 		Concurrency Concurrency          `yaml:"concurrency,omitempty"`
 		SkipClone   bool                 `yaml:"skip_clone,omitempty"`
-		// Deprecated: use when.status. TODO remove in next major.
+		// Deprecated: use when.status. Only kept so the linter can fail on it.
+		// TODO remove in 4.x.
 		RunsOn []string `yaml:"runs_on,omitempty"`
 	}
 
