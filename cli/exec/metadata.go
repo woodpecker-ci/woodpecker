@@ -76,6 +76,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	}
 
 	// Repo
+	metadataFileAndOverrideOrDefault(c, "repo-id", func(id int64) { m.Repo.ID = id }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "repo-remote-id", func(s string) { m.Repo.RemoteID = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-url", func(s string) { m.Repo.ForgeURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-default-branch", func(s string) { m.Repo.Branch = s }, c.String)
