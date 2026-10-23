@@ -23,6 +23,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `tag_title` for tag events
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
+- woodpecker-go: removed `RepoPatch.IsTrusted`, use `RepoPatch.Trusted`
 
 ### Admin-facing migrations
 
