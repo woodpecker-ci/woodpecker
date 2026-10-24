@@ -81,7 +81,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return err
 	}
 
-	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
+	updatePipelineStatus(ctx, store, _forge, killedPipeline, repo, user)
 
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
