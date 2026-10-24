@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -46,7 +47,8 @@ type Runtime struct {
 	tracer tracing.Tracer
 	logger logging.Logger
 
-	uploadWait sync.WaitGroup
+	uploadWait        sync.WaitGroup
+	uploadWaitTimeout time.Duration
 
 	taskUUID    string
 	description map[string]string

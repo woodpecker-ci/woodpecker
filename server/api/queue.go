@@ -19,7 +19,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -137,12 +136,12 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 		}
 
 		if task.AgentID != 0 {
-			name, ok := getAgentName(store, agentNameMap, task.AgentID)
-			if !ok {
-				log.Error().Msgf("agent not found for task %s", task.ID)
+			// Agent name is cosmetic — if the agent row was deleted before the
+			// task was cleared from the queue, skip the name rather than
+			// returning a 500 that breaks KEDA and freezes all pending pipelines.
+			if name, ok := getAgentName(store, agentNameMap, task.AgentID); ok {
+				taskResponse.AgentName = name
 			}
-
-			taskResponse.AgentName = name
 		}
 
 		if task.PipelineID != 0 {

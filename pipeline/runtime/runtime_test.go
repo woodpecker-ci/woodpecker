@@ -35,6 +35,13 @@ import (
 	tracer_mocks "go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing/mocks"
 )
 
+func TestNewRuntimeUploadWaitTimeoutDefaultsToZero(t *testing.T) {
+	// Zero means workflow.go will substitute the 30s production default.
+	// Tests that need a different value use WithUploadWaitTimeout explicitly.
+	r := New(&backend_types.Config{}, dummy.New())
+	assert.Equal(t, time.Duration(0), r.uploadWaitTimeout)
+}
+
 //
 // Step builder helpers.
 //
