@@ -49,6 +49,25 @@ The file records the selected context and its non-secret connection settings:
 
 ` + "`current_context`" + ` must name an entry in ` + "`contexts`" + `. The ` + "`woodpecker-cli context use`" + ` command changes that selection. Authentication tokens are never written to this JSON file; they are stored in the operating system's keyring and looked up by server URL.
 
+## First steps
+
+Connect the CLI to your server with ` + "`woodpecker-cli setup`" + `. It opens the Woodpecker UI in your browser, where you confirm the login, and saves the server and your token as a context. If the machine has no browser, pass the personal access token from the **CLI & API** page of your user settings with ` + "`--token`" + `. ` + "`woodpecker-cli info`" + ` then shows the user you are logged in as:
+
+` + "```shell" + `
+woodpecker-cli setup --server https://ci.example.test
+woodpecker-cli info
+` + "```" + `
+
+To work with more than one server, run ` + "`woodpecker-cli setup --context <name>`" + ` once per server and switch between them with [` + "`woodpecker-cli context use`" + `](#context-ctx).
+
+Shell completion is available for bash, zsh, fish and PowerShell. To enable it for bash, add this line to your ` + "`.bashrc`" + `:
+
+` + "```shell" + `
+source <(woodpecker-cli completion bash)
+` + "```" + `
+
+Run ` + "`woodpecker-cli completion --help`" + ` for the other shells.
+
 ## Legacy configuration
 
 If no usable current context can be loaded, woodpecker-cli falls back to the legacy ` + "`config.json`" + ` file in the same configuration directory. ` + "`--config`" + ` or ` + "`WOODPECKER_CONFIG`" + ` selects a different legacy file. The legacy JSON accepts ` + "`server_url`" + ` and ` + "`log_level`" + `; its token is also read from the operating system's keyring, not from JSON.
@@ -79,7 +98,7 @@ func main() {
 		panic(err)
 	}
 	defer fi.Close()
-	if _, err := fi.WriteString("# CLI\n\n" + configurationDocs + md); err != nil {
+	if _, err := fi.WriteString("# CLI\n\nTo install woodpecker-cli, see [CLI installation](./35-cli-installation.md).\n\n" + configurationDocs + md); err != nil {
 		panic(err)
 	}
 }
