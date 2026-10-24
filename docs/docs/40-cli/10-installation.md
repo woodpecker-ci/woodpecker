@@ -1,6 +1,6 @@
-# CLI installation
+# Installation
 
-woodpecker-cli is available as a pre-built binary, as a DEB or RPM package and as a container image. The [supported platforms](./30-administration/05-installation/05-supported-platforms.md) page lists the operating systems and architectures it is built for. Once it is installed, the [CLI](./40-cli.md) page explains how to connect it to your server.
+woodpecker-cli is available as a pre-built binary, as a DEB or RPM package and as a container image. The [supported platforms](../30-administration/05-installation/05-supported-platforms.md) page lists the operating systems and architectures it is built for. Once it is installed, the [configuration](./20-configuration.md) page explains how to connect it to your server.
 
 ## Pre-built binaries
 
@@ -22,11 +22,11 @@ To update a binary installed this way, run `woodpecker-cli update`. It replaces 
 
 ## Distribution packages
 
-The [distribution packages](./30-administration/05-installation/30-packages.md) include a `woodpecker-cli` package for `linux/amd64`, which installs the binary to `/usr/local/bin/woodpecker-cli`. Homebrew and several Linux distributions also package the CLI. They are listed under [community packages](./30-administration/05-installation/30-packages.md#community-packages).
+The [distribution packages](../30-administration/05-installation/30-packages.md) include a `woodpecker-cli` package for `linux/amd64`, which installs the binary to `/usr/local/bin/woodpecker-cli`. Homebrew and several Linux distributions also package the CLI. They are listed under [community packages](../30-administration/05-installation/30-packages.md#community-packages).
 
 ## Container image
 
-The CLI is published as the `woodpeckerci/woodpecker-cli` [container image](./30-administration/00-general.md#container-images). A container has no keyring to store a token in, so pass the server and token as environment variables. This command takes both from your shell:
+The CLI is published as the `woodpeckerci/woodpecker-cli` [container image](../30-administration/00-general.md#container-images). A container has no keyring to store a token in, so pass the server and token as environment variables. This command takes both from your shell:
 
 ```shell
 docker run --rm -e WOODPECKER_SERVER -e WOODPECKER_TOKEN woodpeckerci/woodpecker-cli:v3-alpine info
@@ -44,4 +44,4 @@ steps:
 
 ## Build from source
 
-Run `make build-cli` in a clone of the repository. It writes the binary to `dist/woodpecker-cli`. The [development docs](./92-development/01-getting-started.md) list the tools you need.
+Run `make build-cli` in a clone of the repository. It writes the binary to `dist/woodpecker-cli`. The [development docs](../92-development/01-getting-started.md) list the tools you need.
