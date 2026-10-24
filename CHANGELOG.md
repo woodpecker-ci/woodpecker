@@ -1,5 +1,98 @@
 # Changelog
 
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-24
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
+
+### 🔒 Security
+
+- Enhance matrix feature [[#7353](https://github.com/woodpecker-ci/woodpecker/pull/7353)]
+- Recover from config parsing panic in server [[#7348](https://github.com/woodpecker-ci/woodpecker/pull/7348)]
+- Fix server panics while parsing config [[#7336](https://github.com/woodpecker-ci/woodpecker/pull/7336)]
+- Only link http(s) error URIs on the login page [[#7318](https://github.com/woodpecker-ci/woodpecker/pull/7318)]
+- Do not log bearer credentials at trace level [[#7317](https://github.com/woodpecker-ci/woodpecker/pull/7317)]
+- Fall back to read only if the forge permission sync fails [[#7282](https://github.com/woodpecker-ci/woodpecker/pull/7282)]
+- Quote all YAML line breaks in environment substitution [[#7283](https://github.com/woodpecker-ci/woodpecker/pull/7283)]
+
+### ✨ Features
+
+- Add option to restrict organization and user to use its agents only [[#7359](https://github.com/woodpecker-ci/woodpecker/pull/7359)]
+- Make CLI lint prefer detected Woodpecker config [[#6634](https://github.com/woodpecker-ci/woodpecker/pull/6634)]
+
+### 📈 Enhancement
+
+- Harden store scoping for org-level secret and registry retrieval [[#7365](https://github.com/woodpecker-ci/woodpecker/pull/7365)]
+- Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
+- Replace pipeline author on deploy with session user [[#7358](https://github.com/woodpecker-ci/woodpecker/pull/7358)]
+- Switch to the woodpecker-ci envsubst fork [[#7349](https://github.com/woodpecker-ci/woodpecker/pull/7349)]
+- StepFinished of log store return error now [[#7346](https://github.com/woodpecker-ci/woodpecker/pull/7346)]
+- Speed up queue scheduling calculations [[#7303](https://github.com/woodpecker-ci/woodpecker/pull/7303)]
+- Allow selecting the forge when creating a user [[#7314](https://github.com/woodpecker-ci/woodpecker/pull/7314)]
+- Drop reviewer metadata when restarting a pipeline [[#7287](https://github.com/woodpecker-ci/woodpecker/pull/7287)]
+- Indicate permission fallback in webui [[#7285](https://github.com/woodpecker-ci/woodpecker/pull/7285)]
+- lint against tag align in golang [[#7292](https://github.com/woodpecker-ci/woodpecker/pull/7292)]
+- Rework dark theme [[#7263](https://github.com/woodpecker-ci/woodpecker/pull/7263)]
+- Persist queue paused state across server restarts [[#7256](https://github.com/woodpecker-ci/woodpecker/pull/7256)]
+
+### 🐛 Bug Fixes
+
+- Make workflow collapsible behavor consistent [[#7367](https://github.com/woodpecker-ci/woodpecker/pull/7367)]
+- For kubernetes do not report unknown deleted pods as successful [[#7357](https://github.com/woodpecker-ci/woodpecker/pull/7357)]
+- Make agent respect keepalive time and timeout flags [[#7351](https://github.com/woodpecker-ci/woodpecker/pull/7351)]
+- Forward OOM error correctly [[#7313](https://github.com/woodpecker-ci/woodpecker/pull/7313)]
+- Enable crons created without `enabled` field [[#7339](https://github.com/woodpecker-ci/woodpecker/pull/7339)]
+- Fix file based logstore related bugs [[#7323](https://github.com/woodpecker-ci/woodpecker/pull/7323)]
+- Use merge request IID in GitLab pull request list [[#7259](https://github.com/woodpecker-ci/woodpecker/pull/7259)]
+- Retry pipeline creation on SQLite database lock [[#7264](https://github.com/woodpecker-ci/woodpecker/pull/7264)]
+- Do not retry extensions that respond with 204 No Content [[#7320](https://github.com/woodpecker-ci/woodpecker/pull/7320)]
+- Return an error when Kubernetes backend options cannot be parsed [[#7312](https://github.com/woodpecker-ci/woodpecker/pull/7312)]
+- Persist token expiry when existing users sign in [[#7304](https://github.com/woodpecker-ci/woodpecker/pull/7304)]
+- Fix quoting windows container [[#7293](https://github.com/woodpecker-ci/woodpecker/pull/7293)]
+- Fix PowerShell-specific quoting for commands in local backend [[#7290](https://github.com/woodpecker-ci/woodpecker/pull/7290)]
+- Ignore GitLab tag deletion webhooks [[#7289](https://github.com/woodpecker-ci/woodpecker/pull/7289)]
+- Fix Docker backend with TLS and a custom host [[#7269](https://github.com/woodpecker-ci/woodpecker/pull/7269)]
+- Force oauth2 token exchange in forge Refresh for Gitea, GitLab, Forgejo and GitHub [[#7167](https://github.com/woodpecker-ci/woodpecker/pull/7167)]
+- Fix 'Repair Repository' failing for Bitbucket Datacenter repos with spaces in their name [[#7261](https://github.com/woodpecker-ci/woodpecker/pull/7261)]
+- For Gitlab resolve group-inherited project permissions for repos [[#7172](https://github.com/woodpecker-ci/woodpecker/pull/7172)]
+
+### 🧪 Tests
+
+- Require `scheduler_mocks` import name [[#7341](https://github.com/woodpecker-ci/woodpecker/pull/7341)]
+- Increase test coverage of `server/forge` and `server/servies` [[#7319](https://github.com/woodpecker-ci/woodpecker/pull/7319)]
+- Count cross-package coverage in all Go test targets [[#7316](https://github.com/woodpecker-ci/woodpecker/pull/7316)]
+
+### 📚 Documentation
+
+- Add `concurrency` option to Workflow Syntax docs [[#7369](https://github.com/woodpecker-ci/woodpecker/pull/7369)]
+- Update pnpm to v12.15.0 [[#7374](https://github.com/woodpecker-ci/woodpecker/pull/7374)]
+- Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
+- Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
+- Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
+- Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
+- Update docs npm deps non-major [[#7326](https://github.com/woodpecker-ci/woodpecker/pull/7326)]
+- Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
+- Add Asyntai AI Chatbot Docs Sync to plugins [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
+- Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
+- Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
+- Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
+- Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
+- Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
+
+### 📦️ Dependency
+
+- Update dependency @antfu/eslint-config to v10 [[#7377](https://github.com/woodpecker-ci/woodpecker/pull/7377)]
+- Update woodpeckerci/plugin-git Docker tag to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.33.0 [[#7373](https://github.com/woodpecker-ci/woodpecker/pull/7373)]
+- Update docker.io/mysql Docker tag to v26.10.0 [[#7372](https://github.com/woodpecker-ci/woodpecker/pull/7372)]
+- Update web npm deps non-major [[#7370](https://github.com/woodpecker-ci/woodpecker/pull/7370)]
+- Update woodpeckerci/plugin-release Docker tag to v0.3.3 [[#7371](https://github.com/woodpecker-ci/woodpecker/pull/7371)]
+
+### Misc
+
+- Check for a migration note on breaking pull requests [[#7249](https://github.com/woodpecker-ci/woodpecker/pull/7249)]
+
 ## [3.19.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.19.0) - 2026-10-07
 
 ### ❤️ Thanks to all contributors! ❤️
