@@ -12,27 +12,15 @@
         extend: {
           fontFamily: {
             sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', 'Arial', 'sans-serif'],
-          },
-          colors: {
-            wp: {
-              background: {
-                100: '#1e293b',
-                200: '#0f172a',
-                300: '#020617',
-              },
-              primary: {
-                100: '#38bdf8',
-                200: '#0284c7',
-                300: '#0369a1',
-              }
-            }
           }
         }
       }
     }
   </script>
   <style>
-    body {
+    html, body {
+      height: 100vh;
+      overflow: hidden;
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Noto Sans, Liberation Sans, Arial, sans-serif;
     }
@@ -40,11 +28,11 @@
 </head>
 <body class="bg-slate-950 text-slate-100 h-screen flex flex-col justify-between overflow-hidden font-sans select-none">
 
-  <!-- Symphonix Operating Mode Banner (Full Width, Top) -->
+  <!-- 1. Top Operating Mode Banner (Compact, No Scroll) -->
   <header
     id="operating-mode-banner"
     data-testid="operating-mode-banner"
-    class="border-b transition-colors duration-200 px-5 py-2 text-xs font-medium flex flex-wrap items-center justify-between gap-2 shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30"
+    class="border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30"
   >
     <div class="flex items-center space-x-2">
       <span class="inline-block h-2 w-2 rounded-full animate-pulse bg-emerald-400 shrink-0"></span>
@@ -55,19 +43,19 @@
     </div>
 
     <!-- Mode Selector Controls -->
-    <div class="flex items-center space-x-1.5 text-xs">
-      <button id="btn-mode-live" onclick="setMode('live')" class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-500 text-slate-950">Live</button>
-      <button id="btn-mode-simulation" onclick="setMode('simulation')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Simulation</button>
-      <button id="btn-mode-replay" onclick="setMode('replay')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Replay</button>
-      <button id="btn-mode-audit" onclick="setMode('audit')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Audit</button>
+    <div class="flex items-center space-x-1 text-xs">
+      <button id="btn-mode-live" onclick="setMode('live')" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500 text-slate-950">Live</button>
+      <button id="btn-mode-simulation" onclick="setMode('simulation')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Simulation</button>
+      <button id="btn-mode-replay" onclick="setMode('replay')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Replay</button>
+      <button id="btn-mode-audit" onclick="setMode('audit')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Audit</button>
     </div>
   </header>
 
-  <!-- Woodpecker Top Navigation Bar (Full Width, Below Banner) -->
-  <nav class="bg-slate-900 border-b border-slate-800 px-5 py-3 flex items-center justify-between font-bold shrink-0 z-20">
+  <!-- 2. Woodpecker Top Navigation Bar (Compact, No Scroll) -->
+  <nav class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between font-bold shrink-0 z-20">
     <div class="flex items-center space-x-4">
       <div class="flex items-center space-x-2">
-        <div class="h-8 w-8 rounded-lg bg-sky-600 flex items-center justify-center text-white text-base font-black shadow-md">
+        <div class="h-7 w-7 rounded bg-sky-600 flex items-center justify-center text-white text-sm font-black shadow-md">
           W
         </div>
         <div>
@@ -85,20 +73,20 @@
     </div>
 
     <div class="flex items-center space-x-3">
-      <!-- Symphonix SFDS View Level Selector -->
-      <div data-testid="view-level-selector" class="flex items-center space-x-1 rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
-        <span class="px-2 text-xs font-semibold text-slate-400 uppercase">View:</span>
-        <button id="btn-view-essential" onclick="setViewLevel('essential')" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
-        <button id="btn-view-standard" onclick="setViewLevel('standard')" class="rounded px-2.5 py-1 text-xs font-medium bg-cyan-600 text-white shadow">Standard</button>
-        <button id="btn-view-advanced" onclick="setViewLevel('advanced')" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
-        <button id="btn-view-expert" onclick="setViewLevel('expert')" class="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
+      <!-- SFDS View Level Selector -->
+      <div data-testid="view-level-selector" class="flex items-center space-x-1 rounded bg-slate-950 p-1 border border-slate-800 text-xs">
+        <span class="px-1.5 text-xs font-semibold text-slate-400 uppercase">View:</span>
+        <button id="btn-view-essential" onclick="setViewLevel('essential')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
+        <button id="btn-view-standard" onclick="setViewLevel('standard')" class="rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow">Standard</button>
+        <button id="btn-view-advanced" onclick="setViewLevel('advanced')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
+        <button id="btn-view-expert" onclick="setViewLevel('expert')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
       </div>
 
-      <!-- SignalBox Clinical Assurance Toggle -->
+      <!-- SignalBox Toggle -->
       <button
         id="signalbox-toggle"
         data-testid="signalbox-toggle"
-        class="signalbox-toggle-btn relative flex items-center space-x-2 rounded-lg bg-cyan-950/80 border border-cyan-500/50 px-3 py-1.5 text-xs text-cyan-300 hover:bg-cyan-900/90 transition shadow-sm"
+        class="signalbox-toggle-btn relative flex items-center space-x-1.5 rounded bg-cyan-950/80 border border-cyan-500/50 px-2.5 py-1 text-xs text-cyan-300 hover:bg-cyan-900/90 transition shadow-sm"
         onclick="toggleSignalBox()"
       >
         <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -109,244 +97,305 @@
       </button>
 
       <!-- Account Badge -->
-      <div class="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300">
+      <div class="h-7 w-7 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300">
         CSO
       </div>
     </div>
   </nav>
 
-  <!-- Symphonix 3-Panel Unified Workspace: Main Stage + Right SignalBox Panel (DODCKED SIDE-BY-SIDE) -->
+  <!-- 3. Main Workspace Shell: Exact 1-Page Height (Zero Down Scroll) -->
   <div class="flex-1 flex min-h-0 overflow-hidden relative w-full">
-    <!-- Center Stage: Main Pipeline Dashboard -->
-    <main class="flex-1 p-6 overflow-y-auto min-w-0 transition-all duration-300">
-      <div class="w-full space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 class="text-xl font-bold text-white tracking-wide">Clinical CI/CD Pipelines</h1>
-            <p class="text-xs text-slate-400 mt-1">Autonomous self-healing, zero-mock validation, and NHS DCB0129/DCB0160 governance</p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2 text-xs">
-            <span class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300">
-              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-              DB: PostgreSQL 16 (Encrypted AEAD Tink Keyset)
-            </span>
-            <span class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-300">
-              <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
-              Agent Quarantine: Ready
-            </span>
-          </div>
+    
+    <!-- Left/Center Stage: Clean Clinical Pipelines Table -->
+    <main class="flex-1 p-5 overflow-hidden flex flex-col min-w-0">
+      <!-- Title & Platform Badges Row -->
+      <div class="flex items-center justify-between mb-4 shrink-0">
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-wide">Clinical CI/CD Pipelines</h1>
+          <p class="text-xs text-slate-400">Autonomous self-healing, zero-mock validation, and NHS DCB0129/DCB0160 governance</p>
         </div>
 
-        <!-- Active Pipeline Feeds Cards -->
-        <div class="space-y-4">
-          <!-- Pipeline 1: BulletTrain HIE (Self-Healed OOM) -->
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg hover:border-slate-700 transition">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center space-x-3 min-w-[280px]">
-                <span class="flex h-3 w-3 relative shrink-0">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            PostgreSQL 16 (Tink AEAD)
+          </span>
+          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
+            <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+            Quarantine: Ready
+          </span>
+        </div>
+      </div>
+
+      <!-- Pipelines Table Container (Compact, Zero Scroll) -->
+      <div class="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-lg shrink-0">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+              <th class="py-2.5 px-4">Status</th>
+              <th class="py-2.5 px-4">Repository &amp; Branch</th>
+              <th class="py-2.5 px-4">Commit</th>
+              <th class="py-2.5 px-4">Clinical Governance / Self-Healing Signal</th>
+              <th class="py-2.5 px-4 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60">
+            <!-- Row 1: BulletTrain HIE -->
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
                 </span>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <span class="font-bold text-white text-sm">symphonix-health / bullettrain-hie</span>
-                    <span class="text-xs font-mono text-slate-400">#412</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">SUCCESS</span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5 font-mono">commit <span class="text-cyan-400 font-semibold">a8b29f1</span> on branch <span class="text-slate-300 font-semibold">main</span> by <span class="text-slate-300">fde-superpersona</span></p>
-                </div>
-              </div>
-              <!-- Self-Healing Badge -->
-              <div class="flex items-center space-x-2">
-                <span class="px-3 py-1 rounded-md text-xs font-medium bg-blue-950/80 text-blue-300 border border-blue-700/50 flex items-center gap-1.5">
-                  <svg class="h-3.5 w-3.5 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-bold text-white text-xs">symphonix-health / bullettrain-hie</div>
+                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
+              </td>
+              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">a8b29f1</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-blue-950/80 text-blue-300 border border-blue-700/50">
+                  <svg class="h-3 w-3 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Autonomous L1 Self-Heal: OOM Scaled 1.5x (2.0GB &rarr; 3.0GB)
+                  L1 Self-Heal: OOM Scaled 1.5x (2GB &rarr; 3GB)
                 </span>
-              </div>
-            </div>
-          </div>
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-slate-400 text-xs">3m 22s</td>
+            </tr>
 
-          <!-- Pipeline 2: CAID Clinical Governance Engine (Blocked by CSO Human Sign-Off) -->
-          <div class="rounded-xl border border-amber-800/40 bg-slate-900/60 p-5 shadow-lg">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center space-x-3 min-w-[280px]">
-                <span class="flex h-3 w-3 relative shrink-0">
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
+            <!-- Row 2: CAID Clinical Eval -->
+            <tr class="bg-amber-950/10 hover:bg-amber-950/20 transition">
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/60">
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span> GATED
                 </span>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <span class="font-bold text-white text-sm">symphonix-health / caid-clinical-eval</span>
-                    <span class="text-xs font-mono text-slate-400">#413</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/60">GATED - AWAITING HUMAN</span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5 font-mono">commit <span class="text-cyan-400 font-semibold">c3e41b9</span> on branch <span class="text-amber-300 font-semibold">release/v2.4.0</span></p>
-                </div>
-              </div>
-              <!-- Governance Gate Badge -->
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="px-3 py-1 rounded-md text-xs font-medium bg-amber-950/80 text-amber-300 border border-amber-600/50 flex items-center gap-1.5">
-                  <svg class="h-3.5 w-3.5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-bold text-white text-xs">symphonix-health / caid-clinical-eval</div>
+                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-amber-300">release/v2.4.0</span></div>
+              </td>
+              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">c3e41b9</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-amber-950/80 text-amber-300 border border-amber-600/50">
+                  <svg class="h-3 w-3 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   ACCOUNTABLE_HUMAN_REQUIRED: CSO Approval Mandatory
                 </span>
-                <button onclick="toggleSignalBox()" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold shadow transition">
+              </td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="openSignalBoxTab('gate')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold shadow transition">
                   Review Gate
                 </button>
-              </div>
-            </div>
-          </div>
+              </td>
+            </tr>
 
-          <!-- Pipeline 3: Client Registry Sync (Zero-PHI Sentry Active) -->
-          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg hover:border-slate-700 transition">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center space-x-3 min-w-[280px]">
-                <span class="flex h-3 w-3 relative shrink-0">
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            <!-- Row 3: Client Registry Sync -->
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
                 </span>
-                <div>
-                  <div class="flex items-center space-x-2">
-                    <span class="font-bold text-white text-sm">symphonix-health / client-registry-sync</span>
-                    <span class="text-xs font-mono text-slate-400">#414</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">SUCCESS</span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5 font-mono">commit <span class="text-cyan-400 font-semibold">7f10d22</span> on branch <span class="text-slate-300 font-semibold">main</span></p>
-                </div>
-              </div>
-              <!-- Zero-PHI Badge -->
-              <div class="flex items-center space-x-2">
-                <span class="px-3 py-1 rounded-md text-xs font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-700/50 flex items-center gap-1.5">
-                  <svg class="h-3.5 w-3.5 text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              </td>
+              <td class="py-3 px-4">
+                <div class="font-bold text-white text-xs">symphonix-health / client-registry-sync</div>
+                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
+              </td>
+              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">7f10d22</td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-700/50">
+                  <svg class="h-3 w-3 text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                   </svg>
-                  Zero-PHI Streaming Sentry: 42 Patient IDs Sanitized (CR-*, MPI-*, NHS Modulus 11)
+                  Zero-PHI Streaming Sentry: 42 IDs Sanitized (CR-*, MPI-*, NHS Modulus 11)
                 </span>
-              </div>
-            </div>
+              </td>
+              <td class="py-3 px-4 text-right font-mono text-slate-400 text-xs">1m 14s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Quick Platform Telemetry Footer Cards (Compact 1-Page Fit) -->
+      <div class="grid grid-cols-3 gap-3 mt-4 shrink-0">
+        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase">Security Keyset</div>
+            <div class="text-sm font-bold text-white mt-0.5">Google Tink AEAD</div>
           </div>
+          <span class="text-xs font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">ACTIVE</span>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase">Zero-Mock Compliance</div>
+            <div class="text-sm font-bold text-white mt-0.5">L-CAID-10 Rule</div>
+          </div>
+          <span class="text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">ENFORCED</span>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-400 font-semibold uppercase">Air-Gap Egress</div>
+            <div class="text-sm font-bold text-white mt-0.5">NHS Trust Perimeter</div>
+          </div>
+          <span class="text-xs font-mono text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/60">ZERO-LEAK</span>
         </div>
       </div>
     </main>
 
-    <!-- Right Stage: SignalBox Clinical Assurance Docked 3rd Panel (NON-OVERLAPPING DOCKED INLINE) -->
+    <!-- Right Stage: SignalBox Docked 3rd Panel WITH TABS (Exact 1-Page Fit, Zero Down Scroll) -->
     <aside
       id="signalbox-panel"
       data-testid="signalbox-panel"
-      class="hidden w-96 xl:w-[420px] shrink-0 border-l border-slate-800 bg-slate-900 text-slate-100 flex-col h-full overflow-hidden transition-all duration-300 z-10"
+      class="hidden w-96 xl:w-[440px] shrink-0 border-l border-slate-800 bg-slate-900 text-slate-100 flex flex-col h-full overflow-hidden transition-all duration-300 z-10"
       aria-label="Symphonix SignalBox Clinical Assurance & Governance Panel"
     >
       <!-- Panel Header -->
-      <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4 shrink-0 bg-slate-900/90">
-        <div class="flex items-center space-x-3">
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-500/40 shrink-0">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="flex items-center justify-between border-b border-slate-800 px-4 py-2.5 shrink-0 bg-slate-900/90">
+        <div class="flex items-center space-x-2.5">
+          <div class="flex h-7 w-7 items-center justify-center rounded bg-cyan-950 text-cyan-400 border border-cyan-500/40 shrink-0">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
           <div>
-            <h2 class="text-sm font-bold tracking-wide text-white uppercase">SignalBox Governance</h2>
-            <p class="text-xs text-slate-400">CAID / DCB0129-DCB0160 Active</p>
+            <h2 class="text-xs font-bold tracking-wide text-white uppercase">SignalBox Governance</h2>
+            <p class="text-[11px] text-slate-400">CAID / DCB0129-DCB0160 Active</p>
           </div>
         </div>
         <button
           id="signalbox-close"
           data-testid="signalbox-close"
-          class="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+          class="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition"
           title="Close Panel"
           onclick="toggleSignalBox()"
         >
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
         </button>
       </div>
 
-      <!-- Scrollable Drawer Content -->
-      <div class="flex-1 space-y-5 overflow-y-auto p-5 text-xs">
-        <!-- Clinical Safety Officer (CSO) Signoff Box -->
-        <section class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-4">
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
-              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              CSO Clinical Gate Passed
-            </span>
-            <span class="rounded bg-emerald-900/60 px-2 py-0.5 font-mono text-xs text-emerald-300 border border-emerald-600/40">
-              ACCOUNTABLE_HUMAN
-            </span>
-          </div>
-          <p class="text-slate-300 text-xs">
-            Signoff by: <span class="font-mono text-emerald-300 font-semibold">dr.elena.rostova@symphonix.health</span>
-          </p>
-          <p class="text-slate-400 text-xs mt-0.5">
-            Timestamp: <span class="font-mono text-slate-300">2026-10-24T16:45:00Z</span>
-          </p>
-          <div class="mt-2 text-xs text-slate-400 font-mono break-all bg-slate-950 p-2 rounded border border-slate-800">
-            Merkle Root: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-          </div>
-        </section>
+      <!-- Navigation Tabs (Prevents Vertical Scroll Overflow) -->
+      <div class="flex border-b border-slate-800 bg-slate-950 shrink-0 text-xs">
+        <button
+          id="tab-btn-gate"
+          onclick="switchSignalBoxTab('gate')"
+          class="flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition"
+        >
+          Clinical Gate
+        </button>
+        <button
+          id="tab-btn-heal"
+          onclick="switchSignalBoxTab('heal')"
+          class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
+        >
+          Self-Healing
+        </button>
+        <button
+          id="tab-btn-cdr"
+          onclick="switchSignalBoxTab('cdr')"
+          class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
+        >
+          CDR 1.0.0
+        </button>
+      </div>
 
-        <!-- Key Assurance Metrics Grid -->
-        <section class="grid grid-cols-2 gap-3">
+      <!-- Tab Content Area: Fits Perfectly in 1 Viewport Page -->
+      <div class="flex-1 p-4 overflow-hidden flex flex-col justify-between text-xs">
+        
+        <!-- Tab 1: Clinical Gate & CSO -->
+        <div id="tab-pane-gate" class="space-y-3.5 flex-1 flex flex-col justify-start">
+          <!-- CSO Gate Box -->
+          <div class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                CSO Clinical Gate Passed
+              </span>
+              <span class="rounded bg-emerald-900/60 px-1.5 py-0.5 font-mono text-[11px] text-emerald-300 border border-emerald-600/40">
+                ACCOUNTABLE_HUMAN
+              </span>
+            </div>
+            <p class="text-slate-300 text-xs">
+              Signoff: <span class="font-mono text-emerald-300 font-semibold">dr.elena.rostova@symphonix.health</span>
+            </p>
+            <p class="text-slate-400 text-xs mt-0.5">
+              Timestamp: <span class="font-mono text-slate-300">2026-10-24T16:45:00Z</span>
+            </p>
+            <div class="mt-2 text-[11px] text-slate-400 font-mono break-all bg-slate-950 p-1.5 rounded border border-slate-800">
+              Merkle Root: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+            </div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+              <div class="text-slate-400 text-xs uppercase font-semibold">Golden Dataset</div>
+              <div class="mt-0.5 text-xl font-bold font-mono text-cyan-400">99.94%</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Target: &ge; 99.9% zero-miss</div>
+            </div>
+
+            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+              <div class="text-slate-400 text-xs uppercase font-semibold">Zero-PHI Sentry</div>
+              <div class="mt-0.5 text-xl font-bold font-mono text-indigo-400">ACTIVE</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">42 IDs Redacted</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Self-Healing Telemetry -->
+        <div id="tab-pane-heal" class="hidden space-y-3.5 flex-1 flex flex-col justify-start">
           <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3.5">
-            <div class="text-slate-400 text-xs uppercase tracking-wider font-semibold">Golden Dataset</div>
-            <div class="mt-1 text-2xl font-bold font-mono text-cyan-400">99.94%</div>
-            <div class="text-xs text-slate-400 mt-0.5">Target: &ge; 99.9% zero-miss</div>
-          </div>
-
-          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3.5">
-            <div class="text-slate-400 text-xs uppercase tracking-wider font-semibold">Zero-PHI Sentry</div>
-            <div class="mt-1 text-2xl font-bold font-mono text-indigo-400">ACTIVE</div>
-            <div class="text-xs text-slate-400 mt-0.5">42 IDs redacted</div>
-          </div>
-        </section>
-
-        <!-- Multi-Tier Self-Healing Telemetry -->
-        <section class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-          <h3 class="font-bold text-sky-400 uppercase tracking-wide mb-3 flex items-center gap-1.5 text-xs">
-            <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Multi-Tier Autonomous Healing
-          </h3>
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-              <div class="font-mono text-base font-bold text-cyan-400">12</div>
-              <div class="text-xs text-slate-400 mt-0.5">L1 OOM Scaled</div>
-            </div>
-            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-              <div class="font-mono text-base font-bold text-amber-400">7</div>
-              <div class="text-xs text-slate-400 mt-0.5">L2 AI Retries</div>
-            </div>
-            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-              <div class="font-mono text-base font-bold text-emerald-400">0</div>
-              <div class="text-xs text-slate-400 mt-0.5">L3 Quarantines</div>
+            <h3 class="font-bold text-sky-400 uppercase tracking-wide mb-2.5 flex items-center gap-1.5 text-xs">
+              <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Multi-Tier Autonomous Healing
+            </h3>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                <div class="font-mono text-base font-bold text-cyan-400">12</div>
+                <div class="text-[11px] text-slate-400">L1 OOM Scaled</div>
+              </div>
+              <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                <div class="font-mono text-base font-bold text-amber-400">7</div>
+                <div class="text-[11px] text-slate-400">L2 AI Retries</div>
+              </div>
+              <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                <div class="font-mono text-base font-bold text-emerald-400">0</div>
+                <div class="text-[11px] text-slate-400">L3 Quarantines</div>
+              </div>
             </div>
           </div>
-        </section>
 
-        <!-- Dual-Audience Explainability (CDR 1.0.0) -->
-        <section class="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
-          <div class="flex items-center justify-between mb-3">
+          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-300 space-y-1 font-mono">
+            <div class="text-slate-400 font-semibold uppercase">Latest Diagnostic Trace:</div>
+            <div class="text-cyan-400">OomError: container killed (exit 137)</div>
+            <div class="text-emerald-400">&rarr; Auto-scaled memory limit: 2048MB &rarr; 3072MB</div>
+            <div class="text-slate-400">&rarr; Status: Auto-restarted, step succeeded in 32s</div>
+          </div>
+        </div>
+
+        <!-- Tab 3: CDR 1.0.0 Dual-Audience Explainability -->
+        <div id="tab-pane-cdr" class="hidden space-y-3 flex-1 flex flex-col justify-start">
+          <div class="flex items-center justify-between">
             <h3 class="font-bold text-slate-200 uppercase tracking-wide text-xs">Dual-Audience CDR 1.0.0</h3>
-            <div class="flex rounded-md bg-slate-900 p-0.5 border border-slate-800">
+            <div class="flex rounded bg-slate-950 p-0.5 border border-slate-800">
               <button
                 id="toggle-clinician-view"
                 data-testid="toggle-clinician-view"
-                class="px-2.5 py-1 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition"
+                class="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition"
                 onclick="setAudienceView('clinician')"
               >
-                Clinician View
+                Clinician
               </button>
               <button
                 id="toggle-patient-view"
                 data-testid="toggle-patient-view"
-                class="px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
+                class="px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
                 onclick="setAudienceView('patient')"
               >
-                Explain to Patient
+                Patient
               </button>
             </div>
           </div>
@@ -355,71 +404,61 @@
           <div
             id="cdr-view-clinician"
             data-testid="cdr-view-clinician"
-            class="space-y-3 bg-slate-900/80 p-3 rounded-lg border border-slate-800"
+            class="space-y-2 bg-slate-900/80 p-3 rounded-lg border border-slate-800"
           >
             <div class="flex items-center justify-between">
               <span class="font-semibold text-cyan-400 text-xs">Acute Coronary Syndrome Rule-Out</span>
-              <span class="text-xs font-mono text-slate-400">WORM SHA-256 AUDITED</span>
+              <span class="text-[11px] font-mono text-slate-400">WORM SHA-256</span>
             </div>
             <div>
-              <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Triggering Rules & Guidelines</div>
-              <ul class="list-disc list-inside space-y-1 text-slate-300 text-xs">
+              <div class="text-[11px] font-semibold uppercase text-slate-400 mb-0.5">Rules &amp; Guidelines</div>
+              <ul class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
                 <li>NICE NG185 Chest pain guideline logic v3.2</li>
-                <li>GRACE 2.0 Risk Model calculated 6-month mortality &lt; 1%</li>
-                <li>L-CAID-10 Zero-Mock validation confirmed across Client Registry &amp; Lab feed</li>
+                <li>GRACE 2.0 Risk Model 6-month mortality &lt; 1%</li>
               </ul>
             </div>
-            <div class="border-t border-slate-800 pt-2 text-xs text-slate-400 font-mono">
+            <div class="border-t border-slate-800 pt-1.5 text-[11px] text-slate-400 font-mono">
               <span data-testid="triage-cdr-record-id">record_id: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
             </div>
           </div>
 
-          <!-- Explain to Patient View (Hidden initially) -->
+          <!-- Explain to Patient View -->
           <div
             id="cdr-view-patient"
             data-testid="cdr-view-patient"
-            class="hidden space-y-3 bg-teal-950/20 p-3 rounded-lg border border-teal-800/40 text-slate-200"
+            class="hidden space-y-2 bg-teal-950/20 p-3 rounded-lg border border-teal-800/40 text-slate-200"
           >
-            <div data-testid="cdr-patient-summary" class="rounded-lg bg-teal-900/30 p-3 border border-teal-600/30 text-teal-200 text-xs leading-relaxed font-sans font-medium">
-              Your heart tests and scans look reassuring. There is no evidence of sudden heart artery blockage today. We are monitoring your symptoms safely.
+            <div data-testid="cdr-patient-summary" class="rounded bg-teal-900/30 p-2 border border-teal-600/30 text-teal-200 text-xs leading-relaxed font-sans font-medium">
+              Your heart tests and scans look reassuring. There is no evidence of sudden heart artery blockage today.
             </div>
 
             <div>
-              <div class="text-xs font-semibold uppercase text-teal-400 mb-1">Ruled-Out Dangers</div>
-              <ul data-testid="cdr-patient-excluded" class="list-disc list-inside space-y-1 text-slate-300 text-xs">
+              <div class="text-[11px] font-semibold uppercase text-teal-400 mb-0.5">Ruled-Out Dangers</div>
+              <ul data-testid="cdr-patient-excluded" class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
                 <li>ST-Elevation Myocardial Infarction (STEMI)</li>
                 <li>Aortic Dissection</li>
               </ul>
             </div>
 
-            <div>
-              <div class="text-xs font-semibold uppercase text-teal-400 mb-1">Key Observations</div>
-              <ul data-testid="cdr-patient-facts" class="list-disc list-inside space-y-1 text-slate-300 text-xs">
-                <li>High-sensitivity Troponin T: &lt; 5 ng/L (Normal)</li>
-                <li>12-lead ECG: Normal sinus rhythm, no ST changes</li>
-              </ul>
-            </div>
-
-            <div data-testid="cdr-patient-uncertainty" class="text-xs text-amber-300/90 bg-amber-950/20 p-2.5 rounded-lg border border-amber-600/30">
-              Notice: Slight residual muscular chest tenderness remains under observation. Clinical team reassessment in 2 hours.
+            <div data-testid="cdr-patient-uncertainty" class="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded border border-amber-600/30">
+              Notice: Reassessment in 2 hours by the clinical team.
             </div>
           </div>
-        </section>
+        </div>
 
-        <!-- Authority & DID Reference -->
-        <section class="text-xs text-slate-400 border-t border-slate-800 pt-3 space-y-1">
+        <!-- Authority Footer (Inside Drawer, Compact) -->
+        <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 shrink-0 space-y-0.5">
           <div>DID: <span class="font-mono text-slate-300">did:web:gharra.symphonix.health:agents:fde-superpersona</span></div>
-          <div>Covenant: <span class="font-mono text-slate-300">symphonix-care-covenant-v1</span></div>
-          <div>Assurance: <span class="font-mono text-slate-300">NHS-DCB0129-DCB0160 | FUTURE-AI | ISO-IEC-42001</span></div>
-        </section>
+          <div>Assurance: <span class="font-mono text-slate-300">NHS-DCB0129-DCB0160 | FUTURE-AI</span></div>
+        </div>
       </div>
     </aside>
   </div>
 
-  <!-- Symphonix SFDS Mandatory Clinical Disclaimer Footer (Full Width, Bottom) -->
+  <!-- 4. SFDS Mandatory Clinical Disclaimer Footer (Compact, No Scroll) -->
   <footer
     data-testid="clinical-disclaimer-footer"
-    class="border-t border-slate-800 bg-slate-950 text-slate-400 px-5 py-2.5 text-xs flex flex-wrap items-center justify-between gap-3 shadow-inner shrink-0 z-20"
+    class="border-t border-slate-800 bg-slate-950 text-slate-400 px-5 py-2 text-xs flex items-center justify-between gap-3 shadow-inner shrink-0 z-20"
   >
     <div class="flex items-center space-x-2">
       <span class="inline-flex items-center justify-center h-4 w-4 rounded-full bg-cyan-900/80 text-cyan-300 font-bold text-xs">
@@ -451,21 +490,45 @@
       }
     }
 
+    function openSignalBoxTab(tabName) {
+      const panel = document.getElementById('signalbox-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        panel.classList.add('flex');
+      }
+      switchSignalBoxTab(tabName);
+    }
+
+    function switchSignalBoxTab(tab) {
+      const tabs = ['gate', 'heal', 'cdr'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const pane = document.getElementById(`tab-pane-${t}`);
+        if (t === tab) {
+          btn.className = "flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition";
+          pane.classList.remove('hidden');
+        } else {
+          btn.className = "flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition";
+          pane.classList.add('hidden');
+        }
+      });
+    }
+
     function setOperatingMode(mode) {
       const banner = document.getElementById('operating-mode-banner');
       const label = document.getElementById('current-mode-label');
 
       if (mode === 'live') {
-        banner.className = "border-b transition-colors duration-200 px-5 py-2 text-xs font-medium flex flex-wrap items-center justify-between gap-2 shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30";
+        banner.className = "border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30";
         label.innerText = "LIVE CLINICAL ENVIRONMENT";
       } else if (mode === 'simulation') {
-        banner.className = "border-b transition-colors duration-200 px-5 py-2 text-xs font-medium flex flex-wrap items-center justify-between gap-2 shadow-sm bg-amber-950/80 border-amber-600/60 text-amber-200 shrink-0 z-30";
+        banner.className = "border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-amber-950/80 border-amber-600/60 text-amber-200 shrink-0 z-30";
         label.innerText = "SIMULATION / TRAINING SANDBOX";
       } else if (mode === 'replay') {
-        banner.className = "border-b transition-colors duration-200 px-5 py-2 text-xs font-medium flex flex-wrap items-center justify-between gap-2 shadow-sm bg-blue-950/80 border-blue-600/60 text-blue-200 shrink-0 z-30";
+        banner.className = "border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-blue-950/80 border-blue-600/60 text-blue-200 shrink-0 z-30";
         label.innerText = "HISTORICAL REPLAY MODE";
       } else if (mode === 'audit') {
-        banner.className = "border-b transition-colors duration-200 px-5 py-2 text-xs font-medium flex flex-wrap items-center justify-between gap-2 shadow-sm bg-purple-950/80 border-purple-600/60 text-purple-200 shrink-0 z-30";
+        banner.className = "border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-purple-950/80 border-purple-600/60 text-purple-200 shrink-0 z-30";
         label.innerText = "STATUTORY AUDIT & INSPECTION MODE";
       }
     }
@@ -476,9 +539,9 @@
       levels.forEach(lvl => {
         const btn = document.getElementById(`btn-view-${lvl}`);
         if (lvl === level) {
-          btn.className = "rounded px-2.5 py-1 text-xs font-medium bg-cyan-600 text-white shadow";
+          btn.className = "rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow";
         } else {
-          btn.className = "rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-white transition";
+          btn.className = "rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition";
         }
       });
     }
@@ -490,13 +553,13 @@
       const patientView = document.getElementById('cdr-view-patient');
 
       if (audience === 'clinician') {
-        clinicianBtn.className = "px-2.5 py-1 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition";
-        patientBtn.className = "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition";
+        patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
         clinicianView.classList.remove('hidden');
         patientView.classList.add('hidden');
       } else {
-        clinicianBtn.className = "px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
-        patientBtn.className = "px-2.5 py-1 rounded text-xs font-semibold bg-teal-600 text-white shadow transition";
+        clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-teal-600 text-white shadow transition";
         clinicianView.classList.add('hidden');
         patientView.classList.remove('hidden');
       }
