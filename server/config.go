@@ -97,6 +97,7 @@ var Config = struct {
 	SelfHealing struct {
 		Enabled          bool
 		Endpoint         string
+		Model            string
 		AutoRestartFlaky bool
 		MaxRetries       int
 	}

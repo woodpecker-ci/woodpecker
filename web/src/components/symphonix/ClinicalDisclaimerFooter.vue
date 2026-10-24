@@ -15,7 +15,7 @@
     <div class="flex items-center space-x-3 text-[10px] text-slate-500 font-mono">
       <span>DID: did:web:gharra.symphonix.health:agents:fde-superpersona</span>
       <span>•</span>
-      <span class="text-cyan-400">NHS-DCB0129 / DCB0160</span>
+      <span class="text-cyan-400">DCB0129 / DCB0160 / ISO-42001</span>
       <span>•</span>
       <span class="text-emerald-400">ACCOUNTABLE_HUMAN_REQUIRED</span>
     </div>

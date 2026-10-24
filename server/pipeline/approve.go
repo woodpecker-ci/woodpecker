@@ -47,7 +47,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 			Str("repo", repo.FullName).
 			Int64("pipeline", currentPipeline.Number).
 			Str("cso_user", user.Login).
-			Msg("Clinical Safety Gate: CSO sign-off verified and recorded under NHS DCB0129/DCB0160")
+			Msg("Clinical Safety Gate: CSO sign-off verified and recorded under DCB0129/ISO-42001")
 	}
 
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)

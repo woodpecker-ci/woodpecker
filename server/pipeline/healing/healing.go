@@ -58,10 +58,10 @@ func DiagnoseAndHeal(ctx context.Context, _store store.Store, repo *model.Repo, 
 	logger := log.With().
 		Str("repo", repo.FullName).
 		Int64("pipeline", failedPipeline.Number).
-		Int("rerun_count", failedPipeline.RerunCount).
+		Int64("rerun_count", failedPipeline.RerunCount).
 		Logger()
 
-	if failedPipeline.RerunCount >= server.Config.SelfHealing.MaxRetries {
+	if failedPipeline.RerunCount >= int64(server.Config.SelfHealing.MaxRetries) {
 		logger.Warn().Msg("Self-healing: max retry limit reached, skipping auto-remediation")
 		return
 	}
@@ -228,20 +228,52 @@ func matchTransientPatterns(logContent string) (Diagnosis, bool) {
 	return Diagnosis{}, false
 }
 
-// queryAIDiagnostic sends a structured request to a local LLM or CAID service.
+// queryAIDiagnostic sends a structured request to a local LLM (vLLM/Ollama) or CAID service.
 func queryAIDiagnostic(ctx context.Context, endpoint string, step *model.Step, logExcerpt string) (Diagnosis, error) {
-	reqPayload := map[string]any{
-		"step_name":   step.Name,
-		"exit_code":   step.ExitCode,
-		"log_excerpt": logExcerpt,
+	modelName := server.Config.SelfHealing.Model
+	if modelName == "" {
+		modelName = "qwen2.5-coder:32b"
 	}
 
-	bodyBytes, err := json.Marshal(reqPayload)
+	var reqBody []byte
+	var err error
+
+	// If endpoint points to an OpenAI / Ollama compatible completions API
+	if strings.Contains(endpoint, "chat/completions") || strings.Contains(endpoint, "api/chat") {
+		prompt := fmt.Sprintf("Analyze this CI step failure:\nStep Name: %s\nExit Code: %d\nLog Excerpt:\n%s\n\nClassify root cause into TRANSIENT, CODE_DEFECT, or CONFIG_DRIFT.",
+			step.Name, step.ExitCode, logExcerpt)
+
+		payload := map[string]any{
+			"model": modelName,
+			"messages": []map[string]string{
+				{
+					"role":    "system",
+					"content": "You are Symphonix HealthCI Autonomous Self-Healing Diagnostic Agent. Respond ONLY with valid JSON having the exact keys: classification (TRANSIENT, CODE_DEFECT, or CONFIG_DRIFT), root_cause (concise explanation), confidence (float between 0 and 1.0), recommended_action (RESTART, MANUAL_INSPECTION, or AUTO_FIX).",
+				},
+				{
+					"role":    "user",
+					"content": prompt,
+				},
+			},
+			"temperature": 0.1,
+		}
+		reqBody, err = json.Marshal(payload)
+	} else {
+		// Native direct diagnostic endpoint payload
+		payload := map[string]any{
+			"model":       modelName,
+			"step_name":   step.Name,
+			"exit_code":   step.ExitCode,
+			"log_excerpt": logExcerpt,
+		}
+		reqBody, err = json.Marshal(payload)
+	}
+
 	if err != nil {
 		return Diagnosis{}, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(bodyBytes))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(reqBody))
 	if err != nil {
 		return Diagnosis{}, err
 	}
@@ -258,10 +290,43 @@ func queryAIDiagnostic(ctx context.Context, endpoint string, step *model.Step, l
 		return Diagnosis{}, fmt.Errorf("ai diagnostic endpoint returned status %d", resp.StatusCode)
 	}
 
-	var diag Diagnosis
-	if err := json.NewDecoder(resp.Body).Decode(&diag); err != nil {
+	var rawResp map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&rawResp); err != nil {
 		return Diagnosis{}, err
 	}
 
-	return diag, nil
+	// Case A: OpenAI / Ollama chat completion format
+	if choices, ok := rawResp["choices"].([]any); ok && len(choices) > 0 {
+		if firstChoice, ok := choices[0].(map[string]any); ok {
+			if msg, ok := firstChoice["message"].(map[string]any); ok {
+				if content, ok := msg["content"].(string); ok {
+					var diag Diagnosis
+					// Strip potential markdown code blocks ```json ... ```
+					cleanedContent := strings.TrimSpace(content)
+					cleanedContent = strings.TrimPrefix(cleanedContent, "```json")
+					cleanedContent = strings.TrimPrefix(cleanedContent, "```")
+					cleanedContent = strings.TrimSuffix(cleanedContent, "```")
+					cleanedContent = strings.TrimSpace(cleanedContent)
+
+					if err := json.Unmarshal([]byte(cleanedContent), &diag); err == nil && diag.Classification != "" {
+						return diag, nil
+					}
+				}
+			}
+		}
+	}
+
+	// Case B: Direct diagnosis object
+	rawBytes, _ := json.Marshal(rawResp)
+	var diag Diagnosis
+	if err := json.Unmarshal(rawBytes, &diag); err == nil && diag.Classification != "" {
+		return diag, nil
+	}
+
+	return Diagnosis{
+		Classification:    ClassUnknown,
+		RootCause:         "AI diagnostic returned unparseable response structure",
+		Confidence:        0.50,
+		RecommendedAction: "MANUAL_INSPECTION",
+	}, nil
 }

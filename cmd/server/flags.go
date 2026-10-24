@@ -697,6 +697,12 @@ var flags = append([]cli.Flag{
 		Name:    "self-healing-endpoint",
 		Usage:   "endpoint URL for AI self-healing diagnostic service (e.g. Ollama/vLLM/CAID)",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_MODEL"),
+		Name:    "self-healing-model",
+		Usage:   "local or remote LLM model name for self-healing diagnostics (e.g. qwen2.5-coder:32b)",
+		Value:   "qwen2.5-coder:32b",
+	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_AUTO_RESTART_FLAKY"),
 		Name:    "self-healing-auto-restart-flaky",

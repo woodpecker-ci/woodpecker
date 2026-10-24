@@ -60,7 +60,7 @@
         </div>
         <div>
           <span class="text-white text-sm font-bold tracking-wide">Woodpecker CI</span>
-          <span class="ml-1.5 text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">Symphonix Edition</span>
+          <span class="ml-1.5 text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">Clinical Edition</span>
         </div>
       </div>
 
@@ -112,7 +112,7 @@
       <div class="flex items-center justify-between mb-4 shrink-0">
         <div>
           <h1 class="text-lg font-bold text-white tracking-wide">Clinical CI/CD Pipelines</h1>
-          <p class="text-xs text-slate-400">Autonomous self-healing, zero-mock validation, and NHS DCB0129/DCB0160 governance</p>
+          <p class="text-xs text-slate-400">Autonomous self-healing, zero-mock validation, and Enterprise DCB0129/DCB0160 governance</p>
         </div>
 
         <div class="flex items-center space-x-2 text-xs">
@@ -207,7 +207,7 @@
                   <svg class="h-3 w-3 text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                   </svg>
-                  Zero-PHI Streaming Sentry: 42 IDs Sanitized (CR-*, MPI-*, NHS Modulus 11)
+                  Zero-PHI Streaming Sentry: 42 IDs Sanitized (CR-*, MPI-*, Modulus 11 Validated)
                 </span>
               </td>
               <td class="py-3 px-4 text-right font-mono text-slate-400 text-xs">1m 14s</td>
@@ -235,19 +235,19 @@
         <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
           <div>
             <div class="text-xs text-slate-400 font-semibold uppercase">Air-Gap Egress</div>
-            <div class="text-sm font-bold text-white mt-0.5">NHS Trust Perimeter</div>
+            <div class="text-sm font-bold text-white mt-0.5">Enterprise Perimeter</div>
           </div>
           <span class="text-xs font-mono text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/60">ZERO-LEAK</span>
         </div>
       </div>
     </main>
 
-    <!-- Right Stage: SignalBox Docked 3rd Panel WITH TABS (Exact 1-Page Fit, Zero Down Scroll) -->
+    <!-- Right Stage: SignalBox Docked 3rd Panel WITH TABS (Shifted Down, Compact Width) -->
     <aside
       id="signalbox-panel"
       data-testid="signalbox-panel"
-      class="hidden w-96 xl:w-[440px] shrink-0 border-l border-slate-800 bg-slate-900 text-slate-100 flex flex-col h-full overflow-hidden transition-all duration-300 z-10"
-      aria-label="Symphonix SignalBox Clinical Assurance & Governance Panel"
+      class="hidden w-80 xl:w-96 shrink-0 my-2.5 mr-4 rounded-xl border border-slate-800 bg-slate-900/95 text-slate-100 flex-col h-[calc(100%-1.25rem)] overflow-hidden shadow-2xl transition-all duration-300 z-10"
+      aria-label="SignalBox Clinical Assurance & Governance Panel"
     >
       <!-- Panel Header -->
       <div class="flex items-center justify-between border-b border-slate-800 px-4 py-2.5 shrink-0 bg-slate-900/90">
@@ -344,35 +344,72 @@
         </div>
 
         <!-- Tab 2: Self-Healing Telemetry -->
-        <div id="tab-pane-heal" class="hidden space-y-3.5 flex-1 flex flex-col justify-start">
-          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3.5">
-            <h3 class="font-bold text-sky-400 uppercase tracking-wide mb-2.5 flex items-center gap-1.5 text-xs">
-              <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Multi-Tier Autonomous Healing
-            </h3>
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <div class="font-mono text-base font-bold text-cyan-400">12</div>
-                <div class="text-[11px] text-slate-400">L1 OOM Scaled</div>
+        <div id="tab-pane-heal" class="hidden space-y-2.5 flex-1 flex flex-col justify-start">
+          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold text-sky-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
+                <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Autonomous Self-Healing
+              </h3>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+                Qwen 2.5 Coder 32B (Air-Gap)
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5 text-center">
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <div class="font-mono text-sm font-bold text-cyan-400">12</div>
+                <div class="text-[10px] text-slate-400">L1 OOM Scaled</div>
               </div>
-              <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <div class="font-mono text-base font-bold text-amber-400">7</div>
-                <div class="text-[11px] text-slate-400">L2 AI Retries</div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <div class="font-mono text-sm font-bold text-amber-400">7</div>
+                <div class="text-[10px] text-slate-400">L2 AI Retries</div>
               </div>
-              <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <div class="font-mono text-base font-bold text-emerald-400">0</div>
-                <div class="text-[11px] text-slate-400">L3 Quarantines</div>
+              <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+                <div class="font-mono text-sm font-bold text-emerald-400">0</div>
+                <div class="text-[10px] text-slate-400">L3 Quarantines</div>
               </div>
             </div>
           </div>
 
-          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-300 space-y-1 font-mono">
-            <div class="text-slate-400 font-semibold uppercase">Latest Diagnostic Trace:</div>
-            <div class="text-cyan-400">OomError: container killed (exit 137)</div>
-            <div class="text-emerald-400">&rarr; Auto-scaled memory limit: 2048MB &rarr; 3072MB</div>
-            <div class="text-slate-400">&rarr; Status: Auto-restarted, step succeeded in 32s</div>
+          <!-- DCB0129 Code Provenance Gate Status -->
+          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2 text-xs text-slate-300 space-y-1">
+            <div class="flex items-center justify-between text-[11px] font-semibold">
+              <span class="text-slate-400 uppercase">DCB0129 Code Provenance:</span>
+              <span class="text-emerald-400 font-mono">DUAL-KEY ENFORCED</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-mono flex items-center justify-between">
+              <span>Author: <span class="text-slate-300">symphonix-healer[bot]</span></span>
+              <span>DID: <span class="text-cyan-400">healer-v1</span></span>
+            </div>
+            <div class="text-[10px] text-indigo-300 bg-indigo-950/40 p-1 rounded border border-indigo-900/50">
+              Direct merge blocked: 2 human sign-offs (incl. Certified CSO) required.
+            </div>
+          </div>
+
+          <!-- 6 Scoped Self-Healing Primitives -->
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">Flaky Quarantine</div>
+              <div class="text-emerald-400">Tiered (TTL 72h)</div>
+              <div class="text-[9px] text-slate-500">Clinical tests immune</div>
+            </div>
+            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">Predictive Sizing</div>
+              <div class="text-cyan-400">P95 + 20% Headroom</div>
+              <div class="text-[9px] text-slate-500">Zero Exit 137 OOM</div>
+            </div>
+            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">Config Auto-Fix</div>
+              <div class="text-amber-400">1-Click YAML Diff</div>
+              <div class="text-[9px] text-slate-500">L-CAID-10 & Tink AEAD</div>
+            </div>
+            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">Multi-Agent Gate</div>
+              <div class="text-purple-400">Dev &times; Safety CSO</div>
+              <div class="text-[9px] text-slate-500">Assertion relaxation check</div>
+            </div>
           </div>
         </div>
 
@@ -449,7 +486,7 @@
         <!-- Authority Footer (Inside Drawer, Compact) -->
         <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 shrink-0 space-y-0.5">
           <div>DID: <span class="font-mono text-slate-300">did:web:gharra.symphonix.health:agents:fde-superpersona</span></div>
-          <div>Assurance: <span class="font-mono text-slate-300">NHS-DCB0129-DCB0160 | FUTURE-AI</span></div>
+          <div>Assurance: <span class="font-mono text-slate-300">DCB0129-DCB0160 | FUTURE-AI | ISO-42001</span></div>
         </div>
       </div>
     </aside>
@@ -472,7 +509,7 @@
     <div class="flex items-center space-x-3 text-xs text-slate-400 font-mono">
       <span>DID: did:web:gharra.symphonix.health:agents:fde-superpersona</span>
       <span>&bull;</span>
-      <span class="text-cyan-400 font-semibold">NHS-DCB0129 / DCB0160</span>
+      <span class="text-cyan-400 font-semibold">DCB0129 / DCB0160 / ISO-42001</span>
       <span>&bull;</span>
       <span class="text-emerald-400 font-semibold">ACCOUNTABLE_HUMAN_REQUIRED</span>
     </div>

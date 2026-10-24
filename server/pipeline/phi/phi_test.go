@@ -52,15 +52,15 @@ func TestSanitizeLogData(t *testing.T) {
 			wantDetected: true,
 		},
 		{
-			name:         "Valid UK NHS Number with spaces",
-			input:        "Patient NHS identifier: 943 476 5919 assigned\n",
-			expected:     "Patient NHS identifier: [REDACTED_NHS_NUMBER] assigned\n",
+			name:         "Valid Modulus 11 National Health Identifier with spaces",
+			input:        "Patient identifier: 943 476 5919 assigned\n",
+			expected:     "Patient identifier: [REDACTED_NATIONAL_HEALTH_ID] assigned\n",
 			wantDetected: true,
 		},
 		{
-			name:         "Valid UK NHS Number without spaces",
+			name:         "Valid Modulus 11 National Health Identifier without spaces",
 			input:        "Processing encounter record 9434765919\n",
-			expected:     "Processing encounter record [REDACTED_NHS_NUMBER]\n",
+			expected:     "Processing encounter record [REDACTED_NATIONAL_HEALTH_ID]\n",
 			wantDetected: true,
 		},
 		{

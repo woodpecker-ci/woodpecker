@@ -3,7 +3,7 @@ version: '3.8'
 # ==============================================================================
 # Symphonix-Health Hardened Clinical AI CI/CD Engine (Woodpecker HealthCI)
 # Architecture: PostgreSQL 16 + Google Tink AEAD Envelope Encryption + Hardened Agent
-# Standards: NHS DCB0129 / DCB0160 | ISO-27001 | ISO-42001
+# Standards: DCB0129 / DCB0160 | ISO-27001 | ISO-42001
 # ==============================================================================
 
 services:
@@ -67,6 +67,13 @@ services:
       # Google Tink AEAD Database Secret Encryption at Rest (Mandatory)
       - WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE=/etc/woodpecker/tink-keyset.json
 
+      # Autonomous Self-Healing & Air-Gapped Local LLM Diagnostic (Qwen 2.5 Coder)
+      - WOODPECKER_SELF_HEALING_ENABLED=true
+      - WOODPECKER_SELF_HEALING_ENDPOINT=http://symphonix-healing-llm:11434/v1/chat/completions
+      - WOODPECKER_SELF_HEALING_MODEL=qwen2.5-coder:32b
+      - WOODPECKER_SELF_HEALING_AUTO_RESTART_FLAKY=true
+      - WOODPECKER_SELF_HEALING_MAX_RETRIES=2
+
       # Observability & Metrics (Prometheus)
       - WOODPECKER_METRICS_SERVER_ADDR=:9001
       - WOODPECKER_STEP_LEVEL_METRICS=true
@@ -78,7 +85,7 @@ services:
       - WOODPECKER_ENABLE_SWAGGER=true
       - WOODPECKER_ADMIN=${WOODPECKER_ADMIN:-cso_admin,symphonix_fde}
 
-      # Open User Registration Disabled for NHS Tenant Isolation
+      # Open User Registration Disabled for Tenant Isolation
       - WOODPECKER_OPEN=false
     networks:
       - healthci_net
@@ -104,11 +111,30 @@ services:
     networks:
       - healthci_net
 
+  # ----------------------------------------------------------------------------
+  # 4. Air-Gapped Local LLM Diagnostic Service (Ollama / Qwen 2.5 Coder)
+  # ----------------------------------------------------------------------------
+  symphonix-healing-llm:
+    image: ollama/ollama:latest
+    container_name: symphonix-healthci-llm
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_MODELS=/root/.ollama
+    networks:
+      - healthci_net
+
 volumes:
   postgres_data:
     name: symphonix_healthci_postgres_data
   server_data:
     name: symphonix_healthci_server_data
+  ollama_models:
+    name: symphonix_healthci_ollama_models
 
 networks:
   healthci_net:

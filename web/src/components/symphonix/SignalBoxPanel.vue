@@ -3,8 +3,8 @@
     v-if="isOpen"
     ref="panelRef"
     data-testid="signalbox-panel"
-    class="signalbox-panel flex h-full w-96 xl:w-[440px] shrink-0 flex-col border-l border-slate-800 bg-slate-900 text-slate-100 shadow-2xl overflow-hidden transition-all duration-300 font-sans"
-    aria-label="Symphonix SignalBox Clinical Assurance & Governance Panel"
+    class="signalbox-panel flex h-[calc(100%-1.25rem)] my-2.5 mr-4 w-80 xl:w-96 shrink-0 flex-col rounded-xl border border-slate-800 bg-slate-900/95 text-slate-100 shadow-2xl overflow-hidden transition-all duration-300 font-sans z-10"
+    aria-label="SignalBox Clinical Assurance & Governance Panel"
   >
     <!-- Panel Header -->
     <div class="flex items-center justify-between border-b border-slate-800 px-4 py-2.5 shrink-0 bg-slate-900/90">
@@ -100,35 +100,72 @@
       </div>
 
       <!-- Tab 2: Self-Healing Telemetry -->
-      <div v-else-if="activeTab === 'heal'" class="space-y-3.5 flex-1 flex flex-col justify-start">
-        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3.5">
-          <h3 class="font-bold text-sky-400 uppercase tracking-wide mb-2.5 flex items-center gap-1.5 text-xs">
-            <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Multi-Tier Autonomous Healing
-          </h3>
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-              <div class="font-mono text-base font-bold text-cyan-400">{{ stats.selfHealingStats.oomEscalations }}</div>
-              <div class="text-[11px] text-slate-400">L1 OOM Scaled</div>
+      <div v-else-if="activeTab === 'heal'" class="space-y-2.5 flex-1 flex flex-col justify-start">
+        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold text-sky-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
+              <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Autonomous Self-Healing
+            </h3>
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+              Qwen 2.5 Coder 32B (Air-Gap)
+            </span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center">
+            <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+              <div class="font-mono text-sm font-bold text-cyan-400">{{ stats.selfHealingStats.oomEscalations }}</div>
+              <div class="text-[10px] text-slate-400">L1 OOM Scaled</div>
             </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-              <div class="font-mono text-base font-bold text-amber-400">{{ stats.selfHealingStats.flakyRetries }}</div>
-              <div class="text-[11px] text-slate-400">L2 AI Retries</div>
+            <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+              <div class="font-mono text-sm font-bold text-amber-400">{{ stats.selfHealingStats.flakyRetries }}</div>
+              <div class="text-[10px] text-slate-400">L2 AI Retries</div>
             </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-              <div class="font-mono text-base font-bold text-emerald-400">{{ stats.selfHealingStats.quarantinedAgents }}</div>
-              <div class="text-[11px] text-slate-400">L3 Quarantines</div>
+            <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
+              <div class="font-mono text-sm font-bold text-emerald-400">{{ stats.selfHealingStats.quarantinedAgents }}</div>
+              <div class="text-[10px] text-slate-400">L3 Quarantines</div>
             </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-300 space-y-1 font-mono">
-          <div class="text-slate-400 font-semibold uppercase">Latest Diagnostic Trace:</div>
-          <div class="text-cyan-400">OomError: container killed (exit 137)</div>
-          <div class="text-emerald-400">&rarr; Auto-scaled memory limit: 2048MB &rarr; 3072MB</div>
-          <div class="text-slate-400">&rarr; Status: Auto-restarted, step succeeded in 32s</div>
+        <!-- DCB0129 Code Provenance Gate Status -->
+        <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2 text-xs text-slate-300 space-y-1">
+          <div class="flex items-center justify-between text-[11px] font-semibold">
+            <span class="text-slate-400 uppercase">DCB0129 Code Provenance:</span>
+            <span class="text-emerald-400 font-mono">DUAL-KEY ENFORCED</span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono flex items-center justify-between">
+            <span>Author: <span class="text-slate-300">symphonix-healer[bot]</span></span>
+            <span>DID: <span class="text-cyan-400">healer-v1</span></span>
+          </div>
+          <div class="text-[10px] text-indigo-300 bg-indigo-950/40 p-1 rounded border border-indigo-900/50">
+            Direct merge blocked: 2 human sign-offs (incl. Certified CSO) required.
+          </div>
+        </div>
+
+        <!-- 6 Scoped Self-Healing Primitives -->
+        <div class="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
+          <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div class="text-slate-400 text-[10px] uppercase font-bold">Flaky Quarantine</div>
+            <div class="text-emerald-400">Tiered (TTL 72h)</div>
+            <div class="text-[9px] text-slate-500">Clinical tests immune</div>
+          </div>
+          <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div class="text-slate-400 text-[10px] uppercase font-bold">Predictive Sizing</div>
+            <div class="text-cyan-400">P95 + 20% Headroom</div>
+            <div class="text-[9px] text-slate-500">Zero Exit 137 OOM</div>
+          </div>
+          <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div class="text-slate-400 text-[10px] uppercase font-bold">Config Auto-Fix</div>
+            <div class="text-amber-400">1-Click YAML Diff</div>
+            <div class="text-[9px] text-slate-500">L-CAID-10 & Tink AEAD</div>
+          </div>
+          <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div class="text-slate-400 text-[10px] uppercase font-bold">Multi-Agent Gate</div>
+            <div class="text-purple-400">Dev &times; Safety CSO</div>
+            <div class="text-[9px] text-slate-500">Assertion relaxation check</div>
+          </div>
         </div>
       </div>
 

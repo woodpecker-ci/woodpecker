@@ -18,7 +18,7 @@ This module contains the Phase 1 hardening assets and operational configurations
 
 2. **Kubernetes Runner Security Hardening (Defense-in-Depth)**:
    - **File**: [`pipeline/backend/kubernetes/pod.go`](file:///C:/Users/Joshua%20Tedam/github/woodpecker/pipeline/backend/kubernetes/pod.go#L710-L745)
-     - Added strict security defaults for unprivileged steps: automatically sets `AllowPrivilegeEscalation: false` and drops all Linux capabilities (`Drop: ["ALL"]`) by default, preventing container breakout and ensuring NHS DCB0160 compliance.
+     - Added strict security defaults for unprivileged steps: automatically sets `AllowPrivilegeEscalation: false` and drops all Linux capabilities (`Drop: ["ALL"]`) by default, preventing container breakout and ensuring DCB0160 clinical safety compliance.
 
 ---
 
@@ -54,7 +54,7 @@ docker compose -f docker-compose.symphonix-postgres.yml up -d
 
 ---
 
-## 3. Production Deployment Notes (NHS Trust Air-Gap)
+## 3. Production Deployment Notes (Enterprise Clinical Air-Gap)
 
 - **Database Connection Strings**: In hospital production environments, configure SSL encryption (`sslmode=verify-full&sslrootcert=/etc/ssl/certs/hospital-ca.crt`).
 - **Keyset Storage**: Store `tink-keyset.json` in a secure Kubernetes Secret or mount it from OpenBao/HashiCorp Vault using CSI Secret Store driver.

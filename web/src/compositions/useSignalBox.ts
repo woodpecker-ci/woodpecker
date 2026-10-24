@@ -9,7 +9,7 @@ const viewLevel = ref<ViewLevel>('standard');
 const audienceView = ref<'clinician' | 'patient'>('clinician');
 
 const clinicalAssuranceStats = ref({
-  assuranceProfile: 'NHS-DCB0129-DCB0160 | FUTURE-AI | ISO-IEC-42001',
+  assuranceProfile: 'DCB0129-DCB0160 | FUTURE-AI | ISO-IEC-42001',
   did: 'did:web:gharra.symphonix.health:agents:fde-superpersona',
   careCovenant: 'symphonix-care-covenant-v1',
   goldenDatasetAccuracy: 99.94,

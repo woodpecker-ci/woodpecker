@@ -31,7 +31,7 @@ func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 }
 
 func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
-	// Clinical Safety Gate (NHS DCB0129/DCB0160): Production & Release branches always require CSO sign-off
+	// Clinical Safety Gate (DCB0129/ISO-42001): Production & Release branches always require CSO sign-off
 	if isClinicalSafetyBranch(pipeline.Branch) || pipeline.Event == model.EventDeploy {
 		if pipeline.AdditionalVariables == nil {
 			pipeline.AdditionalVariables = make(map[string]string)

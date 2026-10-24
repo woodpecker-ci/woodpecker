@@ -24,16 +24,16 @@ var (
 	// clientRegistryIDRegex matches BulletTrain Client Registry Patient IDs (e.g. CR-000001, MPI-102938, BT-PAT-9921)
 	clientRegistryIDRegex = regexp.MustCompile(`\b(CR|MPI|BT-PAT|BT)-[0-9]{5,12}\b`)
 
-	// nhsNumberCandidateRegex matches candidate 10-digit UK NHS numbers with optional spaces or dashes
-	nhsNumberCandidateRegex = regexp.MustCompile(`\b\d{3}[ -]?\d{3}[ -]?\d{4}\b`)
+	// nationalHealthIDCandidateRegex matches candidate 10-digit national patient health identifiers with optional spaces or dashes
+	nationalHealthIDCandidateRegex = regexp.MustCompile(`\b\d{3}[ -]?\d{3}[ -]?\d{4}\b`)
 )
 
 const (
-	RedactedPatientID = "[REDACTED_CLIENT_REGISTRY_PATIENT_ID]"
-	RedactedNHSNumber = "[REDACTED_NHS_NUMBER]"
+	RedactedPatientID        = "[REDACTED_CLIENT_REGISTRY_PATIENT_ID]"
+	RedactedNationalHealthID = "[REDACTED_NATIONAL_HEALTH_ID]"
 )
 
-// SanitizeLogData scans a log line, redacting client registry patient IDs and valid NHS numbers.
+// SanitizeLogData scans a log line, redacting client registry patient IDs and valid Modulus 11 national health identifiers.
 func SanitizeLogData(input []byte) ([]byte, bool) {
 	str := string(input)
 	detected := false
@@ -44,13 +44,13 @@ func SanitizeLogData(input []byte) ([]byte, bool) {
 		detected = true
 	}
 
-	// 2. Redact verified UK NHS Numbers (Modulus 11 validated)
-	if nhsNumberCandidateRegex.MatchString(str) {
-		cleaned := nhsNumberCandidateRegex.ReplaceAllStringFunc(str, func(match string) string {
+	// 2. Redact verified National Health IDs (Modulus 11 validated)
+	if nationalHealthIDCandidateRegex.MatchString(str) {
+		cleaned := nationalHealthIDCandidateRegex.ReplaceAllStringFunc(str, func(match string) string {
 			digits := extractDigits(match)
-			if len(digits) == 10 && isValidNHSNumber(digits) {
+			if len(digits) == 10 && isValidNationalHealthID(digits) {
 				detected = true
-				return RedactedNHSNumber
+				return RedactedNationalHealthID
 			}
 			return match
 		})
@@ -70,8 +70,8 @@ func extractDigits(s string) string {
 	return sb.String()
 }
 
-// isValidNHSNumber executes the official UK NHS Number Modulus 11 algorithm.
-func isValidNHSNumber(digits string) bool {
+// isValidNationalHealthID executes the standard Modulus 11 national health identifier algorithm.
+func isValidNationalHealthID(digits string) bool {
 	if len(digits) != 10 {
 		return false
 	}
@@ -91,7 +91,7 @@ func isValidNHSNumber(digits string) bool {
 	if checkDigit == 11 {
 		checkDigit = 0
 	} else if checkDigit == 10 {
-		// 10 is reserved/invalid under NHS standard
+		// 10 is reserved/invalid under Modulus 11 standard
 		return false
 	}
 

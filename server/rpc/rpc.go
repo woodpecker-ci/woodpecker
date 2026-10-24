@@ -502,7 +502,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 			return fmt.Errorf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID)
 		}
 
-		// Clinical Safety & Information Governance Gate: Sanitize Client Registry Patient IDs & NHS Numbers
+		// Clinical Safety & Information Governance Gate: Sanitize Client Registry Patient IDs & National Health IDs
 		sanitizedData, detected := phi.SanitizeLogData(rpcLogEntry.Data)
 		if detected {
 			log.Warn().
