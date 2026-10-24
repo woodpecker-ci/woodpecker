@@ -81,6 +81,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-git Docker tag to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.33.0 [[#7373](https://github.com/woodpecker-ci/woodpecker/pull/7373)]
 - Update docker.io/mysql Docker tag to v26.10.0 [[#7372](https://github.com/woodpecker-ci/woodpecker/pull/7372)]
 - Update web npm deps non-major [[#7370](https://github.com/woodpecker-ci/woodpecker/pull/7370)]
