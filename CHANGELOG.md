@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-23
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -77,6 +77,10 @@
 - Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
 - Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
 - Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
+
+### 📦️ Dependency
+
+- Update woodpeckerci/plugin-release Docker tag to v0.3.3 [[#7371](https://github.com/woodpecker-ci/woodpecker/pull/7371)]
 
 ### Misc
 
