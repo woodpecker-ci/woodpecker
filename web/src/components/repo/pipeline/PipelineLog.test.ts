@@ -209,7 +209,7 @@ describe('pipelineLog', () => {
     expect(wrapper.find('a#L3').exists()).toBe(false);
     expect(wrapper.find('a#L5').exists()).toBe(false);
     await wrapper.get('button[title="repo.pipeline.actions.expand_all"]').trigger('click');
-    expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3', '4', '5']);
+    expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3', '5']);
   });
 
   it('preserves whitespace-padded configured command markers', async () => {
@@ -222,8 +222,8 @@ describe('pipelineLog', () => {
     expect(wrapper.get('.sticky span#L2').element.textContent).toBe('▶  npm test  \n');
     expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1']);
     await wrapper.get('button[title="repo.pipeline.actions.expand_all"]').trigger('click');
-    expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3']);
-    expect(wrapper.get('a#L2').element.nextElementSibling?.textContent).toBe('  ▶  npm test  \n');
+    expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3']);
+    expect(wrapper.find('a#L2').exists()).toBe(false);
     expect(wrapper.get('a#L3').element.nextElementSibling?.textContent).toBe('existing command output\n');
     await wrapper.get('.sticky').trigger('click');
     expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1']);
@@ -250,10 +250,18 @@ describe('pipelineLog', () => {
         'Test suite',
       ]);
       expect(wrapper.findAll('.sticky span[id]').map((heading) => heading.attributes('id'))).toEqual(['L2', 'L4']);
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3', '4', '5']);
-      for (const [index, text] of lines.entries()) {
-        expect(wrapper.get(`a#L${index + 1}`).element.nextElementSibling?.textContent).toBe(`${text}\n`);
-      }
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3', '5']);
+      expect(wrapper.get('a#L1').element.nextElementSibling?.textContent).toBe('Preparing plugin\n');
+      expect(wrapper.get('a#L3').element.nextElementSibling?.textContent).toBe('Compiled café\n');
+      expect(wrapper.get('a#L5').element.nextElementSibling?.textContent).toBe('Tests passed\n');
+    });
+
+    it('renders a command heading only once when expanded', async () => {
+      const wrapper = await loadLog(['Preparing', '▶  Build', 'built']);
+
+      expect(wrapper.findAll('.sticky span[id]').map((heading) => heading.text())).toEqual(['Build']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3']);
+      expect(wrapper.find('a#L2').exists()).toBe(false);
     });
 
     it('starts only at a nonempty heading and ends at the next heading or end of log', async () => {
@@ -262,7 +270,7 @@ describe('pipelineLog', () => {
       expect(wrapper.findAll('.sticky span[id]').map((heading) => heading.text())).toEqual(['B', 'T']);
       await wrapper.get('.sticky').trigger('click');
 
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '5', '6', '7']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '6', '7']);
     });
 
     it('collapses and expands an individual group without hiding the next group or preamble', async () => {
@@ -270,10 +278,10 @@ describe('pipelineLog', () => {
 
       await wrapper.get('.sticky').trigger('click');
 
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '4', '5']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '5']);
       expect(wrapper.get('.sticky span').text()).toBe('Build');
       await wrapper.get('.sticky').trigger('click');
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3', '4', '5']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3', '5']);
     });
 
     it('collapses and expands all groups while retaining initialization', async () => {
@@ -284,7 +292,7 @@ describe('pipelineLog', () => {
       expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1']);
       expect(wrapper.findAll('.sticky')).toHaveLength(2);
       await wrapper.get('button[title="repo.pipeline.actions.expand_all"]').trigger('click');
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3', '4', '5']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3', '5']);
     });
 
     it.each([true, false])('honors the finished-log default-collapse preference: %s', async (collapse) => {
@@ -342,10 +350,10 @@ describe('pipelineLog', () => {
       await flushLogs();
 
       expect(wrapper.findAll('.sticky span[id]').map((heading) => heading.text())).toEqual(['Build', 'Test suite']);
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '5', '6']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '6']);
       await wrapper.get('.sticky').trigger('click');
       expect(wrapper.get('a#L4').element.nextElementSibling?.textContent).toBe('later output\n');
-      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '2', '3', '4', '5', '6']);
+      expect(wrapper.findAll('a[href^="#L"]').map((line) => line.text())).toEqual(['1', '3', '4', '6']);
       wrapper.unmount();
       expect(closeStream).toHaveBeenCalledOnce();
     });
