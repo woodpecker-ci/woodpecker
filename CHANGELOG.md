@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -65,6 +65,7 @@
 
 ### 📚 Documentation
 
+- Add `concurrency` option to Workflow Syntax docs [[#7369](https://github.com/woodpecker-ci/woodpecker/pull/7369)]
 - Update pnpm to v12.15.0 [[#7374](https://github.com/woodpecker-ci/woodpecker/pull/7374)]
 - Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
 - Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
