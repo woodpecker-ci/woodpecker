@@ -363,7 +363,7 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
-		"secret":       r.Hash,
+		"secret":       r.WebhookSecret,
 		"content_type": "json",
 	}
 	hook := gitea.CreateHookOption{
