@@ -1167,6 +1167,22 @@ func TestDirPagination(t *testing.T) {
 			{Name: ".woodpecker/b.yaml", Data: []byte("steps: .woodpecker/b.yaml")},
 		}, metas)
 	})
+
+	t.Run("stops after maxDirPages full pages", func(t *testing.T) {
+		requests := 0
+		client := newServer(t, func(w http.ResponseWriter, r *http.Request) {
+			requests++
+			if requests > maxDirPages+1 {
+				http.Error(w, "too many requests", http.StatusBadRequest)
+				return
+			}
+			_, _ = w.Write([]byte(fullPage(".woodpecker/a.yaml")))
+		})
+
+		_, err := client.Dir(t.Context(), user, repo, pipeline, ".woodpecker")
+		assert.EqualError(t, err, "config folder '.woodpecker' has too many entries: stopped listing after 100 pages of 100 entries")
+		assert.Equal(t, maxDirPages, requests)
+	})
 }
 
 func TestBranchHead(t *testing.T) {

@@ -42,6 +42,9 @@ import (
 const (
 	defaultScope   = "api"
 	defaultPerPage = 100
+	// Dir lists at most maxDirPages pages, so a folder with too many entries
+	// or a forge that keeps returning full pages can not loop forever.
+	maxDirPages = 100
 )
 
 // Opts defines configuration options.
@@ -421,7 +424,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for page := int64(1); ; page++ {
+	for page := int64(1); page <= maxDirPages; page++ {
 		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
@@ -446,11 +449,11 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		}
 
 		if len(batch) < defaultPerPage {
-			break
+			return files, nil
 		}
 	}
 
-	return files, nil
+	return nil, fmt.Errorf("config folder '%s' has too many entries: stopped listing after %d pages of %d entries", path, maxDirPages, defaultPerPage)
 }
 
 // Status sends the commit status back to gitlab.
