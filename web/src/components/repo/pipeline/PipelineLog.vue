@@ -260,7 +260,7 @@ const groupedLogs = computed(() => {
     if (isCommand) {
       currentBlock = {
         command: line,
-        lines: [line],
+        lines: [],
         id: line.number,
         isActualCommand: true,
       };
