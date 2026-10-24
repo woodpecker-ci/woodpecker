@@ -35,6 +35,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/healing"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/phi"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -442,6 +444,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		s.pipelineCount.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Inc()
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
+	if currentPipeline.Status == model.StatusFailure {
+		healingCtx := context.WithoutCancel(c)
+		go healing.DiagnoseAndHeal(healingCtx, s.store, repo, currentPipeline)
+	}
 	if currentPipeline.IsMultiPipeline() {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
@@ -495,11 +501,20 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		if rpcLogEntry.StepUUID != stepUUID {
 			return fmt.Errorf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID)
 		}
+
+		// Clinical Safety & Information Governance Gate: Sanitize Client Registry Patient IDs & NHS Numbers
+		sanitizedData, detected := phi.SanitizeLogData(rpcLogEntry.Data)
+		if detected {
+			log.Warn().
+				Str("step_uuid", stepUUID).
+				Msg("PHI Redaction Sentry: intercepted and masked patient identifier in log stream")
+		}
+
 		logEntries = append(logEntries, &model.LogEntry{
 			StepID: step.ID,
 			Time:   rpcLogEntry.Time,
 			Line:   rpcLogEntry.Line,
-			Data:   rpcLogEntry.Data,
+			Data:   sanitizedData,
 			Type:   model.LogEntryType(rpcLogEntry.Type),
 		})
 	}
@@ -568,9 +583,28 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 		return err
 	}
 
+	// Layer 3 Self-Healing: Agent Pool Quarantine & Recovery
+	if strings.HasPrefix(status, "DEGRADED:") {
+		log.Warn().
+			Int64("agent_id", agent.ID).
+			Str("reason", status).
+			Msg("Self-healing: agent reported degraded state, activating quarantine (NoSchedule=true)")
+		agent.NoSchedule = true
+		agent.LastContact = time.Now().Unix()
+		return s.store.AgentUpdate(agent)
+	}
+
 	if status != "I am alive!" {
 		//nolint:staticcheck
 		return errors.New("Are you alive?")
+	}
+
+	// If agent previously was quarantined and now reports healthy, restore scheduling
+	if agent.NoSchedule {
+		log.Info().
+			Int64("agent_id", agent.ID).
+			Msg("Self-healing: agent recovered, lifting quarantine (NoSchedule=false)")
+		agent.NoSchedule = false
 	}
 
 	agent.LastContact = time.Now().Unix()

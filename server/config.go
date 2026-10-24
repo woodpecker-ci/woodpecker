@@ -94,4 +94,10 @@ var Config = struct {
 		Orgs            *permissions.Orgs
 		OwnersAllowlist *permissions.OwnersAllowlist
 	}
+	SelfHealing struct {
+		Enabled          bool
+		Endpoint         string
+		AutoRestartFlaky bool
+		MaxRetries       int
+	}
 }{}

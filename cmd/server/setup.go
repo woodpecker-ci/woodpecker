@@ -285,5 +285,11 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+
+	// autonomous self-healing
+	server.Config.SelfHealing.Enabled = c.Bool("self-healing-enabled")
+	server.Config.SelfHealing.Endpoint = strings.TrimSpace(c.String("self-healing-endpoint"))
+	server.Config.SelfHealing.AutoRestartFlaky = c.Bool("self-healing-auto-restart-flaky")
+	server.Config.SelfHealing.MaxRetries = int(c.Int("self-healing-max-retries"))
 	return nil
 }

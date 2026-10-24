@@ -1,5 +1,6 @@
 <template>
   <div class="app bg-wp-background-100 dark:bg-wp-background-300 m-auto flex h-full w-full flex-col">
+    <OperatingModeBanner />
     <router-view v-if="layout === 'blank'" />
     <template v-else>
       <Navbar />
@@ -12,7 +13,9 @@
             class="dark:shadow-wp-background-500 absolute top-0 right-0 bottom-0 w-full max-w-80 border-l shadow-lg xl:max-w-96"
           />
         </transition>
+        <SignalBoxPanel />
       </main>
+      <ClinicalDisclaimerFooter />
     </template>
     <notifications position="bottom right" />
   </div>
@@ -25,6 +28,9 @@ import { useRoute } from 'vue-router';
 
 import Navbar from '~/components/layout/header/Navbar.vue';
 import PipelineFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.vue';
+import ClinicalDisclaimerFooter from '~/components/symphonix/ClinicalDisclaimerFooter.vue';
+import OperatingModeBanner from '~/components/symphonix/OperatingModeBanner.vue';
+import SignalBoxPanel from '~/components/symphonix/SignalBoxPanel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 

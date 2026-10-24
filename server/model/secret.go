@@ -32,14 +32,14 @@ var (
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
+	SecretList(*Repo, bool, *ListOptionsWithAll) ([]*Secret, error)
 	SecretCreate(*Secret) error
 	SecretUpdate(*Secret) error
 	SecretDelete(*Secret) error
 	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
+	OrgSecretList(int64, *ListOptionsWithAll) ([]*Secret, error)
 	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
+	GlobalSecretList(*ListOptionsWithAll) ([]*Secret, error)
 	SecretListAll() ([]*Secret, error)
 }
 

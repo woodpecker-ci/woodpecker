@@ -28,6 +28,8 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption"
+	encryptedStore "go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/wrapper/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
@@ -54,20 +56,24 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, incl
 	return service
 }
 
-func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
+func setupSecretService(c *cli.Command, store store.Store, endpoint string, client *utils.Client, includeNetrc bool) (secret.Service, error) {
+	var secretStore model.SecretStore = store
 
-	if endpoint != "" {
-		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
+	if c.IsSet("encryption-raw-key") || c.IsSet("encryption-tink-keyset") || c.Bool("encryption-disable-flag") {
+		encryptedSecretStore := encryptedStore.NewSecretStore(store)
+		err := encryption.Encryption(c, store).WithClient(encryptedSecretStore).Build()
+		if err != nil {
+			return nil, fmt.Errorf("could not create encryption service: %w", err)
+		}
+		secretStore = encryptedSecretStore
+		log.Info().Msg("database secret store encryption configured successfully")
 	}
 
-	return secret.NewDB(store)
+	if endpoint != "" {
+		return secret.NewCombined(secret.NewDB(secretStore), secret.NewHTTP(endpoint, client, includeNetrc)), nil
+	}
+
+	return secret.NewDB(secretStore), nil
 }
 
 func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {

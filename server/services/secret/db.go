@@ -22,11 +22,11 @@ import (
 )
 
 type db struct {
-	store store.Store
+	store model.SecretStore
 }
 
 // NewDB returns a new local secret service.
-func NewDB(store store.Store) Service {
+func NewDB(store model.SecretStore) Service {
 	return &db{store: store}
 }
 

@@ -683,6 +683,32 @@ var flags = append([]cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
+	//
+	// autonomous self-healing parameters
+	//
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_ENABLED"),
+		Name:    "self-healing-enabled",
+		Usage:   "enable autonomous self-healing for failed pipelines",
+		Value:   true,
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_ENDPOINT"),
+		Name:    "self-healing-endpoint",
+		Usage:   "endpoint URL for AI self-healing diagnostic service (e.g. Ollama/vLLM/CAID)",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_AUTO_RESTART_FLAKY"),
+		Name:    "self-healing-auto-restart-flaky",
+		Usage:   "automatically restart pipelines diagnosed as transient or flaky",
+		Value:   true,
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_SELF_HEALING_MAX_RETRIES"),
+		Name:    "self-healing-max-retries",
+		Usage:   "max self-healing retries for a pipeline",
+		Value:   2,
+	},
 }, logger.GlobalLoggerFlags...)
 
 // If woodpecker is running inside a container the default value for

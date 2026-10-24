@@ -730,8 +730,15 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *kube_co
 		capabilities = containerCapabilities(sc.Capabilities)
 	}
 
-	if privileged == nil && capabilities == nil && allowPrivilegeEscalation == nil {
-		return nil
+	// Defense-in-depth security defaults for clinical & unprivileged workloads:
+	// Prevent privilege escalation and drop all root/kernel capabilities unless privileged mode is granted.
+	if privileged == nil && allowPrivilegeEscalation == nil {
+		allowPrivilegeEscalation = newBool(false)
+	}
+	if privileged == nil && capabilities == nil {
+		capabilities = &kube_core_v1.Capabilities{
+			Drop: []kube_core_v1.Capability{"ALL"},
+		}
 	}
 
 	securityContext := &kube_core_v1.SecurityContext{

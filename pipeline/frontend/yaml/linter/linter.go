@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 
 	"go.uber.org/multierr"
 
@@ -110,6 +111,9 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 		linterErr = multierr.Append(linterErr, err)
 	}
 	if err := l.lintBadHabits(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+	if err := l.lintZeroMockCompliance(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
 
@@ -445,6 +449,37 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 					},
 					IsWarning: true,
 				})
+			}
+		}
+	}
+
+	return err
+}
+
+// lintZeroMockCompliance enforces Symphonix-Health L-CAID-10: internal clinical microservices
+// (e.g. Client Registry, BulletTrain HIE, Triage API) must never be mocked or bypassed with demo flags.
+func (l *Linter) lintZeroMockCompliance(config *WorkflowConfig) (err error) {
+	forbiddenPatterns := []struct {
+		pattern string
+		reason  string
+	}{
+		{"x-test-bypass", "Prohibited test bypass header 'x-test-bypass' detected"},
+		{"?demo=true", "Prohibited test bypass query parameter '?demo=true' detected"},
+		{"mock_client_registry", "Mocking internal Client Registry is prohibited"},
+		{"mock_bullettrain", "Mocking internal BulletTrain services is prohibited"},
+	}
+
+	for _, step := range config.Workflow.Steps.ContainerList {
+		for _, cmd := range step.Commands {
+			cmdLower := strings.ToLower(cmd)
+			for _, fp := range forbiddenPatterns {
+				if strings.Contains(cmdLower, fp.pattern) {
+					err = multierr.Append(err, &pipeline_errors.PipelineError{
+						Type:      pipeline_errors.PipelineErrorTypeGeneric,
+						Message:   fmt.Sprintf("L-CAID-10 Zero-Mock Clinical Invariant Violation: %s in step %q", fp.reason, step.Name),
+						IsWarning: false,
+					})
+				}
 			}
 		}
 	}

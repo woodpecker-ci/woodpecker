@@ -32,7 +32,7 @@ func (wrapper *EncryptedSecretStore) SecretFind(repo *model.Repo, s string) (*mo
 	return result, nil
 }
 
-func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool, p *model.ListOptions) ([]*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) SecretList(repo *model.Repo, b bool, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	results, err := wrapper.store.SecretList(repo, b, p)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (wrapper *EncryptedSecretStore) OrgSecretFind(s int64, s2 string) (*model.S
 	return result, nil
 }
 
-func (wrapper *EncryptedSecretStore) OrgSecretList(s int64, p *model.ListOptions) ([]*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) OrgSecretList(s int64, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	results, err := wrapper.store.OrgSecretList(s, p)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (wrapper *EncryptedSecretStore) GlobalSecretFind(s string) (*model.Secret, 
 	return result, nil
 }
 
-func (wrapper *EncryptedSecretStore) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+func (wrapper *EncryptedSecretStore) GlobalSecretList(p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	results, err := wrapper.store.GlobalSecretList(p)
 	if err != nil {
 		return nil, err

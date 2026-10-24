@@ -222,25 +222,46 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 }
 
 // runBlockingStep starts the step and blocks until it fully completes.
-// The error is traced and returned to runStage, which feeds it into the
-// stage error group.
+// It includes Layer 1 self-healing: intercepting OOM failures and dynamically escalating resources.
 func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types.Step) error {
 	logger := r.makeLogger()
+	healingEnabled, maxOOMRetries := r.isOOMSelfHealingEnabled(step)
 
-	waitForLogs, startTime, err := r.startStep(step)
-	if err != nil {
-		// The step never ran — trace the start failure and surface it.
+	var processState *backend_types.State
+	var err error
+
+	for attempt := 0; attempt <= maxOOMRetries; attempt++ {
+		waitForLogs, startTime, startErr := r.startStep(step)
+		if startErr != nil {
+			// The step never ran — trace the start failure and surface it.
+			if r.cancelFallout(startErr) {
+				startErr = r.cancelErr(startErr, step)
+			}
+			return r.traceStep(nil, startErr, step)
+		}
+
+		processState, err = r.completeStep(runnerCtx, step, waitForLogs, startTime)
+		logger.Debug().Str("step", step.Name).Msg("complete")
+
 		if r.cancelFallout(err) {
 			err = r.cancelErr(err, step)
+			break
 		}
-		return r.traceStep(nil, err, step)
-	}
 
-	processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
-	logger.Debug().Str("step", step.Name).Msg("complete")
+		// Layer 1 Self-Healing: Intercept OOMKilled and dynamically escalate memory resources
+		if healingEnabled && processState != nil && processState.OOMKilled && attempt < maxOOMRetries && !r.canceled() {
+			logger.Warn().
+				Str("step", step.Name).
+				Int("attempt", attempt+1).
+				Int("max_retries", maxOOMRetries).
+				Msg("Self-healing: OOMKilled detected, dynamically escalating memory resources and retrying step")
 
-	if r.cancelFallout(err) {
-		err = r.cancelErr(err, step)
+			r.escalateStepMemory(step)
+			step.Environment["CI_HEALED_OOM_ATTEMPTS"] = strconv.Itoa(attempt + 1)
+			continue
+		}
+
+		break
 	}
 
 	err = r.traceStep(processState, err, step)

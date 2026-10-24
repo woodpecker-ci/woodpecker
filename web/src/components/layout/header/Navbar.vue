@@ -19,6 +19,21 @@
       }}</a>
     </div>
     <div class="-m-1.5 ml-auto flex items-center space-x-2">
+      <ViewLevelSelector class="hidden md:flex mr-1" />
+
+      <!-- SignalBox Clinical Assurance & Governance Toggle -->
+      <button
+        data-testid="signalbox-toggle"
+        class="signalbox-toggle-btn navbar-icon relative flex items-center justify-center text-cyan-200 hover:text-cyan-100"
+        title="Symphonix SignalBox Clinical Assurance"
+        @click="signalBox.toggle"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+      </button>
+
       <IconButton
         v-if="user?.admin"
         class="navbar-icon relative"
@@ -51,12 +66,16 @@ import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
+import ViewLevelSelector from '~/components/symphonix/ViewLevelSelector.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import useSignalBox from '~/compositions/useSignalBox';
 import useUserConfig from '~/compositions/useUserConfig';
 import { useVersion } from '~/compositions/useVersion';
 
 import ActivePipelines from './ActivePipelines.vue';
+
+const signalBox = useSignalBox();
 
 const version = useVersion();
 const config = useConfig();

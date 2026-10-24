@@ -1,0 +1,115 @@
+version: '3.8'
+
+# ==============================================================================
+# Symphonix-Health Hardened Clinical AI CI/CD Engine (Woodpecker HealthCI)
+# Architecture: PostgreSQL 16 + Google Tink AEAD Envelope Encryption + Hardened Agent
+# Standards: NHS DCB0129 / DCB0160 | ISO-27001 | ISO-42001
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. High-Availability ACID Persistence (PostgreSQL 16)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: symphonix-healthci-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-woodpecker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-symphonix_secure_db_pass_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-woodpecker}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - healthci_net
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+
+  # ----------------------------------------------------------------------------
+  # 2. Symphonix HealthCI Server (Woodpecker Server + Tink AEAD Encryption)
+  # ----------------------------------------------------------------------------
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:v3.1.2
+    container_name: symphonix-healthci-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"   # HTTP UI & REST API
+      - "9000:9000"   # gRPC Agent Transport
+      - "9001:9001"   # Prometheus Metrics Endpoint
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./tink-keyset.example.json:/etc/woodpecker/tink-keyset.json:ro
+      - server_data:/var/lib/woodpecker
+    environment:
+      # Host & Networking
+      - WOODPECKER_HOST=http://localhost:8000
+      - WOODPECKER_SERVER_ADDR=:8000
+      - WOODPECKER_GRPC_ADDR=:9000
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET:-symphonix_agent_grpc_secret_token_2026}
+
+      # PostgreSQL Database Backend
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=postgres://${POSTGRES_USER:-woodpecker}:${POSTGRES_PASSWORD:-symphonix_secure_db_pass_2026}@postgres:5432/${POSTGRES_DB:-woodpecker}?sslmode=disable
+      - WOODPECKER_DATABASE_MAX_CONNECTIONS=100
+      - WOODPECKER_DATABASE_IDLE_CONNECTIONS=10
+      - WOODPECKER_DATABASE_CONNECTION_TIMEOUT=5s
+
+      # Google Tink AEAD Database Secret Encryption at Rest (Mandatory)
+      - WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE=/etc/woodpecker/tink-keyset.json
+
+      # Observability & Metrics (Prometheus)
+      - WOODPECKER_METRICS_SERVER_ADDR=:9001
+      - WOODPECKER_STEP_LEVEL_METRICS=true
+
+      # Clinical Safety & Governance Controls (DCB0129 / DCB0160)
+      - WOODPECKER_DEFAULT_APPROVAL_MODE=all_events
+      - WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS=true
+      - WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT=10000
+      - WOODPECKER_ENABLE_SWAGGER=true
+      - WOODPECKER_ADMIN=${WOODPECKER_ADMIN:-cso_admin,symphonix_fde}
+
+      # Open User Registration Disabled for NHS Tenant Isolation
+      - WOODPECKER_OPEN=false
+    networks:
+      - healthci_net
+
+  # ----------------------------------------------------------------------------
+  # 3. Hardened HealthCI Runner Agent
+  # ----------------------------------------------------------------------------
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:v3.1.2
+    container_name: symphonix-healthci-agent
+    restart: unless-stopped
+    depends_on:
+      - woodpecker-server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET:-symphonix_agent_grpc_secret_token_2026}
+      - WOODPECKER_MAX_WORKFLOWS=4
+      - WOODPECKER_HEALTHCHECK=true
+      - WOODPECKER_HEALTHCHECK_ADDR=:3000
+      - WOODPECKER_AGENT_LABELS=platform=symphonix,tier=secure-clinical
+    networks:
+      - healthci_net
+
+volumes:
+  postgres_data:
+    name: symphonix_healthci_postgres_data
+  server_data:
+    name: symphonix_healthci_server_data
+
+networks:
+  healthci_net:
+    name: symphonix_healthci_network

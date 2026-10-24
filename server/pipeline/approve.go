@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -31,6 +33,21 @@ import (
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}
+	}
+
+	// Clinical Safety Gate (ACCOUNTABLE_HUMAN_REQUIRED):
+	// Prohibit automated bot tokens on clinical safety-critical deployments
+	if currentPipeline.AdditionalVariables != nil && currentPipeline.AdditionalVariables["CLINICAL_GATE_REQUIRED"] == "true" {
+		if user == nil || user.Login == "" || strings.HasSuffix(user.Login, "-bot") || user.Login == "woodpecker-ci" {
+			return nil, ErrBadRequest{Msg: "ACCOUNTABLE_HUMAN_REQUIRED: clinical release deployments require accountable Clinical Safety Officer (CSO) sign-off; automated bot approvals are prohibited"}
+		}
+		currentPipeline.AdditionalVariables["CSO_SIGNOFF_USER"] = user.Login
+		currentPipeline.AdditionalVariables["CSO_SIGNOFF_TIMESTAMP"] = fmt.Sprint(time.Now().Unix())
+		log.Info().
+			Str("repo", repo.FullName).
+			Int64("pipeline", currentPipeline.Number).
+			Str("cso_user", user.Login).
+			Msg("Clinical Safety Gate: CSO sign-off verified and recorded under NHS DCB0129/DCB0160")
 	}
 
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)

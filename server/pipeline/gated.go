@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"slices"
+	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -30,6 +31,15 @@ func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 }
 
 func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
+	// Clinical Safety Gate (NHS DCB0129/DCB0160): Production & Release branches always require CSO sign-off
+	if isClinicalSafetyBranch(pipeline.Branch) || pipeline.Event == model.EventDeploy {
+		if pipeline.AdditionalVariables == nil {
+			pipeline.AdditionalVariables = make(map[string]string)
+		}
+		pipeline.AdditionalVariables["CLINICAL_GATE_REQUIRED"] = "true"
+		return true
+	}
+
 	// skip events created by woodpecker itself
 	if pipeline.Event == model.EventCron || pipeline.Event == model.EventManual {
 		return false
@@ -64,4 +74,8 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 	}
 
 	return false
+}
+
+func isClinicalSafetyBranch(branch string) bool {
+	return strings.HasPrefix(branch, "release/") || branch == "production" || branch == "live"
 }
