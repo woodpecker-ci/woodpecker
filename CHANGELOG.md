@@ -82,6 +82,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency @antfu/eslint-config to v10 [[#7377](https://github.com/woodpecker-ci/woodpecker/pull/7377)]
 - Update woodpeckerci/plugin-git Docker tag to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.33.0 [[#7373](https://github.com/woodpecker-ci/woodpecker/pull/7373)]
 - Update docker.io/mysql Docker tag to v26.10.0 [[#7372](https://github.com/woodpecker-ci/woodpecker/pull/7372)]
