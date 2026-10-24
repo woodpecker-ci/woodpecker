@@ -16,6 +16,7 @@ package config
 
 import (
 	"context"
+	"errors"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -32,9 +33,20 @@ func NewCombined(services ...Service) Service {
 
 func (c *combined) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) (files []*types.FileMeta, err error) {
 	files = oldConfigData
+	var notFound error
 	for _, s := range c.services {
 		files, err = s.Fetch(ctx, forge, user, repo, pipeline, files, restart)
+		switch {
+		case errors.Is(err, &types.ErrConfigNotFound{}):
+			// a repo without config is fine as long as a later service provides one
+			notFound = err
+		case err != nil:
+			return files, err
+		}
 	}
 
-	return files, err
+	if len(files) == 0 && notFound != nil {
+		return nil, notFound
+	}
+	return files, nil
 }
