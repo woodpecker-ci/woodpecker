@@ -9,7 +9,7 @@
       <span class="inline-block h-2 w-2 rounded-full animate-pulse" :class="dotClass" />
       <span>Symphonix CareCI &bull; Mode: {{ modeTitle }}</span>
     </div>
-    <div class="flex items-center space-x-3 text-2xs normal-case opacity-90">
+    <div class="flex items-center space-x-3 text-xs normal-case opacity-90">
       <span>{{ modeDescription }}</span>
       <span class="border-l pl-3 font-mono">SFDS-HELP-PLATFORM-001</span>
     </div>

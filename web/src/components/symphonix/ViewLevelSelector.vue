@@ -4,7 +4,7 @@
       v-for="lvl in levels"
       :key="lvl.id"
       type="button"
-      class="px-2 py-1 rounded transition-colors text-2xs font-medium cursor-pointer"
+      class="px-2 py-1 rounded transition-colors text-xs font-medium cursor-pointer"
       :class="
         currentLevel === lvl.id
           ? 'bg-wp-primary-100 text-white font-bold shadow-xs'
