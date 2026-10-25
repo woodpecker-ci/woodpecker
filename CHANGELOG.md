@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @Mihir-Rabari, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @Mihir-Rabari, @PatelFarhaan, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -23,6 +23,7 @@
 
 ### 📈 Enhancement
 
+- Send restart flag to the HTTP config extension [[#7384](https://github.com/woodpecker-ci/woodpecker/pull/7384)]
 - Harden store scoping for org-level secret and registry retrieval [[#7365](https://github.com/woodpecker-ci/woodpecker/pull/7365)]
 - Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
 - Replace pipeline author on deploy with session user [[#7358](https://github.com/woodpecker-ci/woodpecker/pull/7358)]
@@ -83,14 +84,7 @@
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7381](https://github.com/woodpecker-ci/woodpecker/pull/7381)]
-- Update pre-commit hook igorshubovych/markdownlint-cli to v0.50.0 [[#7382](https://github.com/woodpecker-ci/woodpecker/pull/7382)]
-- Update dependency @antfu/eslint-config to v10 [[#7377](https://github.com/woodpecker-ci/woodpecker/pull/7377)]
-- Update woodpeckerci/plugin-git Docker tag to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.33.0 [[#7373](https://github.com/woodpecker-ci/woodpecker/pull/7373)]
-- Update docker.io/mysql Docker tag to v26.10.0 [[#7372](https://github.com/woodpecker-ci/woodpecker/pull/7372)]
-- Update web npm deps non-major [[#7370](https://github.com/woodpecker-ci/woodpecker/pull/7370)]
-- Update woodpeckerci/plugin-release Docker tag to v0.3.3 [[#7371](https://github.com/woodpecker-ci/woodpecker/pull/7371)]
+- Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
 
