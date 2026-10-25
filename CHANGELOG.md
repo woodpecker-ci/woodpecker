@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-24
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -83,6 +83,8 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7381](https://github.com/woodpecker-ci/woodpecker/pull/7381)]
+- Update pre-commit hook igorshubovych/markdownlint-cli to v0.50.0 [[#7382](https://github.com/woodpecker-ci/woodpecker/pull/7382)]
 - Update dependency @antfu/eslint-config to v10 [[#7377](https://github.com/woodpecker-ci/woodpecker/pull/7377)]
 - Update woodpeckerci/plugin-git Docker tag to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.33.0 [[#7373](https://github.com/woodpecker-ci/woodpecker/pull/7373)]
