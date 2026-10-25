@@ -580,8 +580,18 @@ func TestFileAndDir(t *testing.T) {
 			case "/repos/octocat/hello-world/contents/.woodpecker":
 				writeJSON(t, w, []github.RepositoryContent{
 					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("dir"), Name: new("sub")},
+					{Type: new("symlink"), Name: new("link.yaml")},
 					{Type: new("file"), Name: new("b.yaml")},
 				})
+			case "/repos/octocat/hello-world/contents/.broken":
+				writeJSON(t, w, []github.RepositoryContent{
+					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("file"), Name: new("b.yaml")},
+				})
+			case "/repos/octocat/hello-world/contents/.broken/a.yaml", "/repos/octocat/hello-world/contents/.broken/b.yaml":
+				w.WriteHeader(http.StatusInternalServerError)
+				writeJSON(t, w, map[string]string{"message": "Server Error"})
 			default:
 				w.WriteHeader(http.StatusNotFound)
 				writeJSON(t, w, map[string]string{"message": "Not Found"})
@@ -604,14 +614,39 @@ func TestFileAndDir(t *testing.T) {
 	_, err = c.File(ctx, user, repo, pipeline, ".woodpecker")
 	assert.ErrorContains(t, err, "is a folder not a file")
 
-	metas, err := c.Dir(ctx, user, repo, pipeline, ".woodpecker")
+	// dir fails the test instead of hanging when Dir does not return
+	dir := func(path string) ([]*forge_types.FileMeta, error) {
+		type result struct {
+			metas []*forge_types.FileMeta
+			err   error
+		}
+		done := make(chan result, 1)
+		go func() {
+			metas, err := c.Dir(ctx, user, repo, pipeline, path)
+			done <- result{metas, err}
+		}()
+		select {
+		case r := <-done:
+			return r.metas, r.err
+		case <-time.After(5 * time.Second):
+			require.FailNow(t, "Dir did not return", path)
+			return nil, nil
+		}
+	}
+
+	// sub folders and symlinks are skipped, files are loaded with their content
+	metas, err := dir(".woodpecker")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*forge_types.FileMeta{
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
 
-	_, err = c.Dir(ctx, user, repo, pipeline, ".missing")
+	// a file that can not be loaded fails the folder
+	_, err = dir(".broken")
+	assert.ErrorContains(t, err, "500")
+
+	_, err = dir(".missing")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
 }
 
