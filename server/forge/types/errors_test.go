@@ -16,6 +16,7 @@ package types
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,5 +59,22 @@ func TestErrConfigNotFound(t *testing.T) {
 		err := &ErrConfigNotFound{Configs: []string{"x"}}
 		assert.ErrorIs(t, err, &ErrConfigNotFound{})
 		assert.NotErrorIs(t, errors.New("other"), &ErrConfigNotFound{})
+	})
+}
+
+func TestErrTooManyPages(t *testing.T) {
+	t.Parallel()
+
+	t.Run("message names the listing and the page limit", func(t *testing.T) {
+		t.Parallel()
+		err := &ErrTooManyPages{Listing: "config folder '.woodpecker'", Pages: 100}
+		assert.Equal(t, "too many pages: stopped listing config folder '.woodpecker' after 100 pages", err.Error())
+	})
+
+	t.Run("errors.Is matches any ErrTooManyPages", func(t *testing.T) {
+		t.Parallel()
+		err := fmt.Errorf("wrapped: %w", &ErrTooManyPages{Listing: "x", Pages: 1})
+		assert.ErrorIs(t, err, &ErrTooManyPages{})
+		assert.NotErrorIs(t, errors.New("other"), &ErrTooManyPages{})
 	})
 }

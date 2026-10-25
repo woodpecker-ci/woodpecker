@@ -55,3 +55,19 @@ func (*ErrConfigNotFound) Is(target error) bool {
 	_, ok := target.(*ErrConfigNotFound)
 	return ok
 }
+
+// ErrTooManyPages is returned when a forge listing still has more entries
+// after the page limit, see common.MaxPages.
+type ErrTooManyPages struct {
+	Listing string
+	Pages   int
+}
+
+func (m *ErrTooManyPages) Error() string {
+	return fmt.Sprintf("too many pages: stopped listing %s after %d pages", m.Listing, m.Pages)
+}
+
+func (*ErrTooManyPages) Is(target error) bool {
+	_, ok := target.(*ErrTooManyPages)
+	return ok
+}
