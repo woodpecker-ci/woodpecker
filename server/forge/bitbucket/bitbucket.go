@@ -274,18 +274,20 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
+			// sub directories are no pipeline files
+			if file.Type != "commit_file" {
+				continue
+			}
 			_, filename := filepath.Split(file.Path)
 			repoFile := forge_types.FileMeta{
 				Name: filename,
 			}
-			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
-				if err != nil {
-					return nil, err
-				}
-				if fileData != nil {
-					repoFile.Data = []byte(*fileData)
-				}
+			fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+			if err != nil {
+				return nil, err
+			}
+			if fileData != nil {
+				repoFile.Data = []byte(*fileData)
 			}
 			repoPathFiles = append(repoPathFiles, &repoFile)
 		}
