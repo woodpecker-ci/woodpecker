@@ -1,9 +1,9 @@
 # Symphonix HealthCI: Autonomous Self-Healing Requirements Specification
 
-**Document Identifier**: `DOC-REQ-HEALTHCI-HEAL-001`  
-**Standard Compliance**: DCB0129 / DCB0160 (Clinical Risk Management), ISO/IEC 42001 (AI Management System), IEC 62304 (Medical Device Software Lifecycle)  
-**Author**: Symphonix Health Forward Deployed Engineering (FDE) & Clinical AI Safety  
-**Status**: APPROVED  
+**Document Identifier**: `DOC-REQ-HEALTHCI-HEAL-001`
+**Standard Compliance**: DCB0129 / DCB0160 (Clinical Risk Management), ISO/IEC 42001 (AI Management System), IEC 62304 (Medical Device Software Lifecycle)
+**Author**: Symphonix Health Forward Deployed Engineering (FDE) & Clinical AI Safety
+**Status**: APPROVED
 **Target Matrix**: `contrib/symphonix/tests/reduced_json_matrices/healthci_self_healing_matrix.14col.json`
 
 ---
