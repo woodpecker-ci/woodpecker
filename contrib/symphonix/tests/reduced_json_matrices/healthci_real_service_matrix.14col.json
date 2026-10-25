@@ -1,0 +1,315 @@
+{
+  "metadata": {
+    "format": "Standard BulletTrain 14-column format",
+    "total_scenarios": 10,
+    "component": "healthci_real_service",
+    "data_source": "HealthCI Real Service End-to-End Governance (DOC-REQ-HEALTHCI-SVC-001)",
+    "requirements_doc": "docs/HEALTHCI_REAL_SERVICE_REQUIREMENTS.md",
+    "executor": "contrib/symphonix/tests/run_real_service_matrix.py",
+    "reconciliation": "Adheres to BulletTrain WS8 / L-CAID-10 zero-mock principle: tests against live running Woodpecker server instance, real PostgreSQL 16 database with Google Tink AEAD envelope encryption, real Qwen 2.5 Coder 32B endpoint, and real gRPC streaming transport.",
+    "distribution": {
+      "positive": 6,
+      "negative": 2,
+      "edge": 2
+    },
+    "requirement_ids": [
+      "FR-HCI-SVC-001",
+      "FR-HCI-SVC-002",
+      "FR-HCI-SVC-003",
+      "FR-HCI-SVC-004",
+      "FR-HCI-SVC-005",
+      "FR-HCI-SVC-006",
+      "NFR-HCI-SVC-001",
+      "NFR-HCI-SVC-002"
+    ]
+  },
+  "test_cases": [
+    {
+      "use_case_id": "healthci_svc_oom_autoscale_0001",
+      "component": "healthci_real_service",
+      "scenario": "Trigger pipeline execution on live server; step encounters OOM Exit 137; L1 self-healer escalates memory 1.5x in PostgreSQL metadata and completes with status: SUCCESS",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Live server intercepts Exit 137 OOM",
+        "PostgreSQL step metadata updated to 3GB (1.5x of 2GB)",
+        "Rescheduled pipeline run completes successfully"
+      ],
+      "preconditions": "Woodpecker server running on :8000 with PostgreSQL 16 backend",
+      "test_data": {
+        "repo": "symphonix-health/bullettrain-hie",
+        "initial_memory": "2GB",
+        "escalation_factor": 1.5,
+        "requirement_ids": ["FR-HCI-SVC-001"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-001-AC01"]
+      },
+      "validation_rules": [
+        "pipeline.status == 'success'",
+        "pipeline.rerun_count >= 1",
+        "step.memory_limit == '3GB'"
+      ],
+      "dependencies": ["FR-HCI-SVC-001"],
+      "tags": ["real-service", "oom-autoscale", "postgresql-16", "l1-healing", "FR-HCI-SVC-001"],
+      "estimated_duration": 25,
+      "automation_status": "automated",
+      "notes": "Verified against live Woodpecker REST API and PostgreSQL 16"
+    },
+    {
+      "use_case_id": "healthci_svc_cso_gate_refusal_0002",
+      "component": "healthci_real_service",
+      "scenario": "PR targeting protected branch creates gated pipeline; non-CSO token receives HTTP 403 ACCOUNTABLE_HUMAN_REQUIRED; authorized CSO unblocks pipeline",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Live server sets pipeline status to GATED",
+        "Unauthorized approval attempt refused with 403",
+        "Certified CSO approval unblocks pipeline to RUNNING"
+      ],
+      "preconditions": "Woodpecker server running with DCB0129 branch protection enabled",
+      "test_data": {
+        "repo": "symphonix-health/caid-clinical-eval",
+        "branch": "release/v2.4.0",
+        "cso_user": "dr.elena.rostova@symphonix.health",
+        "unauthorized_user": "dev-engineer-42",
+        "requirement_ids": ["FR-HCI-SVC-002"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-002-AC01"]
+      },
+      "validation_rules": [
+        "unauthorized_response.status_code == 403",
+        "unauthorized_response.body.contains('ACCOUNTABLE_HUMAN_REQUIRED')",
+        "cso_response.status_code == 200"
+      ],
+      "dependencies": ["FR-HCI-SVC-002"],
+      "tags": ["real-service", "cso-gate", "dcb0129", "rbac", "FR-HCI-SVC-002"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Validates statutory accountable human gate over live HTTP API"
+    },
+    {
+      "use_case_id": "healthci_svc_zero_phi_stream_masking_0003",
+      "component": "healthci_real_service",
+      "scenario": "Pipeline emitting live NHS Modulus 11 and BulletTrain Client Registry IDs (CR-94812, MPI-3091); real streaming sentry sanitizes logs before PostgreSQL storage",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Streaming log interceptor redacts patient identifiers in real-time",
+        "PostgreSQL raw log rows contain only sanitized tokens [REDACTED_PATIENT_ID]",
+        "Zero raw patient IDs persisted in database"
+      ],
+      "preconditions": "Live server running with Zero-PHI sentry enabled",
+      "test_data": {
+        "repo": "symphonix-health/client-registry-sync",
+        "test_ids": ["CR-94812", "MPI-3091", "9434765919"],
+        "requirement_ids": ["FR-HCI-SVC-003"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-003-AC01"]
+      },
+      "validation_rules": [
+        "persisted_logs.count(test_ids) == 0",
+        "persisted_logs.contains('[REDACTED_PATIENT_ID]')"
+      ],
+      "dependencies": ["FR-HCI-SVC-003"],
+      "tags": ["real-service", "zero-phi", "modulus-11", "streaming-sentry", "FR-HCI-SVC-003"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Verified against real streaming log transport and DB persistence"
+    },
+    {
+      "use_case_id": "healthci_svc_tink_aead_rest_envelope_0004",
+      "component": "healthci_real_service",
+      "scenario": "Secrets created via POST /api/repos/{owner}/{repo}/secrets; raw PostgreSQL query confirms ciphertext envelope; API retrieval returns decrypted plaintext",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Secret persisted to PostgreSQL as Tink AEAD ciphertext envelope",
+        "Direct SQL query confirms plaintext is never stored in DB",
+        "Server decrypts secret in memory only during authorized step execution"
+      ],
+      "preconditions": "Woodpecker server started with WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE",
+      "test_data": {
+        "secret_name": "SMART_ON_FHIR_SIGNING_KEY",
+        "secret_value": "super-sensitive-clinical-key-2026",
+        "requirement_ids": ["FR-HCI-SVC-004"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-004-AC01"]
+      },
+      "validation_rules": [
+        "raw_db_row.secret_data != 'super-sensitive-clinical-key-2026'",
+        "api_retrieval.secret_data == 'super-sensitive-clinical-key-2026'"
+      ],
+      "dependencies": ["FR-HCI-SVC-004"],
+      "tags": ["real-service", "tink-aead", "envelope-encryption", "postgresql", "FR-HCI-SVC-004"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Live database cryptographic envelope validation"
+    },
+    {
+      "use_case_id": "healthci_svc_qwen_airgap_diagnostic_0005",
+      "component": "healthci_real_service",
+      "scenario": "Step failure triggers diagnostic dispatch to local endpoint (http://127.0.0.1:11434/v1/chat/completions); returns structured RCA JSON with proposed diff",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Diagnostic payload sent to local Qwen 2.5 Coder 32B endpoint",
+        "Structured RCA JSON returned containing root_cause and proposed_patch",
+        "Graceful fallback to deterministic heuristic when endpoint is unreachable"
+      ],
+      "preconditions": "Local OpenAI-compatible inference server running",
+      "test_data": {
+        "model": "qwen2.5-coder:32b",
+        "endpoint": "http://127.0.0.1:11434/v1/chat/completions",
+        "requirement_ids": ["FR-HCI-SVC-005"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-005-AC01"]
+      },
+      "validation_rules": [
+        "rca_response.root_cause.length > 0",
+        "rca_response.proposed_patch.contains('diff --git')"
+      ],
+      "dependencies": ["FR-HCI-SVC-005"],
+      "tags": ["real-service", "qwen-coder", "air-gap", "local-llm", "FR-HCI-SVC-005"],
+      "estimated_duration": 30,
+      "automation_status": "automated",
+      "notes": "Verified against live local LLM inference endpoint"
+    },
+    {
+      "use_case_id": "healthci_svc_dcb0129_code_provenance_gate_0006",
+      "component": "healthci_real_service",
+      "scenario": "Healer bot symphonix-healer[bot] authors remediation patch; merge to main is strictly blocked until dual human review (incl. certified CSO) is recorded",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Patch commit annotated with DID did:symphonix:agent:healer-v1",
+        "Attempt to merge without dual human review fails closed with ErrDCB0129ProvenanceViolation",
+        "Merge unblocked after recorded CSO approval"
+      ],
+      "preconditions": "Self-healing remediation PR created on repository",
+      "test_data": {
+        "author": "symphonix-healer[bot]",
+        "did": "did:symphonix:agent:healer-v1",
+        "branch": "main",
+        "requirement_ids": ["FR-HCI-SVC-006"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-006-AC01"]
+      },
+      "validation_rules": [
+        "merge_refusal.error == 'ErrDCB0129ProvenanceViolation'",
+        "merge_success_after_cso == true"
+      ],
+      "dependencies": ["FR-HCI-SVC-006"],
+      "tags": ["real-service", "dcb0129", "provenance-gate", "dual-key", "FR-HCI-SVC-006"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Strict machine-authored code barrier on live service"
+    },
+    {
+      "use_case_id": "healthci_svc_quarantine_immune_boundary_0007",
+      "component": "healthci_real_service",
+      "scenario": "Attempt to quarantine a clinical safety test (clinical/sepsis_triage_test.go) via API; service rejects request with HTTP 422 ErrClinicalTestCannotBeQuarantined",
+      "test_type": "negative",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Service inspects test path against clinical immune boundary",
+        "Quarantine request refused with HTTP 422",
+        "Clinical safety test remains mandatory for pipeline pass"
+      ],
+      "preconditions": "Quarantine management endpoint active on live server",
+      "test_data": {
+        "test_path": "clinical/sepsis_triage_test.go",
+        "attempted_ttl": "72h",
+        "requirement_ids": ["NFR-HCI-SVC-001"],
+        "acceptance_criteria_ids": ["NFR-HCI-SVC-001-AC01"]
+      },
+      "validation_rules": [
+        "quarantine_response.status_code == 422",
+        "quarantine_response.body.contains('ErrClinicalTestCannotBeQuarantined')"
+      ],
+      "dependencies": ["NFR-HCI-SVC-001"],
+      "tags": ["real-service", "negative", "quarantine", "immune-boundary", "NFR-HCI-SVC-001"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Enforces clinical safety invariance across live API"
+    },
+    {
+      "use_case_id": "healthci_svc_multiagent_assertion_rejection_0008",
+      "component": "healthci_real_service",
+      "scenario": "Turn 1 dev proposes patch deleting assert.Equal or lowering vital sign threshold; Turn 2 Clinical Safety Auditor rejects patch with HazardCritical",
+      "test_type": "negative",
+      "priority": "high",
+      "expected_outcomes": [
+        "Multi-agent validator analyzes unified diff line by line",
+        "Relaxation of clinical assertion triggers HazardCritical",
+        "Patch rejected and safety audit record generated"
+      ],
+      "preconditions": "Multi-agent dual-turn check enabled on live server",
+      "test_data": {
+        "proposed_diff": "--- a/eval.go\n+++ b/eval.go\n- assert.Equal(t, vital.OxygenSaturation >= 92)\n+ // relaxed check\n",
+        "requirement_ids": ["NFR-HCI-SVC-001"],
+        "acceptance_criteria_ids": ["NFR-HCI-SVC-001-AC02"]
+      },
+      "validation_rules": [
+        "safety_audit.passed == false",
+        "safety_audit.hazard_level == 'HazardCritical'"
+      ],
+      "dependencies": ["NFR-HCI-SVC-001"],
+      "tags": ["real-service", "negative", "multi-agent", "assertion-relaxation", "NFR-HCI-SVC-001"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Scrutiny of AI patches to prevent clinical threshold drift"
+    },
+    {
+      "use_case_id": "healthci_svc_predictive_p95_sizing_0009",
+      "component": "healthci_real_service",
+      "scenario": "Service queries PostgreSQL historical telemetry; computes P95 + 20% headroom; pre-allocates 3.6GB to container before start; prevents initial Exit 137 OOM",
+      "test_type": "edge",
+      "priority": "medium",
+      "expected_outcomes": [
+        "Historical P95 query returns 3000MB peak memory",
+        "Rightsizer computes 3600MB allocation (+20% headroom)",
+        "Pipeline launches with rightsized memory and zero OOM exits"
+      ],
+      "preconditions": "Historical step execution data present in PostgreSQL 16",
+      "test_data": {
+        "step_name": "clinical-eval-inference",
+        "historical_p95": 3000,
+        "headroom_factor": 1.2,
+        "requirement_ids": ["FR-HCI-SVC-001"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-001-AC02"]
+      },
+      "validation_rules": [
+        "allocated_memory == 3600",
+        "exit_code == 0"
+      ],
+      "dependencies": ["FR-HCI-SVC-001"],
+      "tags": ["real-service", "edge", "predictive-sizing", "p95-headroom", "FR-HCI-SVC-001"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Eliminates the initial Exit 137 crash before container start"
+    },
+    {
+      "use_case_id": "healthci_svc_bounded_counterfactual_fhir_0010",
+      "component": "healthci_real_service",
+      "scenario": "Generate bounded counterfactual FHIR R4 Observations (+-1% / +-2%) across clinical decision boundary; verifies absence of catastrophic sensitivity cliff",
+      "test_type": "edge",
+      "priority": "medium",
+      "expected_outcomes": [
+        "FHIR R4 Observation resource generated with minimal perturbation",
+        "Clinical classification remains stable within +-2% tolerance",
+        "Validation passes schema and profile adherence checks"
+      ],
+      "preconditions": "FHIR validation service active on live server",
+      "test_data": {
+        "loinc_code": "2708-6",
+        "base_value": 92.0,
+        "perturbation": 0.02,
+        "requirement_ids": ["FR-HCI-SVC-005"],
+        "acceptance_criteria_ids": ["FR-HCI-SVC-005-AC02"]
+      },
+      "validation_rules": [
+        "fhir_resource.resourceType == 'Observation'",
+        "evaluation.catastrophic_cliff_detected == false"
+      ],
+      "dependencies": ["FR-HCI-SVC-005"],
+      "tags": ["real-service", "edge", "counterfactual", "fhir-r4", "FR-HCI-SVC-005"],
+      "estimated_duration": 20,
+      "automation_status": "automated",
+      "notes": "Proves model robustness across decision boundaries"
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "schema_version": "SYMPHONIX_SCENARIO_EXECUTION_RESULT_V1",
+  "suite_name": "healthci_real_service_matrix",
+  "matrix_path": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+  "total_scenarios": 10,
+  "passed": 10,
+  "failed": 0,
+  "skipped": 0,
+  "executed_at": "2026-10-25T13:13:15.461898+00:00",
+  "results": [
+    {
+      "use_case_id": "healthci_svc_oom_autoscale_0001",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 0,
+      "matrix_row_sha256": "6c4f60eb25e8d8585eaa2d08a5960eb69fc9756e70ea3e9afc1c26e4edec7cfb",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_oom_autoscale_0001",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_cso_gate_refusal_0002",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 1,
+      "matrix_row_sha256": "706017c6605518d384ab21b83bcd06ddcc986b1a0d490494b657c17cc5adfaa1",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_cso_gate_refusal_0002",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_zero_phi_stream_masking_0003",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 2,
+      "matrix_row_sha256": "8cf21f7d72b18f6bd2cc2d54d3bc74a0329e6dacbb492c3d8f36d285dba0bd48",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_zero_phi_stream_masking_0003",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_tink_aead_rest_envelope_0004",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 3,
+      "matrix_row_sha256": "2f01f15bb362cca6424623e5eb3dc2dbdcddaf68c492a59d19516a6f03441988",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_tink_aead_rest_envelope_0004",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_qwen_airgap_diagnostic_0005",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 4,
+      "matrix_row_sha256": "cabd7b81d0d11ec35353780f9840a4953ec849491c344ba6f9baead054a690cf",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_qwen_airgap_diagnostic_0005",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_dcb0129_code_provenance_gate_0006",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 5,
+      "matrix_row_sha256": "874589c1f0fc7254cc1827a6b2e10d5f7ec9aa013dbbfd0edc4b13d45b39b2da",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_dcb0129_code_provenance_gate_0006",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_quarantine_immune_boundary_0007",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 6,
+      "matrix_row_sha256": "f328fee23ced143a661881bd8bf93e7dfa0754813368f249786fd23e8815ea4a",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_quarantine_immune_boundary_0007",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_multiagent_assertion_rejection_0008",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 7,
+      "matrix_row_sha256": "baecb7fdd9fc7604a0d1decff7ab610a68da2291e81926627c990cce97531515",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_multiagent_assertion_rejection_0008",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_predictive_p95_sizing_0009",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 8,
+      "matrix_row_sha256": "0d2c90136913dbf73565a56ee60fda2efa12d36a4ae18d04bd88de82ba554a9c",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_predictive_p95_sizing_0009",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_svc_bounded_counterfactual_fhir_0010",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_real_service_matrix.14col.json",
+      "matrix_row_index": 9,
+      "matrix_row_sha256": "c2320bab73c65c875822cfb7a8162da317697edf5ecc1656a37da12e96604aaa",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_real_service_matrix.py::healthci_svc_bounded_counterfactual_fhir_0010",
+      "real_service_endpoints": [
+        "http://127.0.0.1:8000/api/pipelines",
+        "http://127.0.0.1:8000/api/repos/symphonix-health/caid-clinical-eval/pipelines/approve",
+        "postgres:5432/woodpecker (Tink AEAD)",
+        "http://symphonix-healing-llm:11434/v1/chat/completions (Qwen 2.5 Coder 32B)"
+      ],
+      "app_paths_dispatched": [
+        "server/pipeline/healing/provenance.go",
+        "server/pipeline/healing/quarantine.go",
+        "server/pipeline/healing/predictive.go",
+        "server/pipeline/healing/config_repair.go",
+        "server/pipeline/healing/multi_agent.go",
+        "server/pipeline/healing/synthetic_eval.go",
+        "server/pipeline/healing/healing.go",
+        "server/pipeline/gated.go",
+        "server/pipeline/phi/phi.go",
+        "contrib/symphonix/docker-compose.symphonix-postgres.yml"
+      ],
+      "services_started": [
+        "woodpecker-server:8000",
+        "postgres:16",
+        "symphonix-healing-llm:11434"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T13:13:15.461898+00:00",
+      "source": "symphonix-healthci-real-service-runner",
+      "environment": {
+        "runner": "Repeatable Real-Service E2E Harness",
+        "os": "win32",
+        "zero_mock_enforced": true,
+        "tink_aead_verified": true,
+        "qwen_airgap_verified": true
+      }
+    }
+  ]
+}
