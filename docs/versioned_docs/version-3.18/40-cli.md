@@ -4,11 +4,11 @@
 
 woodpecker-cli stores named contexts in a `contexts.json` file under the user's configuration directory. `XDG_CONFIG_HOME` overrides the base directory. The default paths are:
 
-| Platform | Path |
-| --- | --- |
-| Linux and other Unix systems | `~/.config/woodpecker/contexts.json` |
-| macOS | `~/Library/Application Support/woodpecker/contexts.json` |
-| Windows | `C:\Users\<user>\AppData\Local\woodpecker\contexts.json` |
+| Platform                     | Path                                                     |
+| ---------------------------- | -------------------------------------------------------- |
+| Linux and other Unix systems | `~/.config/woodpecker/contexts.json`                     |
+| macOS                        | `~/Library/Application Support/woodpecker/contexts.json` |
+| Windows                      | `C:\Users\<user>\AppData\Local\woodpecker\contexts.json` |
 
 The file records the selected context and its non-secret connection settings:
 
@@ -35,10 +35,10 @@ If no usable current context can be loaded, woodpecker-cli falls back to the leg
 
 Command-line flags take precedence over their matching environment variables, and either source takes precedence over stored context or legacy values:
 
-| Flag | Environment variable |
-| --- | --- |
-| `--server` | `WOODPECKER_SERVER` |
-| `--token` | `WOODPECKER_TOKEN` |
+| Flag          | Environment variable   |
+| ------------- | ---------------------- |
+| `--server`    | `WOODPECKER_SERVER`    |
+| `--token`     | `WOODPECKER_TOKEN`     |
 | `--log-level` | `WOODPECKER_LOG_LEVEL` |
 
 The `--config` flag and `WOODPECKER_CONFIG` only choose the legacy configuration file; they do not replace or select a context.
@@ -98,7 +98,6 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 **--socks-proxy-off**: socks proxy ignored (default: false)
 
 **--token, -t**="": server auth token
-
 
 # COMMANDS
 
@@ -502,9 +501,9 @@ execute a local pipeline
 
 **--workflow-number**="": Set the metadata environment variable "CI_WORKFLOW_NUMBER". (default: 0)
 
-**--workspace-base**="":  (default: /woodpecker)
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="":  (default: src)
+**--workspace-path**="": (default: src)
 
 ## info
 
