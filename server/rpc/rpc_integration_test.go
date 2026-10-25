@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
@@ -171,7 +172,6 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -594,7 +594,7 @@ func TestRPCLog(t *testing.T) {
 	// that it is outside the drain window, so log appending is rejected.
 	stalePipeline := func(status model.StatusValue) *model.Pipeline {
 		p := defaultPipeline(status)
-		p.Finished = time.Now().Add(-(logStreamDelayAllowed + time.Minute)).Unix()
+		p.Finished = time.Now().Add(-(service_log.StreamDelayAllowed + time.Minute)).Unix()
 		return p
 	}
 
@@ -998,7 +998,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1060,7 +1059,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1122,7 +1120,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))

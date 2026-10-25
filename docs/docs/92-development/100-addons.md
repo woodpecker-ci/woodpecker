@@ -53,6 +53,16 @@ type config struct {
 // `config` must implement `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`. You must directly use Woodpecker's packages - see imports above.
 ```
 
+### Log store addons
+
+`StepFinished(step) error` is called once for a step when its log is complete: its pipeline and the step have stopped and the late-log window has passed.
+Steps that never started have no log and get no call.
+It may pack, compress or move the log.
+It is called again after an error, a crash or when the server stopped waiting for it after one minute, so it has to be idempotent.
+It may come for a log that was just deleted, which has to stay deleted.
+`LogFind` must return the complete log before, during and after the call.
+`LogAppend` should be done within one minute: the server stops waiting then, and a line the addon writes later may come after `StepFinished`.
+
 ### Addon types
 
 | Type      | Addon package                                                  | Service interface                                                  |

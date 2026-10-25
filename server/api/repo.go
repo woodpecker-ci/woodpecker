@@ -521,7 +521,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := deleteStoredRepoLogs(c, _store, repo); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(deleteLogsStatus(err), err)
 			return
 		}
 

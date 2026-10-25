@@ -29,6 +29,12 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
 
+#### Log store
+
+`StepFinished` of the log store is now called once the log of a step is complete, no longer when the step exits.
+A background loop (see `WOODPECKER_LOG_STORE_FINALIZER_INTERVAL`) calls it six minutes after the pipeline and the step have stopped (five for late log lines, one to write the last batch), and once for all existing steps after the upgrade.
+Deleting logs fails with HTTP 409 "the log is being finalized or deleted, try again" while that step log is being finalized.
+
 #### Extensions
 
 Extension HTTP calls (as of now the configuration extension) will by default only be allowed to contact external hosts. Set `WOODPECKER_EXTENSIONS_ALLOWED_HOSTS` accordingly to allow additional hosts as needed.
@@ -42,6 +48,9 @@ Extension HTTP calls (as of now the configuration extension) will by default onl
 ### Internal changes
 
 - Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
+- Log store addons: `StepFinished(step)` of `"go.woodpecker-ci.org/woodpecker/v3/server/services/log".Service` now returns an `error`.
+- Log store addons: `StepFinished(step)` is no longer called when a step exits, but once its log is complete, and it is retried after an error.
+  It has to be idempotent. `LogFind` must return the complete log before, during and after the call.
 
 ## 3.0.0
 

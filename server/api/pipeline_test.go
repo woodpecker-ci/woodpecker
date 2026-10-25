@@ -161,6 +161,14 @@ func TestDownloadStepLogs(t *testing.T) {
 	assert.Equal(t, "first line\n\x1b[31msecond line\x1b[0m", w.Body.String())
 }
 
+// claimingStore returns a store mock on which every claim of a step log succeeds.
+func claimingStore(t *testing.T) *store_mocks.MockStore {
+	t.Helper()
+	s := store_mocks.NewMockStore(t)
+	s.On("StepLogStateSwap", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+	return s
+}
+
 func TestDeleteStepLogs(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -179,9 +187,9 @@ func TestDeleteStepLogs(t *testing.T) {
 		mockLogStore := setLogStore(t)
 		mockLogStore.On("LogDelete", mock.Anything, step).Return(nil)
 
-		// the store must not be used to delete logs, the configured log store may not be the database
+		// the store only claims the log, the configured log store may not be the database
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
-		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("store", claimingStore(t))
 		c.Set("step", step)
 
 		DeleteStepLogs(c)
@@ -195,7 +203,7 @@ func TestDeleteStepLogs(t *testing.T) {
 		mockLogStore.On("LogDelete", mock.Anything, step).Return(assert.AnError)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
-		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("store", claimingStore(t))
 		c.Set("step", step)
 
 		DeleteStepLogs(c)
@@ -233,7 +241,7 @@ func TestDeletePipeline(t *testing.T) {
 	}
 
 	t.Run("should delete pipeline", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
@@ -253,7 +261,7 @@ func TestDeletePipeline(t *testing.T) {
 	})
 
 	t.Run("should keep the pipeline if its logs cannot be deleted", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 
 		mockLogStore := setLogStore(t)
@@ -702,7 +710,7 @@ func TestDeletePipelineLogs(t *testing.T) {
 	steps := []*model.Step{{ID: 3, PipelineID: 2}, {ID: 4, PipelineID: 2}}
 
 	run := func(t *testing.T, firstErr, secondErr error) int {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", pipeline.ID).Return(steps, nil)
 
 		mockLogStore := log_mocks.NewMockService(t)

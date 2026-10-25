@@ -66,7 +66,8 @@ func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 
 func (s storage) StepUpdate(step *model.Step) error {
 	return retryWrite(func() error {
-		return wrapUpdate(s.engine.ID(step.ID).AllCols().Update(step))
+		// the log state is written by StepLogStateSwap only: a step loaded before must not reset it.
+		return wrapUpdate(s.engine.ID(step.ID).AllCols().Omit("log_state", "log_claimed").Update(step))
 	})
 }
 

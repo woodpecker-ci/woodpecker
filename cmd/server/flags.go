@@ -432,6 +432,23 @@ var flags = append([]cli.Flag{
 		Name:    "log-store-file-path",
 		Usage:   "directory used for file based log storage or addon executable file path",
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_INTERVAL"),
+		Name:    "log-store-finalizer-interval",
+		Usage:   "how often finished step logs are handed to the log store to be finalized",
+		Value:   time.Minute,
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_BATCH"),
+		Name:    "log-store-finalizer-batch",
+		Usage:   "maximum number of pipelines whose step logs are finalized per interval",
+		Value:   500,
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_PAUSE"),
+		Name:    "log-store-finalizer-pause",
+		Usage:   "do not finalize step logs",
+	},
 	//
 	// backend options for pipeline compiler
 	//

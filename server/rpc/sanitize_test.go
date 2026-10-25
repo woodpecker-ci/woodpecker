@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
 
 func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
@@ -302,7 +303,7 @@ func TestAllowAppendingLogsStepFinished(t *testing.T) {
 
 	t.Run("stale step finish rejected", func(t *testing.T) {
 		t.Parallel()
-		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix()}
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(service_log.StreamDelayAllowed + time.Second)).Unix()}
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }
@@ -318,7 +319,7 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 		t.Parallel()
 		p := &model.Pipeline{
 			Status:   model.StatusSuccess,
-			Finished: time.Now().Add(-(logStreamDelayAllowed - time.Second)).Unix(),
+			Finished: time.Now().Add(-(service_log.StreamDelayAllowed - time.Second)).Unix(),
 		}
 		assert.NoError(t, allowAppendingLogs(p, step))
 	})
@@ -327,7 +328,7 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 		t.Parallel()
 		p := &model.Pipeline{
 			Status:   model.StatusSuccess,
-			Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix(),
+			Finished: time.Now().Add(-(service_log.StreamDelayAllowed + time.Second)).Unix(),
 		}
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})

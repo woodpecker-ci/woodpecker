@@ -148,6 +148,19 @@ type Store interface {
 	LogDelete(context.Context, *model.Step) error
 	StepFinished(context.Context, *model.Step) error
 
+	// StepListLogUnfinalized lists the steps whose log is complete (finished before the given unix time)
+	// but not finalized yet, from the first batch pipelines with an ID above afterPipelineID and
+	// up to untilPipelineID, ordered by pipeline and step ID.
+	StepListLogUnfinalized(ctx context.Context, finishedBefore, afterPipelineID, untilPipelineID int64, batch int) ([]*model.Step, error)
+	// StepLogUnfinalizedStats counts the steps StepListLogUnfinalized selects without cursor, bound and batch,
+	// and returns the highest pipeline ID among them (0 if none).
+	StepLogUnfinalizedStats(ctx context.Context, finishedBefore int64) (count, maxPipelineID int64, err error)
+	// StepListLogClaimed lists the steps whose log is claimed (finalizing or deleting).
+	StepListLogClaimed(ctx context.Context) ([]*model.Step, error)
+	// StepLogStateSwap moves the log of a step to the given state, if its state and claim time are still
+	// those of step, and updates step. It reports whether it did, so only one server wins a claim.
+	StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error)
+
 	// Tasks
 	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)

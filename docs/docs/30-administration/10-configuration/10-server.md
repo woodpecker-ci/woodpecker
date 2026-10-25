@@ -1229,6 +1229,37 @@ If [`WOODPECKER_LOG_STORE`](#log_store) is:
 
 ---
 
+### LOG_STORE_FINALIZER_INTERVAL
+
+- Name: `WOODPECKER_LOG_STORE_FINALIZER_INTERVAL`
+- Default: `1m`
+
+How often finished step logs are handed to the log store to be finalized. Must be positive.
+A step is handed over once its pipeline and the step have stopped and six minutes have passed: five in which the agent may still send log lines, plus one in which a late batch is still written.
+Several servers sharing a database may each run the finalizer: a step log is claimed before it is handed over, and claims left by a crashed server are released after 30 to 40 minutes.
+The log store may pack or move the log then. A call that takes longer than one minute is given up and retried later.
+
+---
+
+### LOG_STORE_FINALIZER_BATCH
+
+- Name: `WOODPECKER_LOG_STORE_FINALIZER_BATCH`
+- Default: `500`
+
+Maximum number of pipelines whose step logs are finalized per interval. Must be at least 1.
+A round goes through the pipelines due when it started, each interval continuing after the pipeline the previous one stopped at, so steps the log store keeps failing on are retried once per round and neither they nor newer pipelines hold back the others.
+
+---
+
+### LOG_STORE_FINALIZER_PAUSE
+
+- Name: `WOODPECKER_LOG_STORE_FINALIZER_PAUSE`
+- Default: `false`
+
+Do not finalize step logs.
+
+---
+
 ### EXPERT_WEBHOOK_HOST
 
 - Name: `WOODPECKER_EXPERT_WEBHOOK_HOST`
