@@ -300,31 +300,38 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *forge_types.FileMeta)
-	errChan := make(chan error)
-
+	// sub folders, symlinks and submodules are no pipeline files
+	var paths []string
 	for _, file := range data {
 		if file.GetType() == "file" {
-			go func(path string) {
-				content, err := c.File(ctx, u, r, b, path)
-				if err != nil {
-					if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-						err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
-					}
-					errChan <- err
-				} else {
-					fc <- &forge_types.FileMeta{
-						Name: path,
-						Data: content,
-					}
-				}
-			}(f + "/" + file.GetName())
+			paths = append(paths, f+"/"+file.GetName())
 		}
+	}
+
+	// buffered so no sender blocks forever when we return on the first error
+	fc := make(chan *forge_types.FileMeta, len(paths))
+	errChan := make(chan error, len(paths))
+
+	for _, path := range paths {
+		go func() {
+			content, err := c.File(ctx, u, r, b, path)
+			if err != nil {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
+				errChan <- err
+			} else {
+				fc <- &forge_types.FileMeta{
+					Name: path,
+					Data: content,
+				}
+			}
+		}()
 	}
 
 	var files []*forge_types.FileMeta
 
-	for range data {
+	for range paths {
 		select {
 		case err := <-errChan:
 			return nil, err
@@ -332,9 +339,6 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 			files = append(files, fileMeta)
 		}
 	}
-
-	close(fc)
-	close(errChan)
 
 	return files, nil
 }
