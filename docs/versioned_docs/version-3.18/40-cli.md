@@ -394,11 +394,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags. The metadata format is only expected to work with the same Woodpecker version it was downloaded from and is not intended to be portable between versions
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks
 
