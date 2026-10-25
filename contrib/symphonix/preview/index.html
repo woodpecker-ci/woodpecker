@@ -39,35 +39,35 @@
   >
     <div class="flex items-center space-x-2">
       <span class="inline-block h-2 w-2 rounded-full animate-pulse bg-emerald-400 shrink-0"></span>
-      <span class="font-bold tracking-wider uppercase">OPERATING MODE:</span>
-      <span id="current-mode-label" class="font-semibold underline decoration-dotted">LIVE CLINICAL ENVIRONMENT</span>
-      <span class="text-slate-400">|</span>
-      <span class="hidden md:inline opacity-90 text-xs">Real clinical pipelines active. Strict audit logging and DCB0129 safety gates enforced.</span>
+      <span class="font-bold tracking-wider uppercase text-[11px]">OPERATING MODE:</span>
+      <span id="current-mode-label" class="font-semibold underline decoration-dotted text-xs">LIVE CLINICAL ENVIRONMENT</span>
+      <span class="text-slate-500">|</span>
+      <span class="hidden md:inline text-slate-300 text-xs">Real clinical pipelines active. Strict audit logging and DCB0129/DCB0160 safety gates enforced.</span>
     </div>
 
     <!-- Mode Selector Controls -->
-    <div class="flex items-center space-x-1 text-xs">
-      <button id="btn-mode-live" data-agent-id="btn-mode-live" onclick="setMode('live')" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500 text-slate-950">Live</button>
-      <button id="btn-mode-simulation" data-agent-id="btn-mode-simulation" onclick="setMode('simulation')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Simulation</button>
-      <button id="btn-mode-replay" data-agent-id="btn-mode-replay" onclick="setMode('replay')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Replay</button>
-      <button id="btn-mode-audit" data-agent-id="btn-mode-audit" onclick="setMode('audit')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Audit</button>
+    <div class="flex items-center space-x-1.5 text-xs">
+      <button id="btn-mode-live" data-agent-id="btn-mode-live" data-agent-status="active" onclick="setMode('live')" class="px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500 text-slate-950 shadow-sm transition">Live</button>
+      <button id="btn-mode-simulation" data-agent-id="btn-mode-simulation" data-agent-status="inactive" onclick="setMode('simulation')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300 transition">Simulation</button>
+      <button id="btn-mode-replay" data-agent-id="btn-mode-replay" data-agent-status="inactive" onclick="setMode('replay')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300 transition">Replay</button>
+      <button id="btn-mode-audit" data-agent-id="btn-mode-audit" data-agent-status="inactive" onclick="setMode('audit')" class="px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300 transition">Audit</button>
     </div>
   </header>
 
   <!-- 2. Woodpecker Top Navigation Bar (Compact, No Scroll) -->
-  <nav data-agent-region="top-nav" class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between font-bold shrink-0 z-20">
-    <div class="flex items-center space-x-4">
-      <div class="flex items-center space-x-2" data-agent-id="brand-woodpecker-clinical">
+  <nav data-agent-region="top-nav" class="bg-slate-900 border-b border-slate-800 px-5 py-2 flex items-center justify-between font-bold shrink-0 z-20">
+    <div class="flex items-center space-x-5">
+      <div class="flex items-center space-x-2.5" data-agent-id="brand-woodpecker-clinical">
         <div class="h-7 w-7 rounded bg-sky-600 flex items-center justify-center text-white text-sm font-black shadow-md">
           W
         </div>
         <div>
           <span class="text-white text-sm font-bold tracking-wide">Woodpecker CI</span>
-          <span class="ml-1.5 text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">Clinical Edition</span>
+          <span class="ml-1.5 text-[11px] font-mono font-semibold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800/80">Clinical Control Plane</span>
         </div>
       </div>
 
-      <div class="hidden md:flex items-center space-x-4 text-xs font-medium text-slate-300 ml-4">
+      <div class="hidden md:flex items-center space-x-5 text-xs font-medium text-slate-300 ml-2">
         <a href="#repos" class="text-cyan-400 border-b-2 border-cyan-400 pb-0.5 font-bold">Repositories</a>
         <a href="#pipelines" class="hover:text-white transition">Pipelines</a>
         <a href="#docs" class="hover:text-white transition">Docs</a>
@@ -75,14 +75,14 @@
       </div>
     </div>
 
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center space-x-3.5">
       <!-- SFDS View Level Selector -->
-      <div data-testid="view-level-selector" data-agent-id="view-level-selector" class="flex items-center space-x-1 rounded bg-slate-950 p-1 border border-slate-800 text-xs">
-        <span class="px-1.5 text-xs font-semibold text-slate-400 uppercase">View:</span>
-        <button id="btn-view-essential" data-agent-id="btn-view-essential" onclick="setViewLevel('essential')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
-        <button id="btn-view-standard" data-agent-id="btn-view-standard" onclick="setViewLevel('standard')" class="rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow">Standard</button>
-        <button id="btn-view-advanced" data-agent-id="btn-view-advanced" onclick="setViewLevel('advanced')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
-        <button id="btn-view-expert" data-agent-id="btn-view-expert" onclick="setViewLevel('expert')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
+      <div data-testid="view-level-selector" data-agent-id="view-level-selector" class="flex items-center space-x-1 rounded-lg bg-slate-950 p-1 border border-slate-800 text-xs">
+        <span class="px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">View:</span>
+        <button id="btn-view-essential" data-agent-id="btn-view-essential" data-agent-status="inactive" onclick="setViewLevel('essential')" class="rounded px-2.5 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
+        <button id="btn-view-standard" data-agent-id="btn-view-standard" data-agent-status="active" onclick="setViewLevel('standard')" class="rounded px-2.5 py-0.5 text-xs font-bold bg-cyan-700 text-white shadow border border-cyan-500/60 transition">Standard</button>
+        <button id="btn-view-advanced" data-agent-id="btn-view-advanced" data-agent-status="inactive" onclick="setViewLevel('advanced')" class="rounded px-2.5 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
+        <button id="btn-view-expert" data-agent-id="btn-view-expert" data-agent-status="inactive" onclick="setViewLevel('expert')" class="rounded px-2.5 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
       </div>
 
       <!-- SignalBox Toggle -->
@@ -90,22 +90,18 @@
         id="signalbox-toggle"
         data-testid="signalbox-toggle"
         data-agent-id="btn-signalbox-toggle"
-        class="signalbox-toggle-btn relative flex items-center space-x-1.5 rounded bg-cyan-950/80 border border-cyan-500/50 px-2.5 py-1 text-xs text-cyan-300 hover:bg-cyan-900/90 transition shadow-sm"
+        class="signalbox-toggle-btn relative flex items-center space-x-2 rounded-lg bg-cyan-950/90 border border-cyan-500/60 px-3 py-1 text-xs text-cyan-200 hover:bg-cyan-900 transition shadow-sm font-bold"
         onclick="toggleSignalBox()"
       >
-        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="h-4 w-4 shrink-0 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
-        <span class="font-bold">SignalBox</span>
+        <span>SignalBox</span>
         <span class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
       </button>
 
       <!-- Account Badge -->
-      <div data-agent-id="badge-user-persona" class="h-7 w-7 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300">
-        CSO
-      </div>
-    </div>
-  </nav>
+      <div data-agent-id="badge-user-persona" class="h-7 w-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300 shadow-sm" title="Active Role: Clinical Safety Officer">
         CSO
       </div>
     </div>
@@ -114,85 +110,127 @@
   <!-- 3. Main Workspace Shell: Exact 1-Page Height (Zero Down Scroll) -->
   <div class="flex-1 flex min-h-0 overflow-hidden relative w-full">
     
-    <!-- Left/Center Stage: Clean Clinical Pipelines Table -->
-    <main class="flex-1 p-5 overflow-hidden flex flex-col min-w-0">
-      <!-- Title & Platform Badges Row -->
-      <div class="flex items-center justify-between mb-4 shrink-0">
-        <div>
-          <h1 class="text-lg font-bold text-white tracking-wide">Clinical CI/CD Pipelines</h1>
-          <p class="text-xs text-slate-400">Autonomous self-healing, zero-mock validation, and Enterprise DCB0129/DCB0160 governance</p>
+    <!-- Left Stage: Clinical Pipelines, Executive Stat Strip & Live DAG Console -->
+    <main class="flex-1 p-4 lg:p-5 overflow-hidden flex flex-col justify-between min-w-0 space-y-3">
+      
+      <!-- Top Title & Executive KPI Stat Strip -->
+      <div class="space-y-3 shrink-0">
+        <!-- Title Row -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-base lg:text-lg font-bold text-white tracking-wide flex items-center gap-2">
+              Clinical CI/CD Pipelines
+              <span class="text-[11px] font-mono font-medium text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">DCB0129 / DCB0160 Active</span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">Autonomous self-healing, zero-mock validation, and accountable human governance</p>
+          </div>
+
+          <div class="flex items-center space-x-2 text-xs">
+            <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px]">
+              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+              PostgreSQL 16 (Tink AEAD)
+            </span>
+            <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px]">
+              <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+              Quarantine: Ready (72h TTL)
+            </span>
+          </div>
         </div>
 
-        <div class="flex items-center space-x-2 text-xs">
-          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
+        <!-- Executive KPI Strip: Fills Horizontal Stage Naturally -->
+        <div class="grid grid-cols-4 gap-3">
+          <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2.5 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Pipelines</div>
+              <div class="text-base font-bold text-white mt-0.5 font-mono">3 Running <span class="text-xs font-normal text-emerald-400">/ 0 Failed</span></div>
+            </div>
             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-            PostgreSQL 16 (Tink AEAD)
-          </span>
-          <span class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-300">
-            <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
-            Quarantine: Ready
-          </span>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2.5 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Autonomous Self-Healed</div>
+              <div class="text-base font-bold text-cyan-400 mt-0.5 font-mono">19 <span class="text-xs font-normal text-slate-400">(12 OOM &bull; 7 AI)</span></div>
+            </div>
+            <span class="text-[10px] font-mono text-cyan-300 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-800/60">Qwen 32B</span>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2.5 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DCB0129 Clinical Gate</div>
+              <div class="text-base font-bold text-amber-400 mt-0.5 font-mono">1 Pending <span class="text-xs font-normal text-slate-400">CSO Review</span></div>
+            </div>
+            <span class="text-[10px] font-mono text-amber-300 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800/60">Dual-Key</span>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-2.5 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Golden Dataset Accuracy</div>
+              <div class="text-base font-bold text-emerald-400 mt-0.5 font-mono">99.94% <span class="text-xs font-normal text-slate-400">(&ge; 99.9%)</span></div>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-300 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800/60">Zero-Miss</span>
+          </div>
         </div>
       </div>
 
       <!-- Pipelines Table Container (Compact, Zero Scroll) -->
-      <div data-agent-region="pipeline-table" class="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-lg shrink-0">
+      <div data-agent-region="pipeline-table" class="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden shadow-lg shrink-0">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
-            <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-              <th class="py-2.5 px-4">Status</th>
-              <th class="py-2.5 px-4">Repository &amp; Branch</th>
-              <th class="py-2.5 px-4">Commit</th>
+            <tr class="border-b border-slate-800 bg-slate-900 text-slate-400 text-[11px] font-semibold uppercase tracking-wider">
+              <th class="py-2.5 px-4 w-28">Status</th>
+              <th class="py-2.5 px-4 w-72">Repository &amp; Branch</th>
+              <th class="py-2.5 px-4 w-24">Commit</th>
               <th class="py-2.5 px-4">Clinical Governance / Self-Healing Signal</th>
-              <th class="py-2.5 px-4 text-right">Action</th>
+              <th class="py-2.5 px-4 text-right w-36">Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/60">
             <!-- Row 1: BulletTrain HIE -->
             <tr data-agent-id="pipeline-row-bullettrain-hie" data-agent-status="success" class="hover:bg-slate-800/40 transition">
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+              <td class="py-2.5 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
                 </span>
               </td>
-              <td class="py-3 px-4">
+              <td class="py-2.5 px-4">
                 <div class="font-bold text-white text-xs">symphonix-health / bullettrain-hie</div>
-                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
+                <div class="text-[11px] text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
               </td>
-              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">a8b29f1</td>
-              <td class="py-3 px-4">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-blue-950/80 text-blue-300 border border-blue-700/50">
+              <td class="py-2.5 px-4 font-mono text-cyan-400 text-xs">a8b29f1</td>
+              <td class="py-2.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium bg-blue-950/80 text-blue-300 border border-blue-700/50">
                   <svg class="h-3 w-3 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                   L1 Self-Heal: OOM Scaled 1.5x (2GB &rarr; 3GB)
                 </span>
               </td>
-              <td class="py-3 px-4 text-right font-mono text-slate-400 text-xs">3m 22s</td>
+              <td class="py-2.5 px-4 text-right font-mono text-slate-400 text-xs">3m 22s</td>
             </tr>
 
             <!-- Row 2: CAID Clinical Eval -->
-            <tr data-agent-id="pipeline-row-caid-clinical-eval" data-agent-status="gated" class="bg-amber-950/10 hover:bg-amber-950/20 transition">
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/60">
+            <tr data-agent-id="pipeline-row-caid-clinical-eval" data-agent-status="gated" class="bg-amber-950/15 hover:bg-amber-950/25 transition">
+              <td class="py-2.5 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-700/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span> GATED
                 </span>
               </td>
-              <td class="py-3 px-4">
+              <td class="py-2.5 px-4">
                 <div class="font-bold text-white text-xs">symphonix-health / caid-clinical-eval</div>
-                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-amber-300">release/v2.4.0</span></div>
+                <div class="text-[11px] text-slate-400 font-mono">branch: <span class="text-amber-300">release/v2.4.0</span></div>
               </td>
-              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">c3e41b9</td>
-              <td class="py-3 px-4">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-amber-950/80 text-amber-300 border border-amber-600/50">
+              <td class="py-2.5 px-4 font-mono text-cyan-400 text-xs">c3e41b9</td>
+              <td class="py-2.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium bg-amber-950/80 text-amber-300 border border-amber-600/50">
                   <svg class="h-3 w-3 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                   ACCOUNTABLE_HUMAN_REQUIRED: CSO Approval Mandatory
                 </span>
               </td>
-              <td class="py-3 px-4 text-right">
-                <button id="btn-review-gate" data-agent-id="btn-review-gate" onclick="openSignalBoxTab('gate')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold shadow transition">
+              <td class="py-2.5 px-4 text-right">
+                <button id="btn-review-gate" data-agent-id="btn-review-gate" onclick="openSignalBoxTab('gate')" class="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 text-white font-bold rounded text-xs shadow border border-cyan-500/60 transition">
                   Review Gate
                 </button>
               </td>
@@ -200,77 +238,151 @@
 
             <!-- Row 3: Client Registry Sync -->
             <tr data-agent-id="pipeline-row-client-registry-sync" data-agent-status="success" class="hover:bg-slate-800/40 transition">
-              <td class="py-3 px-4 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+              <td class="py-2.5 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
                 </span>
               </td>
-              <td class="py-3 px-4">
+              <td class="py-2.5 px-4">
                 <div class="font-bold text-white text-xs">symphonix-health / client-registry-sync</div>
-                <div class="text-xs text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
+                <div class="text-[11px] text-slate-400 font-mono">branch: <span class="text-slate-300">main</span></div>
               </td>
-              <td class="py-3 px-4 font-mono text-cyan-400 text-xs">7f10d22</td>
-              <td class="py-3 px-4">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-700/50">
+              <td class="py-2.5 px-4 font-mono text-cyan-400 text-xs">7f10d22</td>
+              <td class="py-2.5 px-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-700/50">
                   <svg class="h-3 w-3 text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                   </svg>
                   Zero-PHI Streaming Sentry: 42 IDs Sanitized (CR-*, MPI-*, Modulus 11 Validated)
                 </span>
               </td>
-              <td class="py-3 px-4 text-right font-mono text-slate-400 text-xs">1m 14s</td>
+              <td class="py-2.5 px-4 text-right font-mono text-slate-400 text-xs">1m 14s</td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Live Pipeline DAG Stages & Recent Self-Healing Event Stream (Fills Central Void) -->
+      <div class="grid grid-cols-2 gap-3 shrink-0">
+        <!-- Left: Live Pipeline DAG Execution Stages -->
+        <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+              Live Pipeline DAG Stages (caid-clinical-eval)
+            </span>
+            <span class="text-[10px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-800/60">STAGE 3/4</span>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2 text-center text-xs">
+            <div class="p-2 rounded bg-slate-950/80 border border-emerald-800/50">
+              <div class="text-[10px] font-bold text-emerald-400 flex items-center justify-center gap-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Step 1
+              </div>
+              <div class="text-[11px] font-semibold text-slate-200 mt-0.5">Tink Decrypt</div>
+              <div class="text-[10px] text-slate-400 font-mono">0.42s &bull; PASS</div>
+            </div>
+
+            <div class="p-2 rounded bg-slate-950/80 border border-emerald-800/50">
+              <div class="text-[10px] font-bold text-emerald-400 flex items-center justify-center gap-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Step 2
+              </div>
+              <div class="text-[11px] font-semibold text-slate-200 mt-0.5">Zero-PHI Scan</div>
+              <div class="text-[10px] text-slate-400 font-mono">1.18s &bull; PASS</div>
+            </div>
+
+            <div class="p-2 rounded bg-slate-950/80 border border-cyan-500/60 shadow">
+              <div class="text-[10px] font-bold text-cyan-400 flex items-center justify-center gap-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse"></span> Step 3
+              </div>
+              <div class="text-[11px] font-semibold text-white mt-0.5">Golden Eval</div>
+              <div class="text-[10px] text-cyan-300 font-mono">RUNNING 99.94%</div>
+            </div>
+
+            <div class="p-2 rounded bg-slate-950/40 border border-slate-800 text-slate-400">
+              <div class="text-[10px] font-bold text-slate-500">Step 4</div>
+              <div class="text-[11px] font-semibold text-slate-400 mt-0.5">Air-Gap Egress</div>
+              <div class="text-[10px] text-slate-500 font-mono">QUEUED</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Recent Self-Healing Log Stream -->
+        <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-3 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <svg class="h-3.5 w-3.5 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Live Clinical Event Stream
+            </span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800/60">AUTONOMOUS</span>
+          </div>
+
+          <div class="space-y-1.5 font-mono text-[11px]">
+            <div class="flex items-center justify-between text-slate-300 bg-slate-950/60 px-2 py-1 rounded border border-slate-800/60">
+              <span><span class="text-cyan-400">12:24:02</span> &bull; <span class="text-blue-300 font-bold">HEAL_OOM</span>: bullettrain-hie scaled 2GB &rarr; 3GB (1.5x)</span>
+              <span class="text-emerald-400 font-bold text-[10px]">RESOLVED</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300 bg-slate-950/60 px-2 py-1 rounded border border-slate-800/60">
+              <span><span class="text-cyan-400">12:21:45</span> &bull; <span class="text-indigo-300 font-bold">SENTRY_PHI</span>: 42 patient IDs redacted via Modulus 11</span>
+              <span class="text-indigo-300 font-bold text-[10px]">PROTECTED</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300 bg-slate-950/60 px-2 py-1 rounded border border-slate-800/60">
+              <span><span class="text-cyan-400">12:18:10</span> &bull; <span class="text-amber-300 font-bold">PROVENANCE</span>: symphonix-healer[bot] patch gated for CSO</span>
+              <span class="text-amber-400 font-bold text-[10px]">GATED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Quick Platform Telemetry Footer Cards (Compact 1-Page Fit) -->
-      <div data-agent-region="platform-telemetry" class="grid grid-cols-3 gap-3 mt-4 shrink-0">
-        <div data-agent-id="telemetry-card-tink" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+      <div data-agent-region="platform-telemetry" class="grid grid-cols-3 gap-3 shrink-0">
+        <div data-agent-id="telemetry-card-tink" class="rounded-lg border border-slate-800 bg-slate-900/50 p-2.5 flex items-center justify-between">
           <div>
-            <div class="text-xs text-slate-400 font-semibold uppercase">Security Keyset</div>
-            <div class="text-sm font-bold text-white mt-0.5">Google Tink AEAD</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Security Keyset</div>
+            <div class="text-xs font-bold text-white mt-0.5">Google Tink AEAD Envelope</div>
           </div>
-          <span class="text-xs font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">ACTIVE</span>
+          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">ACTIVE</span>
         </div>
-        <div data-agent-id="telemetry-card-zero-mock" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+        <div data-agent-id="telemetry-card-zero-mock" class="rounded-lg border border-slate-800 bg-slate-900/50 p-2.5 flex items-center justify-between">
           <div>
-            <div class="text-xs text-slate-400 font-semibold uppercase">Zero-Mock Compliance</div>
-            <div class="text-sm font-bold text-white mt-0.5">L-CAID-10 Rule</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Zero-Mock Compliance</div>
+            <div class="text-xs font-bold text-white mt-0.5">L-CAID-10 Verification Rule</div>
           </div>
-          <span class="text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">ENFORCED</span>
+          <span class="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">ENFORCED</span>
         </div>
-        <div data-agent-id="telemetry-card-air-gap" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+        <div data-agent-id="telemetry-card-air-gap" class="rounded-lg border border-slate-800 bg-slate-900/50 p-2.5 flex items-center justify-between">
           <div>
-            <div class="text-xs text-slate-400 font-semibold uppercase">Air-Gap Egress</div>
-            <div class="text-sm font-bold text-white mt-0.5">Enterprise Perimeter</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Air-Gap Egress</div>
+            <div class="text-xs font-bold text-white mt-0.5">Enterprise Perimeter Shield</div>
           </div>
-          <span class="text-xs font-mono text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/60">ZERO-LEAK</span>
+          <span class="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800/60">ZERO-LEAK</span>
         </div>
       </div>
     </main>
 
-    <!-- Right Stage: SignalBox Docked 3rd Panel WITH TABS (Shifted Down, Compact Width) -->
+    <!-- Right Stage: SignalBox Docked 3rd Panel WITH TABS (Shifted Down, Balanced Width) -->
     <aside
       id="signalbox-panel"
       data-testid="signalbox-panel"
       data-agent-id="panel-signalbox"
       data-agent-region="signalbox-panel"
       data-agent-status="docked"
-      class="hidden w-80 xl:w-96 shrink-0 my-2.5 mr-4 rounded-xl border border-slate-800 bg-slate-900/95 text-slate-100 flex-col h-[calc(100%-1.25rem)] overflow-hidden shadow-2xl transition-all duration-300 z-10"
+      class="hidden w-96 xl:w-[440px] 2xl:w-[480px] shrink-0 my-2.5 mr-4 rounded-xl border border-slate-800 bg-slate-900/95 text-slate-100 flex flex-col h-[calc(100%-1.25rem)] overflow-hidden shadow-2xl transition-all duration-300 z-10"
       aria-label="SignalBox Clinical Assurance & Governance Panel"
     >
       <!-- Panel Header -->
       <div class="flex items-center justify-between border-b border-slate-800 px-4 py-2.5 shrink-0 bg-slate-900/90">
         <div class="flex items-center space-x-2.5">
-          <div class="flex h-7 w-7 items-center justify-center rounded bg-cyan-950 text-cyan-400 border border-cyan-500/40 shrink-0">
+          <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-500/50 shrink-0">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
           <div>
             <h2 class="text-xs font-bold tracking-wide text-white uppercase">SignalBox Governance</h2>
-            <p class="text-[11px] text-slate-400">CAID / DCB0129-DCB0160 Active</p>
+            <p class="text-[11px] text-slate-400">CAID / DCB0129-DCB0160 Active Control</p>
           </div>
         </div>
         <button
@@ -294,7 +406,7 @@
           data-agent-id="btn-tab-gate"
           data-agent-status="active"
           onclick="switchSignalBoxTab('gate')"
-          class="flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition"
+          class="flex-1 py-2 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 transition"
         >
           Clinical Gate
         </button>
@@ -303,7 +415,7 @@
           data-agent-id="btn-tab-heal"
           data-agent-status="inactive"
           onclick="switchSignalBoxTab('heal')"
-          class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
+          class="flex-1 py-2 text-center font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
         >
           Self-Healing
         </button>
@@ -312,58 +424,86 @@
           data-agent-id="btn-tab-cdr"
           data-agent-status="inactive"
           onclick="switchSignalBoxTab('cdr')"
-          class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
+          class="flex-1 py-2 text-center font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
         >
           CDR 1.0.0
         </button>
       </div>
 
-      <!-- Tab Content Area: Fits Perfectly in 1 Viewport Page -->
-      <div class="flex-1 p-4 overflow-hidden flex flex-col justify-between text-xs">
+      <!-- Tab Content Area: Fills Drawer Naturally Without Dead Space -->
+      <div class="flex-1 p-3.5 overflow-hidden flex flex-col justify-between text-xs">
         
         <!-- Tab 1: Clinical Gate & CSO -->
-        <div id="tab-pane-gate" data-agent-region="tab-pane-gate" data-agent-status="visible" class="space-y-3.5 flex-1 flex flex-col justify-start">
+        <div id="tab-pane-gate" data-agent-region="tab-pane-gate" data-agent-status="visible" class="space-y-3 flex-1 flex flex-col justify-start">
           <!-- CSO Gate Box -->
-          <div data-agent-id="cso-gate-box" data-agent-status="passed" class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+          <div data-agent-id="cso-gate-box" data-agent-status="passed" class="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 shadow-sm">
             <div class="flex items-center justify-between mb-1.5">
               <span class="font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
                 <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 CSO Clinical Gate Passed
               </span>
-              <span class="rounded bg-emerald-900/60 px-1.5 py-0.5 font-mono text-[11px] text-emerald-300 border border-emerald-600/40">
+              <span class="rounded bg-emerald-900/80 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-200 border border-emerald-600/50">
                 ACCOUNTABLE_HUMAN
               </span>
             </div>
-            <p class="text-slate-300 text-xs">
+            <p class="text-slate-200 text-xs">
               Signoff: <span class="font-mono text-emerald-300 font-semibold">dr.elena.rostova@symphonix.health</span>
             </p>
             <p class="text-slate-400 text-xs mt-0.5">
               Timestamp: <span class="font-mono text-slate-300">2026-10-24T16:45:00Z</span>
             </p>
-            <div class="mt-2 text-[11px] text-slate-400 font-mono break-all bg-slate-950 p-1.5 rounded border border-slate-800">
+            <div class="mt-2 text-[10px] text-slate-300 font-mono break-all bg-slate-950 p-2 rounded border border-slate-800">
               Merkle Root: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
             </div>
           </div>
 
           <!-- Metrics Grid -->
           <div class="grid grid-cols-2 gap-2.5">
-            <div data-agent-id="metric-golden-dataset" class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-              <div class="text-slate-400 text-xs uppercase font-semibold">Golden Dataset</div>
+            <div data-agent-id="metric-golden-dataset" class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <div class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Golden Dataset</div>
               <div class="mt-0.5 text-xl font-bold font-mono text-cyan-400">99.94%</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Target: &ge; 99.9% zero-miss</div>
+              <div class="text-[10px] text-slate-400 mt-0.5 font-medium">Target: &ge; 99.9% zero-miss</div>
             </div>
 
-            <div data-agent-id="metric-zero-phi" class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-              <div class="text-slate-400 text-xs uppercase font-semibold">Zero-PHI Sentry</div>
+            <div data-agent-id="metric-zero-phi" class="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <div class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Zero-PHI Sentry</div>
               <div class="mt-0.5 text-xl font-bold font-mono text-indigo-400">ACTIVE</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">42 IDs Redacted</div>
+              <div class="text-[10px] text-slate-400 mt-0.5 font-medium">42 Identifiers Redacted</div>
+            </div>
+          </div>
+
+          <!-- Statutory Chain of Custody & Audit Trail (Fills Drawer Naturally) -->
+          <div class="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 space-y-1.5 flex-1 flex flex-col justify-start">
+            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">Statutory Chain of Custody</div>
+            <div class="space-y-1.5 font-mono text-[10px]">
+              <div class="flex items-start justify-between text-slate-300 bg-slate-900/60 p-1.5 rounded border border-slate-800/70">
+                <div>
+                  <div class="text-cyan-400 font-bold">16:45:00Z &bull; CSO_SIGNOFF</div>
+                  <div class="text-slate-400 text-[9px]">Certified CSO approval committed to branch.</div>
+                </div>
+                <span class="text-emerald-400 font-bold">VERIFIED</span>
+              </div>
+              <div class="flex items-start justify-between text-slate-300 bg-slate-900/60 p-1.5 rounded border border-slate-800/70">
+                <div>
+                  <div class="text-cyan-400 font-bold">16:44:12Z &bull; EVAL_BENCHMARK</div>
+                  <div class="text-slate-400 text-[9px]">Golden Dataset sensitivity threshold met (99.94%).</div>
+                </div>
+                <span class="text-cyan-300 font-bold">PASSED</span>
+              </div>
+              <div class="flex items-start justify-between text-slate-300 bg-slate-900/60 p-1.5 rounded border border-slate-800/70">
+                <div>
+                  <div class="text-cyan-400 font-bold">16:42:05Z &bull; AIR_GAP_EGRESS</div>
+                  <div class="text-slate-400 text-[9px]">Perimeter firewall confirmed zero external outbound packets.</div>
+                </div>
+                <span class="text-indigo-400 font-bold">CLEAN</span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Tab 2: Self-Healing Telemetry -->
         <div id="tab-pane-heal" data-agent-region="tab-pane-heal" data-agent-status="hidden" class="hidden space-y-2.5 flex-1 flex flex-col justify-start">
-          <div data-agent-id="self-healing-summary-card" class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
+          <div data-agent-id="self-healing-summary-card" class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5">
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-bold text-sky-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
                 <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -371,62 +511,72 @@
                 </svg>
                 Autonomous Self-Healing
               </h3>
-              <span data-agent-id="badge-qwen-coder" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+              <span data-agent-id="badge-qwen-coder" class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-200 border border-cyan-700">
                 Qwen 2.5 Coder 32B (Air-Gap)
               </span>
             </div>
             <div class="grid grid-cols-3 gap-1.5 text-center">
               <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <div class="font-mono text-sm font-bold text-cyan-400">12</div>
-                <div class="text-[10px] text-slate-400">L1 OOM Scaled</div>
+                <div class="font-mono text-base font-bold text-cyan-400">12</div>
+                <div class="text-[10px] text-slate-400 font-medium">L1 OOM Scaled</div>
               </div>
               <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <div class="font-mono text-sm font-bold text-amber-400">7</div>
-                <div class="text-[10px] text-slate-400">L2 AI Retries</div>
+                <div class="font-mono text-base font-bold text-amber-400">7</div>
+                <div class="text-[10px] text-slate-400 font-medium">L2 AI Retries</div>
               </div>
               <div class="bg-slate-900 p-1.5 rounded border border-slate-800">
-                <div class="font-mono text-sm font-bold text-emerald-400">0</div>
-                <div class="text-[10px] text-slate-400">L3 Quarantines</div>
+                <div class="font-mono text-base font-bold text-emerald-400">0</div>
+                <div class="text-[10px] text-slate-400 font-medium">L3 Quarantines</div>
               </div>
             </div>
           </div>
 
           <!-- DCB0129 Code Provenance Gate Status -->
-          <div data-agent-id="provenance-gate-card" class="rounded-lg border border-slate-800 bg-slate-950/60 p-2 text-xs text-slate-300 space-y-1">
+          <div data-agent-id="provenance-gate-card" class="rounded-lg border border-slate-800 bg-slate-950/70 p-2.5 text-xs text-slate-300 space-y-1.5">
             <div class="flex items-center justify-between text-[11px] font-semibold">
-              <span class="text-slate-400 uppercase">DCB0129 Code Provenance:</span>
-              <span class="text-emerald-400 font-mono">DUAL-KEY ENFORCED</span>
+              <span class="text-slate-400 uppercase font-bold text-[10px]">DCB0129 Code Provenance:</span>
+              <span class="text-emerald-400 font-mono font-bold">DUAL-KEY ENFORCED</span>
             </div>
             <div class="text-[11px] text-slate-400 font-mono flex items-center justify-between">
-              <span>Author: <span class="text-slate-300">symphonix-healer[bot]</span></span>
+              <span>Author: <span class="text-slate-200 font-semibold">symphonix-healer[bot]</span></span>
               <span>DID: <span class="text-cyan-400">healer-v1</span></span>
             </div>
-            <div class="text-[10px] text-indigo-300 bg-indigo-950/40 p-1 rounded border border-indigo-900/50">
-              Direct merge blocked: 2 human sign-offs (incl. Certified CSO) required.
+            <div class="text-[10px] text-indigo-300 bg-indigo-950/50 p-1.5 rounded border border-indigo-900/60 font-sans">
+              Direct merge blocked: 2 human sign-offs (incl. Certified CSO) strictly enforced.
             </div>
           </div>
 
-          <!-- 6 Scoped Self-Healing Primitives -->
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
-            <div data-agent-id="healing-primitive-quarantine" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
-              <div class="text-slate-400 text-[10px] uppercase font-bold">Flaky Quarantine</div>
-              <div class="text-emerald-400">Tiered (TTL 72h)</div>
-              <div class="text-[9px] text-slate-500">Clinical tests immune</div>
+          <!-- All 6 Scoped Self-Healing Primitives (Complete 3x2 Grid) -->
+          <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div data-agent-id="healing-primitive-quarantine" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">1. Flaky Quarantine</div>
+              <div class="text-emerald-400 font-bold">Tiered (TTL 72h)</div>
+              <div class="text-[9px] text-slate-400 font-sans">Clinical tests immune</div>
             </div>
-            <div data-agent-id="healing-primitive-predictive" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
-              <div class="text-slate-400 text-[10px] uppercase font-bold">Predictive Sizing</div>
-              <div class="text-cyan-400">P95 + 20% Headroom</div>
-              <div class="text-[9px] text-slate-500">Zero Exit 137 OOM</div>
+            <div data-agent-id="healing-primitive-predictive" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">2. Predictive Sizing</div>
+              <div class="text-cyan-400 font-bold">P95 + 20% Headroom</div>
+              <div class="text-[9px] text-slate-400 font-sans">Zero Exit 137 OOM</div>
             </div>
-            <div data-agent-id="healing-primitive-config" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
-              <div class="text-slate-400 text-[10px] uppercase font-bold">Config Auto-Fix</div>
-              <div class="text-amber-400">1-Click YAML Diff</div>
-              <div class="text-[9px] text-slate-500">L-CAID-10 & Tink AEAD</div>
+            <div data-agent-id="healing-primitive-config" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">3. Config Auto-Fix</div>
+              <div class="text-amber-400 font-bold">1-Click YAML Diff</div>
+              <div class="text-[9px] text-slate-400 font-sans">L-CAID-10 & Tink AEAD</div>
             </div>
-            <div data-agent-id="healing-primitive-multiagent" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
-              <div class="text-slate-400 text-[10px] uppercase font-bold">Multi-Agent Gate</div>
-              <div class="text-purple-400">Dev &times; Safety CSO</div>
-              <div class="text-[9px] text-slate-500">Assertion relaxation check</div>
+            <div data-agent-id="healing-primitive-multiagent" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">4. Multi-Agent Gate</div>
+              <div class="text-purple-400 font-bold">Dev &times; Safety CSO</div>
+              <div class="text-[9px] text-slate-400 font-sans">Assertion relaxation check</div>
+            </div>
+            <div data-agent-id="healing-primitive-synthetic" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">5. Synthetic Evals</div>
+              <div class="text-teal-400 font-bold">FHIR R4 &plusmn;1% / &plusmn;2%</div>
+              <div class="text-[9px] text-slate-400 font-sans">Bounded perturbations</div>
+            </div>
+            <div data-agent-id="healing-primitive-airgap" class="p-2 rounded bg-slate-900/80 border border-slate-800">
+              <div class="text-slate-400 text-[10px] uppercase font-bold">6. Air-Gap Local LLM</div>
+              <div class="text-sky-400 font-bold">Qwen 2.5 Coder 32B</div>
+              <div class="text-[9px] text-slate-400 font-sans">Offline vLLM/Ollama</div>
             </div>
           </div>
         </div>
@@ -435,13 +585,13 @@
         <div id="tab-pane-cdr" data-agent-region="tab-pane-cdr" data-agent-status="hidden" class="hidden space-y-3 flex-1 flex flex-col justify-start">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-slate-200 uppercase tracking-wide text-xs">Dual-Audience CDR 1.0.0</h3>
-            <div class="flex rounded bg-slate-950 p-0.5 border border-slate-800">
+            <div class="flex rounded-lg bg-slate-950 p-0.5 border border-slate-800">
               <button
                 id="toggle-clinician-view"
                 data-testid="toggle-clinician-view"
                 data-agent-id="toggle-clinician-view"
                 data-agent-status="active"
-                class="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition"
+                class="px-2.5 py-0.5 rounded text-xs font-bold bg-cyan-700 text-white shadow border border-cyan-500/50 transition"
                 onclick="setAudienceView('clinician')"
               >
                 Clinician
@@ -451,7 +601,7 @@
                 data-testid="toggle-patient-view"
                 data-agent-id="toggle-patient-view"
                 data-agent-status="inactive"
-                class="px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
+                class="px-2.5 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
                 onclick="setAudienceView('patient')"
               >
                 Patient
@@ -465,20 +615,21 @@
             data-testid="cdr-view-clinician"
             data-agent-id="cdr-view-clinician"
             data-agent-status="visible"
-            class="space-y-2 bg-slate-900/80 p-3 rounded-lg border border-slate-800"
+            class="space-y-2.5 bg-slate-900/80 p-3.5 rounded-lg border border-slate-800"
           >
             <div class="flex items-center justify-between">
-              <span class="font-semibold text-cyan-400 text-xs">Acute Coronary Syndrome Rule-Out</span>
-              <span class="text-[11px] font-mono text-slate-400">WORM SHA-256</span>
+              <span class="font-bold text-cyan-300 text-xs">Acute Coronary Syndrome Rule-Out</span>
+              <span class="text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">WORM SHA-256</span>
             </div>
             <div>
-              <div class="text-[11px] font-semibold uppercase text-slate-400 mb-0.5">Rules &amp; Guidelines</div>
-              <ul class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
+              <div class="text-[10px] font-bold uppercase text-slate-400 mb-1">Clinical Rules &amp; Guidelines</div>
+              <ul class="list-disc list-inside space-y-1 text-slate-300 text-xs">
                 <li>NICE NG185 Chest pain guideline logic v3.2</li>
                 <li>GRACE 2.0 Risk Model 6-month mortality &lt; 1%</li>
+                <li>High-sensitivity Troponin T (hs-cTnT) delta &lt; 3 ng/L at 2h</li>
               </ul>
             </div>
-            <div class="border-t border-slate-800 pt-1.5 text-[11px] text-slate-400 font-mono">
+            <div class="border-t border-slate-800 pt-2 text-[10px] text-slate-400 font-mono break-all">
               <span data-testid="triage-cdr-record-id" data-agent-id="triage-cdr-record-id">record_id: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
             </div>
           </div>
@@ -489,22 +640,23 @@
             data-testid="cdr-view-patient"
             data-agent-id="cdr-view-patient"
             data-agent-status="hidden"
-            class="hidden space-y-2 bg-teal-950/20 p-3 rounded-lg border border-teal-800/40 text-slate-200"
+            class="hidden space-y-2.5 bg-teal-950/25 p-3.5 rounded-lg border border-teal-800/50 text-slate-200"
           >
-            <div data-testid="cdr-patient-summary" data-agent-id="cdr-patient-summary" class="rounded bg-teal-900/30 p-2 border border-teal-600/30 text-teal-200 text-xs leading-relaxed font-sans font-medium">
+            <div data-testid="cdr-patient-summary" data-agent-id="cdr-patient-summary" class="rounded bg-teal-900/40 p-2.5 border border-teal-600/40 text-teal-200 text-xs leading-relaxed font-sans font-medium">
               Your heart tests and scans look reassuring. There is no evidence of sudden heart artery blockage today.
             </div>
 
             <div>
-              <div class="text-[11px] font-semibold uppercase text-teal-400 mb-0.5">Ruled-Out Dangers</div>
-              <ul data-testid="cdr-patient-excluded" data-agent-id="cdr-patient-excluded" class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
+              <div class="text-[10px] font-bold uppercase text-teal-400 mb-1">Ruled-Out Dangers</div>
+              <ul data-testid="cdr-patient-excluded" data-agent-id="cdr-patient-excluded" class="list-disc list-inside space-y-1 text-slate-300 text-xs">
                 <li>ST-Elevation Myocardial Infarction (STEMI)</li>
                 <li>Aortic Dissection</li>
+                <li>Acute Pulmonary Embolism</li>
               </ul>
             </div>
 
-            <div data-testid="cdr-patient-uncertainty" data-agent-id="cdr-patient-uncertainty" class="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded border border-amber-600/30">
-              Notice: Reassessment in 2 hours by the clinical team.
+            <div data-testid="cdr-patient-uncertainty" data-agent-id="cdr-patient-uncertainty" class="text-xs text-amber-200 bg-amber-950/30 p-2 rounded border border-amber-600/40 font-medium">
+              Notice: Reassessment scheduled in 2 hours by the attending clinical team.
             </div>
           </div>
         </div>
@@ -574,13 +726,13 @@
         const btn = document.getElementById(`tab-btn-${t}`);
         const pane = document.getElementById(`tab-pane-${t}`);
         if (t === tab) {
-          btn.className = "flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition";
+          btn.className = "flex-1 py-2 text-center font-bold text-cyan-400 border-b-2 border-cyan-400 transition";
           btn.setAttribute('data-agent-status', 'active');
           btn.setAttribute('aria-selected', 'true');
           pane.classList.remove('hidden');
           pane.setAttribute('data-agent-status', 'visible');
         } else {
-          btn.className = "flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition";
+          btn.className = "flex-1 py-2 text-center font-semibold text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition";
           btn.setAttribute('data-agent-status', 'inactive');
           btn.setAttribute('aria-selected', 'false');
           pane.classList.add('hidden');
@@ -599,8 +751,18 @@
         const btn = document.getElementById(`btn-mode-${m}`);
         if (m === mode) {
           btn.setAttribute('data-agent-status', 'active');
+          if (m === 'live') {
+            btn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-500 text-slate-950 shadow-sm transition";
+          } else if (m === 'simulation') {
+            btn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500 text-slate-950 shadow-sm transition";
+          } else if (m === 'replay') {
+            btn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-blue-500 text-slate-950 shadow-sm transition";
+          } else if (m === 'audit') {
+            btn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-purple-500 text-slate-950 shadow-sm transition";
+          }
         } else {
           btn.setAttribute('data-agent-status', 'inactive');
+          btn.className = "px-2.5 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300 transition";
         }
       });
 
@@ -625,10 +787,10 @@
       levels.forEach(lvl => {
         const btn = document.getElementById(`btn-view-${lvl}`);
         if (lvl === level) {
-          btn.className = "rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow";
+          btn.className = "rounded px-2.5 py-0.5 text-xs font-bold bg-cyan-700 text-white shadow border border-cyan-500/60 transition";
           btn.setAttribute('data-agent-status', 'active');
         } else {
-          btn.className = "rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition";
+          btn.className = "rounded px-2.5 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition";
           btn.setAttribute('data-agent-status', 'inactive');
         }
       });
@@ -641,18 +803,18 @@
       const patientView = document.getElementById('cdr-view-patient');
 
       if (audience === 'clinician') {
-        clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition";
+        clinicianBtn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-cyan-700 text-white shadow border border-cyan-500/50 transition";
         clinicianBtn.setAttribute('data-agent-status', 'active');
-        patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        patientBtn.className = "px-2.5 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
         patientBtn.setAttribute('data-agent-status', 'inactive');
         clinicianView.classList.remove('hidden');
         clinicianView.setAttribute('data-agent-status', 'visible');
         patientView.classList.add('hidden');
         patientView.setAttribute('data-agent-status', 'hidden');
       } else {
-        clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        clinicianBtn.className = "px-2.5 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
         clinicianBtn.setAttribute('data-agent-status', 'inactive');
-        patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-teal-600 text-white shadow transition";
+        patientBtn.className = "px-2.5 py-0.5 rounded text-xs font-bold bg-teal-700 text-white shadow border border-teal-500/50 transition";
         patientBtn.setAttribute('data-agent-status', 'active');
         clinicianView.classList.add('hidden');
         clinicianView.setAttribute('data-agent-status', 'hidden');
@@ -660,7 +822,6 @@
         patientView.setAttribute('data-agent-status', 'visible');
       }
     }
-  </script>
   </script>
 </body>
 </html>
