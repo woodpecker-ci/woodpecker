@@ -32,6 +32,9 @@
   <header
     id="operating-mode-banner"
     data-testid="operating-mode-banner"
+    data-agent-id="banner-operating-mode"
+    data-agent-region="operating-mode"
+    data-agent-status="live"
     class="border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30"
   >
     <div class="flex items-center space-x-2">
@@ -44,17 +47,17 @@
 
     <!-- Mode Selector Controls -->
     <div class="flex items-center space-x-1 text-xs">
-      <button id="btn-mode-live" onclick="setMode('live')" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500 text-slate-950">Live</button>
-      <button id="btn-mode-simulation" onclick="setMode('simulation')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Simulation</button>
-      <button id="btn-mode-replay" onclick="setMode('replay')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Replay</button>
-      <button id="btn-mode-audit" onclick="setMode('audit')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Audit</button>
+      <button id="btn-mode-live" data-agent-id="btn-mode-live" onclick="setMode('live')" class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500 text-slate-950">Live</button>
+      <button id="btn-mode-simulation" data-agent-id="btn-mode-simulation" onclick="setMode('simulation')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Simulation</button>
+      <button id="btn-mode-replay" data-agent-id="btn-mode-replay" onclick="setMode('replay')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Replay</button>
+      <button id="btn-mode-audit" data-agent-id="btn-mode-audit" onclick="setMode('audit')" class="px-2 py-0.5 rounded text-xs font-semibold hover:bg-slate-800 text-slate-300">Audit</button>
     </div>
   </header>
 
   <!-- 2. Woodpecker Top Navigation Bar (Compact, No Scroll) -->
-  <nav class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between font-bold shrink-0 z-20">
+  <nav data-agent-region="top-nav" class="bg-slate-900 border-b border-slate-800 px-5 py-2.5 flex items-center justify-between font-bold shrink-0 z-20">
     <div class="flex items-center space-x-4">
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2" data-agent-id="brand-woodpecker-clinical">
         <div class="h-7 w-7 rounded bg-sky-600 flex items-center justify-center text-white text-sm font-black shadow-md">
           W
         </div>
@@ -74,18 +77,19 @@
 
     <div class="flex items-center space-x-3">
       <!-- SFDS View Level Selector -->
-      <div data-testid="view-level-selector" class="flex items-center space-x-1 rounded bg-slate-950 p-1 border border-slate-800 text-xs">
+      <div data-testid="view-level-selector" data-agent-id="view-level-selector" class="flex items-center space-x-1 rounded bg-slate-950 p-1 border border-slate-800 text-xs">
         <span class="px-1.5 text-xs font-semibold text-slate-400 uppercase">View:</span>
-        <button id="btn-view-essential" onclick="setViewLevel('essential')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
-        <button id="btn-view-standard" onclick="setViewLevel('standard')" class="rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow">Standard</button>
-        <button id="btn-view-advanced" onclick="setViewLevel('advanced')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
-        <button id="btn-view-expert" onclick="setViewLevel('expert')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
+        <button id="btn-view-essential" data-agent-id="btn-view-essential" onclick="setViewLevel('essential')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Essential</button>
+        <button id="btn-view-standard" data-agent-id="btn-view-standard" onclick="setViewLevel('standard')" class="rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow">Standard</button>
+        <button id="btn-view-advanced" data-agent-id="btn-view-advanced" onclick="setViewLevel('advanced')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Advanced</button>
+        <button id="btn-view-expert" data-agent-id="btn-view-expert" onclick="setViewLevel('expert')" class="rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition">Expert</button>
       </div>
 
       <!-- SignalBox Toggle -->
       <button
         id="signalbox-toggle"
         data-testid="signalbox-toggle"
+        data-agent-id="btn-signalbox-toggle"
         class="signalbox-toggle-btn relative flex items-center space-x-1.5 rounded bg-cyan-950/80 border border-cyan-500/50 px-2.5 py-1 text-xs text-cyan-300 hover:bg-cyan-900/90 transition shadow-sm"
         onclick="toggleSignalBox()"
       >
@@ -97,7 +101,11 @@
       </button>
 
       <!-- Account Badge -->
-      <div class="h-7 w-7 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300">
+      <div data-agent-id="badge-user-persona" class="h-7 w-7 rounded bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold font-mono text-cyan-300">
+        CSO
+      </div>
+    </div>
+  </nav>
         CSO
       </div>
     </div>
@@ -128,7 +136,7 @@
       </div>
 
       <!-- Pipelines Table Container (Compact, Zero Scroll) -->
-      <div class="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-lg shrink-0">
+      <div data-agent-region="pipeline-table" class="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-lg shrink-0">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs font-semibold uppercase tracking-wider">
@@ -141,7 +149,7 @@
           </thead>
           <tbody class="divide-y divide-slate-800/60">
             <!-- Row 1: BulletTrain HIE -->
-            <tr class="hover:bg-slate-800/40 transition">
+            <tr data-agent-id="pipeline-row-bullettrain-hie" data-agent-status="success" class="hover:bg-slate-800/40 transition">
               <td class="py-3 px-4 whitespace-nowrap">
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
@@ -164,7 +172,7 @@
             </tr>
 
             <!-- Row 2: CAID Clinical Eval -->
-            <tr class="bg-amber-950/10 hover:bg-amber-950/20 transition">
+            <tr data-agent-id="pipeline-row-caid-clinical-eval" data-agent-status="gated" class="bg-amber-950/10 hover:bg-amber-950/20 transition">
               <td class="py-3 px-4 whitespace-nowrap">
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span> GATED
@@ -184,14 +192,14 @@
                 </span>
               </td>
               <td class="py-3 px-4 text-right">
-                <button onclick="openSignalBoxTab('gate')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold shadow transition">
+                <button id="btn-review-gate" data-agent-id="btn-review-gate" onclick="openSignalBoxTab('gate')" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-semibold shadow transition">
                   Review Gate
                 </button>
               </td>
             </tr>
 
             <!-- Row 3: Client Registry Sync -->
-            <tr class="hover:bg-slate-800/40 transition">
+            <tr data-agent-id="pipeline-row-client-registry-sync" data-agent-status="success" class="hover:bg-slate-800/40 transition">
               <td class="py-3 px-4 whitespace-nowrap">
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800/60">
                   <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> SUCCESS
@@ -217,22 +225,22 @@
       </div>
 
       <!-- Quick Platform Telemetry Footer Cards (Compact 1-Page Fit) -->
-      <div class="grid grid-cols-3 gap-3 mt-4 shrink-0">
-        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+      <div data-agent-region="platform-telemetry" class="grid grid-cols-3 gap-3 mt-4 shrink-0">
+        <div data-agent-id="telemetry-card-tink" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
           <div>
             <div class="text-xs text-slate-400 font-semibold uppercase">Security Keyset</div>
             <div class="text-sm font-bold text-white mt-0.5">Google Tink AEAD</div>
           </div>
           <span class="text-xs font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">ACTIVE</span>
         </div>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+        <div data-agent-id="telemetry-card-zero-mock" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
           <div>
             <div class="text-xs text-slate-400 font-semibold uppercase">Zero-Mock Compliance</div>
             <div class="text-sm font-bold text-white mt-0.5">L-CAID-10 Rule</div>
           </div>
           <span class="text-xs font-mono text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60">ENFORCED</span>
         </div>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
+        <div data-agent-id="telemetry-card-air-gap" class="rounded-lg border border-slate-800 bg-slate-900/50 p-3 flex items-center justify-between">
           <div>
             <div class="text-xs text-slate-400 font-semibold uppercase">Air-Gap Egress</div>
             <div class="text-sm font-bold text-white mt-0.5">Enterprise Perimeter</div>
@@ -246,6 +254,9 @@
     <aside
       id="signalbox-panel"
       data-testid="signalbox-panel"
+      data-agent-id="panel-signalbox"
+      data-agent-region="signalbox-panel"
+      data-agent-status="docked"
       class="hidden w-80 xl:w-96 shrink-0 my-2.5 mr-4 rounded-xl border border-slate-800 bg-slate-900/95 text-slate-100 flex-col h-[calc(100%-1.25rem)] overflow-hidden shadow-2xl transition-all duration-300 z-10"
       aria-label="SignalBox Clinical Assurance & Governance Panel"
     >
@@ -265,6 +276,7 @@
         <button
           id="signalbox-close"
           data-testid="signalbox-close"
+          data-agent-id="btn-signalbox-close"
           class="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white transition"
           title="Close Panel"
           onclick="toggleSignalBox()"
@@ -276,9 +288,11 @@
       </div>
 
       <!-- Navigation Tabs (Prevents Vertical Scroll Overflow) -->
-      <div class="flex border-b border-slate-800 bg-slate-950 shrink-0 text-xs">
+      <div data-agent-region="signalbox-tab-bar" class="flex border-b border-slate-800 bg-slate-950 shrink-0 text-xs">
         <button
           id="tab-btn-gate"
+          data-agent-id="btn-tab-gate"
+          data-agent-status="active"
           onclick="switchSignalBoxTab('gate')"
           class="flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition"
         >
@@ -286,6 +300,8 @@
         </button>
         <button
           id="tab-btn-heal"
+          data-agent-id="btn-tab-heal"
+          data-agent-status="inactive"
           onclick="switchSignalBoxTab('heal')"
           class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
         >
@@ -293,6 +309,8 @@
         </button>
         <button
           id="tab-btn-cdr"
+          data-agent-id="btn-tab-cdr"
+          data-agent-status="inactive"
           onclick="switchSignalBoxTab('cdr')"
           class="flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition"
         >
@@ -304,9 +322,9 @@
       <div class="flex-1 p-4 overflow-hidden flex flex-col justify-between text-xs">
         
         <!-- Tab 1: Clinical Gate & CSO -->
-        <div id="tab-pane-gate" class="space-y-3.5 flex-1 flex flex-col justify-start">
+        <div id="tab-pane-gate" data-agent-region="tab-pane-gate" data-agent-status="visible" class="space-y-3.5 flex-1 flex flex-col justify-start">
           <!-- CSO Gate Box -->
-          <div class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
+          <div data-agent-id="cso-gate-box" data-agent-status="passed" class="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3">
             <div class="flex items-center justify-between mb-1.5">
               <span class="font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
                 <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -329,13 +347,13 @@
 
           <!-- Metrics Grid -->
           <div class="grid grid-cols-2 gap-2.5">
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+            <div data-agent-id="metric-golden-dataset" class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <div class="text-slate-400 text-xs uppercase font-semibold">Golden Dataset</div>
               <div class="mt-0.5 text-xl font-bold font-mono text-cyan-400">99.94%</div>
               <div class="text-[11px] text-slate-400 mt-0.5">Target: &ge; 99.9% zero-miss</div>
             </div>
 
-            <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+            <div data-agent-id="metric-zero-phi" class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
               <div class="text-slate-400 text-xs uppercase font-semibold">Zero-PHI Sentry</div>
               <div class="mt-0.5 text-xl font-bold font-mono text-indigo-400">ACTIVE</div>
               <div class="text-[11px] text-slate-400 mt-0.5">42 IDs Redacted</div>
@@ -344,8 +362,8 @@
         </div>
 
         <!-- Tab 2: Self-Healing Telemetry -->
-        <div id="tab-pane-heal" class="hidden space-y-2.5 flex-1 flex flex-col justify-start">
-          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
+        <div id="tab-pane-heal" data-agent-region="tab-pane-heal" data-agent-status="hidden" class="hidden space-y-2.5 flex-1 flex flex-col justify-start">
+          <div data-agent-id="self-healing-summary-card" class="rounded-lg border border-slate-800 bg-slate-950/60 p-2.5">
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-bold text-sky-400 uppercase tracking-wide flex items-center gap-1.5 text-xs">
                 <svg class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -353,7 +371,7 @@
                 </svg>
                 Autonomous Self-Healing
               </h3>
-              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
+              <span data-agent-id="badge-qwen-coder" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800/60">
                 Qwen 2.5 Coder 32B (Air-Gap)
               </span>
             </div>
@@ -374,7 +392,7 @@
           </div>
 
           <!-- DCB0129 Code Provenance Gate Status -->
-          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-2 text-xs text-slate-300 space-y-1">
+          <div data-agent-id="provenance-gate-card" class="rounded-lg border border-slate-800 bg-slate-950/60 p-2 text-xs text-slate-300 space-y-1">
             <div class="flex items-center justify-between text-[11px] font-semibold">
               <span class="text-slate-400 uppercase">DCB0129 Code Provenance:</span>
               <span class="text-emerald-400 font-mono">DUAL-KEY ENFORCED</span>
@@ -390,22 +408,22 @@
 
           <!-- 6 Scoped Self-Healing Primitives -->
           <div class="grid grid-cols-2 gap-1.5 text-[11px] font-mono">
-            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div data-agent-id="healing-primitive-quarantine" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
               <div class="text-slate-400 text-[10px] uppercase font-bold">Flaky Quarantine</div>
               <div class="text-emerald-400">Tiered (TTL 72h)</div>
               <div class="text-[9px] text-slate-500">Clinical tests immune</div>
             </div>
-            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div data-agent-id="healing-primitive-predictive" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
               <div class="text-slate-400 text-[10px] uppercase font-bold">Predictive Sizing</div>
               <div class="text-cyan-400">P95 + 20% Headroom</div>
               <div class="text-[9px] text-slate-500">Zero Exit 137 OOM</div>
             </div>
-            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div data-agent-id="healing-primitive-config" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
               <div class="text-slate-400 text-[10px] uppercase font-bold">Config Auto-Fix</div>
               <div class="text-amber-400">1-Click YAML Diff</div>
               <div class="text-[9px] text-slate-500">L-CAID-10 & Tink AEAD</div>
             </div>
-            <div class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
+            <div data-agent-id="healing-primitive-multiagent" class="p-1.5 rounded bg-slate-900/80 border border-slate-800">
               <div class="text-slate-400 text-[10px] uppercase font-bold">Multi-Agent Gate</div>
               <div class="text-purple-400">Dev &times; Safety CSO</div>
               <div class="text-[9px] text-slate-500">Assertion relaxation check</div>
@@ -414,13 +432,15 @@
         </div>
 
         <!-- Tab 3: CDR 1.0.0 Dual-Audience Explainability -->
-        <div id="tab-pane-cdr" class="hidden space-y-3 flex-1 flex flex-col justify-start">
+        <div id="tab-pane-cdr" data-agent-region="tab-pane-cdr" data-agent-status="hidden" class="hidden space-y-3 flex-1 flex flex-col justify-start">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-slate-200 uppercase tracking-wide text-xs">Dual-Audience CDR 1.0.0</h3>
             <div class="flex rounded bg-slate-950 p-0.5 border border-slate-800">
               <button
                 id="toggle-clinician-view"
                 data-testid="toggle-clinician-view"
+                data-agent-id="toggle-clinician-view"
+                data-agent-status="active"
                 class="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition"
                 onclick="setAudienceView('clinician')"
               >
@@ -429,6 +449,8 @@
               <button
                 id="toggle-patient-view"
                 data-testid="toggle-patient-view"
+                data-agent-id="toggle-patient-view"
+                data-agent-status="inactive"
                 class="px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition"
                 onclick="setAudienceView('patient')"
               >
@@ -441,6 +463,8 @@
           <div
             id="cdr-view-clinician"
             data-testid="cdr-view-clinician"
+            data-agent-id="cdr-view-clinician"
+            data-agent-status="visible"
             class="space-y-2 bg-slate-900/80 p-3 rounded-lg border border-slate-800"
           >
             <div class="flex items-center justify-between">
@@ -455,7 +479,7 @@
               </ul>
             </div>
             <div class="border-t border-slate-800 pt-1.5 text-[11px] text-slate-400 font-mono">
-              <span data-testid="triage-cdr-record-id">record_id: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
+              <span data-testid="triage-cdr-record-id" data-agent-id="triage-cdr-record-id">record_id: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span>
             </div>
           </div>
 
@@ -463,28 +487,30 @@
           <div
             id="cdr-view-patient"
             data-testid="cdr-view-patient"
+            data-agent-id="cdr-view-patient"
+            data-agent-status="hidden"
             class="hidden space-y-2 bg-teal-950/20 p-3 rounded-lg border border-teal-800/40 text-slate-200"
           >
-            <div data-testid="cdr-patient-summary" class="rounded bg-teal-900/30 p-2 border border-teal-600/30 text-teal-200 text-xs leading-relaxed font-sans font-medium">
+            <div data-testid="cdr-patient-summary" data-agent-id="cdr-patient-summary" class="rounded bg-teal-900/30 p-2 border border-teal-600/30 text-teal-200 text-xs leading-relaxed font-sans font-medium">
               Your heart tests and scans look reassuring. There is no evidence of sudden heart artery blockage today.
             </div>
 
             <div>
               <div class="text-[11px] font-semibold uppercase text-teal-400 mb-0.5">Ruled-Out Dangers</div>
-              <ul data-testid="cdr-patient-excluded" class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
+              <ul data-testid="cdr-patient-excluded" data-agent-id="cdr-patient-excluded" class="list-disc list-inside space-y-0.5 text-slate-300 text-xs">
                 <li>ST-Elevation Myocardial Infarction (STEMI)</li>
                 <li>Aortic Dissection</li>
               </ul>
             </div>
 
-            <div data-testid="cdr-patient-uncertainty" class="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded border border-amber-600/30">
+            <div data-testid="cdr-patient-uncertainty" data-agent-id="cdr-patient-uncertainty" class="text-xs text-amber-300/90 bg-amber-950/20 p-2 rounded border border-amber-600/30">
               Notice: Reassessment in 2 hours by the clinical team.
             </div>
           </div>
         </div>
 
         <!-- Authority Footer (Inside Drawer, Compact) -->
-        <div class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 shrink-0 space-y-0.5">
+        <div data-agent-region="panel-authority-footer" class="text-[11px] text-slate-400 border-t border-slate-800 pt-2 shrink-0 space-y-0.5">
           <div>DID: <span class="font-mono text-slate-300">did:web:gharra.symphonix.health:agents:fde-superpersona</span></div>
           <div>Assurance: <span class="font-mono text-slate-300">DCB0129-DCB0160 | FUTURE-AI | ISO-42001</span></div>
         </div>
@@ -494,7 +520,10 @@
 
   <!-- 4. SFDS Mandatory Clinical Disclaimer Footer (Compact, No Scroll) -->
   <footer
+    id="clinical-disclaimer-footer"
     data-testid="clinical-disclaimer-footer"
+    data-agent-id="footer-clinical-disclaimer"
+    data-agent-region="clinical-disclaimer"
     class="border-t border-slate-800 bg-slate-950 text-slate-400 px-5 py-2 text-xs flex items-center justify-between gap-3 shadow-inner shrink-0 z-20"
   >
     <div class="flex items-center space-x-2">
@@ -521,9 +550,11 @@
       if (panel.classList.contains('hidden')) {
         panel.classList.remove('hidden');
         panel.classList.add('flex');
+        panel.setAttribute('data-agent-status', 'open');
       } else {
         panel.classList.add('hidden');
         panel.classList.remove('flex');
+        panel.setAttribute('data-agent-status', 'closed');
       }
     }
 
@@ -532,6 +563,7 @@
       if (panel.classList.contains('hidden')) {
         panel.classList.remove('hidden');
         panel.classList.add('flex');
+        panel.setAttribute('data-agent-status', 'open');
       }
       switchSignalBoxTab(tabName);
     }
@@ -543,10 +575,16 @@
         const pane = document.getElementById(`tab-pane-${t}`);
         if (t === tab) {
           btn.className = "flex-1 py-2 text-center font-semibold text-cyan-400 border-b-2 border-cyan-400 transition";
+          btn.setAttribute('data-agent-status', 'active');
+          btn.setAttribute('aria-selected', 'true');
           pane.classList.remove('hidden');
+          pane.setAttribute('data-agent-status', 'visible');
         } else {
           btn.className = "flex-1 py-2 text-center font-medium text-slate-400 hover:text-slate-200 border-b-2 border-transparent transition";
+          btn.setAttribute('data-agent-status', 'inactive');
+          btn.setAttribute('aria-selected', 'false');
           pane.classList.add('hidden');
+          pane.setAttribute('data-agent-status', 'hidden');
         }
       });
     }
@@ -554,6 +592,17 @@
     function setOperatingMode(mode) {
       const banner = document.getElementById('operating-mode-banner');
       const label = document.getElementById('current-mode-label');
+      banner.setAttribute('data-agent-status', mode);
+
+      const modes = ['live', 'simulation', 'replay', 'audit'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`btn-mode-${m}`);
+        if (m === mode) {
+          btn.setAttribute('data-agent-status', 'active');
+        } else {
+          btn.setAttribute('data-agent-status', 'inactive');
+        }
+      });
 
       if (mode === 'live') {
         banner.className = "border-b transition-colors duration-200 px-5 py-1.5 text-xs font-medium flex items-center justify-between shadow-sm bg-emerald-950/80 border-emerald-600/60 text-emerald-200 shrink-0 z-30";
@@ -577,8 +626,10 @@
         const btn = document.getElementById(`btn-view-${lvl}`);
         if (lvl === level) {
           btn.className = "rounded px-2 py-0.5 text-xs font-medium bg-cyan-600 text-white shadow";
+          btn.setAttribute('data-agent-status', 'active');
         } else {
           btn.className = "rounded px-2 py-0.5 text-xs font-medium text-slate-400 hover:text-white transition";
+          btn.setAttribute('data-agent-status', 'inactive');
         }
       });
     }
@@ -591,16 +642,25 @@
 
       if (audience === 'clinician') {
         clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-cyan-600 text-white shadow transition";
+        clinicianBtn.setAttribute('data-agent-status', 'active');
         patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        patientBtn.setAttribute('data-agent-status', 'inactive');
         clinicianView.classList.remove('hidden');
+        clinicianView.setAttribute('data-agent-status', 'visible');
         patientView.classList.add('hidden');
+        patientView.setAttribute('data-agent-status', 'hidden');
       } else {
         clinicianBtn.className = "px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        clinicianBtn.setAttribute('data-agent-status', 'inactive');
         patientBtn.className = "px-2 py-0.5 rounded text-xs font-semibold bg-teal-600 text-white shadow transition";
+        patientBtn.setAttribute('data-agent-status', 'active');
         clinicianView.classList.add('hidden');
+        clinicianView.setAttribute('data-agent-status', 'hidden');
         patientView.classList.remove('hidden');
+        patientView.setAttribute('data-agent-status', 'visible');
       }
     }
+  </script>
   </script>
 </body>
 </html>

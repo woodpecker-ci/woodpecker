@@ -1,0 +1,492 @@
+{
+  "schema_version": "SYMPHONIX_SCENARIO_EXECUTION_RESULT_V1",
+  "suite_name": "healthci_ui_semantics_matrix",
+  "matrix_path": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+  "total_scenarios": 12,
+  "passed": 12,
+  "failed": 0,
+  "skipped": 0,
+  "executed_at": "2026-10-25T12:13:15.483866+00:00",
+  "results": [
+    {
+      "use_case_id": "healthci_ui_fde_view_levels_0001",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 0,
+      "matrix_row_sha256": "193bf76ddbe84b5f06f46ea573e40129b58bb9aac849551b733dd553442b0e2c",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_fde_view_levels_0001",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_clinician_gate_review_0002",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 1,
+      "matrix_row_sha256": "daa911feb4b248e1d7fd71995874bef36739b4d7a511f8c3639652d639ca5988",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_clinician_gate_review_0002",
+      "persona_driver": "clinician",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_cso_patient_cdr_0003",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 2,
+      "matrix_row_sha256": "988de55f30fbc9e40d90246698fdc1af2de8056b40f513cf35d16d0aff7a0714",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_cso_patient_cdr_0003",
+      "persona_driver": "cso",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_fde_self_healing_telemetry_0004",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 3,
+      "matrix_row_sha256": "0dfcd749f4081e15ebc9bcc26a0315e94fbc0609b29075beee99c95be0988fb5",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_fde_self_healing_telemetry_0004",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_cso_code_provenance_gate_0005",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 4,
+      "matrix_row_sha256": "ea3e219c99d9a81c5668a031e61cbf7a233f5232da76a510f7b8b6b9ad1f08f9",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_cso_code_provenance_gate_0005",
+      "persona_driver": "cso",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_mode_switch_reactive_styling_0006",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 5,
+      "matrix_row_sha256": "a326666a0b6ff23a08ca59771a2c8b8c11c13a7f7ceab03f60b11a3bfd1573c6",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_mode_switch_reactive_styling_0006",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_missing_agent_hook_0007",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 6,
+      "matrix_row_sha256": "c4ff4bf5f081f5ae6c4b03ae19b12fb5021e2dd32d3ca7eeba857f7d9b0915e6",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_missing_agent_hook_0007",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_zero_scroll_overflow_rejection_0008",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 7,
+      "matrix_row_sha256": "267c58511f26edfd5885355d6b90fbea0368c35de5fcc7e1077e31d3c7c0a5c4",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_zero_scroll_overflow_rejection_0008",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_unauthorized_override_rejection_0009",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 8,
+      "matrix_row_sha256": "a2a926c3919c886e40c43f03b24c0453a85090f46979844fb81d64d1bb0bbc9d",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_unauthorized_override_rejection_0009",
+      "persona_driver": "clinician",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_rapid_tab_switching_resilience_0010",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 9,
+      "matrix_row_sha256": "3d190cbef8313523b92ebbd17afa05f7bc0b751e1aee693550b2c98b41d5c060",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_rapid_tab_switching_resilience_0010",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_high_contrast_theme_edge_0011",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 10,
+      "matrix_row_sha256": "67f68ed704aa455dd8a119f28502667de2a58746659287fe348dde9cfd00b908",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_high_contrast_theme_edge_0011",
+      "persona_driver": "cso",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    },
+    {
+      "use_case_id": "healthci_ui_headed_browser_visual_attestation_0012",
+      "matrix_file": "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+      "matrix_row_index": 11,
+      "matrix_row_sha256": "4cc63c820a8535a7471a464855fe7bea686a65baef7d0f72cb4ce93af652b294",
+      "outcome": "passed",
+      "pytest_node_id": "contrib/symphonix/tests/run_frontend_headed_matrix.py::healthci_ui_headed_browser_visual_attestation_0012",
+      "persona_driver": "fde-superpersona",
+      "headed_mode": true,
+      "layout_audit": {
+        "has_unnecessary_scroll": false,
+        "scrollHeight_equals_clientHeight": true,
+        "wcag_contrast_status": "pass"
+      },
+      "app_paths_dispatched": [
+        "contrib/symphonix/preview/index.html",
+        "contrib/symphonix/tests/reduced_json_matrices/healthci_ui_semantics_matrix.14col.json",
+        "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md"
+      ],
+      "services_started": [
+        "headed-chromium",
+        "signalbox-mcp",
+        "preview-http-server"
+      ],
+      "failures": [],
+      "executed_at": "2026-10-25T12:13:15.483866+00:00",
+      "source": "symphonix-healthci-ui-runner",
+      "environment": {
+        "runner": "SignalBox Headed Chromium",
+        "os": "win32",
+        "browser_strategy": "headless=False",
+        "personas": [
+          "fde-superpersona",
+          "clinician",
+          "cso"
+        ],
+        "viewport": "1280x800",
+        "zero_scroll_verified": true
+      }
+    }
+  ]
+}

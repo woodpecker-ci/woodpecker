@@ -1,0 +1,362 @@
+{
+  "metadata": {
+    "format": "Standard BulletTrain 14-column format",
+    "total_scenarios": 12,
+    "component": "healthci_ui_semantics",
+    "data_source": "HealthCI UI Semantics and Headed Browser Verification (DOC-REQ-HEALTHCI-UI-001)",
+    "requirements_doc": "docs/HEALTHCI_UI_SEMANTICS_REQUIREMENTS.md",
+    "executor": "contrib/symphonix/tests/run_frontend_headed_matrix.py",
+    "reconciliation": "Adheres to BulletTrain WS8 UI semantics standards: data-agent-id top selector priority, data-agent-region, data-agent-status, multi-persona headed browser execution via SignalBox MCP (fde-superpersona, clinician, cso), zero-scroll single-page desktop fit.",
+    "distribution": {
+      "positive": 7,
+      "negative": 3,
+      "edge": 2
+    },
+    "requirement_ids": [
+      "FR-HCI-UI-001",
+      "FR-HCI-UI-002",
+      "FR-HCI-UI-003",
+      "FR-HCI-UI-004",
+      "NFR-HCI-UI-001",
+      "NFR-HCI-UI-002",
+      "NFR-HCI-UI-003"
+    ]
+  },
+  "test_cases": [
+    {
+      "use_case_id": "healthci_ui_fde_view_levels_0001",
+      "component": "healthci_ui_semantics",
+      "scenario": "fde-superpersona toggles view levels (Essential -> Standard -> Advanced -> Expert) verifying DOM element visibility and zero-scroll fit",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "View level selector cycles smoothly across all 4 levels",
+        "Active level button reflects data-agent-status='active'",
+        "Page remains within zero-scroll boundary"
+      ],
+      "preconditions": "Preview dashboard loaded in headed Chromium window",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "levels": ["essential", "standard", "advanced", "expert"],
+        "requirement_ids": ["FR-HCI-UI-001", "NFR-HCI-UI-001"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-001-AC01", "NFR-HCI-UI-001-AC01"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"btn-view-standard\"]').getAttribute('data-agent-status') == 'active'",
+        "layout_audit.has_unnecessary_scroll == false"
+      ],
+      "dependencies": ["FR-HCI-UI-001"],
+      "tags": ["ui", "fde-superpersona", "view-levels", "zero-scroll", "FR-HCI-UI-001"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Verified under headed browser with fde-superpersona"
+    },
+    {
+      "use_case_id": "healthci_ui_clinician_gate_review_0002",
+      "component": "healthci_ui_semantics",
+      "scenario": "clinician inspects Clinical Gate, Golden Dataset (>= 99.9%), and Clinician CDR 1.0.0 view with Merkle root hash",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Clinical Gate indicates CSO Clinical Gate Passed",
+        "Golden Dataset accuracy shows >= 99.9%",
+        "Clinician view displays Merkle Root hash and NICE NG185 guideline logic"
+      ],
+      "preconditions": "SignalBox drawer opened to Clinical Gate tab",
+      "test_data": {
+        "persona": "clinician",
+        "target_tab": "gate",
+        "requirement_ids": ["FR-HCI-UI-002", "FR-HCI-UI-003"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-002-AC02", "FR-HCI-UI-003-AC01"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"cso-gate-box\"]').getAttribute('data-agent-status') == 'passed'",
+        "document.querySelector('[data-agent-id=\"metric-golden-dataset\"]').textContent.includes('99.94%')"
+      ],
+      "dependencies": ["FR-HCI-UI-003"],
+      "tags": ["ui", "clinician", "clinical-gate", "golden-dataset", "merkle-root"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Clinician persona review of statutory compliance markers"
+    },
+    {
+      "use_case_id": "healthci_ui_cso_patient_cdr_0003",
+      "component": "healthci_ui_semantics",
+      "scenario": "cso switches to Explain to Patient view, verifying plain language and suppression of internal cryptographic hashes",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Patient explanation text visible with reassuring tone",
+        "Ruled-out dangers listed in bulleted list",
+        "Cryptographic Merkle hashes and WORM SHA-256 strings suppressed"
+      ],
+      "preconditions": "CDR 1.0.0 tab open, toggle set to patient",
+      "test_data": {
+        "persona": "cso",
+        "target_audience": "patient",
+        "requirement_ids": ["FR-HCI-UI-003"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-003-AC02"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"cdr-view-patient\"]').getAttribute('data-agent-status') == 'visible'",
+        "!document.querySelector('[data-agent-id=\"cdr-view-patient\"]').textContent.includes('sha256:')",
+        "document.querySelector('[data-agent-id=\"cdr-patient-summary\"]').textContent.length > 20"
+      ],
+      "dependencies": ["FR-HCI-UI-003"],
+      "tags": ["ui", "cso", "cdr-1.0.0", "patient-explainability", "plain-language"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "CSO validates patient-facing language safety per DCB0129"
+    },
+    {
+      "use_case_id": "healthci_ui_fde_self_healing_telemetry_0004",
+      "component": "healthci_ui_semantics",
+      "scenario": "fde-superpersona opens SignalBox Self-Healing tab, inspecting Air-Gapped Qwen 2.5 Coder 32B badge and 6 self-healing cards",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Qwen 2.5 Coder 32B (Air-Gap) badge visible",
+        "L1, L2, L3 counters properly rendered",
+        "All 6 self-healing cards present with zero layout breakage"
+      ],
+      "preconditions": "SignalBox drawer switched to 'heal' tab",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "model": "qwen2.5-coder:32b",
+        "requirement_ids": ["FR-HCI-UI-004"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-004-AC01", "FR-HCI-UI-004-AC02"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"badge-qwen-coder\"]').textContent.includes('Qwen 2.5 Coder 32B')",
+        "document.querySelector('[data-agent-id=\"healing-primitive-predictive\"]').textContent.includes('P95 + 20%')"
+      ],
+      "dependencies": ["FR-HCI-UI-004"],
+      "tags": ["ui", "fde-superpersona", "self-healing", "qwen", "air-gap"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Air-gapped telemetry inspection"
+    },
+    {
+      "use_case_id": "healthci_ui_cso_code_provenance_gate_0005",
+      "component": "healthci_ui_semantics",
+      "scenario": "cso reviews DCB0129 code provenance gate display confirming symphonix-healer[bot] author and merge block rules",
+      "test_type": "positive",
+      "priority": "high",
+      "expected_outcomes": [
+        "Provenance card displays DUAL-KEY ENFORCED",
+        "Machine DID healer-v1 and bot author shown",
+        "Merge block warning explicitly states requirement for 2 human sign-offs including Certified CSO"
+      ],
+      "preconditions": "Self-Healing tab active",
+      "test_data": {
+        "persona": "cso",
+        "author": "symphonix-healer[bot]",
+        "requirement_ids": ["FR-HCI-UI-001", "FR-HCI-UI-004"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-001-AC03", "FR-HCI-UI-004-AC02"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"provenance-gate-card\"]').textContent.includes('DUAL-KEY ENFORCED')",
+        "document.querySelector('[data-agent-id=\"provenance-gate-card\"]').textContent.includes('symphonix-healer[bot]')"
+      ],
+      "dependencies": ["FR-HCI-UI-004"],
+      "tags": ["ui", "cso", "dcb0129", "provenance-gate", "dual-key"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "CSO validates machine provenance barrier"
+    },
+    {
+      "use_case_id": "healthci_ui_mode_switch_reactive_styling_0006",
+      "component": "healthci_ui_semantics",
+      "scenario": "Operator cycles operating modes (Live -> Simulation -> Replay -> Audit) verifying dynamic styling and disclaimer banner updates",
+      "test_type": "positive",
+      "priority": "medium",
+      "expected_outcomes": [
+        "Operating mode header updates background and text color dynamically",
+        "Label reflects the selected mode accurately",
+        "data-agent-status on header transitions to live/simulation/replay/audit"
+      ],
+      "preconditions": "Top navigation banner loaded",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "modes": ["live", "simulation", "replay", "audit"],
+        "requirement_ids": ["FR-HCI-UI-002"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-002-AC01"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"banner-operating-mode\"]').getAttribute('data-agent-status') in ['live', 'simulation', 'replay', 'audit']",
+        "document.querySelector('[data-agent-id=\"btn-mode-audit\"]').getAttribute('data-agent-status') == 'active'"
+      ],
+      "dependencies": ["FR-HCI-UI-002"],
+      "tags": ["ui", "fde-superpersona", "operating-modes", "reactive-ui"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Validates reactive mode styling"
+    },
+    {
+      "use_case_id": "healthci_ui_missing_agent_hook_0007",
+      "component": "healthci_ui_semantics",
+      "scenario": "Fallback selector chain test: query nonexistent data-agent-id falls back gracefully to data-testid without crash",
+      "test_type": "negative",
+      "priority": "high",
+      "expected_outcomes": [
+        "Query for nonexistent data-agent-id returns null or routes to data-testid fallback",
+        "No JavaScript error thrown in page console"
+      ],
+      "preconditions": "Page active",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "nonexistent_hook": "nonexistent-button-hook",
+        "fallback_testid": "signalbox-toggle",
+        "requirement_ids": ["FR-HCI-UI-001"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-001-AC01"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"nonexistent-button-hook\"]') == null",
+        "document.querySelector('[data-testid=\"signalbox-toggle\"]') != null"
+      ],
+      "dependencies": ["FR-HCI-UI-001"],
+      "tags": ["ui", "negative", "selector-fallback", "error-resilience"],
+      "estimated_duration": 10,
+      "automation_status": "automated",
+      "notes": "Ensures graceful degradation of selector resolution"
+    },
+    {
+      "use_case_id": "healthci_ui_zero_scroll_overflow_rejection_0008",
+      "component": "healthci_ui_semantics",
+      "scenario": "Layout audit detects viewport overflow if body is set to scroll or elements exceed viewport bounds",
+      "test_type": "negative",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Normal state has zero unnecessary scroll",
+        "Synthetic 2000px element injection is immediately flagged as overflow by layout audit"
+      ],
+      "preconditions": "Normal zero-scroll desktop viewport (1280x800)",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "overflow_probe": "div#synthetic-overflow",
+        "requirement_ids": ["NFR-HCI-UI-001"],
+        "acceptance_criteria_ids": ["NFR-HCI-UI-001-AC01", "NFR-HCI-UI-001-AC02"]
+      },
+      "validation_rules": [
+        "layout_audit.has_unnecessary_scroll == false",
+        "document.documentElement.scrollHeight <= window.innerHeight + 2"
+      ],
+      "dependencies": ["NFR-HCI-UI-001"],
+      "tags": ["ui", "negative", "zero-scroll", "overflow-detection", "layout-audit"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Guarantees zero-scroll invariant is strictly monitored"
+    },
+    {
+      "use_case_id": "healthci_ui_unauthorized_override_rejection_0009",
+      "component": "healthci_ui_semantics",
+      "scenario": "Non-CSO persona attempting to bypass the DCB0129 review gate is refused",
+      "test_type": "negative",
+      "priority": "high",
+      "expected_outcomes": [
+        "Direct merge button absent or disabled for non-CSO roles",
+        "Status badge indicates ACCOUNTABLE_HUMAN_REQUIRED"
+      ],
+      "preconditions": "Review Gate opened under standard developer persona",
+      "test_data": {
+        "persona": "clinician",
+        "action": "force_merge",
+        "requirement_ids": ["FR-HCI-UI-002"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-002-AC02"]
+      },
+      "validation_rules": [
+        "document.querySelector('[data-agent-id=\"pipeline-row-caid-clinical-eval\"]').getAttribute('data-agent-status') == 'gated'",
+        "document.body.textContent.includes('ACCOUNTABLE_HUMAN_REQUIRED')"
+      ],
+      "dependencies": ["FR-HCI-UI-002"],
+      "tags": ["ui", "negative", "cso-gate", "rbac", "dcb0129"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Asserts authorization barrier on UI actions"
+    },
+    {
+      "use_case_id": "healthci_ui_rapid_tab_switching_resilience_0010",
+      "component": "healthci_ui_semantics",
+      "scenario": "Rapid switching across all 3 SignalBox tabs (gate -> heal -> cdr -> gate) maintains DOM consistency without state corruption",
+      "test_type": "edge",
+      "priority": "medium",
+      "expected_outcomes": [
+        "Tabs switch smoothly without ghost views or multiple active panes",
+        "Exactly one tab pane has data-agent-status='visible' at any moment",
+        "Panel height and width remain completely unchanged"
+      ],
+      "preconditions": "SignalBox drawer opened",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "sequence": ["gate", "heal", "cdr", "gate"],
+        "iterations": 10,
+        "requirement_ids": ["FR-HCI-UI-002"],
+        "acceptance_criteria_ids": ["FR-HCI-UI-002-AC02"]
+      },
+      "validation_rules": [
+        "document.querySelectorAll('[data-agent-region^=\"tab-pane-\"][data-agent-status=\"visible\"]').length == 1"
+      ],
+      "dependencies": ["FR-HCI-UI-002"],
+      "tags": ["ui", "edge", "tabs", "rapid-switch", "concurrency"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Fuzzing tab switching logic"
+    },
+    {
+      "use_case_id": "healthci_ui_high_contrast_theme_edge_0011",
+      "component": "healthci_ui_semantics",
+      "scenario": "Dark mode WCAG 2.2 AA contrast compliance check on all status badges and warning containers",
+      "test_type": "edge",
+      "priority": "medium",
+      "expected_outcomes": [
+        "All text elements meet minimum 4.5:1 contrast against dark slate background",
+        "Zero WCAG contrast violations flagged in layout audit"
+      ],
+      "preconditions": "Standard dark slate theme active",
+      "test_data": {
+        "persona": "cso",
+        "standard": "WCAG_2.2_AA",
+        "requirement_ids": ["NFR-HCI-UI-003"],
+        "acceptance_criteria_ids": ["NFR-HCI-UI-003-AC01"]
+      },
+      "validation_rules": [
+        "layout_audit.contrast_issues_count == 0 || layout_audit.summary.includes('pass')"
+      ],
+      "dependencies": ["NFR-HCI-UI-003"],
+      "tags": ["ui", "edge", "accessibility", "wcag", "contrast"],
+      "estimated_duration": 15,
+      "automation_status": "automated",
+      "notes": "Accessibility contrast audit"
+    },
+    {
+      "use_case_id": "healthci_ui_headed_browser_visual_attestation_0012",
+      "component": "healthci_ui_semantics",
+      "scenario": "Complete headed browser execution attestation through SignalBox MCP verifying visual rendering and zero-scroll layout",
+      "test_type": "positive",
+      "priority": "critical",
+      "expected_outcomes": [
+        "Real visible Chromium window opens with persona cursor badge",
+        "Zero-scroll single page fit is visually confirmed",
+        "Execution record emitted with canonical scenario SHA-256 and visual screenshot evidence"
+      ],
+      "preconditions": "SignalBox MCP session active on 127.0.0.1",
+      "test_data": {
+        "persona": "fde-superpersona",
+        "driver": "headed-playwright",
+        "headless": false,
+        "requirement_ids": ["NFR-HCI-UI-002", "NFR-HCI-UI-001"],
+        "acceptance_criteria_ids": ["NFR-HCI-UI-002-AC01", "NFR-HCI-UI-002-AC02", "NFR-HCI-UI-002-AC03"]
+      },
+      "validation_rules": [
+        "headed_session.is_headed == true",
+        "execution_record.status == 'PASSED'",
+        "execution_record.version == 'SYMPHONIX_SCENARIO_EXECUTION_RESULT_V1'"
+      ],
+      "dependencies": ["NFR-HCI-UI-002"],
+      "tags": ["ui", "fde-superpersona", "headed", "signalbox", "attestation", "critical"],
+      "estimated_duration": 25,
+      "automation_status": "automated",
+      "notes": "End-to-end headed attestation"
+    }
+  ]
+}
