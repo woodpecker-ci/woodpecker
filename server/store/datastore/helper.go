@@ -34,11 +34,11 @@ const maxRetries = 3
 // retryWrite runs fn with exponential backoff, retrying on transient database errors
 // (ErrDatabaseLocked, ErrInsertDuplicateDetected).
 func retryWrite(fn func() error) error {
-	return retryWriteContext(context.Background(), fn)
+	return retryWriteCtx(context.Background(), fn)
 }
 
-// retryWriteContext is retryWrite that stops once ctx is done.
-func retryWriteContext(ctx context.Context, fn func() error) error {
+// retryWriteCtx is retryWrite that stops once ctx is done.
+func retryWriteCtx(ctx context.Context, fn func() error) error {
 	_, err := backoff.Retry(ctx, func() (struct{}, error) {
 		err := fn()
 		if errors.Is(err, types.ErrDatabaseLocked) || errors.Is(err, types.ErrInsertDuplicateDetected) {
