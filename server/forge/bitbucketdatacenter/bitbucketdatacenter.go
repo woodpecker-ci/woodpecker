@@ -298,7 +298,10 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 
 	opts := &bitbucket.FilesListOptions{At: p.Commit}
 	all := make([]*forge_types.FileMeta, 0)
-	for {
+	for pages := 0; ; pages++ {
+		if pages == common.MaxPages {
+			return nil, &forge_types.ErrTooManyPages{Listing: fmt.Sprintf("config folder '%s'", path), Pages: common.MaxPages}
+		}
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
 			if resp != nil && resp.StatusCode == http.StatusNotFound {
