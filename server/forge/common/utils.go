@@ -27,6 +27,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+// MaxPages caps how many pages a forge driver requests for one listing, so a
+// forge that keeps reporting more pages can not keep it busy forever.
+// A listing whose last allowed page is still full fails with ErrTooManyPages.
+const MaxPages = 100
+
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 	u, err := url.Parse(cloneURL)
 	if err != nil {
