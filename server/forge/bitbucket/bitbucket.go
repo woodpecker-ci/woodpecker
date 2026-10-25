@@ -259,7 +259,10 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	var page *string
 	repoPathFiles := []*forge_types.FileMeta{}
 	client := c.newClient(ctx, u)
-	for {
+	for pages := 0; ; pages++ {
+		if pages == common.MaxPages {
+			return nil, &forge_types.ErrTooManyPages{Listing: fmt.Sprintf("config folder '%s'", f), Pages: common.MaxPages}
+		}
 		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
 		if err != nil {
 			var rspErr internal.Error
