@@ -53,7 +53,7 @@ func (s storage) LogAppend(ctx context.Context, _ *model.Step, logEntries []*mod
 }
 
 func (s storage) LogDelete(ctx context.Context, step *model.Step) error {
-	return retryWrite(func() error { //nolint:contextcheck the query uses ctx, retryWrite only waits between attempts
+	return retryWriteContext(ctx, func() error {
 		sess := s.engine.NewSession().Context(ctx)
 		defer sess.Close()
 		return logDelete(sess, step.ID)
