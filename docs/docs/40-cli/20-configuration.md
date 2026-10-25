@@ -29,6 +29,8 @@ woodpecker-cli stores named contexts in a `contexts.json` file under the user's 
 | macOS                        | `~/Library/Application Support/woodpecker/contexts.json` |
 | Windows                      | `C:\Users\<user>\AppData\Local\woodpecker\contexts.json` |
 
+`--contexts-file` or `WOODPECKER_CONTEXTS_FILE` selects a different file for all commands, including `setup` and `context`.
+
 The file records the selected context and its non-secret connection settings:
 
 ```json

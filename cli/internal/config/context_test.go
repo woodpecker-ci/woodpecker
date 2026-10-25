@@ -21,6 +21,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
 )
 
 func TestContextManagement(t *testing.T) {
@@ -33,9 +34,10 @@ func TestContextManagement(t *testing.T) {
 	contextsFile, err := xdg.ConfigFile("woodpecker/contexts.json")
 	_ = os.Remove(contextsFile)
 	require.NoError(t, err)
+	c := &cli.Command{}
 
 	t.Run("LoadContexts returns empty when file doesn't exist", func(t *testing.T) {
-		contexts, err := LoadContexts()
+		contexts, err := LoadContexts(c)
 		require.NoError(t, err)
 		assert.NotNil(t, contexts)
 		assert.Empty(t, contexts.Contexts)
@@ -54,7 +56,7 @@ func TestContextManagement(t *testing.T) {
 			},
 		}
 
-		err := SaveContexts(contexts)
+		err := SaveContexts(c, contexts)
 		require.NoError(t, err)
 
 		// Verify file exists and contains valid JSON
@@ -64,7 +66,7 @@ func TestContextManagement(t *testing.T) {
 	})
 
 	t.Run("LoadContexts reads saved contexts", func(t *testing.T) {
-		contexts, err := LoadContexts()
+		contexts, err := LoadContexts(c)
 		require.NoError(t, err)
 		assert.Equal(t, "test", contexts.CurrentContext)
 		assert.Len(t, contexts.Contexts, 1)
@@ -85,19 +87,19 @@ func TestContextManagement(t *testing.T) {
 				},
 			},
 		}
-		err := SaveContexts(contexts)
+		err := SaveContexts(c, contexts)
 		require.NoError(t, err)
 
-		err = SetCurrentContext("prod")
+		err = SetCurrentContext(c, "prod")
 		require.NoError(t, err)
 
-		contexts, err = LoadContexts()
+		contexts, err = LoadContexts(c)
 		require.NoError(t, err)
 		assert.Equal(t, "prod", contexts.CurrentContext)
 	})
 
 	t.Run("SetCurrentContext fails for non-existent context", func(t *testing.T) {
-		err := SetCurrentContext("nonexistent")
+		err := SetCurrentContext(c, "nonexistent")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "not found")
 	})
@@ -112,13 +114,13 @@ func TestContextManagement(t *testing.T) {
 				},
 			},
 		}
-		err := SaveContexts(contexts)
+		err := SaveContexts(c, contexts)
 		require.NoError(t, err)
 
-		err = RenameContext("old", "new")
+		err = RenameContext(c, "old", "new")
 		require.NoError(t, err)
 
-		contexts, err = LoadContexts()
+		contexts, err = LoadContexts(c)
 		require.NoError(t, err)
 		assert.Equal(t, "new", contexts.CurrentContext)
 		assert.Contains(t, contexts.Contexts, "new")
@@ -133,10 +135,10 @@ func TestContextManagement(t *testing.T) {
 				"ctx2": {Name: "ctx2", ServerURL: "https://test2.example.com"},
 			},
 		}
-		err := SaveContexts(contexts)
+		err := SaveContexts(c, contexts)
 		require.NoError(t, err)
 
-		err = RenameContext("ctx1", "ctx2")
+		err = RenameContext(c, "ctx1", "ctx2")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "already exists")
 	})

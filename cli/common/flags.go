@@ -24,6 +24,11 @@ import (
 
 var GlobalFlags = append([]cli.Flag{
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONTEXTS_FILE"),
+		Name:    "contexts-file",
+		Usage:   "path to the contexts file",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER"),
 		Name:    "server",
 		Aliases: []string{"s"},
