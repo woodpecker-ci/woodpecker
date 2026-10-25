@@ -1,0 +1,203 @@
+// Copyright 2026 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package datastore
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+)
+
+// addPipeline creates a pipeline with its steps and returns the pipeline ID.
+func addPipeline(t *testing.T, s *storage, number int64, status model.StatusValue, finished int64, steps ...*model.Step) int64 {
+	t.Helper()
+	p := &model.Pipeline{RepoID: 1, Status: status, Finished: finished, Number: number}
+	_, err := s.engine.Insert(p)
+	require.NoError(t, err)
+	for i, step := range steps {
+		step.PipelineID = p.ID
+		step.PID = i + 1
+		step.UUID = step.Name
+	}
+	sess := s.engine.NewSession()
+	require.NoError(t, s.stepCreate(sess, steps))
+	require.NoError(t, sess.Commit())
+	return p.ID
+}
+
+func stepNames(steps []*model.Step) []string {
+	names := make([]string, 0, len(steps))
+	for _, s := range steps {
+		names = append(names, s.Name)
+	}
+	return names
+}
+
+func TestStepListLogUnfinalized(t *testing.T) {
+	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	const (
+		before = int64(1000)
+		old    = int64(500)
+		recent = int64(2000)
+	)
+
+	// oldest pipeline first
+	first := addPipeline(t, s, 1, model.StatusSuccess, old,
+		&model.Step{Name: "due", State: model.StatusSuccess, Started: 10, Finished: old},
+		// listed too, the finalizer marks it without calling the log store
+		&model.Step{Name: "never-started", State: model.StatusSkipped},
+		&model.Step{Name: "done", State: model.StatusSuccess, Started: 10, Finished: old, LogState: model.LogStateFinalized},
+		&model.Step{Name: "claimed", State: model.StatusSuccess, Started: 10, Finished: old, LogState: model.LogStateFinalizing},
+		&model.Step{Name: "step-too-recent", State: model.StatusSuccess, Started: 10, Finished: recent},
+		&model.Step{Name: "step-at-cutoff", State: model.StatusSuccess, Started: 10, Finished: before},
+	)
+	for i, status := range []model.StatusValue{model.StatusRunning, model.StatusPending, model.StatusBlocked, model.StatusCreated} {
+		addPipeline(t, s, int64(10+i), status, old, &model.Step{Name: "pipeline-" + string(status), State: model.StatusSuccess, Started: 10, Finished: old})
+	}
+	addPipeline(t, s, 20, model.StatusFailure, recent, &model.Step{Name: "pipeline-too-recent", State: model.StatusFailure, Started: 10, Finished: old})
+	addPipeline(t, s, 21, model.StatusFailure, before, &model.Step{Name: "pipeline-at-cutoff", State: model.StatusFailure, Started: 10, Finished: old})
+	// a canceled pipeline is killed at once, its running steps until the agent reports back:
+	// the agent may still send lines (see allowAppendingLogs)
+	addPipeline(t, s, 30, model.StatusKilled, old, &model.Step{Name: "step-still-running", State: model.StatusRunning, Started: 10})
+	second := addPipeline(t, s, 31, model.StatusFailure, before-1, &model.Step{Name: "second-pipeline", State: model.StatusFailure, Started: 10, Finished: before - 1})
+
+	t.Run("selects only complete logs", func(t *testing.T) {
+		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, second, 10)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"due", "never-started", "second-pipeline"}, stepNames(got))
+	})
+
+	t.Run("stats count without cursor and batch", func(t *testing.T) {
+		n, maxPipelineID, err := s.StepLogUnfinalizedStats(t.Context(), before)
+		require.NoError(t, err)
+		assert.Equal(t, int64(3), n)
+		assert.Equal(t, second, maxPipelineID)
+	})
+
+	t.Run("batch counts pipelines, oldest first", func(t *testing.T) {
+		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, second, 1)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
+	})
+
+	t.Run("continues after a pipeline", func(t *testing.T) {
+		got, err := s.StepListLogUnfinalized(t.Context(), before, first, second, 1)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"second-pipeline"}, stepNames(got))
+
+		got, err = s.StepListLogUnfinalized(t.Context(), before, second, second, 1)
+		require.NoError(t, err)
+		assert.Empty(t, got)
+	})
+
+	t.Run("stops at a pipeline", func(t *testing.T) {
+		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, first, 10)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
+	})
+}
+
+func TestStepLogUnfinalizedStatsEmpty(t *testing.T) {
+	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	n, maxPipelineID, err := s.StepLogUnfinalizedStats(t.Context(), 1000)
+	require.NoError(t, err)
+	assert.Zero(t, n)
+	assert.Zero(t, maxPipelineID)
+}
+
+// TestStepLogStateSwap ensures a log state change is one atomic claim: it only happens if the
+// stored state and claim time are still those of the given step, so only one server wins.
+func TestStepLogStateSwap(t *testing.T) {
+	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	pipelineID := addPipeline(t, s, 1, model.StatusSuccess, 10,
+		&model.Step{Name: "a", State: model.StatusFailure, Started: 1, Finished: 10, ExitCode: 3},
+		&model.Step{Name: "b", State: model.StatusSuccess, Started: 1, Finished: 10},
+	)
+	serverA, err := s.StepByUUID("a")
+	require.NoError(t, err)
+	serverB, err := s.StepByUUID("a")
+	require.NoError(t, err)
+	assert.Equal(t, model.LogStateOpen, serverA.LogState, "new steps are open")
+
+	claimed, err := s.StepLogStateSwap(t.Context(), serverA, model.LogStateFinalizing)
+	require.NoError(t, err)
+	assert.True(t, claimed)
+	assert.Equal(t, model.LogStateFinalizing, serverA.LogState, "the step is updated")
+	claimed, err = s.StepLogStateSwap(t.Context(), serverB, model.LogStateFinalizing)
+	require.NoError(t, err)
+	assert.False(t, claimed, "the second claim of the same state loses")
+
+	listed, err := s.StepListLogClaimed(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, []string{"a"}, stepNames(listed))
+
+	// released and claimed again: a snapshot of the first claim must not reset the new one
+	stale := *serverA
+	for _, to := range []model.LogState{model.LogStateOpen, model.LogStateFinalizing} {
+		claimed, err = s.StepLogStateSwap(t.Context(), serverA, to)
+		require.NoError(t, err)
+		require.True(t, claimed)
+	}
+	claimed, err = s.StepLogStateSwap(t.Context(), &stale, model.LogStateOpen)
+	require.NoError(t, err)
+	assert.False(t, claimed)
+
+	claimed, err = s.StepLogStateSwap(t.Context(), serverA, model.LogStateFinalized)
+	require.NoError(t, err)
+	require.True(t, claimed)
+	stored, err := s.StepByUUID("a")
+	require.NoError(t, err)
+	assert.Equal(t, model.LogStateFinalized, stored.LogState)
+	assert.Equal(t, 3, stored.ExitCode, "only the log state is written")
+
+	list, err := s.StepListLogUnfinalized(t.Context(), 100, 0, pipelineID, 10)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"b"}, stepNames(list))
+}
+
+// TestStepLogCanceled ensures the log finalizer queries give up once their context is done,
+// so a hung database cannot block the finalizer or the server shutdown.
+func TestStepLogCanceled(t *testing.T) {
+	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+	defer holdConnection(t, s)()
+
+	assertCanceled(t, func(ctx context.Context) error {
+		_, _, err := s.StepLogUnfinalizedStats(ctx, 1000)
+		return err
+	})
+	assertCanceled(t, func(ctx context.Context) error {
+		_, err := s.StepListLogUnfinalized(ctx, 1000, 0, 1, 10)
+		return err
+	})
+	assertCanceled(t, func(ctx context.Context) error {
+		_, err := s.StepListLogClaimed(ctx)
+		return err
+	})
+	assertCanceled(t, func(ctx context.Context) error {
+		_, err := s.StepLogStateSwap(ctx, &model.Step{ID: 1}, model.LogStateFinalizing)
+		return err
+	})
+}

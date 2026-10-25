@@ -334,6 +334,33 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 	})
 }
 
+// TestAllowAppendingLogsFinalized ensures a step whose log is finalized never takes new lines,
+// also not inside the drain window.
+func TestAllowAppendingLogsFinalized(t *testing.T) {
+	t.Parallel()
+
+	t.Run("finalized step inside window rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusSuccess, Finished: time.Now().Unix()}
+		step := &model.Step{State: model.StatusSuccess, Finished: time.Now().Unix(), LogState: model.LogStateFinalized}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+
+	t.Run("step claimed by the log finalizer rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusSuccess, Finished: time.Now().Unix()}
+		step := &model.Step{State: model.StatusSuccess, Finished: time.Now().Unix(), LogState: model.LogStateFinalizing}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+
+	t.Run("finalized step of running pipeline rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusRunning}
+		step := &model.Step{State: model.StatusSuccess, LogState: model.LogStateFinalized}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+}
+
 func TestCheckAgentReportedInitState(t *testing.T) {
 	t.Parallel()
 
