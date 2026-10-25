@@ -34,7 +34,7 @@ func main() {
 		panic(err)
 	}
 	defer fi.Close()
-	if _, err := fi.WriteString("---\nslug: /cli\n---\n\n# Reference\n\n" + md); err != nil {
+	if _, err := fi.WriteString("# Reference\n\n" + md); err != nil {
 		panic(err)
 	}
 }
