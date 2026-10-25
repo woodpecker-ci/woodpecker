@@ -45,16 +45,16 @@ func TestLogCreateFindDelete(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, store.LogAppend(&step, logEntries))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, logEntries))
 
 	// we want to find our inserted logs
-	_logEntries, err := store.LogFind(&step)
+	_logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, len(logEntries))
 
 	// delete and check
-	assert.NoError(t, store.LogDelete(&step))
-	_logEntries, err = store.LogFind(&step)
+	assert.NoError(t, store.LogDelete(t.Context(), &step))
+	_logEntries, err = store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, 0)
 }
@@ -81,7 +81,7 @@ func TestLogAppend(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, store.LogAppend(&step, logEntries))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, logEntries))
 
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
@@ -90,9 +90,9 @@ func TestLogAppend(t *testing.T) {
 		Time:   20,
 	}
 
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{logEntry}))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{logEntry}))
 
-	_logEntries, err := store.LogFind(&step)
+	_logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, len(logEntries)+1)
 }
@@ -107,16 +107,16 @@ func TestLogFindOrdersByLine(t *testing.T) {
 
 	// The first batch is written through a node holding the id cache 4000+,
 	// the second one through a node holding the lower cache 30+.
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{ID: 4000, StepID: step.ID, Data: []byte("first"), Line: 0, Time: 0},
 		{ID: 4001, StepID: step.ID, Data: []byte("second"), Line: 1, Time: 10},
 	}))
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{ID: 30, StepID: step.ID, Data: []byte("third"), Line: 2, Time: 20},
 		{ID: 31, StepID: step.ID, Data: []byte("fourth"), Line: 3, Time: 30},
 	}))
 
-	logEntries, err := store.LogFind(&step)
+	logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 
 	lines := make([]int, 0, len(logEntries))
@@ -138,17 +138,17 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 		ID: 1,
 	}
 
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 	// the agent retries with the batch it already sent
-	assert.Error(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.Error(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 
-	logEntries, err := store.LogFind(&step)
+	logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 
 	lines := make([]int, 0, len(logEntries))
