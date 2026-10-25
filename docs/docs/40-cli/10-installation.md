@@ -29,7 +29,7 @@ The [distribution packages](../30-administration/05-installation/30-packages.md)
 The CLI is published as the `woodpeckerci/woodpecker-cli` [container image](../30-administration/00-general.md#container-images). A container has no keyring to store a token in, so pass the server and token as environment variables. This command takes both from your shell:
 
 ```shell
-docker run --rm -e WOODPECKER_SERVER -e WOODPECKER_TOKEN woodpeckerci/woodpecker-cli:v3-alpine info
+docker run --rm -e WOODPECKER_SERVER -e WOODPECKER_TOKEN woodpeckerci/woodpecker-cli:v3 info
 ```
 
 The `-alpine` images include a shell, so they also work as the image of a pipeline step:
