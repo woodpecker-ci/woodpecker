@@ -55,13 +55,11 @@ type config struct {
 
 ### Log store addons
 
-`StepFinished(step) error` is called once for a step when its log is complete: its pipeline and the step have stopped and the late-log window has passed.
-Steps that never started have no log and get no call.
-It may pack, compress or move the log.
-It is called again after an error, a crash or when the server stopped waiting for it after one minute, so it has to be idempotent.
-It may come for a log that was just deleted, which has to stay deleted.
+`StepFinished(step) error` is called once the log of a step is complete. It may pack, compress or move the log.
+It can be called again for the same step, for example after an error, so calling it twice must be safe.
+A log that was deleted must stay deleted, even if `StepFinished` comes for it.
 `LogFind` must return the complete log before, during and after the call.
-`LogAppend` should be done within one minute: the server stops waiting then, and a line the addon writes later may come after `StepFinished`.
+`LogAppend` should finish within one minute: the server stops waiting then, and a line written later may come after `StepFinished`.
 
 ### Addon types
 
