@@ -152,11 +152,14 @@ func TestBitbucket(t *testing.T) {
 	_, err = c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
 	assert.Error(t, err)
 
+	// sub directories are skipped, files are loaded with their content
 	files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir")
 	assert.NoError(t, err)
-	assert.Len(t, files, 3)
-	assert.Equal(t, "README.md", files[0].Name)
-	assert.Equal(t, "dummy payload", string(files[0].Data))
+	if assert.Len(t, files, 2) {
+		assert.Equal(t, "README.md", files[0].Name)
+		assert.Equal(t, "dummy payload", string(files[0].Data))
+		assert.Equal(t, ".gitignore", files[1].Name)
+	}
 
 	_, err = c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found")
 	assert.Error(t, err)
