@@ -1,0 +1,12 @@
+FROM alpine:3.24
+RUN apk add -U --no-cache ca-certificates tzdata docker-cli && \
+  adduser -u 1000 -g 1000 woodpecker -D && \
+  mkdir -p /etc/woodpecker /var/lib/woodpecker && \
+  chown -R woodpecker:woodpecker /etc/woodpecker /var/lib/woodpecker
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_IN_CONTAINER=true
+EXPOSE 3000
+COPY dist/agent/woodpecker-agent /bin/woodpecker-agent
+RUN chmod +x /bin/woodpecker-agent
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+ENTRYPOINT ["/bin/woodpecker-agent"]

@@ -1,0 +1,16 @@
+FROM alpine:3.24
+RUN apk add -U --no-cache ca-certificates tzdata curl && \
+  adduser -u 1000 -g 1000 woodpecker -D && \
+  mkdir -p /var/lib/woodpecker /etc/woodpecker && \
+  chown -R woodpecker:woodpecker /var/lib/woodpecker /etc/woodpecker
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_IN_CONTAINER=true
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+ENV XDG_DATA_HOME=/var/lib/woodpecker
+ENV SQLITE_TMPDIR=/var/lib/woodpecker
+EXPOSE 8000 9000 80 443
+COPY dist/server/woodpecker-server /bin/woodpecker-server
+RUN chmod +x /bin/woodpecker-server
+USER woodpecker
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
+ENTRYPOINT ["/bin/woodpecker-server"]
