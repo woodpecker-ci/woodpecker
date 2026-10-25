@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -209,6 +210,47 @@ func TestLintConcurrent(t *testing.T) {
 
 				require.NoError(t, err)
 				require.Empty(t, configErrors)
+			}
+		})
+	}
+}
+
+func TestMatrixSchemaWorkflowLimit(t *testing.T) {
+	tests := []struct {
+		name    string
+		count   int
+		include bool
+		wantErr bool
+	}{
+		{name: "10 axis values", count: 10},
+		{name: "11 axis values", count: 11, wantErr: true},
+		{name: "64 include entries", count: 64, include: true},
+		{name: "65 include entries", count: 65, include: true, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var matrix string
+			if tt.include {
+				entries := make([]string, tt.count)
+				for i := range entries {
+					entries[i] = fmt.Sprintf("  - VERSION: %d", i)
+				}
+				matrix = "matrix:\n  include:\n" + strings.Join(entries, "\n")
+			} else {
+				values := make([]string, tt.count)
+				for i := range values {
+					values[i] = fmt.Sprintf("    - %d", i)
+				}
+				matrix = "matrix:\n  VERSION:\n" + strings.Join(values, "\n")
+			}
+			config := "steps:\n  test:\n    image: alpine\n    commands: [echo test]\n" + matrix
+
+			_, err := schema.LintString(config)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}
