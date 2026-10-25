@@ -41,6 +41,7 @@ func runLoad(t *testing.T, args ...string) (*cli.Command, error) {
 			&cli.StringFlag{Name: "server"},
 			&cli.StringFlag{Name: "token"},
 			&cli.StringFlag{Name: "log-level"},
+			&cli.StringFlag{Name: "contexts-file"},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
 			loadErr = Load(ctx, c)
@@ -98,5 +99,16 @@ func TestLoad(t *testing.T) {
 		assert.Equal(t, "https://flags.example.test", cmd.String("server"))
 		assert.Equal(t, "flag-token", cmd.String("token"))
 		assert.Equal(t, "warn", cmd.String("log-level"))
+	})
+
+	t.Run("contexts file flag replaces the default contexts file", func(t *testing.T) {
+		contextsFile := filepath.Join(t.TempDir(), "custom.json")
+		require.NoError(t, os.WriteFile(contextsFile, []byte(`{"current_context":"custom","contexts":{"custom":{"name":"custom","server_url":"https://custom.example.test"}}}`), 0o600))
+		require.NoError(t, keyring.Set(testCLIName, "https://custom.example.test", "custom-token"))
+
+		cmd, err := runLoad(t, "--contexts-file", contextsFile)
+		require.NoError(t, err)
+		assert.Equal(t, "https://custom.example.test", cmd.String("server"))
+		assert.Equal(t, "custom-token", cmd.String("token"))
 	})
 }
