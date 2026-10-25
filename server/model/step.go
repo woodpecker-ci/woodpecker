@@ -38,20 +38,20 @@ type Step struct {
 	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
 	Type       StepType    `json:"type,omitempty"       xorm:"type"`
 	DependsOn  []string    `json:"depends_on,omitempty" xorm:"json 'depends_on'"`
-	LogState   LogState    `json:"-"                    xorm:"VARCHAR(16) NOT NULL DEFAULT '' INDEX 'log_state'"`
-	LogClaimed int64       `json:"-"                    xorm:"NOT NULL DEFAULT 0 'log_claimed'"`
+	LogState   LogState    `json:"-"                    xorm:"NOT NULL DEFAULT 0 INDEX 'log_state'"`
 } //	@name	Step
 
 // LogState tells who works on the log of a step. It only changes with store.StepLogStateSwap,
 // which claims the log atomically, so several servers can share the database.
-type LogState string
+type LogState int
 
+// The values are stored in the database, only add new ones at the end.
 // The zero value is open, so new steps and steps from before the upgrade start open.
 const (
-	LogStateOpen       LogState = ""           // log lines may still come
-	LogStateFinalizing LogState = "finalizing" // claimed by a log finalizer
-	LogStateFinalized  LogState = "finalized"  // complete, may be packed or moved
-	LogStateDeleting   LogState = "deleting"   // claimed by a log delete
+	LogStateOpen       LogState = iota // log lines may still come
+	LogStateFinalizing                 // claimed by a log finalizer
+	LogStateFinalized                  // complete, may be packed or moved
+	LogStateDeleting                   // claimed by a log delete
 )
 
 // TableName return database table name for xorm.

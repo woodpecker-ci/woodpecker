@@ -16,7 +16,6 @@ package datastore
 
 import (
 	"context"
-	"time"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -76,17 +75,16 @@ func (s storage) StepListLogClaimed(ctx context.Context) ([]*model.Step, error) 
 }
 
 func (s storage) StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error) {
-	claimed := time.Now().UnixNano()
 	var swapped int64
 	err := retryWriteCtx(ctx, func() (err error) {
 		swapped, err = s.engine.Context(ctx).Table("steps").
-			Where(builder.Eq{"id": step.ID, "log_state": step.LogState, "log_claimed": step.LogClaimed}).
-			Update(map[string]any{"log_state": to, "log_claimed": claimed})
+			Where(builder.Eq{"id": step.ID, "log_state": step.LogState}).
+			Update(map[string]any{"log_state": to})
 		return wrapUpdate(swapped, err)
 	})
 	if err != nil || swapped == 0 {
 		return false, err
 	}
-	step.LogState, step.LogClaimed = to, claimed
+	step.LogState = to
 	return true, nil
 }

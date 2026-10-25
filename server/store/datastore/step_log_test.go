@@ -126,7 +126,7 @@ func TestStepLogUnfinalizedStatsEmpty(t *testing.T) {
 }
 
 // TestStepLogStateSwap ensures a log state change is one atomic claim: it only happens if the
-// stored state and claim time are still those of the given step, so only one server wins.
+// stored state is still the one of the given step, so only one server wins.
 func TestStepLogStateSwap(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
@@ -152,17 +152,6 @@ func TestStepLogStateSwap(t *testing.T) {
 	listed, err := s.StepListLogClaimed(t.Context())
 	require.NoError(t, err)
 	assert.Equal(t, []string{"a"}, stepNames(listed))
-
-	// released and claimed again: a snapshot of the first claim must not reset the new one
-	stale := *serverA
-	for _, to := range []model.LogState{model.LogStateOpen, model.LogStateFinalizing} {
-		claimed, err = s.StepLogStateSwap(t.Context(), serverA, to)
-		require.NoError(t, err)
-		require.True(t, claimed)
-	}
-	claimed, err = s.StepLogStateSwap(t.Context(), &stale, model.LogStateOpen)
-	require.NoError(t, err)
-	assert.False(t, claimed)
 
 	claimed, err = s.StepLogStateSwap(t.Context(), serverA, model.LogStateFinalized)
 	require.NoError(t, err)

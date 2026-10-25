@@ -157,8 +157,8 @@ type Store interface {
 	StepLogUnfinalizedStats(ctx context.Context, finishedBefore int64) (count, maxPipelineID int64, err error)
 	// StepListLogClaimed lists the steps whose log is claimed (finalizing or deleting).
 	StepListLogClaimed(ctx context.Context) ([]*model.Step, error)
-	// StepLogStateSwap moves the log of a step to the given state, if its state and claim time are still
-	// those of step, and updates step. It reports whether it did, so only one server wins a claim.
+	// StepLogStateSwap moves the log of a step to the given state, if its state is still the one of step,
+	// and updates step. It reports whether it did, so only one server wins a claim.
 	StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error)
 
 	// Tasks

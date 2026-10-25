@@ -150,7 +150,7 @@ func (f *Finalizer) finalize(ctx context.Context, step *model.Step) (bool, error
 }
 
 // RecoverClaims hands back the step logs a crashed server left claimed (finalizing or deleting):
-// it lists the claims, waits 30 to 40 minutes and reopens those still unchanged, until ctx is done.
+// it lists the claims, waits 30 to 40 minutes and reopens those still in the same state, until ctx is done.
 func RecoverClaims(ctx context.Context, s store.Store) {
 	for {
 		claimed, err := s.StepListLogClaimed(ctx)
@@ -165,7 +165,7 @@ func RecoverClaims(ctx context.Context, s store.Store) {
 		}
 
 		for _, step := range claimed {
-			// only swaps if state and claim time are still the same
+			// only swaps if the state is still the same
 			if _, err := s.StepLogStateSwap(ctx, step, model.LogStateOpen); err != nil && ctx.Err() == nil {
 				log.Error().Err(err).Int64("step", step.ID).Msg("could not reopen claimed step log")
 			}

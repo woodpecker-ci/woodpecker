@@ -261,7 +261,7 @@ func TestTickSeveralServers(t *testing.T) {
 }
 
 // TestRecoverClaims ensures claims a crashed server left behind are reopened after the delay,
-// but not a claim that was released and taken again meanwhile.
+// but not a claim whose state changed meanwhile.
 func TestRecoverClaims(t *testing.T) {
 	oldDelay, oldJitter := recoverDelay, recoverJitter
 	recoverDelay, recoverJitter = 100*time.Millisecond, 1
