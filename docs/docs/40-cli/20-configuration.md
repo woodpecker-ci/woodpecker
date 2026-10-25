@@ -46,17 +46,9 @@ The file records the selected context and its non-secret connection settings:
 
 `current_context` must name an entry in `contexts`. The `woodpecker-cli context use` command changes that selection. Authentication tokens are never written to this JSON file; they are stored in the operating system's keyring and looked up by server URL.
 
-## Legacy configuration
-
-:::warning
-Legacy `config.json` support will be removed in the next major release. Run `woodpecker-cli setup` to switch to contexts.
-:::
-
-If no usable current context can be loaded, woodpecker-cli falls back to the legacy `config.json` file in the same configuration directory. `--config` or `WOODPECKER_CONFIG` selects a different legacy file. The legacy JSON accepts `server_url` and `log_level`; its token is also read from the operating system's keyring, not from JSON.
-
 ## Precedence
 
-Command-line flags take precedence over their matching environment variables, and either source takes precedence over stored context or legacy values:
+Command-line flags take precedence over their matching environment variables, and either source takes precedence over stored context values:
 
 | Flag          | Environment variable   |
 | ------------- | ---------------------- |
@@ -64,4 +56,4 @@ Command-line flags take precedence over their matching environment variables, an
 | `--token`     | `WOODPECKER_TOKEN`     |
 | `--log-level` | `WOODPECKER_LOG_LEVEL` |
 
-The `--config` flag and `WOODPECKER_CONFIG` only choose the legacy configuration file; they do not replace or select a context.
+Without a current context, both `--server` and `--token` must be set.
