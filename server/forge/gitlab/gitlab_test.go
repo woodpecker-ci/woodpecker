@@ -34,6 +34,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -1168,11 +1169,11 @@ func TestDirPagination(t *testing.T) {
 		}, metas)
 	})
 
-	t.Run("stops after maxDirPages full pages", func(t *testing.T) {
+	t.Run("stops after common.MaxPages full pages", func(t *testing.T) {
 		requests := 0
 		client := newServer(t, func(w http.ResponseWriter, r *http.Request) {
 			requests++
-			if requests > maxDirPages+1 {
+			if requests > common.MaxPages+1 {
 				http.Error(w, "too many requests", http.StatusBadRequest)
 				return
 			}
@@ -1180,8 +1181,8 @@ func TestDirPagination(t *testing.T) {
 		})
 
 		_, err := client.Dir(t.Context(), user, repo, pipeline, ".woodpecker")
-		assert.EqualError(t, err, "config folder '.woodpecker' has too many entries: stopped listing after 100 pages of 100 entries")
-		assert.Equal(t, maxDirPages, requests)
+		assert.EqualError(t, err, "too many pages: stopped listing config folder '.woodpecker' after 100 pages")
+		assert.Equal(t, common.MaxPages, requests)
 	})
 }
 
