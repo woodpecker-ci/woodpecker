@@ -15,9 +15,12 @@
 package datastore
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -160,4 +163,44 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 
 	assert.Equal(t, []int{0, 1}, lines)
 	assert.Equal(t, []string{"hello", "world"}, data)
+}
+
+// holdConnection takes the only connection of a test store (MaxOpenConns=1), like a hung database,
+// until release is called.
+func holdConnection(t *testing.T, s *storage) (release func()) {
+	t.Helper()
+	conn, err := s.engine.DB().Conn(t.Context())
+	require.NoError(t, err)
+	return func() { _ = conn.Close() }
+}
+
+// assertCanceled runs call with a context that ends soon and fails if call keeps waiting.
+func assertCanceled(t *testing.T, call func(ctx context.Context) error) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	defer cancel()
+	errc := make(chan error, 1)
+	go func() { errc <- call(ctx) }()
+	select {
+	case err := <-errc:
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+	case <-time.After(5 * time.Second):
+		t.Fatal("still waiting for the database after the context ended")
+	}
+}
+
+func TestLogCanceled(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
+	defer closer()
+	defer holdConnection(t, store)()
+	step := &model.Step{ID: 1}
+
+	assertCanceled(t, func(ctx context.Context) error {
+		_, err := store.LogFind(ctx, step)
+		return err
+	})
+	assertCanceled(t, func(ctx context.Context) error {
+		return store.LogAppend(ctx, step, []*model.LogEntry{{StepID: step.ID, Line: 1}})
+	})
+	assertCanceled(t, func(ctx context.Context) error { return store.LogDelete(ctx, step) })
 }
