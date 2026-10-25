@@ -38,17 +38,15 @@ func ReleaseContext(ctx context.Context) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.WithoutCancel(ctx), releaseTimeout)
 }
 
-// Service stores step logs. Implementations should give up once ctx is done.
+// Service stores the logs of steps. Every method should return once ctx is done.
 type Service interface {
+	// LogFind returns the log entries of a step.
 	LogFind(ctx context.Context, step *model.Step) ([]*model.LogEntry, error)
+	// LogAppend adds log entries to the log of a step.
 	LogAppend(ctx context.Context, step *model.Step, logEntries []*model.LogEntry) error
+	// LogDelete removes the log of a step.
 	LogDelete(ctx context.Context, step *model.Step) error
-	// StepFinished is called once no further log entries can be appended for the step:
-	// its pipeline and the step have stopped and the late-log window (StreamDelayAllowed) has passed.
-	// Steps that never started have no log and get no call.
-	// Implementations may pack, compress or move the log.
-	// It must be idempotent: it is called again after a failure or a crash.
-	// It may come for a log that was just deleted, which has to stay deleted.
-	// LogFind must return the complete log before, during and after the call.
+	// StepFinished is called once no more log entries can come for a step.
+	// It may be called more than once for the same step, so calling it again must be safe.
 	StepFinished(ctx context.Context, step *model.Step) error
 }
