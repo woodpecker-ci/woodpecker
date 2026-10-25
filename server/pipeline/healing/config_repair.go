@@ -71,7 +71,7 @@ func (r *DefaultConfigRepairer) AnalyzeAndRepair(ctx context.Context, yamlConten
 	}
 
 	// 2. Check for missing Tink AEAD KMS keyset in secrets or environment
-	if !strings.Contains(remediated, "WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE") && strings.Contains(remediated, "secret") {
+	if !strings.Contains(remediated, "WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE") && strings.Contains(strings.ToLower(remediated), "secret") {
 		issues = append(issues, ConfigIssue{
 			RuleID:      "SEC-TINK-01",
 			Description: "Plaintext secrets used without mandatory Google Tink AEAD at-rest encryption",
