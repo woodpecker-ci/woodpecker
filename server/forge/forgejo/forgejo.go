@@ -93,7 +93,7 @@ func (c *Forgejo) URL() string {
 
 // Config returns the generic configuration of the configured forge.
 func (c *Forgejo) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{Host: common.HostFromURL(c.url)}
+	return metadata.ForgeConfig{URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {

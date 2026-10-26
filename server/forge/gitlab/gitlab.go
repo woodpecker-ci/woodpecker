@@ -92,7 +92,7 @@ func (g *GitLab) URL() string {
 
 // Config returns the generic configuration of the configured forge.
 func (g *GitLab) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{Host: common.HostFromURL(g.url)}
+	return metadata.ForgeConfig{URL: g.url, Host: common.HostFromURL(g.url)}
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {

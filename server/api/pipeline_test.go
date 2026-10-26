@@ -300,8 +300,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 	mockForge := forge_mocks.NewMockForge(t)
 	mockForge.On("Name").Return("mock")
-	mockForge.On("URL").Return("https://codeberg.org")
-	mockForge.On("Config").Return(metadata.ForgeConfig{Host: "codeberg.org"})
+	mockForge.On("Config").Return(metadata.ForgeConfig{URL: "https://codeberg.org", Host: "codeberg.org"})
 
 	mockManager := manager_mocks.NewMockManager(t)
 	mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)

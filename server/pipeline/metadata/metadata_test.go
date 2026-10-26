@@ -30,9 +30,11 @@ type testForge struct {
 	host string
 }
 
-func (f testForge) Name() string                 { return f.name }
-func (f testForge) URL() string                  { return f.url }
-func (f testForge) Config() metadata.ForgeConfig { return metadata.ForgeConfig{Host: f.host} }
+func (f testForge) Name() string { return f.name }
+func (f testForge) URL() string  { return f.url }
+func (f testForge) Config() metadata.ForgeConfig {
+	return metadata.ForgeConfig{URL: f.url, Host: f.host}
+}
 
 func TestGetWorkflowMetadata(t *testing.T) {
 	forge := testForge{name: "gitea", url: "https://gitea.com", host: "gitea.com"}

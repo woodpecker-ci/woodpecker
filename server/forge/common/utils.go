@@ -32,8 +32,9 @@ import (
 func HostFromURL(rawURL string) string {
 	u, _ := url.Parse(rawURL)
 	if u != nil {
-		u.Host
+		return u.Host
 	}
+
 	return ""
 }
 

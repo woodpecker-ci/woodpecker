@@ -121,6 +121,8 @@ type (
 
 	// ForgeConfig defines the generic configuration of a configured forge.
 	ForgeConfig struct {
+		// URL is the root url of the configured forge.
+		URL string
 		// Host is the host of the forge, including the port if one is set.
 		Host string
 	}
