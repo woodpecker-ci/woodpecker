@@ -41,6 +41,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+// errLogBusy is returned when a step log is claimed by the log finalizer or another delete.
+var errLogBusy = errors.New("the log is being finalized or deleted, try again")
+
 // CreatePipeline
 //
 //	@Summary	Trigger a manual pipeline
@@ -231,8 +234,6 @@ func DeletePipeline(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
-
-var errLogBusy = errors.New("the log is being finalized or deleted, try again")
 
 // deleteStepLog deletes the log of a step from the log store. It claims the log first,
 // so the log finalizer cannot pack it meanwhile and bring it back.
