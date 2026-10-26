@@ -134,7 +134,7 @@ type (
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
 		Release     *Release         `json:"release,omitempty"`
-		// SelectedWorkflow limits a manual pipeline to this workflow and its dependencies.
+		// SelectedWorkflow limits a manual pipeline to this workflow and its hard dependencies.
 		SelectedWorkflow string `json:"selected_workflow,omitempty"`
 	}
 

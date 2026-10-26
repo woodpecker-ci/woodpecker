@@ -38,7 +38,7 @@ var pipelineCreateCmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "workflow",
-			Usage: "only run this workflow and the workflows it depends on",
+			Usage: "only run this workflow and the workflows it hard depends on",
 		},
 		&cli.StringSliceFlag{
 			Name:  "var",

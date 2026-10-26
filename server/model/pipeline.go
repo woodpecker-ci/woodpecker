@@ -129,7 +129,7 @@ type PipelineOptions struct {
 	Message   string            `json:"message"`
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-	Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its dependencies
+	Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 } //	@name	PipelineOptions
 
 // WorkflowInfo describes a workflow a pipeline config would run, without its compiled config.

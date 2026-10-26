@@ -5288,7 +5288,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "selected_workflow": {
-                    "description": "only run this workflow and its dependencies",
+                    "description": "only run this workflow and its hard dependencies",
                     "type": "string"
                 },
                 "sender": {
@@ -5347,7 +5347,7 @@ const docTemplate = `{
                     }
                 },
                 "workflow": {
-                    "description": "only run this workflow and its dependencies",
+                    "description": "only run this workflow and its hard dependencies",
                     "type": "string"
                 }
             }
