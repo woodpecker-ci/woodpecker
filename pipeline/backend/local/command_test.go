@@ -255,6 +255,46 @@ end'
 `, string(out))
 }
 
+func TestPowerShellRun(t *testing.T) {
+	pwshPath, err := exec.LookPath("pwsh")
+	if err != nil {
+		t.Skip("pwsh not found in PATH")
+	}
+
+	e := local{tempDir: t.TempDir()}
+	args, err := e.genCmdByShell("pwsh", pwshPath, []string{
+		`Write-Host 'plain'`,
+		`Write-Host "it's"`,
+		`Write-Host 'it''s'`,
+		`Write-Host ‘smart’`,
+		`Write-Host "$(1 + 1)"`,
+		"Write-Host \"back`ttick\"",
+		`Write-Output 'C:\Users\test'`,
+		`Write-Host "end'"`,
+	}, t.TempDir())
+	require.NoError(t, err)
+
+	out, err := exec.Command(pwshPath, args...).CombinedOutput()
+	require.NoError(t, err, string(out))
+	assert.Equal(t, `▶  Write-Host 'plain'
+plain
+▶  Write-Host "it's"
+it's
+▶  Write-Host 'it''s'
+it's
+▶  Write-Host ‘smart’
+smart
+▶  Write-Host "$(1 + 1)"
+2
+▶  Write-Host "back`+"`"+`ttick"
+back	tick
+▶  Write-Output 'C:\Users\test'
+C:\Users\test
+▶  Write-Host "end'"
+end'
+`, string(out))
+}
+
 func TestProbeShellIsPosix(t *testing.T) {
 	if runtime.GOOS != "linux" {
 		t.Skip("skipping posix shell tests on non-linux system")
