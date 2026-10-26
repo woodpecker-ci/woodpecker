@@ -48,6 +48,10 @@ The file records the selected context and its non-secret connection settings:
 
 ## Legacy configuration
 
+:::warning
+Legacy `config.json` support will be removed in the next major release. Run `woodpecker-cli setup` to switch to contexts.
+:::
+
 If no usable current context can be loaded, woodpecker-cli falls back to the legacy `config.json` file in the same configuration directory. `--config` or `WOODPECKER_CONFIG` selects a different legacy file. The legacy JSON accepts `server_url` and `log_level`; its token is also read from the operating system's keyring, not from JSON.
 
 ## Precedence

@@ -32,7 +32,7 @@ The CLI is published as the `woodpeckerci/woodpecker-cli` [container image](../3
 docker run --rm -e WOODPECKER_SERVER -e WOODPECKER_TOKEN woodpeckerci/woodpecker-cli:v3 info
 ```
 
-The `-alpine` images include a shell, so they also work as the image of a pipeline step:
+Pipeline steps using `commands` require a shell, so use an `-alpine` image:
 
 ```yaml
 steps:
