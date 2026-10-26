@@ -90,6 +90,7 @@ func checkShellExistence(shell string) error {
 }
 
 // Use a delimiter not present in the value to preserve its contents.
+// https://www.nushell.sh/lang-guide/chapters/strings_and_text.html#string-literals
 func quoteNushell(value string) string {
 	for n := 1; ; n++ {
 		hashes := strings.Repeat("#", n)
@@ -154,7 +155,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 			script.WriteString(cmd + " || exit $status\n")
 		}
 		return []string{"-c", script.String()}, nil
-	case "nu":
+	case "nu", "nushell":
 		var script strings.Builder
 		for _, cmd := range cmdList {
 			script.WriteString("echo " + quoteNushell(common.CommandMarker+cmd) + "\n")
