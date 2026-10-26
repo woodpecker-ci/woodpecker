@@ -348,7 +348,8 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 	)
 
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.GetCommit,
+		mock.WithRequestMatch(
+			mock.GetCommit,
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 		),
@@ -467,7 +468,8 @@ func TestOrgMembership(t *testing.T) {
 
 func TestTeams(t *testing.T) {
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.ListProjects,
+		mock.WithRequestMatch(
+			mock.ListProjects,
 			bitbucket.ProjectList{NextPageStart: 1, Projects: []*bitbucket.Project{{Key: "ONE"}}},
 			bitbucket.ProjectList{LastPage: true, Projects: []*bitbucket.Project{{Key: "TWO"}}},
 		),
