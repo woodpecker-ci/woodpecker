@@ -570,7 +570,12 @@
             "settings": "Configurações",
             "not_allowed": "Você não tem permissão para acessar as configurações desta organização",
             "agents": {
-                "desc": "Agentes registrados para esta organização."
+                "desc": "Agentes registrados para esta organização.",
+                "require_org_agents": {
+                    "require": "Executar pipelines apenas em agentes da organização",
+                    "desc": "Os fluxos de trabalho dos repositórios desta organização são processados apenas por agentes registrados para esta organização, e não por agentes que operam em todo o servidor.",
+                    "saved": "Configurações da organização salvas"
+                }
             },
             "registries": {
                 "desc": "As credenciais de registry da organização podem ser adicionados para usar imagens privadas para todos os pipelines de uma organização."
@@ -648,7 +653,12 @@
                 "swagger_ui": "Swagger UI"
             },
             "agents": {
-                "desc": "Os agentes registrados para os repositórios da sua conta."
+                "desc": "Os agentes registrados para os repositórios da sua conta.",
+                "require_user_agents": {
+                    "require": "Executar pipelines apenas em seus agentes",
+                    "desc": "Os fluxos de trabalho dos seus repositórios pessoais são processados apenas por agentes registrados na sua conta, e não por agentes que operam em nível de servidor.",
+                    "saved": "Configurações de usuário salvas"
+                }
             }
         },
         "oauth_error": "Erro ao autenticar no provedor OAuth",

@@ -143,10 +143,10 @@ type Store interface {
 	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
-	LogFind(*model.Step) ([]*model.LogEntry, error)
-	LogAppend(*model.Step, []*model.LogEntry) error
-	LogDelete(*model.Step) error
-	StepFinished(*model.Step) error
+	LogFind(context.Context, *model.Step) ([]*model.LogEntry, error)
+	LogAppend(context.Context, *model.Step, []*model.LogEntry) error
+	LogDelete(context.Context, *model.Step) error
+	StepFinished(context.Context, *model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter

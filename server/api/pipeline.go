@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -256,7 +257,7 @@ func DeletePipeline(c *gin.Context) {
 
 	_store := store.FromContext(c)
 
-	if err := deleteStoredLogs(_store, pl.ID); err != nil {
+	if err := deleteStoredLogs(c, _store, pl.ID); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
 		return
 	}
@@ -273,7 +274,7 @@ func DeletePipeline(c *gin.Context) {
 // deleteStoredLogs deletes the logs of every step of a pipeline from the log store.
 // Deleting steps from the database only removes logs kept in the database,
 // so logs kept by other log stores would stay behind.
-func deleteStoredLogs(_store store.Store, pipelineID int64) error {
+func deleteStoredLogs(ctx context.Context, _store store.Store, pipelineID int64) error {
 	steps, err := _store.StepList(pipelineID)
 	if err != nil {
 		return err
@@ -281,7 +282,7 @@ func deleteStoredLogs(_store store.Store, pipelineID int64) error {
 
 	var errs error
 	for _, step := range steps {
-		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(step))
+		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(ctx, step))
 	}
 	return errs
 }
@@ -355,7 +356,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 func GetStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -378,7 +379,7 @@ func GetStepLogs(c *gin.Context) {
 func DownloadStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -437,7 +438,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err := server.Config.Services.LogStore.LogDelete(_step)
+	err := server.Config.Services.LogStore.LogDelete(c, _step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -712,7 +713,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := server.Config.Services.LogStore.LogDelete(step); lErr != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(c, step); lErr != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

@@ -140,7 +140,7 @@ func TestDownloadStepLogs(t *testing.T) {
 	}
 
 	mockLogStore := log_mocks.NewMockService(t)
-	mockLogStore.On("LogFind", step).Return(logs, nil)
+	mockLogStore.On("LogFind", mock.Anything, step).Return(logs, nil)
 
 	originalLogStore := server.Config.Services.LogStore
 	server.Config.Services.LogStore = mockLogStore
@@ -178,7 +178,7 @@ func TestDeleteStepLogs(t *testing.T) {
 	t.Run("deletes through the log store", func(t *testing.T) {
 		step := &model.Step{ID: 3, State: model.StatusSuccess}
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", step).Return(nil)
+		mockLogStore.On("LogDelete", mock.Anything, step).Return(nil)
 
 		// the store must not be used to delete logs, the configured log store may not be the database
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -193,7 +193,7 @@ func TestDeleteStepLogs(t *testing.T) {
 	t.Run("returns the log store error", func(t *testing.T) {
 		step := &model.Step{ID: 3, State: model.StatusFailure}
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", step).Return(assert.AnError)
+		mockLogStore.On("LogDelete", mock.Anything, step).Return(assert.AnError)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", store_mocks.NewMockStore(t))
@@ -240,8 +240,8 @@ func TestDeletePipeline(t *testing.T) {
 
 		// the logs may live outside the database, so they are deleted through the log store
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", steps[0]).Return(nil)
-		mockLogStore.On("LogDelete", steps[1]).Return(nil)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(nil)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
@@ -258,8 +258,8 @@ func TestDeletePipeline(t *testing.T) {
 		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", steps[0]).Return(assert.AnError)
-		mockLogStore.On("LogDelete", steps[1]).Return(nil)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(assert.AnError)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
@@ -707,8 +707,8 @@ func TestDeletePipelineLogs(t *testing.T) {
 		mockStore.On("StepList", pipeline.ID).Return(steps, nil)
 
 		mockLogStore := log_mocks.NewMockService(t)
-		mockLogStore.On("LogDelete", steps[0]).Return(firstErr)
-		mockLogStore.On("LogDelete", steps[1]).Return(secondErr)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(firstErr)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(secondErr)
 		originalLogStore := server.Config.Services.LogStore
 		server.Config.Services.LogStore = mockLogStore
 		t.Cleanup(func() {
