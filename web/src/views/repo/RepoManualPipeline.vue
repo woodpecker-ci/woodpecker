@@ -124,7 +124,7 @@ async function loadWorkflows(branch: string) {
   try {
     data = await apiClient.getRepoWorkflows(repo.value.id, branch);
   } catch (error) {
-    console.error("Failed to fetch repo workflows", error);
+    console.error('Failed to fetch repo workflows', error);
   }
 
   if (payload.value.branch !== branch) {
