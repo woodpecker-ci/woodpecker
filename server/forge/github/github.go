@@ -29,6 +29,7 @@ import (
 	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -284,6 +285,9 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
+// maxParallelFileFetches bounds how many files of a config folder Dir loads at once.
+const maxParallelFileFetches = 10
+
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
@@ -308,36 +312,29 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		}
 	}
 
-	// buffered so no sender blocks forever when we return on the first error
-	fc := make(chan *forge_types.FileMeta, len(paths))
-	errChan := make(chan error, len(paths))
-
-	for _, path := range paths {
-		go func() {
-			content, err := c.File(ctx, u, r, b, path)
+	// load the files in parallel with a bounded number of workers,
+	// the first error cancels the fetches still running
+	files := make([]*forge_types.FileMeta, len(paths))
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelFileFetches)
+	for i, path := range paths {
+		g.Go(func() error {
+			content, err := c.File(gCtx, u, r, b, path)
 			if err != nil {
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
+				return err
 			}
-		}()
+			files[i] = &forge_types.FileMeta{
+				Name: path,
+				Data: content,
+			}
+			return nil
+		})
 	}
-
-	var files []*forge_types.FileMeta
-
-	for range paths {
-		select {
-		case err := <-errChan:
-			return nil, err
-		case fileMeta := <-fc:
-			files = append(files, fileMeta)
-		}
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	return files, nil
