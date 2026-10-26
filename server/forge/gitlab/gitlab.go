@@ -421,8 +421,8 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for i := 1; true; i++ {
-		opts.Page = 1
+	for page := int64(1); ; page++ {
+		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err

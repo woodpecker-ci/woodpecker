@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -588,8 +590,18 @@ func TestFileAndDir(t *testing.T) {
 			case "/repos/octocat/hello-world/contents/.woodpecker":
 				writeJSON(t, w, []github.RepositoryContent{
 					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("dir"), Name: new("sub")},
+					{Type: new("symlink"), Name: new("link.yaml")},
 					{Type: new("file"), Name: new("b.yaml")},
 				})
+			case "/repos/octocat/hello-world/contents/.broken":
+				writeJSON(t, w, []github.RepositoryContent{
+					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("file"), Name: new("b.yaml")},
+				})
+			case "/repos/octocat/hello-world/contents/.broken/a.yaml", "/repos/octocat/hello-world/contents/.broken/b.yaml":
+				w.WriteHeader(http.StatusInternalServerError)
+				writeJSON(t, w, map[string]string{"message": "Server Error"})
 			default:
 				w.WriteHeader(http.StatusNotFound)
 				writeJSON(t, w, map[string]string{"message": "Not Found"})
@@ -612,15 +624,77 @@ func TestFileAndDir(t *testing.T) {
 	_, err = c.File(ctx, user, repo, pipeline, ".woodpecker")
 	assert.ErrorContains(t, err, "is a folder not a file")
 
-	metas, err := c.Dir(ctx, user, repo, pipeline, ".woodpecker")
+	// dir fails the test instead of hanging when Dir does not return
+	dir := func(path string) ([]*forge_types.FileMeta, error) {
+		type result struct {
+			metas []*forge_types.FileMeta
+			err   error
+		}
+		done := make(chan result, 1)
+		go func() {
+			metas, err := c.Dir(ctx, user, repo, pipeline, path)
+			done <- result{metas, err}
+		}()
+		select {
+		case r := <-done:
+			return r.metas, r.err
+		case <-time.After(5 * time.Second):
+			require.FailNow(t, "Dir did not return", path)
+			return nil, nil
+		}
+	}
+
+	// sub folders and symlinks are skipped, files are loaded with their content
+	metas, err := dir(".woodpecker")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*forge_types.FileMeta{
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
 
-	_, err = c.Dir(ctx, user, repo, pipeline, ".missing")
+	// a file that can not be loaded fails the folder
+	_, err = dir(".broken")
+	assert.ErrorContains(t, err, "500")
+
+	_, err = dir(".missing")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+}
+
+func TestDirLimitsParallelFileFetches(t *testing.T) {
+	// more files than workers, each fetch stays open for a moment so
+	// unbounded fetching would have all of them in flight at once
+	const files = 3 * maxParallelFileFetches
+	var inFlight, maxInFlight atomic.Int32
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/repos/octocat/hello-world/contents/.woodpecker" {
+				list := make([]github.RepositoryContent, 0, files)
+				for i := range files {
+					list = append(list, github.RepositoryContent{Type: new("file"), Name: new(strconv.Itoa(i) + ".yaml")})
+				}
+				writeJSON(t, w, list)
+				return
+			}
+			n := inFlight.Add(1)
+			defer inFlight.Add(-1)
+			for m := maxInFlight.Load(); n > m && !maxInFlight.CompareAndSwap(m, n); m = maxInFlight.Load() {
+			}
+			time.Sleep(20 * time.Millisecond)
+			name := strings.TrimPrefix(r.URL.Path, "/repos/octocat/hello-world/contents/")
+			writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: new(base64.StdEncoding.EncodeToString([]byte("steps: " + name)))})
+		})),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	metas, err := c.Dir(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, &model.Pipeline{Commit: "abc"}, ".woodpecker")
+	require.NoError(t, err)
+	assert.LessOrEqual(t, maxInFlight.Load(), int32(maxParallelFileFetches))
+	// files keep the order of the folder listing
+	require.Len(t, metas, files)
+	for i, meta := range metas {
+		name := ".woodpecker/" + strconv.Itoa(i) + ".yaml"
+		assert.Equal(t, &forge_types.FileMeta{Name: name, Data: []byte("steps: " + name)}, meta)
+	}
 }
 
 func TestOrgMembership(t *testing.T) {
