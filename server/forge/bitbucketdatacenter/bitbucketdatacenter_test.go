@@ -172,6 +172,29 @@ func TestBitbucketDCRepoByIDWithSpacesInName(t *testing.T) {
 	}, repo)
 }
 
+func TestBitbucketDCRepoByIDStopsAtTheMatch(t *testing.T) {
+	// the repository is on the first page of many, no further page is needed
+	requests := 0
+	s := mock.NewMockServer(
+		mock.WithRequestMatchHandler(mock.SearchRepositories, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			requests++
+			writeJSON(t, w, bitbucket.RepositoryList{
+				Repositories:  []*bitbucket.Repository{{ID: uint64(1234), Slug: "test-repo", Project: &bitbucket.Project{Key: "TEST"}}},
+				LastPage:      requests > 3,
+				NextPageStart: uint(requests * listLimit),
+			})
+		})),
+		mock.WithRequestMatch(mock.GetDefaultBranch, bitbucket.Branch{DisplayID: "main", Default: true}),
+	)
+	defer s.Close()
+	c := &client{urlAPI: s.URL}
+
+	repo, err := c.Repo(t.Context(), fakeUser, model.ForgeRemoteID("1234"), "TEST", "test-repo")
+	require.NoError(t, err)
+	assert.Equal(t, "TEST/test-repo", repo.FullName)
+	assert.Equal(t, 1, requests)
+}
+
 var (
 	fakeUser = &model.User{
 		AccessToken: "fake",
@@ -325,7 +348,8 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 	)
 
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.GetCommit,
+		mock.WithRequestMatch(
+			mock.GetCommit,
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 		),
@@ -444,7 +468,8 @@ func TestOrgMembership(t *testing.T) {
 
 func TestTeams(t *testing.T) {
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.ListProjects,
+		mock.WithRequestMatch(
+			mock.ListProjects,
 			bitbucket.ProjectList{NextPageStart: 1, Projects: []*bitbucket.Project{{Key: "ONE"}}},
 			bitbucket.ProjectList{LastPage: true, Projects: []*bitbucket.Project{{Key: "TWO"}}},
 		),

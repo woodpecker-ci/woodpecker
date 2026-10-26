@@ -230,10 +230,15 @@ func respond(status int, body string) http.HandlerFunc {
 	}
 }
 
-func TestHookReleaseLoadsTagCommit(t *testing.T) {
+func TestHookLoadsTagCommit(t *testing.T) {
 	newRequest := func() *http.Request {
 		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookRelease))
 		req.Header.Set(hookEvent, hookRelease)
+		return req
+	}
+	newTagRequest := func() *http.Request {
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookTag))
+		req.Header.Set(hookEvent, hookCreated)
 		return req
 	}
 
@@ -253,6 +258,19 @@ func TestHookReleaseLoadsTagCommit(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
+		assert.Equal(t, "abc123", pipeline.Commit)
+	})
+
+	t.Run("tag events get the commit of their tag, not the annotated tag object", func(t *testing.T) {
+		// the create hook of a pushed annotated tag holds the SHA of the tag object
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
+		})
+
+		_, pipeline, err := g.Hook(ctx, newTagRequest())
+		require.NoError(t, err)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
 		assert.Equal(t, "abc123", pipeline.Commit)
 	})
 

@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -931,6 +932,33 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		assert.NotEmpty(t, pipeline.Avatar)
 	})
 
+	t.Run("annotated tag records the tagged commit, not the tag object", func(t *testing.T) {
+		// an annotated tag's `after` is the tag object's SHA; the commits
+		// endpoint resolves it to the tagged commit, whose ID differs
+		tagObjectSHA := "187b97cf74a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5"
+		commitSHA := "afd225e8b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+
+		var payload map[string]any
+		require.NoError(t, json.Unmarshal(fixtures.HookTag, &payload))
+		payload["message"] = ""
+		payload["after"] = tagObjectSHA
+		body, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		client := newTestServer(t, map[string]string{
+			"/api/v4/projects/4": `{"id":4}`,
+			"/api/v4/projects/4/repository/commits/" + tagObjectSHA: `{"id":"` + commitSHA + `","message":"Release v22",` +
+				`"author_name":"Jane","author_email":"jane@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
+		})
+
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+		require.NoError(t, err)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+		assert.Equal(t, commitSHA, pipeline.Commit)
+		assert.Equal(t, "Release v22", pipeline.Message)
+	})
+
 	t.Run("release gets the release author", func(t *testing.T) {
 		client := newTestServer(t, map[string]string{
 			"/api/v4/projects/4":                `{"id":4}`,
@@ -1106,6 +1134,66 @@ func TestFileAndDir(t *testing.T) {
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
+}
+
+func TestDirPagination(t *testing.T) {
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{ForgeRemoteID: "4"}
+	pipeline := &model.Pipeline{Commit: "abc"}
+
+	// fullPage returns a page with defaultPerPage sub folders and the given blob,
+	// so the client has to ask for the next page.
+	fullPage := func(blob string) string {
+		entries := make([]string, 0, defaultPerPage)
+		for i := range defaultPerPage - 1 {
+			entries = append(entries, fmt.Sprintf(`{"type":"tree","path":".woodpecker/sub%d"}`, i))
+		}
+		entries = append(entries, `{"type":"blob","path":"`+blob+`"}`)
+		return "[" + strings.Join(entries, ",") + "]"
+	}
+
+	newServer := func(t *testing.T, tree http.HandlerFunc) *GitLab {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(`{"id":4}`))
+		})
+		mux.HandleFunc("/api/v4/projects/4/repository/files/", func(w http.ResponseWriter, r *http.Request) {
+			name := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/api/v4/projects/4/repository/files/"), "/raw")
+			_, _ = w.Write([]byte("steps: " + name))
+		})
+		mux.HandleFunc("/api/v4/projects/4/repository/tree", tree)
+		server := httptest.NewServer(mux)
+		t.Cleanup(server.Close)
+		return load(server.URL + "?client_id=test&client_secret=test")
+	}
+
+	t.Run("follows pages until a short page", func(t *testing.T) {
+		var requests []string
+		client := newServer(t, func(w http.ResponseWriter, r *http.Request) {
+			page := r.URL.Query().Get("page")
+			if slices.Contains(requests, page) {
+				http.Error(w, "page "+page+" requested twice", http.StatusBadRequest)
+				return
+			}
+			requests = append(requests, page)
+			switch page {
+			case "1":
+				_, _ = w.Write([]byte(fullPage(".woodpecker/a.yaml")))
+			case "2":
+				_, _ = w.Write([]byte(`[{"type":"blob","path":".woodpecker/b.yaml"}]`))
+			default:
+				http.Error(w, "unexpected page "+page, http.StatusBadRequest)
+			}
+		})
+
+		metas, err := client.Dir(t.Context(), user, repo, pipeline, ".woodpecker")
+		require.NoError(t, err)
+		assert.Equal(t, []string{"1", "2"}, requests)
+		assert.Equal(t, []*types.FileMeta{
+			{Name: ".woodpecker/a.yaml", Data: []byte("steps: .woodpecker/a.yaml")},
+			{Name: ".woodpecker/b.yaml", Data: []byte("steps: .woodpecker/b.yaml")},
+		}, metas)
+	})
 }
 
 func TestBranchHead(t *testing.T) {
