@@ -807,7 +807,7 @@ depends_on:
 				deploy = item
 			}
 		}
-		assert.ElementsMatch(t, constraint.DependsOn{{Name: "check-a"}, {Name: "check-b"}}, deploy.DependsOn, "both deps should be present")
+		assert.ElementsMatch(t, []string{"check-a", "check-b"}, deploy.DependsOn.Names(), "both deps should be present")
 	})
 
 	t.Run("missing required dep still removes workflow", func(t *testing.T) {
@@ -1175,6 +1175,46 @@ func TestSelectedWorkflow(t *testing.T) {
 		names = append(names, item.Workflow.Name)
 	}
 	assert.Equal(t, []string{"build", "deploy", "lint"}, names, "should run the selected workflow and its transitive dependencies")
+}
+
+func TestSelectedWorkflowSkipsOptionalDependencies(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: "lint", Data: []byte(`
+steps:
+  - name: lint
+    image: scratch
+`)},
+			{Name: "test", Data: []byte(`
+steps:
+  - name: test
+    image: scratch
+`)},
+			{Name: "deploy", Data: []byte(`
+steps:
+  - name: deploy
+    image: scratch
+depends_on:
+  - lint
+  - name: test
+    optional: true
+`)},
+		},
+		SelectedWorkflow: "deploy",
+	}
+
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err))
+	assert.Len(t, items, 2)
+	assert.Equal(t, "deploy", items[0].Workflow.Name)
+	assert.Equal(t, []string{"lint"}, items[0].DependsOn.Names(), "optional dependency should be dropped, not started")
+	assert.Equal(t, "lint", items[1].Workflow.Name)
 }
 
 func TestSelectedWorkflowByPath(t *testing.T) {

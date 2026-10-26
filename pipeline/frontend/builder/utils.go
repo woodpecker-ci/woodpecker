@@ -63,17 +63,10 @@ func filterMissingDependencies(items []*Item) []*Item {
 			break
 		}
 	}
-
-	// surviving deps are all present; flag is no longer relevant
-	for _, item := range items {
-		for i := range item.DependsOn {
-			item.DependsOn[i].Optional = false
-		}
-	}
 	return items
 }
 
-// selectWorkflow keeps the named item and, transitively, the items it depends on.
+// selectWorkflow keeps the named item and, transitively, the items it hard depends on.
 // Returns an empty slice if no item carries that name.
 func selectWorkflow(items []*Item, name string) []*Item {
 	if !ContainsItemWithName(name, items) {
@@ -89,6 +82,9 @@ func selectWorkflow(items []*Item, name string) []*Item {
 				continue
 			}
 			for _, dep := range item.DependsOn {
+				if dep.Optional {
+					continue
+				}
 				if _, ok := wanted[dep.Name]; !ok {
 					wanted[dep.Name] = struct{}{}
 					queue = append(queue, dep.Name)
@@ -99,9 +95,17 @@ func selectWorkflow(items []*Item, name string) []*Item {
 
 	kept := make([]*Item, 0, len(items))
 	for _, item := range items {
-		if _, ok := wanted[item.Workflow.Name]; ok {
-			kept = append(kept, item)
+		if _, ok := wanted[item.Workflow.Name]; !ok {
+			continue
 		}
+		var resolved constraint.DependsOn
+		for _, dep := range item.DependsOn {
+			if _, ok := wanted[dep.Name]; ok {
+				resolved = append(resolved, dep)
+			}
+		}
+		item.DependsOn = resolved
+		kept = append(kept, item)
 	}
 	return kept
 }
