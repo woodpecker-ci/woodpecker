@@ -6085,6 +6085,52 @@ func (_c *MockStore_TaskInsert_Call) RunAndReturn(run func(task *model.Task) err
 	return _c
 }
 
+// TaskUpdate provides a mock function for the type MockStore
+func (_mock *MockStore) TaskUpdate(task *model.Task) error {
+	ret := _mock.Called(task)
+
+	if len(ret) == 0 {
+		panic("no return value specified for TaskUpdate")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Task) error); ok {
+		r0 = returnFunc(task)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_TaskUpdate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'TaskUpdate'
+type MockStore_TaskUpdate_Call struct {
+	*mock.Call
+}
+
+// TaskUpdate is a helper method to define mock.On call
+//   - task *model.Task
+func (_e *MockStore_Expecter) TaskUpdate(task any) *MockStore_TaskUpdate_Call {
+	return &MockStore_TaskUpdate_Call{Call: _e.mock.On("TaskUpdate", task)}
+}
+
+func (_c *MockStore_TaskUpdate_Call) Run(run func(task *model.Task)) *MockStore_TaskUpdate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Task
+		if args[0] != nil {
+			arg0 = args[0].(*model.Task)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_TaskUpdate_Call) Return(err error) *MockStore_TaskUpdate_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
 // TaskList provides a mock function for the type MockStore
 func (_mock *MockStore) TaskList() ([]*model.Task, error) {
 	ret := _mock.Called()
