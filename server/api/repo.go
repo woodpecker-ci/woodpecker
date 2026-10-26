@@ -16,6 +16,7 @@
 package api
 
 import (
+	"context"
 	"encoding/base32"
 	"errors"
 	"fmt"
@@ -519,7 +520,7 @@ func DeleteRepo(c *gin.Context) {
 	}
 
 	if remove {
-		if err := deleteStoredRepoLogs(_store, repo); err != nil {
+		if err := deleteStoredRepoLogs(c, _store, repo); err != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
@@ -543,7 +544,7 @@ func DeleteRepo(c *gin.Context) {
 
 // deleteStoredRepoLogs deletes the logs of every step of a repo from the log store,
 // see deleteStoredLogs.
-func deleteStoredRepoLogs(_store store.Store, repo *model.Repo) error {
+func deleteStoredRepoLogs(ctx context.Context, _store store.Store, repo *model.Repo) error {
 	const perPage = 50
 	opts := &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: perPage}}
 	for {
@@ -553,7 +554,7 @@ func deleteStoredRepoLogs(_store store.Store, repo *model.Repo) error {
 		}
 
 		for _, pipeline := range pipelines {
-			if err := deleteStoredLogs(_store, pipeline.ID); err != nil {
+			if err := deleteStoredLogs(ctx, _store, pipeline.ID); err != nil {
 				return err
 			}
 		}

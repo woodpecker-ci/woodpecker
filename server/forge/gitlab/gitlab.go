@@ -421,8 +421,8 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for i := 1; true; i++ {
-		opts.Page = 1
+	for page := int64(1); ; page++ {
+		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -941,6 +941,11 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	if err != nil {
 		return nil, err
 	}
+
+	// For annotated tags `sha` is the tag object's own SHA; the commits
+	// endpoint resolves it to the tagged commit. Record that commit so
+	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
+	pipeline.Commit = cm.ID
 
 	pipeline.Author = cm.AuthorName
 	pipeline.Email = cm.AuthorEmail
