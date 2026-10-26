@@ -421,7 +421,7 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for page := int64(1); page <= common.MaxPages; page++ {
+	for page := int64(1); ; page++ {
 		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
@@ -446,11 +446,11 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		}
 
 		if len(batch) < defaultPerPage {
-			return files, nil
+			break
 		}
 	}
 
-	return nil, &forge_types.ErrTooManyPages{Listing: fmt.Sprintf("config folder '%s'", path), Pages: common.MaxPages}
+	return files, nil
 }
 
 // Status sends the commit status back to gitlab.

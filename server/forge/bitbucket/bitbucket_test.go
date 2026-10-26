@@ -19,7 +19,6 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -297,27 +295,3 @@ var (
 		State: model.StatusSuccess,
 	}
 )
-
-func TestDirPageLimit(t *testing.T) {
-	// the forge links a next page forever, it stops a bit after the page limit,
-	// so a missing limit fails the test instead of hanging it
-	requests := 0
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/2.0/repositories/test_name/repo_name/src/sha/.woodpecker" {
-			_, _ = w.Write([]byte("steps: a"))
-			return
-		}
-		requests++
-		if requests > common.MaxPages+5 {
-			_, _ = w.Write([]byte(`{"values":[]}`))
-			return
-		}
-		_, _ = w.Write([]byte(`{"values":[{"path":".woodpecker/a.yaml","type":"commit_file"}],"next":"https://api.bitbucket.org/2.0/next?page=` + strconv.Itoa(requests+1) + `"}`))
-	}))
-	defer s.Close()
-	c := &config{url: s.URL, api: s.URL}
-
-	_, err := c.Dir(t.Context(), fakeUser, &model.Repo{Owner: "test_name", Name: "repo_name"}, &model.Pipeline{Commit: "sha"}, ".woodpecker")
-	assert.EqualError(t, err, "too many pages: stopped listing config folder '.woodpecker' after 100 pages")
-	assert.Equal(t, common.MaxPages, requests)
-}

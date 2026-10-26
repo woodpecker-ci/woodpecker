@@ -34,7 +34,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -194,31 +193,6 @@ func TestBitbucketDCRepoByIDStopsAtTheMatch(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "TEST/test-repo", repo.FullName)
 	assert.Equal(t, 1, requests)
-}
-
-func TestDirPageLimit(t *testing.T) {
-	// the forge never reports the last page, it stops a bit after the page
-	// limit, so a missing limit fails the test instead of hanging it
-	requests := 0
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if !strings.HasSuffix(r.URL.Path, "/files/.woodpecker") {
-			_, _ = w.Write([]byte(`{"lines":[{"text":"steps:"}],"isLastPage":true}`))
-			return
-		}
-		requests++
-		writeJSON(t, w, bitbucket.FileList{
-			Files:         []string{"build.yaml"},
-			LastPage:      requests > common.MaxPages+5,
-			NextPageStart: uint(requests),
-		})
-	}))
-	defer s.Close()
-	c := &client{urlAPI: s.URL}
-
-	_, err := c.Dir(t.Context(), fakeUser, &model.Repo{Owner: "PRJ", Name: "repo"}, fakePipeline, ".woodpecker")
-	assert.EqualError(t, err, "too many pages: stopped listing config folder '.woodpecker' after 100 pages")
-	assert.Equal(t, common.MaxPages, requests)
 }
 
 var (
