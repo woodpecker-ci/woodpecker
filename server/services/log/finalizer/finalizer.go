@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	// stepTimeout bounds finalizing one step, so a hung log store cannot stall the finalizer.
+	// Finalizing one step takes at most stepTimeout, so a hung log store cannot stall the finalizer.
 	stepTimeout = time.Minute
 
 	// A claim on a step log counts as left behind by a server that crashed after recoverDelay plus
@@ -40,10 +40,10 @@ var (
 	recoverDelay  = 30 * time.Minute
 	recoverJitter = 10 * time.Minute
 
-	// minInterval is the shortest interval Run accepts.
+	// Run accepts no interval shorter than minInterval.
 	minInterval = time.Minute
 
-	// setup prometheus gauge.
+	// Prometheus gauge of the steps whose log is complete but not yet finalized.
 	unfinalizedSteps = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "log_steps_unfinalized",
