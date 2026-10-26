@@ -207,6 +207,7 @@ func GetPipelines(c *gin.Context) {
 //	@Router		/repos/{repo_id}/pipelines/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
+//	@Failure	409	"a step log is being finalized or deleted, try again later"
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -685,6 +686,7 @@ func PostPipeline(c *gin.Context) {
 //	@Router		/repos/{repo_id}/logs/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
+//	@Failure	409	"a step log is being finalized or deleted, try again later"
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
