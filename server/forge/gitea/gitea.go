@@ -508,13 +508,13 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
-				if err != nil {
-					return nil, nil, err
-				}
-				pipeline.Commit = sha
+			// the create hook of a pushed annotated tag holds the SHA of the
+			// tag object, not of the tagged commit
+			sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			if err != nil {
+				return nil, nil, err
 			}
+			pipeline.Commit = sha
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			if len(pipeline.ChangedFiles) == 0 {
