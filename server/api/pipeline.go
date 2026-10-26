@@ -102,6 +102,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		Ref:                 "refs/heads/" + opts.Branch,
 		AdditionalVariables: opts.Variables,
+		SelectedWorkflow:    opts.Workflow,
 
 		Author: user.Login,
 		Email:  user.Email,
@@ -114,6 +115,45 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 	}
 
 	return pl
+}
+
+// GetRepoWorkflows
+//
+//	@Summary		List workflows a manual pipeline would run
+//	@Description	Fetches the pipeline config of the branch head and lists the workflows that run on the manual event.
+//	@Router			/repos/{repo_id}/workflows [get]
+//	@Produce		json
+//	@Success		200	{array}	WorkflowInfo
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			branch			query	string	false	"the branch to load the config from, defaults to the default branch"
+func GetRepoWorkflows(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	user := session.User(c)
+	opts := model.PipelineOptions{Branch: c.DefaultQuery("branch", repo.Branch)}
+
+	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		return
+	}
+
+	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(model.EventManual, lastCommit, user, &opts))
+	if err != nil {
+		handlePipelineErr(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, workflows)
 }
 
 // GetPipelines
@@ -619,6 +659,8 @@ func PostPipeline(c *gin.Context) {
 		pl.Sender = deployer.Login
 
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
+		// a workflow picked for the manual run must not narrow the deployment
+		pl.SelectedWorkflow = ""
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params

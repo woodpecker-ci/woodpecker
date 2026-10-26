@@ -47,6 +47,10 @@ type PipelineBuilder struct {
 	PrivilegedPlugins   []string
 	CompilerOptions     []compiler.Option
 	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
+	// SelectedWorkflow, if set, limits to this workflow and its dependencies.
+	SelectedWorkflow string
+	// ListOnly reports the workflows that could run instead of building them.
+	ListOnly bool
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -92,6 +96,17 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	}
 
 	items = filterMissingDependencies(items)
+
+	if b.SelectedWorkflow != "" {
+		// normalize like workflow names so ".woodpecker/deploy.yml" matches "deploy"
+		items = selectWorkflow(items, SanitizePath(b.SelectedWorkflow))
+		if len(items) == 0 {
+			return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
+				Type:    pipeline_errors.PipelineErrorTypeGeneric,
+				Message: fmt.Sprintf("selected workflow '%s' does not exist or does not match its conditions", b.SelectedWorkflow),
+			})
+		}
+	}
 
 	return items, errorsAndWarnings
 }
@@ -149,7 +164,11 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	}
 
 	// checking if filtered.
-	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
+	whenMatch := parsed.When.Match
+	if b.ListOnly {
+		whenMatch = parsed.When.MatchIgnoringEvaluate
+	}
+	if match, err := whenMatch(workflowMetadata, true, environ); !match && err == nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"marked as skipped, does not match metadata",
 		)
@@ -161,13 +180,16 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
-	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
-	}
+	var ir *backend_types.Config
+	if !b.ListOnly {
+		ir, err = b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
 
-	if len(ir.Stages) == 0 {
-		return nil, nil
+		if len(ir.Stages) == 0 {
+			return nil, nil
+		}
 	}
 
 	item = &Item{

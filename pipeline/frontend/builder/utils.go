@@ -73,6 +73,39 @@ func filterMissingDependencies(items []*Item) []*Item {
 	return items
 }
 
+// selectWorkflow keeps the named item and, transitively, the items it depends on.
+// Returns an empty slice if no item carries that name.
+func selectWorkflow(items []*Item, name string) []*Item {
+	if !ContainsItemWithName(name, items) {
+		return nil
+	}
+	wanted := map[string]struct{}{name: {}}
+	queue := []string{name}
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+		for _, item := range items {
+			if item.Workflow.Name != current {
+				continue
+			}
+			for _, dep := range item.DependsOn {
+				if _, ok := wanted[dep.Name]; !ok {
+					wanted[dep.Name] = struct{}{}
+					queue = append(queue, dep.Name)
+				}
+			}
+		}
+	}
+
+	kept := make([]*Item, 0, len(items))
+	for _, item := range items {
+		if _, ok := wanted[item.Workflow.Name]; ok {
+			kept = append(kept, item)
+		}
+	}
+	return kept
+}
+
 func ContainsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
 		if name == item.Workflow.Name {

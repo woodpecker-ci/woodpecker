@@ -121,7 +121,8 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Volumes:  repo.Trusted.Volumes,
 			Security: repo.Trusted.Security,
 		},
-		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
+		DefaultLabels:    server.Config.Pipeline.DefaultWorkflowLabels,
+		SelectedWorkflow: currentPipeline.SelectedWorkflow,
 		CompilerOptions: []compiler.Option{
 			compiler.WithLocal(false),
 			compiler.WithRegistry(registries...),

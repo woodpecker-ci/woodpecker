@@ -1116,3 +1116,124 @@ steps:
 	assert.Equal(t, "main", items[0].Labels[pipeline.LabelCommitBranch])
 	assert.Equal(t, "push", items[0].Labels[pipeline.LabelEvent])
 }
+
+func selectedWorkflowYamls() []*YamlFile {
+	return []*YamlFile{
+		{Name: "lint", Data: []byte(`
+steps:
+  - name: lint
+    image: scratch
+`)},
+		{Name: "build", Data: []byte(`
+steps:
+  - name: build
+    image: scratch
+depends_on: [lint]
+`)},
+		{Name: "deploy", Data: []byte(`
+when:
+  event: manual
+steps:
+  - name: deploy
+    image: scratch
+depends_on: [build]
+`)},
+		{Name: "push-only", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: push
+    image: scratch
+`)},
+		{Name: "prod-only", Data: []byte(`
+when:
+  event: manual
+  evaluate: 'DEPLOY_ENV == "prod"'
+steps:
+  - name: prod
+    image: scratch
+`)},
+	}
+}
+
+func TestSelectedWorkflow(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               selectedWorkflowYamls(),
+		SelectedWorkflow:    "deploy",
+	}
+
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err))
+	names := make([]string, 0, len(items))
+	for _, item := range items {
+		names = append(names, item.Workflow.Name)
+	}
+	assert.Equal(t, []string{"build", "deploy", "lint"}, names, "should run the selected workflow and its transitive dependencies")
+}
+
+func TestSelectedWorkflowByPath(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               selectedWorkflowYamls(),
+		SelectedWorkflow:    ".woodpecker/deploy.yml",
+	}
+
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err))
+	names := make([]string, 0, len(items))
+	for _, item := range items {
+		names = append(names, item.Workflow.Name)
+	}
+	assert.Equal(t, []string{"build", "deploy", "lint"}, names, "selection should be normalized like workflow names")
+}
+
+func TestListOnly(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               selectedWorkflowYamls(),
+		ListOnly:            true,
+	}
+
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err))
+	names := make([]string, 0, len(items))
+	for _, item := range items {
+		assert.Nil(t, item.Config, "should not compile")
+		names = append(names, item.Workflow.Name)
+	}
+	assert.Equal(t, []string{"build", "deploy", "lint", "prod-only"}, names, "should list workflows gated by evaluate, but not by other conditions")
+}
+
+func TestSelectedWorkflowNotFound(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               selectedWorkflowYamls(),
+		SelectedWorkflow:    "push-only",
+	}
+
+	items, err := b.Build()
+	assert.Nil(t, items)
+	assert.True(t, errors.HasBlockingErrors(err))
+	assert.ErrorContains(t, err, "selected workflow 'push-only' does not exist or does not match its conditions")
+}
