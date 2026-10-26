@@ -125,7 +125,7 @@ clean: ## Clean build artifacts
 clean-all: clean ## Clean all artifacts
 	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
-	rm -rf docs/docs/40-cli.md docs/openapi.json
+	rm -rf docs/docs/40-cli/90-reference.md docs/openapi.json
 
 .PHONY: generate
 generate: generate-openapi ## Run all code generations

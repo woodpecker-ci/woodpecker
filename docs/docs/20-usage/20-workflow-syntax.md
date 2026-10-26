@@ -806,6 +806,10 @@ depends_on:
     optional: true
 ```
 
+## `concurrency`
+
+By default, workflows run in parallel. See the [Concurrency section](./25-workflows.md#concurrency) for instructions on how to limit parallel execution of workflows.
+
 ## Advanced network options for steps
 
 :::warning
