@@ -57,6 +57,7 @@ func (s *ServerMetadata) GetWorkflowMetadata(workflow *builder.Workflow) metadat
 		fForge = metadata.Forge{
 			Type: s.forge.Name(),
 			URL:  s.forge.URL(),
+			Host: s.forge.Config().Host,
 		}
 	}
 

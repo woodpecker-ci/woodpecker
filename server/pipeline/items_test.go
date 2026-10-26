@@ -24,6 +24,7 @@ import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -175,6 +176,7 @@ steps:
 	}, nil)
 	forge.On("Name").Return("github")
 	forge.On("URL").Return("https://github.com")
+	forge.On("Config").Return(metadata.ForgeConfig{Host: "github.com"})
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)

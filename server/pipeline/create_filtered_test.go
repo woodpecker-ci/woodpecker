@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -68,6 +69,7 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	mockForge := forge_mocks.NewMockForge(t)
 	mockForge.On("Name").Return("github")
 	mockForge.On("URL").Return("https://github.com")
+	mockForge.On("Config").Return(metadata.ForgeConfig{Host: "github.com"})
 	mockForge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)

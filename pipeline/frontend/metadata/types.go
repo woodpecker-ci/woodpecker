@@ -116,6 +116,13 @@ type (
 	Forge struct {
 		Type string `json:"type,omitempty"`
 		URL  string `json:"url,omitempty"`
+		Host string `json:"host,omitempty"`
+	}
+
+	// ForgeConfig defines the generic configuration of a configured forge.
+	ForgeConfig struct {
+		// Host is the host of the forge, including the port if one is set.
+		Host string
 	}
 
 	// ServerForge represent the needed func of a server forge to get its metadata.
@@ -124,6 +131,8 @@ type (
 		Name() string
 		// URL returns the root url of a configured forge
 		URL() string
+		// Config returns the generic configuration of a configured forge
+		Config() ForgeConfig
 	}
 
 	TrustedConfiguration struct {

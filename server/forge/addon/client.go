@@ -25,7 +25,9 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -81,6 +83,11 @@ func (g *RPC) URL() string {
 		log.Error().Err(err).Msg("addon Plugin.URL call failed")
 	}
 	return resp
+}
+
+// Config returns the generic configuration of the configured forge.
+func (g *RPC) Config() metadata.ForgeConfig {
+	return metadata.ForgeConfig{Host: common.HostFromURL(g.URL())}
 }
 
 func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, string, error) {

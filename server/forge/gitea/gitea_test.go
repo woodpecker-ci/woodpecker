@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea/fixtures"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -456,4 +457,14 @@ func TestPerPage(t *testing.T) {
 		g := &Gitea{pageSize: 7}
 		assert.Equal(t, 7, g.perPage(t.Context()))
 	})
+}
+
+func TestConfig(t *testing.T) {
+	f, err := New(1, Opts{URL: "https://example.com/gitea"})
+	require.NoError(t, err)
+
+	serverForge, ok := f.(metadata.ServerForge)
+	require.True(t, ok, "gitea must implement the metadata forge interface")
+
+	assert.Equal(t, metadata.ForgeConfig{Host: "example.com"}, serverForge.Config())
 }

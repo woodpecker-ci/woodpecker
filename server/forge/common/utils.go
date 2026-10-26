@@ -27,6 +27,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+// HostFromURL returns the host of a configured forge url, including the port if one
+// is set. An url that cannot be parsed yields no host.
+func HostFromURL(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return ""
+	}
+
+	return u.Host
+}
+
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 	u, err := url.Parse(cloneURL)
 	if err != nil {

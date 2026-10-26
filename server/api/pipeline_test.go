@@ -301,6 +301,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 	mockForge := forge_mocks.NewMockForge(t)
 	mockForge.On("Name").Return("mock")
 	mockForge.On("URL").Return("https://codeberg.org")
+	mockForge.On("Config").Return(metadata.ForgeConfig{Host: "codeberg.org"})
 
 	mockManager := manager_mocks.NewMockManager(t)
 	mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -386,6 +387,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockForge := forge_mocks.NewMockForge(t)
 		mockForge.On("Name").Return("mock").Maybe()
 		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.ForgeConfig{Host: "example.com"}).Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{
 			Machine:  "example.com",
@@ -458,6 +460,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockForge := forge_mocks.NewMockForge(t)
 		mockForge.On("Name").Return("mock").Maybe()
 		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.ForgeConfig{Host: "example.com"}).Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
 		// mock the netrc for parse config
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{
@@ -595,6 +598,7 @@ func TestPostPipeline(t *testing.T) {
 		mockForge := forge_mocks.NewMockForge(t)
 		mockForge.On("Name").Return("mock").Maybe()
 		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.ForgeConfig{Host: "example.com"}).Maybe()
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
 
