@@ -15,9 +15,14 @@
 package core
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli/v3"
+
+	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
 )
 
 func TestStringSliceAddToMap(t *testing.T) {
@@ -72,4 +77,20 @@ func TestStringSliceAddToMap(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGrpcDialConfigUsesRegisteredKeepaliveFlags(t *testing.T) {
+	t.Setenv("WOODPECKER_KEEPALIVE_TIME", "10m")
+	t.Setenv("WOODPECKER_KEEPALIVE_TIMEOUT", "30s")
+
+	app := GenApp(nil)
+	var dialConfig agent_rpc.DialConfig
+	app.Action = func(_ context.Context, c *cli.Command) error {
+		dialConfig = grpcDialConfig(c, AgentConfig{}, false)
+		return nil
+	}
+	assert.NoError(t, app.Run(context.Background(), []string{"woodpecker-agent"}))
+
+	assert.Equal(t, 10*time.Minute, dialConfig.KeepaliveTime)
+	assert.Equal(t, 30*time.Second, dialConfig.KeepaliveTimeout)
 }

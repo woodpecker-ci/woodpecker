@@ -33,8 +33,8 @@ func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p
 	var secrets []*model.Secret
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
-		cond = cond.Or(builder.Eq{"org_id": repo.OrgID}).
-			Or(builder.And(builder.Eq{"org_id": 0}, builder.Eq{"repo_id": 0}))
+		cond = cond.Or(builder.Eq{"org_id": repo.OrgID, "repo_id": 0}).
+			Or(builder.Eq{"org_id": 0, "repo_id": 0})
 	}
 	return secrets, s.paginate(p).Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
 }
@@ -50,12 +50,15 @@ func (s storage) SecretCreate(secret *model.Secret) error {
 }
 
 func (s storage) SecretUpdate(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).AllCols().Update(secret)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(secret.ID).AllCols().Update(secret))
+	})
 }
 
 func (s storage) SecretDelete(secret *model.Secret) error {
-	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
+	})
 }
 
 func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {

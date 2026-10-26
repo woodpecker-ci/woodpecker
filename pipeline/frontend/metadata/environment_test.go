@@ -23,6 +23,9 @@ import (
 func TestEnviron(t *testing.T) {
 	m := Metadata{
 		Sys: System{Name: "wp"},
+		Repo: Repo{
+			ID: 42,
+		},
 		Curr: Pipeline{
 			Event: EventRelease,
 			Release: Release{
@@ -45,6 +48,7 @@ func TestEnviron(t *testing.T) {
 
 	envs := m.Environ()
 	assert.Equal(t, "wp", envs["CI"])
+	assert.Equal(t, "42", envs["CI_REPO_ID"])
 	assert.Equal(t, "release", envs["CI_PIPELINE_EVENT"])
 	assert.Equal(t, "pull_request_metadata", envs["CI_PREV_PIPELINE_EVENT"])
 	assert.Equal(t, "v1.2.3", envs["CI_PIPELINE_RELEASE_TITLE"])

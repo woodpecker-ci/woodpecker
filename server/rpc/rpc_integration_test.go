@@ -171,7 +171,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything).Return()
+		mockLogStore.On("StepFinished", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -998,7 +998,7 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything).Return()
+		mockLogStore.On("StepFinished", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1060,7 +1060,7 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything).Return()
+		mockLogStore.On("StepFinished", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1122,7 +1122,7 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything).Return()
+		mockLogStore.On("StepFinished", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))

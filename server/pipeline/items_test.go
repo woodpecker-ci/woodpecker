@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
@@ -213,4 +214,44 @@ steps:
 	assert.Equal(t, "value", step.Environment["ADDITIONAL"])
 	assert.Equal(t, "bar", step.Environment["FOO"])
 	assert.Equal(t, "secret world", step.Environment["HELLO"])
+}
+
+// A panic while building the pipeline must not crash the server. The panic is
+// injected through the forge mock, so the test does not depend on a parser bug.
+func TestParsePipelineRecoversPanic(t *testing.T) {
+	pipeline := &model.Pipeline{ID: 1, Event: model.EventPush}
+	repo := &model.Repo{ID: 1}
+
+	forge := forge_mocks.NewMockForge(t)
+	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
+	// Name is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
+	forge.On("Name").Panic("injected test panic")
+
+	store := store_mocks.NewMockStore(t)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)
+
+	mockManager := manager_mocks.NewMockManager(t)
+	server.Config.Services.Manager = mockManager
+	secretService := secret_service_mocks.NewMockService(t)
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
+	registryService := registry_service_mocks.NewMockService(t)
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("RegistryServiceFromRepo", mock.Anything).Return(registryService, nil)
+	mockManager.On("EnvironmentService").Return(nil, nil)
+
+	yamls := []*forge_types.FileMeta{{
+		Name: "woodpecker.yml",
+		Data: []byte("steps:\n  - name: test\n    image: alpine\n"),
+	}}
+
+	var items []*builder.Item
+	var err error
+	require.NotPanics(t, func() {
+		items, err = parsePipeline(t.Context(), forge, store, pipeline, &model.User{ID: 1}, repo, yamls, nil)
+	})
+	assert.Nil(t, items)
+	assert.True(t, pipeline_errors.HasBlockingErrors(err))
+	assert.ErrorContains(t, err, "injected test panic")
+	assert.ErrorContains(t, err, "please report it at https://github.com/woodpecker-ci/woodpecker/issues")
 }

@@ -56,7 +56,7 @@ steps:
   lint:
     depends_on:
       - vendor
-    image: golangci/golangci-lint:v2.14.0
+    image: golangci/golangci-lint:v2.15.0
     commands:
       - make lint
     when: *when
@@ -173,7 +173,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:26.7.0
+    image: docker.io/mysql:26.10.0
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test
