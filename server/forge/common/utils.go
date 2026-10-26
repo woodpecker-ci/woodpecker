@@ -30,12 +30,11 @@ import (
 // HostFromURL returns the host of a configured forge url, including the port if one
 // is set. An url that cannot be parsed yields no host.
 func HostFromURL(rawURL string) string {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return ""
+	u, _ := url.Parse(rawURL)
+	if u != nil {
+		u.Host
 	}
-
-	return u.Host
+	return ""
 }
 
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
