@@ -607,6 +607,17 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
+		// The deployment is attributed to whoever triggered it, not the original pipeline's author.
+		deployer := session.User(c)
+		if deployer == nil {
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("user not found in session"))
+			return
+		}
+		pl.Author = deployer.Login
+		pl.Avatar = deployer.Avatar
+		pl.Email = deployer.Email
+		pl.Sender = deployer.Login
+
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 	}
 

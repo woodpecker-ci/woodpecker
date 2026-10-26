@@ -181,6 +181,38 @@ func LookupOrg(c *gin.Context) {
 	c.JSON(http.StatusOK, org)
 }
 
+// PatchOrg
+//
+//	@Summary	Update an organization
+//	@Router		/orgs/{org_id} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Org
+//	@Tags		Organization
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string		true	"the organization's id"
+//	@Param		org				body	OrgPatch	true	"the org's updated data"
+func PatchOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+	org := session.Org(c)
+
+	in := new(model.OrgPatch)
+	if err := c.Bind(in); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if in.RequireOrgAgents != nil {
+		org.RequireOrgAgents = *in.RequireOrgAgents
+	}
+
+	if err := _store.OrgUpdate(org); err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, org)
+}
+
 // DeleteOrg
 //
 //	@Summary		Delete an organization

@@ -1059,6 +1059,49 @@ const docTemplate = `{
                         "description": "No Content"
                     }
                 }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Update an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the org's updated data",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/OrgPatch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
+                        }
+                    }
+                }
             }
         },
         "/orgs/{org_id}/agents": {
@@ -5110,6 +5153,18 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "require_org_agents": {
+                    "description": "RequireOrgAgents restricts workflows of the organization's repos to agents of this organization",
+                    "type": "boolean"
+                }
+            }
+        },
+        "OrgPatch": {
+            "type": "object",
+            "properties": {
+                "require_org_agents": {
+                    "type": "boolean"
                 }
             }
         },

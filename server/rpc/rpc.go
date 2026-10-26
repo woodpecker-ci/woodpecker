@@ -229,7 +229,9 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		).Observe(float64(duration))
 	}
 	if state.Exited {
-		server.Config.Services.LogStore.StepFinished(step)
+		if err := server.Config.Services.LogStore.StepFinished(step); err != nil {
+			log.Error().Err(err).Int64("step", step.ID).Msg("log store could not finalize the step log")
+		}
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {

@@ -189,6 +189,9 @@ type Client interface {
 	// OrgLookup returns an organization id by name.
 	OrgLookup(orgName string) (*Org, error)
 
+	// OrgPatch updates an organization.
+	OrgPatch(orgID int64, org *OrgPatch) (*Org, error)
+
 	// OrgList returns a list of all organizations.
 	OrgList(opt ListOptions) ([]*Org, error)
 

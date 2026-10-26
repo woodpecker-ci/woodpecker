@@ -20,5 +20,5 @@ type Service interface {
 	LogFind(step *model.Step) ([]*model.LogEntry, error)
 	LogAppend(step *model.Step, logEntries []*model.LogEntry) error
 	LogDelete(step *model.Step) error
-	StepFinished(step *model.Step)
+	StepFinished(step *model.Step) error
 }

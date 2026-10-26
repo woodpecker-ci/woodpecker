@@ -266,6 +266,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${orgId}`) as Promise<Org>;
   }
 
+  async updateOrg(orgId: number, org: Partial<Org>): Promise<Org> {
+    return this._patch(`/api/orgs/${orgId}`, org) as Promise<Org>;
+  }
+
   async lookupOrg(name: string): Promise<Org> {
     return this._get(`/api/orgs/lookup/${name}`) as Promise<Org>;
   }
