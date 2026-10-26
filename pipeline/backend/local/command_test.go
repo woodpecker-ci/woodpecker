@@ -17,6 +17,7 @@ package local
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"testing"
@@ -212,6 +213,46 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
 	})
+}
+
+func TestNushellRun(t *testing.T) {
+	nuPath, err := exec.LookPath("nu")
+	if err != nil {
+		t.Skip("nu not found in PATH")
+	}
+
+	e := local{tempDir: t.TempDir()}
+	args, err := e.genCmdByShell("nu", nuPath, []string{
+		`print "plain"`,
+		`print "it's"`,
+		`print "text '# test"`,
+		`print "a'#'##b"`,
+		`print $"(1 + 1)"`,
+		`print 'C:\Users\test'`,
+		"print `back tick`",
+		`print "end'"`,
+	}, t.TempDir())
+	require.NoError(t, err)
+
+	out, err := exec.Command(nuPath, args...).CombinedOutput()
+	require.NoError(t, err, string(out))
+	assert.Equal(t, `▶  print "plain"
+plain
+▶  print "it's"
+it's
+▶  print "text '# test"
+text '# test
+▶  print "a'#'##b"
+a'#'##b
+▶  print $"(1 + 1)"
+2
+▶  print 'C:\Users\test'
+C:\Users\test
+▶  print `+"`back tick`"+`
+back tick
+▶  print "end'"
+end'
+`, string(out))
 }
 
 func TestProbeShellIsPosix(t *testing.T) {
