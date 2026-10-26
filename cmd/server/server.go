@@ -118,10 +118,12 @@ func run(ctx context.Context, c *cli.Command) error {
 		}
 	}()
 
-	_store, err = encryption.Setup(c, _store)
+	// keep _store, which the deferred Close uses, until setup succeeded
+	encryptedStore, err := encryption.Setup(c, _store)
 	if err != nil {
 		return fmt.Errorf("could not set up encryption: %w", err)
 	}
+	_store = encryptedStore
 
 	err = setupEvilGlobals(ctx, c, _store)
 	if err != nil {

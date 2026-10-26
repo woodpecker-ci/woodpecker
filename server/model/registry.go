@@ -36,6 +36,9 @@ type Registry struct {
 	Username string `json:"username" xorm:"varchar(2000) 'username'"`
 	Password string `json:"password" xorm:"TEXT 'password'"`
 	ReadOnly bool   `json:"readonly" xorm:"-"`
+	// EncryptionKeyID is the id of the key the stored password is
+	// encrypted with, empty for plaintext.
+	EncryptionKeyID string `json:"-" xorm:"NOT NULL DEFAULT '' varchar(255) 'encryption_key_id'"`
 } //	@name	Registry
 
 func (r Registry) TableName() string {

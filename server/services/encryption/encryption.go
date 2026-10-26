@@ -40,8 +40,9 @@ const (
 // Setup brings the data at rest into the configured state and returns s
 // wrapped to keep it there:
 //   - without a key everything stays plaintext; encrypted data stops the start
-//   - with a key everything gets encrypted with it; a new tink primary key
-//     re-encrypts everything
+//   - with a key every value gets encrypted with its primary key, including
+//     values another server wrote with an older key meanwhile; a value whose
+//     key is not in the keyset stops the start
 //   - with a key and the disable flag everything gets decrypted
 //
 // Each step can be interrupted: the next start continues where it stopped.
@@ -74,34 +75,28 @@ func Setup(c *cli.Command, s store.Store) (store.Store, error) {
 	if c.Bool(disableFlag) {
 		return disable(s, key, enabled)
 	}
-	return enable(s, key, keyID, enabled, usedKeyID != keyID)
+	return enable(s, key, keyID, enabled, usedKeyID)
 }
 
-func enable(s store.Store, key tink.AEAD, keyID string, enabled, rotated bool) (store.Store, error) {
-	es := &encryptedStore{Store: s, key: key}
-
+func enable(s store.Store, key tink.AEAD, keyID string, enabled bool, usedKeyID string) (store.Store, error) {
 	// record the key before the data, so a start without it fails instead
-	// of handing out ciphertext
+	// of serving ciphertext
 	if !enabled {
 		log.Warn().Msg("enabling encryption")
 		if err := saveKeyID(s, key, keyID); err != nil {
 			return nil, err
 		}
 	}
-	if rotated {
+	if usedKeyID != keyID {
 		log.Warn().Msg("re-encrypting data with the new primary key")
 	}
 
-	err := es.rewrite(func(value, associatedData string) (string, error) {
-		return convert(value, associatedData, key, key, rotated)
-	})
-	if err != nil {
+	es := &encryptedStore{Store: s, key: key, keyID: keyID}
+	if err := es.rewrite(); err != nil {
 		return nil, fmt.Errorf("could not encrypt data: %w", err)
 	}
 
-	// record a new key only after all data uses it, as only then the old
-	// key may be removed
-	if rotated {
+	if usedKeyID != keyID {
 		if err := saveKeyID(s, key, keyID); err != nil {
 			return nil, err
 		}
@@ -110,13 +105,8 @@ func enable(s store.Store, key tink.AEAD, keyID string, enabled, rotated bool) (
 }
 
 func disable(s store.Store, key tink.AEAD, enabled bool) (store.Store, error) {
-	es := &encryptedStore{Store: s}
-
 	log.Warn().Msg("disabling encryption")
-	err := es.rewrite(func(value, associatedData string) (string, error) {
-		return convert(value, associatedData, key, nil, false)
-	})
-	if err != nil {
+	if err := (&encryptedStore{Store: s, key: key}).rewrite(); err != nil {
 		return nil, fmt.Errorf("could not decrypt data: %w", err)
 	}
 
@@ -126,7 +116,7 @@ func disable(s store.Store, key tink.AEAD, enabled bool) (store.Store, error) {
 			return nil, err
 		}
 	}
-	return es, nil
+	return &encryptedStore{Store: s}, nil
 }
 
 func saveKeyID(s store.Store, key tink.AEAD, keyID string) error {

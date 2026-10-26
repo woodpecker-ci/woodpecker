@@ -55,6 +55,17 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 	})
 }
 
+func (s storage) RegistrySwapPassword(registry *model.Registry, oldPassword, oldKeyID string) (bool, error) {
+	var swapped int64
+	err := retryWrite(func() error {
+		n, err := s.engine.Where("id = ? AND password = ? AND encryption_key_id = ?", registry.ID, oldPassword, oldKeyID).
+			Cols("password", "encryption_key_id").Update(registry)
+		swapped = n
+		return wrapUpdate(n, err)
+	})
+	return swapped == 1, err
+}
+
 func (s storage) RegistryDelete(registry *model.Registry) error {
 	return retryWrite(func() error {
 		return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))

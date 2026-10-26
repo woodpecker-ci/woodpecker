@@ -49,6 +49,10 @@ type User struct {
 	// RefreshToken is the oauth2 refresh token.
 	RefreshToken string `json:"-" xorm:"TEXT 'refresh_token'"`
 
+	// EncryptionKeyID is the id of the key the stored tokens are encrypted
+	// with, empty for plaintext.
+	EncryptionKeyID string `json:"-" xorm:"NOT NULL DEFAULT '' varchar(255) 'encryption_key_id'"`
+
 	// Expiry is the AccessToken expiration timestamp (unix seconds).
 	Expiry int64 `json:"-" xorm:"expiry"`
 

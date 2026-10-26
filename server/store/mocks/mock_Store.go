@@ -4848,6 +4848,78 @@ func (_c *MockStore_RegistryListAll_Call) RunAndReturn(run func() ([]*model.Regi
 	return _c
 }
 
+// RegistrySwapPassword provides a mock function for the type MockStore
+func (_mock *MockStore) RegistrySwapPassword(registry *model.Registry, oldPassword string, oldKeyID string) (bool, error) {
+	ret := _mock.Called(registry, oldPassword, oldKeyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistrySwapPassword")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Registry, string, string) (bool, error)); ok {
+		return returnFunc(registry, oldPassword, oldKeyID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Registry, string, string) bool); ok {
+		r0 = returnFunc(registry, oldPassword, oldKeyID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Registry, string, string) error); ok {
+		r1 = returnFunc(registry, oldPassword, oldKeyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_RegistrySwapPassword_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegistrySwapPassword'
+type MockStore_RegistrySwapPassword_Call struct {
+	*mock.Call
+}
+
+// RegistrySwapPassword is a helper method to define mock.On call
+//   - registry *model.Registry
+//   - oldPassword string
+//   - oldKeyID string
+func (_e *MockStore_Expecter) RegistrySwapPassword(registry any, oldPassword any, oldKeyID any) *MockStore_RegistrySwapPassword_Call {
+	return &MockStore_RegistrySwapPassword_Call{Call: _e.mock.On("RegistrySwapPassword", registry, oldPassword, oldKeyID)}
+}
+
+func (_c *MockStore_RegistrySwapPassword_Call) Run(run func(registry *model.Registry, oldPassword string, oldKeyID string)) *MockStore_RegistrySwapPassword_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Registry
+		if args[0] != nil {
+			arg0 = args[0].(*model.Registry)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_RegistrySwapPassword_Call) Return(b bool, err error) *MockStore_RegistrySwapPassword_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_RegistrySwapPassword_Call) RunAndReturn(run func(registry *model.Registry, oldPassword string, oldKeyID string) (bool, error)) *MockStore_RegistrySwapPassword_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RegistryUpdate provides a mock function for the type MockStore
 func (_mock *MockStore) RegistryUpdate(registry *model.Registry) error {
 	ret := _mock.Called(registry)
@@ -5404,6 +5476,78 @@ func (_c *MockStore_SecretListAll_Call) Return(secrets []*model.Secret, err erro
 }
 
 func (_c *MockStore_SecretListAll_Call) RunAndReturn(run func() ([]*model.Secret, error)) *MockStore_SecretListAll_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SecretSwapValue provides a mock function for the type MockStore
+func (_mock *MockStore) SecretSwapValue(secret *model.Secret, oldValue string, oldKeyID string) (bool, error) {
+	ret := _mock.Called(secret, oldValue, oldKeyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SecretSwapValue")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Secret, string, string) (bool, error)); ok {
+		return returnFunc(secret, oldValue, oldKeyID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Secret, string, string) bool); ok {
+		r0 = returnFunc(secret, oldValue, oldKeyID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Secret, string, string) error); ok {
+		r1 = returnFunc(secret, oldValue, oldKeyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_SecretSwapValue_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SecretSwapValue'
+type MockStore_SecretSwapValue_Call struct {
+	*mock.Call
+}
+
+// SecretSwapValue is a helper method to define mock.On call
+//   - secret *model.Secret
+//   - oldValue string
+//   - oldKeyID string
+func (_e *MockStore_Expecter) SecretSwapValue(secret any, oldValue any, oldKeyID any) *MockStore_SecretSwapValue_Call {
+	return &MockStore_SecretSwapValue_Call{Call: _e.mock.On("SecretSwapValue", secret, oldValue, oldKeyID)}
+}
+
+func (_c *MockStore_SecretSwapValue_Call) Run(run func(secret *model.Secret, oldValue string, oldKeyID string)) *MockStore_SecretSwapValue_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Secret
+		if args[0] != nil {
+			arg0 = args[0].(*model.Secret)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_SecretSwapValue_Call) Return(b bool, err error) *MockStore_SecretSwapValue_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_SecretSwapValue_Call) RunAndReturn(run func(secret *model.Secret, oldValue string, oldKeyID string) (bool, error)) *MockStore_SecretSwapValue_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -6351,6 +6495,84 @@ func (_c *MockStore_UserFeed_Call) Return(feeds []*model.Feed, err error) *MockS
 }
 
 func (_c *MockStore_UserFeed_Call) RunAndReturn(run func(user *model.User) ([]*model.Feed, error)) *MockStore_UserFeed_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UserSwapTokens provides a mock function for the type MockStore
+func (_mock *MockStore) UserSwapTokens(user *model.User, oldAccessToken string, oldRefreshToken string, oldKeyID string) (bool, error) {
+	ret := _mock.Called(user, oldAccessToken, oldRefreshToken, oldKeyID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UserSwapTokens")
+	}
+
+	var r0 bool
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.User, string, string, string) (bool, error)); ok {
+		return returnFunc(user, oldAccessToken, oldRefreshToken, oldKeyID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.User, string, string, string) bool); ok {
+		r0 = returnFunc(user, oldAccessToken, oldRefreshToken, oldKeyID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.User, string, string, string) error); ok {
+		r1 = returnFunc(user, oldAccessToken, oldRefreshToken, oldKeyID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_UserSwapTokens_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UserSwapTokens'
+type MockStore_UserSwapTokens_Call struct {
+	*mock.Call
+}
+
+// UserSwapTokens is a helper method to define mock.On call
+//   - user *model.User
+//   - oldAccessToken string
+//   - oldRefreshToken string
+//   - oldKeyID string
+func (_e *MockStore_Expecter) UserSwapTokens(user any, oldAccessToken any, oldRefreshToken any, oldKeyID any) *MockStore_UserSwapTokens_Call {
+	return &MockStore_UserSwapTokens_Call{Call: _e.mock.On("UserSwapTokens", user, oldAccessToken, oldRefreshToken, oldKeyID)}
+}
+
+func (_c *MockStore_UserSwapTokens_Call) Run(run func(user *model.User, oldAccessToken string, oldRefreshToken string, oldKeyID string)) *MockStore_UserSwapTokens_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.User
+		if args[0] != nil {
+			arg0 = args[0].(*model.User)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_UserSwapTokens_Call) Return(b bool, err error) *MockStore_UserSwapTokens_Call {
+	_c.Call.Return(b, err)
+	return _c
+}
+
+func (_c *MockStore_UserSwapTokens_Call) RunAndReturn(run func(user *model.User, oldAccessToken string, oldRefreshToken string, oldKeyID string) (bool, error)) *MockStore_UserSwapTokens_Call {
 	_c.Call.Return(run)
 	return _c
 }

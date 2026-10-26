@@ -38,17 +38,19 @@ import (
 )
 
 const (
-	encryptedPrefix = "woodpecker-enc:v1:"
-	sampleKey       = "encryption-ciphertext-sample"
+	sampleKey = "encryption-ciphertext-sample"
+	// A plaintext value that looks like an encrypted one.
+	lookalike = "woodpecker-enc:v1:bG9va3MgZW5jcnlwdGVk"
 )
 
 var setup = encryption.Setup
 
 // TestEncryption walks one database through the life of a server: it starts
 // without encryption, gets a key, restarts, gets disabled, crashes in the
-// middle of every data rewrite and rotates tink keys. After every start the
-// data read through the store has to match what was written, and the data at
-// rest has to be either all plaintext or all encrypted.
+// middle of every data rewrite, rotates tink keys and shares the database
+// with another server. After every start the data read through the store has
+// to match what was written, and the data at rest has to be either all
+// plaintext or all encrypted.
 func TestEncryption(t *testing.T) {
 	db := datastore.NewTestStore(t)
 	want := newData()
@@ -56,6 +58,12 @@ func TestEncryption(t *testing.T) {
 	t.Run("without a key data is stored in plaintext", func(t *testing.T) {
 		s := start(t, db)
 		want.add(t, s, "plain")
+
+		require.NoError(t, s.SecretCreate(&model.Secret{Name: "lookalike", Value: lookalike}))
+		want.secrets["lookalike"] = lookalike
+		require.NoError(t, s.RegistryCreate(&model.Registry{Address: "lookalike.example.com", Password: lookalike}))
+		want.registries["lookalike.example.com"] = lookalike
+
 		want.check(t, s, db, false)
 	})
 
@@ -124,9 +132,10 @@ func TestEncryption(t *testing.T) {
 		_, err := setupWith(t, crashAfter(db, 3), "--encryption-raw-key", "key-1")
 		require.Error(t, err)
 
-		if s, err := setupWith(t, db); err == nil {
-			requireNoCiphertext(t, s)
-		}
+		// the key is recorded first, so a start without it does not serve
+		// ciphertext
+		_, err = setupWith(t, db)
+		require.Error(t, err)
 
 		s := start(t, db, "--encryption-raw-key", "key-1")
 		want.check(t, s, db, true)
@@ -147,23 +156,34 @@ func TestEncryption(t *testing.T) {
 		want.check(t, s, db, false)
 	})
 
-	t.Run("a crash while creating leaves no plaintext and no blocker", func(t *testing.T) {
+	t.Run("a crash while creating leaves no plaintext and no partial record", func(t *testing.T) {
 		start(t, db, "--encryption-raw-key", "key-1")
-		crashing := crashAfter(db, 1)
+		crashing := crashAfter(db, 0)
 		s, err := setupWith(t, crashing, "--encryption-raw-key", "key-1")
 		require.NoError(t, err)
 
 		assert.Error(t, s.SecretCreate(&model.Secret{Name: "crash", Value: "crash-value"}))
-		crashing.budget = 1
 		assert.Error(t, s.RegistryCreate(&model.Registry{Address: "crash.example.com", Password: "crash-password"}))
 		crashing.budget = 1
 		assert.Error(t, s.CreateUser(newUser("crash")))
 		requireNoPlaintext(t, db, "crash-value", "crash-password", "crash-access", "crash-refresh")
 
-		// later creates must not trip over what the crash left behind
+		// a secret or registry is created completely or not at all, so the
+		// create can be retried
 		s = start(t, db, "--encryption-raw-key", "key-1")
-		want.add(t, s, "after-crash")
-		removeUnwanted(t, db, want)
+		require.NoError(t, s.SecretCreate(&model.Secret{Name: "crash", Value: "crash-value"}))
+		want.secrets["crash"] = "crash-value"
+		require.NoError(t, s.RegistryCreate(&model.Registry{Address: "crash.example.com", Password: "crash-password"}))
+		want.registries["crash.example.com"] = "crash-password"
+
+		// the user exists without tokens until the next login stores them
+		user, err := s.GetUserByLogin(1, "crash")
+		require.NoError(t, err)
+		assert.Empty(t, user.AccessToken)
+		user.AccessToken, user.RefreshToken = "crash-access", "crash-refresh"
+		require.NoError(t, s.UpdateUser(user))
+		want.users["crash"] = tokens{"crash-access", "crash-refresh"}
+
 		want.check(t, s, db, true)
 	})
 
@@ -199,6 +219,41 @@ func TestEncryption(t *testing.T) {
 		keys.remove(t, oldKey)
 		s = start(t, db, "--encryption-tink-keyset", keys.write(t, keysDir, "rotated.json"))
 		want.check(t, s, db, true)
+	})
+
+	t.Run("another server writing during and after a rotation loses nothing", func(t *testing.T) {
+		other := start(t, db, "--encryption-tink-keyset", keys.write(t, keysDir, "current.json"))
+		oldKey := keys.rotate(t)
+		rotating := keys.write(t, keysDir, "concurrent.json")
+
+		// the other server updates a secret after this one listed it for the
+		// rotation
+		interleaving := &interleavingStore{Store: db, before: func() {
+			secret, err := other.GlobalSecretFind("plain")
+			require.NoError(t, err)
+			secret.Value = "plain-updated-during-rotation"
+			require.NoError(t, other.SecretUpdate(secret))
+			want.secrets["plain"] = secret.Value
+		}}
+		s := start(t, interleaving, "--encryption-tink-keyset", rotating)
+		want.check(t, s, db, true)
+
+		// the other server still writes with the old key until it restarts
+		secret, err := db.GlobalSecretFind("plain")
+		require.NoError(t, err)
+		secret.Value = "plain-updated-by-old-server"
+		require.NoError(t, other.SecretUpdate(secret))
+		want.secrets["plain"] = secret.Value
+
+		// that value stops a start that lacks the old key ...
+		keys.remove(t, oldKey)
+		newOnly := keys.write(t, keysDir, "new-only.json")
+		_, err = setupWith(t, db, "--encryption-tink-keyset", newOnly)
+		assert.ErrorContains(t, err, "could not decrypt secret")
+
+		// ... and a start that has it re-encrypts the value
+		want.check(t, start(t, db, "--encryption-tink-keyset", rotating), db, true)
+		want.check(t, start(t, db, "--encryption-tink-keyset", newOnly), db, true)
 	})
 
 	t.Run("a keyset without the key in use stops the server", func(t *testing.T) {
@@ -338,90 +393,62 @@ func (d *data) check(t *testing.T, s, db store.Store, encrypted bool) {
 		if key == sampleKey {
 			continue
 		}
-		assert.Equal(t, encrypted, strings.HasPrefix(value, encryptedPrefix), "stored form of %s", key)
+		assert.Equal(t, encrypted, value.keyID != "", "key id of %s", key)
+		assert.Equal(t, encrypted, value.value != d.plaintext(key), "stored form of %s", key)
 	}
 	_, hasSample := stored[sampleKey]
 	assert.Equal(t, encrypted, hasSample, "ciphertext sample")
 }
 
-// snapshot returns the values at rest, keyed by record.
-func snapshot(t *testing.T, db store.Store) map[string]string {
+// plaintext returns the expected plaintext of a snapshot key.
+func (d *data) plaintext(key string) string {
+	kind, name, _ := strings.Cut(key, " ")
+	switch kind {
+	case "secret":
+		return d.secrets[name]
+	case "registry":
+		return d.registries[name]
+	case "access-token":
+		return d.users[name].access
+	case "refresh-token":
+		return d.users[name].refresh
+	}
+	return ""
+}
+
+type stored struct{ value, keyID string }
+
+// snapshot returns the values at rest, keyed by kind and name.
+func snapshot(t *testing.T, db store.Store) map[string]stored {
 	t.Helper()
-	values := map[string]string{}
+	values := map[string]stored{}
 	secrets, err := db.SecretListAll()
 	require.NoError(t, err)
 	for _, secret := range secrets {
-		values["secret "+secret.Name] = secret.Value
+		values["secret "+secret.Name] = stored{secret.Value, secret.EncryptionKeyID}
 	}
 	registries, err := db.RegistryListAll()
 	require.NoError(t, err)
 	for _, registry := range registries {
-		values["registry "+registry.Address] = registry.Password
+		values["registry "+registry.Address] = stored{registry.Password, registry.EncryptionKeyID}
 	}
 	users, err := db.GetUserList(&model.ListOptionsWithAll{All: true})
 	require.NoError(t, err)
 	for _, user := range users {
-		values["access token "+user.Login] = user.AccessToken
-		values["refresh token "+user.Login] = user.RefreshToken
+		values["access-token "+user.Login] = stored{user.AccessToken, user.EncryptionKeyID}
+		values["refresh-token "+user.Login] = stored{user.RefreshToken, user.EncryptionKeyID}
 	}
 	if sample, err := db.ServerConfigGet(sampleKey); err == nil {
-		values[sampleKey] = sample
+		values[sampleKey] = stored{value: sample}
 	}
 	return values
-}
-
-// requireNoCiphertext fails if s hands out a value that is still encrypted.
-func requireNoCiphertext(t *testing.T, s store.Store) {
-	t.Helper()
-	if secrets, err := s.SecretListAll(); err == nil {
-		for _, secret := range secrets {
-			assert.NotContains(t, secret.Value, encryptedPrefix, "secret %s", secret.Name)
-		}
-	}
-	if registries, err := s.RegistryListAll(); err == nil {
-		for _, registry := range registries {
-			assert.NotContains(t, registry.Password, encryptedPrefix, "registry %s", registry.Address)
-		}
-	}
-	if users, err := s.GetUserList(&model.ListOptionsWithAll{All: true}); err == nil {
-		for _, user := range users {
-			assert.NotContains(t, user.AccessToken, encryptedPrefix, "user %s", user.Login)
-		}
-	}
 }
 
 func requireNoPlaintext(t *testing.T, db store.Store, plaintexts ...string) {
 	t.Helper()
 	for key, value := range snapshot(t, db) {
 		for _, plaintext := range plaintexts {
-			assert.NotEqual(t, plaintext, value, "plaintext at rest in %s", key)
-		}
-	}
-}
-
-// removeUnwanted deletes records a crashed write left behind, as an admin
-// would.
-func removeUnwanted(t *testing.T, db store.Store, want *data) {
-	t.Helper()
-	secrets, err := db.SecretListAll()
-	require.NoError(t, err)
-	for _, secret := range secrets {
-		if _, ok := want.secrets[secret.Name]; !ok {
-			require.NoError(t, db.SecretDelete(secret))
-		}
-	}
-	registries, err := db.RegistryListAll()
-	require.NoError(t, err)
-	for _, registry := range registries {
-		if _, ok := want.registries[registry.Address]; !ok {
-			require.NoError(t, db.RegistryDelete(registry))
-		}
-	}
-	users, err := db.GetUserList(&model.ListOptionsWithAll{All: true})
-	require.NoError(t, err)
-	for _, user := range users {
-		if _, ok := want.users[user.Login]; !ok {
-			require.NoError(t, db.DeleteUser(user))
+			assert.NotEqual(t, plaintext, value.value, "plaintext at rest in %s", key)
 		}
 	}
 }
@@ -468,6 +495,13 @@ func (c *crashingStore) SecretDelete(secret *model.Secret) error {
 	return c.Store.SecretDelete(secret)
 }
 
+func (c *crashingStore) SecretSwapValue(secret *model.Secret, oldValue, oldKeyID string) (bool, error) {
+	if err := c.write(); err != nil {
+		return false, err
+	}
+	return c.Store.SecretSwapValue(secret, oldValue, oldKeyID)
+}
+
 func (c *crashingStore) RegistryCreate(registry *model.Registry) error {
 	if err := c.write(); err != nil {
 		return err
@@ -489,6 +523,13 @@ func (c *crashingStore) RegistryDelete(registry *model.Registry) error {
 	return c.Store.RegistryDelete(registry)
 }
 
+func (c *crashingStore) RegistrySwapPassword(registry *model.Registry, oldPassword, oldKeyID string) (bool, error) {
+	if err := c.write(); err != nil {
+		return false, err
+	}
+	return c.Store.RegistrySwapPassword(registry, oldPassword, oldKeyID)
+}
+
 func (c *crashingStore) CreateUser(user *model.User) error {
 	if err := c.write(); err != nil {
 		return err
@@ -501,6 +542,13 @@ func (c *crashingStore) UpdateUser(user *model.User) error {
 		return err
 	}
 	return c.Store.UpdateUser(user)
+}
+
+func (c *crashingStore) UserSwapTokens(user *model.User, oldAccessToken, oldRefreshToken, oldKeyID string) (bool, error) {
+	if err := c.write(); err != nil {
+		return false, err
+	}
+	return c.Store.UserSwapTokens(user, oldAccessToken, oldRefreshToken, oldKeyID)
 }
 
 func (c *crashingStore) DeleteUser(user *model.User) error {
@@ -522,6 +570,23 @@ func (c *crashingStore) ServerConfigDelete(key string) error {
 		return err
 	}
 	return c.Store.ServerConfigDelete(key)
+}
+
+// interleavingStore runs before once right after the secrets were listed,
+// like another server writing while this one works on that list.
+type interleavingStore struct {
+	store.Store
+	before func()
+}
+
+func (i *interleavingStore) SecretListAll() ([]*model.Secret, error) {
+	secrets, err := i.Store.SecretListAll()
+	if i.before != nil {
+		before := i.before
+		i.before = nil
+		before()
+	}
+	return secrets, err
 }
 
 // tinkKeys is a tink keyset the test rotates like an admin would.

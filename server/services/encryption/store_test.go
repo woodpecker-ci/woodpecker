@@ -17,18 +17,20 @@
 package encryption
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 )
 
 func TestEncryptedStore(t *testing.T) {
 	db := datastore.NewTestStore(t)
-	s := &encryptedStore{Store: db, key: testKey(t, "key")}
+	s := &encryptedStore{Store: db, key: testKey(t, "key"), keyID: "key"}
 	repo := &model.Repo{ID: 1}
 	all := &model.ListOptionsWithAll{All: true}
 
@@ -134,6 +136,50 @@ func TestEncryptedStore(t *testing.T) {
 		assert.Len(t, registries, 3)
 	})
 
+	t.Run("records are written complete in one insert", func(t *testing.T) {
+		reader := &encryptedStore{Store: db, key: s.key, keyID: s.keyID}
+		var seen *model.Secret
+		writer := &encryptedStore{Store: &afterInsertStore{Store: db, after: func() {
+			var err error
+			seen, err = reader.GlobalSecretFind("complete")
+			require.NoError(t, err)
+		}}, key: s.key, keyID: s.keyID}
+
+		require.NoError(t, writer.SecretCreate(&model.Secret{Name: "complete", Value: "complete-value"}))
+		require.NotNil(t, seen)
+		assert.Equal(t, "complete-value", seen.Value)
+		require.NoError(t, db.SecretDelete(seen))
+	})
+
+	t.Run("a failed user create keeps the org it took over", func(t *testing.T) {
+		org := &model.Org{Name: "alice", ForgeID: 1}
+		require.NoError(t, db.OrgCreate(org))
+		require.NoError(t, db.SecretCreate(&model.Secret{OrgID: org.ID, Name: "alice-secret", Value: "v"}))
+
+		failing := &encryptedStore{Store: &failingUpdateUserStore{db}, key: s.key, keyID: s.keyID}
+		assert.Error(t, failing.CreateUser(&model.User{ForgeID: 1, ForgeRemoteID: "8", Login: "alice", Hash: "alice-hash", AccessToken: "a"}))
+
+		_, err := db.OrgGet(org.ID)
+		assert.NoError(t, err)
+		_, err = db.OrgSecretFind(org.ID, "alice-secret")
+		assert.NoError(t, err)
+		alice, err := s.GetUserByLogin(1, "alice")
+		require.NoError(t, err)
+		assert.Empty(t, alice.AccessToken, "tokens are stored by the next login")
+	})
+
+	t.Run("without a key plaintext passes and encrypted values are refused", func(t *testing.T) {
+		plain := &encryptedStore{Store: db}
+		_, err := plain.SecretFind(repo, "repo")
+		assert.ErrorIs(t, err, errNoKey)
+
+		require.NoError(t, plain.SecretCreate(&model.Secret{Name: "plain", Value: "plain-value"}))
+		stored, err := db.GlobalSecretFind("plain")
+		require.NoError(t, err)
+		assert.Equal(t, "plain-value", stored.Value)
+		assert.Empty(t, stored.EncryptionKeyID)
+	})
+
 	t.Run("a ciphertext copied to another record does not decrypt", func(t *testing.T) {
 		global, err := db.GlobalSecretFind("global")
 		require.NoError(t, err)
@@ -147,4 +193,26 @@ func TestEncryptedStore(t *testing.T) {
 		_, err = s.SecretList(repo, true, all)
 		assert.Error(t, err)
 	})
+}
+
+// afterInsertStore runs after once a secret was inserted.
+type afterInsertStore struct {
+	store.Store
+	after func()
+}
+
+func (a *afterInsertStore) SecretCreate(secret *model.Secret) error {
+	if err := a.Store.SecretCreate(secret); err != nil {
+		return err
+	}
+	a.after()
+	return nil
+}
+
+type failingUpdateUserStore struct {
+	store.Store
+}
+
+func (failingUpdateUserStore) UpdateUser(*model.User) error {
+	return errors.New("update failed")
 }

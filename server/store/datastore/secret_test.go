@@ -114,6 +114,32 @@ func TestSecretUpdate(t *testing.T) {
 	assert.Equal(t, "qux", updated.Value)
 }
 
+func TestSecretSwapValue(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	secret := &model.Secret{RepoID: 1, Name: "foo", Value: "old", Note: "note"}
+	assert.NoError(t, store.SecretCreate(secret))
+
+	// a stale old value changes nothing
+	stale := &model.Secret{ID: secret.ID, Value: "stale", EncryptionKeyID: "key"}
+	swapped, err := store.SecretSwapValue(stale, "other", "")
+	assert.NoError(t, err)
+	assert.False(t, swapped)
+
+	// only value and key id are written
+	updated := &model.Secret{ID: secret.ID, Value: "new", EncryptionKeyID: "key"}
+	swapped, err = store.SecretSwapValue(updated, "old", "")
+	assert.NoError(t, err)
+	assert.True(t, swapped)
+
+	got, err := store.SecretFind(&model.Repo{ID: 1}, "foo")
+	assert.NoError(t, err)
+	assert.Equal(t, "new", got.Value)
+	assert.Equal(t, "key", got.EncryptionKeyID)
+	assert.Equal(t, "note", got.Note)
+}
+
 func TestSecretDelete(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()

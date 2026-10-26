@@ -16,7 +16,6 @@ package encryption
 
 import (
 	"encoding/base64"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,96 +33,35 @@ func testKey(t *testing.T, rawKey string) tink.AEAD {
 func TestEncryptDecrypt(t *testing.T) {
 	key := testKey(t, "key")
 
-	t.Run("a value round trips and is marked", func(t *testing.T) {
-		encrypted, err := encrypt(key, "value", "secret/1")
+	t.Run("a value round trips", func(t *testing.T) {
+		encrypted, err := encrypt(key, "value", "secret/0/0/name")
 		require.NoError(t, err)
-		assert.True(t, strings.HasPrefix(encrypted, encryptedPrefix))
 		assert.NotContains(t, encrypted, "value")
 
-		again, err := encrypt(key, "value", "secret/1")
+		again, err := encrypt(key, "value", "secret/0/0/name")
 		require.NoError(t, err)
 		assert.NotEqual(t, encrypted, again, "nonce must be random")
 
-		decrypted, err := decrypt(key, encrypted, "secret/1")
+		decrypted, err := decrypt(key, encrypted, "secret/0/0/name")
 		require.NoError(t, err)
 		assert.Equal(t, "value", decrypted)
 	})
 
 	t.Run("a ciphertext is bound to its associated data and key", func(t *testing.T) {
-		encrypted, err := encrypt(key, "value", "secret/1")
+		encrypted, err := encrypt(key, "value", "secret/0/0/name")
 		require.NoError(t, err)
 
-		_, err = decrypt(key, encrypted, "secret/2")
+		_, err = decrypt(key, encrypted, "secret/0/1/name")
 		assert.Error(t, err)
-		_, err = decrypt(testKey(t, "other"), encrypted, "secret/1")
+		_, err = decrypt(testKey(t, "other"), encrypted, "secret/0/0/name")
 		assert.Error(t, err)
-	})
-
-	t.Run("plaintext passes through", func(t *testing.T) {
-		decrypted, err := decrypt(key, "value", "secret/1")
-		require.NoError(t, err)
-		assert.Equal(t, "value", decrypted)
-	})
-
-	t.Run("without a key values stay plaintext and ciphertext is refused", func(t *testing.T) {
-		plaintext, err := encrypt(nil, "value", "secret/1")
-		require.NoError(t, err)
-		assert.Equal(t, "value", plaintext)
-
-		encrypted, err := encrypt(key, "value", "secret/1")
-		require.NoError(t, err)
-		_, err = decrypt(nil, encrypted, "secret/1")
-		assert.ErrorIs(t, err, errNoKey)
 	})
 
 	t.Run("broken ciphertext is an error", func(t *testing.T) {
-		_, err := decrypt(key, encryptedPrefix+"not base64!", "secret/1")
+		_, err := decrypt(key, "not base64!", "secret/0/0/name")
 		assert.Error(t, err)
 
-		tooShort := encryptedPrefix + base64.StdEncoding.EncodeToString([]byte("short"))
-		_, err = decrypt(key, tooShort, "secret/1")
-		assert.Error(t, err)
-	})
-}
-
-func TestConvert(t *testing.T) {
-	key := testKey(t, "key")
-	encrypted, err := encrypt(key, "value", "ad")
-	require.NoError(t, err)
-
-	t.Run("encrypts plaintext", func(t *testing.T) {
-		converted, err := convert("value", "ad", key, key, false)
-		require.NoError(t, err)
-		decrypted, err := decrypt(key, converted, "ad")
-		require.NoError(t, err)
-		assert.Equal(t, "value", decrypted)
-	})
-
-	t.Run("keeps encrypted values unless all are converted", func(t *testing.T) {
-		converted, err := convert(encrypted, "ad", key, key, false)
-		require.NoError(t, err)
-		assert.Equal(t, encrypted, converted)
-
-		converted, err = convert(encrypted, "ad", key, key, true)
-		require.NoError(t, err)
-		assert.NotEqual(t, encrypted, converted)
-		decrypted, err := decrypt(key, converted, "ad")
-		require.NoError(t, err)
-		assert.Equal(t, "value", decrypted)
-	})
-
-	t.Run("decrypts to plaintext and keeps plaintext", func(t *testing.T) {
-		converted, err := convert(encrypted, "ad", key, nil, false)
-		require.NoError(t, err)
-		assert.Equal(t, "value", converted)
-
-		converted, err = convert("value", "ad", key, nil, false)
-		require.NoError(t, err)
-		assert.Equal(t, "value", converted)
-	})
-
-	t.Run("fails on values the old key cannot decrypt", func(t *testing.T) {
-		_, err := convert(encrypted, "ad", testKey(t, "other"), key, true)
+		_, err = decrypt(key, base64.StdEncoding.EncodeToString([]byte("short")), "secret/0/0/name")
 		assert.Error(t, err)
 	})
 }

@@ -25,22 +25,60 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+const maxRewritePasses = 10
+
+var errNoKey = errors.New("value is encrypted, but no encryption key is configured")
+
 // encryptedStore is a store.Store that encrypts secret values, registry
-// passwords and user forge tokens on write and decrypts them on read. Without
-// a key it stores plaintext and refuses to read encrypted values.
+// passwords and user forge tokens on write and decrypts them on read. Each
+// record stores the id of the key its value is encrypted with, empty for
+// plaintext. The records it returns always hold plaintext and an empty key
+// id.
 type encryptedStore struct {
 	store.Store
+	// key decrypts values of every key the data may be encrypted with. It is
+	// nil without encryption.
 	key tink.AEAD
+	// keyID identifies the key new values are encrypted with. Empty stores
+	// plaintext.
+	keyID string
 }
 
-// The associated data binds a ciphertext to its record, so it cannot be
-// copied to another one.
-func secretAD(id int64) string {
-	return "secret/" + strconv.FormatInt(id, 10)
+// seal returns value and key id as they are stored.
+func (s *encryptedStore) seal(value, associatedData string) (string, string, error) {
+	if s.keyID == "" {
+		return value, "", nil
+	}
+	encrypted, err := encrypt(s.key, value, associatedData)
+	return encrypted, s.keyID, err
 }
 
-func registryAD(id int64) string {
-	return "registry/" + strconv.FormatInt(id, 10)
+// open returns the plaintext of a stored value.
+func (s *encryptedStore) open(value, keyID, associatedData string) (string, error) {
+	switch {
+	case keyID == "":
+		return value, nil
+	case s.key == nil:
+		return "", errNoKey
+	}
+	plaintext, err := decrypt(s.key, value, associatedData)
+	if err != nil {
+		return "", fmt.Errorf("key %s: %w", keyID, err)
+	}
+	return plaintext, nil
+}
+
+// The associated data binds a ciphertext to its record, so it does not decrypt
+// when copied to another record or moved to another repo or org. Secrets and
+// registries are bound to their unique scope and name, which exist before the
+// record is inserted, so a create is a single insert.
+
+func secretAD(secret *model.Secret) string {
+	return fmt.Sprintf("secret/%d/%d/%s", secret.OrgID, secret.RepoID, secret.Name)
+}
+
+func registryAD(registry *model.Registry) string {
+	return fmt.Sprintf("registry/%d/%d/%s", registry.OrgID, registry.RepoID, registry.Address)
 }
 
 func accessTokenAD(id int64) string {
@@ -51,64 +89,95 @@ func refreshTokenAD(id int64) string {
 	return "user/" + strconv.FormatInt(id, 10) + "/refresh-token"
 }
 
-// rewrite stores every secret value, registry password and user token as
-// convert returns it. Records convert leaves unchanged are not written.
-func (s *encryptedStore) rewrite(convert func(value, associatedData string) (string, error)) error {
+// rewrite brings every stored value into the form s writes. It writes only
+// the encrypted columns and only if they did not change since they were read;
+// values another server changed meanwhile are rewritten in the next pass.
+func (s *encryptedStore) rewrite() error {
+	for range maxRewritePasses {
+		conflicts, err := s.rewritePass()
+		if err != nil || conflicts == 0 {
+			return err
+		}
+	}
+	return errors.New("data kept changing while it was being converted")
+}
+
+func (s *encryptedStore) rewritePass() (conflicts int, err error) {
 	secrets, err := s.Store.SecretListAll()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, secret := range secrets {
-		value, err := convert(secret.Value, secretAD(secret.ID))
-		if err != nil {
-			return fmt.Errorf("secret %d: %w", secret.ID, err)
+		if secret.EncryptionKeyID == s.keyID {
+			continue
 		}
-		if value != secret.Value {
-			secret.Value = value
-			if err := s.Store.SecretUpdate(secret); err != nil {
-				return err
-			}
+		value, err := s.open(secret.Value, secret.EncryptionKeyID, secretAD(secret))
+		if err != nil {
+			return 0, fmt.Errorf("could not decrypt secret %d: %w", secret.ID, err)
+		}
+		oldValue, oldKeyID := secret.Value, secret.EncryptionKeyID
+		if secret.Value, secret.EncryptionKeyID, err = s.seal(value, secretAD(secret)); err != nil {
+			return 0, err
+		}
+		swapped, err := s.SecretSwapValue(secret, oldValue, oldKeyID)
+		if err != nil {
+			return 0, err
+		}
+		if !swapped {
+			conflicts++
 		}
 	}
 
 	registries, err := s.Store.RegistryListAll()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, registry := range registries {
-		password, err := convert(registry.Password, registryAD(registry.ID))
-		if err != nil {
-			return fmt.Errorf("registry %d: %w", registry.ID, err)
+		if registry.EncryptionKeyID == s.keyID {
+			continue
 		}
-		if password != registry.Password {
-			registry.Password = password
-			if err := s.Store.RegistryUpdate(registry); err != nil {
-				return err
-			}
+		password, err := s.open(registry.Password, registry.EncryptionKeyID, registryAD(registry))
+		if err != nil {
+			return 0, fmt.Errorf("could not decrypt registry %d: %w", registry.ID, err)
+		}
+		oldPassword, oldKeyID := registry.Password, registry.EncryptionKeyID
+		if registry.Password, registry.EncryptionKeyID, err = s.seal(password, registryAD(registry)); err != nil {
+			return 0, err
+		}
+		swapped, err := s.RegistrySwapPassword(registry, oldPassword, oldKeyID)
+		if err != nil {
+			return 0, err
+		}
+		if !swapped {
+			conflicts++
 		}
 	}
 
 	users, err := s.Store.GetUserList(&model.ListOptionsWithAll{All: true})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, user := range users {
-		accessToken, err := convert(user.AccessToken, accessTokenAD(user.ID))
-		if err != nil {
-			return fmt.Errorf("user %d: %w", user.ID, err)
+		if user.EncryptionKeyID == s.keyID {
+			continue
 		}
-		refreshToken, err := convert(user.RefreshToken, refreshTokenAD(user.ID))
-		if err != nil {
-			return fmt.Errorf("user %d: %w", user.ID, err)
+		oldAccessToken, oldRefreshToken, oldKeyID := user.AccessToken, user.RefreshToken, user.EncryptionKeyID
+		if _, err := s.user(user, nil); err != nil {
+			return 0, err
 		}
-		if accessToken != user.AccessToken || refreshToken != user.RefreshToken {
-			user.AccessToken, user.RefreshToken = accessToken, refreshToken
-			if err := s.Store.UpdateUser(user); err != nil {
-				return err
-			}
+		sealed, err := s.sealUser(user)
+		if err != nil {
+			return 0, err
+		}
+		swapped, err := s.UserSwapTokens(sealed, oldAccessToken, oldRefreshToken, oldKeyID)
+		if err != nil {
+			return 0, err
+		}
+		if !swapped {
+			conflicts++
 		}
 	}
-	return nil
+	return conflicts, nil
 }
 
 // Secrets.
@@ -117,9 +186,10 @@ func (s *encryptedStore) secret(secret *model.Secret, err error) (*model.Secret,
 	if err != nil {
 		return nil, err
 	}
-	if secret.Value, err = decrypt(s.key, secret.Value, secretAD(secret.ID)); err != nil {
+	if secret.Value, err = s.open(secret.Value, secret.EncryptionKeyID, secretAD(secret)); err != nil {
 		return nil, fmt.Errorf("could not decrypt secret %d: %w", secret.ID, err)
 	}
+	secret.EncryptionKeyID = ""
 	return secret, nil
 }
 
@@ -133,6 +203,13 @@ func (s *encryptedStore) secrets(secrets []*model.Secret, err error) ([]*model.S
 		}
 	}
 	return secrets, nil
+}
+
+func (s *encryptedStore) sealSecret(secret *model.Secret) (*model.Secret, error) {
+	sealed := *secret
+	var err error
+	sealed.Value, sealed.EncryptionKeyID, err = s.seal(secret.Value, secretAD(secret))
+	return &sealed, err
 }
 
 func (s *encryptedStore) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
@@ -163,32 +240,25 @@ func (s *encryptedStore) GlobalSecretList(p *model.ListOptionsWithAll) ([]*model
 	return s.secrets(s.Store.GlobalSecretList(p))
 }
 
-// SecretCreate stores the secret without its value first, because the id the
-// value is bound to only exists afterwards.
 func (s *encryptedStore) SecretCreate(secret *model.Secret) error {
-	if s.key == nil {
-		return s.Store.SecretCreate(secret)
-	}
-	value := secret.Value
-	secret.Value = ""
-	err := s.Store.SecretCreate(secret)
-	secret.Value = value
+	sealed, err := s.sealSecret(secret)
 	if err != nil {
 		return err
 	}
-	if err := s.SecretUpdate(secret); err != nil {
-		return errors.Join(err, s.SecretDelete(secret))
+	if err := s.Store.SecretCreate(sealed); err != nil {
+		return err
 	}
+	sealed.Value, sealed.EncryptionKeyID = secret.Value, ""
+	*secret = *sealed
 	return nil
 }
 
 func (s *encryptedStore) SecretUpdate(secret *model.Secret) error {
-	encrypted := *secret
-	var err error
-	if encrypted.Value, err = encrypt(s.key, secret.Value, secretAD(secret.ID)); err != nil {
+	sealed, err := s.sealSecret(secret)
+	if err != nil {
 		return err
 	}
-	return s.Store.SecretUpdate(&encrypted)
+	return s.Store.SecretUpdate(sealed)
 }
 
 // Registries.
@@ -197,9 +267,10 @@ func (s *encryptedStore) registry(registry *model.Registry, err error) (*model.R
 	if err != nil {
 		return nil, err
 	}
-	if registry.Password, err = decrypt(s.key, registry.Password, registryAD(registry.ID)); err != nil {
+	if registry.Password, err = s.open(registry.Password, registry.EncryptionKeyID, registryAD(registry)); err != nil {
 		return nil, fmt.Errorf("could not decrypt registry %d: %w", registry.ID, err)
 	}
+	registry.EncryptionKeyID = ""
 	return registry, nil
 }
 
@@ -213,6 +284,13 @@ func (s *encryptedStore) registries(registries []*model.Registry, err error) ([]
 		}
 	}
 	return registries, nil
+}
+
+func (s *encryptedStore) sealRegistry(registry *model.Registry) (*model.Registry, error) {
+	sealed := *registry
+	var err error
+	sealed.Password, sealed.EncryptionKeyID, err = s.seal(registry.Password, registryAD(registry))
+	return &sealed, err
 }
 
 func (s *encryptedStore) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
@@ -243,32 +321,25 @@ func (s *encryptedStore) GlobalRegistryList(p *model.ListOptionsWithAll) ([]*mod
 	return s.registries(s.Store.GlobalRegistryList(p))
 }
 
-// RegistryCreate stores the registry without its password first, because the
-// id the password is bound to only exists afterwards.
 func (s *encryptedStore) RegistryCreate(registry *model.Registry) error {
-	if s.key == nil {
-		return s.Store.RegistryCreate(registry)
-	}
-	password := registry.Password
-	registry.Password = ""
-	err := s.Store.RegistryCreate(registry)
-	registry.Password = password
+	sealed, err := s.sealRegistry(registry)
 	if err != nil {
 		return err
 	}
-	if err := s.RegistryUpdate(registry); err != nil {
-		return errors.Join(err, s.RegistryDelete(registry))
+	if err := s.Store.RegistryCreate(sealed); err != nil {
+		return err
 	}
+	sealed.Password, sealed.EncryptionKeyID = registry.Password, ""
+	*registry = *sealed
 	return nil
 }
 
 func (s *encryptedStore) RegistryUpdate(registry *model.Registry) error {
-	encrypted := *registry
-	var err error
-	if encrypted.Password, err = encrypt(s.key, registry.Password, registryAD(registry.ID)); err != nil {
+	sealed, err := s.sealRegistry(registry)
+	if err != nil {
 		return err
 	}
-	return s.Store.RegistryUpdate(&encrypted)
+	return s.Store.RegistryUpdate(sealed)
 }
 
 // Users.
@@ -277,13 +348,26 @@ func (s *encryptedStore) user(user *model.User, err error) (*model.User, error) 
 	if err != nil {
 		return nil, err
 	}
-	if user.AccessToken, err = decrypt(s.key, user.AccessToken, accessTokenAD(user.ID)); err != nil {
+	if user.AccessToken, err = s.open(user.AccessToken, user.EncryptionKeyID, accessTokenAD(user.ID)); err != nil {
 		return nil, fmt.Errorf("could not decrypt access token of user %d: %w", user.ID, err)
 	}
-	if user.RefreshToken, err = decrypt(s.key, user.RefreshToken, refreshTokenAD(user.ID)); err != nil {
+	if user.RefreshToken, err = s.open(user.RefreshToken, user.EncryptionKeyID, refreshTokenAD(user.ID)); err != nil {
 		return nil, fmt.Errorf("could not decrypt refresh token of user %d: %w", user.ID, err)
 	}
+	user.EncryptionKeyID = ""
 	return user, nil
+}
+
+func (s *encryptedStore) sealUser(user *model.User) (*model.User, error) {
+	sealed := *user
+	var err error
+	if sealed.AccessToken, sealed.EncryptionKeyID, err = s.seal(user.AccessToken, accessTokenAD(user.ID)); err != nil {
+		return nil, err
+	}
+	if sealed.RefreshToken, _, err = s.seal(user.RefreshToken, refreshTokenAD(user.ID)); err != nil {
+		return nil, err
+	}
+	return &sealed, nil
 }
 
 func (s *encryptedStore) GetUser(id int64) (*model.User, error) {
@@ -311,10 +395,11 @@ func (s *encryptedStore) GetUserList(p *model.ListOptionsWithAll) ([]*model.User
 	return users, nil
 }
 
-// CreateUser stores the user without its tokens first, because the id the
-// tokens are bound to only exists afterwards.
+// CreateUser stores the user without tokens first, because the tokens are
+// bound to the user id, which only exists afterwards. If storing the tokens
+// fails, the user stays without tokens until the next login stores them.
 func (s *encryptedStore) CreateUser(user *model.User) error {
-	if s.key == nil {
+	if s.keyID == "" {
 		return s.Store.CreateUser(user)
 	}
 	accessToken, refreshToken := user.AccessToken, user.RefreshToken
@@ -324,20 +409,13 @@ func (s *encryptedStore) CreateUser(user *model.User) error {
 	if err != nil {
 		return err
 	}
-	if err := s.UpdateUser(user); err != nil {
-		return errors.Join(err, s.DeleteUser(user))
-	}
-	return nil
+	return s.UpdateUser(user)
 }
 
 func (s *encryptedStore) UpdateUser(user *model.User) error {
-	encrypted := *user
-	var err error
-	if encrypted.AccessToken, err = encrypt(s.key, user.AccessToken, accessTokenAD(user.ID)); err != nil {
+	sealed, err := s.sealUser(user)
+	if err != nil {
 		return err
 	}
-	if encrypted.RefreshToken, err = encrypt(s.key, user.RefreshToken, refreshTokenAD(user.ID)); err != nil {
-		return err
-	}
-	return s.Store.UpdateUser(&encrypted)
+	return s.Store.UpdateUser(sealed)
 }
