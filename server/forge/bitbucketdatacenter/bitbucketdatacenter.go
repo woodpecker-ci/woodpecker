@@ -182,7 +182,8 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 					break
 				}
 			}
-			if resp.LastPage {
+			// if repo was found or last page reached we give up
+			if repo != nil || resp.LastPage {
 				break
 			}
 			opts.Start = resp.NextPageStart
