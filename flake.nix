@@ -58,6 +58,11 @@
 
               # docs
               graphviz
+
+              # test env tools
+              bash
+              nushell
+              powershell
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";
