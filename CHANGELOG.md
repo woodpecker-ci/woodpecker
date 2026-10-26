@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @MannXo, @Mihir-Rabari, @PatelFarhaan, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @MannXo, @Mihir-Rabari, @PatelFarhaan, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @eknathdj, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -40,6 +40,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix depends_on workflows running after failed dependency on queue reload [[#7395](https://github.com/woodpecker-ci/woodpecker/pull/7395)]
 - Resolve commit SHA for annotated tags for gitlab, gitea and forgejo [[#7394](https://github.com/woodpecker-ci/woodpecker/pull/7394)]
 - Fix nushell quoting for command in local backend [[#7294](https://github.com/woodpecker-ci/woodpecker/pull/7294)]
 - Make workflow collapsible behavor consistent [[#7367](https://github.com/woodpecker-ci/woodpecker/pull/7367)]
