@@ -280,18 +280,18 @@ func (_c *MockForge_Branches_Call) RunAndReturn(run func(ctx context.Context, u 
 }
 
 // Config provides a mock function for the type MockForge
-func (_mock *MockForge) Config() metadata.ForgeConfig {
+func (_mock *MockForge) Config() metadata.Forge {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Config")
 	}
 
-	var r0 metadata.ForgeConfig
-	if returnFunc, ok := ret.Get(0).(func() metadata.ForgeConfig); ok {
+	var r0 metadata.Forge
+	if returnFunc, ok := ret.Get(0).(func() metadata.Forge); ok {
 		r0 = returnFunc()
 	} else {
-		r0 = ret.Get(0).(metadata.ForgeConfig)
+		r0 = ret.Get(0).(metadata.Forge)
 	}
 	return r0
 }
@@ -313,12 +313,12 @@ func (_c *MockForge_Config_Call) Run(run func()) *MockForge_Config_Call {
 	return _c
 }
 
-func (_c *MockForge_Config_Call) Return(forgeConfig metadata.ForgeConfig) *MockForge_Config_Call {
-	_c.Call.Return(forgeConfig)
+func (_c *MockForge_Config_Call) Return(forge metadata.Forge) *MockForge_Config_Call {
+	_c.Call.Return(forge)
 	return _c
 }
 
-func (_c *MockForge_Config_Call) RunAndReturn(run func() metadata.ForgeConfig) *MockForge_Config_Call {
+func (_c *MockForge_Config_Call) RunAndReturn(run func() metadata.Forge) *MockForge_Config_Call {
 	_c.Call.Return(run)
 	return _c
 }

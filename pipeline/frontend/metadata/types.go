@@ -119,22 +119,14 @@ type (
 		Host string `json:"host,omitempty"`
 	}
 
-	// ForgeConfig defines the generic configuration of a configured forge.
-	ForgeConfig struct {
-		// URL is the root url of the configured forge.
-		URL string
-		// Host is the host of the forge, including the port if one is set.
-		Host string
-	}
-
 	// ServerForge represent the needed func of a server forge to get its metadata.
 	ServerForge interface {
 		// Name returns the string name of this driver
 		Name() string
 		// URL returns the root url of a configured forge
 		URL() string
-		// Config returns the generic configuration of a configured forge
-		Config() ForgeConfig
+		// Config returns the metadata of a configured forge
+		Config() Forge
 	}
 
 	TrustedConfiguration struct {

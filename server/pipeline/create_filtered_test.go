@@ -67,8 +67,7 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	mockStore.On("DeletePipeline", mock.Anything).Return(nil).Once()
 
 	mockForge := forge_mocks.NewMockForge(t)
-	mockForge.On("Name").Return("github")
-	mockForge.On("Config").Return(metadata.ForgeConfig{URL: "https://github.com", Host: "github.com"})
+	mockForge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 	mockForge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)

@@ -32,8 +32,8 @@ type testForge struct {
 
 func (f testForge) Name() string { return f.name }
 func (f testForge) URL() string  { return f.url }
-func (f testForge) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{URL: f.url, Host: f.host}
+func (f testForge) Config() metadata.Forge {
+	return metadata.Forge{Type: f.name, URL: f.url, Host: f.host}
 }
 
 func TestGetWorkflowMetadata(t *testing.T) {

@@ -85,9 +85,10 @@ func (g *RPC) URL() string {
 	return resp
 }
 
-// Config returns the generic configuration of the configured forge.
-func (g *RPC) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{URL: g.URL(), Host: common.HostFromURL(g.URL())}
+// Config returns the metadata of the configured forge.
+func (g *RPC) Config() metadata.Forge {
+	url := g.URL()
+	return metadata.Forge{Type: g.Name(), URL: url, Host: common.HostFromURL(url)}
 }
 
 func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, string, error) {

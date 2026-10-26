@@ -81,9 +81,9 @@ func (c *config) URL() string {
 	return c.url
 }
 
-// Config returns the generic configuration of the configured forge.
-func (c *config) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{URL: c.url, Host: common.HostFromURL(c.url)}
+// Config returns the metadata of the configured forge.
+func (c *config) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The

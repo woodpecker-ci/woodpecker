@@ -174,8 +174,7 @@ steps:
 		Login:    "user",
 		Password: "password",
 	}, nil)
-	forge.On("Name").Return("github")
-	forge.On("Config").Return(metadata.ForgeConfig{URL: "https://github.com", Host: "github.com"})
+	forge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)
@@ -225,8 +224,8 @@ func TestParsePipelineRecoversPanic(t *testing.T) {
 
 	forge := forge_mocks.NewMockForge(t)
 	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
-	// Name is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
-	forge.On("Name").Panic("injected test panic")
+	// Config is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
+	forge.On("Config").Panic("injected test panic")
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)

@@ -105,9 +105,9 @@ func (c *client) URL() string {
 	return c.url
 }
 
-// Config returns the generic configuration of the configured forge.
-func (c *client) Config() metadata.ForgeConfig {
-	return metadata.ForgeConfig{URL: c.url, Host: common.HostFromURL(c.url)}
+// Config returns the metadata of the configured forge.
+func (c *client) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {

@@ -466,5 +466,5 @@ func TestConfig(t *testing.T) {
 	serverForge, ok := f.(metadata.ServerForge)
 	require.True(t, ok, "gitea must implement the metadata forge interface")
 
-	assert.Equal(t, metadata.ForgeConfig{URL: "https://example.com/gitea", Host: "example.com"}, serverForge.Config())
+	assert.Equal(t, metadata.Forge{Type: "gitea", URL: "https://example.com/gitea", Host: "example.com"}, serverForge.Config())
 }
