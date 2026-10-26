@@ -28,12 +28,6 @@ func (s storage) TaskInsert(task *model.Task) error {
 	return wrapInsert(s.engine.Insert(task))
 }
 
-func (s storage) TaskUpdate(task *model.Task) error {
-	return retryWrite(func() error {
-		return wrapUpdate(s.engine.ID(task.ID).AllCols().Update(task))
-	})
-}
-
 func (s storage) TaskDelete(id string) error {
 	return retryWrite(func() error {
 		return wrapDelete(s.engine.Where("id = ?", id).Delete(new(model.Task)))

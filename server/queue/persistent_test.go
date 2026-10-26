@@ -15,11 +15,9 @@
 package queue
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -48,38 +46,6 @@ func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 	info := q.Info(ctx)
 	assert.Equal(t, 0, info.Stats.Pending, "stale task must be removed from pending")
 	assert.Equal(t, 0, info.Stats.Running, "stale task must be removed from running")
-}
-
-// A depends_on gate task that is still queued must have the failure of a
-// dependency that finished before a queue reload persisted into the store —
-// otherwise the reloaded queue sees the empty DepStatus the task was inserted
-// with and Task.ShouldRun() vacuously returns true, reporting success for a
-// failed dependency (woodpecker-ci/woodpecker#7154).
-func TestPersistentQueuePersistsDepStatusOnError(t *testing.T) {
-	ctx, cancel, q := setupTestQueue(t)
-	defer cancel(nil)
-
-	store := store_mocks.NewMockStore(t)
-
-	pq := &persistentQueue{Queue: q, store: store}
-
-	depTask := genDummyTask()
-	depTask.ID = "100"
-	gateTask := genDummyTask()
-	gateTask.ID = "101"
-	gateTask.Dependencies = []string{"100"}
-	gateTask.DepStatus = map[string]model.StatusValue{}
-
-	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{depTask, gateTask}))
-
-	store.EXPECT().TaskList().Return([]*model.Task{depTask, gateTask}, nil).Once()
-	store.EXPECT().TaskUpdate(mock.Anything).Run(func(task *model.Task) {
-		assert.Equal(t, "101", task.ID, "only the dependent gate task is persisted")
-		assert.Equal(t, model.StatusFailure, task.DepStatus["100"])
-	}).Return(nil).Once()
-	store.EXPECT().TaskDelete("100").Return(nil).Once()
-
-	assert.NoError(t, pq.ErrorAtOnce(ctx, []string{"100"}, errors.New("dependency failed")))
 }
 
 func TestPersistentQueuePollDropsTaskWithMissingWorkflow(t *testing.T) {

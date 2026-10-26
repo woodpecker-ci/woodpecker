@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strconv"
 
 	"github.com/rs/zerolog/log"
@@ -38,12 +37,41 @@ const serverConfigQueuePaused = "queue-paused"
 // starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
+	for _, task := range tasks {
+		restoreDepStatus(s, task)
+	}
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	pq := &persistentQueue{q, s}
 	pq.restorePausedState()
 	return pq
+}
+
+// restoreDepStatus sets the status of every finished dependency of a reloaded
+// task from its workflow. The queue keeps that status only in memory, so the
+// stored task still has the empty DepStatus it was inserted with and
+// Task.ShouldRun() would vacuously let it run.
+func restoreDepStatus(s store.Store, task *model.Task) {
+	for _, dep := range task.Dependencies {
+		workflowID, err := strconv.ParseInt(dep, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: invalid dependency id %s", task.ID, dep)
+			continue
+		}
+		workflow, err := s.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: cannot load dependency %s", task.ID, dep)
+			continue
+		}
+		if !isTerminalWorkflowState(workflow.State) {
+			continue
+		}
+		if task.DepStatus == nil {
+			task.DepStatus = make(map[string]model.StatusValue)
+		}
+		task.DepStatus[dep] = workflow.State
+	}
 }
 
 type persistentQueue struct {
@@ -196,10 +224,6 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 		return err
 	}
 
-	if err := q.updateDepStatusInStore([]string{id}, model.StatusFailure); err != nil {
-		return err
-	}
-
 	if deleteErr := q.store.TaskDelete(id); deleteErr != nil {
 		if !errors.Is(deleteErr, types.ErrRecordNotExist) {
 			return deleteErr
@@ -209,52 +233,10 @@ func (q *persistentQueue) Error(c context.Context, id string, err error) error {
 	return nil
 }
 
-// updateDepStatusInStore persists the dependency status of every still-stored
-// task that depends on one of the given task ids. Without it, a queue reload
-// (server restart or HA leader change) restores such tasks with the empty
-// DepStatus they were inserted with, and Task.ShouldRun() vacuously returns
-// true — a depends_on gate workflow can then report success even though a
-// required dependency failed.
-func (q *persistentQueue) updateDepStatusInStore(ids []string, status model.StatusValue) error {
-	tasks, err := q.store.TaskList()
-	if err != nil {
-		return err
-	}
-
-	var errs []error
-	for _, task := range tasks {
-		matched := false
-		for _, dep := range task.Dependencies {
-			if slices.Contains(ids, dep) {
-				if task.DepStatus == nil {
-					task.DepStatus = make(map[string]model.StatusValue)
-				}
-				task.DepStatus[dep] = status
-				matched = true
-			}
-		}
-		if matched {
-			if err := q.store.TaskUpdate(task); err != nil {
-				errs = append(errs, fmt.Errorf("task id [%s]: %w", task.ID, err))
-			}
-		}
-	}
-
-	return errors.Join(errs...)
-}
-
 // ErrorAtOnce signals multiple tasks are done and complete with an error.
 // If still pending they will just get removed from the queue.
 func (q *persistentQueue) ErrorAtOnce(c context.Context, ids []string, err error) error {
 	if err := q.Queue.ErrorAtOnce(c, ids, err); err != nil {
-		return err
-	}
-
-	status := model.StatusFailure
-	if errors.Is(err, ErrCancel) {
-		status = model.StatusKilled
-	}
-	if err := q.updateDepStatusInStore(ids, status); err != nil {
 		return err
 	}
 
