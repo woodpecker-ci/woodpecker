@@ -243,7 +243,7 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 		user, repo, steps := seed(t, "rocket")
 		mockLogStore := setLogStore(t)
 		for _, step := range steps {
-			mockLogStore.On("LogDelete", mock.MatchedBy(func(s *model.Step) bool { return s.ID == step.ID })).Return(nil).Once()
+			mockLogStore.On("LogDelete", mock.Anything, mock.MatchedBy(func(s *model.Step) bool { return s.ID == step.ID })).Return(nil).Once()
 		}
 
 		require.Equal(t, http.StatusOK, deleteRepo(t, user, repo))
@@ -255,7 +255,7 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 	t.Run("a failed log delete keeps the repo", func(t *testing.T) {
 		user, repo, _ := seed(t, "probe")
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", mock.Anything).Return(assert.AnError)
+		mockLogStore.On("LogDelete", mock.Anything, mock.Anything).Return(assert.AnError)
 
 		assert.Equal(t, http.StatusInternalServerError, deleteRepo(t, user, repo))
 
