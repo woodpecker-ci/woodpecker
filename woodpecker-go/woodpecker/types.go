@@ -274,7 +274,7 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
-		Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its dependencies
+		Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 	}
 
 	// Agent is the JSON data for an agent.
