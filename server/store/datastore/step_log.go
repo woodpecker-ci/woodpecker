@@ -23,49 +23,51 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// unfinalizedCond selects the steps whose log is complete but not finalized yet,
-// the counterpart of allowAppendingLogs: a running step may still get lines, even in a stopped pipeline.
+// stepLogCond selects the steps of filter, ignoring Pipelines. A complete log is the counterpart of
+// allowAppendingLogs: a running step may still get lines, even in a stopped pipeline.
 // Steps that never started are included, so they leave the selection too.
-func unfinalizedCond(finishedBefore int64) builder.Cond {
-	return builder.And(
-		builder.Eq{"steps.log_state": model.LogStateOpen},
-		builder.Neq{"steps.state": model.StatusRunning},
-		builder.Lt{"steps.finished": finishedBefore},
-		builder.NotIn("pipelines.status", model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusCreated),
-		builder.Lt{"pipelines.finished": finishedBefore},
-	)
+func stepLogCond(filter *model.StepLogFilter) builder.Cond {
+	cond := builder.NewCond()
+	if len(filter.States) > 0 {
+		cond = cond.And(builder.In("steps.log_state", filter.States))
+	}
+	if filter.CompleteBefore != 0 {
+		cond = cond.And(
+			builder.Neq{"steps.state": model.StatusRunning},
+			builder.Lt{"steps.finished": filter.CompleteBefore},
+			builder.NotIn("pipelines.status", model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusCreated),
+			builder.Lt{"pipelines.finished": filter.CompleteBefore},
+		)
+	}
+	return cond
 }
 
-func (s storage) unfinalizedSession(ctx context.Context, cond builder.Cond) *xorm.Session {
+func (s storage) stepLogSession(ctx context.Context, cond builder.Cond) *xorm.Session {
 	return s.engine.Context(ctx).Table("steps").Join("INNER", "pipelines", "pipelines.id = steps.pipeline_id").Where(cond)
 }
 
-func (s storage) StepListLogUnfinalized(ctx context.Context, finishedBefore int64, batch int) ([]*model.Step, error) {
-	cond := unfinalizedCond(finishedBefore)
-
-	var pipelineIDs []int64
-	if err := s.unfinalizedSession(ctx, cond).Distinct("steps.pipeline_id").
-		OrderBy("steps.pipeline_id ASC").Limit(batch).Find(&pipelineIDs); err != nil {
-		return nil, err
-	}
-
+func (s storage) StepListByLogState(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error) {
+	cond := stepLogCond(filter)
 	steps := make([]*model.Step, 0)
-	if len(pipelineIDs) == 0 {
-		return steps, nil
+
+	if filter.Pipelines > 0 {
+		var pipelineIDs []int64
+		if err := s.stepLogSession(ctx, cond).Distinct("steps.pipeline_id").
+			OrderBy("steps.pipeline_id ASC").Limit(filter.Pipelines).Find(&pipelineIDs); err != nil {
+			return nil, err
+		}
+		if len(pipelineIDs) == 0 {
+			return steps, nil
+		}
+		cond = builder.And(cond, builder.In("steps.pipeline_id", pipelineIDs))
 	}
 
-	err := s.unfinalizedSession(ctx, builder.And(cond, builder.In("steps.pipeline_id", pipelineIDs))).
-		Cols("steps.*").OrderBy("steps.pipeline_id ASC, steps.id ASC").Find(&steps)
+	err := s.stepLogSession(ctx, cond).Cols("steps.*").OrderBy("steps.pipeline_id ASC, steps.id ASC").Find(&steps)
 	return steps, err
 }
 
-func (s storage) StepLogUnfinalizedCount(ctx context.Context, finishedBefore int64) (int64, error) {
-	return s.unfinalizedSession(ctx, unfinalizedCond(finishedBefore)).Count()
-}
-
-func (s storage) StepListLogClaimed(ctx context.Context) ([]*model.Step, error) {
-	steps := make([]*model.Step, 0)
-	return steps, s.engine.Context(ctx).In("log_state", model.LogStateFinalizing, model.LogStateDeleting).Find(&steps)
+func (s storage) StepCountByLogState(ctx context.Context, filter *model.StepLogFilter) (int64, error) {
+	return s.stepLogSession(ctx, stepLogCond(filter)).Count()
 }
 
 func (s storage) StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error) {

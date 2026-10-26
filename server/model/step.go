@@ -54,6 +54,17 @@ const (
 	LogStateDeleting                   // claimed by a log delete
 )
 
+// StepLogFilter selects steps by the state of their log.
+type StepLogFilter struct {
+	// States the log must be in, any if empty.
+	States []LogState
+	// CompleteBefore, if set, selects only complete logs:
+	// step and pipeline stopped and finished before this unix time.
+	CompleteBefore int64
+	// Pipelines, if set, limits a list to the steps of the oldest Pipelines pipelines.
+	Pipelines int
+}
+
 // TableName return database table name for xorm.
 func (Step) TableName() string {
 	return "steps"

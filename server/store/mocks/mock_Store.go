@@ -5707,6 +5707,72 @@ func (_c *MockStore_StepByUUID_Call) RunAndReturn(run func(uuid string) (*model.
 	return _c
 }
 
+// StepCountByLogState provides a mock function for the type MockStore
+func (_mock *MockStore) StepCountByLogState(ctx context.Context, filter *model.StepLogFilter) (int64, error) {
+	ret := _mock.Called(ctx, filter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StepCountByLogState")
+	}
+
+	var r0 int64
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.StepLogFilter) (int64, error)); ok {
+		return returnFunc(ctx, filter)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.StepLogFilter) int64); ok {
+		r0 = returnFunc(ctx, filter)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.StepLogFilter) error); ok {
+		r1 = returnFunc(ctx, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_StepCountByLogState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepCountByLogState'
+type MockStore_StepCountByLogState_Call struct {
+	*mock.Call
+}
+
+// StepCountByLogState is a helper method to define mock.On call
+//   - ctx context.Context
+//   - filter *model.StepLogFilter
+func (_e *MockStore_Expecter) StepCountByLogState(ctx any, filter any) *MockStore_StepCountByLogState_Call {
+	return &MockStore_StepCountByLogState_Call{Call: _e.mock.On("StepCountByLogState", ctx, filter)}
+}
+
+func (_c *MockStore_StepCountByLogState_Call) Run(run func(ctx context.Context, filter *model.StepLogFilter)) *MockStore_StepCountByLogState_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.StepLogFilter
+		if args[1] != nil {
+			arg1 = args[1].(*model.StepLogFilter)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_StepCountByLogState_Call) Return(n int64, err error) *MockStore_StepCountByLogState_Call {
+	_c.Call.Return(n, err)
+	return _c
+}
+
+func (_c *MockStore_StepCountByLogState_Call) RunAndReturn(run func(ctx context.Context, filter *model.StepLogFilter) (int64, error)) *MockStore_StepCountByLogState_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StepFinished provides a mock function for the type MockStore
 func (_mock *MockStore) StepFinished(context1 context.Context, step *model.Step) error {
 	ret := _mock.Called(context1, step)
@@ -5826,6 +5892,74 @@ func (_c *MockStore_StepList_Call) RunAndReturn(run func(pipelineID int64) ([]*m
 	return _c
 }
 
+// StepListByLogState provides a mock function for the type MockStore
+func (_mock *MockStore) StepListByLogState(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error) {
+	ret := _mock.Called(ctx, filter)
+
+	if len(ret) == 0 {
+		panic("no return value specified for StepListByLogState")
+	}
+
+	var r0 []*model.Step
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.StepLogFilter) ([]*model.Step, error)); ok {
+		return returnFunc(ctx, filter)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.StepLogFilter) []*model.Step); ok {
+		r0 = returnFunc(ctx, filter)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Step)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.StepLogFilter) error); ok {
+		r1 = returnFunc(ctx, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_StepListByLogState_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepListByLogState'
+type MockStore_StepListByLogState_Call struct {
+	*mock.Call
+}
+
+// StepListByLogState is a helper method to define mock.On call
+//   - ctx context.Context
+//   - filter *model.StepLogFilter
+func (_e *MockStore_Expecter) StepListByLogState(ctx any, filter any) *MockStore_StepListByLogState_Call {
+	return &MockStore_StepListByLogState_Call{Call: _e.mock.On("StepListByLogState", ctx, filter)}
+}
+
+func (_c *MockStore_StepListByLogState_Call) Run(run func(ctx context.Context, filter *model.StepLogFilter)) *MockStore_StepListByLogState_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.StepLogFilter
+		if args[1] != nil {
+			arg1 = args[1].(*model.StepLogFilter)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_StepListByLogState_Call) Return(steps []*model.Step, err error) *MockStore_StepListByLogState_Call {
+	_c.Call.Return(steps, err)
+	return _c
+}
+
+func (_c *MockStore_StepListByLogState_Call) RunAndReturn(run func(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error)) *MockStore_StepListByLogState_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // StepListFromWorkflowFind provides a mock function for the type MockStore
 func (_mock *MockStore) StepListFromWorkflowFind(workflow *model.Workflow) ([]*model.Step, error) {
 	ret := _mock.Called(workflow)
@@ -5884,142 +6018,6 @@ func (_c *MockStore_StepListFromWorkflowFind_Call) Return(steps []*model.Step, e
 }
 
 func (_c *MockStore_StepListFromWorkflowFind_Call) RunAndReturn(run func(workflow *model.Workflow) ([]*model.Step, error)) *MockStore_StepListFromWorkflowFind_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// StepListLogClaimed provides a mock function for the type MockStore
-func (_mock *MockStore) StepListLogClaimed(ctx context.Context) ([]*model.Step, error) {
-	ret := _mock.Called(ctx)
-
-	if len(ret) == 0 {
-		panic("no return value specified for StepListLogClaimed")
-	}
-
-	var r0 []*model.Step
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) ([]*model.Step, error)); ok {
-		return returnFunc(ctx)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) []*model.Step); ok {
-		r0 = returnFunc(ctx)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.Step)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = returnFunc(ctx)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_StepListLogClaimed_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepListLogClaimed'
-type MockStore_StepListLogClaimed_Call struct {
-	*mock.Call
-}
-
-// StepListLogClaimed is a helper method to define mock.On call
-//   - ctx context.Context
-func (_e *MockStore_Expecter) StepListLogClaimed(ctx any) *MockStore_StepListLogClaimed_Call {
-	return &MockStore_StepListLogClaimed_Call{Call: _e.mock.On("StepListLogClaimed", ctx)}
-}
-
-func (_c *MockStore_StepListLogClaimed_Call) Run(run func(ctx context.Context)) *MockStore_StepListLogClaimed_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_StepListLogClaimed_Call) Return(steps []*model.Step, err error) *MockStore_StepListLogClaimed_Call {
-	_c.Call.Return(steps, err)
-	return _c
-}
-
-func (_c *MockStore_StepListLogClaimed_Call) RunAndReturn(run func(ctx context.Context) ([]*model.Step, error)) *MockStore_StepListLogClaimed_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// StepListLogUnfinalized provides a mock function for the type MockStore
-func (_mock *MockStore) StepListLogUnfinalized(ctx context.Context, finishedBefore int64, batch int) ([]*model.Step, error) {
-	ret := _mock.Called(ctx, finishedBefore, batch)
-
-	if len(ret) == 0 {
-		panic("no return value specified for StepListLogUnfinalized")
-	}
-
-	var r0 []*model.Step
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int) ([]*model.Step, error)); ok {
-		return returnFunc(ctx, finishedBefore, batch)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int) []*model.Step); ok {
-		r0 = returnFunc(ctx, finishedBefore, batch)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*model.Step)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int64, int) error); ok {
-		r1 = returnFunc(ctx, finishedBefore, batch)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_StepListLogUnfinalized_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepListLogUnfinalized'
-type MockStore_StepListLogUnfinalized_Call struct {
-	*mock.Call
-}
-
-// StepListLogUnfinalized is a helper method to define mock.On call
-//   - ctx context.Context
-//   - finishedBefore int64
-//   - batch int
-func (_e *MockStore_Expecter) StepListLogUnfinalized(ctx any, finishedBefore any, batch any) *MockStore_StepListLogUnfinalized_Call {
-	return &MockStore_StepListLogUnfinalized_Call{Call: _e.mock.On("StepListLogUnfinalized", ctx, finishedBefore, batch)}
-}
-
-func (_c *MockStore_StepListLogUnfinalized_Call) Run(run func(ctx context.Context, finishedBefore int64, batch int)) *MockStore_StepListLogUnfinalized_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int64
-		if args[1] != nil {
-			arg1 = args[1].(int64)
-		}
-		var arg2 int
-		if args[2] != nil {
-			arg2 = args[2].(int)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_StepListLogUnfinalized_Call) Return(steps []*model.Step, err error) *MockStore_StepListLogUnfinalized_Call {
-	_c.Call.Return(steps, err)
-	return _c
-}
-
-func (_c *MockStore_StepListLogUnfinalized_Call) RunAndReturn(run func(ctx context.Context, finishedBefore int64, batch int) ([]*model.Step, error)) *MockStore_StepListLogUnfinalized_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -6160,72 +6158,6 @@ func (_c *MockStore_StepLogStateSwap_Call) Return(b bool, err error) *MockStore_
 }
 
 func (_c *MockStore_StepLogStateSwap_Call) RunAndReturn(run func(ctx context.Context, step *model.Step, to model.LogState) (bool, error)) *MockStore_StepLogStateSwap_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// StepLogUnfinalizedCount provides a mock function for the type MockStore
-func (_mock *MockStore) StepLogUnfinalizedCount(ctx context.Context, finishedBefore int64) (int64, error) {
-	ret := _mock.Called(ctx, finishedBefore)
-
-	if len(ret) == 0 {
-		panic("no return value specified for StepLogUnfinalizedCount")
-	}
-
-	var r0 int64
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (int64, error)); ok {
-		return returnFunc(ctx, finishedBefore)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) int64); ok {
-		r0 = returnFunc(ctx, finishedBefore)
-	} else {
-		r0 = ret.Get(0).(int64)
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
-		r1 = returnFunc(ctx, finishedBefore)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_StepLogUnfinalizedCount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'StepLogUnfinalizedCount'
-type MockStore_StepLogUnfinalizedCount_Call struct {
-	*mock.Call
-}
-
-// StepLogUnfinalizedCount is a helper method to define mock.On call
-//   - ctx context.Context
-//   - finishedBefore int64
-func (_e *MockStore_Expecter) StepLogUnfinalizedCount(ctx any, finishedBefore any) *MockStore_StepLogUnfinalizedCount_Call {
-	return &MockStore_StepLogUnfinalizedCount_Call{Call: _e.mock.On("StepLogUnfinalizedCount", ctx, finishedBefore)}
-}
-
-func (_c *MockStore_StepLogUnfinalizedCount_Call) Run(run func(ctx context.Context, finishedBefore int64)) *MockStore_StepLogUnfinalizedCount_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 int64
-		if args[1] != nil {
-			arg1 = args[1].(int64)
-		}
-		run(
-			arg0,
-			arg1,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_StepLogUnfinalizedCount_Call) Return(n int64, err error) *MockStore_StepLogUnfinalizedCount_Call {
-	_c.Call.Return(n, err)
-	return _c
-}
-
-func (_c *MockStore_StepLogUnfinalizedCount_Call) RunAndReturn(run func(ctx context.Context, finishedBefore int64) (int64, error)) *MockStore_StepLogUnfinalizedCount_Call {
 	_c.Call.Return(run)
 	return _c
 }

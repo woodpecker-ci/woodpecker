@@ -79,8 +79,8 @@ func before(now time.Time) int64 {
 func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 	var res Result
 
-	finishedBefore := before(now)
-	count, err := f.Store.StepLogUnfinalizedCount(ctx, finishedBefore)
+	due := &model.StepLogFilter{States: []model.LogState{model.LogStateOpen}, CompleteBefore: before(now)}
+	count, err := f.Store.StepCountByLogState(ctx, due)
 	if err != nil {
 		return res, err
 	}
@@ -89,7 +89,8 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		return res, nil
 	}
 
-	steps, err := f.Store.StepListLogUnfinalized(ctx, finishedBefore, f.Batch)
+	due.Pipelines = f.Batch
+	steps, err := f.Store.StepListByLogState(ctx, due)
 	if err != nil {
 		return res, err
 	}
@@ -139,7 +140,9 @@ func (f *Finalizer) finalize(ctx context.Context, step *model.Step) (bool, error
 // it lists the claims, waits 30 to 40 minutes and reopens those still in the same state, until ctx is done.
 func RecoverClaims(ctx context.Context, s store.Store) {
 	for {
-		claimed, err := s.StepListLogClaimed(ctx)
+		claimed, err := s.StepListByLogState(ctx, &model.StepLogFilter{
+			States: []model.LogState{model.LogStateFinalizing, model.LogStateDeleting},
+		})
 		if err != nil && ctx.Err() == nil {
 			log.Error().Err(err).Msg("could not list claimed step logs")
 		}

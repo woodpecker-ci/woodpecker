@@ -148,13 +148,10 @@ type Store interface {
 	LogDelete(context.Context, *model.Step) error
 	StepFinished(context.Context, *model.Step) error
 
-	// StepListLogUnfinalized lists the steps whose log is complete (finished before the given unix time)
-	// but not finalized yet, from the oldest batch pipelines, ordered by pipeline and step ID.
-	StepListLogUnfinalized(ctx context.Context, finishedBefore int64, batch int) ([]*model.Step, error)
-	// StepLogUnfinalizedCount counts the steps StepListLogUnfinalized selects without batch.
-	StepLogUnfinalizedCount(ctx context.Context, finishedBefore int64) (int64, error)
-	// StepListLogClaimed lists the steps whose log is claimed (finalizing or deleting).
-	StepListLogClaimed(ctx context.Context) ([]*model.Step, error)
+	// StepListByLogState lists the steps the filter selects, ordered by pipeline and step ID.
+	StepListByLogState(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error)
+	// StepCountByLogState counts the steps the filter selects, ignoring Pipelines.
+	StepCountByLogState(ctx context.Context, filter *model.StepLogFilter) (int64, error)
 	// StepLogStateSwap moves the log of a step to the given state, if its state is still the one of step,
 	// and updates step. It reports whether it did, so only one concurrent call wins a claim.
 	StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error)
