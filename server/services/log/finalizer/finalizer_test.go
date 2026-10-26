@@ -225,9 +225,9 @@ func TestTickRetriesUnderContinuousArrivals(t *testing.T) {
 	assert.True(t, f.finalized(t, "bad"))
 }
 
-// TestTickSeveralServers ensures finalizers of several servers sharing the database hand every
+// TestTickConcurrent ensures concurrent finalizers sharing the database hand every
 // step to the log store once: each claims a step before it works on it.
-func TestTickSeveralServers(t *testing.T) {
+func TestTickConcurrent(t *testing.T) {
 	f := newFixture(t)
 	for i := range 5 {
 		f.pipeline(t, model.StatusSuccess, f.ago(time.Hour), fmt.Sprintf("a%d", i), fmt.Sprintf("b%d", i))
@@ -238,7 +238,7 @@ func TestTickSeveralServers(t *testing.T) {
 		mu.Lock()
 		calls[step.Name]++
 		mu.Unlock()
-		time.Sleep(time.Millisecond) // let the servers overlap
+		time.Sleep(time.Millisecond) // let the finalizers overlap
 		return nil
 	})
 

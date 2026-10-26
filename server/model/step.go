@@ -42,7 +42,7 @@ type Step struct {
 } //	@name	Step
 
 // LogState tells who works on the log of a step. It only changes with store.StepLogStateSwap,
-// which claims the log atomically, so several servers can share the database.
+// which claims the log atomically, so concurrent calls never work on the same log.
 type LogState int
 
 // The values are stored in the database, only add new ones at the end.

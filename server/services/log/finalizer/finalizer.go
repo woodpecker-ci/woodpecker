@@ -35,8 +35,8 @@ var (
 	// Finalizing one step takes at most stepTimeout, so a hung log store cannot stall the finalizer.
 	stepTimeout = time.Minute
 
-	// A claim on a step log counts as left behind by a server that crashed after recoverDelay plus
-	// up to recoverJitter (so servers do not all recover at once): finalizing or deleting takes a minute.
+	// A claim on a step log counts as left behind by a crash after recoverDelay plus
+	// up to recoverJitter (so recoveries do not all happen at once): finalizing or deleting takes a minute.
 	recoverDelay  = 30 * time.Minute
 	recoverJitter = 10 * time.Minute
 
@@ -53,7 +53,7 @@ var (
 
 // Finalizer is the only caller of StepFinished.
 // It remembers which steps were finalized, what the log store does with the log is its own business.
-// Several servers may each run one: they claim a step log before they work on it.
+// Several finalizers may run concurrently: they claim a step log before they work on it.
 // It is not safe for concurrent use.
 type Finalizer struct {
 	Store    store.Store
@@ -130,7 +130,7 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 }
 
 // finalize claims a step log, hands it to the log store and marks it finalized.
-// It reports false for a log another server or a delete claimed first.
+// It reports false for a log a concurrent finalize or delete claimed first.
 func (f *Finalizer) finalize(ctx context.Context, step *model.Step) (bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, stepTimeout)
 	defer cancel()

@@ -126,7 +126,7 @@ func TestStepLogUnfinalizedStatsEmpty(t *testing.T) {
 }
 
 // TestStepLogStateSwap ensures a log state change is one atomic claim: it only happens if the
-// stored state is still the one of the given step, so only one server wins.
+// stored state is still the one of the given step, so only one concurrent call wins.
 func TestStepLogStateSwap(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
@@ -135,17 +135,17 @@ func TestStepLogStateSwap(t *testing.T) {
 		&model.Step{Name: "a", State: model.StatusFailure, Started: 1, Finished: 10, ExitCode: 3},
 		&model.Step{Name: "b", State: model.StatusSuccess, Started: 1, Finished: 10},
 	)
-	serverA, err := s.StepByUUID("a")
+	callA, err := s.StepByUUID("a")
 	require.NoError(t, err)
-	serverB, err := s.StepByUUID("a")
+	callB, err := s.StepByUUID("a")
 	require.NoError(t, err)
-	assert.Equal(t, model.LogStateOpen, serverA.LogState, "new steps are open")
+	assert.Equal(t, model.LogStateOpen, callA.LogState, "new steps are open")
 
-	claimed, err := s.StepLogStateSwap(t.Context(), serverA, model.LogStateFinalizing)
+	claimed, err := s.StepLogStateSwap(t.Context(), callA, model.LogStateFinalizing)
 	require.NoError(t, err)
 	assert.True(t, claimed)
-	assert.Equal(t, model.LogStateFinalizing, serverA.LogState, "the step is updated")
-	claimed, err = s.StepLogStateSwap(t.Context(), serverB, model.LogStateFinalizing)
+	assert.Equal(t, model.LogStateFinalizing, callA.LogState, "the step is updated")
+	claimed, err = s.StepLogStateSwap(t.Context(), callB, model.LogStateFinalizing)
 	require.NoError(t, err)
 	assert.False(t, claimed, "the second claim of the same state loses")
 
@@ -153,7 +153,7 @@ func TestStepLogStateSwap(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"a"}, stepNames(listed))
 
-	claimed, err = s.StepLogStateSwap(t.Context(), serverA, model.LogStateFinalized)
+	claimed, err = s.StepLogStateSwap(t.Context(), callA, model.LogStateFinalized)
 	require.NoError(t, err)
 	require.True(t, claimed)
 	stored, err := s.StepByUUID("a")
