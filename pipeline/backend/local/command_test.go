@@ -163,11 +163,11 @@ echo test
 		require.NoError(t, err)
 		require.Len(t, args, 2)
 		assert.Equal(t, "--commands", args[0])
-		assert.Equal(t, `echo r#'▶  echo test'#
+		assert.Equal(t, `print r#'▶  echo test'#
 echo test
-echo r#'▶  echo "hello"'#
+print r#'▶  echo "hello"'#
 echo "hello"
-echo r##'▶  echo "text '# test"'##
+print r##'▶  echo "text '# test"'##
 echo "text '# test"
 `, args[1])
 	})

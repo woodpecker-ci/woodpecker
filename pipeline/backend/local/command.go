@@ -158,7 +158,7 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "nu", "nushell":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			script.WriteString("echo " + quoteNushell(common.CommandMarker+cmd) + "\n")
+			script.WriteString("print " + quoteNushell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"--commands", script.String()}, nil
