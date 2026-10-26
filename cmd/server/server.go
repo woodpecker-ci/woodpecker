@@ -42,6 +42,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/web"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -116,6 +117,11 @@ func run(ctx context.Context, c *cli.Command) error {
 			log.Error().Err(err).Msg("could not close store")
 		}
 	}()
+
+	_store, err = encryption.Setup(c, _store)
+	if err != nil {
+		return fmt.Errorf("could not set up encryption: %w", err)
+	}
 
 	err = setupEvilGlobals(ctx, c, _store)
 	if err != nil {
