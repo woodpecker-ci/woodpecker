@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -1133,6 +1134,66 @@ func TestFileAndDir(t *testing.T) {
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
+}
+
+func TestDirPagination(t *testing.T) {
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{ForgeRemoteID: "4"}
+	pipeline := &model.Pipeline{Commit: "abc"}
+
+	// fullPage returns a page with defaultPerPage sub folders and the given blob,
+	// so the client has to ask for the next page.
+	fullPage := func(blob string) string {
+		entries := make([]string, 0, defaultPerPage)
+		for i := range defaultPerPage - 1 {
+			entries = append(entries, fmt.Sprintf(`{"type":"tree","path":".woodpecker/sub%d"}`, i))
+		}
+		entries = append(entries, `{"type":"blob","path":"`+blob+`"}`)
+		return "[" + strings.Join(entries, ",") + "]"
+	}
+
+	newServer := func(t *testing.T, tree http.HandlerFunc) *GitLab {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = w.Write([]byte(`{"id":4}`))
+		})
+		mux.HandleFunc("/api/v4/projects/4/repository/files/", func(w http.ResponseWriter, r *http.Request) {
+			name := strings.TrimSuffix(strings.TrimPrefix(r.URL.Path, "/api/v4/projects/4/repository/files/"), "/raw")
+			_, _ = w.Write([]byte("steps: " + name))
+		})
+		mux.HandleFunc("/api/v4/projects/4/repository/tree", tree)
+		server := httptest.NewServer(mux)
+		t.Cleanup(server.Close)
+		return load(server.URL + "?client_id=test&client_secret=test")
+	}
+
+	t.Run("follows pages until a short page", func(t *testing.T) {
+		var requests []string
+		client := newServer(t, func(w http.ResponseWriter, r *http.Request) {
+			page := r.URL.Query().Get("page")
+			if slices.Contains(requests, page) {
+				http.Error(w, "page "+page+" requested twice", http.StatusBadRequest)
+				return
+			}
+			requests = append(requests, page)
+			switch page {
+			case "1":
+				_, _ = w.Write([]byte(fullPage(".woodpecker/a.yaml")))
+			case "2":
+				_, _ = w.Write([]byte(`[{"type":"blob","path":".woodpecker/b.yaml"}]`))
+			default:
+				http.Error(w, "unexpected page "+page, http.StatusBadRequest)
+			}
+		})
+
+		metas, err := client.Dir(t.Context(), user, repo, pipeline, ".woodpecker")
+		require.NoError(t, err)
+		assert.Equal(t, []string{"1", "2"}, requests)
+		assert.Equal(t, []*types.FileMeta{
+			{Name: ".woodpecker/a.yaml", Data: []byte("steps: .woodpecker/a.yaml")},
+			{Name: ".woodpecker/b.yaml", Data: []byte("steps: .woodpecker/b.yaml")},
+		}, metas)
+	})
 }
 
 func TestBranchHead(t *testing.T) {
