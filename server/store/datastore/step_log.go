@@ -40,12 +40,8 @@ func (s storage) unfinalizedSession(ctx context.Context, cond builder.Cond) *xor
 	return s.engine.Context(ctx).Table("steps").Join("INNER", "pipelines", "pipelines.id = steps.pipeline_id").Where(cond)
 }
 
-func (s storage) StepListLogUnfinalized(ctx context.Context, finishedBefore, afterPipelineID, untilPipelineID int64, batch int) ([]*model.Step, error) {
-	cond := builder.And(
-		unfinalizedCond(finishedBefore),
-		builder.Gt{"steps.pipeline_id": afterPipelineID},
-		builder.Lte{"steps.pipeline_id": untilPipelineID},
-	)
+func (s storage) StepListLogUnfinalized(ctx context.Context, finishedBefore int64, batch int) ([]*model.Step, error) {
+	cond := unfinalizedCond(finishedBefore)
 
 	var pipelineIDs []int64
 	if err := s.unfinalizedSession(ctx, cond).Distinct("steps.pipeline_id").
@@ -63,10 +59,8 @@ func (s storage) StepListLogUnfinalized(ctx context.Context, finishedBefore, aft
 	return steps, err
 }
 
-func (s storage) StepLogUnfinalizedStats(ctx context.Context, finishedBefore int64) (count, maxPipelineID int64, err error) {
-	_, err = s.unfinalizedSession(ctx, unfinalizedCond(finishedBefore)).
-		Select("COUNT(*), COALESCE(MAX(steps.pipeline_id), 0)").Get(&count, &maxPipelineID)
-	return count, maxPipelineID, err
+func (s storage) StepLogUnfinalizedCount(ctx context.Context, finishedBefore int64) (int64, error) {
+	return s.unfinalizedSession(ctx, unfinalizedCond(finishedBefore)).Count()
 }
 
 func (s storage) StepListLogClaimed(ctx context.Context) ([]*model.Step, error) {

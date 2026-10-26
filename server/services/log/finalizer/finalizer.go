@@ -17,7 +17,6 @@ package finalizer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand/v2"
 	"time"
@@ -54,7 +53,6 @@ var (
 // Finalizer is the only caller of StepFinished.
 // It remembers which steps were finalized, what the log store does with the log is its own business.
 // Several finalizers may run concurrently: they claim a step log before they work on it.
-// It is not safe for concurrent use.
 type Finalizer struct {
 	Store    store.Store
 	Logs     service_log.Service
@@ -62,10 +60,6 @@ type Finalizer struct {
 	// Batch is the maximum number of pipelines handled per tick.
 	Batch  int
 	Paused bool
-
-	// A pass goes through the pipelines due when it started, a batch per tick:
-	// after is the pipeline ID the next tick continues after, until the last one of the pass.
-	after, until int64
 }
 
 // Result counts the steps a tick finalized or failed on.
@@ -80,13 +74,13 @@ func before(now time.Time) int64 {
 	return now.Add(-service_log.StreamDelayAllowed - service_log.AppendTimeout).Unix()
 }
 
-// Tick finalizes one batch of pipelines. Passes keep steps that fail from blocking newer pipelines
-// and newer pipelines from keeping failed steps from being retried.
+// Tick finalizes the steps of the oldest Batch pipelines due. A step that fails stays claimed
+// until RecoverClaims hands it back, so it cannot block newer pipelines and is retried then.
 func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 	var res Result
 
 	finishedBefore := before(now)
-	count, maxPipelineID, err := f.Store.StepLogUnfinalizedStats(ctx, finishedBefore)
+	count, err := f.Store.StepLogUnfinalizedCount(ctx, finishedBefore)
 	if err != nil {
 		return res, err
 	}
@@ -95,10 +89,7 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		return res, nil
 	}
 
-	if f.after == 0 {
-		f.until = maxPipelineID
-	}
-	steps, err := f.Store.StepListLogUnfinalized(ctx, finishedBefore, f.after, f.until, f.Batch)
+	steps, err := f.Store.StepListLogUnfinalized(ctx, finishedBefore, f.Batch)
 	if err != nil {
 		return res, err
 	}
@@ -115,12 +106,6 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		case finalized:
 			res.Done++
 		}
-	}
-
-	// the next tick continues the pass after the last pipeline, or starts a new one
-	f.after = 0
-	if n := len(steps); n > 0 && steps[n-1].PipelineID < f.until {
-		f.after = steps[n-1].PipelineID
 	}
 
 	if res.Done > 0 || res.Failed > 0 {
@@ -142,18 +127,15 @@ func (f *Finalizer) finalize(ctx context.Context, step *model.Step) (bool, error
 	// A step that never started has no log, it is only marked.
 	if step.Started != 0 {
 		if err := f.Logs.StepFinished(ctx, step); err != nil {
-			// hand it back to the next pass, else RecoverClaims does
-			releaseCtx, cancel := service_log.ReleaseContext(ctx)
-			defer cancel()
-			_, reopenErr := f.Store.StepLogStateSwap(releaseCtx, step, model.LogStateOpen)
-			return false, errors.Join(err, reopenErr)
+			// stays claimed, RecoverClaims hands it back later
+			return false, err
 		}
 	}
 	_, err := f.Store.StepLogStateSwap(ctx, step, model.LogStateFinalized)
 	return err == nil, err
 }
 
-// RecoverClaims hands back the step logs a crashed server left claimed (finalizing or deleting):
+// RecoverClaims hands back the step logs left claimed (finalizing or deleting) by a failed finalize or a crash:
 // it lists the claims, waits 30 to 40 minutes and reopens those still in the same state, until ctx is done.
 func RecoverClaims(ctx context.Context, s store.Store) {
 	for {
