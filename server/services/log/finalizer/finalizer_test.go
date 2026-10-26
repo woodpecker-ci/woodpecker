@@ -460,6 +460,9 @@ func TestRunStopsWithHungStore(t *testing.T) {
 		return hung(ctx, step)
 	}).Once()
 
+	// the interval is at least a minute in production, the test cannot wait that long
+	defer func(interval time.Duration) { minInterval = interval }(minInterval)
+	minInterval = time.Millisecond
 	fin := f.finalizer()
 	fin.Interval = time.Millisecond
 	ctx, cancel := context.WithCancelCause(t.Context())
@@ -477,6 +480,7 @@ func TestRunStopsWithHungStore(t *testing.T) {
 
 func TestRunRejectsInvalidConfig(t *testing.T) {
 	for name, fin := range map[string]*Finalizer{
+		"interval below 1m": {Interval: time.Minute - time.Second, Batch: 1},
 		"zero interval":     {Interval: 0, Batch: 1},
 		"negative interval": {Interval: -time.Second, Batch: 1},
 		"zero batch":        {Interval: time.Minute, Batch: 0},

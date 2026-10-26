@@ -31,21 +31,25 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// stepTimeout bounds finalizing one step, so a hung log store cannot stall the finalizer.
-var stepTimeout = time.Minute
-
-// A claim on a step log counts as left behind by a server that crashed after recoverDelay plus
-// up to recoverJitter (so servers do not all recover at once): finalizing or deleting takes a minute.
 var (
+	// stepTimeout bounds finalizing one step, so a hung log store cannot stall the finalizer.
+	stepTimeout = time.Minute
+
+	// A claim on a step log counts as left behind by a server that crashed after recoverDelay plus
+	// up to recoverJitter (so servers do not all recover at once): finalizing or deleting takes a minute.
 	recoverDelay  = 30 * time.Minute
 	recoverJitter = 10 * time.Minute
-)
 
-var unfinalizedSteps = promauto.NewGauge(prometheus.GaugeOpts{
-	Namespace: "woodpecker",
-	Name:      "log_steps_unfinalized",
-	Help:      "Number of steps whose log is complete but not yet finalized.",
-})
+	// minInterval is the shortest interval Run accepts.
+	minInterval = time.Minute
+
+	// setup prometheus gauge.
+	unfinalizedSteps = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace: "woodpecker",
+		Name:      "log_steps_unfinalized",
+		Help:      "Number of steps whose log is complete but not yet finalized.",
+	})
+)
 
 // Finalizer is the only caller of StepFinished.
 // It remembers which steps were finalized, what the log store does with the log is its own business.
@@ -175,8 +179,8 @@ func RecoverClaims(ctx context.Context, s store.Store) {
 
 // Run checks the configuration and ticks every Interval until the context is done.
 func (f *Finalizer) Run(ctx context.Context) error {
-	if f.Interval < 0 {
-		return fmt.Errorf("log finalizer interval must be positive, got %s", f.Interval)
+	if f.Interval < minInterval {
+		return fmt.Errorf("log finalizer interval must be at least %s, got %s", minInterval, f.Interval)
 	}
 	if f.Batch < 1 {
 		return fmt.Errorf("log finalizer batch must be at least 1, got %d", f.Batch)

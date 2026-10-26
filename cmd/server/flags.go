@@ -436,7 +436,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_INTERVAL"),
 		Name:    "log-store-finalizer-interval",
 		Usage:   "how often finished step logs are handed to the log store to be finalized",
-		Value:   time.Minute,
+		Value:   5 * time.Minute,
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_BATCH"),
