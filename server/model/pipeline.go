@@ -56,7 +56,7 @@ type Pipeline struct {
 	PullRequestDraft     bool                    `json:"pr_draft,omitempty"          xorm:"pr_draft"`
 	Cron                 string                  `json:"cron,omitempty"              xorm:"cron"` // name of the cron job
 	FromFork             bool                    `json:"from_fork,omitempty"         xorm:"from_fork"`
-	SelectedWorkflow     string                  `json:"selected_workflow,omitempty" xorm:"selected_workflow"` // only run this workflow and its dependencies
+	SelectedWorkflow     string                  `json:"selected_workflow,omitempty" xorm:"selected_workflow"` // only run this workflow and its hard dependencies
 	Version              string                  `json:"version"                     xorm:"'version'"`
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
