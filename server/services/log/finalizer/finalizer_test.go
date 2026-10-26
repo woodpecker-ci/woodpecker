@@ -80,6 +80,24 @@ func (f *fixture) finalized(t *testing.T, name string) bool {
 	return step.LogState == model.LogStateFinalized
 }
 
+// state returns the log state of the step with the given name.
+func (f *fixture) state(t *testing.T, name string) model.LogState {
+	t.Helper()
+	step, err := f.store.StepByUUID(name)
+	require.NoError(t, err)
+	return step.LogState
+}
+
+// recover hands back a claimed step log like RecoverClaims does once its delay is over.
+func (f *fixture) recover(t *testing.T, name string) {
+	t.Helper()
+	step, err := f.store.StepByUUID(name)
+	require.NoError(t, err)
+	claimed, err := f.store.StepLogStateSwap(t.Context(), step, model.LogStateOpen)
+	require.NoError(t, err)
+	require.True(t, claimed)
+}
+
 func (f *fixture) finalizer() *Finalizer {
 	return &Finalizer{Store: f.store, Logs: f.logs, Interval: time.Minute, Batch: 10}
 }
@@ -140,6 +158,8 @@ func TestTickCutoff(t *testing.T) {
 	assert.True(t, f.finalized(t, "past-cutoff"))
 }
 
+// TestTickRetriesFailedSteps ensures a step whose log store call failed stays claimed,
+// so ticks skip it until RecoverClaims hands it back, and it is retried then.
 func TestTickRetriesFailedSteps(t *testing.T) {
 	f := newFixture(t)
 	f.pipeline(t, model.StatusFailure, f.ago(time.Hour), "ok", "bad")
@@ -157,9 +177,14 @@ func TestTickRetriesFailedSteps(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, Result{Done: 1, Failed: 1}, res)
 	assert.True(t, f.finalized(t, "ok"))
-	assert.False(t, f.finalized(t, "bad"))
+	assert.Equal(t, model.LogStateFinalizing, f.state(t, "bad"), "stays claimed")
 
 	fail = false
+	res, err = fin.Tick(t.Context(), f.now)
+	require.NoError(t, err)
+	assert.Equal(t, Result{}, res, "a claimed step is skipped")
+
+	f.recover(t, "bad")
 	res, err = fin.Tick(t.Context(), f.now)
 	require.NoError(t, err)
 	assert.Equal(t, Result{Done: 1}, res)
@@ -167,7 +192,7 @@ func TestTickRetriesFailedSteps(t *testing.T) {
 }
 
 // TestTickFailingStepsDoNotBlock ensures steps that keep failing cannot hold back newer pipelines:
-// a tick continues after the last pipeline of the previous tick and starts over at the end of the pass.
+// a failed step stays claimed, so the next tick takes the next pipeline.
 func TestTickFailingStepsDoNotBlock(t *testing.T) {
 	f := newFixture(t)
 	f.pipeline(t, model.StatusFailure, f.ago(time.Hour), "bad")
@@ -184,18 +209,17 @@ func TestTickFailingStepsDoNotBlock(t *testing.T) {
 
 	fin := f.finalizer()
 	fin.Batch = 1
-	// the second tick reaches the last pipeline due, so the third starts over
 	for range 3 {
 		_, err := fin.Tick(t.Context(), f.now)
 		require.NoError(t, err)
 	}
-	assert.Equal(t, []string{"bad", "good", "bad"}, called)
+	assert.Equal(t, []string{"bad", "good"}, called)
 	assert.True(t, f.finalized(t, "good"))
 	assert.False(t, f.finalized(t, "bad"))
 }
 
-// TestTickRetriesUnderContinuousArrivals ensures a pass ends even if a full batch of newer
-// pipelines becomes due every interval: failed steps are retried once the store recovered.
+// TestTickRetriesUnderContinuousArrivals ensures a full batch of newer pipelines due every interval
+// neither blocks behind a failed step nor keeps it from being retried once it is handed back.
 func TestTickRetriesUnderContinuousArrivals(t *testing.T) {
 	f := newFixture(t)
 	f.pipeline(t, model.StatusFailure, f.ago(time.Hour), "bad")
@@ -215,12 +239,24 @@ func TestTickRetriesUnderContinuousArrivals(t *testing.T) {
 
 	fin := f.finalizer()
 	fin.Batch = 1
-	for i := range 5 {
-		f.pipeline(t, model.StatusSuccess, f.ago(time.Hour), fmt.Sprintf("new-%d", i))
+	tick := func(name string) {
+		t.Helper()
+		f.pipeline(t, model.StatusSuccess, f.ago(time.Hour), name)
 		_, err := fin.Tick(t.Context(), f.now)
 		require.NoError(t, err)
+	}
+	for i := range 5 {
+		tick(fmt.Sprintf("new-%d", i))
 		down = false
 	}
+	assert.Equal(t, 1, badCalls)
+	for i := range 4 {
+		assert.True(t, f.finalized(t, fmt.Sprintf("new-%d", i)), "new-%d", i)
+	}
+
+	// handed back, the oldest pipeline comes first again
+	f.recover(t, "bad")
+	tick("new-5")
 	assert.Equal(t, 2, badCalls)
 	assert.True(t, f.finalized(t, "bad"))
 }
@@ -326,18 +362,15 @@ func TestTickGivesUpOnHungStore(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, Result{Done: 1, Failed: 1}, res)
 	assert.True(t, f.finalized(t, "next"))
-	// handed back though the step timeout is over, else it waits for RecoverClaims
-	hungStep, err := f.store.StepByUUID("hung")
-	require.NoError(t, err)
-	assert.Equal(t, model.LogStateOpen, hungStep.LogState)
+	assert.Equal(t, model.LogStateFinalizing, f.state(t, "hung"), "stays claimed for RecoverClaims")
 }
 
 // mockStore returns a store mock that lists the given steps of pipeline 1 as due.
 func mockStore(t *testing.T, steps ...*model.Step) *store_mocks.MockStore {
 	t.Helper()
 	s := store_mocks.NewMockStore(t)
-	s.On("StepLogUnfinalizedStats", mock.Anything, mock.Anything).Return(int64(len(steps)), int64(1), nil)
-	s.On("StepListLogUnfinalized", mock.Anything, mock.Anything, int64(0), int64(1), 10).Return(steps, nil)
+	s.On("StepLogUnfinalizedCount", mock.Anything, mock.Anything).Return(int64(len(steps)), nil)
+	s.On("StepListLogUnfinalized", mock.Anything, mock.Anything, 10).Return(steps, nil)
 	return s
 }
 
@@ -392,10 +425,10 @@ func TestTickGivesUpOnHungDatabase(t *testing.T) {
 func TestTickStopsWhileDatabaseHangs(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	querying := make(chan struct{})
-	s.On("StepLogUnfinalizedStats", mock.Anything, mock.Anything).Return(func(ctx context.Context, _ int64) (int64, int64, error) {
+	s.On("StepLogUnfinalizedCount", mock.Anything, mock.Anything).Return(func(ctx context.Context, _ int64) (int64, error) {
 		close(querying)
 		<-ctx.Done()
-		return 0, 0, context.Cause(ctx)
+		return 0, context.Cause(ctx)
 	})
 
 	ctx, cancel := context.WithCancelCause(t.Context())

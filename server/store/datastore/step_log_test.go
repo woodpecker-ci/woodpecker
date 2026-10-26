@@ -24,8 +24,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// addPipeline creates a pipeline with its steps and returns the pipeline ID.
-func addPipeline(t *testing.T, s *storage, number int64, status model.StatusValue, finished int64, steps ...*model.Step) int64 {
+// addPipeline creates a pipeline with its steps.
+func addPipeline(t *testing.T, s *storage, number int64, status model.StatusValue, finished int64, steps ...*model.Step) {
 	t.Helper()
 	p := &model.Pipeline{RepoID: 1, Status: status, Finished: finished, Number: number}
 	_, err := s.engine.Insert(p)
@@ -38,7 +38,6 @@ func addPipeline(t *testing.T, s *storage, number int64, status model.StatusValu
 	sess := s.engine.NewSession()
 	require.NoError(t, s.stepCreate(sess, steps))
 	require.NoError(t, sess.Commit())
-	return p.ID
 }
 
 func stepNames(steps []*model.Step) []string {
@@ -60,7 +59,7 @@ func TestStepListLogUnfinalized(t *testing.T) {
 	)
 
 	// oldest pipeline first
-	first := addPipeline(t, s, 1, model.StatusSuccess, old,
+	addPipeline(t, s, 1, model.StatusSuccess, old,
 		&model.Step{Name: "due", State: model.StatusSuccess, Started: 10, Finished: old},
 		// listed too, the finalizer marks it without calling the log store
 		&model.Step{Name: "never-started", State: model.StatusSkipped},
@@ -77,52 +76,34 @@ func TestStepListLogUnfinalized(t *testing.T) {
 	// a canceled pipeline is killed at once, its running steps until the agent reports back:
 	// the agent may still send lines (see allowAppendingLogs)
 	addPipeline(t, s, 30, model.StatusKilled, old, &model.Step{Name: "step-still-running", State: model.StatusRunning, Started: 10})
-	second := addPipeline(t, s, 31, model.StatusFailure, before-1, &model.Step{Name: "second-pipeline", State: model.StatusFailure, Started: 10, Finished: before - 1})
+	addPipeline(t, s, 31, model.StatusFailure, before-1, &model.Step{Name: "second-pipeline", State: model.StatusFailure, Started: 10, Finished: before - 1})
 
 	t.Run("selects only complete logs", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, second, 10)
+		got, err := s.StepListLogUnfinalized(t.Context(), before, 10)
 		require.NoError(t, err)
 		assert.Equal(t, []string{"due", "never-started", "second-pipeline"}, stepNames(got))
 	})
 
-	t.Run("stats count without cursor and batch", func(t *testing.T) {
-		n, maxPipelineID, err := s.StepLogUnfinalizedStats(t.Context(), before)
+	t.Run("count without batch", func(t *testing.T) {
+		n, err := s.StepLogUnfinalizedCount(t.Context(), before)
 		require.NoError(t, err)
 		assert.Equal(t, int64(3), n)
-		assert.Equal(t, second, maxPipelineID)
 	})
 
 	t.Run("batch counts pipelines, oldest first", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, second, 1)
-		require.NoError(t, err)
-		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
-	})
-
-	t.Run("continues after a pipeline", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, first, second, 1)
-		require.NoError(t, err)
-		assert.Equal(t, []string{"second-pipeline"}, stepNames(got))
-
-		got, err = s.StepListLogUnfinalized(t.Context(), before, second, second, 1)
-		require.NoError(t, err)
-		assert.Empty(t, got)
-	})
-
-	t.Run("stops at a pipeline", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, 0, first, 10)
+		got, err := s.StepListLogUnfinalized(t.Context(), before, 1)
 		require.NoError(t, err)
 		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
 	})
 }
 
-func TestStepLogUnfinalizedStatsEmpty(t *testing.T) {
+func TestStepLogUnfinalizedCountEmpty(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	n, maxPipelineID, err := s.StepLogUnfinalizedStats(t.Context(), 1000)
+	n, err := s.StepLogUnfinalizedCount(t.Context(), 1000)
 	require.NoError(t, err)
 	assert.Zero(t, n)
-	assert.Zero(t, maxPipelineID)
 }
 
 // TestStepLogStateSwap ensures a log state change is one atomic claim: it only happens if the
@@ -131,7 +112,7 @@ func TestStepLogStateSwap(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	pipelineID := addPipeline(t, s, 1, model.StatusSuccess, 10,
+	addPipeline(t, s, 1, model.StatusSuccess, 10,
 		&model.Step{Name: "a", State: model.StatusFailure, Started: 1, Finished: 10, ExitCode: 3},
 		&model.Step{Name: "b", State: model.StatusSuccess, Started: 1, Finished: 10},
 	)
@@ -161,7 +142,7 @@ func TestStepLogStateSwap(t *testing.T) {
 	assert.Equal(t, model.LogStateFinalized, stored.LogState)
 	assert.Equal(t, 3, stored.ExitCode, "only the log state is written")
 
-	list, err := s.StepListLogUnfinalized(t.Context(), 100, 0, pipelineID, 10)
+	list, err := s.StepListLogUnfinalized(t.Context(), 100, 10)
 	require.NoError(t, err)
 	assert.Equal(t, []string{"b"}, stepNames(list))
 }
@@ -174,11 +155,11 @@ func TestStepLogCanceled(t *testing.T) {
 	defer holdConnection(t, s)()
 
 	assertCanceled(t, func(ctx context.Context) error {
-		_, _, err := s.StepLogUnfinalizedStats(ctx, 1000)
+		_, err := s.StepLogUnfinalizedCount(ctx, 1000)
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {
-		_, err := s.StepListLogUnfinalized(ctx, 1000, 0, 1, 10)
+		_, err := s.StepListLogUnfinalized(ctx, 1000, 10)
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {
