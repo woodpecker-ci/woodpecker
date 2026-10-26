@@ -942,6 +942,11 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 		return nil, err
 	}
 
+	// For annotated tags `sha` is the tag object's own SHA; the commits
+	// endpoint resolves it to the tagged commit. Record that commit so
+	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
+	pipeline.Commit = cm.ID
+
 	pipeline.Author = cm.AuthorName
 	pipeline.Email = cm.AuthorEmail
 	pipeline.Message = cm.Message
