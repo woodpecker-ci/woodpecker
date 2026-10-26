@@ -369,8 +369,8 @@ func TestTickGivesUpOnHungStore(t *testing.T) {
 func mockStore(t *testing.T, steps ...*model.Step) *store_mocks.MockStore {
 	t.Helper()
 	s := store_mocks.NewMockStore(t)
-	s.On("StepLogUnfinalizedCount", mock.Anything, mock.Anything).Return(int64(len(steps)), nil)
-	s.On("StepListLogUnfinalized", mock.Anything, mock.Anything, 10).Return(steps, nil)
+	s.On("StepCountByLogState", mock.Anything, mock.Anything).Return(int64(len(steps)), nil)
+	s.On("StepListByLogState", mock.Anything, mock.MatchedBy(func(f *model.StepLogFilter) bool { return f.Pipelines == 10 })).Return(steps, nil)
 	return s
 }
 
@@ -425,7 +425,7 @@ func TestTickGivesUpOnHungDatabase(t *testing.T) {
 func TestTickStopsWhileDatabaseHangs(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	querying := make(chan struct{})
-	s.On("StepLogUnfinalizedCount", mock.Anything, mock.Anything).Return(func(ctx context.Context, _ int64) (int64, error) {
+	s.On("StepCountByLogState", mock.Anything, mock.Anything).Return(func(ctx context.Context, _ *model.StepLogFilter) (int64, error) {
 		close(querying)
 		<-ctx.Done()
 		return 0, context.Cause(ctx)

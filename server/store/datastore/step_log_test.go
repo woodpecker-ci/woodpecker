@@ -48,7 +48,7 @@ func stepNames(steps []*model.Step) []string {
 	return names
 }
 
-func TestStepListLogUnfinalized(t *testing.T) {
+func TestStepListByLogState(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
@@ -78,30 +78,49 @@ func TestStepListLogUnfinalized(t *testing.T) {
 	addPipeline(t, s, 30, model.StatusKilled, old, &model.Step{Name: "step-still-running", State: model.StatusRunning, Started: 10})
 	addPipeline(t, s, 31, model.StatusFailure, before-1, &model.Step{Name: "second-pipeline", State: model.StatusFailure, Started: 10, Finished: before - 1})
 
+	// due selects the open logs that are complete, as the log finalizer does
+	due := func(pipelines int) *model.StepLogFilter {
+		return &model.StepLogFilter{States: []model.LogState{model.LogStateOpen}, CompleteBefore: before, Pipelines: pipelines}
+	}
+
 	t.Run("selects only complete logs", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, 10)
+		got, err := s.StepListByLogState(t.Context(), due(0))
 		require.NoError(t, err)
 		assert.Equal(t, []string{"due", "never-started", "second-pipeline"}, stepNames(got))
 	})
 
-	t.Run("count without batch", func(t *testing.T) {
-		n, err := s.StepLogUnfinalizedCount(t.Context(), before)
+	t.Run("pipelines limit, oldest first", func(t *testing.T) {
+		got, err := s.StepListByLogState(t.Context(), due(1))
+		require.NoError(t, err)
+		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
+	})
+
+	t.Run("count ignores the pipelines limit", func(t *testing.T) {
+		n, err := s.StepCountByLogState(t.Context(), due(1))
 		require.NoError(t, err)
 		assert.Equal(t, int64(3), n)
 	})
 
-	t.Run("batch counts pipelines, oldest first", func(t *testing.T) {
-		got, err := s.StepListLogUnfinalized(t.Context(), before, 1)
+	t.Run("states without cutoff", func(t *testing.T) {
+		got, err := s.StepListByLogState(t.Context(), &model.StepLogFilter{
+			States: []model.LogState{model.LogStateFinalizing, model.LogStateFinalized},
+		})
 		require.NoError(t, err)
-		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
+		assert.Equal(t, []string{"done", "claimed"}, stepNames(got))
+	})
+
+	t.Run("no states selects any", func(t *testing.T) {
+		n, err := s.StepCountByLogState(t.Context(), &model.StepLogFilter{})
+		require.NoError(t, err)
+		assert.Equal(t, int64(14), n, "every step")
 	})
 }
 
-func TestStepLogUnfinalizedCountEmpty(t *testing.T) {
+func TestStepCountByLogStateEmpty(t *testing.T) {
 	s, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
 	defer closer()
 
-	n, err := s.StepLogUnfinalizedCount(t.Context(), 1000)
+	n, err := s.StepCountByLogState(t.Context(), &model.StepLogFilter{States: []model.LogState{model.LogStateOpen}, CompleteBefore: 1000})
 	require.NoError(t, err)
 	assert.Zero(t, n)
 }
@@ -130,7 +149,9 @@ func TestStepLogStateSwap(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, claimed, "the second claim of the same state loses")
 
-	listed, err := s.StepListLogClaimed(t.Context())
+	listed, err := s.StepListByLogState(t.Context(), &model.StepLogFilter{
+		States: []model.LogState{model.LogStateFinalizing, model.LogStateDeleting},
+	})
 	require.NoError(t, err)
 	assert.Equal(t, []string{"a"}, stepNames(listed))
 
@@ -142,7 +163,9 @@ func TestStepLogStateSwap(t *testing.T) {
 	assert.Equal(t, model.LogStateFinalized, stored.LogState)
 	assert.Equal(t, 3, stored.ExitCode, "only the log state is written")
 
-	list, err := s.StepListLogUnfinalized(t.Context(), 100, 10)
+	list, err := s.StepListByLogState(t.Context(), &model.StepLogFilter{
+		States: []model.LogState{model.LogStateOpen}, CompleteBefore: 100, Pipelines: 10,
+	})
 	require.NoError(t, err)
 	assert.Equal(t, []string{"b"}, stepNames(list))
 }
@@ -155,15 +178,11 @@ func TestStepLogCanceled(t *testing.T) {
 	defer holdConnection(t, s)()
 
 	assertCanceled(t, func(ctx context.Context) error {
-		_, err := s.StepLogUnfinalizedCount(ctx, 1000)
+		_, err := s.StepCountByLogState(ctx, &model.StepLogFilter{CompleteBefore: 1000})
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {
-		_, err := s.StepListLogUnfinalized(ctx, 1000, 10)
-		return err
-	})
-	assertCanceled(t, func(ctx context.Context) error {
-		_, err := s.StepListLogClaimed(ctx)
+		_, err := s.StepListByLogState(ctx, &model.StepLogFilter{CompleteBefore: 1000, Pipelines: 10})
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {
