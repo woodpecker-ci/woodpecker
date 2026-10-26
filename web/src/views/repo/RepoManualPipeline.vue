@@ -124,10 +124,9 @@ async function loadWorkflows(branch: string) {
   try {
     data = await apiClient.getRepoWorkflows(repo.value.id, branch);
   } catch (error) {
-    // the api client already notifies about the response, e.g. a broken config
-    console.error(error);
+    console.error("Failed to fetch repo workflows", error);
   }
-  // ignore responses for a branch that is no longer selected
+
   if (payload.value.branch !== branch) {
     return;
   }
@@ -141,7 +140,6 @@ async function loadWorkflows(branch: string) {
   }
 }
 
-// the workflows route requires push access; without it onMounted redirects away anyway
 watch(
   () => payload.value.branch,
   (branch) => {
