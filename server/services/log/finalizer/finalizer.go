@@ -175,7 +175,7 @@ func RecoverClaims(ctx context.Context, s store.Store) {
 
 // Run checks the configuration and ticks every Interval until the context is done.
 func (f *Finalizer) Run(ctx context.Context) error {
-	if f.Interval <= 0 {
+	if f.Interval < 0 {
 		return fmt.Errorf("log finalizer interval must be positive, got %s", f.Interval)
 	}
 	if f.Batch < 1 {
