@@ -79,7 +79,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
-				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
+				Forge: metadata.Forge{Type: "gitea", Host: "gitea.com", URL: "https://gitea.com"},
 				Sys:   metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
 				Repo:  metadata.Repo{Owner: "testUser", Name: "testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
 				Curr: metadata.Pipeline{
@@ -93,6 +93,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 				"CI":                        "woodpecker",
 				"CI_FORGE_TYPE":             "gitea",
 				"CI_FORGE_URL":              "https://gitea.com",
+				"CI_FORGE_HOST":             "gitea.com",
 				"CI_COMMIT_TIMESTAMP":       "1722617519",
 				"CI_PIPELINE_CREATED":       "0",
 				"CI_PIPELINE_FILES":         `["test.go","markdown file.md"]`,

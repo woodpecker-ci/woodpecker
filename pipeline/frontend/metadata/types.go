@@ -115,6 +115,7 @@ type (
 	// Forge defines runtime metadata about the forge that host the repo.
 	Forge struct {
 		Type string `json:"type,omitempty"`
+		Host string `json:"host,omitempty"`
 		URL  string `json:"url,omitempty"`
 	}
 
