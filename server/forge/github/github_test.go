@@ -21,7 +21,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -648,6 +650,43 @@ func TestFileAndDir(t *testing.T) {
 
 	_, err = dir(".missing")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+}
+
+func TestDirLimitsParallelFileFetches(t *testing.T) {
+	// more files than workers, each fetch stays open for a moment so
+	// unbounded fetching would have all of them in flight at once
+	const files = 3 * maxParallelFileFetches
+	var inFlight, maxInFlight atomic.Int32
+	ctx := mockedContext(t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/repos/octocat/hello-world/contents/.woodpecker" {
+				list := make([]github.RepositoryContent, 0, files)
+				for i := range files {
+					list = append(list, github.RepositoryContent{Type: new("file"), Name: new(strconv.Itoa(i) + ".yaml")})
+				}
+				writeJSON(t, w, list)
+				return
+			}
+			n := inFlight.Add(1)
+			defer inFlight.Add(-1)
+			for m := maxInFlight.Load(); n > m && !maxInFlight.CompareAndSwap(m, n); m = maxInFlight.Load() {
+			}
+			time.Sleep(20 * time.Millisecond)
+			name := strings.TrimPrefix(r.URL.Path, "/repos/octocat/hello-world/contents/")
+			writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: new(base64.StdEncoding.EncodeToString([]byte("steps: " + name)))})
+		})),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	metas, err := c.Dir(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, &model.Pipeline{Commit: "abc"}, ".woodpecker")
+	require.NoError(t, err)
+	assert.LessOrEqual(t, maxInFlight.Load(), int32(maxParallelFileFetches))
+	// files keep the order of the folder listing
+	require.Len(t, metas, files)
+	for i, meta := range metas {
+		name := ".woodpecker/" + strconv.Itoa(i) + ".yaml"
+		assert.Equal(t, &forge_types.FileMeta{Name: name, Data: []byte("steps: " + name)}, meta)
+	}
 }
 
 func TestOrgMembership(t *testing.T) {
