@@ -461,6 +461,33 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
+func (c *client) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, _ bool) (*model.Org, error) {
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.ParseInt(string(remoteID), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	// users and orgs share the same ids, and both can be fetched by id as user
+	account, resp, err := client.Users.GetByID(ctx, id)
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrOrgNotFound)
+		}
+		return nil, err
+	}
+
+	return &model.Org{
+		ForgeRemoteID: remoteID,
+		Name:          account.GetLogin(),
+		IsUser:        account.GetType() == "User",
+	}, nil
+}
+
 // newContext returns the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {

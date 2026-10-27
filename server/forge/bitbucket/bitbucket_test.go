@@ -235,6 +235,20 @@ func TestOrg(t *testing.T) {
 
 	_, err = c.Org(t.Context(), user, "missing")
 	assert.Error(t, err)
+
+	org, err = c.OrgByRemoteID(t.Context(), user, "{jane-uuid}", true)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, ForgeRemoteID: "{jane-uuid}"}, org)
+
+	org, err = c.OrgByRemoteID(t.Context(), user, "{team-uuid}", false)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "team", ForgeRemoteID: "{team-uuid}"}, org)
+
+	_, err = c.OrgByRemoteID(t.Context(), user, "{gone-uuid}", true)
+	assert.ErrorIs(t, err, types.ErrOrgNotFound)
+
+	_, err = c.OrgByRemoteID(t.Context(), user, "{gone-uuid}", false)
+	assert.ErrorIs(t, err, types.ErrOrgNotFound)
 }
 
 var (

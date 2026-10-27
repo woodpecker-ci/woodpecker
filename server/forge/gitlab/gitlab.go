@@ -773,6 +773,41 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	return &model.OrgPerm{}, nil
 }
 
+func (g *GitLab) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error) {
+	client, err := newClient(g.url, u.AccessToken, g.skipVerify)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.ParseInt(strings.TrimPrefix(string(remoteID), groupRemoteIDPrefix), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	org := &model.Org{ForgeRemoteID: remoteID, IsUser: isUser}
+	var resp *gitlab.Response
+	if isUser {
+		var user *gitlab.User
+		user, resp, err = client.Users.GetUser(id, nil, gitlab.WithContext(ctx))
+		if err == nil {
+			org.Name = user.Username
+		}
+	} else {
+		var group *gitlab.Group
+		group, resp, err = client.Groups.GetGroup(id, nil, gitlab.WithContext(ctx))
+		if err == nil {
+			org.Name = group.FullPath
+		}
+	}
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrOrgNotFound)
+		}
+		return nil, err
+	}
+	return org, nil
+}
+
 func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
 	client, err := newClient(g.url, u.AccessToken, g.skipVerify)
 	if err != nil {

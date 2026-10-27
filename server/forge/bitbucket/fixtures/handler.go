@@ -40,14 +40,23 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/emails", getEmails)
 	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/workspaces/:workspace", getWorkspace)
+	e.GET("/2.0/users/:user", getAccount)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
 	return e
 }
 
+func getAccount(c *gin.Context) {
+	if c.Param("user") != "{jane-uuid}" {
+		c.String(http.StatusNotFound, "")
+		return
+	}
+	c.String(http.StatusOK, `{"uuid":"{jane-uuid}","username":"jane","type":"user"}`)
+}
+
 func getWorkspace(c *gin.Context) {
-	if c.Param("workspace") != "team" {
+	if w := c.Param("workspace"); w != "team" && w != "{team-uuid}" {
 		c.String(http.StatusNotFound, "")
 		return
 	}

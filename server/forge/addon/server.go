@@ -237,6 +237,20 @@ func (s *RPCServer) Org(args []byte, resp *[]byte) error {
 	return err
 }
 
+func (s *RPCServer) OrgByRemoteID(args []byte, resp *[]byte) error {
+	var a argumentsOrgByRemoteID
+	err := json.Unmarshal(args, &a)
+	if err != nil {
+		return err
+	}
+	org, err := s.Impl.OrgByRemoteID(mkCtx(), a.U.asModel(), a.RemoteID, a.IsUser)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(org)
+	return err
+}
+
 func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	var a httpRequest
 	err := json.Unmarshal(args, &a)

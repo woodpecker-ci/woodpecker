@@ -855,6 +855,86 @@ func (_c *MockForge_Org_Call) RunAndReturn(run func(ctx context.Context, u *mode
 	return _c
 }
 
+// OrgByRemoteID provides a mock function for the type MockForge
+func (_mock *MockForge) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error) {
+	ret := _mock.Called(ctx, u, remoteID, isUser)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgByRemoteID")
+	}
+
+	var r0 *model.Org
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, model.ForgeRemoteID, bool) (*model.Org, error)); ok {
+		return returnFunc(ctx, u, remoteID, isUser)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.User, model.ForgeRemoteID, bool) *model.Org); ok {
+		r0 = returnFunc(ctx, u, remoteID, isUser)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Org)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.User, model.ForgeRemoteID, bool) error); ok {
+		r1 = returnFunc(ctx, u, remoteID, isUser)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockForge_OrgByRemoteID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrgByRemoteID'
+type MockForge_OrgByRemoteID_Call struct {
+	*mock.Call
+}
+
+// OrgByRemoteID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - u *model.User
+//   - remoteID model.ForgeRemoteID
+//   - isUser bool
+func (_e *MockForge_Expecter) OrgByRemoteID(ctx any, u any, remoteID any, isUser any) *MockForge_OrgByRemoteID_Call {
+	return &MockForge_OrgByRemoteID_Call{Call: _e.mock.On("OrgByRemoteID", ctx, u, remoteID, isUser)}
+}
+
+func (_c *MockForge_OrgByRemoteID_Call) Run(run func(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool)) *MockForge_OrgByRemoteID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.User
+		if args[1] != nil {
+			arg1 = args[1].(*model.User)
+		}
+		var arg2 model.ForgeRemoteID
+		if args[2] != nil {
+			arg2 = args[2].(model.ForgeRemoteID)
+		}
+		var arg3 bool
+		if args[3] != nil {
+			arg3 = args[3].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockForge_OrgByRemoteID_Call) Return(org *model.Org, err error) *MockForge_OrgByRemoteID_Call {
+	_c.Call.Return(org, err)
+	return _c
+}
+
+func (_c *MockForge_OrgByRemoteID_Call) RunAndReturn(run func(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error)) *MockForge_OrgByRemoteID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrgMembership provides a mock function for the type MockForge
 func (_mock *MockForge) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	ret := _mock.Called(ctx, u, org)

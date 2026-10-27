@@ -746,6 +746,11 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
+// OrgByRemoteID is not supported, as the API can't find users or projects by id.
+func (c *client) OrgByRemoteID(_ context.Context, _ *model.User, _ model.ForgeRemoteID, _ bool) (*model.Org, error) {
+	return nil, forge_types.ErrNotImplemented
+}
+
 func (c *client) newOAuth2Config() *oauth2.Config {
 	publicOAuthURL := c.oauthHost
 	if publicOAuthURL == "" {

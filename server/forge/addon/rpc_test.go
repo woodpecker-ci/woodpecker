@@ -205,7 +205,8 @@ func TestRPCRoundTrip(t *testing.T) {
 	t.Run("org membership and org", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
 		impl.On("OrgMembership", mock.Anything, user, "org").Return(&model.OrgPerm{Member: true, Admin: true}, nil)
-		impl.On("Org", mock.Anything, user, "org").Return(&model.Org{Name: "org", IsUser: false}, nil)
+		impl.On("Org", mock.Anything, user, "org").Return(&model.Org{Name: "org", IsUser: false, ForgeRemoteID: "7"}, nil)
+		impl.On("OrgByRemoteID", mock.Anything, user, model.ForgeRemoteID("8"), true).Return(&model.Org{Name: "jane", IsUser: true, ForgeRemoteID: "8"}, nil)
 
 		f := newRPCForge(t, impl)
 		perm, err := f.OrgMembership(ctx, user, "org")
@@ -214,8 +215,11 @@ func TestRPCRoundTrip(t *testing.T) {
 
 		org, err := f.Org(ctx, user, "org")
 		require.NoError(t, err)
-		assert.Equal(t, "org", org.Name)
-		assert.False(t, org.IsUser)
+		assert.Equal(t, &model.Org{Name: "org", IsUser: false, ForgeRemoteID: "7"}, org)
+
+		org, err = f.OrgByRemoteID(ctx, user, "8", true)
+		require.NoError(t, err)
+		assert.Equal(t, &model.Org{Name: "jane", IsUser: true, ForgeRemoteID: "8"}, org)
 	})
 
 	t.Run("hook forwards method, url, header and body", func(t *testing.T) {
@@ -273,6 +277,7 @@ func TestRPCErrors(t *testing.T) {
 	impl.On("PullRequests", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("OrgMembership", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("Org", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
+	impl.On("OrgByRemoteID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, errForge)
 
 	f := newRPCForge(t, impl)
@@ -310,6 +315,8 @@ func TestRPCErrors(t *testing.T) {
 	_, err = f.OrgMembership(ctx, user, "org")
 	assertForgeErr(t, err)
 	_, err = f.Org(ctx, user, "org")
+	assertForgeErr(t, err)
+	_, err = f.OrgByRemoteID(ctx, user, "8", true)
 	assertForgeErr(t, err)
 	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")))
 	assertForgeErr(t, err)

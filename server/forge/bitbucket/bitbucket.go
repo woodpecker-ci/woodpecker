@@ -507,6 +507,31 @@ func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
+func (c *config) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error) {
+	client := c.newClient(ctx, u)
+	org := &model.Org{ForgeRemoteID: remoteID, IsUser: isUser}
+	var err error
+	if isUser {
+		var account *internal.Account
+		if account, err = client.GetAccount(string(remoteID)); err == nil {
+			org.Name = account.Login
+		}
+	} else {
+		var workspace *internal.Workspace
+		if workspace, err = client.GetWorkspace(string(remoteID)); err == nil {
+			org.Name = workspace.Slug
+		}
+	}
+	var apiErr internal.Error
+	if errors.As(err, &apiErr) && apiErr.Status == http.StatusNotFound {
+		return nil, errors.Join(err, forge_types.ErrOrgNotFound)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return org, nil
+}
+
 // helper function to return the bitbucket oauth2 client.
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
 	if u == nil {

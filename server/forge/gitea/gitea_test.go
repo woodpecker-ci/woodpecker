@@ -357,6 +357,29 @@ func TestOrg(t *testing.T) {
 	})
 }
 
+func TestOrgByRemoteID(t *testing.T) {
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/users/search": func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Query().Get("uid") == "3" {
+				respond(http.StatusOK, `{"ok":true,"data":[{"id":3,"login":"public-user"}]}`)(w, r)
+				return
+			}
+			respond(http.StatusOK, `{"ok":true,"data":[]}`)(w, r)
+		},
+	})
+	user := &model.User{AccessToken: "token"}
+
+	org, err := g.OrgByRemoteID(t.Context(), user, "3", true)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "public-user", IsUser: true, ForgeRemoteID: "3"}, org)
+
+	_, err = g.OrgByRemoteID(t.Context(), user, "4", true)
+	assert.ErrorIs(t, err, forge_types.ErrOrgNotFound)
+
+	_, err = g.OrgByRemoteID(t.Context(), user, "1", false)
+	assert.ErrorIs(t, err, forge_types.ErrNotImplemented)
+}
+
 func TestTeams(t *testing.T) {
 	// a page size of two makes the second, shorter page the last one
 	g := newTestForge(t, map[string]http.HandlerFunc{

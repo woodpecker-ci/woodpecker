@@ -108,6 +108,9 @@ func TestBitbucketDC(t *testing.T) {
 		ForgeRemoteID: "project-789",
 	}, org)
 
+	_, err = c.OrgByRemoteID(ctx, fakeUser, "project-456", false)
+	assert.ErrorIs(t, err, forge_types.ErrNotImplemented)
+
 	// Execute the Status method
 	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 	assert.NoError(t, err)
