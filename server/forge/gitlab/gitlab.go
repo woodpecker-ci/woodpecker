@@ -947,7 +947,11 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
 	pipeline.Commit = cm.ID
 
-	pipeline.Author = cm.AuthorName
+	// Do not set pipeline.Author from the git commit metadata here: it is
+	// controlled by whoever made the commit and would overwrite the author
+	// taken from the authenticated webhook (convertTagHook sets it to
+	// hook.UserUsername). Trusting it lets a pusher spoof an
+	// ApprovalAllowedUsers entry and skip approval (CVE-2026-58370).
 	pipeline.Email = cm.AuthorEmail
 	pipeline.Message = cm.Message
 	pipeline.Timestamp = cm.CommittedDate.Unix()
