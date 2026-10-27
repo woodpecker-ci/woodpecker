@@ -400,6 +400,13 @@ woodpecker_waiting_steps 0
 # HELP woodpecker_worker_count Total number of workers.
 # TYPE woodpecker_worker_count gauge
 woodpecker_worker_count 4
+# HELP woodpecker_log_steps_unfinalized Number of steps whose log is complete but not yet finalized.
+# TYPE woodpecker_log_steps_unfinalized gauge
+woodpecker_log_steps_unfinalized 0
+# HELP woodpecker_log_steps_finalized_total Number of steps whose log was finalized, by result (done or failed).
+# TYPE woodpecker_log_steps_finalized_total counter
+woodpecker_log_steps_finalized_total{result="done"} 1324
+woodpecker_log_steps_finalized_total{result="failed"} 2
 # HELP woodpecker_step_failures_total Total number of pipeline step failures.
 # TYPE woodpecker_step_failures_total counter
 woodpecker_step_failures_total{repo="woodpecker-ci/woodpecker",step="deploy",workflow="woodpecker"} 1
