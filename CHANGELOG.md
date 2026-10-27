@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update module github.com/woodpecker-ci/envsubst to v1.2.0 [[#7398](https://github.com/woodpecker-ci/woodpecker/pull/7398)]
 - Rotate repo JWT on repo repair [[#7361](https://github.com/woodpecker-ci/woodpecker/pull/7361)]
 - Fix and harden config fetching [[#7386](https://github.com/woodpecker-ci/woodpecker/pull/7386)]
 - Enhance matrix feature [[#7353](https://github.com/woodpecker-ci/woodpecker/pull/7353)]
