@@ -40,6 +40,7 @@ What the pipeline can do then depends on the author the forge reports, the [appr
   Users in the list become instance admins when they sign in, the list is read at server start.
   Instance admins can also be granted and revoked in the admin settings or with the users API.
   Revoking a listed user in the UI takes effect right away, but if you don't remove them from the list, they are admin again at their first sign in after the next server restart.
+  With [multiple forges](../30-administration/10-configuration/12-forges/11-overview.md#known-limitations), a user with a listed login on any connected forge becomes admin.
 - Admins of a repository on the forge can change its [project settings](./75-project-settings.md).
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
 - Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.
