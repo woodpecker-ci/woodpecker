@@ -114,6 +114,7 @@ Everybody who can change the workflow controls their settings and the workspace.
 
 A step is only a plugin if it sets none of `commands`, `entrypoint` and `environment`, otherwise it gets none of this trust.
 The linter rejects `commands` and `entrypoint` next to `settings`, but only warns about `environment`.
+<!-- TODO: the linter also rejects `environment` next to `settings` once https://github.com/woodpecker-ci/woodpecker/pull/7404 is merged (scheduled for the next major). -->
 
 See [creating plugins](./51-plugins/20-creating-plugins.md#security) for what this means for plugin authors.
 
