@@ -85,7 +85,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	if envs == nil {
-		envs = map[string]string{}
+		envs = make(map[string]string)
 	}
 
 	environmentService := server.Config.Services.Manager.EnvironmentService()
