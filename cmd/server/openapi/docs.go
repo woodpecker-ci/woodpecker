@@ -5067,6 +5067,10 @@ const docTemplate = `{
                 "forge_id": {
                     "type": "integer"
                 },
+                "forge_remote_id": {
+                    "description": "ForgeRemoteID is the unique identifier for the org on the forge.",
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
