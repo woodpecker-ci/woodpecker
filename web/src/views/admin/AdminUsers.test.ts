@@ -133,7 +133,7 @@ describe('adminUsers', () => {
       {
         text: 'Admin temporarily revoked',
         title:
-          'The user is listed in WOODPECKER_ADMIN, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN.',
+          'The user is listed in WOODPECKER_ADMIN environment configuratio, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN.',
       },
     ]);
 
