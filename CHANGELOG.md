@@ -8,6 +8,8 @@
 
 ### 🔒 Security
 
+- Keep revoked env admins revoked until the server restarts [[#7403](https://github.com/woodpecker-ci/woodpecker/pull/7403)]
+- Fix gitlab to set tag pipeline author from webhook metadata [[#7397](https://github.com/woodpecker-ci/woodpecker/pull/7397)]
 - Update module github.com/woodpecker-ci/envsubst to v1.2.0 [[#7398](https://github.com/woodpecker-ci/woodpecker/pull/7398)]
 - Rotate repo JWT on repo repair [[#7361](https://github.com/woodpecker-ci/woodpecker/pull/7361)]
 - Fix and harden config fetching [[#7386](https://github.com/woodpecker-ci/woodpecker/pull/7386)]
@@ -42,6 +44,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix server panic when saving workflows fails [[#7401](https://github.com/woodpecker-ci/woodpecker/pull/7401)]
 - Fix depends_on workflows running after failed dependency on queue reload [[#7395](https://github.com/woodpecker-ci/woodpecker/pull/7395)]
 - Resolve commit SHA for annotated tags for gitlab, gitea and forgejo [[#7394](https://github.com/woodpecker-ci/woodpecker/pull/7394)]
 - Fix nushell quoting for command in local backend [[#7294](https://github.com/woodpecker-ci/woodpecker/pull/7294)]
@@ -72,28 +75,18 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7390](https://github.com/woodpecker-ci/woodpecker/pull/7390)]
 - Document how to install the CLI [[#7360](https://github.com/woodpecker-ci/woodpecker/pull/7360)]
 - Add OpenArtifact plugin [[#7378](https://github.com/woodpecker-ci/woodpecker/pull/7378)]
 - Add `concurrency` option to Workflow Syntax docs [[#7369](https://github.com/woodpecker-ci/woodpecker/pull/7369)]
-- Update pnpm to v12.15.0 [[#7374](https://github.com/woodpecker-ci/woodpecker/pull/7374)]
 - Add Reviewdog PHPCS, PHPMD and PHPStan plugins [[#7347](https://github.com/woodpecker-ci/woodpecker/pull/7347)]
 - Document missing server and backend environment variables [[#7335](https://github.com/woodpecker-ci/woodpecker/pull/7335)]
-- Update dependency isomorphic-dompurify to v4.6.0 [[#7332](https://github.com/woodpecker-ci/woodpecker/pull/7332)]
 - Remove Codeberg Pages Deploy plugin [[#7325](https://github.com/woodpecker-ci/woodpecker/pull/7325)]
-- Update docs npm deps non-major [[#7326](https://github.com/woodpecker-ci/woodpecker/pull/7326)]
 - Update and extend development docs [[#7248](https://github.com/woodpecker-ci/woodpecker/pull/7248)]
 - Add Asyntai AI Chatbot Docs Sync to plugins [[#7298](https://github.com/woodpecker-ci/woodpecker/pull/7298)]
-- Update docs npm deps non-major [[#7272](https://github.com/woodpecker-ci/woodpecker/pull/7272)]
-- Update pnpm to v12.11.1 [[#7271](https://github.com/woodpecker-ci/woodpecker/pull/7271)]
-- Update dependency concurrently to v10.0.6 [[#7265](https://github.com/woodpecker-ci/woodpecker/pull/7265)]
 - Extend / Update awesome list [[#7243](https://github.com/woodpecker-ci/woodpecker/pull/7243)]
-- Update docs npm deps non-major [[#7252](https://github.com/woodpecker-ci/woodpecker/pull/7252)]
 
 ### 📦️ Dependency
 
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.39.0 [[#7396](https://github.com/woodpecker-ci/woodpecker/pull/7396)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.35.0 [[#7389](https://github.com/woodpecker-ci/woodpecker/pull/7389)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
