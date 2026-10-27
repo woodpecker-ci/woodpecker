@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Rotate repo JWT on repo repair [[#7361](https://github.com/woodpecker-ci/woodpecker/pull/7361)]
 - Fix and harden config fetching [[#7386](https://github.com/woodpecker-ci/woodpecker/pull/7386)]
 - Enhance matrix feature [[#7353](https://github.com/woodpecker-ci/woodpecker/pull/7353)]
 - Recover from config parsing panic in server [[#7348](https://github.com/woodpecker-ci/woodpecker/pull/7348)]
