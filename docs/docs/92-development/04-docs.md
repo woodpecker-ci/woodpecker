@@ -39,7 +39,7 @@ pnpm docusaurus docs:version x.x; pnpm format
 ```
 
 :::warning
-Always run `make generate-docs` before you create the snapshot. The CLI docs (`docs/docs/40-cli.md`) are not part of the repository,
+Always run `make generate-docs` before you create the snapshot. The CLI docs (`docs/docs/40-cli/90-reference.md`) are not part of the repository,
 they are generated from the code each time the docs of `next` get built. The snapshot only contains the files that exist at that moment.
 So without this step the CLI docs are missing in the new version or, even worse, are outdated.
 :::
