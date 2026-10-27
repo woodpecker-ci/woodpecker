@@ -99,7 +99,7 @@ func ListWorkflows(ctx context.Context, _forge forge.Forge, _store store.Store, 
 
 	// matrix workflows produce one item per axis, list each name once
 	workflows := make([]*model.WorkflowInfo, 0, len(items))
-	seen := map[string]bool{}
+	seen := make(map[string]bool)
 	for _, item := range items {
 		if seen[item.Workflow.Name] {
 			continue
