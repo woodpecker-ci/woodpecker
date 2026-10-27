@@ -31,6 +31,7 @@ import (
 
 const (
 	hookEvent       = "X-Gitea-Event"
+	hookSignature   = "X-Gitea-Signature"
 	hookPush        = "push"
 	hookCreated     = "create"
 	hookPullRequest = "pull_request"

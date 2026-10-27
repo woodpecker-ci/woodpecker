@@ -315,7 +315,7 @@ func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *m
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, nil, err
@@ -326,6 +326,7 @@ func (g *RPC) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipe
 		Header: r.Header,
 		Form:   r.Form,
 		Body:   body,
+		Secret: secret,
 	})
 	if err != nil {
 		return nil, nil, err

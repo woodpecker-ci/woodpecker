@@ -15,10 +15,12 @@
 package forgejo
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -494,7 +496,17 @@ func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo
 
 // Hook parses the incoming Forgejo hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *Forgejo) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	valid, err := forgejo.VerifyWebhookSignature(secret, r.Header.Get(hookSignature), body)
+	if err != nil || !valid {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+	r.Body = io.NopCloser(bytes.NewReader(body))
+
 	repo, pipeline, err := parseHook(r)
 	if err != nil {
 		return nil, nil, err

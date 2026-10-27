@@ -29,6 +29,7 @@ import (
 
 const (
 	hookEvent       = "X-Forgejo-Event"
+	hookSignature   = "X-Forgejo-Signature"
 	hookPush        = "push"
 	hookCreated     = "create"
 	hookPullRequest = "pull_request"

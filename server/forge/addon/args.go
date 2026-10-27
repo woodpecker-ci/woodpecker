@@ -95,6 +95,7 @@ type httpRequest struct {
 	Header map[string][]string `json:"header"`
 	Form   map[string][]string `json:"form"`
 	Body   []byte              `json:"body"`
+	Secret string              `json:"secret"`
 }
 
 // modelUser is an extension of model.User to marshal all fields to JSON.
