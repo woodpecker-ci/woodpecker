@@ -52,7 +52,7 @@ func TestRunSuccess(t *testing.T) {
 				Steps: []*backend_types.Step{{
 					Name: "build", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo hello"},
+					Environment: make(map[string]string), Commands: []string{"echo hello"},
 				}},
 			}},
 		},
@@ -77,12 +77,12 @@ func TestRunMultipleStages(t *testing.T) {
 				{Steps: []*backend_types.Step{{
 					Name: "stage1", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo 1"},
+					Environment: make(map[string]string), Commands: []string{"echo 1"},
 				}}},
 				{Steps: []*backend_types.Step{{
 					Name: "stage2", UUID: "u2",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo 2"},
+					Environment: make(map[string]string), Commands: []string{"echo 2"},
 				}}},
 			},
 		},
@@ -139,7 +139,7 @@ func TestRunContextCanceled(t *testing.T) {
 				Steps: []*backend_types.Step{{
 					Name: "s1", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo hello"},
+					Environment: make(map[string]string), Commands: []string{"echo hello"},
 				}},
 			}},
 		},
@@ -275,9 +275,9 @@ func TestRunStage(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend_types.Step{
-			{Name: "a", UUID: "ua", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo a"}},
-			{Name: "b", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo b"}},
-			{Name: "c", UUID: "uc", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo c"}},
+			{Name: "a", UUID: "ua", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo a"}},
+			{Name: "b", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo b"}},
+			{Name: "c", UUID: "uc", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo c"}},
 		}
 
 		err := <-r.runStage(t.Context(), steps)
@@ -292,7 +292,7 @@ func TestRunStage(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend_types.Step{
-			{Name: "good", UUID: "ug", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo ok"}},
+			{Name: "good", UUID: "ug", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo ok"}},
 			{Name: "bad", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"}, Commands: []string{"exit 1"}},
 		}
 

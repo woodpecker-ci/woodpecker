@@ -30,6 +30,8 @@ WOODPECKER_MAX_WORKFLOWS=4
 
 When the agent starts it connects to the server using the token from `WOODPECKER_AGENT_SECRET`. The server identifies the agent and registers the agent in its database if it wasn't connected before.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
+
 There are two types of tokens to connect an agent to the server:
 
 ### Using system token

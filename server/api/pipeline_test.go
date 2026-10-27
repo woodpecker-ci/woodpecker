@@ -37,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/finalizer"
@@ -908,4 +909,118 @@ func TestDeleteStepLogsDuringPacking(t *testing.T) {
 	stored, err = s.StepByUUID("packed")
 	require.NoError(t, err)
 	assert.Equal(t, model.LogStateFinalized, stored.LogState, "a deleted log stays finalized")
+}
+
+func TestGetRepoWorkflows(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	fakeRepo := &model.Repo{ID: 1, UserID: 1, FullName: "test/repo", Branch: "develop"}
+	fakeUser := &model.User{ID: 1, Login: "testuser"}
+	fakeCommit := &model.Commit{SHA: "abc123", ForgeURL: "https://example.com/commit/abc123"}
+
+	configData := []*forge_types.FileMeta{
+		{Name: "lint", Data: []byte("steps:\n  - name: lint\n    image: alpine")},
+		{Name: "build", Data: []byte("depends_on: [lint]\nsteps:\n  - name: build\n    image: alpine")},
+		{Name: "push-only", Data: []byte("when:\n  event: push\nsteps:\n  - name: push\n    image: alpine")},
+		{Name: "matrix", Data: []byte("matrix:\n  GO: ['1', '2']\nsteps:\n  - name: test\n    image: golang:${GO}")},
+	}
+	expectedWorkflows := `[{"name":"build","depends_on":["lint"]},{"name":"lint"},{"name":"matrix"}]`
+
+	// run wires the mocks of a workflow listing, returning the config
+	// service's result for the fetch, and serves GET /workflows?branch=branch,
+	// without the query parameter for an empty branch.
+	run := func(t *testing.T, branch string, configs []*forge_types.FileMeta, fetchErr error) (*httptest.ResponseRecorder, *forge_mocks.MockForge) {
+		t.Helper()
+
+		mockForge := forge_mocks.NewMockForge(t)
+		mockForge.On("Name").Return("mock").Maybe()
+		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, mock.Anything).Return(fakeCommit, nil)
+
+		mockConfigService := config_service_mocks.NewMockService(t)
+		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configs, fetchErr)
+
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
+		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
+		mockManager.On("EnvironmentService").Return(nil).Maybe()
+		server.Config.Services.Manager = mockManager
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		url := "/workflows"
+		if branch != "" {
+			url += "?branch=" + branch
+		}
+		c.Request, _ = http.NewRequest(http.MethodGet, url, nil)
+
+		GetRepoWorkflows(c)
+		c.Writer.WriteHeaderNow()
+
+		return w, mockForge
+	}
+
+	t.Run("lists the workflows a manual pipeline would run", func(t *testing.T) {
+		w, mockForge := run(t, "main", configData, nil)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expectedWorkflows, w.Body.String(), "should skip other events and list matrix workflows once")
+		mockForge.AssertCalled(t, "BranchHead", mock.Anything, fakeUser, fakeRepo, "main")
+	})
+
+	t.Run("defaults to the default branch of the repo", func(t *testing.T) {
+		w, mockForge := run(t, "", configData, nil)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		mockForge.AssertCalled(t, "BranchHead", mock.Anything, fakeUser, fakeRepo, "develop")
+	})
+
+	t.Run("returns an empty list without config", func(t *testing.T) {
+		w, _ := run(t, "main", nil, &forge_types.ErrConfigNotFound{Configs: []string{".woodpecker.yml"}})
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[]`, w.Body.String())
+	})
+
+	t.Run("reports an invalid config", func(t *testing.T) {
+		w, _ := run(t, "main", []*forge_types.FileMeta{{Name: "broken", Data: []byte("steps: [")}}, nil)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), "could not parse pipeline config")
+	})
+
+	t.Run("falls back to the old config when fetching fails", func(t *testing.T) {
+		w, _ := run(t, "main", configData, http.ErrHandlerTimeout)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expectedWorkflows, w.Body.String())
+	})
+
+	t.Run("fails when fetching fails without old config", func(t *testing.T) {
+		w, _ := run(t, "main", nil, http.ErrHandlerTimeout)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
+
+	t.Run("requires push access", func(t *testing.T) {
+		// no manager expectations: reaching the handler would fail the test
+		server.Config.Services.Manager = manager_mocks.NewMockManager(t)
+
+		r := gin.New()
+		r.GET("/workflows", func(c *gin.Context) {
+			c.Set("user", fakeUser)
+			c.Set("perm", &model.Perm{Pull: true})
+		}, session.MustPush, GetRepoWorkflows)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/workflows", nil))
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+	})
 }

@@ -142,8 +142,8 @@ func PostRepo(c *gin.Context) {
 		repo.Timeout = server.Config.Pipeline.MaxTimeout
 	}
 
-	if repo.Hash == "" {
-		repo.Hash = base32.StdEncoding.EncodeToString(
+	if repo.WebhookSecret == "" {
+		repo.WebhookSecret = base32.StdEncoding.EncodeToString(
 			random.GetRandomBytes(32),
 		)
 	}
@@ -163,7 +163,7 @@ func PostRepo(c *gin.Context) {
 	t := token.New(token.HookToken)
 	t.Set("repo-forge-remote-id", string(forgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
-	sig, err := t.Sign(repo.Hash)
+	sig, err := t.Sign(repo.WebhookSecret)
 	if err != nil {
 		msg := "could not generate new jwt token."
 		log.Error().Err(err).Msg(msg)
@@ -673,7 +673,7 @@ func MoveRepo(c *gin.Context) {
 	t := token.New(token.HookToken)
 	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
-	sig, err := t.Sign(repo.Hash)
+	sig, err := t.Sign(repo.WebhookSecret)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -780,23 +780,6 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	// refresh user token if necessary
 	forge.Refresh(c, _forge, _store, repoUser)
 
-	// creates a new jwt token used to verify webhook calls
-	t := token.New(token.HookToken)
-	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
-	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
-	sig, err := t.Sign(repo.Hash)
-	if err != nil {
-		return err
-	}
-
-	// reconstruct the webhook url
-	host := server.Config.Server.WebhookHost
-	hookURL := fmt.Sprintf(
-		"%s/api/hook?access_token=%s",
-		host,
-		sig,
-	)
-
 	from, err := _forge.Repo(c, repoUser, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		// If we have valid ForgeRemoteID and can not find the repo,
@@ -826,9 +809,6 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	}
 
 	repo.Update(from)
-	if err := _store.UpdateRepo(repo); err != nil {
-		return err
-	}
 
 	if updatePermissions {
 		repo.Perm = from.Perm
@@ -838,6 +818,30 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 		if err := _store.PermUpsert(repo.Perm); err != nil {
 			return err
 		}
+	}
+
+	repo.WebhookSecret = base32.StdEncoding.EncodeToString(random.GetRandomBytes(32))
+
+	// creates a new jwt token used to verify webhook calls
+	t := token.New(token.HookToken)
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
+	sig, err := t.Sign(repo.WebhookSecret)
+	if err != nil {
+		return err
+	}
+
+	// reconstruct the webhook url
+	host := server.Config.Server.WebhookHost
+	hookURL := fmt.Sprintf(
+		"%s/api/hook?access_token=%s",
+		host,
+		sig,
+	)
+
+	// Persist revocation before replacing the remote webhook, even if activation fails.
+	if err := _store.UpdateRepo(repo); err != nil {
+		return err
 	}
 
 	// remove webhook (deactivate) and recreate it (activate)
