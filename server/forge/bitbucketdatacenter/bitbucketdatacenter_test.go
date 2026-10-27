@@ -290,7 +290,7 @@ func TestHook(t *testing.T) {
 		dbRepo := &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1684", dbRepo)
 
-		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "")
+		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "secret")
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPush, pipeline.Event)
@@ -315,28 +315,24 @@ func TestHook(t *testing.T) {
 		dbRepo := &model.Repo{ID: 3, UserID: 1, Owner: "DEV", Name: "network-monitor", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1079", dbRepo)
 
-		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "pr:opened", fixtures.HookPull, "secret"), "")
+		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "pr:opened", fixtures.HookPull, "secret"), "secret")
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPull, pipeline.Event)
 		assert.Equal(t, []string{"main.go", "README.md"}, pipeline.ChangedFiles)
 	})
 
-	t.Run("rejects a payload signed with another secret", func(t *testing.T) {
-		// no API route is registered, so any forge call after the failed check would fail differently
-		s := mock.NewMockServer()
-		defer s.Close()
+	t.Run("rejects a payload not signed with the secret it gets", func(t *testing.T) {
+		// no store in the context: the signature is checked before the repo is loaded
+		c := &client{forgeID: 1, url: "https://bitbucket.example.com"}
 
-		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		ctx := hookContext(t, "1684", &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", WebhookSecret: "secret"})
-
-		_, _, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "other"), "")
-		assert.ErrorContains(t, err, "signature does not match")
+		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "other"), "secret")
+		assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
 	})
 
 	t.Run("fails without a store", func(t *testing.T) {
 		c := &client{forgeID: 1, url: "https://bitbucket.example.com"}
-		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "")
+		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "secret")
 		assert.ErrorContains(t, err, "unable to get store from context")
 	})
 }
