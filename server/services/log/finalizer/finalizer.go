@@ -23,6 +23,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -110,7 +111,11 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 	}
 
 	if res.Done > 0 || res.Failed > 0 {
-		log.Info().Int("finalized", res.Done).Int("failed", res.Failed).Msg("finalized step logs")
+		level := zerolog.DebugLevel
+		if res.Failed > 0 {
+			level = zerolog.WarnLevel
+		}
+		log.WithLevel(level).Int("finalized", res.Done).Int("failed", res.Failed).Msg("finalized step logs")
 	}
 	return res, nil
 }
