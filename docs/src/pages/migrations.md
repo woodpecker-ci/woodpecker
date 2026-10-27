@@ -32,6 +32,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
   Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise GitHub repositories get no new pipelines.
 - Bitbucket Cloud webhooks are now signed with the secret of the repository, and Woodpecker rejects webhooks without a valid signature.
   Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise Bitbucket repositories get no new pipelines.
+- GitLab webhooks are now signed with a signing token, which needs GitLab 19.0 or newer, and Woodpecker rejects webhooks without a valid signature.
+  Upgrade GitLab first, then run **Repair all** in the admin settings under Repositories, otherwise GitLab repositories get no new pipelines.
 
 #### Extensions
 
