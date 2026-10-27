@@ -23,7 +23,7 @@ The webhook URL carries a non-expiring token signed with this secret, which name
 A secret only allows tokens for its own repository.
 
 The token does not cover the body, so keep the webhook URL private: whoever has it can send forged requests for its repository.
-Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret and Woodpecker verifies it, so do not leak the secret either.
+<!-- TODO: Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret and Woodpecker verifies it, so do not leak the secret either. (only Bitbucket Data Center is verified for now) -->
 This only protects against a leaked URL, not against admins of the repository on the forge, who can read the URL and, depending on your forge, the secret.
 
 :::info
