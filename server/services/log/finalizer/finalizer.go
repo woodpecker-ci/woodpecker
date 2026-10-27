@@ -49,6 +49,13 @@ var (
 		Name:      "log_steps_unfinalized",
 		Help:      "Number of steps whose log is complete but not yet finalized.",
 	})
+
+	// Prometheus counter of the steps ticks finalized (result done) or failed on (result failed).
+	finalizedSteps = promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "woodpecker",
+		Name:      "log_steps_finalized_total",
+		Help:      "Number of steps whose log was finalized, by result (done or failed).",
+	}, []string{"result"})
 )
 
 // Finalizer is the only caller of StepFinished.
@@ -105,8 +112,10 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		case err != nil:
 			log.Error().Err(err).Int64("step", step.ID).Msg("could not finalize step log")
 			res.Failed++
+			finalizedSteps.WithLabelValues("failed").Inc()
 		case finalized:
 			res.Done++
+			finalizedSteps.WithLabelValues("done").Inc()
 		}
 	}
 
