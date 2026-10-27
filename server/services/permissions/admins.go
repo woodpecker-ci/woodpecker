@@ -27,7 +27,7 @@ func NewAdmins(admins []string) *Admins {
 	for i, a := range admins {
 		adminsLowercase[i] = strings.ToLower(a)
 	}
-	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase), revoked: map[string]bool{}}
+	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase), revoked: make(map[string]bool)}
 }
 
 type Admins struct {

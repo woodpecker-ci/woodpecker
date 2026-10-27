@@ -295,6 +295,8 @@ linters:
         - random.GetRandomBytes
     revive:
       rules:
+        - name: enforce-map-style
+          arguments: [make]
         - name: var-naming
           arguments:
             - []
