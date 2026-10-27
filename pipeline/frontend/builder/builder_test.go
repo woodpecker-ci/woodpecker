@@ -1275,5 +1275,84 @@ func TestSelectedWorkflowNotFound(t *testing.T) {
 	items, err := b.Build()
 	assert.Nil(t, items)
 	assert.True(t, errors.HasBlockingErrors(err))
-	assert.ErrorContains(t, err, "selected workflow 'push-only' does not exist or does not match its conditions")
+	assert.ErrorContains(t, err, "selected workflow 'push-only' does not match its conditions")
+}
+
+func TestSelectedWorkflowDoesNotExist(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               selectedWorkflowYamls(),
+		SelectedWorkflow:    "release",
+	}
+
+	items, err := b.Build()
+	assert.Nil(t, items)
+	assert.ErrorContains(t, err, "selected workflow 'release' does not exist")
+}
+
+// workflowsWithUnrelatedBroken has a lint workflow next to a deploy workflow
+// that needs manual variables to substitute and to evaluate its conditions.
+func workflowsWithUnrelatedBroken() []*YamlFile {
+	return []*YamlFile{
+		{Name: "lint", Data: []byte(`
+steps:
+  - name: lint
+    image: scratch
+`)},
+		{Name: "deploy", Data: []byte(`
+when:
+  event: manual
+  evaluate: 'int(DEPLOY_COUNT) > 0'
+steps:
+  - name: deploy
+    image: ${BUILD_IMAGE}
+`)},
+	}
+}
+
+func TestSelectedWorkflowIgnoresUnrelatedWorkflows(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               workflowsWithUnrelatedBroken(),
+	}
+
+	_, err := b.Build()
+	assert.True(t, errors.HasBlockingErrors(err), "without the variables the full build should fail")
+
+	b.SelectedWorkflow = "lint"
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err), "unrelated workflows should not be substituted, linted or compiled")
+	assert.Len(t, items, 1)
+	assert.Equal(t, "lint", items[0].Workflow.Name)
+}
+
+func TestListOnlyToleratesMissingVariables(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "manual"}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls:               workflowsWithUnrelatedBroken(),
+		ListOnly:            true,
+	}
+
+	items, err := b.Build()
+	assert.False(t, errors.HasBlockingErrors(err))
+	names := make([]string, 0, len(items))
+	for _, item := range items {
+		names = append(names, item.Workflow.Name)
+	}
+	assert.Equal(t, []string{"deploy", "lint"}, names, "workflows needing variables should still be listed")
 }

@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 )
 
@@ -66,46 +67,45 @@ func filterMissingDependencies(items []*Item) []*Item {
 	return items
 }
 
-// selectWorkflow keeps the named item and, transitively, the items it hard depends on.
-// Returns an empty slice if no item carries that name.
-func selectWorkflow(items []*Item, name string) []*Item {
-	if !ContainsItemWithName(name, items) {
+// selectYamls returns the file of the named workflow and, transitively, the
+// files of the workflows it hard depends on.
+func selectYamls(yamls []*YamlFile, name string) []*YamlFile {
+	byName := make(map[string]*YamlFile, len(yamls))
+	for _, y := range yamls {
+		byName[SanitizePath(y.Name)] = y
+	}
+	if _, ok := byName[name]; !ok {
 		return nil
 	}
+
 	wanted := map[string]struct{}{name: {}}
 	queue := []string{name}
 	for len(queue) > 0 {
 		current := queue[0]
 		queue = queue[1:]
-		for _, item := range items {
-			if item.Workflow.Name != current {
+		parsed, err := yaml.ParseString(string(byName[current].Data))
+		if err != nil {
+			continue
+		}
+		for _, dep := range parsed.DependsOn {
+			if dep.Optional {
 				continue
 			}
-			for _, dep := range item.DependsOn {
-				if dep.Optional {
-					continue
-				}
-				if _, ok := wanted[dep.Name]; !ok {
-					wanted[dep.Name] = struct{}{}
-					queue = append(queue, dep.Name)
-				}
+			if _, ok := byName[dep.Name]; !ok {
+				continue
+			}
+			if _, ok := wanted[dep.Name]; !ok {
+				wanted[dep.Name] = struct{}{}
+				queue = append(queue, dep.Name)
 			}
 		}
 	}
 
-	kept := make([]*Item, 0, len(items))
-	for _, item := range items {
-		if _, ok := wanted[item.Workflow.Name]; !ok {
-			continue
+	kept := make([]*YamlFile, 0, len(wanted))
+	for _, y := range yamls {
+		if _, ok := wanted[SanitizePath(y.Name)]; ok {
+			kept = append(kept, y)
 		}
-		var resolved constraint.DependsOn
-		for _, dep := range item.DependsOn {
-			if _, ok := wanted[dep.Name]; ok {
-				resolved = append(resolved, dep)
-			}
-		}
-		item.DependsOn = resolved
-		kept = append(kept, item)
 	}
 	return kept
 }

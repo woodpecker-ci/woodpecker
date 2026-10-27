@@ -56,9 +56,21 @@ type PipelineBuilder struct {
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = SortYamlFilesByName(b.Yamls)
 
+	yamls := b.Yamls
+	selected := SanitizePath(b.SelectedWorkflow)
+	if b.SelectedWorkflow != "" {
+		yamls = selectYamls(b.Yamls, selected)
+		if len(yamls) == 0 {
+			return nil, &pipeline_errors.PipelineError{
+				Type:    pipeline_errors.PipelineErrorTypeGeneric,
+				Message: fmt.Sprintf("selected workflow '%s' does not exist", b.SelectedWorkflow),
+			}
+		}
+	}
+
 	pidSequence := 1
 
-	for _, y := range b.Yamls {
+	for _, y := range yamls {
 		// matrix axes
 		axes, err := matrix.Parse(y.Data)
 		if err != nil {
@@ -97,15 +109,11 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
-	if b.SelectedWorkflow != "" {
-		// normalize like workflow names so ".woodpecker/deploy.yml" matches "deploy"
-		items = selectWorkflow(items, SanitizePath(b.SelectedWorkflow))
-		if len(items) == 0 {
-			return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
-				Type:    pipeline_errors.PipelineErrorTypeGeneric,
-				Message: fmt.Sprintf("selected workflow '%s' does not exist or does not match its conditions", b.SelectedWorkflow),
-			})
-		}
+	if b.SelectedWorkflow != "" && !ContainsItemWithName(selected, items) {
+		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeGeneric,
+			Message: fmt.Sprintf("selected workflow '%s' does not match its conditions or misses a dependency", b.SelectedWorkflow),
+		})
 	}
 
 	return items, errorsAndWarnings
@@ -146,21 +154,23 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	}
 
 	// lint pipeline
-	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(linter.TrustedConfiguration{
-			Network:  b.RepoTrusted.Network,
-			Volumes:  b.RepoTrusted.Volumes,
-			Security: b.RepoTrusted.Security,
-		}),
-		linter.PrivilegedPlugins(b.PrivilegedPlugins),
-		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
-	).Lint([]*linter.WorkflowConfig{{
-		Workflow:  parsed,
-		File:      workflow.Name,
-		RawConfig: data,
-	}}))
-	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
-		return nil, errorsAndWarnings
+	if !b.ListOnly {
+		errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
+			linter.WithTrusted(linter.TrustedConfiguration{
+				Network:  b.RepoTrusted.Network,
+				Volumes:  b.RepoTrusted.Volumes,
+				Security: b.RepoTrusted.Security,
+			}),
+			linter.PrivilegedPlugins(b.PrivilegedPlugins),
+			linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
+		).Lint([]*linter.WorkflowConfig{{
+			Workflow:  parsed,
+			File:      workflow.Name,
+			RawConfig: data,
+		}}))
+		if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+			return nil, errorsAndWarnings
+		}
 	}
 
 	// checking if filtered.
