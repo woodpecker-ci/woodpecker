@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -912,4 +913,108 @@ func TestRefreshWithoutRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, refreshed)
 	assert.Equal(t, "token", user.AccessToken)
+}
+
+func TestConfigs(t *testing.T) {
+	// git objects of the fake repository by path at commit abc
+	world := map[string]string{
+		"": `{"__typename": "Tree", "entries": [
+			{"name": ".woodpecker", "type": "tree", "mode": 16384, "object": {}},
+			{"name": ".woodpecker.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: root", "isTruncated": false, "isBinary": false}},
+			{"name": "linked.yaml", "type": "blob", "mode": 40960, "object": {"text": "ci/real.yaml", "isTruncated": false, "isBinary": false}}
+		]}`,
+		".woodpecker": `{"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: a", "isTruncated": false, "isBinary": false}},
+			{"name": "sub", "type": "tree", "mode": 16384, "object": {}}
+		]}`,
+		".woodpecker/a.yaml": `{"__typename": "Blob", "text": "steps: a", "isTruncated": false, "isBinary": false}`,
+		".woodpecker.yaml":   `{"__typename": "Blob", "text": "steps: root", "isTruncated": false, "isBinary": false}`,
+		"linked.yaml":        `{"__typename": "Blob", "text": "ci/real.yaml", "isTruncated": false, "isBinary": false}`,
+	}
+	objectAlias := regexp.MustCompile(`(\w+): object\(expression: \$(\w+)\)`)
+
+	var requests atomic.Int32
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.EndpointPattern{Pattern: "/graphql", Method: http.MethodPost}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requests.Add(1)
+			var req struct {
+				Query     string            `json:"query"`
+				Variables map[string]string `json:"variables"`
+			}
+			assert.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+			assert.Equal(t, "octocat", req.Variables["owner"])
+
+			w.Header().Set("Content-Type", "application/json")
+			switch req.Variables["name"] {
+			case "gone":
+				_, _ = w.Write([]byte(`{"data": {"repository": null}}`))
+				return
+			case "partial":
+				_, _ = w.Write([]byte(`{"data": {"repository": {}}}`))
+				return
+			}
+
+			objects := []string{}
+			for _, m := range objectAlias.FindAllStringSubmatch(req.Query, -1) {
+				path, ok := strings.CutPrefix(req.Variables[m[2]], "abc:")
+				assert.True(t, ok, "expression %q must be at the pipeline commit", req.Variables[m[2]])
+				object, ok := world[path]
+				if !ok {
+					object = "null"
+				}
+				objects = append(objects, strconv.Quote(m[1])+": "+object)
+			}
+			_, _ = w.Write([]byte(`{"data": {"repository": {` + strings.Join(objects, ", ") + `}}}`))
+		})),
+	)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token"}
+	pipeline := &model.Pipeline{Commit: "abc"}
+	repo := &model.Repo{Owner: "octocat", Name: "hello-world"}
+
+	t.Run("default candidates with a single request", func(t *testing.T) {
+		requests.Store(0)
+		configs, err := c.Configs(ctx, user, repo, pipeline, []string{".woodpecker/", ".woodpecker.yaml", ".woodpecker.yml"})
+		require.NoError(t, err)
+		assert.Equal(t, [][]*forge_types.FileMeta{
+			{{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")}},
+			{{Name: ".woodpecker.yaml", Data: []byte("steps: root")}},
+			nil,
+		}, configs)
+		assert.EqualValues(t, 1, requests.Load())
+	})
+
+	t.Run("file in a folder", func(t *testing.T) {
+		configs, err := c.Configs(ctx, user, repo, pipeline, []string{".woodpecker/a.yaml", "nope/b.yaml"})
+		require.NoError(t, err)
+		assert.Equal(t, [][]*forge_types.FileMeta{
+			{{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")}},
+			nil,
+		}, configs)
+	})
+
+	for _, tt := range []struct {
+		name       string
+		repo       string
+		candidates []string
+	}{
+		// the blob holds the link target, File resolves the link
+		{name: "symlinked file", candidates: []string{"linked.yaml"}},
+		{name: "folder candidate is a file", candidates: []string{".woodpecker.yaml/"}},
+		{name: "file candidate is a folder", candidates: []string{".woodpecker"}},
+		{name: "repository missing in the response", repo: "gone", candidates: []string{".woodpecker.yaml"}},
+		{name: "candidate missing in the response", repo: "partial", candidates: []string{".woodpecker.yaml"}},
+	} {
+		t.Run(tt.name+" is left to File and Dir", func(t *testing.T) {
+			repo := repo
+			if tt.repo != "" {
+				repo = &model.Repo{Owner: "octocat", Name: tt.repo}
+			}
+			_, err := c.Configs(ctx, user, repo, pipeline, tt.candidates)
+			assert.Error(t, err)
+			assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+		})
+	}
 }

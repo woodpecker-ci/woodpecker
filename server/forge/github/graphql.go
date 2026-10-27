@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -122,6 +123,79 @@ func (c *client) graphql(ctx context.Context, token, query string, variables map
 	return json.Unmarshal(result.Data, data)
 }
 
+// gitModeSymlink is the mode of symlinks in git trees, see
+// https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
+const gitModeSymlink = 0o120000
+
+// graphqlBlob is the content of a blob as returned by the GraphQL api.
+type graphqlBlob struct {
+	Text        *string `json:"text"`
+	IsTruncated bool    `json:"isTruncated"`
+	IsBinary    *bool   `json:"isBinary"`
+}
+
+// content returns the text of the blob, ok is false if the GraphQL api did not
+// return it as the blob is binary or too large.
+func (b *graphqlBlob) content() (data []byte, ok bool) {
+	if b.Text == nil || b.IsTruncated || (b.IsBinary != nil && *b.IsBinary) {
+		return nil, false
+	}
+	return []byte(*b.Text), true
+}
+
+// graphqlObject is a git object as returned by the GraphQL api: a blob with
+// its content or a tree with its entries.
+type graphqlObject struct {
+	TypeName string `json:"__typename"`
+	graphqlBlob
+	Entries []struct {
+		Name   string      `json:"name"`
+		Type   string      `json:"type"`
+		Mode   int         `json:"mode"`
+		Object graphqlBlob `json:"object"`
+	} `json:"entries"`
+}
+
+// mode returns the mode of the tree entry name.
+func (o *graphqlObject) mode(name string) (mode int, ok bool) {
+	for _, entry := range o.Entries {
+		if entry.Name == name {
+			return entry.Mode, true
+		}
+	}
+	return 0, false
+}
+
+// treeFiles returns the files of tree at path, nested trees are not descended
+// into. Files GraphQL does not return as content are loaded over REST.
+func (c *client) treeFiles(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, path string, tree *graphqlObject) ([]*forge_types.FileMeta, error) {
+	files := make([]*forge_types.FileMeta, 0, len(tree.Entries))
+	for _, entry := range tree.Entries {
+		// sub folders and submodules are no pipeline files
+		if entry.Type != "blob" {
+			continue
+		}
+		isSymlink := entry.Mode == gitModeSymlink
+		if isSymlink && !followSymlinks {
+			continue
+		}
+		filePath := path + "/" + entry.Name
+		data, ok := entry.Object.content()
+		if isSymlink || !ok {
+			// GraphQL returns a symlink's target instead of the linked file,
+			// and no full text for large or binary files: load this one over REST
+			file, err := c.dirFile(ctx, u, r, b, filePath)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, file)
+			continue
+		}
+		files = append(files, &forge_types.FileMeta{Name: filePath, Data: data})
+	}
+	return files, nil
+}
+
 // dirFromGraphQL fetches all files of a repository directory with a single
 // GraphQL request instead of one REST request per file, so a directory with
 // many files neither multiplies the fetch latency nor the exposure to
@@ -132,19 +206,7 @@ func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Rep
 		// all is distinguishable from one where the repository resolved but the
 		// requested path did not exist
 		Repository *struct {
-			Object *struct {
-				TypeName string `json:"__typename"`
-				Entries  []struct {
-					Name   string `json:"name"`
-					Type   string `json:"type"`
-					Mode   int    `json:"mode"`
-					Object struct {
-						Text        *string `json:"text"`
-						IsTruncated bool    `json:"isTruncated"`
-						IsBinary    *bool   `json:"isBinary"`
-					} `json:"object"`
-				} `json:"entries"`
-			} `json:"object"`
+			Object *graphqlObject `json:"object"`
 		} `json:"repository"`
 	}
 	err := c.graphql(ctx, u.AccessToken, dirQuery, map[string]string{
@@ -172,35 +234,131 @@ func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Rep
 	if object.TypeName != "Tree" {
 		return nil, fmt.Errorf("%s is not a directory at this ref", path)
 	}
+	return c.treeFiles(ctx, u, r, b, path, object)
+}
 
-	// symlink mode in git trees, see https://git-scm.com/book/en/v2/Git-Internals-Git-Objects
-	const gitModeSymlink = 0o120000
+// configObjectFields selects a config candidate: the content of a file or the
+// files of a folder.
+const configObjectFields = `__typename
+      ... on Blob { text isTruncated isBinary }
+      ... on Tree { entries { name type mode object { ... on Blob { text isTruncated isBinary } } } }`
 
-	files := make([]*forge_types.FileMeta, 0, len(object.Entries))
-	for _, entry := range object.Entries {
-		// sub folders and submodules are no pipeline files
-		if entry.Type != "blob" {
+// configsQuery builds a query that fetches the candidate expressions $cN with
+// their content and the parent tree expressions $pN with the modes of their
+// entries only.
+func configsQuery(candidates, parents int) string {
+	var q strings.Builder
+	q.WriteString("query($owner: String!, $name: String!")
+	for i := range candidates {
+		fmt.Fprintf(&q, ", $c%d: String!", i)
+	}
+	for i := range parents {
+		fmt.Fprintf(&q, ", $p%d: String!", i)
+	}
+	q.WriteString(") {\n  repository(owner: $owner, name: $name) {\n")
+	for i := range candidates {
+		fmt.Fprintf(&q, "    c%d: object(expression: $c%d) {\n      %s\n    }\n", i, i, configObjectFields)
+	}
+	for i := range parents {
+		fmt.Fprintf(&q, "    p%d: object(expression: $p%d) {\n      __typename\n      ... on Tree { entries { name mode } }\n    }\n", i, i)
+	}
+	q.WriteString("  }\n}")
+	return q.String()
+}
+
+// splitPath returns the parent folder and the name of a file path, the parent
+// of a top level file is "".
+func splitPath(path string) (parent, name string) {
+	i := strings.LastIndex(path, "/")
+	return path[:max(i, 0)], path[i+1:]
+}
+
+// configsFromGraphQL fetches all config candidates with a single GraphQL
+// request, see forge.ConfigsFetcher. Anything File or Dir would answer
+// differently, like a symlink, is returned as error.
+func (c *client) configsFromGraphQL(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, candidates []string) ([][]*forge_types.FileMeta, error) {
+	ref := b.Commit
+	variables := map[string]string{
+		"owner": r.Owner,
+		"name":  r.Name,
+	}
+
+	// a blob does not carry its mode, the entry in the parent tree of a file
+	// tells whether it is a symlink
+	var parents []string
+	parentAliases := make([]string, len(candidates))
+	for i, candidate := range candidates {
+		path, isFolder := strings.CutSuffix(strings.TrimPrefix(candidate, "/"), "/")
+		variables[fmt.Sprintf("c%d", i)] = ref + ":" + path
+		if isFolder {
 			continue
 		}
-		isSymlink := entry.Mode == gitModeSymlink
-		if isSymlink && !followSymlinks {
+		parent, _ := splitPath(path)
+		j := slices.Index(parents, parent)
+		if j < 0 {
+			j = len(parents)
+			parents = append(parents, parent)
+			variables[fmt.Sprintf("p%d", j)] = ref + ":" + parent
+		}
+		parentAliases[i] = fmt.Sprintf("p%d", j)
+	}
+
+	var data struct {
+		Repository map[string]*graphqlObject `json:"repository"`
+	}
+	if err := c.graphql(ctx, u.AccessToken, configsQuery(len(candidates), len(parents)), variables, &data); err != nil {
+		return nil, err
+	}
+	// as for directories, only a resolved repository proves a candidate is missing
+	if data.Repository == nil {
+		return nil, errors.New("graphql response for the config candidates did not contain a repository object")
+	}
+
+	configs := make([][]*forge_types.FileMeta, len(candidates))
+	for i, candidate := range candidates {
+		object, ok := data.Repository[fmt.Sprintf("c%d", i)]
+		if !ok {
+			return nil, fmt.Errorf("graphql response did not contain the config candidate %s", candidate)
+		}
+		if object == nil {
+			// the candidate does not exist at this ref
 			continue
 		}
-		filePath := path + "/" + entry.Name
-		text := entry.Object.Text
-		if isSymlink || text == nil || entry.Object.IsTruncated || (entry.Object.IsBinary != nil && *entry.Object.IsBinary) {
-			// GraphQL returns a symlink's target instead of the linked file,
-			// and no full text for large or binary files: load this one over REST
-			file, err := c.dirFile(ctx, u, r, b, filePath)
+
+		folder, isFolder := strings.CutSuffix(candidate, "/")
+		switch {
+		case isFolder && object.TypeName == "Tree":
+			files, err := c.treeFiles(ctx, u, r, b, folder, object)
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, file)
-			continue
+			configs[i] = files
+		case !isFolder && object.TypeName == "Blob":
+			parent := data.Repository[parentAliases[i]]
+			if parent == nil {
+				return nil, fmt.Errorf("graphql response did not contain the folder of the config candidate %s", candidate)
+			}
+			_, fileName := splitPath(strings.TrimPrefix(candidate, "/"))
+			mode, ok := parent.mode(fileName)
+			if !ok {
+				return nil, fmt.Errorf("graphql response did not list the config candidate %s in its folder", candidate)
+			}
+			if mode == gitModeSymlink {
+				// the graphql api returns the link target, File resolves the link
+				return nil, fmt.Errorf("config candidate %s is a symlink", candidate)
+			}
+			content, ok := object.content()
+			if !ok {
+				return nil, fmt.Errorf("config candidate %s is binary or too large for the graphql api", candidate)
+			}
+			configs[i] = []*forge_types.FileMeta{{Name: candidate, Data: content}}
+		default:
+			// a file where a folder is expected or the other way around, File
+			// and Dir report those
+			return nil, fmt.Errorf("config candidate %s is a %s", candidate, object.TypeName)
 		}
-		files = append(files, &forge_types.FileMeta{Name: filePath, Data: []byte(*text)})
 	}
-	return files, nil
+	return configs, nil
 }
 
 // tagCommitQuery resolves a tag to the commit it points to, an annotated tag
