@@ -16,6 +16,7 @@ Currently we do not support [services](../../../20-usage/60-services.md) for thi
 Since the commands run directly in the same context as the agent (same user, same
 filesystem), a malicious pipeline could be used to access the agent
 configuration especially the `WOODPECKER_AGENT_SECRET` variable.
+Steps do not inherit this variable from the agent, but they can still read the secret in other ways.
 
 It is recommended to use this backend only for private setup where the code and
 pipeline can be trusted. It should not be used in a public instance where
