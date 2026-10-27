@@ -16,12 +16,14 @@ const forges: Forge[] = [
 const getForges = vi.fn<(query: { page: number }) => Promise<Forge[]>>();
 const getUsers = vi.fn<(query: { page: number }) => Promise<User[] | null>>();
 const createUser = vi.fn<(user: Partial<User>) => Promise<User>>();
+const remapUser = vi.fn<(user: User) => Promise<User>>();
 
 vi.mock('~/compositions/useApiClient', () => ({
   default: () => ({
     getForges,
     getUsers,
     createUser,
+    remapUser,
     updateUser: vi.fn(),
     deleteUser: vi.fn(),
   }),
@@ -118,5 +120,23 @@ describe('adminUsers', () => {
     await flushPromises();
 
     expect(createUser).toHaveBeenCalledWith(expect.objectContaining({ login: 'octocat', forge_id: 2 }));
+  });
+
+  it('marks users with a name conflict and gives them to the new forge account', async () => {
+    getUsers.mockResolvedValue([
+      { id: 7, login: 'octocat', forge_id: 1, conflict_forge_remote_id: '42' } as User,
+      { id: 8, login: 'hubot', forge_id: 1 } as User,
+    ]);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const wrapper = await mountAdminUsers();
+
+    expect(wrapper.text()).toContain('Name conflict');
+    const remapButtons = wrapper.findAll('button[title="Give to the new forge account"]');
+    expect(remapButtons).toHaveLength(1);
+
+    await remapButtons[0].trigger('click');
+    await flushPromises();
+
+    expect(remapUser).toHaveBeenCalledWith(expect.objectContaining({ login: 'octocat' }));
   });
 });

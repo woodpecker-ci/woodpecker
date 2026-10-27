@@ -413,6 +413,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/users/${user.login}?forge_id=${user.forge_id}`);
   }
 
+  async remapUser(user: User): Promise<User> {
+    return this._post(`/api/users/${user.login}/remap?forge_id=${user.forge_id}`) as Promise<User>;
+  }
+
   async resetToken(): Promise<string> {
     return this._delete('/api/user/token') as Promise<string>;
   }
@@ -424,6 +428,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async deleteOrg(org: Org): Promise<unknown> {
     return this._delete(`/api/orgs/${org.id}`);
+  }
+
+  async remapOrg(org: Org): Promise<Org> {
+    return this._post(`/api/orgs/${org.id}/remap`) as Promise<Org>;
   }
 
   async getAllRepos(opts?: PaginationOptions): Promise<Repo[] | null> {

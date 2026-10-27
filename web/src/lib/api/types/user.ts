@@ -29,4 +29,7 @@ export interface User {
 
   org_id: number;
   // The ID of the org assigned to the user.
+
+  conflict_forge_remote_id?: string;
+  // The forge remote id of another forge account that now uses the login of this user.
 }
