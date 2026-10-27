@@ -578,6 +578,7 @@
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
   "org_access_denied": "You are not allowed to access this organization",
+  "name_conflict": "Your name is still used by another account in Woodpecker. Ask an admin to resolve the conflict.",
   "invalid_state": "The OAuth state is invalid",
   "extensions": "Extensions",
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",

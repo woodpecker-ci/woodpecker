@@ -41,26 +41,12 @@ import (
 // getOrCreateOrg resolves the org named owner on the given forge, creating it
 // from forge data if it is not known yet.
 func getOrCreateOrg(c *gin.Context, _store store.Store, _forge forge.Forge, user *model.User, forgeID int64, owner string) (*model.Org, error) {
-	org, err := _store.OrgFindByName(owner, forgeID)
-	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
-		return nil, err
+	from, err := _forge.Org(c, user, owner)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch organization from forge: %w", err)
 	}
-
-	// create an org if it doesn't exist yet
-	if errors.Is(err, types.ErrRecordNotExist) {
-		org, err = _forge.Org(c, user, owner)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch organization from forge: %w", err)
-		}
-
-		org.ForgeID = forgeID
-		err = _store.OrgCreate(org)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create organization: %w", err)
-		}
-	}
-
-	return org, nil
+	from.ForgeID = forgeID
+	return syncOrg(c, _store, _forge, user, from)
 }
 
 // PostRepo
@@ -150,6 +136,10 @@ func PostRepo(c *gin.Context) {
 
 	// find org of repo
 	org, err := getOrCreateOrg(c, _store, _forge, user, user.ForgeID, repo.Owner)
+	if errors.Is(err, errNameConflict) {
+		c.String(http.StatusConflict, "Organization %s: %s.", repo.Owner, err)
+		return
+	}
 	if err != nil {
 		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
 		log.Error().Err(err).Msg(msg)
@@ -645,6 +635,10 @@ func MoveRepo(c *gin.Context) {
 	// the owner changed, so re-resolve the org of the repo: org-level
 	// secrets and registries of the old owner must no longer apply
 	org, err := getOrCreateOrg(c, _store, _forge, user, repo.ForgeID, repo.Owner)
+	if errors.Is(err, errNameConflict) {
+		c.String(http.StatusConflict, "Organization %s: %s.", repo.Owner, err)
+		return
+	}
 	if err != nil {
 		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
 		log.Error().Err(err).Msg(msg)

@@ -5064,6 +5064,10 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "conflict_forge_remote_id": {
+                    "description": "ConflictForgeRemoteID is the forge remote id of another forge account that now uses the name of this org",
+                    "type": "string"
+                },
                 "forge_id": {
                     "type": "integer"
                 },
@@ -5963,6 +5967,10 @@ const docTemplate = `{
                 },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
+                    "type": "string"
+                },
+                "conflict_forge_remote_id": {
+                    "description": "ConflictForgeRemoteID is the forge remote id of another forge account that now uses the login of this user.",
                     "type": "string"
                 },
                 "email": {

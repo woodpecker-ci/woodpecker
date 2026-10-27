@@ -73,6 +73,9 @@ type User struct {
 
 	// OrgID is the of the user as model.Org.
 	OrgID int64 `json:"org_id" xorm:"org_id"`
+
+	// ConflictForgeRemoteID is the forge remote id of another forge account that now uses the login of this user.
+	ConflictForgeRemoteID ForgeRemoteID `json:"conflict_forge_remote_id,omitempty" xorm:"conflict_forge_remote_id"`
 } //	@name	User
 
 // TableName return database table name for xorm.

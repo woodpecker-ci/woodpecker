@@ -30,6 +30,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
@@ -66,12 +67,13 @@ func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
 		Perm:          &model.Perm{Admin: true},
 	}
 
-	org := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID}
+	org := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID, ForgeRemoteID: "5"}
 
 	mockManager.On("ForgeFromUser", user).Return(mockForge, nil)
 	mockStore.On("GetRepoForgeID", user.ForgeID, forgeRemoteID).Return(nil, types.ErrRecordNotExist)
 	mockForge.On("Repo", mock.Anything, user, forgeRemoteID, "", "").Return(forgeRepo, nil)
-	mockStore.On("OrgFindByName", forgeRepo.Owner, user.ForgeID).Return(org, nil)
+	mockForge.On("Org", mock.Anything, user, forgeRepo.Owner).Return(&model.Org{Name: "acme", ForgeRemoteID: "5"}, nil)
+	mockStore.On("OrgFindByRemoteID", user.ForgeID, org.ForgeRemoteID).Return(org, nil)
 	mockForge.On("Activate", mock.Anything, user, mock.AnythingOfType("*model.Repo"), mock.AnythingOfType("string")).Return(nil)
 	mockStore.On("CreateRepo", mock.AnythingOfType("*model.Repo")).Return(types.ErrInsertDuplicateDetected)
 
@@ -86,6 +88,47 @@ func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.Contains(t, w.Body.String(), "Remove the stale repository entry")
 	mockStore.AssertNotCalled(t, "PermUpsert", mock.Anything)
+}
+
+func TestPostRepoReturnsConflictOnOrgNameOfGoneForgeAccount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockManager := manager_mocks.NewMockManager(t)
+	mockForge := forge_mocks.NewMockForge(t)
+
+	server.Config.Services.Manager = mockManager
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(nil)
+	server.Config.Pipeline.DefaultTimeout = 60
+	server.Config.Pipeline.MaxTimeout = 120
+
+	user := &model.User{ID: 10, ForgeID: 7, Login: "alice"}
+	forgeRepo := &model.Repo{ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket", Perm: &model.Perm{Admin: true}}
+	// the stored org named acme belongs to a forge account that is gone
+	stale := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID, ForgeRemoteID: "5"}
+
+	mockManager.On("ForgeFromUser", user).Return(mockForge, nil)
+	mockStore.On("GetRepoForgeID", user.ForgeID, forgeRepo.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+	mockForge.On("Repo", mock.Anything, user, forgeRepo.ForgeRemoteID, "", "").Return(forgeRepo, nil)
+	mockForge.On("Org", mock.Anything, user, "acme").Return(&model.Org{Name: "acme", ForgeRemoteID: "6"}, nil)
+	mockStore.On("OrgFindByRemoteID", user.ForgeID, model.ForgeRemoteID("6")).Return(nil, types.ErrRecordNotExist)
+	mockStore.On("OrgFindByName", "acme", user.ForgeID).Return(stale, nil)
+	mockForge.On("OrgByRemoteID", mock.Anything, user, stale.ForgeRemoteID, false).Return(nil, forge_types.ErrOrgNotFound)
+	mockStore.On("OrgUpdate", mock.Anything).Return(nil)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", mockStore)
+	c.Set("user", user)
+	c.Request = httptest.NewRequest(http.MethodPost, "/repos?forge_remote_id=42", nil)
+
+	PostRepo(c)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.Contains(t, w.Body.String(), "an admin has to resolve the conflict")
+	assert.EqualValues(t, "6", stale.ConflictForgeRemoteID)
+	mockForge.AssertNotCalled(t, "Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockStore.AssertNotCalled(t, "CreateRepo", mock.Anything)
 }
 
 func moveRepoForge(t *testing.T) *forge_mocks.MockForge {
@@ -166,7 +209,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		user, oldOrg, repo := seed(t, 1, "oldinc", "probe")
 		// same-named org on ANOTHER forge that must not be picked
 		require.NoError(t, s.OrgCreate(&model.Org{Name: "newinc", ForgeID: 2}))
-		target := &model.Org{Name: "newinc", ForgeID: 1}
+		target := &model.Org{Name: "newinc", ForgeID: 1, ForgeRemoteID: "o-newinc"}
 		require.NoError(t, s.OrgCreate(target))
 
 		mockForge := moveRepoForge(t)
@@ -177,8 +220,8 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 			FullName:      "newinc/probe",
 			Perm:          &model.Perm{Admin: true},
 		}
-		// no Org() expectation: forge must not be asked for a known org
 		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newinc", "probe").Return(from, nil)
+		mockForge.On("Org", mock.Anything, user, "newinc").Return(&model.Org{Name: "newinc", ForgeRemoteID: "o-newinc"}, nil)
 		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 
