@@ -8,6 +8,7 @@ Woodpecker does not check this information itself, it uses what the [forge](../3
 
 - Who a user is, their username and their organizations.
 - Which permissions a user has on a repository (read, push or admin).
+  A user who can sign in to Woodpecker gets the same [permissions](#permissions) there.
 - The webhook data, like the event, the author and if a pull request comes from a fork.
 - That only users with write access can push branches to the repository itself.
 
@@ -35,8 +36,9 @@ What the pipeline can do then depends on the author the forge reports, the [appr
 ## Permissions
 
 - Instance admins ([`WOODPECKER_ADMIN`](../30-administration/10-configuration/10-server.md#admin)) are admins of every org and repository.
-  The admin flag is stored on the user. The list sets it when a listed user signs in, but removing a user from the list does not clear it.
-  Revoke it in the admin settings or with the users API.
+  Users in the list become instance admins when they sign in, the list is read at server start.
+  Instance admins can also be granted and revoked in the admin settings or with the users API.
+  To revoke a listed user, remove them from the list and restart the server first, otherwise they are admin again at their next sign in.
 - Admins of a repository on the forge can change its [project settings](./75-project-settings.md).
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
 - Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.
@@ -75,7 +77,7 @@ Where the commit data is not written by the one who wrote the workflow, treat it
 Secrets are only passed to pipelines of the [events](./40-secrets.md#events-filter) they are enabled for.
 Enabling `pull_request` gives them to everybody who can open a pull request that runs without approval. You can partially limit this by filtering for plugins.
 
-A secret limited to [plugins](./40-secrets.md#plugins-filter) is only passed to those images.
+A secret limited to [plugins](./40-secrets.md#plugins-filter) is only passed to those images, and only if the step is a [plugin](#plugins).
 [In this case](./51-plugins/20-creating-plugins.md#security), the plugin is in charge of making sure it cannot be leaked.
 
 Secrets from a [secret extension](./72-extensions/55-secret-extension.md) without events are passed to all events.
@@ -107,6 +109,9 @@ and to every step of a repository with the [security option](#trusted-repositori
 Plugins can get more trust than other steps: plugin only secrets, [privileged plugins](../30-administration/10-configuration/10-server.md#plugins_privileged) and trusted clone plugins.
 Everybody who can change the workflow controls their settings and the workspace.
 
+A step is only a plugin if it sets none of `commands`, `entrypoint` and `environment`, otherwise it gets none of this trust.
+The linter rejects `commands` and `entrypoint` next to `settings`, but only warns about `environment`.
+
 See [creating plugins](./51-plugins/20-creating-plugins.md#security) for what this means for plugin authors.
 
 ## Extensions
@@ -121,7 +126,7 @@ and return configurations, secrets or registries. They are called before a pipel
 Agents connect with a [system or agent token](../30-administration/10-configuration/30-agent.md#agent-registration),
 using TLS only with [`WOODPECKER_GRPC_SECURE`](../30-administration/10-configuration/30-agent.md#grpc_secure).
 The server serves gRPC without TLS, so put it behind a [TLS proxy](../30-administration/10-configuration/10-server.md#reverse-proxy) or use a [unix socket](../30-administration/10-configuration/10-server.md#grpc_addr) for agents on the same host.
-Organization admins can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
+Organization admins, and every user for their own repositories, can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
 Every admin of an organization can see the tokens of all its agents, also of the ones other admins added, and can edit and remove them.
 This gives no more access than adding an own agent, as [organization agents](../30-administration/10-configuration/30-agent.md#agent-filters) only get workflows of their organization.
 Instance-wide agents run workflows of all organizations, unless an organization allows [only its own agents](../30-administration/10-configuration/30-agent.md#organization-agents-only).
