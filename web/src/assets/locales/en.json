@@ -54,7 +54,7 @@
       },
       "workflow": {
         "title": "Workflow",
-        "desc": "Run only the selected workflow and the workflows it depends on.",
+        "desc": "Run only the selected workflow and its hard dependencies.",
         "all": "All workflows",
         "load_error": "Could not load the workflows of this branch. Check that the branch exists and its pipeline config is valid."
       },

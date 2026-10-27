@@ -47,7 +47,7 @@ type PipelineBuilder struct {
 	PrivilegedPlugins   []string
 	CompilerOptions     []compiler.Option
 	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
-	// SelectedWorkflow, if set, limits to this workflow and its dependencies.
+	// SelectedWorkflow, if set, limits to this workflow and its hard dependencies.
 	SelectedWorkflow string
 	// ListOnly reports the workflows that could run instead of building them.
 	ListOnly bool

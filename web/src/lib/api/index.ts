@@ -31,7 +31,7 @@ interface RepoListOptions {
 interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
-  // only run this workflow and the workflows it depends on
+  // only run this workflow and its hard dependencies
   workflow?: string;
 }
 

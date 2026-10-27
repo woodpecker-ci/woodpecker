@@ -98,7 +98,7 @@ export interface Pipeline {
 
   version: string;
 
-  // Only this workflow and its dependencies were run (manual pipelines).
+  // Only this workflow and its hard dependencies were run (manual pipelines).
   selected_workflow?: string;
 }
 
