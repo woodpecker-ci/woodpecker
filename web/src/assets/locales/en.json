@@ -436,7 +436,7 @@
         "admin": {
           "admin": "Admin",
           "placeholder": "User is an admin",
-          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, also remove the user from WOODPECKER_ADMIN, otherwise they regain them at their first sign in after the next server restart."
+          "admin_warning": "This user is listed in WOODPECKER_ADMIN. Revoking admin here lasts until the next server restart. To revoke it for good, also remove the user from WOODPECKER_ADMIN."
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user",
