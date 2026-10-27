@@ -242,7 +242,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "push")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, req, "")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -266,7 +266,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "pull_request")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, req, "")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -291,7 +291,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "deployment")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, req, "")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -313,7 +313,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "push")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, req, "")
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
