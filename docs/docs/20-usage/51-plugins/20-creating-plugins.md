@@ -15,6 +15,8 @@ Everybody who can change the workflow, for example with a pull request, controls
 
 If your plugin is not designed for this, say so in its documentation.
 
+Also see [security boundaries](../17-security-boundaries.md#plugins).
+
 ## Settings
 
 To allow users to configure the behavior of your plugin, you should use `settings:`.
