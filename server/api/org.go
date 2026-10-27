@@ -113,6 +113,31 @@ func GetOrgPermissions(c *gin.Context) {
 	c.JSON(http.StatusOK, perm)
 }
 
+// RemapOrg
+//
+//	@Summary		Give an org to the forge account that now uses its name
+//	@Description	Gives the org with all its data to the forge account in its name conflict. Only allowed if the old forge account is gone. Requires admin rights.
+//	@Router			/orgs/{org_id}/remap [post]
+//	@Produce		json
+//	@Success		200	{object}	Org
+//	@Tags			Orgs
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			org_id			path	string	true	"the org's id"
+func RemapOrg(c *gin.Context) {
+	org := session.Org(c)
+	if !remapAllowed(c, org.ForgeID, org.ForgeRemoteID, org.ConflictForgeRemoteID, org.IsUser) {
+		return
+	}
+
+	org.ForgeRemoteID = org.ConflictForgeRemoteID
+	org.ConflictForgeRemoteID = ""
+	if err := store.FromContext(c).OrgUpdate(org); err != nil {
+		handleDBError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, org)
+}
+
 // LookupOrg
 //
 //	@Summary	Lookup an organization by full name

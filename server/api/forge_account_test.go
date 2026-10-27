@@ -18,15 +18,18 @@ package api
 
 import (
 	"errors"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
@@ -179,4 +182,107 @@ func TestReleaseUserLogin(t *testing.T) {
 		assert.Equal(t, "jane", stored.Login)
 		assert.EqualValues(t, "2", stored.ConflictForgeRemoteID)
 	})
+}
+
+// remapForge installs a forge that answers the lookup of the old forge
+// account with the given result.
+func remapForge(t *testing.T, admin *model.User, remoteID model.ForgeRemoteID, isUser bool, account *model.Org, err error) {
+	t.Helper()
+	f := forge_mocks.NewMockForge(t)
+	f.On("OrgByRemoteID", mock.Anything, admin, remoteID, isUser).Return(account, err)
+	mgr := manager_mocks.NewMockManager(t)
+	mgr.On("ForgeByID", int64(1)).Return(f, nil)
+	server.Config.Services.Manager = mgr
+}
+
+func TestRemapOrg(t *testing.T) {
+	s := newTestStore(t)
+	admin := &model.User{ID: 1, ForgeID: 1, Admin: true, AccessToken: "token"}
+
+	remap := func(t *testing.T, org *model.Org) *testContext {
+		t.Helper()
+		tc := newTestContext(t, s)
+		withUser(admin)(tc)
+		tc.Ctx.Set("org", org)
+		RemapOrg(tc.Ctx)
+		return tc
+	}
+
+	t.Run("old forge account is gone", func(t *testing.T) {
+		org := &model.Org{ForgeID: 1, ForgeRemoteID: "1", Name: "gone", ConflictForgeRemoteID: "2"}
+		require.NoError(t, s.OrgCreate(org))
+		remapForge(t, admin, "1", false, nil, forge_types.ErrOrgNotFound)
+
+		tc := remap(t, org)
+		require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
+
+		stored, err := s.OrgFindByRemoteID(1, "2")
+		require.NoError(t, err)
+		assert.Equal(t, org.ID, stored.ID)
+		assert.Empty(t, stored.ConflictForgeRemoteID)
+	})
+
+	for _, tc := range []struct {
+		name    string
+		account *model.Org
+		err     error
+		code    int
+	}{
+		{name: "old forge account still exists", account: &model.Org{Name: "exists"}, code: http.StatusConflict},
+		{name: "forge can not look up old account", err: forge_types.ErrNotImplemented, code: http.StatusUnprocessableEntity},
+		{name: "forge error", err: errors.New("forge unavailable"), code: http.StatusInternalServerError},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			org := &model.Org{ForgeID: 1, ForgeRemoteID: model.ForgeRemoteID("old-" + tc.name), Name: tc.name, ConflictForgeRemoteID: "new"}
+			require.NoError(t, s.OrgCreate(org))
+			remapForge(t, admin, org.ForgeRemoteID, false, tc.account, tc.err)
+
+			assert.Equal(t, tc.code, remap(t, org).Recorder.Code)
+
+			stored, err := s.OrgGet(org.ID)
+			require.NoError(t, err)
+			assert.Equal(t, org.ForgeRemoteID, stored.ForgeRemoteID)
+		})
+	}
+
+	t.Run("no conflict", func(t *testing.T) {
+		org := &model.Org{ForgeID: 1, ForgeRemoteID: "5", Name: "fine"}
+		require.NoError(t, s.OrgCreate(org))
+
+		assert.Equal(t, http.StatusBadRequest, remap(t, org).Recorder.Code)
+	})
+
+	t.Run("admin of another forge", func(t *testing.T) {
+		org := &model.Org{ForgeID: 2, ForgeRemoteID: "6", Name: "other-forge", ConflictForgeRemoteID: "7"}
+		require.NoError(t, s.OrgCreate(org))
+
+		assert.Equal(t, http.StatusBadRequest, remap(t, org).Recorder.Code)
+	})
+}
+
+func TestRemapUser(t *testing.T) {
+	s := newTestStore(t)
+	admin := &model.User{ID: 100, ForgeID: 1, Admin: true, AccessToken: "token"}
+
+	org := &model.Org{ForgeID: 1, ForgeRemoteID: "1", Name: "jane", IsUser: true}
+	require.NoError(t, s.OrgCreate(org))
+	user := &model.User{ForgeID: 1, ForgeRemoteID: "1", Login: "jane", Hash: "1", OrgID: org.ID, ConflictForgeRemoteID: "2"}
+	require.NoError(t, s.CreateUser(user))
+	remapForge(t, admin, "1", true, nil, forge_types.ErrOrgNotFound)
+
+	tc := newTestContext(t, s)
+	withUser(admin)(tc)
+	withParam("login", "jane")(tc)
+	RemapUser(tc.Ctx)
+	require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
+
+	stored, err := s.GetUserByRemoteID(1, "2")
+	require.NoError(t, err)
+	assert.Equal(t, user.ID, stored.ID)
+	assert.Empty(t, stored.ConflictForgeRemoteID)
+
+	// the org of the user moves along
+	storedOrg, err := s.OrgFindByRemoteID(1, "2")
+	require.NoError(t, err)
+	assert.Equal(t, org.ID, storedOrg.ID)
 }

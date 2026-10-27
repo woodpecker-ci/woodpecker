@@ -110,3 +110,26 @@ func TestOrgForgeRemoteID(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "renamed", found.Name)
 }
+
+func TestOrgListConflictsFirst(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Org))
+	defer closer()
+
+	for _, org := range []*model.Org{
+		{ForgeID: 1, Name: "a"},
+		{ForgeID: 1, Name: "user", IsUser: true},
+		{ForgeID: 1, Name: "b", ConflictForgeRemoteID: "1"},
+		{ForgeID: 1, Name: "conflicting-user", IsUser: true, ConflictForgeRemoteID: "2"},
+	} {
+		require.NoError(t, store.OrgCreate(org))
+	}
+
+	orgs, err := store.OrgList(&model.ListOptionsWithAll{All: true})
+	require.NoError(t, err)
+	names := make([]string, 0, len(orgs))
+	for _, org := range orgs {
+		names = append(names, org.Name)
+	}
+	// user orgs are only listed if they have a conflict
+	assert.Equal(t, []string{"b", "conflicting-user", "a"}, names)
+}
