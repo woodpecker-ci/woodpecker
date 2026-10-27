@@ -18,8 +18,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 )
 
 func SanitizePath(path string) string {
@@ -69,13 +72,13 @@ func filterMissingDependencies(items []*Item) []*Item {
 
 // selectYamls returns the file of the named workflow and, transitively, the
 // files of the workflows it hard depends on.
-func selectYamls(yamls []*YamlFile, name string) []*YamlFile {
-	byName := make(map[string]*YamlFile, len(yamls))
-	for _, y := range yamls {
+func (b *PipelineBuilder) selectYamls(name string) ([]*YamlFile, error) {
+	byName := make(map[string]*YamlFile, len(b.Yamls))
+	for _, y := range b.Yamls {
 		byName[SanitizePath(y.Name)] = y
 	}
 	if _, ok := byName[name]; !ok {
-		return nil
+		return nil, nil
 	}
 
 	wanted := map[string]struct{}{name: {}}
@@ -83,11 +86,11 @@ func selectYamls(yamls []*YamlFile, name string) []*YamlFile {
 	for len(queue) > 0 {
 		current := queue[0]
 		queue = queue[1:]
-		parsed, err := yaml.ParseString(string(byName[current].Data))
+		dependencies, err := b.workflowDependencies(byName[current])
 		if err != nil {
-			continue
+			return nil, err
 		}
-		for _, dep := range parsed.DependsOn {
+		for _, dep := range dependencies {
 			if dep.Optional {
 				continue
 			}
@@ -102,12 +105,40 @@ func selectYamls(yamls []*YamlFile, name string) []*YamlFile {
 	}
 
 	kept := make([]*YamlFile, 0, len(wanted))
-	for _, y := range yamls {
+	for _, y := range b.Yamls {
 		if _, ok := wanted[SanitizePath(y.Name)]; ok {
 			kept = append(kept, y)
 		}
 	}
-	return kept
+	return kept, nil
+}
+
+// workflowDependencies resolves hard and optional dependencies for every matrix
+// axis using the same variable substitution as a workflow build.
+func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.DependsOn, error) {
+	axes, err := matrix.Parse(file.Data)
+	if err != nil {
+		return nil, err
+	}
+	if len(axes) == 0 {
+		axes = append(axes, matrix.Axis{})
+	}
+
+	var dependencies constraint.DependsOn
+	for _, axis := range axes {
+		workflow := &Workflow{Name: SanitizePath(file.Name), Environ: axis}
+		environ := b.environmentVariables(b.GetWorkflowMetadata(workflow), axis)
+		substituted, err := metadata.EnvVarSubst(string(file.Data), environ)
+		if err != nil {
+			return nil, err
+		}
+		parsed, err := yaml.ParseString(substituted)
+		if err != nil {
+			return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		}
+		dependencies = append(dependencies, parsed.DependsOn...)
+	}
+	return dependencies, nil
 }
 
 func ContainsItemWithName(name string, items []*Item) bool {

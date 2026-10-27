@@ -1356,3 +1356,105 @@ func TestListOnlyToleratesMissingVariables(t *testing.T) {
 	}
 	assert.Equal(t, []string{"deploy", "lint"}, names, "workflows needing variables should still be listed")
 }
+
+func TestSelectedWorkflowSubstitutedDependencies(t *testing.T) {
+	t.Parallel()
+
+	for _, tt := range []struct {
+		name       string
+		dependency string
+		matrix     string
+		envs       map[string]string
+		variables  map[string]string
+		want       []string
+		wantError  bool
+	}{
+		{
+			name:       "manual variable overrides global",
+			dependency: "${DEPENDENCY}",
+			envs:       map[string]string{"DEPENDENCY": "ignored"},
+			variables:  map[string]string{"DEPENDENCY": "build"},
+			want:       []string{"build", "deploy", "lint"},
+		},
+		{
+			name:       "global variable",
+			dependency: "${DEPENDENCY}",
+			envs:       map[string]string{"DEPENDENCY": "build"},
+			want:       []string{"build", "deploy", "lint"},
+		},
+		{
+			name:       "metadata overrides manual variable",
+			dependency: "${CI_REPO_NAME}",
+			variables:  map[string]string{"CI_REPO_NAME": "ignored"},
+			want:       []string{"deploy", "lint"},
+		},
+		{
+			name:       "missing substituted dependency still fails",
+			dependency: "${DEPENDENCY}",
+			variables:  map[string]string{"DEPENDENCY": "missing"},
+			wantError:  true,
+		},
+		{
+			name:       "matrix axes override manual variable",
+			dependency: "${DEPENDENCY}",
+			matrix:     "matrix:\n  DEPENDENCY: [lint, build]\n",
+			variables:  map[string]string{"DEPENDENCY": "ignored"},
+			want:       []string{"build", "deploy", "deploy", "lint"},
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			m := &testMetadata{pipelineEvent: "manual", repo: "lint"}
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				Envs:                tt.envs,
+				AdditionalEnvs:      tt.variables,
+				SelectedWorkflow:    "deploy",
+				Yamls: []*YamlFile{
+					{Name: "lint", Data: []byte("steps:\n  - name: lint\n    image: scratch\n")},
+					{Name: "build", Data: []byte("depends_on: [\"${PARENT:-lint}\"]\nsteps:\n  - name: build\n    image: scratch\n")},
+					{Name: "deploy", Data: []byte(tt.matrix + "depends_on:\n  - name: \"" + tt.dependency + "\"\n  - name: ignored\n    optional: true\nsteps:\n  - name: deploy\n    image: scratch\n")},
+					{Name: "ignored", Data: []byte("when:\n  evaluate: 'int(DEPLOY_COUNT) > 0'\nsteps:\n  - name: ignored\n    image: scratch\n")},
+				},
+			}
+
+			items, err := b.Build()
+			if tt.wantError {
+				assert.True(t, errors.HasBlockingErrors(err))
+				assert.ErrorContains(t, err, "misses a dependency")
+				return
+			}
+			if errors.HasBlockingErrors(err) {
+				t.Fatalf("selected workflow must retain its substituted hard dependencies: %v", err)
+			}
+			names := make([]string, 0, len(items))
+			for _, item := range items {
+				names = append(names, item.Workflow.Name)
+			}
+			assert.Equal(t, tt.want, names)
+		})
+	}
+}
+
+func TestSelectedWorkflowInvalidConfig(t *testing.T) {
+	t.Parallel()
+
+	for _, config := range []string{"steps: [", "skip_clone: invalid\nsteps:\n  - name: deploy\n    image: scratch\n"} {
+		t.Run(config, func(t *testing.T) {
+			t.Parallel()
+
+			m := &testMetadata{pipelineEvent: "manual"}
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				SelectedWorkflow:    "deploy",
+				Yamls:               []*YamlFile{{Name: "deploy", Data: []byte(config)}},
+			}
+			items, err := b.Build()
+			assert.True(t, errors.HasBlockingErrors(err))
+			assert.Nil(t, items)
+		})
+	}
+}

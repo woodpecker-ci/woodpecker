@@ -59,7 +59,11 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	yamls := b.Yamls
 	selected := SanitizePath(b.SelectedWorkflow)
 	if b.SelectedWorkflow != "" {
-		yamls = selectYamls(b.Yamls, selected)
+		var err error
+		yamls, err = b.selectYamls(selected)
+		if err != nil {
+			return nil, err
+		}
 		if len(yamls) == 0 {
 			return nil, &pipeline_errors.PipelineError{
 				Type:    pipeline_errors.PipelineErrorTypeGeneric,
@@ -122,24 +126,6 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
-
-	// add additional environment variables for substituting
-	for k, v := range b.AdditionalEnvs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
-
-	// add global environment variables for substituting
-	for k, v := range b.Envs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
 
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
@@ -254,6 +240,25 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	maps.Copy(environ, axis)
+
+	// add additional environment variables for substituting
+	for k, v := range b.AdditionalEnvs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
+
+	// add global environment variables for substituting
+	for k, v := range b.Envs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
+
 	return environ
 }
 
