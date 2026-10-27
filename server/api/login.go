@@ -184,8 +184,9 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 	// update user login (in case forge supports renaming)
-	if user != nil {
+	if user != nil && user.Login != userFromForge.Login {
 		user.Login = userFromForge.Login
+		user.ConflictForgeRemoteID = ""
 	}
 
 	// re-try with login name
@@ -195,6 +196,15 @@ func HandleAuth(c *gin.Context) {
 			log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
+		}
+
+		// the login is still used by the user of another forge account
+		if err == nil && user.ForgeRemoteID.IsValid() && user.ForgeRemoteID != userFromForge.ForgeRemoteID {
+			if err := releaseUserLogin(c, _store, _forge, userFromForge, user); err != nil {
+				loginNameError(c, userFromForge.Login, err)
+				return
+			}
+			user = nil
 		}
 	}
 
@@ -230,54 +240,28 @@ func HandleAuth(c *gin.Context) {
 		}
 	}
 
-	// create or set the user's organization if it isn't linked yet
-	if user.OrgID == 0 {
-		// check if an org with the same name exists already and assign it to the user if it does
-		org, err := _store.OrgFindByName(user.Login, forgeID)
-		if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
-			log.Error().Err(err).Msgf("cannot get org for user %s", user.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-			return
-		}
-
-		// if an org with the same name exists => assign org to the user
-		if err == nil && org != nil {
-			org.IsUser = true
-			user.OrgID = org.ID
-
+	// an org linked before orgs had forge remote ids gets the one of the user
+	if user.OrgID != 0 {
+		if org, err := _store.OrgGet(user.OrgID); err == nil && !org.ForgeRemoteID.IsValid() && userFromForge.ForgeRemoteID.IsValid() {
+			org.ForgeRemoteID = userFromForge.ForgeRemoteID
 			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("cannot assign user %s to existing org %d", user.Login, org.ID)
-			}
-		}
-
-		// if still no org with the same name exists => create a new org
-		if user.OrgID == 0 || errors.Is(err, types.ErrRecordNotExist) {
-			org := &model.Org{
-				Name:    user.Login,
-				IsUser:  true,
-				Private: false,
-				ForgeID: user.ForgeID,
-			}
-			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("cannot create org for user %s", user.Login)
-			}
-			user.OrgID = org.ID
-		}
-	} else {
-		// update org name if necessary
-		org, err := _store.OrgGet(user.OrgID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot get org %d for user %s", user.OrgID, user.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-			return
-		}
-		if org != nil && org.Name != user.Login {
-			org.Name = user.Login
-			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("cannot update org %d name to user name %s", org.ID, user.Login)
+				log.Error().Err(err).Msgf("cannot set forge remote id of org %d", org.ID)
 			}
 		}
 	}
+
+	// link the org of the user, found by the forge remote id of the user
+	org, err := syncOrg(c, _store, _forge, userFromForge, &model.Org{
+		ForgeID:       forgeID,
+		ForgeRemoteID: userFromForge.ForgeRemoteID,
+		Name:          userFromForge.Login,
+		IsUser:        true,
+	})
+	if err != nil {
+		loginNameError(c, userFromForge.Login, err)
+		return
+	}
+	user.OrgID = org.ID
 
 	// update the user meta data and authorization data.
 	user.AccessToken = userFromForge.AccessToken
@@ -333,6 +317,18 @@ func HandleAuth(c *gin.Context) {
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
+}
+
+// loginNameError redirects to the login page with the error of a user or org
+// name that can't be resolved.
+func loginNameError(c *gin.Context, login string, err error) {
+	if errors.Is(err, errNameConflict) {
+		log.Warn().Msgf("cannot log in %s: %s", login, err)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=name_conflict")
+		return
+	}
+	log.Error().Err(err).Msgf("cannot resolve user or org name %s", login)
+	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {

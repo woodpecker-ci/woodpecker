@@ -26,6 +26,8 @@ type Org struct {
 	Private bool `json:"-" xorm:"private"`
 	// RequireOrgAgents restricts workflows of the organization's repos to agents of this organization
 	RequireOrgAgents bool `json:"require_org_agents" xorm:"DEFAULT FALSE 'require_org_agents'"`
+	// ConflictForgeRemoteID is the forge remote id of another forge account that now uses the name of this org
+	ConflictForgeRemoteID ForgeRemoteID `json:"conflict_forge_remote_id,omitempty" xorm:"conflict_forge_remote_id"`
 } //	@name	Org
 
 // OrgPatch represents an organization patch object.
