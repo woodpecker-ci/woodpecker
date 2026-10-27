@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Document security boundaries [[#7281](https://github.com/woodpecker-ci/woodpecker/pull/7281)]
 - Keep revoked env admins revoked until the server restarts [[#7403](https://github.com/woodpecker-ci/woodpecker/pull/7403)]
 - Fix gitlab to set tag pipeline author from webhook metadata [[#7397](https://github.com/woodpecker-ci/woodpecker/pull/7397)]
 - Update module github.com/woodpecker-ci/envsubst to v1.2.0 [[#7398](https://github.com/woodpecker-ci/woodpecker/pull/7398)]
