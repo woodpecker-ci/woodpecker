@@ -340,6 +340,9 @@ func (g *RPC) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipe
 	if err != nil {
 		return nil, nil, err
 	}
+	if resp.IgnoreEvent != nil {
+		return nil, nil, resp.IgnoreEvent
+	}
 	return resp.Repo.asModel(), resp.Pipeline, nil
 }
 

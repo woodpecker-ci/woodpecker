@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/hashicorp/go-plugin"
@@ -250,6 +251,10 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	req.Header = a.Header
 	req.Form = a.Form
 	repo, pipeline, err := s.Impl.Hook(mkCtx(), req)
+	if ignored, ok := errors.AsType[*types.ErrIgnoreEvent](err); ok {
+		*resp, err = json.Marshal(&responseHook{IgnoreEvent: ignored})
+		return err
+	}
 	if err != nil {
 		return err
 	}
