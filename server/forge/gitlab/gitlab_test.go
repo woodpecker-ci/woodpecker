@@ -926,7 +926,9 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "Release v22", pipeline.Message)
-		assert.Equal(t, "Jane", pipeline.Author)
+		// the author stays the authenticated webhook username, not the git
+		// commit author name (CVE-2026-58370 approval-bypass fix)
+		assert.Equal(t, "test", pipeline.Author)
 		assert.Equal(t, "jane@example.com", pipeline.Email)
 		assert.Equal(t, time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC).Unix(), pipeline.Timestamp)
 		assert.NotEmpty(t, pipeline.Avatar)
@@ -1205,4 +1207,32 @@ func TestBranchHead(t *testing.T) {
 	commit, err := client.BranchHead(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{ForgeRemoteID: "4"}, "main")
 	require.NoError(t, err)
 	assert.Equal(t, &model.Commit{SHA: "abc", ForgeURL: "https://gitlab.example.com/commit/abc"}, commit)
+}
+
+// TestTagAuthorNotSpoofedFromCommit is a regression for the incomplete fix of
+// CVE-2026-58370: a GitLab tag event whose commit message is not in the webhook
+// payload falls back to loadCommitFromSHA, which must not overwrite
+// pipeline.Author (the authenticated webhook username) with the git commit
+// author name, which a pusher controls and could set to an
+// ApprovalAllowedUsers entry to skip approval.
+func TestTagAuthorNotSpoofedFromCommit(t *testing.T) {
+	var payload map[string]any
+	require.NoError(t, json.Unmarshal(fixtures.HookTag, &payload))
+	payload["message"] = ""
+	body, err := json.Marshal(payload)
+	require.NoError(t, err)
+	sha, ok := payload["after"].(string)
+	require.True(t, ok)
+
+	client := newTestServer(t, map[string]string{
+		"/api/v4/projects/4": `{"id":4}`,
+		"/api/v4/projects/4/repository/commits/" + sha: `{"id":"` + sha + `","message":"Release v22",` +
+			`"author_name":"trusted-admin","author_email":"x@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
+	})
+
+	_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+	require.NoError(t, err)
+	assert.Equal(t, model.EventTag, pipeline.Event)
+	// "test" is user_username in the fixture; "trusted-admin" is the spoofable git author name.
+	assert.Equal(t, "test", pipeline.Author)
 }

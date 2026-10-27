@@ -6011,6 +6011,10 @@ const docTemplate = `{
                 "admin_env": {
                     "type": "boolean"
                 },
+                "admin_revoked": {
+                    "description": "AdminRevoked is set when the user is listed in WOODPECKER_ADMIN, but admin\nwas revoked and is not granted again before the next server restart.",
+                    "type": "boolean"
+                },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
                     "type": "string"
