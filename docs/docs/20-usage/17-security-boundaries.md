@@ -6,12 +6,12 @@ Woodpecker runs code from your repositories. This page lists who can do what, wi
 
 Woodpecker does not check this information itself, it uses what the [forge](../30-administration/10-configuration/12-forges/11-overview.md) reports:
 
-- Who a user is, their login and their organizations.
+- Who a user is, their username and their organizations.
 - Which permissions a user has on a repository (read, push or admin).
 - The webhook data, like the event, the author and if a pull request comes from a fork.
 - That only users with write access can push branches to the repository itself.
 
-If the forge reports something wrong, the boundaries on this page are wrong too.
+Woodpecker assumes that the information from the forge is correct. There is no further validation.
 
 <!-- TODO: document forge specific behavior, e.g. which login is used as pipeline author on each forge (GitLab releases use the name of the commit author). -->
 
@@ -23,7 +23,7 @@ A secret only allows tokens for its own repository.
 
 The token does not cover the body, so keep the webhook URL private: whoever has it can send forged requests for its repository.
 Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret and Woodpecker verifies it, so do not leak the secret either.
-This only protects against a leaked URL, not against admins of the repository on the forge, who can read the URL and sometimes the secret.
+This only protects against a leaked URL, not against admins of the repository on the forge, who can read the URL and, depending on your forge, the secret.
 
 :::info
 If the webhook URL or secret got leaked, use **Repair repository** in the repository settings to rotate the secret.
@@ -46,7 +46,7 @@ If fetching permissions failed, the user is downgraded to read access till fetch
 
 ## Approval of pipelines
 
-A pipeline can wait for approval before it runs, see [require approval for](./75-project-settings.md#require-approval-for).
+A pipeline can wait for approval before it runs, see [require approval setting](./75-project-settings.md#require-approval-for).
 By default this is the case for pull requests from forks.
 
 - Pipelines of users in the allowed users list never need approval.
@@ -60,7 +60,7 @@ By default this is the case for pull requests from forks.
 ## Workflow configuration
 
 Woodpecker reads the workflow files from the commit a pipeline runs for, so a pull request runs the workflow of its own branch.
-Everybody who can push or open a pull request that runs without approval controls the workflow.
+Everybody who can push or open a pull request that runs without approval can control the workflows.
 
 Values from the forge, like the commit message, the author or the pull request labels, are untrusted input.
 [String substitution](./50-environment.md#string-substitution) puts them into the YAML text before it is parsed.

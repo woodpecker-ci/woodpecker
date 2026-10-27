@@ -54,7 +54,7 @@ adjusted accordingly, as user of a plugin you should not have to care about this
 or `entrypoint` which will fail. Using `environment` is possible, but in this case, the plugin is internally not treated as plugin
 anymore. The container then cannot access secrets with plugin filter anymore and the containers won't be privileged without explicit definition.
 
-See [security boundaries](../17-security-boundaries.md#plugins).
+Also see [security boundaries](../17-security-boundaries.md#plugins).
 
 ## Finding Plugins
 

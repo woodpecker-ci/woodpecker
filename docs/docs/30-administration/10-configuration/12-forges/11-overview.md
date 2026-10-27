@@ -35,7 +35,7 @@ The forge configured through environment variables has no own environment settin
 
 Use the organization name, for GitLab the group's [`full_path`](https://docs.gitlab.com/api/groups/) like `my-group/my-subgroup`. Matching is case-insensitive and only happens while logging in.
 
-See [security boundaries](../../../20-usage/17-security-boundaries.md#what-woodpecker-trusts-the-forge-with).
+Also see [security boundaries](../../../20-usage/17-security-boundaries.md#what-woodpecker-trusts-the-forge-with).
 
 ### Known limitations
 

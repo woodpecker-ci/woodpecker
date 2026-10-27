@@ -15,7 +15,7 @@ Everybody who can change the workflow, for example with a pull request, controls
 
 If your plugin is not designed for this, say so in its documentation.
 
-See [security boundaries](../17-security-boundaries.md#plugins).
+Also see [security boundaries](../17-security-boundaries.md#plugins).
 
 ## Settings
 

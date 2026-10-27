@@ -806,7 +806,7 @@ The default setting for allowing pull requests on a repo.
 
 The default setting for the approval mode on a repo. Possible values: `none`, `forks`, `pull_requests` or `all_events`.
 
-See [security boundaries](../../20-usage/17-security-boundaries.md#approval-of-pipelines).
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#approval-of-pipelines).
 
 ---
 
@@ -890,7 +890,7 @@ Docker images to run in privileged mode. Only change if you are sure what you do
 
 You should specify the tag of your images too, as this enforces exact matches.
 
-See [security boundaries](../../20-usage/17-security-boundaries.md#plugins).
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#plugins).
 
 ### PLUGINS_TRUSTED_CLONE
 
@@ -902,7 +902,7 @@ If a clone step use an image not in this list, Git credentials will not be injec
 
 You should specify the tag of your images too, as this enforces exact matches.
 
-See [security boundaries](../../20-usage/17-security-boundaries.md#git-credentials).
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#git-credentials).
 
 <!-- ---
 
@@ -981,7 +981,7 @@ You should set this option if you have, for example,
 global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
 :::
 
-See [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
 
 ---
 
@@ -1183,7 +1183,7 @@ The `netrc` data is pretty powerful as it contains credentials to access the rep
 
 Comma-separated list of hosts that are allowed to be contacted by extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
 
-See [security boundaries](../../20-usage/17-security-boundaries.md#extensions).
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#extensions).
 
 ---
 

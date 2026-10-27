@@ -21,7 +21,7 @@ It is recommended to use this backend only for private setup where the code and
 pipeline can be trusted. It should not be used in a public instance where
 anyone can submit code or add new repositories. The agent should not run as a privileged user (root).
 
-See [security boundaries](../../../20-usage/17-security-boundaries.md#agents-and-backends).
+Also see [security boundaries](../../../20-usage/17-security-boundaries.md#agents-and-backends).
 
 The local backend will use a random directory in `$TMPDIR` to store the cloned
 code and execute commands.
