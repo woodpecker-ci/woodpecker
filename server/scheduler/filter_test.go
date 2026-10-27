@@ -93,7 +93,7 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -156,7 +156,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name: "Agent without labels",
 			agentFilter: rpc.Filter{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			task: &model.Task{
 				Labels: map[string]string{"docker": "true"},
@@ -170,7 +170,7 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"docker": "true"},
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -178,10 +178,10 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name: "Agent and task without labels",
 			agentFilter: rpc.Filter{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -332,7 +332,7 @@ func TestMissingRequiredLabels(t *testing.T) {
 		// No agent labels
 		{
 			taskLabels:     map[string]string{"os": "linux"},
-			requiredLabels: map[string]string{},
+			requiredLabels: make(map[string]string),
 			want:           false,
 		},
 	}

@@ -361,7 +361,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
-		"secret":       r.Hash,
+		"secret":       r.WebhookSecret,
 		"content_type": "json",
 	}
 	hook := forgejo.CreateHookOption{

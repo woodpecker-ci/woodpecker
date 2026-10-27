@@ -36,7 +36,7 @@ func TestParseBackendOptions(t *testing.T) {
 		},
 		{
 			name: "empty options",
-			step: &backend_types.Step{BackendOptions: map[string]any{}},
+			step: &backend_types.Step{BackendOptions: make(map[string]any)},
 			want: BackendOptions{},
 		},
 		{

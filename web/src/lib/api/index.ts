@@ -18,6 +18,7 @@ import type {
   RepoSettings,
   Secret,
   User,
+  WorkflowInfo,
 } from './types';
 
 export const DEFAULT_FORGE_ID = 1;
@@ -30,6 +31,8 @@ interface RepoListOptions {
 interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
+  // only run this workflow and its hard dependencies
+  workflow?: string;
 }
 
 interface DeploymentOptions {
@@ -91,6 +94,11 @@ export default class WoodpeckerClient extends ApiClient {
 
   async repairRepo(repoId: number): Promise<unknown> {
     return this._post(`/api/repos/${repoId}/repair`);
+  }
+
+  async getRepoWorkflows(repoId: number, branch: string): Promise<WorkflowInfo[]> {
+    const query = encodeQueryString({ branch });
+    return this._get(`/api/repos/${repoId}/workflows?${query}`) as Promise<WorkflowInfo[]>;
   }
 
   async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline | string> {

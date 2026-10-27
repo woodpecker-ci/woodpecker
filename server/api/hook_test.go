@@ -64,7 +64,7 @@ func TestHook(t *testing.T) {
 		Name:          "name",
 		IsActive:      true,
 		UserID:        user.ID,
-		Hash:          "secret-123-this-is-a-secret",
+		WebhookSecret: "secret-123-this-is-a-secret",
 	}
 	pipeline := &model.Pipeline{
 		ID:     123,
