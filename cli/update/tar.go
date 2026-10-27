@@ -63,7 +63,7 @@ func UnTar(dst string, r io.Reader) error {
 			}
 
 		case tar.TypeReg:
-			f, err := root.OpenFile(header.Name, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			f, err := root.OpenFile(header.Name, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode)&os.ModePerm)
 			if err != nil {
 				return err
 			}
