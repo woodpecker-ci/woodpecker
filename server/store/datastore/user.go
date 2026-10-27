@@ -39,7 +39,7 @@ func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error
 
 func (s storage) GetUserList(p *model.ListOptionsWithAll) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).OrderBy("login").Find(&users)
+	return users, s.paginate(p).OrderBy(conflictsFirst + ", login").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {

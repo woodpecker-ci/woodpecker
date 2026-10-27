@@ -116,3 +116,25 @@ func TestCreateUserDoesNotLinkOrgByName(t *testing.T) {
 	_, err := store.OrgGet(org.ID)
 	assert.NoError(t, err)
 }
+
+func TestUserListConflictsFirst(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User))
+	defer closer()
+
+	for i, user := range []*model.User{
+		{ForgeID: 1, ForgeRemoteID: "1", Login: "anna"},
+		{ForgeID: 1, ForgeRemoteID: "2", Login: "zoe", ConflictForgeRemoteID: "9"},
+		{ForgeID: 1, ForgeRemoteID: "3", Login: "bob"},
+	} {
+		user.Hash = string(rune('a' + i))
+		require.NoError(t, store.CreateUser(user))
+	}
+
+	users, err := store.GetUserList(&model.ListOptionsWithAll{All: true})
+	require.NoError(t, err)
+	logins := make([]string, 0, len(users))
+	for _, user := range users {
+		logins = append(logins, user.Login)
+	}
+	assert.Equal(t, []string{"zoe", "anna", "bob"}, logins)
+}

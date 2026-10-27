@@ -17,13 +17,17 @@ package api
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -127,4 +131,43 @@ func forgeAccountName(ctx context.Context, _forge forge.Forge, u *model.User, re
 		return "", errNameConflict
 	}
 	return account.Name, nil
+}
+
+// remapAllowed checks if a stored user or org with a name conflict may be
+// given to the forge account that now uses its name: only if its own forge
+// account is gone, as checked with the token of the admin. Else it writes an
+// error response.
+func remapAllowed(c *gin.Context, forgeID int64, remoteID, conflictRemoteID model.ForgeRemoteID, isUser bool) bool {
+	if !conflictRemoteID.IsValid() {
+		c.String(http.StatusBadRequest, "There is no name conflict to resolve.")
+		return false
+	}
+
+	admin := session.User(c)
+	if admin.ForgeID != forgeID {
+		c.String(http.StatusBadRequest, "Only an admin of the same forge can check the old forge account.")
+		return false
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
+	if err != nil {
+		log.Error().Err(err).Msg("cannot get forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return false
+	}
+	forge.Refresh(c, _forge, store.FromContext(c), admin)
+
+	_, err = _forge.OrgByRemoteID(c, admin, remoteID, isUser)
+	switch {
+	case errors.Is(err, forge_types.ErrOrgNotFound):
+		return true
+	case err == nil:
+		c.String(http.StatusConflict, "The old forge account still exists, so it keeps its data.")
+	case errors.Is(err, forge_types.ErrNotImplemented):
+		c.String(http.StatusUnprocessableEntity, "The forge can't tell if the old forge account still exists. Delete it instead.")
+	default:
+		log.Error().Err(err).Msgf("cannot look up forge account %s", remoteID)
+		c.String(http.StatusInternalServerError, "Could not look up the old forge account.")
+	}
+	return false
 }
