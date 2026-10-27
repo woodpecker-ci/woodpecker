@@ -586,8 +586,9 @@ func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.
 	org, _, orgErr := client.GetOrg(owner)
 	if orgErr == nil && org != nil {
 		return &model.Org{
-			Name:    org.UserName,
-			Private: forgejo.VisibleType(org.Visibility) != forgejo.VisibleTypePublic,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(org.ID)),
+			Name:          org.UserName,
+			Private:       forgejo.VisibleType(org.Visibility) != forgejo.VisibleTypePublic,
 		}, nil
 	}
 
@@ -599,9 +600,10 @@ func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.
 		return nil, err
 	}
 	return &model.Org{
-		Name:    user.UserName,
-		IsUser:  true,
-		Private: user.Visibility != forgejo.VisibleTypePublic,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.ID)),
+		Name:          user.UserName,
+		IsUser:        true,
+		Private:       user.Visibility != forgejo.VisibleTypePublic,
 	}, nil
 }
 

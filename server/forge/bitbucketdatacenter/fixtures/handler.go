@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"path/filepath"
 
 	"github.com/neticdk/go-bitbucket/bitbucket"
@@ -30,6 +31,7 @@ var (
 	//go:embed expected/*
 	embeddedFixtures embed.FS
 	PostBuildStatus  = mock.EndpointPattern{Pattern: "/api/latest/projects/:projectKey/repos/:repositorySlug/commits/:commitId/builds", Method: "POST"}
+	GetProject       = mock.EndpointPattern{Pattern: "/api/latest/projects/:projectKey", Method: "GET"}
 )
 
 type ResponseContent map[string]any
@@ -68,6 +70,16 @@ func Server() *httptest.Server {
 				Key: "PRJ",
 			},
 		}),
+		mock.WithRequestMatchHandler(GetProject, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ids := map[string]uint64{"ORG": 456, "~ORG": 789}
+			key := path.Base(r.URL.Path)
+			id, ok := ids[key]
+			if !ok {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			_ = json.NewEncoder(w).Encode(bitbucket.Project{ID: id, Key: key})
+		})),
 		mock.WithRequestMatch(mock.GetDefaultBranch, bitbucket.Branch{
 			ID:        "refs/head/main",
 			DisplayID: "main",
