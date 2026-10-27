@@ -16,7 +16,6 @@ package forgejo
 
 import (
 	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -764,10 +763,7 @@ func TestForgejoParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tt.data))
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, tt.event)
-			r, p, err := parseHook(req)
+			r, p, err := parseHook(tt.event, []byte(tt.data))
 			if tt.err != nil {
 				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {

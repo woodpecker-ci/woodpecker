@@ -16,9 +16,9 @@
 package gitea
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"slices"
 	"strings"
 
@@ -73,17 +73,17 @@ func supportedAction(action string) bool {
 
 // parseHook parses a Gitea hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	hookType := r.Header.Get(hookEvent)
+func parseHook(hookType string, payload []byte) (*model.Repo, *model.Pipeline, error) {
+	body := bytes.NewReader(payload)
 	switch hookType {
 	case hookPush:
-		return parsePushHook(r.Body)
+		return parsePushHook(body)
 	case hookCreated:
-		return parseCreatedHook(r.Body)
+		return parseCreatedHook(body)
 	case hookPullRequest:
-		return parsePullRequestHook(r.Body)
+		return parsePullRequestHook(body)
 	case hookRelease:
-		return parseReleaseHook(r.Body)
+		return parseReleaseHook(body)
 	}
 	log.Debug().Msgf("unsupported hook type: '%s'", hookType)
 	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}

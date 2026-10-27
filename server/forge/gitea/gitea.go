@@ -17,7 +17,6 @@
 package gitea
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
@@ -507,9 +506,8 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request, secret string) (*mode
 	if err != nil || !valid {
 		return nil, nil, forge_types.ErrInvalidWebhookSignature
 	}
-	r.Body = io.NopCloser(bytes.NewReader(body))
 
-	repo, pipeline, err := parseHook(r)
+	repo, pipeline, err := parseHook(r.Header.Get(hookEvent), body)
 	if err != nil {
 		return nil, nil, err
 	}
