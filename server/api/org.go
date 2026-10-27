@@ -104,7 +104,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", org.ID, err)
 		return
@@ -166,7 +166,7 @@ func LookupOrg(c *gin.Context) {
 				return
 			}
 
-			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)
