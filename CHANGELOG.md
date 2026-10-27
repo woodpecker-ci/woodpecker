@@ -24,12 +24,12 @@
 
 ### ✨ Features
 
+- Add support for selecting workflow to run for manual pipelines [[#7393](https://github.com/woodpecker-ci/woodpecker/pull/7393)]
 - Add option to restrict organization and user to use its agents only [[#7359](https://github.com/woodpecker-ci/woodpecker/pull/7359)]
 - Make CLI lint prefer detected Woodpecker config [[#6634](https://github.com/woodpecker-ci/woodpecker/pull/6634)]
 
 ### 📈 Enhancement
 
-- Enforce make syntax for empty maps [[#7406](https://github.com/woodpecker-ci/woodpecker/pull/7406)]
 - Send restart flag to the HTTP config extension [[#7384](https://github.com/woodpecker-ci/woodpecker/pull/7384)]
 - Harden store scoping for org-level secret and registry retrieval [[#7365](https://github.com/woodpecker-ci/woodpecker/pull/7365)]
 - Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
@@ -71,6 +71,7 @@
 
 ### 🧪 Tests
 
+- Enforce make syntax for empty maps [[#7406](https://github.com/woodpecker-ci/woodpecker/pull/7406)]
 - Require `scheduler_mocks` import name [[#7341](https://github.com/woodpecker-ci/woodpecker/pull/7341)]
 - Increase test coverage of `server/forge` and `server/servies` [[#7319](https://github.com/woodpecker-ci/woodpecker/pull/7319)]
 - Count cross-package coverage in all Go test targets [[#7316](https://github.com/woodpecker-ci/woodpecker/pull/7316)]
