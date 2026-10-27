@@ -114,7 +114,7 @@ See [creating plugins](./51-plugins/20-creating-plugins.md#security) for what th
 [Extensions](./72-extensions/index.md#security) get the repository and pipeline data, optionally the Git credentials,
 and return configurations, secrets or registries. They are called before a pipeline is approved.
 
-Woodpecker signs its requests and only calls hosts allowed by [`WOODPECKER_EXTENSIONS_ALLOWED_HOSTS`](../30-administration/10-configuration/10-server.md#extensions_allowed_hosts).
+[Woodpecker signs its requests](./72-extensions/index.md#security) and only calls hosts allowed by [`WOODPECKER_EXTENSIONS_ALLOWED_HOSTS`](../30-administration/10-configuration/10-server.md#extensions_allowed_hosts).
 
 ## Agents and backends
 
