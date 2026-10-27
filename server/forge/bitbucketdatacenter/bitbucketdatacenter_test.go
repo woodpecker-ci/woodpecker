@@ -94,16 +94,18 @@ func TestBitbucketDC(t *testing.T) {
 	org, err := c.Org(ctx, fakeUser, "ORG")
 	assert.NoError(t, err)
 	assert.Equal(t, &model.Org{
-		Name:   "ORG",
-		IsUser: false,
+		Name:          "ORG",
+		IsUser:        false,
+		ForgeRemoteID: "project-456",
 	}, org)
 
 	// user
 	org, err = c.Org(ctx, fakeUser, "~ORG")
 	assert.NoError(t, err)
 	assert.Equal(t, &model.Org{
-		Name:   "~ORG",
-		IsUser: true,
+		Name:          "~ORG",
+		IsUser:        true,
+		ForgeRemoteID: "project-789",
 	}, org)
 
 	// Execute the Status method

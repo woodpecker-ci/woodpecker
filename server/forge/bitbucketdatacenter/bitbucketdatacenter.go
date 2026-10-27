@@ -726,17 +726,23 @@ func (c *client) hasRepositoryWriteAccess(ctx context.Context, org string, clien
 	return false, nil
 }
 
-// Org fetches the organization from the forge by name. If the name is a user an org with type user is returned.
-func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org, error) {
-	if strings.HasPrefix(owner, "~") {
-		return &model.Org{
-			Name:   owner,
-			IsUser: true,
-		}, nil
+// Org fetches the project with the given key. A personal project (key starts with ~) is returned as an org with type user.
+func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
+
+	project := new(bitbucket.Project)
+	if _, err := bc.Get(ctx, "api", "projects/"+url.PathEscape(owner), project); err != nil {
+		return nil, fmt.Errorf("unable to get project %s: %w", owner, err)
+	}
+
 	return &model.Org{
-		Name:   owner,
-		IsUser: false,
+		// project ids are counted apart from user ids, so they get a prefix
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprintf("project-%d", project.ID)),
+		Name:          owner,
+		IsUser:        strings.HasPrefix(owner, "~"),
 	}, nil
 }
 

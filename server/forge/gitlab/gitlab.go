@@ -786,9 +786,10 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	})
 	if len(users) == 1 && err == nil {
 		return &model.Org{
-			Name:    users[0].Username,
-			IsUser:  true,
-			Private: users[0].PrivateProfile,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(users[0].ID)),
+			Name:          users[0].Username,
+			IsUser:        true,
+			Private:       users[0].PrivateProfile,
 		}, nil
 	}
 
@@ -814,8 +815,9 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:    matchedGroup.FullPath,
-		Private: matchedGroup.Visibility != gitlab.PublicVisibility,
+		ForgeRemoteID: groupRemoteID(matchedGroup.ID),
+		Name:          matchedGroup.FullPath,
+		Private:       matchedGroup.Visibility != gitlab.PublicVisibility,
 	}, nil
 }
 

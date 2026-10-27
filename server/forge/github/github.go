@@ -442,8 +442,9 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
 	if org != nil && err == nil {
 		return &model.Org{
-			Name:   org.GetLogin(),
-			IsUser: false,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(org.GetID())),
+			Name:          org.GetLogin(),
+			IsUser:        false,
 		}, nil
 	}
 
@@ -454,8 +455,9 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:   user.GetLogin(),
-		IsUser: true,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.GetID())),
+		Name:          user.GetLogin(),
+		IsUser:        true,
 	}, nil
 }
 

@@ -567,8 +567,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	org, _, orgErr := client.GetOrg(owner)
 	if orgErr == nil && org != nil {
 		return &model.Org{
-			Name:    org.Name,
-			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(org.ID)),
+			Name:          org.Name,
+			Private:       gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
 		}, nil
 	}
 
@@ -580,9 +581,10 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 	return &model.Org{
-		Name:    user.UserName,
-		IsUser:  true,
-		Private: user.Visibility != gitea.VisibleTypePublic,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.ID)),
+		Name:          user.UserName,
+		IsUser:        true,
+		Private:       user.Visibility != gitea.VisibleTypePublic,
 	}, nil
 }
 

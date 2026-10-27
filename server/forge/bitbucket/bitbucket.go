@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -484,14 +485,25 @@ func (c *config) OrgMembership(ctx context.Context, u *model.User, owner string)
 }
 
 func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
+	// bitbucket uses workspaces for teams and single users, so only the own
+	// workspace of the user is known to belong to a user
+	if strings.EqualFold(owner, u.Login) {
+		return &model.Org{
+			ForgeRemoteID: u.ForgeRemoteID,
+			Name:          owner,
+			IsUser:        true,
+		}, nil
+	}
+
 	workspace, err := c.newClient(ctx, u).GetWorkspace(owner)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.Org{
-		Name:   workspace.Slug,
-		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we cannot distinguish between them
+		ForgeRemoteID: model.ForgeRemoteID(workspace.UUID),
+		Name:          workspace.Slug,
+		IsUser:        false,
 	}, nil
 }
 

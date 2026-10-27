@@ -1061,15 +1061,15 @@ func TestOrg(t *testing.T) {
 
 	org, err := client.Org(t.Context(), user, "jane")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, Private: true}, org)
+	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, Private: true, ForgeRemoteID: "5"}, org)
 
 	org, err = client.Org(t.Context(), user, "parent/sub")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "parent/sub", Private: true}, org)
+	assert.Equal(t, &model.Org{Name: "parent/sub", Private: true, ForgeRemoteID: "group-2"}, org)
 
 	org, err = client.Org(t.Context(), user, "public")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "public", Private: false}, org)
+	assert.Equal(t, &model.Org{Name: "public", Private: false, ForgeRemoteID: "group-3"}, org)
 
 	_, err = client.Org(t.Context(), user, "missing")
 	assert.ErrorContains(t, err, "could not find org missing")

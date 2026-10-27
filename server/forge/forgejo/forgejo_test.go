@@ -344,11 +344,11 @@ func TestOrgMembership(t *testing.T) {
 
 func TestOrg(t *testing.T) {
 	g := newTestForge(t, map[string]http.HandlerFunc{
-		"/api/v1/orgs/public-org":    respond(http.StatusOK, `{"username":"public-org","visibility":"public"}`),
-		"/api/v1/orgs/private-org":   respond(http.StatusOK, `{"username":"private-org","visibility":"private"}`),
+		"/api/v1/orgs/public-org":    respond(http.StatusOK, `{"id":1,"username":"public-org","visibility":"public"}`),
+		"/api/v1/orgs/private-org":   respond(http.StatusOK, `{"id":2,"username":"private-org","visibility":"private"}`),
 		"/api/v1/orgs/":              respond(http.StatusNotFound, `{"message":"not found"}`),
-		"/api/v1/users/public-user":  respond(http.StatusOK, `{"login":"public-user","visibility":"public"}`),
-		"/api/v1/users/limited-user": respond(http.StatusOK, `{"login":"limited-user","visibility":"limited"}`),
+		"/api/v1/users/public-user":  respond(http.StatusOK, `{"id":3,"login":"public-user","visibility":"public"}`),
+		"/api/v1/users/limited-user": respond(http.StatusOK, `{"id":4,"login":"limited-user","visibility":"limited"}`),
 		"/api/v1/users/":             respond(http.StatusNotFound, `{"message":"not found"}`),
 	})
 	user := &model.User{AccessToken: "token"}
@@ -357,10 +357,10 @@ func TestOrg(t *testing.T) {
 		name string
 		want *model.Org
 	}{
-		{name: "public-org", want: &model.Org{Name: "public-org"}},
-		{name: "private-org", want: &model.Org{Name: "private-org", Private: true}},
-		{name: "public-user", want: &model.Org{Name: "public-user", IsUser: true}},
-		{name: "limited-user", want: &model.Org{Name: "limited-user", IsUser: true, Private: true}},
+		{name: "public-org", want: &model.Org{Name: "public-org", ForgeRemoteID: "1"}},
+		{name: "private-org", want: &model.Org{Name: "private-org", Private: true, ForgeRemoteID: "2"}},
+		{name: "public-user", want: &model.Org{Name: "public-user", IsUser: true, ForgeRemoteID: "3"}},
+		{name: "limited-user", want: &model.Org{Name: "limited-user", IsUser: true, Private: true, ForgeRemoteID: "4"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			org, err := g.Org(t.Context(), user, tc.name)

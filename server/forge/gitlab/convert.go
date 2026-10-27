@@ -32,6 +32,10 @@ import (
 const (
 	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
 
+	// GitLab counts user and group ids separately, so group ids get a prefix
+	// to keep the forge remote ids of orgs unique.
+	groupRemoteIDPrefix = "group-"
+
 	// GitLab project visibility_level values, as sent in webhook payloads.
 	// See https://docs.gitlab.com/api/projects/#project-visibility-level.
 	visibilityLevelPrivate  = 0
@@ -459,4 +463,8 @@ func convertLabels(from []*gitlab.EventLabel) []string {
 		labels[i] = label.Title
 	}
 	return labels
+}
+
+func groupRemoteID(id int64) model.ForgeRemoteID {
+	return model.ForgeRemoteID(fmt.Sprintf("%s%d", groupRemoteIDPrefix, id))
 }

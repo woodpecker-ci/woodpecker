@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -216,6 +217,24 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
+}
+
+func TestOrg(t *testing.T) {
+	s := httptest.NewServer(fixtures.Handler())
+	defer s.Close()
+	c := &config{url: s.URL, api: s.URL}
+	user := &model.User{Login: "jane", ForgeRemoteID: "{jane-uuid}", AccessToken: "token"}
+
+	org, err := c.Org(t.Context(), user, "Jane")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "Jane", IsUser: true, ForgeRemoteID: "{jane-uuid}"}, org)
+
+	org, err = c.Org(t.Context(), user, "team")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "team", ForgeRemoteID: "{team-uuid}"}, org)
+
+	_, err = c.Org(t.Context(), user, "missing")
+	assert.Error(t, err)
 }
 
 var (
