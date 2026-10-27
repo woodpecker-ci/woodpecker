@@ -16,6 +16,7 @@ package permissions
 
 import (
 	"strings"
+	"sync"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -30,9 +31,20 @@ func NewAdmins(admins []string) *Admins {
 }
 
 type Admins struct {
+	mu     sync.RWMutex
 	admins map[string]bool
 }
 
 func (a *Admins) IsAdmin(user *model.User) bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
 	return a.admins[strings.ToLower(user.Login)]
+}
+
+// Remove drops a login from the list until the server restarts, so a revoked
+// admin does not get admin back at their next sign in.
+func (a *Admins) Remove(login string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	delete(a.admins, strings.ToLower(login))
 }

@@ -23,7 +23,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
 )
 
 func TestPostUser(t *testing.T) {
@@ -58,5 +60,42 @@ func TestPostUser(t *testing.T) {
 		created := new(model.User)
 		tc.decodeJSON(t, created)
 		assert.EqualValues(t, 2, created.ForgeID)
+	})
+}
+
+func TestPatchUser(t *testing.T) {
+	s := newTestStore(t)
+
+	patch := func(t *testing.T, login string, in *model.User) {
+		t.Helper()
+		tc := newTestContext(t, s)
+		withRequest(http.MethodPatch, in)(tc)
+		withParam("login", login)(tc)
+
+		PatchUser(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
+	}
+
+	t.Run("revoking a listed admin removes them from the admin list", func(t *testing.T) {
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"Erin"})
+		require.NoError(t, s.CreateUser(&model.User{Login: "erin", ForgeID: defaultForgeID, ForgeRemoteID: "5", Hash: "erin", Admin: true}))
+
+		patch(t, "erin", &model.User{Login: "erin", ForgeID: defaultForgeID, ForgeRemoteID: "5", Admin: false})
+
+		// the next sign in must not grant admin again
+		assert.False(t, server.Config.Permissions.Admins.IsAdmin(&model.User{Login: "erin"}))
+		stored, err := s.GetUserByLogin(defaultForgeID, "erin")
+		require.NoError(t, err)
+		assert.False(t, stored.Admin)
+	})
+
+	t.Run("keeping admin leaves the admin list alone", func(t *testing.T) {
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"frank"})
+		require.NoError(t, s.CreateUser(&model.User{Login: "frank", ForgeID: defaultForgeID, ForgeRemoteID: "6", Hash: "frank", Admin: true}))
+
+		patch(t, "frank", &model.User{Login: "frank", ForgeID: defaultForgeID, ForgeRemoteID: "6", Admin: true})
+
+		assert.True(t, server.Config.Permissions.Admins.IsAdmin(&model.User{Login: "frank"}))
 	})
 }

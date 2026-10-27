@@ -22,6 +22,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -128,6 +129,13 @@ func PatchUser(c *gin.Context) {
 			handleDBError(c, err)
 			return
 		}
+	}
+
+	// a revoked admin from WOODPECKER_ADMIN would get admin back at the next sign in
+	admins := server.Config.Permissions.Admins
+	if !in.Admin && admins.IsAdmin(user) {
+		admins.Remove(user.Login)
+		log.Warn().Str("user", user.Login).Msg("revoked admin is removed from the admin list until the server restarts, also remove the user from WOODPECKER_ADMIN")
 	}
 
 	// TODO: disallow to change login, email, avatar if the user is using oauth

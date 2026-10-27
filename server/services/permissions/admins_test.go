@@ -15,6 +15,7 @@
 package permissions
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,4 +30,30 @@ func TestAdmins(t *testing.T) {
 	empty := NewAdmins([]string{})
 	assert.False(t, empty.IsAdmin(&model.User{Login: "woodpecker-ci"}))
 	assert.False(t, empty.IsAdmin(&model.User{Login: "not-woodpecker-ci"}))
+}
+
+func TestAdminsRemove(t *testing.T) {
+	a := NewAdmins([]string{"Alice", "bob"})
+
+	a.Remove("ALICE")
+	assert.False(t, a.IsAdmin(&model.User{Login: "alice"}), "removal must ignore case like NewAdmins")
+	assert.True(t, a.IsAdmin(&model.User{Login: "bob"}), "other admins must stay")
+
+	a.Remove("unknown")
+	assert.True(t, a.IsAdmin(&model.User{Login: "bob"}))
+}
+
+// A revoke in the admin settings can run while other users sign in.
+func TestAdminsRemoveConcurrentWithIsAdmin(t *testing.T) {
+	a := NewAdmins([]string{"alice", "bob"})
+	user := &model.User{Login: "bob"}
+
+	var wg sync.WaitGroup
+	for range 10 {
+		wg.Go(func() { a.IsAdmin(user) })
+	}
+	wg.Go(func() { a.Remove("alice") })
+	wg.Wait()
+
+	assert.False(t, a.IsAdmin(&model.User{Login: "alice"}))
 }
