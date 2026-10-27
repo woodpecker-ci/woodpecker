@@ -96,7 +96,7 @@ func TestGrpcDialConfigUsesRegisteredKeepaliveFlags(t *testing.T) {
 		dialConfig = grpcDialConfig(c, AgentConfig{}, false)
 		return nil
 	}
-	assert.NoError(t, app.Run(context.Background(), []string{"woodpecker-agent"}))
+	assert.NoError(t, app.Run(t.Context(), []string{"woodpecker-agent"}))
 
 	assert.Equal(t, 10*time.Minute, dialConfig.KeepaliveTime)
 	assert.Equal(t, 30*time.Second, dialConfig.KeepaliveTimeout)
