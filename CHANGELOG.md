@@ -29,6 +29,7 @@
 
 ### 📈 Enhancement
 
+- Enforce make syntax for empty maps [[#7406](https://github.com/woodpecker-ci/woodpecker/pull/7406)]
 - Send restart flag to the HTTP config extension [[#7384](https://github.com/woodpecker-ci/woodpecker/pull/7384)]
 - Harden store scoping for org-level secret and registry retrieval [[#7365](https://github.com/woodpecker-ci/woodpecker/pull/7365)]
 - Add `CI_REPO_ID` environment variable [[#7295](https://github.com/woodpecker-ci/woodpecker/pull/7295)]
