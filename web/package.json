@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.15.0",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -38,7 +38,7 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.0.0",
+    "@antfu/eslint-config": "^10.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@intlify/eslint-plugin-vue-i18n": "4.5.1",

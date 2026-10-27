@@ -76,7 +76,7 @@ func testRepo() *model.Repo {
 		Owner:         "octocat",
 		Name:          "hello",
 		FullName:      "octocat/hello",
-		Hash:          "repo-hash",
+		WebhookSecret: "repo-hash",
 		Perm:          &model.Perm{Pull: true, Push: true},
 	}
 }

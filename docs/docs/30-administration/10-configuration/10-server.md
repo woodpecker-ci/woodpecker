@@ -1190,7 +1190,7 @@ See [security boundaries](../../20-usage/17-security-boundaries.md#extensions).
 ### FORGE_TIMEOUT
 
 - Name: `WOODPECKER_FORGE_TIMEOUT`
-- Default: 5s
+- Default: 30s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
