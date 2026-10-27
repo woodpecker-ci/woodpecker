@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Remove agent token from process os environments [[#7412](https://github.com/woodpecker-ci/woodpecker/pull/7412)]
 - Make sure CLI self-update can target cli install dir only [[#7400](https://github.com/woodpecker-ci/woodpecker/pull/7400)]
 - Document security boundaries [[#7281](https://github.com/woodpecker-ci/woodpecker/pull/7281)]
 - Keep revoked env admins revoked until the server restarts [[#7403](https://github.com/woodpecker-ci/woodpecker/pull/7403)]
