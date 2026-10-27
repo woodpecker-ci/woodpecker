@@ -17,6 +17,7 @@ package core
 
 import (
 	"context"
+	"errors"
 	"os"
 	"time"
 
@@ -44,7 +45,10 @@ var flags = []cli.Flag{
 		// remove the secret from the environment so that processes started by
 		// the agent, like local backend steps, do not inherit it
 		Action: func(context.Context, *cli.Command, string) error {
-			return os.Unsetenv("WOODPECKER_AGENT_SECRET")
+			return errors.Join(
+				os.Unsetenv("WOODPECKER_AGENT_SECRET"),
+				os.Unsetenv("WOODPECKER_AGENT_SECRET_FILE"),
+			)
 		},
 	},
 	&cli.BoolFlag{
