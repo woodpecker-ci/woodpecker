@@ -762,30 +762,18 @@ func TestGetRepoWorkflows(t *testing.T) {
 		mockForge.On("Name").Return("mock").Maybe()
 		mockForge.On("URL").Return("https://example.com").Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, mock.Anything).Return(fakeCommit, nil)
-		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{}, nil).Maybe()
 
 		mockConfigService := config_service_mocks.NewMockService(t)
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, false).Return(configs, fetchErr)
 
-		mockSecretService := secret_service_mocks.NewMockService(t)
-		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
-		mockRegistryService := registry_service_mocks.NewMockService(t)
-		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
-
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
 		mockManager.On("ConfigServiceFromRepo", fakeRepo).Return(mockConfigService)
-		mockManager.On("SecretServiceFromRepo", fakeRepo).Return(mockSecretService).Maybe()
-		mockManager.On("RegistryServiceFromRepo", fakeRepo).Return(mockRegistryService).Maybe()
 		mockManager.On("EnvironmentService").Return(nil).Maybe()
 		server.Config.Services.Manager = mockManager
 
 		mockStore := store_mocks.NewMockStore(t)
 		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
-		// the listing must resolve the same previous pipeline a run would,
-		// i.e. the one before the number the run would get
-		mockStore.On("GetRepoLatestPipelines", []int64{fakeRepo.ID}).Return([]*model.Pipeline{{Number: 41}}, nil).Maybe()
-		mockStore.On("GetPipelineLastBefore", fakeRepo, mock.Anything, int64(42)).Return(nil, types.ErrRecordNotExist).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
