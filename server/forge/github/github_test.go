@@ -629,6 +629,8 @@ func TestFileAndDir(t *testing.T) {
 				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: a")})
 			case "/repos/octocat/hello-world/contents/.woodpecker/b.yaml":
 				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: b")})
+			case "/repos/octocat/hello-world/contents/.woodpecker/link.yaml":
+				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: link")})
 			case "/repos/octocat/hello-world/contents/.woodpecker":
 				writeJSON(t, w, []github.RepositoryContent{
 					{Type: new("file"), Name: new("a.yaml")},
@@ -686,11 +688,12 @@ func TestFileAndDir(t *testing.T) {
 		}
 	}
 
-	// sub folders and symlinks are skipped, files are loaded with their content
+	// sub folders are skipped, files and symlinks are loaded with their content
 	metas, err := dir(".woodpecker")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*forge_types.FileMeta{
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
+		{Name: ".woodpecker/link.yaml", Data: []byte("steps: link")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
 
