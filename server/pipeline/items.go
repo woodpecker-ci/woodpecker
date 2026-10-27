@@ -207,12 +207,13 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
+	savedPipeline, err := saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
 	if err != nil {
+		// callers use the returned pipeline before they check err, so never return nil
 		return currentPipeline, nil, parseErr, err
 	}
 
-	return currentPipeline, pipelineItems, parseErr, nil
+	return savedPipeline, pipelineItems, parseErr, nil
 }
 
 // enrichPipelineItemSteps stamps server-side fields onto the backend step

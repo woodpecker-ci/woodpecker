@@ -733,6 +733,8 @@ Admins granted in the admin settings or with the users API also stay admins when
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 
+Revoking a listed user in the admin settings or with the users API takes effect right away. Also remove them from the list, otherwise they are admin again at their first sign in after the next server restart.
+
 ---
 
 ### ORGS
