@@ -51,7 +51,7 @@ require (
 	github.com/tink-crypto/tink-go/v2 v2.9.0
 	github.com/urfave/cli-docs/v3 v3.1.1-0.20251022123016-72b87d11c482
 	github.com/urfave/cli/v3 v3.14.0
-	github.com/woodpecker-ci/envsubst v1.1.0
+	github.com/woodpecker-ci/envsubst v1.2.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.6.2
 	github.com/zalando/go-keyring v0.2.8
