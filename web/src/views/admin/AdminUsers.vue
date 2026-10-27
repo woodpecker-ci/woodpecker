@@ -24,7 +24,23 @@
             class="md:display-unset hidden"
             :value="forgesMap.get(user.forge_id)"
           />
-          <Badge v-if="user.admin" class="md:display-unset hidden" :value="$t('admin.settings.users.admin.admin')" />
+          <Badge
+            v-if="user.admin_revoked"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_revoked')"
+            :title="$t('admin.settings.users.admin.admin_revoked_desc')"
+          />
+          <Badge
+            v-else-if="user.admin_env"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_env')"
+            :title="$t('admin.settings.users.admin.admin_env_desc')"
+          />
+          <Badge
+            v-else-if="user.admin"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin')"
+          />
         </span>
         <div class="flex items-center gap-2">
           <IconButton
