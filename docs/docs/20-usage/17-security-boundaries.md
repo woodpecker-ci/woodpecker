@@ -39,8 +39,7 @@ What the pipeline can do then depends on the author the forge reports, the [appr
 - Instance admins ([`WOODPECKER_ADMIN`](../30-administration/10-configuration/10-server.md#admin)) are admins of every org and repository.
   Users in the list become instance admins when they sign in, the list is read at server start.
   Instance admins can also be granted and revoked in the admin settings or with the users API.
-  To revoke a listed user, remove them from the list and restart the server first, otherwise they are admin again at their next sign in.
-  <!-- TODO: adjust once https://github.com/woodpecker-ci/woodpecker/pull/7403 is merged, which keeps a revoke without restart until the next server start. -->
+  Revoking a listed user takes effect right away, but also remove them from the list, otherwise they are admin again at their first sign in after the next server restart.
 - Admins of a repository on the forge can change its [project settings](./75-project-settings.md).
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
 - Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.
