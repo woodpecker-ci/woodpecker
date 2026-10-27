@@ -71,7 +71,7 @@ func supportedAction(action string) bool {
 	return slices.Contains(actionList, action)
 }
 
-// parseHook parses a Gitea hook from an http.Request and returns
+// parseHook parses a Gitea hook payload of the given type and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(hookType string, payload []byte) (*model.Repo, *model.Pipeline, error) {
 	body := bytes.NewReader(payload)
