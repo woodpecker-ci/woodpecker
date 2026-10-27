@@ -452,6 +452,24 @@ func (g *rpcForge) OrgMembership(_ context.Context, u *model.User, org string) (
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
+func (g *rpcForge) OrgByRemoteID(_ context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error) {
+	args, err := json.Marshal(&argumentsOrgByRemoteID{
+		U:        modelUserFromModel(u),
+		RemoteID: remoteID,
+		IsUser:   isUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var jsonResp []byte
+	err = g.call("Plugin.OrgByRemoteID", args, &jsonResp)
+	if err != nil {
+		return nil, addonError(err)
+	}
+	var resp *model.Org
+	return resp, json.Unmarshal(jsonResp, &resp)
+}
+
 func (g *rpcForge) Org(_ context.Context, u *model.User, org string) (*model.Org, error) {
 	args, err := json.Marshal(&argumentsOrgMembershipOrg{
 		U:   modelUserFromModel(u),
