@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @MannXo, @Mihir-Rabari, @PatelFarhaan, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @eknathdj, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @tritsystem, @wolffberg, @xoxys
+@6543, @AhmadNajiKam, @AkashKumar7902, @CamiloEspinoza, @Javex, @M0Rf30, @MannXo, @Mihir-Rabari, @PatelFarhaan, @Sawarz, @Sriram-PR, @YouCD, @aniketatgithub, @arcaartem, @asyntai, @carstenschmidt77, @confusedsushi, @cuducos, @eknathdj, @fredrikblau, @lafriks, @njaaazi, @pcbeingused333, @qwerty287, @roian6, @sugar700, @supertj, @tritsystem, @wolffberg, @xoxys
 
 ### 🔒 Security
 
@@ -78,6 +78,7 @@
 
 ### 📚 Documentation
 
+- Add Supabase Backup plugin [[#7410](https://github.com/woodpecker-ci/woodpecker/pull/7410)]
 - Document how to install the CLI [[#7360](https://github.com/woodpecker-ci/woodpecker/pull/7360)]
 - Add OpenArtifact plugin [[#7378](https://github.com/woodpecker-ci/woodpecker/pull/7378)]
 - Add `concurrency` option to Workflow Syntax docs [[#7369](https://github.com/woodpecker-ci/woodpecker/pull/7369)]
