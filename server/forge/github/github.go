@@ -624,7 +624,8 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		},
 		Config: &github.HookConfig{
 			URL:         &link,
-			ContentType: new("form"),
+			ContentType: new("json"),
+			Secret:      &r.WebhookSecret,
 		},
 	}
 	_, _, err = client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
@@ -673,8 +674,17 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
-	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
+func (c *client) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	// go-github skips the check when neither a secret nor a signature is given
+	if secret == "" {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+	payload, err := github.ValidatePayload(r, []byte(secret))
+	if err != nil {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+
+	pull, repo, pipeline, currCommit, prevCommit, err := parseHookPayload(github.WebHookType(r), payload, c.MergeRef)
 	if err != nil {
 		return nil, nil, err
 	}
