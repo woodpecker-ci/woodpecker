@@ -54,7 +54,7 @@ func ListWorkflows(ctx context.Context, _forge forge.Forge, _store store.Store, 
 		return nil, fmt.Errorf("could not load config from forge: %w", configFetchErr)
 	}
 
-	// Substitute and lint like a run would, but stop before compiling
+	// Substitute and parse like a run would, without linting or compiling.
 	envs := make(map[string]string)
 	if environmentService := server.Config.Services.Manager.EnvironmentService(); environmentService != nil {
 		globals, err := environmentService.EnvironList(repo)
