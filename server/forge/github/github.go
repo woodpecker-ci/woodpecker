@@ -801,6 +801,17 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	// would fail with an authentication error.
 	forge.Refresh(ctx, c, _store, user)
 
+	// resolve the tag with a single GraphQL request: the tag list is paged
+	// and the tag can be on any page
+	sha, err := c.tagCommitFromGraphQL(ctx, user.AccessToken, repo.Owner, repo.Name, tagName)
+	if err == nil {
+		return sha, nil
+	}
+	if errors.Is(err, errTagNotFound) {
+		return "", fmt.Errorf("could not find tag %s", tagName)
+	}
+	log.Debug().Err(err).Msgf("github: graphql lookup of tag %s failed, falling back to the tag list", tagName)
+
 	gh, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return "", err

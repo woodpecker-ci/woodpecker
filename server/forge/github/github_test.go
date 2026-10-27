@@ -449,6 +449,92 @@ func TestGetTagCommitSHA(t *testing.T) {
 	})
 }
 
+func TestGetTagCommitSHAGraphQL(t *testing.T) {
+	restCalls := 0
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.EndpointPattern{Pattern: "/graphql", Method: http.MethodPost}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var req struct {
+				Variables map[string]string `json:"variables"`
+			}
+			assert.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+			assert.Equal(t, "6543", req.Variables["owner"])
+			assert.Equal(t, "hello-world", req.Variables["name"])
+
+			// the tag is passed as fully qualified ref
+			var tag string
+			for _, v := range req.Variables {
+				if name, ok := strings.CutPrefix(v, "refs/tags/"); ok {
+					tag = name
+				}
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			switch tag {
+			case "lightweight":
+				_, _ = w.Write([]byte(`{"data": {"repository": {"ref": {"target": {"__typename": "Commit", "oid": "c0ffee"}}}}}`))
+			case "annotated":
+				_, _ = w.Write([]byte(`{"data": {"repository": {"ref": {"target": {"__typename": "Tag", "oid": "7a90b1", "target": {"__typename": "Commit", "oid": "a77a7ed"}}}}}}`))
+			case "missing":
+				_, _ = w.Write([]byte(`{"data": {"repository": {"ref": null}}}`))
+			case "nested":
+				// a tag of a tag is not peeled by the query
+				_, _ = w.Write([]byte(`{"data": {"repository": {"ref": {"target": {"__typename": "Tag", "oid": "7a90b2", "target": {"__typename": "Tag", "oid": "7a90b3"}}}}}}`))
+			default:
+				w.WriteHeader(http.StatusBadGateway)
+			}
+		})),
+		github_mock.WithRequestMatchHandler(github_mock.GetReposTagsByOwnerByRepo, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			restCalls++
+			writeJSON(t, w, []github.RepositoryTag{
+				{Name: new("nested"), Commit: &github.Commit{SHA: new("fa11bac")}},
+				{Name: new("broken"), Commit: &github.Commit{SHA: new("b0b0")}},
+			})
+		})),
+	)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockStore.On("GetUser", mock.Anything).Return(&model.User{ID: 1, Login: "6543", AccessToken: "token"}, nil)
+	mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID:            1,
+		ForgeRemoteID: "1",
+		Owner:         "6543",
+		Name:          "hello-world",
+		UserID:        1,
+	}, nil)
+	ctx = store.InjectToContext(ctx, mockStore)
+
+	c := &client{API: defaultAPI, url: defaultURL}
+	repo := &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}
+
+	tests := []struct {
+		name      string
+		tag       string
+		sha       string
+		wantErr   bool
+		restCalls int
+	}{
+		{name: "lightweight tag in a single request", tag: "lightweight", sha: "c0ffee"},
+		{name: "annotated tag resolves to its commit", tag: "annotated", sha: "a77a7ed"},
+		{name: "missing tag fails without paging the tags", tag: "missing", wantErr: true},
+		{name: "tag of a tag falls back to the tags list", tag: "nested", sha: "fa11bac", restCalls: 1},
+		{name: "graphql failure falls back to the tags list", tag: "broken", sha: "b0b0", restCalls: 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			restCalls = 0
+			sha, err := c.getTagCommitSHA(ctx, repo, tt.tag)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.sha, sha)
+			}
+			assert.Equal(t, tt.restCalls, restCalls, "REST tag list requests")
+		})
+	}
+}
+
 // mockedContext returns a context whose GitHub client talks to a mock API.
 func mockedContext(t *testing.T, ctx context.Context, opts ...github_mock.MockBackendOption) context.Context {
 	t.Helper()
