@@ -301,6 +301,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 	log.Error().Err(err).Msgf("github: graphql fetch of directory %s failed, falling back to fetching per file", f)
 
+// TODO: once it got real world usage and no issues are reported remove fallback and we only do qrapql
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
