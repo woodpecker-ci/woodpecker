@@ -173,13 +173,13 @@ func createDepAndGate(t *testing.T, s store.Store, gateRunOn []string) (dep, gat
 	dep = &model.Task{
 		ID:        fmt.Sprint(workflows[0].ID),
 		RunOn:     []string{string(model.StatusSuccess)},
-		DepStatus: map[string]model.StatusValue{},
+		DepStatus: make(map[string]model.StatusValue),
 	}
 	gate = &model.Task{
 		ID:           fmt.Sprint(workflows[1].ID),
 		Dependencies: []string{dep.ID},
 		RunOn:        gateRunOn,
-		DepStatus:    map[string]model.StatusValue{},
+		DepStatus:    make(map[string]model.StatusValue),
 	}
 	return dep, gate
 }

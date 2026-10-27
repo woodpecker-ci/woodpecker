@@ -50,11 +50,11 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 			c := parseConstraints(t, tt.conf)
 			assert.Equalf(t,
 				tt.wantSuccess,
-				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
 				"include success is wrong for when: '%s'", tt.conf)
 			assert.Equal(t,
 				tt.wantFail,
-				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
 				"include fail is wrong for when: '%s'", tt.conf)
 		})
 	}
