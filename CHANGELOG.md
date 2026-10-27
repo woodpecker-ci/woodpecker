@@ -90,6 +90,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.39.0 [[#7396](https://github.com/woodpecker-ci/woodpecker/pull/7396)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.35.0 [[#7389](https://github.com/woodpecker-ci/woodpecker/pull/7389)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
