@@ -1250,7 +1250,7 @@ How often finished step logs are handed to the log store to be finalized. Must b
 - Name: `WOODPECKER_LOG_STORE_FINALIZER_BATCH`
 - Default: `500`
 
-Maximum number of pipelines whose step logs are finalized per interval. Must be at least 1.
+Maximum number of steps finalized per interval. Must be at least 1.
 
 ---
 

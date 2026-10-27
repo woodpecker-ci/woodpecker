@@ -441,7 +441,7 @@ var flags = append([]cli.Flag{
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_BATCH"),
 		Name:    "log-store-finalizer-batch",
-		Usage:   "maximum number of pipelines whose step logs are finalized per interval",
+		Usage:   "maximum number of steps finalized per interval",
 		Value:   500,
 	},
 	&cli.BoolFlag{

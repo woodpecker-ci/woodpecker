@@ -65,7 +65,7 @@ type Finalizer struct {
 	Store    store.Store
 	Logs     service_log.Service
 	Interval time.Duration
-	// Batch is the maximum number of pipelines handled per tick.
+	// Batch is the maximum number of steps handled per tick.
 	Batch  int
 	Paused bool
 }
@@ -82,7 +82,7 @@ func before(now time.Time) int64 {
 	return now.Add(-service_log.StreamDelayAllowed - service_log.AppendTimeout).Unix()
 }
 
-// Tick finalizes the steps of the oldest Batch pipelines due. A step that fails stays claimed
+// Tick finalizes the oldest Batch steps due. A step that fails stays claimed
 // until RecoverClaims hands it back, so it cannot block newer pipelines and is retried then.
 func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 	var res Result
@@ -97,7 +97,7 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		return res, nil
 	}
 
-	due.Pipelines = f.Batch
+	due.Limit = f.Batch
 	steps, err := f.Store.StepListByLogState(ctx, due)
 	if err != nil {
 		return res, err

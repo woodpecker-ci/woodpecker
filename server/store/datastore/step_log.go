@@ -23,7 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-// stepLogCond selects the steps of filter, ignoring Pipelines. A complete log is the counterpart of
+// stepLogCond selects the steps of filter, ignoring Limit. A complete log is the counterpart of
 // allowAppendingLogs: a running step may still get lines, even in a stopped pipeline.
 // Steps that never started are included, so they leave the selection too.
 func stepLogCond(filter *model.StepLogFilter) builder.Cond {
@@ -46,24 +46,15 @@ func (s storage) stepLogSession(ctx context.Context, cond builder.Cond) *xorm.Se
 	return s.engine.Context(ctx).Table("steps").Join("INNER", "pipelines", "pipelines.id = steps.pipeline_id").Where(cond)
 }
 
+// StepListByLogState orders by step ID, so the log_state index (log_state, id) serves the order and
+// the limit: steps are created with their pipeline, oldest pipeline first.
 func (s storage) StepListByLogState(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error) {
-	cond := stepLogCond(filter)
-	steps := make([]*model.Step, 0)
-
-	if filter.Pipelines > 0 {
-		var pipelineIDs []int64
-		if err := s.stepLogSession(ctx, cond).Distinct("steps.pipeline_id").
-			OrderBy("steps.pipeline_id ASC").Limit(filter.Pipelines).Find(&pipelineIDs); err != nil {
-			return nil, err
-		}
-		if len(pipelineIDs) == 0 {
-			return steps, nil
-		}
-		cond = builder.And(cond, builder.In("steps.pipeline_id", pipelineIDs))
+	sess := s.stepLogSession(ctx, stepLogCond(filter)).Cols("steps.*").OrderBy("steps.id ASC")
+	if filter.Limit > 0 {
+		sess = sess.Limit(filter.Limit)
 	}
-
-	err := s.stepLogSession(ctx, cond).Cols("steps.*").OrderBy("steps.pipeline_id ASC, steps.id ASC").Find(&steps)
-	return steps, err
+	steps := make([]*model.Step, 0)
+	return steps, sess.Find(&steps)
 }
 
 func (s storage) StepCountByLogState(ctx context.Context, filter *model.StepLogFilter) (int64, error) {

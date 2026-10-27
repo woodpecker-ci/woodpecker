@@ -61,8 +61,8 @@ type StepLogFilter struct {
 	// CompleteBefore, if set, selects only complete logs:
 	// step and pipeline stopped and finished before this unix time.
 	CompleteBefore int64
-	// Pipelines, if set, limits a list to the steps of the oldest Pipelines pipelines.
-	Pipelines int
+	// Limit, if set, limits a list to the oldest Limit steps.
+	Limit int
 }
 
 // TableName return database table name for xorm.
