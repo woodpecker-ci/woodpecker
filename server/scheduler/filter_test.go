@@ -246,6 +246,50 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantMatched: true,
 			wantScore:   10,
 		},
+		{
+			name: "Org agents only matches agent of the same org",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: true,
+			wantScore:   20,
+		},
+		{
+			name: "Org agents only rejects system agent",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "*", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
+			name: "Org agents only rejects agent of other org",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "456", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
+			name: "Org agents only rejects agent without org label",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
 	}
 
 	for _, tt := range tests {

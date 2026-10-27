@@ -25,11 +25,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v91/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -163,10 +163,9 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 	config := c.newConfig()
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -286,6 +285,9 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
+// maxParallelFileFetches bounds how many files of a config folder Dir loads at once.
+const maxParallelFileFetches = 10
+
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	// fetch the whole directory with a single GraphQL request: fetching one
 	// file per request multiplies both the latency and the exposure to
@@ -314,47 +316,40 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	// directories are not descended into, like in the single-request fetch
-	entries := make([]*github.RepositoryContent, 0, len(data))
+	// sub folders and submodules are no pipeline files and are not descended
+	// into, like in the single-request fetch; symlinks are fetched as the
+	// per-file fetch resolves them to the linked content
+	var paths []string
 	for _, file := range data {
-		if file.GetType() != "dir" {
-			entries = append(entries, file)
+		if t := file.GetType(); t == "file" || t == "symlink" {
+			paths = append(paths, f+"/"+file.GetName())
 		}
 	}
 
-	fc := make(chan *forge_types.FileMeta)
-	errChan := make(chan error)
-
-	for _, file := range entries {
-		go func(path string) {
-			content, err := c.File(ctx, u, r, b, path)
+	// load the files in parallel with a bounded number of workers,
+	// the first error cancels the fetches still running
+	files := make([]*forge_types.FileMeta, len(paths))
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelFileFetches)
+	for i, path := range paths {
+		g.Go(func() error {
+			content, err := c.File(gCtx, u, r, b, path)
 			if err != nil {
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
+				return err
 			}
-		}(f + "/" + file.GetName())
+			files[i] = &forge_types.FileMeta{
+				Name: path,
+				Data: content,
+			}
+			return nil
+		})
 	}
-
-	var files []*forge_types.FileMeta
-
-	for range entries {
-		select {
-		case err := <-errChan:
-			return nil, err
-		case fileMeta := <-fc:
-			files = append(files, fileMeta)
-		}
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
-
-	close(fc)
-	close(errChan)
 
 	return files, nil
 }
@@ -367,11 +362,9 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+		State:   "open",
 	})
 	if err != nil {
 		return nil, err
@@ -661,10 +654,8 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
 	})
 	if err != nil {
 		return nil, err

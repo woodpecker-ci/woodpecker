@@ -29,6 +29,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
@@ -88,16 +89,21 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
+// Use a delimiter not present in the value to preserve its contents.
+// https://www.nushell.sh/lang-guide/chapters/strings_and_text.html#string-literals
+func quoteNushell(value string) string {
+	for n := 1; ; n++ {
+		hashes := strings.Repeat("#", n)
+		if !strings.Contains(value, "'"+hashes) {
+			return "r" + hashes + "'" + value + "'" + hashes
+		}
+	}
+}
+
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
 	}
-
-	script := ""
-	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
-	}
-	script = strings.TrimSpace(script)
 
 	switch shellName {
 	default:
@@ -108,7 +114,12 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		fallthrough
 		// normal posix shells
 	case "sh", "bash", "zsh":
-		return []string{"-e", "-c", script}, nil
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-e", "-c", script.String()}, nil
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
@@ -116,37 +127,49 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		if err != nil {
 			return nil, err
 		}
-		script := "@echo off\n"
+		var script strings.Builder
+		script.WriteString("@echo off\n")
 		for _, cmd := range cmdList {
 			// Escaping in cmd.exe is a pain, because of that, the command is encoded in Base64, then the output is done
 			// by a special agent command, the decoder intentionally does not add a new line, so we have to add it here
-			encodedCmd := base64.StdEncoding.EncodeToString([]byte("+ " + cmd + "\n"))
+			encodedCmd := base64.StdEncoding.EncodeToString([]byte(common.CommandMarker + cmd + "\n"))
 
-			script += "\n"
-			script += agentPath + " decode-base64 " + encodedCmd + "\n"
-			script += cmd + "\n"
-			script += "if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
+			script.WriteString("\n")
+			script.WriteString(agentPath + " decode-base64 " + encodedCmd + "\n")
+			script.WriteString(cmd + "\n")
+			script.WriteString("if not %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n")
 		}
 		cmd, err := os.CreateTemp(baseDir, "*.cmd")
 		if err != nil {
 			return nil, err
 		}
 		defer cmd.Close()
-		if _, err := cmd.WriteString(script); err != nil {
+		if _, err := cmd.WriteString(script.String()); err != nil {
 			return nil, err
 		}
 		return []string{"/D", "/C", cmd.Name()}, nil
 	case "fish":
-		script := ""
+		var script strings.Builder
 		for _, cmd := range cmdList {
-			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + " || exit $status\n")
 		}
-		return []string{"-c", script}, nil
-	case "nu":
-		return []string{"--commands", script}, nil
+		return []string{"-c", script.String()}, nil
+	case "nu", "nushell":
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("print " + quoteNushell(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"--commands", script.String()}, nil
 	case "powershell", "pwsh":
-		// cspell:disable-next-line
-		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
+		var script strings.Builder
+		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
+		for _, cmd := range cmdList {
+			script.WriteString("Write-Host " + common.QuotePowerShell(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
 	}
 }
 

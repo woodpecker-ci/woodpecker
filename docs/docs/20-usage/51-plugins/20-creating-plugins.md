@@ -2,6 +2,19 @@
 
 Creating a new plugin is simple: Build a Docker container which uses your plugin logic as the ENTRYPOINT.
 
+## Security
+
+A plugin is just a step that runs your image, it is not secure on its own. But it can get more trust than a normal step: secrets limited to it by the [plugins filter](../40-secrets.md#plugins-filter), [privileged mode](../../30-administration/10-configuration/10-server.md#plugins_privileged) or the Git credentials as a [trusted clone plugin](../75-project-settings.md#custom-trusted-clone-plugins).
+
+Everybody who can change the workflow, for example with a pull request, controls the settings and the workspace. A plugin that should get this trust has to treat both as untrusted input:
+
+- No settings that run commands or scripts.
+- No settings loaded from files in the workspace.
+- Never print secrets.
+- Placeholders in settings are fine, as long as they cannot reach a secret: remove your secret settings (e.g. `PLUGIN_TOKEN`) from the environment before you replace them, or only allow a fixed list of names.
+
+If your plugin is not designed for this, say so in its documentation.
+
 ## Settings
 
 To allow users to configure the behavior of your plugin, you should use `settings:`.
@@ -42,11 +55,15 @@ Values like this are converted to JSON and then passed to your plugin. In the ex
 
 ### Secrets
 
-Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage).
+Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage). See [security](#security) for what your plugin has to take care of.
 
 ## Plugin library
 
-For Go, we provide a plugin library you can use to get easy access to internal env vars and your settings. See <https://codeberg.org/woodpecker-plugins/go-plugin>.
+We provide plugin libraries you can use to get easy access to internal env vars and your settings:
+
+- Go: [go-plugin](https://codeberg.org/woodpecker-plugins/go-plugin), import as `codeberg.org/woodpecker-plugins/go-plugin`
+- TypeScript / JavaScript: [ts-plugin](https://codeberg.org/woodpecker-plugins/ts-plugin), published as [`@woodpecker-ci/plugin`](https://www.npmjs.com/package/@woodpecker-ci/plugin)
+- Rust: [rust-plugin](https://codeberg.org/woodpecker-plugins/rust-plugin), published as [`woodpecker-plugin`](https://crates.io/crates/woodpecker-plugin)
 
 ## Metadata
 
@@ -65,20 +82,24 @@ Supported metadata:
 
 If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
 
-## Command output collapsing
+## Output groups
 
-Woodpecker's UI supports collapsing the output of single commands. Many plugins follow a similar structure to "regular" pipeline steps: They execute a fixed set of commands.
+Woodpecker's UI supports collapsible output groups for commands, plugin stages, test suites, or any other title. Titles do not need to match a command in the pipeline configuration, and groups work even when no pipeline configuration is available.
 
 <!-- markdownlint-disable no-space-in-code -->
 
-To make more clear to users which output belongs to which command, you can create those sections using a plugin as well: Print `▶  ` (two spaces) followed by the executed command.
+To start a group, print a line beginning with `▶  ` (`▶` followed by two ASCII spaces), then a nonempty title. Leading and trailing whitespace is ignored when detecting group headings. A single space, an embedded marker, or an empty or whitespace-only title does not start a group.
 
 <!-- markdownlint-enable no-space-in-code -->
 
-Example:
+Groups are flat: each group includes its heading and all following output until the next group heading or the end of the log. There are no nested groups or explicit end markers. Output before the first group remains visible.
+
+For example, a plugin can group its build and test output:
 
 ```bash
-echo "▶  make test"
+echo "▶  Build assets"
+make build
+echo "▶  Test suite"
 make test
 ```
 

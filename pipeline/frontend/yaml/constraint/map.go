@@ -14,7 +14,11 @@
 
 package constraint
 
-import "github.com/bmatcuk/doublestar/v4"
+import (
+	"maps"
+
+	"github.com/bmatcuk/doublestar/v4"
+)
 
 // Map defines a runtime constraint for exclude & include map strings.
 type Map struct {
@@ -69,9 +73,15 @@ func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 
 	c.Include = out1.Include
 	c.Exclude = out1.Exclude
-	for k, v := range out2 {
-		c.Include[k] = v
+	if c.Include == nil {
+		c.Include = make(map[string]string)
 	}
+	if c.Exclude == nil {
+		c.Exclude = make(map[string]string)
+	}
+	delete(out2, "include")
+	delete(out2, "exclude")
+	maps.Copy(c.Include, out2)
 	return nil
 }
 

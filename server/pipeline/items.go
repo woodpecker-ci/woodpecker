@@ -19,6 +19,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/rs/zerolog/log"
 
@@ -34,7 +35,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) (items []*builder.Item, err error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -149,6 +150,19 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	if server.Config.Pipeline.ForceIgnoreServiceFailure {
 		b.CompilerOptions = append(b.CompilerOptions, compiler.WithForceIgnoreServiceFailure())
 	}
+
+	// config is user controlled, so a panic in parser would crash the whole server
+	defer func() {
+		if r := recover(); r != nil {
+			const report = "This is a bug in Woodpecker, please report it at https://github.com/woodpecker-ci/woodpecker/issues"
+			log.Error().Str("repo", repo.FullName).Interface("recovered", r).Str("stack", string(debug.Stack())).
+				Msg("recovered panic while parsing pipeline config. " + report)
+			items, err = nil, &pipeline_errors.PipelineError{
+				Type:    pipeline_errors.PipelineErrorTypeGeneric,
+				Message: fmt.Sprintf("unexpected internal error while parsing config: %v. %s", r, report),
+			}
+		}
+	}()
 
 	return b.Build()
 }
@@ -265,6 +279,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			DependsOn:  item.DependsOn.Names(),
 		}
 
 		if pipeline.Status == model.StatusBlocked {
@@ -284,6 +299,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 					State:      model.StatusPending,
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
+					DependsOn:  step.DependsOn,
 				}
 
 				if pipeline.Status == model.StatusBlocked {

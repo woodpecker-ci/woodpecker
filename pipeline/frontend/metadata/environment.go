@@ -52,6 +52,9 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_REPO", path.Join(repo.Owner, repo.Name))
 	setNonEmptyEnvVar(params, "CI_REPO_NAME", repo.Name)
 	setNonEmptyEnvVar(params, "CI_REPO_OWNER", repo.Owner)
+	if repo.ID > 0 {
+		setNonEmptyEnvVar(params, "CI_REPO_ID", strconv.FormatInt(repo.ID, 10))
+	}
 	setNonEmptyEnvVar(params, "CI_REPO_REMOTE_ID", repo.RemoteID)
 	setNonEmptyEnvVar(params, "CI_REPO_URL", repo.ForgeURL)
 	setNonEmptyEnvVar(params, "CI_REPO_CLONE_URL", repo.CloneURL)

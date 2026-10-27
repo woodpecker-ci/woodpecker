@@ -17,6 +17,7 @@ package local
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"testing"
@@ -34,6 +35,33 @@ func TestLookupShellPath(t *testing.T) {
 		t.Setenv("WOODPECKER_SHELL_PATH_woodpecker-test-shell", "/custom/path/woodpecker-test-shell")
 		assert.Equal(t, "/custom/path/woodpecker-test-shell", lookupShellPath("woodpecker-test-shell"))
 	})
+}
+
+func TestQuoteNushell(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"empty", "", "r#''#"},
+		{"plain", "hello", "r#'hello'#"},
+		{"single quote", "it's working", "r#'it's working'#"},
+		{"double quote", `echo "hello"`, `r#'echo "hello"'#`},
+		{"variable", `echo $env.HOME`, `r#'echo $env.HOME'#`},
+		{"expression", `echo (date now)`, `r#'echo (date now)'#`},
+		{"backslash", `C:\Users\test`, `r#'C:\Users\test'#`},
+		{"backtick", "echo `test", "r#'echo `test'#"},
+		{"delimiter", "echo '# test", "r##'echo '# test'##"},
+		{"nested delimiter", "echo '## test", "r###'echo '## test'###"},
+		{"multiple delimiters", "echo '# and '##", "r###'echo '# and '##'###"},
+		{"newline", "hello\nworld", "r#'hello\nworld'#"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, quoteNushell(tt.input))
+		})
+	}
 }
 
 func TestGenCmdByShell(t *testing.T) {
@@ -66,25 +94,29 @@ func TestGenCmdByShell(t *testing.T) {
 			require.NoError(t, err)
 			assert.EqualValues(t, fmt.Sprintf(`@echo off
 
-%s decode-base64 KyBlY2hvIGhpCg==
+%s decode-base64 4pa2ICBlY2hvIGhpCg==
 echo hi
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 
-%s decode-base64 KyBjYWxsIGJ1aWxkLmJhdAo=
+%s decode-base64 4pa2ICBjYWxsIGJ1aWxkLmJhdAo=
 call build.bat
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 `, agentPath, agentPath), string(content))
 		})
 
 		t.Run("powershell", func(t *testing.T) {
-			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "echo test"}, t.TempDir())
+			args, err := e.genCmdByShell("powershell", "powershell", []string{"Write-Host 'test'", "Write-Output 'test'", "echo test"}, t.TempDir())
 			require.NoError(t, err)
 			require.Len(t, args, 4)
 			assert.EqualValues(t, []string{"-noprofile", "-noninteractive", "-c"}, []string{args[0], args[1], args[2]})
-			assert.EqualValues(t, `$ErrorActionPreference = "Stop"; echo '+ Write-Host '"'"'test'"'"''
+			assert.EqualValues(t, `$ErrorActionPreference = "Stop"
+Write-Host '▶  Write-Host ''test'''
 Write-Host 'test'
-echo '+ echo test'
-echo test`, args[3])
+Write-Host '▶  Write-Output ''test'''
+Write-Output 'test'
+Write-Host '▶  echo test'
+echo test
+`, args[3])
 
 			args, err = e.genCmdByShell("pwsh", "pwsh", []string{"Get-Process"}, t.TempDir())
 			require.NoError(t, err)
@@ -124,11 +156,21 @@ echo test`, args[3])
 	})
 
 	t.Run("nu shell", func(t *testing.T) {
-		args, err := e.genCmdByShell("nu", "nu", []string{"echo test"}, t.TempDir())
+		args, err := e.genCmdByShell("nu", "nu", []string{
+			"echo test",
+			`echo "hello"`,
+			`echo "text '# test"`,
+		}, t.TempDir())
 		require.NoError(t, err)
-		assert.Len(t, args, 2)
+		require.Len(t, args, 2)
 		assert.Equal(t, "--commands", args[0])
-		assert.Contains(t, args[1], "echo test")
+		assert.Equal(t, `print r#'▶  echo test'#
+echo test
+print r#'▶  echo "hello"'#
+echo "hello"
+print r##'▶  echo "text '# test"'##
+echo "text '# test"
+`, args[1])
 	})
 
 	t.Run("command escaping", func(t *testing.T) {
@@ -140,11 +182,11 @@ echo test`, args[3])
 		require.NoError(t, err)
 		assert.EqualValues(t, fmt.Sprintf(`@echo off
 
-%s decode-base64 KyBlY2hvICd0ZXN0IHdpdGggfCBwaXBlJwo=
+%s decode-base64 4pa2ICBlY2hvICd0ZXN0IHdpdGggfCBwaXBlJwo=
 echo 'test with | pipe'
 if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 
-%s decode-base64 KyBlY2hvICd0ZXN0ICYgYW1wZXJzYW5kJwoKZWNobyBuZXcgbGluZQo=
+%s decode-base64 4pa2ICBlY2hvICd0ZXN0ICYgYW1wZXJzYW5kJwoKZWNobyBuZXcgbGluZQo=
 echo 'test & ampersand'
 
 echo new line
@@ -171,6 +213,86 @@ if not %%ERRORLEVEL%% == 0 exit %%ERRORLEVEL%%
 		assert.Len(t, args, 3)
 		assert.Equal(t, "-e", args[0])
 	})
+}
+
+func TestNushellRun(t *testing.T) {
+	nuPath, err := exec.LookPath("nu")
+	if err != nil {
+		t.Skip("nu not found in PATH")
+	}
+
+	e := local{tempDir: t.TempDir()}
+	args, err := e.genCmdByShell("nu", nuPath, []string{
+		`print "plain"`,
+		`print "it's"`,
+		`print "text '# test"`,
+		`print "a'#'##b"`,
+		`print $"(1 + 1)"`,
+		`print 'C:\Users\test'`,
+		"print `back tick`",
+		`print "end'"`,
+	}, t.TempDir())
+	require.NoError(t, err)
+
+	out, err := exec.Command(nuPath, args...).CombinedOutput()
+	require.NoError(t, err, string(out))
+	assert.Equal(t, `▶  print "plain"
+plain
+▶  print "it's"
+it's
+▶  print "text '# test"
+text '# test
+▶  print "a'#'##b"
+a'#'##b
+▶  print $"(1 + 1)"
+2
+▶  print 'C:\Users\test'
+C:\Users\test
+▶  print `+"`back tick`"+`
+back tick
+▶  print "end'"
+end'
+`, string(out))
+}
+
+func TestPowerShellRun(t *testing.T) {
+	pwshPath, err := exec.LookPath("pwsh")
+	if err != nil {
+		t.Skip("pwsh not found in PATH")
+	}
+
+	e := local{tempDir: t.TempDir()}
+	args, err := e.genCmdByShell("pwsh", pwshPath, []string{
+		`Write-Host 'plain'`,
+		`Write-Host "it's"`,
+		`Write-Host 'it''s'`,
+		`Write-Host ‘smart’`,
+		`Write-Host "$(1 + 1)"`,
+		"Write-Host \"back`ttick\"",
+		`Write-Output 'C:\Users\test'`,
+		`Write-Host "end'"`,
+	}, t.TempDir())
+	require.NoError(t, err)
+
+	out, err := exec.Command(pwshPath, args...).CombinedOutput()
+	require.NoError(t, err, string(out))
+	assert.Equal(t, `▶  Write-Host 'plain'
+plain
+▶  Write-Host "it's"
+it's
+▶  Write-Host 'it''s'
+it's
+▶  Write-Host ‘smart’
+smart
+▶  Write-Host "$(1 + 1)"
+2
+▶  Write-Host "back`+"`"+`ttick"
+back	tick
+▶  Write-Output 'C:\Users\test'
+C:\Users\test
+▶  Write-Host "end'"
+end'
+`, string(out))
 }
 
 func TestProbeShellIsPosix(t *testing.T) {

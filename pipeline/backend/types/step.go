@@ -37,6 +37,7 @@ type Step struct {
 	Networks       []Conn            `json:"networks,omitempty"`
 	DNS            []string          `json:"dns,omitempty"`
 	DNSSearch      []string          `json:"dns_search,omitempty"`
+	DependsOn      []string          `json:"depends_on,omitempty"`
 	OnFailure      bool              `json:"on_failure,omitempty"`
 	OnSuccess      bool              `json:"on_success,omitempty"`
 	Failure        string            `json:"failure,omitempty"`

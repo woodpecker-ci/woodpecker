@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -214,13 +215,36 @@ func DeletePipeline(c *gin.Context) {
 		return
 	}
 
-	err := store.FromContext(c).DeletePipeline(pl)
+	_store := store.FromContext(c)
+
+	if err := deleteStoredLogs(c, _store, pl.ID); err != nil {
+		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
+		return
+	}
+
+	err := _store.DeletePipeline(pl)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
 		return
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// deleteStoredLogs deletes the logs of every step of a pipeline from the log store.
+// Deleting steps from the database only removes logs kept in the database,
+// so logs kept by other log stores would stay behind.
+func deleteStoredLogs(ctx context.Context, _store store.Store, pipelineID int64) error {
+	steps, err := _store.StepList(pipelineID)
+	if err != nil {
+		return err
+	}
+
+	var errs error
+	for _, step := range steps {
+		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(ctx, step))
+	}
+	return errs
 }
 
 // GetPipeline
@@ -292,7 +316,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 func GetStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -315,7 +339,7 @@ func GetStepLogs(c *gin.Context) {
 func DownloadStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -366,7 +390,6 @@ func sanitizeDownloadFilename(filename string) string {
 //	@Param		pipeline_number	path	int		true	"the number of the pipeline"
 //	@Param		step_id			path	int		true	"the step id"
 func DeleteStepLogs(c *gin.Context) {
-	_store := store.FromContext(c)
 	_step := session.Step(c)
 
 	switch _step.State {
@@ -375,7 +398,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err := _store.LogDelete(_step)
+	err := server.Config.Services.LogStore.LogDelete(c, _step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -585,6 +608,17 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
+		// The deployment is attributed to whoever triggered it, not the original pipeline's author.
+		deployer := session.User(c)
+		if deployer == nil {
+			_ = c.AbortWithError(http.StatusUnauthorized, fmt.Errorf("user not found in session"))
+			return
+		}
+		pl.Author = deployer.Login
+		pl.Avatar = deployer.Avatar
+		pl.Email = deployer.Email
+		pl.Sender = deployer.Login
+
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 	}
 
@@ -637,7 +671,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := server.Config.Services.LogStore.LogDelete(step); err != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(c, step); lErr != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

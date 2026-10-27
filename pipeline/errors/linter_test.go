@@ -105,8 +105,8 @@ func TestGetPipelineErrors(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		assert.Equalf(t, pipeline_errors.GetPipelineErrors(test.err), test.expected, test.title)
+	for _, tt := range tests {
+		assert.Equalf(t, pipeline_errors.GetPipelineErrors(tt.err), tt.expected, tt.title)
 	}
 }
 
@@ -164,7 +164,7 @@ func TestHasBlockingErrors(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		assert.Equal(t, test.expected, pipeline_errors.HasBlockingErrors(test.err))
+	for _, tt := range tests {
+		assert.Equal(t, tt.expected, pipeline_errors.HasBlockingErrors(tt.err))
 	}
 }

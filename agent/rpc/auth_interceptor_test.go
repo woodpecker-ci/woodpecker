@@ -49,7 +49,7 @@ func TestAuthInterceptorAttachToken(t *testing.T) {
 	t.Parallel()
 
 	interceptor := &AuthInterceptor{accessToken: "token"}
-	base := metadata.AppendToOutgoingContext(context.Background(), "extra", "value")
+	base := metadata.AppendToOutgoingContext(t.Context(), "extra", "value")
 	ctx, token := interceptor.attachToken(base)
 
 	md, ok := metadata.FromOutgoingContext(ctx)
@@ -60,7 +60,7 @@ func TestAuthInterceptorAttachToken(t *testing.T) {
 }
 
 func TestAuthInterceptorRefreshesRejectedTokenForCallerRetry(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
 	defer cancel()
 	wantDeadline, _ := ctx.Deadline()
 
@@ -105,7 +105,7 @@ func TestAuthInterceptorPreservesErrors(t *testing.T) {
 		permissionErr := status.Error(codes.PermissionDenied, "denied")
 
 		err := interceptor.Unary()(
-			context.Background(), "/proto.Woodpecker/Next", nil, nil, nil,
+			t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
 			func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
 				return permissionErr
 			},
@@ -123,7 +123,7 @@ func TestAuthInterceptorPreservesErrors(t *testing.T) {
 		unauthenticatedErr := status.Error(codes.Unauthenticated, "expired token")
 
 		err := interceptor.Unary()(
-			context.Background(), "/proto.Woodpecker/Next", nil, nil, nil,
+			t.Context(), "/proto.Woodpecker/Next", nil, nil, nil,
 			func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
 				return unauthenticatedErr
 			},
@@ -145,12 +145,10 @@ func TestAuthInterceptorCoalescesConcurrentRefresh(t *testing.T) {
 	errs := make(chan error, callers)
 	var wg sync.WaitGroup
 	for range callers {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			<-start
-			errs <- interceptor.refreshTokenAfterUnauthenticated(context.Background(), "old-token")
-		}()
+			errs <- interceptor.refreshTokenAfterUnauthenticated(t.Context(), "old-token")
+		})
 	}
 	close(start)
 	wg.Wait()
@@ -159,7 +157,7 @@ func TestAuthInterceptorCoalescesConcurrentRefresh(t *testing.T) {
 	for err := range errs {
 		require.NoError(t, err)
 	}
-	_, token := interceptor.attachToken(context.Background())
+	_, token := interceptor.attachToken(t.Context())
 	assert.Equal(t, "new-token", token)
 	assert.Equal(t, int32(1), authCalls.Load())
 }

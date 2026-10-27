@@ -180,7 +180,8 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 
 			// If status code is OK (2xx), parse and return response
 			if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
-				if out != nil {
+				// a 204 No Content response has no body to decode
+				if out != nil && statusCode != http.StatusNoContent {
 					err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
 					// Check for EOF error during response body parsing
 					if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {
@@ -209,8 +210,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 // isRetryableError checks if an error is transient and suitable for retry.
 func isRetryableError(err error) bool {
 	// Check for network-related errors
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	if netErr, ok := errors.AsType[net.Error](err); ok {
 		// Retry on timeout errors
 		if netErr.Timeout() {
 			return true

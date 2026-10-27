@@ -10,13 +10,13 @@ repos:
       - id: end-of-file-fixer
         exclude: '\.sql$'
       - id: trailing-whitespace
-        exclude: ^docs/versioned_docs/.+/40-cli.md$
+        exclude: ^docs/versioned_docs/.+/40-cli/90-reference.md$
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.14.0
+    rev: v2.15.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.49.1
+    rev: v0.50.0
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
@@ -31,7 +31,7 @@ repos:
     hooks:
       - id: hadolint
   - repo: https://github.com/rbubley/mirrors-prettier
-    rev: v3.9.9
+    rev: v3.9.10
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git

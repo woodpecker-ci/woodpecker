@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -34,7 +35,12 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
 
-	tasks, err := pipelineTasks(repo, activePipeline, pipelineItems)
+	org, err := store.OrgGet(repo.OrgID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load org %d of repo %s: %w", repo.OrgID, repo.FullName, err)
+	}
+
+	tasks, err := pipelineTasks(repo, org, activePipeline, pipelineItems)
 	if err != nil {
 		return nil, err
 	}

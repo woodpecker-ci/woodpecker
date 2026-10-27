@@ -81,28 +81,31 @@ func (s storage) CreateUser(user *model.User) error {
 }
 
 func (s storage) UpdateUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).AllCols().Update(user)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(user.ID).AllCols().Update(user))
+	})
 }
 
 func (s storage) DeleteUser(user *model.User) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
 
-	if err := s.orgDelete(sess, user.OrgID); err != nil {
-		return fmt.Errorf("failed to delete org: %w", err)
-	}
+		if err := s.orgDelete(sess, user.OrgID); err != nil {
+			return fmt.Errorf("failed to delete org: %w", err)
+		}
 
-	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
-	}
+		if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
 
-	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
-		return fmt.Errorf("failed to delete perms: %w", err)
-	}
+		if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+			return fmt.Errorf("failed to delete perms: %w", err)
+		}
 
-	return sess.Commit()
+		return sess.Commit()
+	})
 }

@@ -139,7 +139,7 @@ func TestDownloadStepLogs(t *testing.T) {
 	}
 
 	mockLogStore := log_mocks.NewMockService(t)
-	mockLogStore.On("LogFind", step).Return(logs, nil)
+	mockLogStore.On("LogFind", mock.Anything, step).Return(logs, nil)
 
 	originalLogStore := server.Config.Services.LogStore
 	server.Config.Services.LogStore = mockLogStore
@@ -161,12 +161,86 @@ func TestDownloadStepLogs(t *testing.T) {
 	assert.Equal(t, "first line\n\x1b[31msecond line\x1b[0m", w.Body.String())
 }
 
+func TestDeleteStepLogs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	setLogStore := func(t *testing.T) *log_mocks.MockService {
+		mockLogStore := log_mocks.NewMockService(t)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+		return mockLogStore
+	}
+
+	t.Run("deletes through the log store", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusSuccess}
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", mock.Anything, step).Return(nil)
+
+		// the store must not be used to delete logs, the configured log store may not be the database
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+
+	t.Run("returns the log store error", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusFailure}
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", mock.Anything, step).Return(assert.AnError)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusInternalServerError, c.Writer.Status())
+	})
+
+	t.Run("does not delete logs of a running step", func(t *testing.T) {
+		step := &model.Step{ID: 3, State: model.StatusRunning}
+		setLogStore(t)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("step", step)
+
+		DeleteStepLogs(c)
+
+		assert.Equal(t, http.StatusUnprocessableEntity, c.Writer.Status())
+	})
+}
+
 func TestDeletePipeline(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	steps := []*model.Step{{ID: 3, PipelineID: fakePipeline.ID}, {ID: 4, PipelineID: fakePipeline.ID}}
+
+	setLogStore := func(t *testing.T) *log_mocks.MockService {
+		mockLogStore := log_mocks.NewMockService(t)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+		return mockLogStore
+	}
+
 	t.Run("should delete pipeline", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
+
+		// the logs may live outside the database, so they are deleted through the log store
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(nil)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(nil)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
 		c.Set("store", mockStore)
@@ -176,6 +250,24 @@ func TestDeletePipeline(t *testing.T) {
 
 		mockStore.AssertCalled(t, "DeletePipeline", mock.Anything)
 		assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	})
+
+	t.Run("should keep the pipeline if its logs cannot be deleted", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
+
+		mockLogStore := setLogStore(t)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(assert.AnError)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(nil)
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", mockStore)
+		c.Set("pipeline", fakePipeline)
+
+		DeletePipeline(c)
+
+		mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
+		assert.Equal(t, http.StatusInternalServerError, c.Writer.Status())
 	})
 
 	t.Run("should not delete pending", func(t *testing.T) {
@@ -332,6 +424,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -404,6 +497,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -492,7 +586,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// fetchResult is what the config service serves on the fetch. The store is
 	// returned so callers can assert which persist calls ran.
-	setupPost := func(t *testing.T, parent *model.Pipeline, fetchResult []*forge_types.FileMeta) (*httptest.ResponseRecorder, *store_mocks.MockStore) {
+	setupPost := func(t *testing.T, parent *model.Pipeline, fetchResult []*forge_types.FileMeta, target string, sessionUser *model.User) (*httptest.ResponseRecorder, *store_mocks.MockStore) {
 		mockStore := store_mocks.NewMockStore(t)
 		mockConfigService := config_service_mocks.NewMockService(t)
 		mockSecretService := secret_service_mocks.NewMockService(t)
@@ -533,14 +627,15 @@ func TestPostPipeline(t *testing.T) {
 		mockStore.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("WorkflowsCreate", mock.Anything).Return(nil).Maybe()
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil).Maybe()
+		mockStore.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", mockStore)
 		c.Set("repo", fakeRepo)
-		c.Set("user", fakeUser)
+		c.Set("user", sessionUser)
 		c.Set("pipeline", parent)
-		c.Request, _ = http.NewRequest(http.MethodPost, "", nil)
+		c.Request, _ = http.NewRequest(http.MethodPost, target, nil)
 
 		PostPipeline(c)
 		return w, mockStore
@@ -548,7 +643,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// Before the fix, Restart guarded on the empty old config rows.
 	t.Run("restart of a config-less errored pipeline succeeds when the fetch yields config", func(t *testing.T) {
-		w, mockStore := setupPost(t, newErroredParent(), validConfig)
+		w, mockStore := setupPost(t, newErroredParent(), validConfig, "", fakeUser)
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var got model.Pipeline
@@ -566,7 +661,7 @@ func TestPostPipeline(t *testing.T) {
 
 	// No old config and an empty fetch is a genuine "not found".
 	t.Run("restart still errors when no old config and the fetch is empty", func(t *testing.T) {
-		w, _ := setupPost(t, newErroredParent(), []*forge_types.FileMeta{})
+		w, _ := setupPost(t, newErroredParent(), []*forge_types.FileMeta{}, "", fakeUser)
 
 		require.Equal(t, http.StatusOK, w.Code)
 		var got model.Pipeline
@@ -574,5 +669,69 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, model.StatusError, got.Status)
 		require.NotEmpty(t, got.Errors)
 		assert.Equal(t, "pipeline definition not found", got.Errors[0].Message)
+	})
+
+	t.Run("deployment is attributed to the session user, not the original author or repo owner", func(t *testing.T) {
+		fakeRepo.AllowDeploy = true
+		t.Cleanup(func() { fakeRepo.AllowDeploy = false })
+
+		parent := newErroredParent()
+		parent.Author, parent.Avatar, parent.Email, parent.Sender = "orig", "orig.png", "orig@example.com", "orig"
+		deployer := &model.User{ID: 2, Login: "deployer", Email: "deployer@example.com", Avatar: "deployer.png"}
+		deployConfig := []*forge_types.FileMeta{
+			{Name: ".woodpecker.yml", Data: []byte("when:\n  event: deployment\nsteps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
+		}
+
+		w, _ := setupPost(t, parent, deployConfig, "?event=deployment&deploy_to=prod", deployer)
+
+		require.Equal(t, http.StatusOK, w.Code)
+		var got model.Pipeline
+		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))
+		assert.Equal(t, model.EventDeploy, got.Event)
+		assert.Equal(t, "deployer", got.Author)
+		assert.Equal(t, "deployer.png", got.Avatar)
+		assert.Equal(t, "deployer@example.com", got.Email)
+		assert.Equal(t, "deployer", got.Sender)
+	})
+}
+
+func TestDeletePipelineLogs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	pipeline := &model.Pipeline{ID: 2, Status: model.StatusFailure}
+	steps := []*model.Step{{ID: 3, PipelineID: 2}, {ID: 4, PipelineID: 2}}
+
+	run := func(t *testing.T, firstErr, secondErr error) int {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("StepList", pipeline.ID).Return(steps, nil)
+
+		mockLogStore := log_mocks.NewMockService(t)
+		mockLogStore.On("LogDelete", mock.Anything, steps[0]).Return(firstErr)
+		mockLogStore.On("LogDelete", mock.Anything, steps[1]).Return(secondErr)
+		originalLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() {
+			server.Config.Services.LogStore = originalLogStore
+		})
+
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", mockStore)
+		c.Set("pipeline", pipeline)
+
+		DeletePipelineLogs(c)
+
+		return c.Writer.Status()
+	}
+
+	t.Run("deletes the logs of every step", func(t *testing.T) {
+		assert.Equal(t, http.StatusNoContent, run(t, nil, nil))
+	})
+
+	t.Run("reports a failed delete and still tries every step", func(t *testing.T) {
+		assert.Equal(t, http.StatusInternalServerError, run(t, assert.AnError, nil))
+	})
+
+	t.Run("reports a failed delete of the last step", func(t *testing.T) {
+		assert.Equal(t, http.StatusInternalServerError, run(t, nil, assert.AnError))
 	})
 }

@@ -82,9 +82,9 @@ func (e *docker) IsAvailable(ctx context.Context) bool {
 	return err == nil
 }
 
-func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
+func httpClientOfOpts(dockerCertPath string, verifyTLS bool) (*http.Client, error) {
 	if dockerCertPath == "" {
-		return nil
+		return nil, nil
 	}
 
 	options := tlsconfig.Options{
@@ -95,17 +95,14 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 	tlsConf, err := tlsconfig.Client(options)
 	if err != nil {
-		log.Error().Err(err).Msg("could not create http client out of docker backend options")
-		return nil
+		return nil, fmt.Errorf("could not create TLS config from docker backend certificates: %w", err)
 	}
 
+	// client.WithHost can only configure a plain *http.Transport, so it must not be wrapped.
 	return &http.Client{
-		Transport: httputil.NewUserAgentRoundTripper(
-			&http.Transport{TLSClientConfig: tlsConf},
-			"backend-docker",
-		),
+		Transport:     &http.Transport{TLSClientConfig: tlsConf},
 		CheckRedirect: client.CheckRedirect,
-	}
+	}, nil
 }
 
 func (e *docker) Flags() []cli.Flag {
@@ -119,8 +116,12 @@ func (e *docker) Load(ctx context.Context) (*backend_types.BackendInfo, error) {
 		return nil, backend_types.ErrNoCliContextFound
 	}
 
-	var dockerClientOpts []client.Opt
-	if httpClient := httpClientOfOpts(c.String("backend-docker-cert"), c.Bool("backend-docker-tls-verify")); httpClient != nil {
+	dockerClientOpts := []client.Opt{client.WithUserAgent(httputil.UserAgent("backend-docker"))}
+	httpClient, err := httpClientOfOpts(c.String("backend-docker-cert"), c.Bool("backend-docker-tls-verify"))
+	if err != nil {
+		return nil, err
+	}
+	if httpClient != nil {
 		dockerClientOpts = append(dockerClientOpts, client.WithHTTPClient(httpClient))
 	}
 	if dockerHost := c.String("backend-docker-host"); dockerHost != "" {
@@ -348,7 +349,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 
 	// we first signal to the container to stop ...
 	if _, err := e.client.ContainerStop(ctx, containerName, client.ContainerStopOptions{
-		Timeout: toRef(int(e.config.stopTimeout)),
+		Timeout: new(int(e.config.stopTimeout)),
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		// we do not return error yet as we try to kill it first
 		stopErr = fmt.Errorf("could not stop container '%s': %w", step.Name, err)
