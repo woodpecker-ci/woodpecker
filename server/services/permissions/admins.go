@@ -45,12 +45,12 @@ func (a *Admins) IsAdmin(user *model.User) bool {
 	return a.admins[login] && !a.revoked[login]
 }
 
-// IsListed reports whether the user is in the list read at server start,
-// also after a revoke, so the UI can show where the admin comes from.
-func (a *Admins) IsListed(user *model.User) bool {
+// IsRevoked reports whether the user is listed, but admin was revoked until the
+// server restarts.
+func (a *Admins) IsRevoked(user *model.User) bool {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
-	return a.admins[strings.ToLower(user.Login)]
+	return a.revoked[strings.ToLower(user.Login)]
 }
 
 // Revoke stops granting admin to a listed login until the server restarts, so a

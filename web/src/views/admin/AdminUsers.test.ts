@@ -108,8 +108,9 @@ describe('adminUsers', () => {
     getUsers.mockResolvedValue([
       { id: 1, login: 'db-admin', forge_id: 1, admin: true, admin_env: false } as User,
       { id: 2, login: 'env-admin', forge_id: 1, admin: true, admin_env: true } as User,
-      { id: 3, login: 'revoked', forge_id: 1, admin: false, admin_env: true } as User,
+      { id: 3, login: 'revoked', forge_id: 1, admin: false, admin_env: true, admin_revoked: true } as User,
       { id: 4, login: 'user', forge_id: 1, admin: false, admin_env: false } as User,
+      { id: 5, login: 'not-signed-in', forge_id: 1, admin: false, admin_env: true } as User,
     ]);
     const wrapper = await mountAdminUsers();
 
@@ -138,6 +139,11 @@ describe('adminUsers', () => {
     ]);
 
     expect(adminTexts('user')).not.toContain('Admin');
+
+    // a listed user gets admin at the first sign in, nothing was revoked
+    expect(badgesOf('not-signed-in')).toEqual([
+      { text: 'Admin (env)', title: 'Admin because the user is listed in WOODPECKER_ADMIN.' },
+    ]);
   });
 
   it('creates the user on the forge picked in the form', async () => {

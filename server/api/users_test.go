@@ -103,8 +103,30 @@ func TestPatchUser(t *testing.T) {
 			if u.Login == "erin" {
 				assert.True(t, u.AdminEnv)
 				assert.False(t, u.Admin)
+				assert.True(t, u.AdminRevoked)
 			}
 		}
+	})
+
+	t.Run("a listed user who never signed in is not shown as revoked", func(t *testing.T) {
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"grace"})
+		require.NoError(t, s.CreateUser(&model.User{Login: "grace", ForgeID: defaultForgeID, ForgeRemoteID: "7", Hash: "grace"}))
+
+		tc := newTestContext(t, s)
+		GetUsers(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
+		var users []*model.User
+		tc.decodeJSON(t, &users)
+		found := false
+		for _, u := range users {
+			if u.Login == "grace" {
+				found = true
+				assert.True(t, u.AdminEnv)
+				assert.False(t, u.Admin)
+				assert.False(t, u.AdminRevoked, "grace gets admin at the first sign in")
+			}
+		}
+		assert.True(t, found)
 	})
 
 	t.Run("keeping admin leaves the admin list alone", func(t *testing.T) {

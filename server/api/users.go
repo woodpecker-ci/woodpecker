@@ -51,8 +51,10 @@ func GetUsers(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
 	}
+	admins := server.Config.Permissions.Admins
 	for _, user := range users {
-		user.AdminEnv = server.Config.Permissions.Admins.IsListed(user)
+		user.AdminRevoked = admins.IsRevoked(user)
+		user.AdminEnv = user.AdminRevoked || admins.IsAdmin(user)
 	}
 	c.JSON(http.StatusOK, users)
 }
