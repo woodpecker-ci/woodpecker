@@ -32,7 +32,7 @@ import (
 // MembershipService is a service to check for user membership.
 type MembershipService interface {
 	// Get returns if the user is a member of the organization.
-	Get(ctx context.Context, _forge forge.Forge, u *model.User, org string) (*model.OrgPerm, error)
+	Get(ctx context.Context, _forge forge.Forge, u *model.User, org *model.Org) (*model.OrgPerm, error)
 }
 
 type membershipCache struct {
@@ -51,22 +51,35 @@ func NewMembershipService(_store store.Store) MembershipService {
 }
 
 // Get returns if the user is a member of the organization.
-func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.User, org string) (*model.OrgPerm, error) {
+func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.User, org *model.Org) (*model.OrgPerm, error) {
 	// ForgeRemoteID is only unique per forge, so the key must be scoped by
 	// the (globally unique) user ID to not leak permissions across forges
-	key := fmt.Sprintf("%d-%s", u.ID, org)
+	key := fmt.Sprintf("%d-%d", u.ID, org.ID)
 	item := c.cache.Get(key)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
 	}
 
-	perm, err := _forge.OrgMembership(ctx, u, org)
+	perm, err := _forge.OrgMembership(ctx, u, org.Name)
 	if errors.Is(err, forge_types.ErrNotImplemented) {
 		log.Debug().Msg("Could not check user org membership as forge adapter did not implement it")
 		return &model.OrgPerm{}, nil
 	} else if err != nil {
 		return nil, err
 	}
+
+	// the membership is checked by name, so it only counts if the forge org
+	// with that name is still the one of the stored org
+	if perm.Member && org.ForgeRemoteID.IsValid() {
+		from, err := _forge.Org(ctx, u, org.Name)
+		if err != nil {
+			return nil, err
+		}
+		if from.ForgeRemoteID.IsValid() && from.ForgeRemoteID != org.ForgeRemoteID {
+			perm = &model.OrgPerm{}
+		}
+	}
+
 	c.cache.Set(key, perm, c.ttl)
 	return perm, nil
 }
