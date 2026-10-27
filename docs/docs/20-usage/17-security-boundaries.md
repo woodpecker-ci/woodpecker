@@ -56,6 +56,8 @@ By default this is the case for pull requests from forks.
 - On most forges the author of a pull request is the user who opened it, so everybody who can push to it runs pipelines without approval.
 - Manual pipelines, crons, restarts (also of declined pipelines) and deployments started in Woodpecker never need approval,
   as starting them needs push access like approving does.
+  Their author is the user who started them, except for crons, which have none, and restarts, which keep the author of the original pipeline.
+  <!-- TODO: restarts should get the user who restarted them as author, like deployments do since #7358. -->
 - An approved pipeline runs the configuration it was created with, but gets the current secrets and the Git credentials of the user who approved it.
   <!-- https://github.com/woodpecker-ci/woodpecker/blob/1182744d09b1c097b47749ed813cc7e0549c25c9/server/pipeline/approve.go#L60 -->
 
