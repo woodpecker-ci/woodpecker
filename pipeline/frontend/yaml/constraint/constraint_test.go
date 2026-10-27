@@ -199,6 +199,43 @@ func TestConstraints(t *testing.T) {
 	}
 }
 
+func TestConstraintsMatchIgnoringEvaluate(t *testing.T) {
+	testdata := []struct {
+		desc string
+		conf string
+		with metadata.Metadata
+		want bool
+	}{
+		{
+			desc: "eval on unknown variable is treated as matching",
+			conf: `{ event: manual, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: true,
+		},
+		{
+			desc: "other conditions still apply",
+			conf: `{ event: push, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: false,
+		},
+		{
+			desc: "branch still applies",
+			conf: `{ branch: main, evaluate: 'true' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual, Commit: metadata.Commit{Branch: "dev"}}},
+			want: false,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.desc, func(t *testing.T) {
+			c := parseConstraints(t, tt.conf)
+			got, err := c.MatchIgnoringEvaluate(tt.with, true, nil)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func parseConstraints(t *testing.T, s string) *When {
 	t.Helper()
 	c := &When{}

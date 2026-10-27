@@ -36,6 +36,10 @@ var pipelineCreateCmd = &cli.Command{
 			Usage:    "branch to create pipeline from",
 			Required: true,
 		},
+		&cli.StringFlag{
+			Name:  "workflow",
+			Usage: "only run this workflow and the workflows it hard depends on",
+		},
 		&cli.StringSliceFlag{
 			Name:  "var",
 			Usage: "key=value",
@@ -70,6 +74,7 @@ func pipelineCreate(ctx context.Context, c *cli.Command) error {
 	options := &woodpecker.PipelineOptions{
 		Branch:    branch,
 		Variables: variables,
+		Workflow:  c.String("workflow"),
 	}
 
 	pipeline, err := client.PipelineCreate(repoID, options)
