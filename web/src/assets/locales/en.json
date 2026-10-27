@@ -436,7 +436,11 @@
         "admin": {
           "admin": "Admin",
           "placeholder": "User is an admin",
-          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
+          "admin_warning": "This user is listed in WOODPECKER_ADMIN environment configuration. Revoking admin here lasts until the next server restart. To revoke it for good, also remove the user from your environment variables.",
+          "admin_env": "Admin (env)",
+          "admin_env_desc": "Admin because the user is listed in WOODPECKER_ADMIN.",
+          "admin_revoked": "Admin temporarily revoked",
+          "admin_revoked_desc": "The user is listed in WOODPECKER_ADMIN environment configuration, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN."
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user",
