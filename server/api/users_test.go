@@ -66,6 +66,9 @@ func TestPostUser(t *testing.T) {
 func TestPatchUser(t *testing.T) {
 	s := newTestStore(t)
 
+	admins := server.Config.Permissions.Admins
+	t.Cleanup(func() { server.Config.Permissions.Admins = admins })
+
 	patch := func(t *testing.T, login string, in *model.User) {
 		t.Helper()
 		tc := newTestContext(t, s)
