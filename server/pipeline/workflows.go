@@ -55,7 +55,7 @@ func ListWorkflows(ctx context.Context, _forge forge.Forge, _store store.Store, 
 	}
 
 	// Substitute and lint like a run would, but stop before compiling
-	envs := map[string]string{}
+	envs := make(map[string]string)
 	if environmentService := server.Config.Services.Manager.EnvironmentService(); environmentService != nil {
 		globals, err := environmentService.EnvironList(repo)
 		if err != nil {
