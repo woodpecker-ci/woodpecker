@@ -79,8 +79,8 @@ func TestStepListByLogState(t *testing.T) {
 	addPipeline(t, s, 31, model.StatusFailure, before-1, &model.Step{Name: "second-pipeline", State: model.StatusFailure, Started: 10, Finished: before - 1})
 
 	// due selects the open logs that are complete, as the log finalizer does
-	due := func(pipelines int) *model.StepLogFilter {
-		return &model.StepLogFilter{States: []model.LogState{model.LogStateOpen}, CompleteBefore: before, Pipelines: pipelines}
+	due := func(limit int) *model.StepLogFilter {
+		return &model.StepLogFilter{States: []model.LogState{model.LogStateOpen}, CompleteBefore: before, Limit: limit}
 	}
 
 	t.Run("selects only complete logs", func(t *testing.T) {
@@ -89,13 +89,17 @@ func TestStepListByLogState(t *testing.T) {
 		assert.Equal(t, []string{"due", "never-started", "second-pipeline"}, stepNames(got))
 	})
 
-	t.Run("pipelines limit, oldest first", func(t *testing.T) {
+	t.Run("limit counts steps, oldest pipeline first", func(t *testing.T) {
 		got, err := s.StepListByLogState(t.Context(), due(1))
+		require.NoError(t, err)
+		assert.Equal(t, []string{"due"}, stepNames(got))
+
+		got, err = s.StepListByLogState(t.Context(), due(2))
 		require.NoError(t, err)
 		assert.Equal(t, []string{"due", "never-started"}, stepNames(got))
 	})
 
-	t.Run("count ignores the pipelines limit", func(t *testing.T) {
+	t.Run("count ignores the limit", func(t *testing.T) {
 		n, err := s.StepCountByLogState(t.Context(), due(1))
 		require.NoError(t, err)
 		assert.Equal(t, int64(3), n)
@@ -164,7 +168,7 @@ func TestStepLogStateSwap(t *testing.T) {
 	assert.Equal(t, 3, stored.ExitCode, "only the log state is written")
 
 	list, err := s.StepListByLogState(t.Context(), &model.StepLogFilter{
-		States: []model.LogState{model.LogStateOpen}, CompleteBefore: 100, Pipelines: 10,
+		States: []model.LogState{model.LogStateOpen}, CompleteBefore: 100, Limit: 10,
 	})
 	require.NoError(t, err)
 	assert.Equal(t, []string{"b"}, stepNames(list))
@@ -182,7 +186,7 @@ func TestStepLogCanceled(t *testing.T) {
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {
-		_, err := s.StepListByLogState(ctx, &model.StepLogFilter{CompleteBefore: 1000, Pipelines: 10})
+		_, err := s.StepListByLogState(ctx, &model.StepLogFilter{CompleteBefore: 1000, Limit: 10})
 		return err
 	})
 	assertCanceled(t, func(ctx context.Context) error {

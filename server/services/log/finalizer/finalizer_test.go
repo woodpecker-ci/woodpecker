@@ -370,7 +370,7 @@ func mockStore(t *testing.T, steps ...*model.Step) *store_mocks.MockStore {
 	t.Helper()
 	s := store_mocks.NewMockStore(t)
 	s.On("StepCountByLogState", mock.Anything, mock.Anything).Return(int64(len(steps)), nil)
-	s.On("StepListByLogState", mock.Anything, mock.MatchedBy(func(f *model.StepLogFilter) bool { return f.Pipelines == 10 })).Return(steps, nil)
+	s.On("StepListByLogState", mock.Anything, mock.MatchedBy(func(f *model.StepLogFilter) bool { return f.Limit == 10 })).Return(steps, nil)
 	return s
 }
 
