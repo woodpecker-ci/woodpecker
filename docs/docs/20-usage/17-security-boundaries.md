@@ -100,7 +100,7 @@ For private repositories, or with [`WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`](../30
 Woodpecker creates Git credentials of a forge user. They can also push to the repository.
 
 They are only passed to the default clone step, to plugins in the [trusted clone plugins](./75-project-settings.md#custom-trusted-clone-plugins)
-and to every step of a repository with the security option.
+and to every step of a repository with the [security option](#trusted-repositories).
 
 ## Plugins
 
