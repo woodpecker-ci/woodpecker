@@ -719,19 +719,16 @@ Enable step-level metrics, including failed step counters and step duration hist
 - Name: `WOODPECKER_ADMIN`
 - Default: none
 
-Comma-separated list of admin accounts.
-Users in this list become server admins when they sign in.
-
-:::warning
-The list is read at server start and only grants admin access, it never revokes it.
-Admin access is stored on the user, so removing a user from the list does not remove it.
-:::
-
-Admins granted in the admin settings or with the users API also stay admins when they sign in.
+Comma-separated list of users who become server admins when they sign in.
+The list is read at server start.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 
-Revoking a listed user in the admin settings or with the users API takes effect right away. Also remove them from the list, otherwise they are admin again at their first sign in after the next server restart.
+:::warning
+The list only grants admin access, it never revokes it.
+To revoke a listed user, revoke admin access in the admin settings or with the users API and also remove them from the list.
+Otherwise they are admin again at their first sign in after the next server restart.
+:::
 
 ---
 
