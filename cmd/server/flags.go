@@ -435,7 +435,7 @@ var flags = append([]cli.Flag{
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_INTERVAL"),
 		Name:    "log-store-finalizer-interval",
-		Usage:   "how often finished step logs are handed to the log store to be finalized",
+		Usage:   "how often the logs of finished steps are handed to the log store to be finalized",
 		Value:   5 * time.Minute,
 	},
 	&cli.IntFlag{
@@ -447,7 +447,7 @@ var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_LOG_STORE_FINALIZER_PAUSE"),
 		Name:    "log-store-finalizer-pause",
-		Usage:   "do not finalize step logs",
+		Usage:   "do not finalize the logs of steps",
 	},
 	//
 	// backend options for pipeline compiler

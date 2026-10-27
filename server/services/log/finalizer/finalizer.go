@@ -124,7 +124,7 @@ func (f *Finalizer) Tick(ctx context.Context, now time.Time) (Result, error) {
 		if res.Failed > 0 {
 			level = zerolog.WarnLevel
 		}
-		log.WithLevel(level).Int("finalized", res.Done).Int("failed", res.Failed).Msg("finalized step logs")
+		log.WithLevel(level).Int("finalized", res.Done).Int("failed", res.Failed).Msg("finalized logs of steps")
 	}
 	return res, nil
 }
@@ -150,7 +150,7 @@ func (f *Finalizer) finalize(ctx context.Context, step *model.Step) (bool, error
 	return err == nil, err
 }
 
-// RecoverClaims hands back the step logs left claimed (finalizing or deleting) by a failed finalize or a crash:
+// RecoverClaims hands back the logs of steps left claimed (finalizing or deleting) by a failed finalize or a crash:
 // it lists the claims, waits 30 to 40 minutes and reopens those still in the same state, until ctx is done.
 func RecoverClaims(ctx context.Context, s store.Store) {
 	for {
@@ -158,7 +158,7 @@ func RecoverClaims(ctx context.Context, s store.Store) {
 			States: []model.LogState{model.LogStateFinalizing, model.LogStateDeleting},
 		})
 		if err != nil && ctx.Err() == nil {
-			log.Error().Err(err).Msg("could not list claimed step logs")
+			log.Error().Err(err).Msg("could not list steps with a claimed log")
 		}
 
 		select {

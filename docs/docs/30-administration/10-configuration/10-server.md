@@ -1241,7 +1241,7 @@ If [`WOODPECKER_LOG_STORE`](#log_store) is:
 - Name: `WOODPECKER_LOG_STORE_FINALIZER_INTERVAL`
 - Default: `5m`
 
-How often finished step logs are handed to the log store to be finalized. Must be at least `1m`.
+How often the logs of finished steps are handed to the log store to be finalized. Must be at least `1m`.
 
 ---
 
@@ -1259,7 +1259,7 @@ Maximum number of steps finalized per interval. Must be at least 1.
 - Name: `WOODPECKER_LOG_STORE_FINALIZER_PAUSE`
 - Default: `false`
 
-Do not finalize step logs.
+Do not finalize the logs of steps.
 
 ---
 

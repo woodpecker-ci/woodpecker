@@ -431,7 +431,7 @@ func DeleteStepLogs(c *gin.Context) {
 
 	err := deleteStepLog(c, store.FromContext(c), _step)
 	if errors.Is(err, errLogBusy) {
-		c.String(http.StatusConflict, "Error deleting step logs. %s", err)
+		c.String(http.StatusConflict, "Error deleting the log of the step. %s", err)
 		return
 	}
 	if err != nil {

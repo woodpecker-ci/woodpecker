@@ -755,7 +755,7 @@ func TestDeleteLogsBusy(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	for name, deleteLogs := range map[string]gin.HandlerFunc{
-		"step logs":     DeleteStepLogs,
+		"log of a step": DeleteStepLogs,
 		"pipeline logs": DeletePipelineLogs,
 		"pipeline":      DeletePipeline,
 	} {
