@@ -47,14 +47,34 @@ type PipelineBuilder struct {
 	PrivilegedPlugins   []string
 	CompilerOptions     []compiler.Option
 	GetWorkflowMetadata func(workflow *Workflow) metadata.Metadata
+	// SelectedWorkflow, if set, limits to this workflow and its hard dependencies.
+	SelectedWorkflow string
+	// ListOnly reports the workflows that could run instead of building them.
+	ListOnly bool
 }
 
 func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = SortYamlFilesByName(b.Yamls)
 
+	yamls := b.Yamls
+	selected := SanitizePath(b.SelectedWorkflow)
+	if b.SelectedWorkflow != "" {
+		var err error
+		yamls, err = b.selectYamls(selected)
+		if err != nil {
+			return nil, err
+		}
+		if len(yamls) == 0 {
+			return nil, &pipeline_errors.PipelineError{
+				Type:    pipeline_errors.PipelineErrorTypeGeneric,
+				Message: fmt.Sprintf("selected workflow '%s' does not exist", b.SelectedWorkflow),
+			}
+		}
+	}
+
 	pidSequence := 1
 
-	for _, y := range b.Yamls {
+	for _, y := range yamls {
 		// matrix axes
 		axes, err := matrix.Parse(y.Data)
 		if err != nil {
@@ -93,30 +113,19 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
+	if b.SelectedWorkflow != "" && !ContainsItemWithName(selected, items) {
+		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeGeneric,
+			Message: fmt.Sprintf("selected workflow '%s' does not match its conditions or misses a dependency", b.SelectedWorkflow),
+		})
+	}
+
 	return items, errorsAndWarnings
 }
 
 func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
-
-	// add additional environment variables for substituting
-	for k, v := range b.AdditionalEnvs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
-
-	// add global environment variables for substituting
-	for k, v := range b.Envs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
 
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
@@ -131,25 +140,31 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	}
 
 	// lint pipeline
-	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(linter.TrustedConfiguration{
-			Network:  b.RepoTrusted.Network,
-			Volumes:  b.RepoTrusted.Volumes,
-			Security: b.RepoTrusted.Security,
-		}),
-		linter.PrivilegedPlugins(b.PrivilegedPlugins),
-		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
-	).Lint([]*linter.WorkflowConfig{{
-		Workflow:  parsed,
-		File:      workflow.Name,
-		RawConfig: data,
-	}}))
-	if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
-		return nil, errorsAndWarnings
+	if !b.ListOnly {
+		errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
+			linter.WithTrusted(linter.TrustedConfiguration{
+				Network:  b.RepoTrusted.Network,
+				Volumes:  b.RepoTrusted.Volumes,
+				Security: b.RepoTrusted.Security,
+			}),
+			linter.PrivilegedPlugins(b.PrivilegedPlugins),
+			linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
+		).Lint([]*linter.WorkflowConfig{{
+			Workflow:  parsed,
+			File:      workflow.Name,
+			RawConfig: data,
+		}}))
+		if pipeline_errors.HasBlockingErrors(errorsAndWarnings) {
+			return nil, errorsAndWarnings
+		}
 	}
 
 	// checking if filtered.
-	if match, err := parsed.When.Match(workflowMetadata, true, environ); !match && err == nil {
+	whenMatch := parsed.When.Match
+	if b.ListOnly {
+		whenMatch = parsed.When.MatchIgnoringEvaluate
+	}
+	if match, err := whenMatch(workflowMetadata, true, environ); !match && err == nil {
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"marked as skipped, does not match metadata",
 		)
@@ -161,13 +176,16 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
-	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
-	}
+	var ir *backend_types.Config
+	if !b.ListOnly {
+		ir, err = b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
 
-	if len(ir.Stages) == 0 {
-		return nil, nil
+		if len(ir.Stages) == 0 {
+			return nil, nil
+		}
 	}
 
 	item = &Item{
@@ -222,6 +240,25 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 func (b *PipelineBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
 	environ := metadata.Environ()
 	maps.Copy(environ, axis)
+
+	// add additional environment variables for substituting
+	for k, v := range b.AdditionalEnvs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
+
+	// add global environment variables for substituting
+	for k, v := range b.Envs {
+		if _, exists := environ[k]; exists {
+			// don't override existing values
+			continue
+		}
+		environ[k] = v
+	}
+
 	return environ
 }
 
