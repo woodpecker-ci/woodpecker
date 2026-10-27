@@ -623,7 +623,7 @@ func PostPipeline(c *gin.Context) {
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
-	envs := map[string]string{}
+	envs := make(map[string]string)
 	for key, val := range c.Request.URL.Query() {
 		switch key {
 		// Skip some options of the endpoint
