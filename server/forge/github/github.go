@@ -299,7 +299,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 		return nil, err
 	}
-	log.Debug().Err(err).Msgf("github: graphql fetch of directory %s failed, falling back to fetching per file", f)
+	log.Error().Err(err).Msgf("github: graphql fetch of directory %s failed, falling back to fetching per file", f)
 
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
