@@ -18,8 +18,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestOrgCRUD(t *testing.T) {
@@ -74,4 +76,37 @@ func TestOrgCRUD(t *testing.T) {
 	// delete an org and check if it's gone
 	assert.NoError(t, store.OrgDelete(org1.ID))
 	assert.Error(t, store.OrgDelete(org1.ID))
+}
+
+func TestOrgForgeRemoteID(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Org))
+	defer closer()
+
+	// orgs without a forge remote id must not block each other
+	legacy1 := &model.Org{ForgeID: 1, Name: "legacy1"}
+	legacy2 := &model.Org{ForgeID: 1, Name: "legacy2", ForgeRemoteID: "0"}
+	require.NoError(t, store.OrgCreate(legacy1))
+	require.NoError(t, store.OrgCreate(legacy2))
+	require.NoError(t, store.OrgUpdate(legacy1))
+	require.NoError(t, store.OrgUpdate(legacy2))
+
+	org := &model.Org{ForgeID: 1, Name: "org", ForgeRemoteID: "42"}
+	require.NoError(t, store.OrgCreate(org))
+
+	// the same forge remote id can only exist once per forge
+	assert.ErrorIs(t, store.OrgCreate(&model.Org{ForgeID: 1, Name: "other", ForgeRemoteID: "42"}), types.ErrInsertDuplicateDetected)
+	require.NoError(t, store.OrgCreate(&model.Org{ForgeID: 2, Name: "org", ForgeRemoteID: "42"}))
+
+	found, err := store.OrgFindByRemoteID(1, "42")
+	require.NoError(t, err)
+	assert.Equal(t, org.ID, found.ID)
+
+	_, err = store.OrgFindByRemoteID(1, "43")
+	assert.ErrorIs(t, err, types.ErrRecordNotExist)
+
+	// an update without a forge remote id keeps the stored one
+	require.NoError(t, store.OrgUpdate(&model.Org{ID: org.ID, ForgeID: 1, Name: "renamed"}))
+	found, err = store.OrgFindByRemoteID(1, "42")
+	require.NoError(t, err)
+	assert.Equal(t, "renamed", found.Name)
 }
