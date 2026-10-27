@@ -30,6 +30,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
 - GitHub webhooks are now signed with the secret of the repository, and Woodpecker rejects webhooks without a valid signature.
   Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise GitHub repositories get no new pipelines.
+- Bitbucket Cloud webhooks are now signed with the secret of the repository, and Woodpecker rejects webhooks without a valid signature.
+  Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise Bitbucket repositories get no new pipelines.
 
 #### Extensions
 

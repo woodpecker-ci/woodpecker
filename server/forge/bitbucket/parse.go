@@ -16,8 +16,6 @@ package bitbucket
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -35,15 +33,9 @@ const (
 	stateDeclined    = "DECLINED"
 )
 
-// parseHook parses a Bitbucket hook from an http.Request request and returns Pull Request,
+// parseHook parses a Bitbucket hook payload of the given type and returns Pull Request,
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, error) {
-	payload, err := io.ReadAll(r.Body)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	hookType := r.Header.Get(hookEvent)
+func parseHook(hookType string, payload []byte) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, error) {
 	switch hookType {
 	case hookPush:
 		r, pl, err := parsePushHook(payload)
