@@ -27,24 +27,39 @@ func NewAdmins(admins []string) *Admins {
 	for i, a := range admins {
 		adminsLowercase[i] = strings.ToLower(a)
 	}
-	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase)}
+	return &Admins{admins: utils.SliceToBoolMap(adminsLowercase), revoked: map[string]bool{}}
 }
 
 type Admins struct {
-	mu     sync.RWMutex
-	admins map[string]bool
+	mu sync.RWMutex
+	// admins is the list read at server start, it never changes
+	admins  map[string]bool
+	revoked map[string]bool
 }
 
+// IsAdmin reports whether the user gets admin at sign in: listed and not revoked.
 func (a *Admins) IsAdmin(user *model.User) bool {
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	login := strings.ToLower(user.Login)
+	return a.admins[login] && !a.revoked[login]
+}
+
+// IsListed reports whether the user is in the list read at server start,
+// also after a revoke, so the UI can show where the admin comes from.
+func (a *Admins) IsListed(user *model.User) bool {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return a.admins[strings.ToLower(user.Login)]
 }
 
-// Remove drops a login from the list until the server restarts, so a revoked
-// admin does not get admin back at their next sign in.
-func (a *Admins) Remove(login string) {
+// Revoke stops granting admin to a listed login until the server restarts, so a
+// revoked admin does not get admin back at their next sign in.
+func (a *Admins) Revoke(login string) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	delete(a.admins, strings.ToLower(login))
+	login = strings.ToLower(login)
+	if a.admins[login] {
+		a.revoked[login] = true
+	}
 }

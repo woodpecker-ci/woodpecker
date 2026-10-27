@@ -32,27 +32,30 @@ func TestAdmins(t *testing.T) {
 	assert.False(t, empty.IsAdmin(&model.User{Login: "not-woodpecker-ci"}))
 }
 
-func TestAdminsRemove(t *testing.T) {
+func TestAdminsRevoke(t *testing.T) {
 	a := NewAdmins([]string{"Alice", "bob"})
 
-	a.Remove("ALICE")
-	assert.False(t, a.IsAdmin(&model.User{Login: "alice"}), "removal must ignore case like NewAdmins")
+	a.Revoke("ALICE")
+	alice := &model.User{Login: "alice"}
+	assert.False(t, a.IsAdmin(alice), "revoke must ignore case like NewAdmins")
+	assert.True(t, a.IsListed(alice), "a revoked user stays listed so the UI can show it")
 	assert.True(t, a.IsAdmin(&model.User{Login: "bob"}), "other admins must stay")
 
-	a.Remove("unknown")
-	assert.True(t, a.IsAdmin(&model.User{Login: "bob"}))
+	a.Revoke("unknown")
+	assert.False(t, a.IsListed(&model.User{Login: "unknown"}), "revoking must not add a login to the list")
 }
 
 // A revoke in the admin settings can run while other users sign in.
-func TestAdminsRemoveConcurrentWithIsAdmin(t *testing.T) {
+func TestAdminsRevokeConcurrentWithIsAdmin(t *testing.T) {
 	a := NewAdmins([]string{"alice", "bob"})
 	user := &model.User{Login: "bob"}
 
 	var wg sync.WaitGroup
 	for range 10 {
 		wg.Go(func() { a.IsAdmin(user) })
+		wg.Go(func() { a.IsListed(user) })
 	}
-	wg.Go(func() { a.Remove("alice") })
+	wg.Go(func() { a.Revoke("alice") })
 	wg.Wait()
 
 	assert.False(t, a.IsAdmin(&model.User{Login: "alice"}))

@@ -77,7 +77,7 @@ func TestPatchUser(t *testing.T) {
 		require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
 	}
 
-	t.Run("revoking a listed admin removes them from the admin list", func(t *testing.T) {
+	t.Run("revoking a listed admin stops admin at sign in but keeps them listed", func(t *testing.T) {
 		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"Erin"})
 		require.NoError(t, s.CreateUser(&model.User{Login: "erin", ForgeID: defaultForgeID, ForgeRemoteID: "5", Hash: "erin", Admin: true}))
 
@@ -88,6 +88,20 @@ func TestPatchUser(t *testing.T) {
 		stored, err := s.GetUserByLogin(defaultForgeID, "erin")
 		require.NoError(t, err)
 		assert.False(t, stored.Admin)
+
+		// the user list must still show that the user is in WOODPECKER_ADMIN
+		tc := newTestContext(t, s)
+		GetUsers(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Recorder.Code, tc.Recorder.Body.String())
+		var users []*model.User
+		tc.decodeJSON(t, &users)
+		require.NotEmpty(t, users)
+		for _, u := range users {
+			if u.Login == "erin" {
+				assert.True(t, u.AdminEnv)
+				assert.False(t, u.Admin)
+			}
+		}
 	})
 
 	t.Run("keeping admin leaves the admin list alone", func(t *testing.T) {

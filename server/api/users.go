@@ -52,7 +52,7 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 	for _, user := range users {
-		user.AdminEnv = server.Config.Permissions.Admins.IsAdmin(user)
+		user.AdminEnv = server.Config.Permissions.Admins.IsListed(user)
 	}
 	c.JSON(http.StatusOK, users)
 }
@@ -134,8 +134,8 @@ func PatchUser(c *gin.Context) {
 	// a revoked admin from WOODPECKER_ADMIN would get admin back at the next sign in
 	admins := server.Config.Permissions.Admins
 	if !in.Admin && admins.IsAdmin(user) {
-		admins.Remove(user.Login)
-		log.Warn().Str("user", user.Login).Msg("revoked admin is removed from the admin list until the server restarts, also remove the user from WOODPECKER_ADMIN")
+		admins.Revoke(user.Login)
+		log.Warn().Str("user", user.Login).Msg("admin from WOODPECKER_ADMIN is revoked until the server restarts, also remove the user from WOODPECKER_ADMIN")
 	}
 
 	// TODO: disallow to change login, email, avatar if the user is using oauth
