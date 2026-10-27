@@ -249,6 +249,19 @@ func TestRPCRoundTrip(t *testing.T) {
 		assert.Nil(t, gotRepo)
 		assert.Nil(t, gotPipeline)
 	})
+
+	t.Run("hook keeps ignored event", func(t *testing.T) {
+		ignored := &types.ErrIgnoreEvent{Event: "ping", Reason: "no pipeline event"}
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, ignored)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req)
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		assert.Equal(t, ignored.Error(), err.Error())
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
 }
 
 func TestRPCErrors(t *testing.T) {
