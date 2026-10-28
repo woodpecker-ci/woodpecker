@@ -95,6 +95,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7419](https://github.com/woodpecker-ci/woodpecker/pull/7419)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
