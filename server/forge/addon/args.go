@@ -180,6 +180,11 @@ type responseBranches struct {
 	Branches []string `json:"branches"`
 }
 
+type responsePullRequests struct {
+	baseErrorResponse
+	PullRequests []*model.PullRequest `json:"pull_requests"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`

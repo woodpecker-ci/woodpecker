@@ -215,10 +215,11 @@ func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
 		return err
 	}
 	prs, err := s.Impl.PullRequests(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(prs)
+	*resp, err = json.Marshal(&responsePullRequests{baseErrorResponse: base, PullRequests: prs})
 	return err
 }
 

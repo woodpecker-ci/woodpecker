@@ -531,6 +531,17 @@ func TestRPCErrorKinds(t *testing.T) {
 				return err
 			},
 		},
+		{
+			name: "pull requests not implemented",
+			err:  fmt.Errorf("pull requests: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("PullRequests", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.PullRequests(ctx, user, testRepo(), &model.ListOptions{})
+				return err
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

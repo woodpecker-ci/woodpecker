@@ -391,8 +391,15 @@ func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *m
 	if err != nil {
 		return nil, addonError(err)
 	}
-	var resp []*model.PullRequest
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp responsePullRequests
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.PullRequests, nil
 }
 
 func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
