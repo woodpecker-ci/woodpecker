@@ -171,8 +171,12 @@ func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp = []byte{}
-	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
+	base, err := errorResponse(s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link))
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(&base)
+	return err
 }
 
 func (s *RPCServer) Branches(args []byte, resp *[]byte) error {

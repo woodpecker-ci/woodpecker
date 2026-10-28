@@ -510,6 +510,16 @@ func TestRPCErrorKinds(t *testing.T) {
 				return err
 			},
 		},
+		{
+			name: "deactivate repo not found",
+			err:  errors.Join(errors.New("404 Not Found"), types.ErrRepoNotFound),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(err)
+			},
+			call: func(f forge.Forge) error {
+				return f.Deactivate(ctx, user, testRepo(), "link")
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

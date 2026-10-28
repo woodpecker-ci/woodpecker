@@ -322,9 +322,16 @@ func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link s
 		return err
 	}
 	var jsonResp []byte
-	return addonError(
-		g.client.Call("Plugin.Deactivate", args, &jsonResp),
-	)
+	err = g.client.Call("Plugin.Deactivate", args, &jsonResp)
+	if err != nil {
+		return addonError(err)
+	}
+	var resp baseErrorResponse
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return err
+	}
+	return resp.asError()
 }
 
 func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
