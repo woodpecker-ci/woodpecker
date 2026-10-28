@@ -222,10 +222,20 @@ func (g *RPC) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pip
 	if err != nil {
 		return nil, err
 	}
-	var resp []byte
-	return resp, addonError(
-		g.client.Call("Plugin.File", args, &resp),
-	)
+	var jsonResp []byte
+	err = g.client.Call("Plugin.File", args, &jsonResp)
+	if err != nil {
+		return nil, addonError(err)
+	}
+	var resp responseFile
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.File, nil
 }
 
 func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {

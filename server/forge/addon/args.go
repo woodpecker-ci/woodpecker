@@ -165,6 +165,11 @@ type responseRepo struct {
 	Repo *modelRepo `json:"repo"`
 }
 
+type responseFile struct {
+	baseErrorResponse
+	File []byte `json:"file"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`

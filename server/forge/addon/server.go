@@ -107,7 +107,12 @@ func (s *RPCServer) File(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp, err = s.Impl.File(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	file, err := s.Impl.File(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	base, err := errorResponse(err)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(&responseFile{baseErrorResponse: base, File: file})
 	return err
 }
 
