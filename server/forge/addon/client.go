@@ -17,6 +17,7 @@ package addon
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/rpc"
@@ -33,6 +34,30 @@ import (
 
 // make sure RPC implements forge.Forge.
 var _ forge.Forge = new(RPC)
+
+// ErrAddon is an error returned by the addon itself, not by the addon system.
+// Only the message of the error crosses the RPC boundary.
+type ErrAddon struct {
+	Message string
+}
+
+func (err *ErrAddon) Error() string {
+	return err.Message
+}
+
+func (*ErrAddon) Is(target error) bool {
+	_, ok := target.(*ErrAddon)
+	return ok
+}
+
+// addonError turns an error returned by the addon into an ErrAddon and keeps
+// errors of the addon system as they are.
+func addonError(err error) error {
+	if serverErr, ok := errors.AsType[rpc.ServerError](err); ok {
+		return &ErrAddon{Message: string(serverErr)}
+	}
+	return err
+}
 
 func Load(file string) (forge.Forge, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
@@ -91,7 +116,7 @@ func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, stri
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Login", args, &jsonResp)
 	if err != nil {
-		return nil, "", err
+		return nil, "", addonError(err)
 	}
 
 	var resp responseLogin
@@ -114,7 +139,7 @@ func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Teams", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp []*model.Team
@@ -134,7 +159,7 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Repo", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp modelRepo
@@ -156,7 +181,7 @@ func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Repos", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp []*modelRepo
@@ -182,7 +207,8 @@ func (g *RPC) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pip
 		return nil, err
 	}
 	var resp []byte
-	return resp, g.client.Call("Plugin.File", args, &resp)
+	err := g.client.Call("Plugin.File", args, &resp)
+	return resp, addonError(err)
 }
 
 func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
@@ -198,7 +224,7 @@ func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipe
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Dir", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []*types.FileMeta
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -215,7 +241,8 @@ func (g *RPC) Status(_ context.Context, u *model.User, r *model.Repo, b *model.P
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Status", args, &jsonResp)
+	err := g.client.Call("Plugin.Status", args, &jsonResp)
+	return addonError(err)
 }
 
 func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
@@ -229,7 +256,7 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Netrc", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Netrc
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -245,7 +272,8 @@ func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link str
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Activate", args, &jsonResp)
+	err := g.client.Call("Plugin.Activate", args, &jsonResp)
+	return addonError(err)
 }
 
 func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link string) error {
@@ -258,7 +286,8 @@ func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link s
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Deactivate", args, &jsonResp)
+	err := g.client.Call("Plugin.Deactivate", args, &jsonResp)
+	return addonError(err)
 }
 
 func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
@@ -273,7 +302,7 @@ func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Branches", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []string
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -291,7 +320,7 @@ func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch
 	var jsonResp []byte
 	err = g.client.Call("Plugin.BranchHead", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Commit
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -309,7 +338,7 @@ func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *m
 	var jsonResp []byte
 	err = g.client.Call("Plugin.PullRequests", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []*model.PullRequest
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -334,7 +363,7 @@ func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Re
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Hook", args, &jsonResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, addonError(err)
 	}
 	var resp responseHook
 	err = json.Unmarshal(jsonResp, &resp)
@@ -358,7 +387,7 @@ func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*mode
 	var jsonResp []byte
 	err = g.client.Call("Plugin.OrgMembership", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.OrgPerm
 	return resp, json.Unmarshal(jsonResp, &resp)
@@ -375,7 +404,7 @@ func (g *RPC) Org(_ context.Context, u *model.User, org string) (*model.Org, err
 	var jsonResp []byte
 	err = g.client.Call("Plugin.Org", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Org
 	return resp, json.Unmarshal(jsonResp, &resp)
