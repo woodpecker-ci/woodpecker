@@ -96,6 +96,7 @@
 
 ### 📦️ Dependency
 
+- Update Node.js to v26 [[#7421](https://github.com/woodpecker-ci/woodpecker/pull/7421)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
