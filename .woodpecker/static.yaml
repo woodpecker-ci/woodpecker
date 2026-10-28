@@ -12,7 +12,7 @@ steps:
     image: docker.io/node:26-alpine
     depends_on: []
     commands:
-      - corepack enable
+      - npx get-pnpm
       - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
       - apk add --no-cache -U tree # busybox tree don't understand "-I"
       # cspell:disable-next-line
