@@ -175,6 +175,11 @@ type responseDir struct {
 	Files []*types.FileMeta `json:"files"`
 }
 
+type responseBranches struct {
+	baseErrorResponse
+	Branches []string `json:"branches"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`

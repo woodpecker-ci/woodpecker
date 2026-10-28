@@ -520,6 +520,17 @@ func TestRPCErrorKinds(t *testing.T) {
 				return f.Deactivate(ctx, user, testRepo(), "link")
 			},
 		},
+		{
+			name: "branches not implemented",
+			err:  fmt.Errorf("branches: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Branches", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Branches(ctx, user, testRepo(), &model.ListOptions{})
+				return err
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

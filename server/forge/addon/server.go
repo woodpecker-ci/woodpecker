@@ -186,10 +186,11 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 		return err
 	}
 	branches, err := s.Impl.Branches(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(branches)
+	*resp, err = json.Marshal(&responseBranches{baseErrorResponse: base, Branches: branches})
 	return err
 }
 

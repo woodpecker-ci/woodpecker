@@ -348,8 +348,15 @@ func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model
 	if err != nil {
 		return nil, addonError(err)
 	}
-	var resp []string
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp responseBranches
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.Branches, nil
 }
 
 func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
