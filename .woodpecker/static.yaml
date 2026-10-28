@@ -13,6 +13,8 @@ steps:
     depends_on: []
     commands:
       - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
       - apk add --no-cache -U tree # busybox tree don't understand "-I"
       # cspell:disable-next-line
