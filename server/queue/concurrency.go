@@ -21,8 +21,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+// cspell:words Fenwick
+
 // concurrencyIndex lives for one scheduling tick, under the queue lock. It counts
-// running slots and earlier queued tasks without rescanning the queue for every
+// running slots and earlier queued tasks without scanning the queue again for each
 // candidate. Only starts mutate the index; other queue changes happen next tick.
 type concurrencyIndex struct {
 	queue *fifo
