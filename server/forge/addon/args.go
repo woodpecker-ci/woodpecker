@@ -15,6 +15,9 @@
 package addon
 
 import (
+	"errors"
+	"fmt"
+
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -88,13 +91,30 @@ const (
 	errorKindInvalidSignature errorKind = "invalid_signature"
 )
 
-// errorKinds maps the errors the server checks for to their kind.
-var errorKinds = []struct {
-	kind errorKind
-	err  error
-}{
-	{errorKindIgnoreEvent, &types.ErrIgnoreEvent{}},
-	{errorKindInvalidSignature, types.ErrInvalidWebhookSignature},
+// errorKindMap maps the kind to the error the server checks for.
+var errorKindMap = map[errorKind]error{
+	errorKindIgnoreEvent:      &types.ErrIgnoreEvent{},
+	errorKindInvalidSignature: types.ErrInvalidWebhookSignature,
+}
+
+// encodeErrorKinds returns the kind and the message of an error the server
+// checks for. For every other error the result is not found.
+func encodeErrorKinds(err error) (found bool, kind errorKind, msg string) {
+	for k, target := range errorKindMap {
+		if errors.Is(err, target) {
+			return true, k, err.Error()
+		}
+	}
+	return false, "", ""
+}
+
+// decodeErrorKinds returns the error an addon sent as kind and message.
+// A kind this server does not know is returned as ErrAddon with the message only.
+func decodeErrorKinds(kind errorKind, msg string) error {
+	if target, found := errorKindMap[kind]; found {
+		return &ErrAddon{Message: msg, Err: target}
+	}
+	return &ErrAddon{Message: msg, Err: fmt.Errorf("addon sent unknown error kind %q", kind)}
 }
 
 type responseHook struct {

@@ -381,20 +381,9 @@ func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Re
 		return nil, nil, err
 	}
 	if resp.ErrorKind != "" {
-		return nil, nil, hookResponseError(&resp)
+		return nil, nil, decodeErrorKinds(resp.ErrorKind, resp.ErrorMessage)
 	}
 	return resp.Repo.asModel(), resp.Pipeline, nil
-}
-
-// hookResponseError returns the error an addon sent as kind and message.
-// A kind this server does not know is returned as ErrAddon with the message only.
-func hookResponseError(resp *responseHook) error {
-	for _, k := range errorKinds {
-		if k.kind == resp.ErrorKind {
-			return &ErrAddon{Message: resp.ErrorMessage, Err: k.err}
-		}
-	}
-	return &ErrAddon{Message: resp.ErrorMessage}
 }
 
 func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*model.OrgPerm, error) {

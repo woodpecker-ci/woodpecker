@@ -284,13 +284,31 @@ func TestRPCRoundTrip(t *testing.T) {
 	}
 }
 
-func TestHookResponseError(t *testing.T) {
+func TestDecodeErrorKinds(t *testing.T) {
 	// an addon built with a newer woodpecker may send kinds this server does not know
-	err := hookResponseError(&responseHook{ErrorKind: "future_kind", ErrorMessage: "something new"})
+	err := decodeErrorKinds("future_kind", "something new")
 	assert.EqualError(t, err, "something new")
 	assert.ErrorIs(t, err, &ErrAddon{})
+	assert.ErrorContains(t, errors.Unwrap(err), "future_kind")
 	assert.NotErrorIs(t, err, types.ErrInvalidWebhookSignature)
 	assert.NotErrorIs(t, err, &types.ErrIgnoreEvent{})
+}
+
+func TestEncodeErrorKinds(t *testing.T) {
+	found, kind, msg := encodeErrorKinds(fmt.Errorf("verify hook: %w", types.ErrInvalidWebhookSignature))
+	assert.True(t, found)
+	assert.Equal(t, errorKindInvalidSignature, kind)
+	assert.Equal(t, "verify hook: invalid webhook signature", msg)
+
+	found, kind, msg = encodeErrorKinds(&types.ErrIgnoreEvent{Event: "ping"})
+	assert.True(t, found)
+	assert.Equal(t, errorKindIgnoreEvent, kind)
+	assert.Equal(t, "explicit ignored event 'ping'", msg)
+
+	found, kind, msg = encodeErrorKinds(errors.New("forge unavailable"))
+	assert.False(t, found)
+	assert.Empty(t, kind)
+	assert.Empty(t, msg)
 }
 
 func TestRPCHookAddonError(t *testing.T) {
