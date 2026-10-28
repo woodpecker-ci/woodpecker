@@ -148,8 +148,15 @@ func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 		return nil, addonError(err)
 	}
 
-	var resp []*model.Team
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp responseTeams
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.Teams, nil
 }
 
 func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {

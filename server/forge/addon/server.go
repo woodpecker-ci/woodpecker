@@ -60,10 +60,11 @@ func (s *RPCServer) Teams(args []byte, resp *[]byte) error {
 		return err
 	}
 	teams, err := s.Impl.Teams(mkCtx(), a.U.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(teams)
+	*resp, err = json.Marshal(&responseTeams{baseErrorResponse: base, Teams: teams})
 	return err
 }
 

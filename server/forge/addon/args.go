@@ -155,6 +155,11 @@ type responseHook struct {
 	Pipeline *model.Pipeline `json:"pipeline"`
 }
 
+type responseTeams struct {
+	baseErrorResponse
+	Teams []*model.Team `json:"teams"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`

@@ -444,3 +444,34 @@ func TestRPCErrors(t *testing.T) {
 	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")), "")
 	assertForgeErr(t, err)
 }
+
+func TestRPCErrorKinds(t *testing.T) {
+	ctx := t.Context()
+	user := testUser()
+
+	for _, tc := range []struct {
+		name string
+		err  error
+		mock func(impl *forge_mocks.MockForge, err error)
+		call func(f forge.Forge) error
+	}{
+		{
+			name: "teams not implemented",
+			err:  fmt.Errorf("teams: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Teams", mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Teams(ctx, user, &model.ListOptions{})
+				return err
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			impl := forge_mocks.NewMockForge(t)
+			tc.mock(impl, tc.err)
+
+			assertAddonError(t, tc.err, tc.call(newRPCForge(t, impl)))
+		})
+	}
+}
