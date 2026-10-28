@@ -213,8 +213,9 @@ func (g *RPC) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pip
 		return nil, err
 	}
 	var resp []byte
-	err := g.client.Call("Plugin.File", args, &resp)
-	return resp, addonError(err)
+	return resp, addonError(
+		g.client.Call("Plugin.File", args, &resp),
+	)
 }
 
 func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
@@ -247,8 +248,9 @@ func (g *RPC) Status(_ context.Context, u *model.User, r *model.Repo, b *model.P
 		return err
 	}
 	var jsonResp []byte
-	err := g.client.Call("Plugin.Status", args, &jsonResp)
-	return addonError(err)
+	return addonError(
+		g.client.Call("Plugin.Status", args, &jsonResp),
+	)
 }
 
 func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
@@ -278,8 +280,9 @@ func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link str
 		return err
 	}
 	var jsonResp []byte
-	err := g.client.Call("Plugin.Activate", args, &jsonResp)
-	return addonError(err)
+	return addonError(
+		g.client.Call("Plugin.Activate", args, &jsonResp),
+	)
 }
 
 func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link string) error {
@@ -292,8 +295,9 @@ func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link s
 		return err
 	}
 	var jsonResp []byte
-	err := g.client.Call("Plugin.Deactivate", args, &jsonResp)
-	return addonError(err)
+	return addonError(
+		g.client.Call("Plugin.Deactivate", args, &jsonResp),
+	)
 }
 
 func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
