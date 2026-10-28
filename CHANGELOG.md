@@ -81,6 +81,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7423](https://github.com/woodpecker-ci/woodpecker/pull/7423)]
 - Update docs npm deps non-major [[#7420](https://github.com/woodpecker-ci/woodpecker/pull/7420)]
 - Add Supabase Backup plugin [[#7410](https://github.com/woodpecker-ci/woodpecker/pull/7410)]
 - Document how to install the CLI [[#7360](https://github.com/woodpecker-ci/woodpecker/pull/7360)]
@@ -95,7 +96,6 @@
 
 ### 📦️ Dependency
 
-- Update web npm deps non-major [[#7419](https://github.com/woodpecker-ci/woodpecker/pull/7419)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
