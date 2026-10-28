@@ -185,6 +185,11 @@ type responsePullRequests struct {
 	PullRequests []*model.PullRequest `json:"pull_requests"`
 }
 
+type responseOrgMembership struct {
+	baseErrorResponse
+	Perm *model.OrgPerm `json:"perm"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`

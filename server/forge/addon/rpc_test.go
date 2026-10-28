@@ -542,6 +542,17 @@ func TestRPCErrorKinds(t *testing.T) {
 				return err
 			},
 		},
+		{
+			name: "org membership not implemented",
+			err:  fmt.Errorf("org membership: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("OrgMembership", mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.OrgMembership(ctx, user, "org")
+				return err
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

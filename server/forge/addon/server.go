@@ -230,10 +230,11 @@ func (s *RPCServer) OrgMembership(args []byte, resp *[]byte) error {
 		return err
 	}
 	org, err := s.Impl.OrgMembership(mkCtx(), a.U.asModel(), a.Org)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(org)
+	*resp, err = json.Marshal(&responseOrgMembership{baseErrorResponse: base, Perm: org})
 	return err
 }
 

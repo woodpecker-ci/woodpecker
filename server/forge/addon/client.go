@@ -447,8 +447,15 @@ func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*mode
 	if err != nil {
 		return nil, addonError(err)
 	}
-	var resp *model.OrgPerm
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp responseOrgMembership
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.Perm, nil
 }
 
 func (g *RPC) Org(_ context.Context, u *model.User, org string) (*model.Org, error) {
