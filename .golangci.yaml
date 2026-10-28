@@ -302,6 +302,9 @@ linters:
             - []
             - []
             - - skipPackageNameChecks: true
+    usetesting:
+      context-background: true
+      context-todo: true
   exclusions:
     generated: lax
     presets:
