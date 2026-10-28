@@ -175,12 +175,15 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 		return nil, addonError(err)
 	}
 
-	var resp modelRepo
+	var resp responseRepo
 	err = json.Unmarshal(jsonResp, &resp)
 	if err != nil {
 		return nil, err
 	}
-	return resp.asModel(), nil
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.Repo.asModel(), nil
 }
 
 func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {

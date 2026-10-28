@@ -75,10 +75,11 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 		return err
 	}
 	repos, err := s.Impl.Repo(mkCtx(), a.U.asModel(), a.RemoteID, a.Owner, a.Name)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(modelRepoFromModel(repos))
+	*resp, err = json.Marshal(&responseRepo{baseErrorResponse: base, Repo: modelRepoFromModel(repos)})
 	return err
 }
 

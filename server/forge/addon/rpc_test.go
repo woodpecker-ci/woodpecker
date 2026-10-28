@@ -466,6 +466,17 @@ func TestRPCErrorKinds(t *testing.T) {
 				return err
 			},
 		},
+		{
+			name: "repo not found",
+			err:  errors.Join(errors.New("404 Not Found"), types.ErrRepoNotFound),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Repo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Repo(ctx, user, "5", "octocat", "hello")
+				return err
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

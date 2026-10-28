@@ -160,6 +160,11 @@ type responseTeams struct {
 	Teams []*model.Team `json:"teams"`
 }
 
+type responseRepo struct {
+	baseErrorResponse
+	Repo *modelRepo `json:"repo"`
+}
+
 type responseLogin struct {
 	User        *modelUser `json:"user"`
 	RedirectURL string     `json:"redirect_url"`
