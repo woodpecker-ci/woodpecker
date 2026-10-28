@@ -36,13 +36,19 @@ import (
 var _ forge.Forge = new(RPC)
 
 // ErrAddon is an error returned by the addon itself, not by the addon system.
-// Only the message of the error crosses the RPC boundary.
+// Only the message of the error crosses the RPC boundary. Err is set to the
+// error the server checks for, if the addon sent its kind.
 type ErrAddon struct {
 	Message string
+	Err     error
 }
 
 func (err *ErrAddon) Error() string {
 	return err.Message
+}
+
+func (err *ErrAddon) Unwrap() error {
+	return err.Err
 }
 
 func (*ErrAddon) Is(target error) bool {
@@ -370,10 +376,21 @@ func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Re
 	if err != nil {
 		return nil, nil, err
 	}
-	if resp.IgnoreEvent != nil {
-		return nil, nil, resp.IgnoreEvent
+	if resp.ErrorKind != "" {
+		return nil, nil, hookResponseError(&resp)
 	}
 	return resp.Repo.asModel(), resp.Pipeline, nil
+}
+
+// hookResponseError returns the error an addon sent as kind and message.
+// A kind this server does not know is returned as ErrAddon with the message only.
+func hookResponseError(resp *responseHook) error {
+	for _, k := range errorKinds {
+		if k.kind == resp.ErrorKind {
+			return &ErrAddon{Message: resp.ErrorMessage, Err: k.err}
+		}
+	}
+	return &ErrAddon{Message: resp.ErrorMessage}
 }
 
 func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*model.OrgPerm, error) {

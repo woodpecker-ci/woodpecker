@@ -251,9 +251,11 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	req.Header = a.Header
 	req.Form = a.Form
 	repo, pipeline, err := s.Impl.Hook(mkCtx(), req, a.Secret)
-	if ignored, ok := errors.AsType[*types.ErrIgnoreEvent](err); ok {
-		*resp, err = json.Marshal(&responseHook{IgnoreEvent: ignored})
-		return err
+	for _, k := range errorKinds {
+		if errors.Is(err, k.err) {
+			*resp, err = json.Marshal(&responseHook{ErrorKind: k.kind, ErrorMessage: err.Error()})
+			return err
+		}
 	}
 	if err != nil {
 		return err

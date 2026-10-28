@@ -259,10 +259,38 @@ func TestRPCRoundTrip(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
 		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		assert.ErrorIs(t, err, &ErrAddon{})
 		assert.Equal(t, ignored.Error(), err.Error())
 		assert.Nil(t, gotRepo)
 		assert.Nil(t, gotPipeline)
 	})
+
+	for name, hookErr := range map[string]error{
+		"hook keeps invalid signature":         types.ErrInvalidWebhookSignature,
+		"hook keeps wrapped invalid signature": fmt.Errorf("verify hook: %w", types.ErrInvalidWebhookSignature),
+	} {
+		t.Run(name, func(t *testing.T) {
+			impl := forge_mocks.NewMockForge(t)
+			impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, hookErr)
+
+			req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+			gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+			assert.ErrorIs(t, err, types.ErrInvalidWebhookSignature)
+			assert.ErrorIs(t, err, &ErrAddon{})
+			assert.Equal(t, hookErr.Error(), err.Error())
+			assert.Nil(t, gotRepo)
+			assert.Nil(t, gotPipeline)
+		})
+	}
+}
+
+func TestHookResponseError(t *testing.T) {
+	// an addon built with a newer woodpecker may send kinds this server does not know
+	err := hookResponseError(&responseHook{ErrorKind: "future_kind", ErrorMessage: "something new"})
+	assert.EqualError(t, err, "something new")
+	assert.ErrorIs(t, err, &ErrAddon{})
+	assert.NotErrorIs(t, err, types.ErrInvalidWebhookSignature)
+	assert.NotErrorIs(t, err, &types.ErrIgnoreEvent{})
 }
 
 func TestRPCHookAddonError(t *testing.T) {

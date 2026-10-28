@@ -78,10 +78,30 @@ type argumentsRepos struct {
 	P *model.ListOptions `json:"p"`
 }
 
+// errorKind names an error of the forge that the server checks for with
+// errors.Is. The RPC layer only sends the message of an error, so the kind is
+// sent next to the message. The values are part of the protocol, never rename them.
+type errorKind string
+
+const (
+	errorKindIgnoreEvent      errorKind = "ignore_event"
+	errorKindInvalidSignature errorKind = "invalid_signature"
+)
+
+// errorKinds maps the errors the server checks for to their kind.
+var errorKinds = []struct {
+	kind errorKind
+	err  error
+}{
+	{errorKindIgnoreEvent, &types.ErrIgnoreEvent{}},
+	{errorKindInvalidSignature, types.ErrInvalidWebhookSignature},
+}
+
 type responseHook struct {
-	Repo        *modelRepo            `json:"repo"`
-	Pipeline    *model.Pipeline       `json:"pipeline"`
-	IgnoreEvent *types.ErrIgnoreEvent `json:"ignore_event,omitempty"`
+	Repo         *modelRepo      `json:"repo"`
+	Pipeline     *model.Pipeline `json:"pipeline"`
+	ErrorKind    errorKind       `json:"error_kind,omitempty"`
+	ErrorMessage string          `json:"error_message,omitempty"`
 }
 
 type responseLogin struct {
