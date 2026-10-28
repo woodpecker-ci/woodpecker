@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-27
+## [3.20.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.0) - 2026-10-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -93,6 +93,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7417](https://github.com/woodpecker-ci/woodpecker/pull/7417)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
