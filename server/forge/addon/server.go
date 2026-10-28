@@ -250,16 +250,14 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	req.Header = a.Header
 	req.Form = a.Form
 	repo, pipeline, err := s.Impl.Hook(mkCtx(), req, a.Secret)
+	base, err := errorResponse(err)
 	if err != nil {
-		if found, kind, msg := encodeErrorKinds(err); found {
-			*resp, err = json.Marshal(&responseHook{ErrorKind: kind, ErrorMessage: msg})
-			return err
-		}
 		return err
 	}
 	*resp, err = json.Marshal(&responseHook{
-		Repo:     modelRepoFromModel(repo),
-		Pipeline: pipeline,
+		baseErrorResponse: base,
+		Repo:              modelRepoFromModel(repo),
+		Pipeline:          pipeline,
 	})
 	return err
 }

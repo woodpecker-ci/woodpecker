@@ -380,8 +380,8 @@ func (g *RPC) Hook(_ context.Context, r *http.Request, secret string) (*model.Re
 	if err != nil {
 		return nil, nil, err
 	}
-	if resp.ErrorKind != "" {
-		return nil, nil, decodeErrorKinds(resp.ErrorKind, resp.ErrorMessage)
+	if err := resp.asError(); err != nil {
+		return nil, nil, err
 	}
 	return resp.Repo.asModel(), resp.Pipeline, nil
 }

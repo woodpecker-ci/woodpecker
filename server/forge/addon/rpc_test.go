@@ -311,6 +311,44 @@ func TestEncodeErrorKinds(t *testing.T) {
 	assert.Empty(t, msg)
 }
 
+func TestErrorKindsOfForgeErrors(t *testing.T) {
+	for _, forgeErr := range []error{
+		fmt.Errorf("teams: %w", types.ErrNotImplemented),
+		errors.Join(errors.New("404"), types.ErrRepoNotFound),
+		errors.Join(errors.New("404"), &types.ErrConfigNotFound{Configs: []string{".woodpecker.yaml"}}),
+	} {
+		t.Run(forgeErr.Error(), func(t *testing.T) {
+			base, err := errorResponse(forgeErr)
+			require.NoError(t, err)
+
+			assertAddonError(t, forgeErr, base.asError())
+		})
+	}
+}
+
+// assertAddonError checks that got is the error of the addon for want: same
+// message and the same errors of errorKindMap match.
+func assertAddonError(t *testing.T, want, got error) {
+	t.Helper()
+	assert.EqualError(t, got, want.Error())
+	assert.ErrorIs(t, got, &ErrAddon{})
+	for kind, target := range errorKindMap {
+		assert.Equal(t, errors.Is(want, target), errors.Is(got, target), kind)
+	}
+}
+
+func TestErrorResponse(t *testing.T) {
+	base, err := errorResponse(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, baseErrorResponse{}, base)
+	assert.NoError(t, base.asError())
+
+	// errors without kind stay errors of the RPC call
+	other := errors.New("forge unavailable")
+	_, err = errorResponse(other)
+	assert.Same(t, other, err)
+}
+
 func TestRPCHookAddonError(t *testing.T) {
 	ctx := t.Context()
 

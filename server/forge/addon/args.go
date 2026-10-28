@@ -89,12 +89,18 @@ type errorKind string
 const (
 	errorKindIgnoreEvent      errorKind = "ignore_event"
 	errorKindInvalidSignature errorKind = "invalid_signature"
+	errorKindNotImplemented   errorKind = "not_implemented"
+	errorKindRepoNotFound     errorKind = "repo_not_found"
+	errorKindConfigNotFound   errorKind = "config_not_found"
 )
 
 // errorKindMap maps the kind to the error the server checks for.
 var errorKindMap = map[errorKind]error{
 	errorKindIgnoreEvent:      &types.ErrIgnoreEvent{},
 	errorKindInvalidSignature: types.ErrInvalidWebhookSignature,
+	errorKindNotImplemented:   types.ErrNotImplemented,
+	errorKindRepoNotFound:     types.ErrRepoNotFound,
+	errorKindConfigNotFound:   &types.ErrConfigNotFound{},
 }
 
 // encodeErrorKinds returns the kind and the message of an error the server
@@ -120,6 +126,27 @@ func decodeErrorKinds(kind errorKind, msg string) error {
 type baseErrorResponse struct {
 	ErrorKind    errorKind `json:"error_kind,omitempty"`
 	ErrorMessage string    `json:"error_message,omitempty"`
+}
+
+// errorResponse returns the response part for an error the server checks for.
+// Every other error is returned as is and sent as error of the RPC call.
+func errorResponse(err error) (baseErrorResponse, error) {
+	if err == nil {
+		return baseErrorResponse{}, nil
+	}
+	found, kind, msg := encodeErrorKinds(err)
+	if !found {
+		return baseErrorResponse{}, err
+	}
+	return baseErrorResponse{ErrorKind: kind, ErrorMessage: msg}, nil
+}
+
+// asError returns the error the addon sent in the response, or nil.
+func (r baseErrorResponse) asError() error {
+	if r.ErrorKind == "" {
+		return nil
+	}
+	return decodeErrorKinds(r.ErrorKind, r.ErrorMessage)
 }
 
 type responseHook struct {

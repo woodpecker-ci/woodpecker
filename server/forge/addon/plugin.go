@@ -24,8 +24,11 @@ import (
 
 const pluginKey = "forge"
 
+// protocolVersion must be raised whenever the messages between server and addon change.
+const protocolVersion = 2
+
 var HandshakeConfig = plugin.HandshakeConfig{
-	ProtocolVersion:  1,
+	ProtocolVersion:  protocolVersion,
 	MagicCookieKey:   "WOODPECKER_FORGE_ADDON_PLUGIN",
 	MagicCookieValue: "woodpecker-plugin-magic-cookie-value",
 }
