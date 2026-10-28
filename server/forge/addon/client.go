@@ -253,8 +253,15 @@ func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipe
 	if err != nil {
 		return nil, addonError(err)
 	}
-	var resp []*types.FileMeta
-	return resp, json.Unmarshal(jsonResp, &resp)
+	var resp responseDir
+	err = json.Unmarshal(jsonResp, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if err := resp.asError(); err != nil {
+		return nil, err
+	}
+	return resp.Files, nil
 }
 
 func (g *RPC) Status(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error {

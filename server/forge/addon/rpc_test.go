@@ -488,6 +488,28 @@ func TestRPCErrorKinds(t *testing.T) {
 				return err
 			},
 		},
+		{
+			name: "dir not implemented",
+			err:  fmt.Errorf("dir: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Dir(ctx, user, testRepo(), &model.Pipeline{}, ".woodpecker")
+				return err
+			},
+		},
+		{
+			name: "dir config not found",
+			err:  errors.Join(errors.New("404 Not Found"), &types.ErrConfigNotFound{Configs: []string{".woodpecker"}}),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Dir(ctx, user, testRepo(), &model.Pipeline{}, ".woodpecker")
+				return err
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			impl := forge_mocks.NewMockForge(t)

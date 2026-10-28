@@ -123,10 +123,11 @@ func (s *RPCServer) Dir(args []byte, resp *[]byte) error {
 		return err
 	}
 	meta, err := s.Impl.Dir(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(meta)
+	*resp, err = json.Marshal(&responseDir{baseErrorResponse: base, Files: meta})
 	return err
 }
 
