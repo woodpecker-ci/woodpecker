@@ -14,7 +14,7 @@
     "@docusaurus/theme-classic": "^3.9.2",
     "@docusaurus/types": "^3.9.2",
     "@tsconfig/docusaurus": "^2.0.7",
-    "@types/node": "^24.10.9",
+    "@types/node": "^26.0.0",
     "axios": "^1.13.4",
     "concurrently": "^10.0.0",
     "isomorphic-dompurify": "^4.0.0",
