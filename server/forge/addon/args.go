@@ -117,11 +117,15 @@ func decodeErrorKinds(kind errorKind, msg string) error {
 	return &ErrAddon{Message: msg, Err: fmt.Errorf("addon sent unknown error kind %q", kind)}
 }
 
+type baseErrorResponse struct {
+	ErrorKind    errorKind `json:"error_kind,omitempty"`
+	ErrorMessage string    `json:"error_message,omitempty"`
+}
+
 type responseHook struct {
-	Repo         *modelRepo      `json:"repo"`
-	Pipeline     *model.Pipeline `json:"pipeline"`
-	ErrorKind    errorKind       `json:"error_kind,omitempty"`
-	ErrorMessage string          `json:"error_message,omitempty"`
+	baseErrorResponse
+	Repo     *modelRepo      `json:"repo"`
+	Pipeline *model.Pipeline `json:"pipeline"`
 }
 
 type responseLogin struct {
