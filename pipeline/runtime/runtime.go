@@ -80,3 +80,10 @@ func (r *Runtime) Err() error {
 }
 
 // makeLogger returns a logger enriched with all runtime description fields.
+func (r *Runtime) makeLogger() zerolog.Logger {
+	logCtx := log.With()
+	for key, val := range r.description {
+		logCtx = logCtx.Str(key, val)
+	}
+	return logCtx.Logger()
+}
