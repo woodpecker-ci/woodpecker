@@ -70,7 +70,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm install --frozen-lockfile
       - pnpm build
     when:
