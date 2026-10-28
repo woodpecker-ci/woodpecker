@@ -81,7 +81,7 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7423](https://github.com/woodpecker-ci/woodpecker/pull/7423)]
+- Update dependency @types/node to v26 [[#7422](https://github.com/woodpecker-ci/woodpecker/pull/7422)]
 - Update docs npm deps non-major [[#7420](https://github.com/woodpecker-ci/woodpecker/pull/7420)]
 - Add Supabase Backup plugin [[#7410](https://github.com/woodpecker-ci/woodpecker/pull/7410)]
 - Document how to install the CLI [[#7360](https://github.com/woodpecker-ci/woodpecker/pull/7360)]
