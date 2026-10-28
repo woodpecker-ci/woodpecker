@@ -17,6 +17,7 @@ package addon
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -261,6 +262,38 @@ func TestRPCRoundTrip(t *testing.T) {
 		assert.Equal(t, ignored.Error(), err.Error())
 		assert.Nil(t, gotRepo)
 		assert.Nil(t, gotPipeline)
+	})
+}
+
+func TestRPCHookAddonError(t *testing.T) {
+	ctx := t.Context()
+
+	t.Run("error of the addon", func(t *testing.T) {
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("parse hook: %w", errors.New("bad payload")))
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+		assert.ErrorIs(t, err, &ErrAddon{})
+		assert.EqualError(t, err, "parse hook: bad payload")
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
+
+	t.Run("error of the addon system", func(t *testing.T) {
+		client, _ := plugin.TestPluginRPCConn(t, map[string]plugin.Plugin{
+			pluginKey: &Plugin{Impl: forge_mocks.NewMockForge(t)},
+		}, nil)
+		raw, err := client.Dispense(pluginKey)
+		require.NoError(t, err)
+		f, ok := raw.(forge.Forge)
+		require.True(t, ok)
+		require.NoError(t, client.Close())
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		_, _, err = f.Hook(ctx, req, "")
+		require.Error(t, err)
+		assert.NotErrorIs(t, err, &ErrAddon{})
 	})
 }
 
