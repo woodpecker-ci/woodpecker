@@ -63,7 +63,7 @@ func dummyStep(name string) *backend_types.Step {
 		Type:        backend_types.StepTypeCommands,
 		OnSuccess:   true,
 		OnFailure:   false,
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 		Commands:    []string{"echo hello"},
 	}
 }
@@ -477,7 +477,7 @@ func TestExecuteStep(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 		step := &backend_types.Step{
 			Name: "skip-me", UUID: "skip-uuid",
-			Type: backend_types.StepTypeCommands, Environment: map[string]string{},
+			Type: backend_types.StepTypeCommands, Environment: make(map[string]string),
 			OnSuccess: false, OnFailure: true,
 		}
 

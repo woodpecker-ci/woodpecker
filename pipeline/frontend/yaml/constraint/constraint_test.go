@@ -50,11 +50,11 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 			c := parseConstraints(t, tt.conf)
 			assert.Equalf(t,
 				tt.wantSuccess,
-				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
 				"include success is wrong for when: '%s'", tt.conf)
 			assert.Equal(t,
 				tt.wantFail,
-				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
+				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
 				"include fail is wrong for when: '%s'", tt.conf)
 		})
 	}
@@ -193,6 +193,43 @@ func TestConstraints(t *testing.T) {
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
 			got, err := c.Match(tt.with, false, tt.env)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestConstraintsMatchIgnoringEvaluate(t *testing.T) {
+	testdata := []struct {
+		desc string
+		conf string
+		with metadata.Metadata
+		want bool
+	}{
+		{
+			desc: "eval on unknown variable is treated as matching",
+			conf: `{ event: manual, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: true,
+		},
+		{
+			desc: "other conditions still apply",
+			conf: `{ event: push, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: false,
+		},
+		{
+			desc: "branch still applies",
+			conf: `{ branch: main, evaluate: 'true' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual, Commit: metadata.Commit{Branch: "dev"}}},
+			want: false,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.desc, func(t *testing.T) {
+			c := parseConstraints(t, tt.conf)
+			got, err := c.MatchIgnoringEvaluate(tt.with, true, nil)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})

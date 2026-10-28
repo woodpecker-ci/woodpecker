@@ -35,7 +35,7 @@ type Network struct {
 
 // MarshalYAML implements the Marshaller interface.
 func (n Networks) MarshalYAML() (any, error) {
-	m := map[string]*Network{}
+	m := make(map[string]*Network)
 	for _, network := range n.Networks {
 		m[network.Name] = network
 	}

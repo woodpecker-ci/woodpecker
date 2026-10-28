@@ -56,7 +56,7 @@ type Runtime struct {
 func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Option) *Runtime {
 	r := new(Runtime)
 	r.err = utils.NewProtected[error](nil)
-	r.description = map[string]string{}
+	r.description = make(map[string]string)
 	r.spec = spec
 	r.engine = backend
 	r.ctx = context.Background()

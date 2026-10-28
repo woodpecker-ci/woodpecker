@@ -465,7 +465,7 @@ func TestToPermWithoutPermissions(t *testing.T) {
 
 func TestMatchingHooks(t *testing.T) {
 	hooks := []*forgejo.Hook{
-		{ID: 1, Config: map[string]string{}},
+		{ID: 1, Config: make(map[string]string)},
 		{ID: 2, Config: map[string]string{"url": "https://other.example.com/hook"}},
 		{ID: 3, Config: map[string]string{"url": "https://ci.example.com/api/hook?access_token=old"}},
 	}
