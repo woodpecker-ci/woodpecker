@@ -73,6 +73,7 @@
 
 ### 🧪 Tests
 
+- Enable test context checks in usetesting [[#7414](https://github.com/woodpecker-ci/woodpecker/pull/7414)]
 - Enforce make syntax for empty maps [[#7406](https://github.com/woodpecker-ci/woodpecker/pull/7406)]
 - Require `scheduler_mocks` import name [[#7341](https://github.com/woodpecker-ci/woodpecker/pull/7341)]
 - Increase test coverage of `server/forge` and `server/servies` [[#7319](https://github.com/woodpecker-ci/woodpecker/pull/7319)]
@@ -80,6 +81,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7420](https://github.com/woodpecker-ci/woodpecker/pull/7420)]
 - Add Supabase Backup plugin [[#7410](https://github.com/woodpecker-ci/woodpecker/pull/7410)]
 - Document how to install the CLI [[#7360](https://github.com/woodpecker-ci/woodpecker/pull/7360)]
 - Add OpenArtifact plugin [[#7378](https://github.com/woodpecker-ci/woodpecker/pull/7378)]
@@ -93,7 +95,6 @@
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7417](https://github.com/woodpecker-ci/woodpecker/pull/7417)]
 - Update woodpeckerci/plugin-git to v2.11.0 [[#7375](https://github.com/woodpecker-ci/woodpecker/pull/7375)]
 
 ### Misc
