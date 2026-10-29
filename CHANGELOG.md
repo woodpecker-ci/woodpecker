@@ -2,6 +2,14 @@
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
+### ❤️ Thanks to all contributors! ❤️
+
+@lafriks
+
+### 🐛 Bug Fixes
+
+- Fix step lop group UX [[#7431](https://github.com/woodpecker-ci/woodpecker/pull/7431)]
+
 ### 📦️ Dependency
 
 - Update golang-packages [[#7426](https://github.com/woodpecker-ci/woodpecker/pull/7426)]
