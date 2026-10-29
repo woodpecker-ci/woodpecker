@@ -201,7 +201,7 @@ func TestPatchOrg(t *testing.T) {
 	})
 
 	t.Run("empty patch keeps the setting", func(t *testing.T) {
-		tc := patch(t, map[string]any{})
+		tc := patch(t, make(map[string]any))
 
 		require.Equal(t, http.StatusOK, tc.Recorder.Code)
 		stored, err := s.OrgGet(org.ID)

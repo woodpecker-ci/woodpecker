@@ -241,7 +241,7 @@ func TestStartStepReturnsBackendOptionsParseError(t *testing.T) {
 		BackendOptions: map[string]any{"kubernetes": "not-a-map"},
 	}
 
-	err := engine.StartStep(context.Background(), step, "11301")
+	err := engine.StartStep(t.Context(), step, "11301")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "could not parse backend options")
 

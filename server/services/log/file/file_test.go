@@ -66,31 +66,31 @@ func TestLogStoreAppendFindDelete(t *testing.T) {
 		{StepID: 42, Line: 1, Data: []byte("world"), Type: model.LogEntryStdout},
 	}
 
-	require.NoError(t, s.LogAppend(step, first))
+	require.NoError(t, s.LogAppend(t.Context(), step, first))
 
-	got, err := s.LogFind(step)
+	got, err := s.LogFind(t.Context(), step)
 	require.NoError(t, err)
 	require.Len(t, got, 2)
 	assert.Equal(t, []byte("hello"), got[0].Data)
 	assert.Equal(t, 1, got[1].Line)
 
 	// append must add to the existing file, not overwrite it
-	require.NoError(t, s.LogAppend(step, []*model.LogEntry{
+	require.NoError(t, s.LogAppend(t.Context(), step, []*model.LogEntry{
 		{StepID: 42, Line: 2, Data: []byte("again"), Type: model.LogEntryStdout},
 	}))
 
-	got, err = s.LogFind(step)
+	got, err = s.LogFind(t.Context(), step)
 	require.NoError(t, err)
 	require.Len(t, got, 3)
 	assert.Equal(t, []byte("again"), got[2].Data)
 
-	require.NoError(t, s.LogDelete(step))
+	require.NoError(t, s.LogDelete(t.Context(), step))
 
 	// StepFinished is a no-op for the file store but part of the interface
-	require.NoError(t, s.StepFinished(step))
+	require.NoError(t, s.StepFinished(t.Context(), step))
 
 	// after delete the file is gone -> find returns no entries, no error
-	got, err = s.LogFind(step)
+	got, err = s.LogFind(t.Context(), step)
 	require.NoError(t, err)
 	assert.Empty(t, got)
 }
@@ -101,7 +101,7 @@ func TestLogFindMissingFile(t *testing.T) {
 	s, err := NewLogStore(t.TempDir())
 	require.NoError(t, err)
 
-	got, err := s.LogFind(&model.Step{ID: 999})
+	got, err := s.LogFind(t.Context(), &model.Step{ID: 999})
 	require.NoError(t, err)
 	assert.Empty(t, got)
 }
@@ -117,7 +117,7 @@ func TestLogFindMalformedJSON(t *testing.T) {
 	path := filepath.Join(base, "7.json")
 	require.NoError(t, os.WriteFile(path, []byte("{\"line\":0}\nnot-json\n"), 0o600))
 
-	_, err = s.LogFind(&model.Step{ID: 7})
+	_, err = s.LogFind(t.Context(), &model.Step{ID: 7})
 	assert.Error(t, err)
 }
 
@@ -131,7 +131,7 @@ func TestLogFindSkipsBlankLines(t *testing.T) {
 	path := filepath.Join(base, "8.json")
 	require.NoError(t, os.WriteFile(path, []byte("{\"line\":0}\n\n  \n{\"line\":1}\n"), 0o600))
 
-	got, err := s.LogFind(&model.Step{ID: 8})
+	got, err := s.LogFind(t.Context(), &model.Step{ID: 8})
 	require.NoError(t, err)
 	assert.Len(t, got, 2)
 }
@@ -143,5 +143,5 @@ func TestLogDeleteMissingFile(t *testing.T) {
 	require.NoError(t, err)
 
 	// a step without log file has nothing to delete
-	assert.NoError(t, s.LogDelete(&model.Step{ID: 12345}))
+	assert.NoError(t, s.LogDelete(t.Context(), &model.Step{ID: 12345}))
 }

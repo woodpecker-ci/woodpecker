@@ -134,6 +134,8 @@ type (
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
 		Release     *Release         `json:"release,omitempty"`
+		// SelectedWorkflow limits a manual pipeline to this workflow and its hard dependencies.
+		SelectedWorkflow string `json:"selected_workflow,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -272,6 +274,7 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+		Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 	}
 
 	// Agent is the JSON data for an agent.
