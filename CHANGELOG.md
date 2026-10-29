@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lafriks
+@6543, @lafriks
 
 ### 🐛 Bug Fixes
 
+- Restore drone envsubst [[#7433](https://github.com/woodpecker-ci/woodpecker/pull/7433)]
 - Fix step lop group UX [[#7431](https://github.com/woodpecker-ci/woodpecker/pull/7431)]
 
 ### 📦️ Dependency
