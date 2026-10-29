@@ -100,6 +100,7 @@ type Store interface {
 	RepoList(user *model.User, owned, active bool, filter *model.RepoFilter) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
 	RepoListAll(active bool, p *model.ListOptionsWithAll) ([]*model.Repo, error)
+	RepoListOrphaned() ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)

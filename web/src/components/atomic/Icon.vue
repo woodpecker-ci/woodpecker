@@ -77,6 +77,7 @@
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'repo-orphaned'" :path="mdiLinkOff" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="1.3rem" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
@@ -147,6 +148,7 @@ import {
   mdiGitlab,
   mdiHelpCircle,
   mdiInformationSlabCircleOutline,
+  mdiLinkOff,
   mdiLockOpenOutline,
   mdiLockOutline,
   mdiMinusCircle,
@@ -237,6 +239,7 @@ export type IconNames =
   | 'spinner'
   | 'visibility-private'
   | 'visibility-internal'
+  | 'repo-orphaned'
   | 'dots'
   | 'tray-full'
   | 'file-cog-outline'

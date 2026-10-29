@@ -365,6 +365,14 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 			continue
 		}
 
+		// the repo is back at the forge
+		if dbRepo.HasNoForgeRepo {
+			dbRepo.HasNoForgeRepo = false
+			if err := _store.UpdateRepo(dbRepo); err != nil {
+				return err
+			}
+		}
+
 		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
 		perm.RepoID = dbRepo.ID
@@ -377,12 +385,68 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		repoIDs = append(repoIDs, dbRepo.ID)
 	}
 
+	keepRepoIDs, err := keepActivatedRepoPermissions(c, user, _store, _forge, forgeID, repoIDs)
+	if err != nil {
+		return err
+	}
+	repoIDs = append(repoIDs, keepRepoIDs...)
+
 	if err := _store.PermPrune(user.ID, repoIDs); err != nil {
 		return err
 	}
 
 	log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
 	return nil
+}
+
+// keepActivatedRepoPermissions checks the repos the user activated that were missing from the forge repo list.
+// If such a repo got deleted at the forge, it is marked as orphaned and the permission of the user is kept,
+// so the settings of the repo stay accessible. It returns the IDs of the repos whose permission must be kept.
+func keepActivatedRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64, syncedRepoIDs []int64) ([]int64, error) {
+	dbRepos, err := _store.RepoList(user, false, true, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	synced := make(map[int64]bool, len(syncedRepoIDs))
+	for _, id := range syncedRepoIDs {
+		synced[id] = true
+	}
+
+	var keepRepoIDs []int64
+	for _, dbRepo := range dbRepos {
+		if synced[dbRepo.ID] || dbRepo.UserID != user.ID || dbRepo.ForgeID != forgeID {
+			continue
+		}
+
+		forgeRepo, err := _forge.Repo(c, user, dbRepo.ForgeRemoteID, dbRepo.Owner, dbRepo.Name)
+		switch {
+		case errors.Is(err, forge_types.ErrRepoNotFound):
+			if !dbRepo.HasNoForgeRepo {
+				log.Info().Msgf("repo %s does not exist at the forge anymore, marking it as orphaned", dbRepo.FullName)
+				dbRepo.HasNoForgeRepo = true
+				if err := _store.UpdateRepo(dbRepo); err != nil {
+					return nil, err
+				}
+			}
+		case err != nil:
+			// keep the permission, the forge might be temporarily unavailable
+			log.Warn().Err(err).Msgf("could not check if repo %s still exists at the forge", dbRepo.FullName)
+		default:
+			// the repo exists, but was not part of the paginated repo list
+			perm := forgeRepo.Perm
+			perm.RepoID = dbRepo.ID
+			perm.UserID = user.ID
+			perm.Synced = time.Now().Unix()
+			if err := _store.PermUpsert(perm); err != nil {
+				return nil, err
+			}
+		}
+
+		keepRepoIDs = append(keepRepoIDs, dbRepo.ID)
+	}
+
+	return keepRepoIDs, nil
 }
 
 func GetLogout(c *gin.Context) {

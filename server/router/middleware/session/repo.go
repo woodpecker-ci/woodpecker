@@ -25,6 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -140,6 +141,17 @@ func SetPerm() gin.HandlerFunc {
 					if err := _store.PermUpsert(perm); err != nil {
 						_ = c.AbortWithError(http.StatusInternalServerError, err)
 						return
+					}
+				} else if errors.Is(err, forge_types.ErrRepoNotFound) && user.ID == repo.UserID {
+					// the repo got deleted at the forge, keep the permission of the user who activated it,
+					// so the settings of the orphaned repo stay accessible
+					if !repo.HasNoForgeRepo {
+						log.Info().Msgf("repo %s does not exist at the forge anymore, marking it as orphaned", repo.FullName)
+						repo.HasNoForgeRepo = true
+						if err := _store.UpdateRepo(repo); err != nil {
+							_ = c.AbortWithError(http.StatusInternalServerError, err)
+							return
+						}
 					}
 				} else if perm.Push || perm.Admin {
 					// the forge could not confirm the permission, so only keep read access;
