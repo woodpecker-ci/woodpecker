@@ -133,7 +133,6 @@ Note that this tightly couples the server and app configurations (where the app 
 :::warning
 This set up will only work on trusted repositories and for security reasons should only be used in private environments.
 A Woodpecker instance administrator must open the repository's **Settings** and, under **Trusted**, enable **Security** for the privileged service and **Volumes** for the certificate host mounts in this example (see [project settings](./75-project-settings.md#trusted)).
-**Network** can remain disabled for this example.
 :::
 
 The snippet below shows how a step can communicate with the docker daemon running in a `docker:dind` service.
