@@ -182,7 +182,8 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 					break
 				}
 			}
-			if resp.LastPage {
+			// if repo was found or last page reached we give up
+			if repo != nil || resp.LastPage {
 				break
 			}
 			opts.Start = resp.NextPageStart
@@ -437,7 +438,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Events: []bitbucket.EventKey{bitbucket.EventKeyRepoRefsChanged, bitbucket.EventKeyPullRequestFrom, bitbucket.EventKeyPullRequestMerged, bitbucket.EventKeyPullRequestDeclined, bitbucket.EventKeyPullRequestDeleted, bitbucket.EventKeyPullRequestOpened},
 		Active: true,
 		Config: &bitbucket.WebhookConfiguration{
-			Secret: r.Hash,
+			Secret: r.WebhookSecret,
 		},
 	}
 	_, _, err = bc.Projects.CreateWebhook(ctx, r.Owner, r.Name, webhook)
@@ -500,7 +501,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
 	}
 
-	err = bitbucket.ValidateSignature(r, hook.Payload, []byte(repo.Hash))
+	err = bitbucket.ValidateSignature(r, hook.Payload, []byte(repo.WebhookSecret))
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}

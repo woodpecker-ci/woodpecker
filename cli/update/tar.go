@@ -20,10 +20,9 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"path/filepath"
 )
 
-const tarDirectoryMode fs.FileMode = 0x755
+const tarDirectoryMode fs.FileMode = 0o755
 
 func UnTar(dst string, r io.Reader) error {
 	gzr, err := gzip.NewReader(r)
@@ -31,6 +30,13 @@ func UnTar(dst string, r io.Reader) error {
 		return err
 	}
 	defer gzr.Close()
+
+	// all file access goes through root, so no entry can write outside of dst
+	root, err := os.OpenRoot(dst)
+	if err != nil {
+		return err
+	}
+	defer root.Close()
 
 	tr := tar.NewReader(gzr)
 
@@ -48,18 +54,16 @@ func UnTar(dst string, r io.Reader) error {
 			continue
 		}
 
-		target := filepath.Join(dst, header.Name)
-
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if _, err := os.Stat(target); err != nil {
-				if err := os.MkdirAll(target, tarDirectoryMode); err != nil {
+			if _, err := root.Stat(header.Name); err != nil {
+				if err := root.MkdirAll(header.Name, tarDirectoryMode); err != nil {
 					return err
 				}
 			}
 
 		case tar.TypeReg:
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			f, err := root.OpenFile(header.Name, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode)&os.ModePerm)
 			if err != nil {
 				return err
 			}

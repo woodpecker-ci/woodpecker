@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.15.0",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -38,14 +38,14 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.0.0",
+    "@antfu/eslint-config": "^10.0.0",
     "@eslint/js": "^10.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@intlify/eslint-plugin-vue-i18n": "4.5.1",
     "@intlify/unplugin-vue-i18n": "^11.0.7",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "4.3.3",
-    "@types/node": "^24.12.2",
+    "@types/node": "^26.0.0",
     "@types/prismjs": "^1.26.6",
     "@types/semver": "^7.7.1",
     "@types/tinycolor2": "^1.4.6",

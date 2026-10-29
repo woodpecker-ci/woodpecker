@@ -30,6 +30,8 @@ WOODPECKER_MAX_WORKFLOWS=4
 
 When the agent starts it connects to the server using the token from `WOODPECKER_AGENT_SECRET`. The server identifies the agent and registers the agent in its database if it wasn't connected before.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
+
 There are two types of tokens to connect an agent to the server:
 
 ### Using system token
@@ -81,6 +83,19 @@ Changes to the filters of an agent apply the next time that agent requests a wor
 :::
 
 Organization and personal agents always get the `org-id` filter enforced on top of the configured filters, so they can never pick up workflows of another organization.
+
+### Organization agents only
+
+By default, instance-wide agents can also pick up workflows of an organization. To run them only on the organization's own agents, enable the option at:
+
+- `Organization settings -> Agents` for organizations
+- `User settings -> Agents` for personal repositories
+
+Instance-wide agents and agents of other organizations then never pick up these workflows. If no organization agent is online, the workflows stay pending.
+
+:::info
+The option applies to pipelines started after it was changed. Workflows already waiting in the queue keep their previous behavior.
+:::
 
 ## Environment variables
 

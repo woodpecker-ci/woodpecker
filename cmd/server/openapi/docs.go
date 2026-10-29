@@ -1059,6 +1059,49 @@ const docTemplate = `{
                         "description": "No Content"
                     }
                 }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Update an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the org's updated data",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/OrgPatch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
+                        }
+                    }
+                }
             }
         },
         "/orgs/{org_id}/agents": {
@@ -3981,6 +4024,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/workflows": {
+            "get": {
+                "description": "Fetches the pipeline config of the branch head and lists the workflows that run on the manual event.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "List workflows a manual pipeline would run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the branch to load the config from, defaults to the default branch",
+                        "name": "branch",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkflowInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "produces": [
@@ -5032,6 +5121,18 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "require_org_agents": {
+                    "description": "RequireOrgAgents restricts workflows of the organization's repos to agents of this organization",
+                    "type": "boolean"
+                }
+            }
+        },
+        "OrgPatch": {
+            "type": "object",
+            "properties": {
+                "require_org_agents": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5186,6 +5287,10 @@ const docTemplate = `{
                 "reviewed_by": {
                     "type": "string"
                 },
+                "selected_workflow": {
+                    "description": "only run this workflow and its hard dependencies",
+                    "type": "string"
+                },
                 "sender": {
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
@@ -5240,6 +5345,10 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "workflow": {
+                    "description": "only run this workflow and its hard dependencies",
+                    "type": "string"
                 }
             }
         },
@@ -5902,6 +6011,10 @@ const docTemplate = `{
                 "admin_env": {
                     "type": "boolean"
                 },
+                "admin_revoked": {
+                    "description": "AdminRevoked is set when the user is listed in WOODPECKER_ADMIN, but admin\nwas revoked and is not granted again before the next server restart.",
+                    "type": "boolean"
+                },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
                     "type": "string"
@@ -5954,6 +6067,20 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "WorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "errors.PipelineError": {
             "type": "object",

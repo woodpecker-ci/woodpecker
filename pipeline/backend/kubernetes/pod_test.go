@@ -173,7 +173,7 @@ func TestStepNameAsLabelInPod(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}
 	meta, err := podMeta(step, &config{Namespace: "woodpecker"}, BackendOptions{}, "wp-01he8bebctabr3kgk0qj36d2me-1", taskUUID)
 	assert.NoError(t, err)
@@ -196,7 +196,7 @@ func TestPodHostnameSanitized(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 	assert.Equal(t, "update-repos", pod.Spec.Hostname)
@@ -318,7 +318,7 @@ func TestServiceWorkspaceVolume(t *testing.T) {
 		Type:          types.StepTypeService,
 		WorkingDir:    "/woodpecker/src",
 		WorkspaceBase: "/woodpecker",
-		Environment:   map[string]string{},
+		Environment:   make(map[string]string),
 		Volumes:       []string{"workspace:/woodpecker", "cache:/cache"},
 	}
 

@@ -295,11 +295,16 @@ linters:
         - random.GetRandomBytes
     revive:
       rules:
+        - name: enforce-map-style
+          arguments: [make]
         - name: var-naming
           arguments:
             - []
             - []
             - - skipPackageNameChecks: true
+    usetesting:
+      context-background: true
+      context-todo: true
   exclusions:
     generated: lax
     presets:
