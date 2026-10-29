@@ -131,7 +131,8 @@ func SetPerm() gin.HandlerFunc {
 			// their token must not be sent to the repo's forge
 			if user.ForgeID == repo.ForgeID && time.Unix(perm.Synced, 0).Add(PermSyncInterval).Before(time.Now()) {
 				_repo, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
-				if err == nil {
+				switch {
+				case err == nil:
 					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)
 					_repo.ForgeID = repo.ForgeID
 					perm = _repo.Perm
@@ -142,7 +143,7 @@ func SetPerm() gin.HandlerFunc {
 						_ = c.AbortWithError(http.StatusInternalServerError, err)
 						return
 					}
-				} else if errors.Is(err, forge_types.ErrRepoNotFound) && user.ID == repo.UserID {
+				case errors.Is(err, forge_types.ErrRepoNotFound) && user.ID == repo.UserID:
 					// the repo got deleted at the forge, keep the permission of the user who activated it,
 					// so the settings of the orphaned repo stay accessible
 					if !repo.HasNoForgeRepo {
@@ -153,7 +154,7 @@ func SetPerm() gin.HandlerFunc {
 							return
 						}
 					}
-				} else if perm.Push || perm.Admin {
+				case perm.Push || perm.Admin:
 					// the forge could not confirm the permission, so only keep read access;
 					// Synced stays old, so the next request asks the forge again
 					log.Warn().Err(err).Msgf("could not sync user permission for %s %s, falling back to read only",
