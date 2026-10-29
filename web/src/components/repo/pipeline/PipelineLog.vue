@@ -269,7 +269,7 @@ const groupedLogs = computed(() => {
 
   log.value.forEach((line) => {
     const trimmedText = (line.rawText || '').trim();
-    const isCommand = trimmedText.startsWith('▶  ') && trimmedText.slice(3).trim().length > 0;
+    const isCommand = trimmedText.startsWith(commandMarker) && trimmedText.slice(3).trim().length > 0;
 
     if (isCommand) {
       currentBlock = {
