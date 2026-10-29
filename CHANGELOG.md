@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.20.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.2) - 2026-10-29
+
+### ❤️ Thanks to all contributors! ❤️
+
+@roian6
+
+### 📚 Documentation
+
+- Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
+
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
