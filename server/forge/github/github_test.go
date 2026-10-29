@@ -434,7 +434,8 @@ func TestActivate(t *testing.T) {
 	var deleted []string
 	var created *github.Hook
 
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
 			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
 		}),
@@ -467,7 +468,8 @@ func TestActivate(t *testing.T) {
 }
 
 func TestDeactivateWithoutMatchingHook(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
 			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
 		}),
@@ -507,8 +509,10 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 	})
 
 	t.Run("new branch lists the files of the current commit on all pages", func(t *testing.T) {
-		ctx := store.InjectToContext(mockedContext(t, t.Context(),
-			github_mock.WithRequestMatchPages(github_mock.GetReposCommitsByOwnerByRepoByRef,
+		ctx := store.InjectToContext(mockedContext(
+			t, t.Context(),
+			github_mock.WithRequestMatchPages(
+				github_mock.GetReposCommitsByOwnerByRepoByRef,
 				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("a.go")}}},
 				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("b.go")}}},
 			),
@@ -519,7 +523,8 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 	})
 
 	t.Run("push compares both commits and keeps renamed paths once", func(t *testing.T) {
-		ctx := store.InjectToContext(mockedContext(t, t.Context(),
+		ctx := store.InjectToContext(mockedContext(
+			t, t.Context(),
 			github_mock.WithRequestMatchHandler(github_mock.GetReposCompareByOwnerByRepoByBasehead, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, "/repos/octocat/hello-world/compare/"+prev+"..."+curr, r.URL.Path)
 				writeJSON(t, w, github.CommitsComparison{Files: []*github.CommitFile{
@@ -542,8 +547,10 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 }
 
 func TestRepos(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
-		github_mock.WithRequestMatchPages(github_mock.GetUserRepos,
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatchPages(
+			github_mock.GetUserRepos,
 			[]github.Repository{
 				{ID: new(int64(1)), FullName: new("octocat/active"), Name: new("active"), Owner: &github.User{Login: new("octocat")}},
 				{ID: new(int64(2)), FullName: new("octocat/archived"), Name: new("archived"), Owner: &github.User{Login: new("octocat")}, Archived: new(true)},
@@ -571,7 +578,8 @@ func TestRepos(t *testing.T) {
 func TestFileAndDir(t *testing.T) {
 	encoded := func(s string) *string { return new(base64.StdEncoding.EncodeToString([]byte(s))) }
 
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "abc", r.URL.Query().Get("ref"))
 			switch r.URL.Path {
@@ -690,8 +698,10 @@ func TestDirLimitsParallelFileFetches(t *testing.T) {
 }
 
 func TestOrgMembership(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
-		github_mock.WithRequestMatch(github_mock.GetOrgsMembershipsByOrgByUsername,
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatch(
+			github_mock.GetOrgsMembershipsByOrgByUsername,
 			github.Membership{State: new("active"), Role: new("admin")},
 			github.Membership{State: new("pending"), Role: new("member")},
 		),
@@ -710,7 +720,8 @@ func TestOrgMembership(t *testing.T) {
 }
 
 func TestOrg(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetOrgsByOrg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/orgs/org" {
 				writeJSON(t, w, github.Organization{Login: new("org")})

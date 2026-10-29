@@ -72,6 +72,10 @@ type User struct {
 
 	AdminEnv bool `json:"admin_env,omitempty" xorm:"-"`
 
+	// AdminRevoked is set when the user is listed in WOODPECKER_ADMIN, but admin
+	// was revoked and is not granted again before the next server restart.
+	AdminRevoked bool `json:"admin_revoked,omitempty" xorm:"-"`
+
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'hash'"`
 
