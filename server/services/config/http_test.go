@@ -18,6 +18,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -57,4 +58,21 @@ func TestHTTPFetchSendsRestart(t *testing.T) {
 		require.NotNil(t, got.Restart, "request body has no restart field")
 		assert.Equal(t, restart, *got.Restart)
 	}
+}
+
+// An extension is a foreign service, whatever it answers must not be able to crash the server.
+func TestHTTPExtensionRejectsNullConfig(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		fmt.Fprint(w, `{"configs": [null]}`)
+	}))
+	defer ts.Close()
+
+	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+	client, err := utils.NewHTTPClient(privateKey, "loopback")
+	require.NoError(t, err)
+
+	files, err := config.NewHTTP(ts.URL, client, false).Fetch(t.Context(), nil, nil, &model.Repo{}, &model.Pipeline{}, nil, false)
+	require.ErrorContains(t, err, "empty config")
+	assert.Nil(t, files)
 }
