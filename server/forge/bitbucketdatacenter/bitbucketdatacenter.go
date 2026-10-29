@@ -104,6 +104,11 @@ func (c *client) URL() string {
 	return c.url
 }
 
+// Config returns the public configuration of this forge.
+func (c *client) Config() forge_types.Config {
+	return forge_types.ConfigFromURL(c.url)
+}
+
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 

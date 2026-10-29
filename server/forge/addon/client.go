@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os/exec"
+	"strings"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
@@ -79,6 +80,19 @@ func (g *RPC) URL() string {
 	err := g.client.Call("Plugin.URL", []byte{}, &resp)
 	if err != nil {
 		log.Error().Err(err).Msg("addon Plugin.URL call failed")
+	}
+	return resp
+}
+
+// Config returns the public configuration supplied by the addon.
+func (g *RPC) Config() types.Config {
+	var resp types.Config
+	if err := g.client.Call("Plugin.Config", []byte{}, &resp); err != nil {
+		// Older addon binaries do not expose Config yet.
+		if strings.Contains(err.Error(), "can't find method Plugin.Config") {
+			return types.ConfigFromURL(g.URL())
+		}
+		log.Error().Err(err).Msg("addon Plugin.Config call failed")
 	}
 	return resp
 }

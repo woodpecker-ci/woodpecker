@@ -63,6 +63,9 @@ type Forge interface {
 	// Examples: "https://github.com", "https://gitlab.example.com"
 	URL() string
 
+	// Config returns the public configuration of the forge instance.
+	Config() types.Config
+
 	// Login authenticates a user via OAuth2.
 	//
 	// OAuth Flow:
