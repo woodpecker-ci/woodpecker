@@ -294,6 +294,12 @@ describe('pipelineLog', () => {
       expect(wrapper.find('a#L3').exists()).toBe(true);
     });
 
+    it('shows the full plain heading as hover title of the truncated header', async () => {
+      const wrapper = await loadLog(['Preparing', '▶  Build <assets> & bundle  ', 'built']);
+
+      expect(wrapper.get('.sticky .truncate').attributes('title')).toBe('Build <assets> & bundle');
+    });
+
     it('collapses and expands all groups while retaining initialization', async () => {
       const wrapper = await loadLog(['Preparing', '▶  Build', 'built', '▶  Test', 'passed']);
 
