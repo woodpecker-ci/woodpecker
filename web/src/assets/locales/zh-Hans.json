@@ -131,7 +131,11 @@
                 "admin": {
                     "admin": "管理员",
                     "placeholder": "此用户是管理员",
-                    "admin_warning": "由于您的环境配置，该用户拥有管理员权限。如果你在这里撤销权限，该用户下次登录时仍会重新获得管理员权限。"
+                    "admin_warning": "该用户已列在 WOODPECKER_ADMIN 环境配置中。在此处撤销的管理员权限仅在下次服务器重启前有效。如需永久撤销，还需将该用户从环境变量中移除。",
+                    "admin_env": "管理员 (环境变量)",
+                    "admin_env_desc": "该用户已列在 WOODPECKER_ADMIN 中，因此拥有管理员权限。",
+                    "admin_revoked": "管理员权限已临时撤销",
+                    "admin_revoked_desc": "该用户已列在 WOODPECKER_ADMIN 环境配置中，但其管理员权限已在此处撤销。除非将其从 WOODPECKER_ADMIN 中移除，否则下次服务器重启后，该用户首次登录时将重新获得管理员权限。"
                 },
                 "avatar_url": "头像链接",
                 "cancel": "取消",
@@ -261,6 +265,12 @@
             "message": {
                 "title": "消息",
                 "desc": "该消息将作为附加说明添加到流水线消息中。"
+            },
+            "workflow": {
+                "title": "工作流",
+                "desc": "仅运行所选工作流及其硬依赖。",
+                "all": "所有工作流",
+                "load_error": "无法加载此分支的工作流。请检查该分支是否存在，以及其流水线配置是否有效。"
             }
         },
         "not_allowed": "你没有权限访问这个仓库",
