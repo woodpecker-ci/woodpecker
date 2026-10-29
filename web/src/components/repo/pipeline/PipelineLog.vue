@@ -101,7 +101,7 @@
                   invisible: group.lines.length === 0,
                 }"
               />
-              <span class="flex-1 truncate">
+              <span class="flex-1 truncate" :title="group.command.rawText?.trim().slice(commandMarker.length).trim()">
                 <span class="text-[0px] whitespace-pre" aria-hidden="true" v-text="commandMarker" />
                 <!-- eslint-disable vue/no-v-html -->
                 <span v-html="group.command.text?.substring(3)" />
