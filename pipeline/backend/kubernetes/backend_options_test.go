@@ -24,7 +24,7 @@ import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-func Test_parseBackendOptions(t *testing.T) {
+func TestParseBackendOptions(t *testing.T) {
 	tests := []struct {
 		name    string
 		step    *backend_types.Step
@@ -38,7 +38,7 @@ func Test_parseBackendOptions(t *testing.T) {
 		},
 		{
 			name: "empty options",
-			step: &backend_types.Step{BackendOptions: map[string]any{}},
+			step: &backend_types.Step{BackendOptions: make(map[string]any)},
 			want: BackendOptions{},
 		},
 		{
@@ -58,7 +58,7 @@ func Test_parseBackendOptions(t *testing.T) {
 							"podAffinity": map[string]any{
 								"requiredDuringSchedulingIgnoredDuringExecution": []map[string]any{
 									{
-										"labelSelector": map[string]any{},
+										"labelSelector": make(map[string]any),
 										"matchLabelKeys": []string{
 											"woodpecker-ci.org/task-uuid",
 										},

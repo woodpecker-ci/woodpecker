@@ -17,7 +17,7 @@
       <div
         class="bg-wp-code-100 fixed top-0 left-0 flex w-full flex-row items-center px-4 py-2 md:relative md:top-auto md:left-auto"
       >
-        <span class="text-wp-code-text-alt-100 text-base font-bold">
+        <span class="text-wp-code-text-100 text-base font-bold">
           <span class="md:display-unset hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>
         </span>
@@ -78,26 +78,38 @@
       >
         <div v-for="group in groupedLogs" :key="group.id" class="contents">
           <div
-            v-if="group.isActualCommand"
-            class="sticky -top-4 z-10 col-span-3 my-1 flex cursor-pointer items-center rounded-sm px-2 py-1 font-mono text-sm shadow-xs"
-            :class="[group.command && isSelected(group.command) ? 'bg-blue-900' : 'bg-wp-code-100']"
+            v-if="group.isActualCommand && group.command"
+            class="sticky -top-4 z-10 col-span-3 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs"
+            :class="[isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
             @click="toggleGroup(group.id)"
           >
-            <Icon
-              name="chevron-right"
-              class="mr-2 transition-transform"
-              :class="{
-                'rotate-90': !collapsedCommands.has(group.id),
-                invisible: group.lines.length === 0,
-              }"
-            />
-            <!-- eslint-disable vue/no-v-html -->
-            <span
-              v-if="group.command"
-              :id="`L${group.command?.number}`"
-              class="flex-1 truncate"
-              v-html="group.command.text?.substring(2)"
-            />
+            <a
+              :id="`L${group.command.number}`"
+              :href="`#L${group.command.number}`"
+              class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+              :class="{ underline: isSelected(group.command) }"
+              @click.stop
+            >
+              {{ group.command.number }}
+            </a>
+            <div class="flex min-w-0 items-center">
+              <Icon
+                name="chevron-right"
+                class="mr-1 size-4 shrink-0 transition-transform"
+                :class="{
+                  'rotate-90': !collapsedCommands.has(group.id),
+                  invisible: group.lines.length === 0,
+                }"
+              />
+              <span class="flex-1 truncate" :title="group.command.rawText?.trim().slice(commandMarker.length).trim()">
+                <span class="text-[0px] whitespace-pre" aria-hidden="true" v-text="commandMarker" />
+                <!-- eslint-disable vue/no-v-html -->
+                <span v-html="group.command.text?.substring(3)" />
+              </span>
+            </div>
+            <span class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none">
+              {{ formatTime(group.command.time) }}
+            </span>
           </div>
 
           <template v-if="!collapsedCommands.has(group.id)">
@@ -107,9 +119,9 @@
                 :href="`#L${line.number}`"
                 class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
                 :class="{
-                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-                  'bg-blue-600/30': isSelected(line),
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
                   underline: isSelected(line),
                 }"
               >
@@ -119,9 +131,9 @@
               <span
                 class="wrap-break-words align-top whitespace-pre-wrap"
                 :class="{
-                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-                  'bg-blue-600/30': isSelected(line),
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
                 }"
                 v-html="line.text"
               />
@@ -129,9 +141,9 @@
               <span
                 class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
                 :class="{
-                  'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-                  'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-                  'bg-blue-600/30': isSelected(line),
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
                 }"
               >
                 {{ formatTime(line.time) }}
@@ -151,11 +163,11 @@
 
       <div
         v-if="step?.finished !== undefined"
-        class="text-md bg-wp-code-100 text-wp-code-text-alt-100 flex w-full items-center p-4 font-bold"
+        class="text-md bg-wp-code-100 text-wp-code-text-100 flex w-full items-center gap-2 p-4 font-bold"
       >
-        <PipelineStatusIcon :status="step.state" class="h-4! w-4!" />
-        <span v-if="step?.error" class="px-2">{{ step.error }}</span>
-        <span v-else class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
+        <PipelineStatusIcon :status="step.state" class="shrink-0 [&_svg]:h-6 [&_svg]:w-6" />
+        <span v-if="step?.error">{{ step.error }}</span>
+        <span v-else>{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>
     </div>
   </div>
@@ -179,7 +191,7 @@ import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import useUserConfig from '~/compositions/useUserConfig';
-import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
 
 interface LogLine {
@@ -214,7 +226,6 @@ const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
-const pipelineConfigs = requiredInject('pipeline-configs');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -248,59 +259,22 @@ const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
-const commandRegex = /^\s*-\s(.+)$/gm;
-const specialCharsRegex = /[.*+?^${}()|[\]\\]/g;
-const matrixVariableRegex = /\\\$(\\\{\w+\\\})/g;
-
-const knownCommandMatchers = computed(() => {
-  if (!pipelineConfigs.value) return [];
-  const patterns: RegExp[] = [];
-  pipelineConfigs.value.forEach((config: PipelineConfig) => {
-    const decoded = decode(config.data);
-    const matches = decoded.matchAll(commandRegex);
-    for (const match of matches) {
-      const rawCommand = match[1].trim();
-      // Replace matrix variable ${VAR} with a wildcard match (non-greedy)
-      const patternString = rawCommand
-        .replace(specialCharsRegex, '\\$&') // escape all
-        .replace(matrixVariableRegex, '.*'); // match ${VAR}
-
-      patterns.push(new RegExp(`^${patternString}$`));
-    }
-  });
-  return patterns;
-});
+const commandMarker = '▶  ';
 
 const groupedLogs = computed(() => {
   if (!log.value) return [];
-
-  if (!pipelineConfigs.value || pipelineConfigs.value.length === 0) {
-    return [
-      {
-        id: 0,
-        command: null,
-        lines: log.value,
-        isActualCommand: false,
-      },
-    ];
-  }
 
   const blocks: LogBlock[] = [];
   let currentBlock: LogBlock | null = null;
 
   log.value.forEach((line) => {
     const trimmedText = (line.rawText || '').trim();
-
-    let isCommand = false;
-    if (trimmedText.startsWith('+ ')) {
-      const cmdPart = trimmedText.slice(2).trim();
-      isCommand = knownCommandMatchers.value.some((matcher) => matcher.test(cmdPart));
-    }
+    const isCommand = trimmedText.startsWith(commandMarker) && trimmedText.slice(3).trim().length > 0;
 
     if (isCommand) {
       currentBlock = {
         command: line,
-        lines: [line],
+        lines: [],
         id: line.number,
         isActualCommand: true,
       };
@@ -326,7 +300,9 @@ const hasGroupedLogs = computed(() => {
   return groupedLogs.value.find((g) => g.isActualCommand);
 });
 
-const urlRegex = /https?:\/\/\S+/g;
+// Stop a URL at a '<' so that if we are also converting ansi escapes at the end of a URL
+// we don't include their closing </span> in the URL match.
+const urlRegex = /https?:\/\/[^\s<]+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
@@ -485,10 +461,11 @@ async function deleteLogs() {
   }
 }
 
+// A stepless workflow has no `children`, so the deref is guarded.
 function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
     (prev, workflow) => {
-      const result = workflow.children.reduce(
+      const result = (workflow.children ?? []).reduce(
         (prevChild, step) => {
           if (step.pid === pid) {
             return step;

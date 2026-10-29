@@ -48,6 +48,16 @@
         "name": "Variable name",
         "value": "Variable value"
       },
+      "message": {
+        "title": "Message",
+        "desc": "This message is added to the pipeline's message as additional information."
+      },
+      "workflow": {
+        "title": "Workflow",
+        "desc": "Run only the selected workflow and its hard dependencies.",
+        "all": "All workflows",
+        "load_error": "Could not load the workflows of this branch. Check that the branch exists and its pipeline config is valid."
+      },
       "show_pipelines": "Show pipelines",
       "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
@@ -71,6 +81,7 @@
     "refresh": "Refresh repository list",
     "user_none": "This organization/user has no projects yet",
     "not_allowed": "You are not allowed to access this repository",
+    "perm_sync_failed": "Your permissions for this repository could not be synced with the forge. Your access is temporarily degraded to read-only.",
     "enable": {
       "enable": "Enable",
       "enabled": "Already enabled",
@@ -314,7 +325,12 @@
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
       },
       "agents": {
-        "desc": "Agents registered for this organization."
+        "desc": "Agents registered for this organization.",
+        "require_org_agents": {
+          "require": "Run pipelines only on organization agents",
+          "desc": "Workflows of this organization's repositories are only picked up by agents registered for this organization, not by server-wide agents.",
+          "saved": "Organization settings saved"
+        }
       }
     }
   },
@@ -378,7 +394,14 @@
         "never": "Never",
         "delete_confirm": "Do you really want to delete this agent? It will no longer be able to connect to the server.",
         "edit_agent": "Edit agent",
-        "delete_agent": "Delete agent"
+        "delete_agent": "Delete agent",
+        "filters": {
+          "name": "Filters",
+          "desc": "Server side enforced labels of agents to filter workflows",
+          "key": "Label name",
+          "value": "Filter value",
+          "delete": "Delete filter"
+        }
       },
       "queue": {
         "queue": "Queue",
@@ -419,7 +442,11 @@
         "admin": {
           "admin": "Admin",
           "placeholder": "User is an admin",
-          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
+          "admin_warning": "This user is listed in WOODPECKER_ADMIN environment configuration. Revoking admin here lasts until the next server restart. To revoke it for good, also remove the user from your environment variables.",
+          "admin_env": "Admin (env)",
+          "admin_env_desc": "Admin because the user is listed in WOODPECKER_ADMIN.",
+          "admin_revoked": "Admin temporarily revoked",
+          "admin_revoked_desc": "The user is listed in WOODPECKER_ADMIN environment configuration, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN."
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user",
@@ -486,7 +513,12 @@
         "swagger_ui": "Swagger UI"
       },
       "agents": {
-        "desc": "Agents registered to your account repos."
+        "desc": "Agents registered to your account repos.",
+        "require_user_agents": {
+          "require": "Run pipelines only on your agents",
+          "desc": "Workflows of your personal repositories are only picked up by agents registered to your account, not by server-wide agents.",
+          "saved": "User settings saved"
+        }
       }
     }
   },

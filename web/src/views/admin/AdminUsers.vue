@@ -24,7 +24,23 @@
             class="md:display-unset hidden"
             :value="forgesMap.get(user.forge_id)"
           />
-          <Badge v-if="user.admin" class="md:display-unset hidden" :value="$t('admin.settings.users.admin.admin')" />
+          <Badge
+            v-if="user.admin_revoked"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_revoked')"
+            :title="$t('admin.settings.users.admin.admin_revoked_desc')"
+          />
+          <Badge
+            v-else-if="user.admin_env"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_env')"
+            :title="$t('admin.settings.users.admin.admin_env_desc')"
+          />
+          <Badge
+            v-else-if="user.admin"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin')"
+          />
         </span>
         <div class="flex items-center gap-2">
           <IconButton
@@ -60,11 +76,15 @@
         </InputField>
 
         <InputField
-          v-if="selectedUser!.forge_id !== undefined && forgesMap.has(selectedUser!.forge_id)"
+          v-if="isEditingUser && selectedUser!.forge_id !== undefined && forgesMap.has(selectedUser!.forge_id)"
           v-slot="{ id }"
           :label="$t('admin.settings.users.forge')"
         >
           <TextField :id="id" v-model="selectedUserForge" :placeholder="$t('admin.settings.users.forge')" disabled />
+        </InputField>
+
+        <InputField v-else-if="!isEditingUser" v-slot="{ id }" :label="$t('admin.settings.users.forge')">
+          <SelectField :id="id" v-model="selectedForgeId" :options="forgeOptions" />
         </InputField>
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
@@ -124,6 +144,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -131,6 +152,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
+import { DEFAULT_FORGE_ID } from '~/lib/api';
 import type { User } from '~/lib/api/types';
 import { deepClone } from '~/lib/utils';
 
@@ -143,6 +165,15 @@ const forgesMap = ref<Map<number, string>>(new Map());
 const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 const selectedUserForge = computed(() => forgesMap.value.get(selectedUser.value?.forge_id || -1));
+const forgeOptions = computed(() => Array.from(forgesMap.value, ([id, name]) => ({ value: String(id), text: name })));
+const selectedForgeId = computed({
+  get: () => String(selectedUser.value?.forge_id ?? DEFAULT_FORGE_ID),
+  set: (value) => {
+    if (selectedUser.value) {
+      selectedUser.value.forge_id = Number(value);
+    }
+  },
+});
 
 async function loadForges() {
   const forges = await apiClient.getForges({ page: 1 });

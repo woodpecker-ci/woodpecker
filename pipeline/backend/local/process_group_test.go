@@ -129,7 +129,8 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 	taskUUID := "test-cancel-grandchild"
 	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
 	t.Cleanup(func() {
-		_ = backend.DestroyWorkflow(context.Background(), &types.Config{}, taskUUID)
+		// Cleanup runs after the test context is canceled.
+		_ = backend.DestroyWorkflow(context.WithoutCancel(t.Context()), &types.Config{}, taskUUID)
 	})
 
 	pidFile := filepath.Join(t.TempDir(), "grandchild.pid")
@@ -167,7 +168,7 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 	// the entire process group, taking the grandchild with it.
 	cancel(nil)
 
-	_, _ = backend.WaitStep(context.Background(), step, taskUUID)
+	_, _ = backend.WaitStep(t.Context(), step, taskUUID)
 
 	require.Eventuallyf(t, func() bool {
 		return !pidAlive(grandchildPID)
@@ -184,7 +185,7 @@ func pidAlive(pid int) bool {
 	if err != nil {
 		return false
 	}
-	for _, line := range strings.Split(string(data), "\n") {
+	for line := range strings.SplitSeq(string(data), "\n") {
 		if strings.HasPrefix(line, "State:") {
 			// e.g. "State:\tZ (zombie)"
 			return !strings.Contains(line, "Z")

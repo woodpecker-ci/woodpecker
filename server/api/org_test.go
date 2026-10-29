@@ -165,3 +165,67 @@ func TestGetOrgPermissions(t *testing.T) {
 		assert.True(t, membership.called)
 	})
 }
+
+func TestPatchOrg(t *testing.T) {
+	s := newTestStore(t)
+
+	org := &model.Org{Name: "acme", ForgeID: 1}
+	require.NoError(t, s.OrgCreate(org))
+
+	patch := func(t *testing.T, body any) *testContext {
+		t.Helper()
+		stored, err := s.OrgGet(org.ID)
+		require.NoError(t, err)
+
+		tc := newTestContext(t, s)
+		withRequest(http.MethodPatch, body)(tc)
+		tc.Ctx.Set("org", stored)
+
+		PatchOrg(tc.Ctx)
+		return tc
+	}
+
+	t.Run("enables require org agents", func(t *testing.T) {
+		requireOrgAgents := true
+		tc := patch(t, &model.OrgPatch{RequireOrgAgents: &requireOrgAgents})
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		got := new(model.Org)
+		tc.decodeJSON(t, got)
+		assert.True(t, got.RequireOrgAgents)
+
+		stored, err := s.OrgGet(org.ID)
+		require.NoError(t, err)
+		assert.True(t, stored.RequireOrgAgents)
+		assert.Equal(t, "acme", stored.Name)
+	})
+
+	t.Run("empty patch keeps the setting", func(t *testing.T) {
+		tc := patch(t, make(map[string]any))
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		stored, err := s.OrgGet(org.ID)
+		require.NoError(t, err)
+		assert.True(t, stored.RequireOrgAgents)
+	})
+
+	t.Run("disables require org agents", func(t *testing.T) {
+		requireOrgAgents := false
+		tc := patch(t, &model.OrgPatch{RequireOrgAgents: &requireOrgAgents})
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		stored, err := s.OrgGet(org.ID)
+		require.NoError(t, err)
+		assert.False(t, stored.RequireOrgAgents)
+	})
+
+	t.Run("rejects malformed body", func(t *testing.T) {
+		tc := newTestContext(t, s)
+		withRawBody(http.MethodPatch, "application/json", []byte("{"))(tc)
+		tc.Ctx.Set("org", org)
+
+		PatchOrg(tc.Ctx)
+
+		assert.Equal(t, http.StatusBadRequest, tc.Recorder.Code)
+	})
+}

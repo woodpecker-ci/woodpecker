@@ -37,9 +37,7 @@ type ResponseContent map[string]any
 func Server() *httptest.Server {
 	return mock.NewMockServer(
 		mock.WithRequestMatch(mock.SearchRepositories, bitbucket.RepositoryList{
-			ListResponse: bitbucket.ListResponse{
-				LastPage: true,
-			},
+			LastPage: true,
 			Repositories: []*bitbucket.Repository{
 				{
 					ID:   uint64(123),

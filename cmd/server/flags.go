@@ -189,7 +189,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_APPROVAL_MODE"),
 		Name:    "default-approval-mode",
-		Usage:   "The default value for allowing pull requests on a repo.",
+		Usage:   "The default approval mode on a repo: none, forks, pull_requests or all_events.",
 		Value:   "forks",
 	},
 	&cli.StringSliceFlag{
@@ -464,7 +464,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 5,
+		Value:   time.Second * 30,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),

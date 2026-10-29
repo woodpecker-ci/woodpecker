@@ -91,7 +91,7 @@ const repoPermissions = requiredInject('repo-permissions');
 
 const stepId = toRef(props, 'stepId');
 
-const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0].pid ?? null);
+const defaultStepId = computed(() => pipeline.value?.workflows?.[0]?.children?.[0]?.pid ?? null);
 
 // Replace the log view with the error panel for parse errors, or for workflow
 // runtime errors when no step produced logs yet. If steps already ran (e.g.
@@ -108,7 +108,7 @@ const selectedStepId = computed({
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = Number.parseInt(stepId.value, 10);
 
-      let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
+      let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children?.[0];
       if (step) {
         return step.pid;
       }

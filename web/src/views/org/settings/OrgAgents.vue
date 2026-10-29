@@ -5,7 +5,16 @@
     :create-agent="createAgent"
     :update-agent="updateAgent"
     :delete-agent="deleteAgent"
-  />
+  >
+    <template #headerEnd>
+      <RequireOrgAgentsCheckbox
+        v-model="org"
+        :label="$t('org.settings.agents.require_org_agents.require')"
+        :description="$t('org.settings.agents.require_org_agents.desc')"
+        :saved-message="$t('org.settings.agents.require_org_agents.saved')"
+      />
+    </template>
+  </AgentManager>
 </template>
 
 <script lang="ts" setup>
@@ -13,6 +22,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AgentManager from '~/components/agent/AgentManager.vue';
+import RequireOrgAgentsCheckbox from '~/components/agent/RequireOrgAgentsCheckbox.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { useWPTitle } from '~/compositions/useWPTitle';

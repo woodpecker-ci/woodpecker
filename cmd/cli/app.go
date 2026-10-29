@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/cli/repo"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/cli/update"
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/shared"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
@@ -42,6 +43,7 @@ func newApp() *cli.Command {
 	app.Before = common.Before
 	app.After = common.After
 	app.Suggest = true
+	app.EnableShellCompletion = true
 	app.ConfigureShellCompletionCommand = func(c *cli.Command) {
 		c.Hidden = false
 		c.Usage = "generate completion script for the specified shell"
@@ -49,6 +51,12 @@ func newApp() *cli.Command {
 	app.Commands = []*cli.Command{
 		admin.Command,
 		context.Command,
+		{
+			Name:   "decode-base64",
+			Usage:  "decodes a base64 string",
+			Hidden: true, // internal helper for local backend and cmd
+			Action: shared.Base64Decoder,
+		},
 		exec.Command,
 		info.Command,
 		lint.Command,

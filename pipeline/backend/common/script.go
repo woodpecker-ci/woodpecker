@@ -16,23 +16,20 @@ package common
 
 import (
 	"encoding/base64"
-
-	"golang.org/x/text/encoding/unicode"
 )
+
+// CommandMarker prefixes the echoed command line before each step command runs.
+// The web UI (PipelineLog.vue) uses it to detect and collapse command output,
+// and plugins are documented to print it too, so every backend must use it.
+const CommandMarker = "▶  "
 
 func GenerateContainerConf(commands []string, osType, workDir string) (env map[string]string, entry []string, err error) {
 	env = make(map[string]string)
 	if osType == "windows" {
-		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
-		utf16leBytes, err := encoder.Bytes([]byte(generateScriptWindows(commands, workDir)))
-		if err != nil {
-			return nil, nil, err
-		}
-
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString(utf16leBytes)
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-encodedcommand", env["CI_SCRIPT"]}
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
 		env["SHELL"] = "/bin/sh"

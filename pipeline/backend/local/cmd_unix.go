@@ -29,6 +29,11 @@ func newCmd(ctx context.Context, binary string, args ...string) *exec.Cmd {
 	// ... create new process group for the command.
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Cancel = func() error {
+		// the command can have never been started (e.g. the workflow got canceled
+		// before), so there is no process group to kill.
+		if cmd.Process == nil {
+			return nil
+		}
 		// ... send kill to whole process group.
 		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 	}

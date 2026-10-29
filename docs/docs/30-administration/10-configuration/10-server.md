@@ -602,6 +602,15 @@ Time an active database connection is allowed to stay open.
 
 ---
 
+### DATABASE_MAX_RETRIES
+
+- Name: `WOODPECKER_DATABASE_MAX_RETRIES`
+- Default: `10`
+
+Maximum number of retries for the initial connection to the database.
+
+---
+
 ### DEBUG_PRETTY
 
 - Name: `WOODPECKER_DEBUG_PRETTY`
@@ -641,6 +650,15 @@ Examples:
 - Default: `:8000`
 
 Configures the HTTP listener, supports unix socket via unix:// prefix".
+
+---
+
+### UNIX_SOCKET_PERMISSION
+
+- Name: `WOODPECKER_UNIX_SOCKET_PERMISSION`
+- Default: none
+
+File mode for the HTTP unix socket when `WOODPECKER_SERVER_ADDR` uses the `unix://` prefix, for example `660` or `666`.
 
 ---
 
@@ -764,9 +782,17 @@ Enable step-level metrics, including failed step counters and step duration hist
 - Name: `WOODPECKER_ADMIN`
 - Default: none
 
-Comma-separated list of admin accounts.
+Comma-separated list of users who become server admins when they sign in.
+The list is read at server start.
+With [multiple forges](./12-forges/11-overview.md#known-limitations), a user with a listed login on any connected forge becomes admin.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
+
+:::warning
+The list only grants admin access, it never revokes it.
+To revoke a listed user, revoke admin access in the admin settings or with the users API and also remove them from the list.
+Otherwise they are admin again at their first sign in after the next server restart.
+:::
 
 ---
 
@@ -842,6 +868,8 @@ The default setting for allowing pull requests on a repo.
 
 The default setting for the approval mode on a repo. Possible values: `none`, `forks`, `pull_requests` or `all_events`.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#approval-of-pipelines).
+
 ---
 
 ### DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS
@@ -887,6 +915,24 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 
 ---
 
+### MAX_PIPELINE_LOG_LINE_COUNT
+
+- Name: `WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT`
+- Default: `5000`
+
+Maximum number of lines to show in a pipeline log.
+
+---
+
+### WEBHOOK_SYNC_TIMEOUT
+
+- Name: `WOODPECKER_WEBHOOK_SYNC_TIMEOUT`
+- Default: `5s`
+
+Maximum time to wait for the pipeline creation triggered by an incoming webhook. After that, the server responds with `202 Accepted` and finishes it in the background. `0` disables the fallback and always responds synchronously.
+
+---
+
 ### SESSION_EXPIRES
 
 - Name: `WOODPECKER_SESSION_EXPIRES`
@@ -906,6 +952,8 @@ Docker images to run in privileged mode. Only change if you are sure what you do
 
 You should specify the tag of your images too, as this enforces exact matches.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#plugins).
+
 ### PLUGINS_TRUSTED_CLONE
 
 - Name: `WOODPECKER_PLUGINS_TRUSTED_CLONE`
@@ -915,6 +963,8 @@ Plugins which are trusted to handle the Git credential info in clone steps.
 If a clone step use an image not in this list, Git credentials will not be injected and users have to use other methods (e.g. secrets) to clone non-public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
+
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#git-credentials).
 
 <!-- ---
 
@@ -992,6 +1042,8 @@ If an instance admin doesn't want this feature enabled, they can disable the API
 You should set this option if you have, for example,
 global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
 :::
+
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
 
 ---
 
@@ -1118,7 +1170,7 @@ Specify the default pipeline config extensions when scanning a pipeline config d
 
 ### CONFIG_EXTENSION_EXCLUSIVE
 
-- Name: `CONFIG_EXTENSION_EXCLUSIVE`
+- Name: `WOODPECKER_CONFIG_EXTENSION_EXCLUSIVE`
 - Default: false
 
 Whether the forge request should be skipped for the global configuration endpoint.
@@ -1193,12 +1245,14 @@ The `netrc` data is pretty powerful as it contains credentials to access the rep
 
 Comma-separated list of hosts that are allowed to be contacted by extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#extensions).
+
 ---
 
 ### FORGE_TIMEOUT
 
 - Name: `WOODPECKER_FORGE_TIMEOUT`
-- Default: 5s
+- Default: 30s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 

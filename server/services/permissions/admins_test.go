@@ -15,6 +15,7 @@
 package permissions
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,4 +30,37 @@ func TestAdmins(t *testing.T) {
 	empty := NewAdmins([]string{})
 	assert.False(t, empty.IsAdmin(&model.User{Login: "woodpecker-ci"}))
 	assert.False(t, empty.IsAdmin(&model.User{Login: "not-woodpecker-ci"}))
+}
+
+func TestAdminsRevoke(t *testing.T) {
+	a := NewAdmins([]string{"Alice", "bob"})
+
+	a.Revoke("ALICE")
+	alice := &model.User{Login: "alice"}
+	assert.False(t, a.IsAdmin(alice), "revoke must ignore case like NewAdmins")
+	assert.True(t, a.IsRevoked(alice), "the UI must see the revoke")
+	bob := &model.User{Login: "bob"}
+	assert.True(t, a.IsAdmin(bob), "other admins must stay")
+	assert.False(t, a.IsRevoked(bob))
+
+	a.Revoke("unknown")
+	unknown := &model.User{Login: "unknown"}
+	assert.False(t, a.IsRevoked(unknown), "only listed logins can be revoked")
+	assert.False(t, a.IsAdmin(unknown), "revoking must not add a login to the list")
+}
+
+// A revoke in the admin settings can run while other users sign in.
+func TestAdminsRevokeConcurrentWithIsAdmin(t *testing.T) {
+	a := NewAdmins([]string{"alice", "bob"})
+	user := &model.User{Login: "bob"}
+
+	var wg sync.WaitGroup
+	for range 10 {
+		wg.Go(func() { a.IsAdmin(user) })
+		wg.Go(func() { a.IsRevoked(user) })
+	}
+	wg.Go(func() { a.Revoke("alice") })
+	wg.Wait()
+
+	assert.False(t, a.IsAdmin(&model.User{Login: "alice"}))
 }

@@ -68,6 +68,7 @@ func Config(c *gin.Context) {
 		"user_registered_agents":      !server.Config.Agent.DisableUserRegisteredAgentRegistration,
 		"max_pipeline_log_line_count": server.Config.WebUI.MaxPipelineLogLineCount,
 		"default_config_paths":        configPaths,
+		"perm_sync_interval":          int64(session.PermSyncInterval.Seconds()),
 	}
 
 	// default func map with json parser.
@@ -104,4 +105,5 @@ window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 window.WOODPECKER_USER_REGISTERED_AGENTS = {{ .user_registered_agents }}
 window.WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT = {{ .max_pipeline_log_line_count }}
 window.WOODPECKER_DEFAULT_CONFIG_PATHS = {{ json .default_config_paths }}
+window.WOODPECKER_PERM_SYNC_INTERVAL = {{ .perm_sync_interval }}
 `

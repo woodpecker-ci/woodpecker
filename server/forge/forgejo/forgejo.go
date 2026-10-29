@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
 	"github.com/rs/zerolog/log"
@@ -150,10 +149,9 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -182,10 +180,8 @@ func (c *Forgejo) Teams(ctx context.Context, u *model.User, p *model.ListOptions
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		orgs, _, err := client.ListMyOrgs(
 			forgejo.ListOrgsOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		teams := make([]*model.Team, 0, len(orgs))
@@ -249,10 +245,8 @@ func (c *Forgejo) Repos(ctx context.Context, u *model.User, p *model.ListOptions
 	repos, err := shared_utils.Paginate(func(page int) ([]*forgejo.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			forgejo.ListReposOptions{
-				ListOptions: forgejo.ListOptions{
-					Page:     page,
-					PageSize: c.perPage(ctx),
-				},
+				Page:     page,
+				PageSize: c.perPage(ctx),
 			},
 		)
 		return repos, err
@@ -367,7 +361,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
-		"secret":       r.Hash,
+		"secret":       r.WebhookSecret,
 		"content_type": "json",
 	}
 	hook := forgejo.CreateHookOption{
@@ -412,10 +406,8 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*forgejo.Hook, error) {
 		hooks, _, err := client.ListRepoHooks(forgeRepo.Owner, forgeRepo.Name, forgejo.ListHooksOptions{
-			ListOptions: forgejo.ListOptions{
-				Page:     page,
-				PageSize: c.perPage(ctx),
-			},
+			Page:     page,
+			PageSize: c.perPage(ctx),
 		})
 		return hooks, err
 	}, -1)
@@ -441,7 +433,7 @@ func (c *Forgejo) Branches(ctx context.Context, u *model.User, r *model.Repo, p 
 	}
 
 	branches, _, err := client.ListRepoBranches(r.Owner, r.Name,
-		forgejo.ListRepoBranchesOptions{ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage}})
+		forgejo.ListRepoBranchesOptions{Page: p.Page, PageSize: p.PerPage})
 	if err != nil {
 		return nil, err
 	}
@@ -478,8 +470,8 @@ func (c *Forgejo) PullRequests(ctx context.Context, u *model.User, r *model.Repo
 	}
 
 	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, forgejo.ListPullRequestsOptions{
-		ListOptions: forgejo.ListOptions{Page: p.Page, PageSize: p.PerPage},
-		State:       forgejo.StateOpen,
+		Page: p.Page, PageSize: p.PerPage,
+		State: forgejo.StateOpen,
 	})
 	if err != nil {
 		// Repositories without commits return empty list with status code 404
@@ -514,13 +506,13 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
-				if err != nil {
-					return nil, nil, err
-				}
-				pipeline.Commit = sha
+			// the create hook of a pushed annotated tag holds the SHA of the
+			// tag object, not of the tagged commit
+			sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			if err != nil {
+				return nil, nil, err
 			}
+			pipeline.Commit = sha
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			if len(pipeline.ChangedFiles) == 0 {
@@ -615,21 +607,20 @@ func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Cl
 // status to a Forgejo status.
 func getStatus(status model.StatusValue) forgejo.StatusState {
 	switch status {
-	case model.StatusPending, model.StatusBlocked:
+	case model.StatusPending, model.StatusBlocked, model.StatusCreated:
 		return forgejo.StatusPending
 	case model.StatusRunning:
 		return forgejo.StatusPending
 	case model.StatusSuccess:
 		return forgejo.StatusSuccess
-	case model.StatusFailure:
-		return forgejo.StatusFailure
-	case model.StatusKilled:
+	case model.StatusFailure, model.StatusKilled, model.StatusSkipped, model.StatusCanceled:
 		return forgejo.StatusFailure
 	case model.StatusDeclined:
 		return forgejo.StatusWarning
 	case model.StatusError:
 		return forgejo.StatusError
 	default:
+		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return forgejo.StatusFailure
 	}
 }
@@ -660,7 +651,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		forgejoFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
-			forgejo.ListPullRequestFilesOptions{ListOptions: forgejo.ListOptions{Page: page}})
+			forgejo.ListPullRequestFilesOptions{Page: page})
 		if err != nil {
 			return nil, err
 		}

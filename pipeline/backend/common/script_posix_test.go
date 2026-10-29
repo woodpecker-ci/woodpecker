@@ -43,20 +43,20 @@ unset CI_SCRIPT
 mkdir -p "/woodpecker/some"
 cd "/woodpecker/some"
 
-echo + 'echo ${PATH}'
+echo '▶  ''echo ${PATH}'
 echo ${PATH}
 
-echo + 'go build'
+echo '▶  ''go build'
 go build
 
-echo + 'go test'
+echo '▶  ''go test'
 go test
 `,
 		},
 	}
-	for _, test := range testdata {
-		script := generateScriptPosix(test.from, "/woodpecker/some")
-		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
+	for _, tt := range testdata {
+		script := generateScriptPosix(tt.from, "/woodpecker/some")
+		assert.EqualValues(t, tt.want, script, "Want encoded script for %s", tt.from)
 	}
 }
 

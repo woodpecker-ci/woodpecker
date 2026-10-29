@@ -25,11 +25,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v90/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -163,10 +163,9 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 	config := c.newConfig()
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -286,6 +285,9 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
+// maxParallelFileFetches bounds how many files of a config folder Dir loads at once.
+const maxParallelFileFetches = 10
+
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
@@ -302,39 +304,38 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *forge_types.FileMeta)
-	errChan := make(chan error)
-
+	// sub folders, symlinks and submodules are no pipeline files
+	var paths []string
 	for _, file := range data {
-		go func(path string) {
-			content, err := c.File(ctx, u, r, b, path)
+		if file.GetType() == "file" {
+			paths = append(paths, f+"/"+file.GetName())
+		}
+	}
+
+	// load the files in parallel with a bounded number of workers,
+	// the first error cancels the fetches still running
+	files := make([]*forge_types.FileMeta, len(paths))
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelFileFetches)
+	for i, path := range paths {
+		g.Go(func() error {
+			content, err := c.File(gCtx, u, r, b, path)
 			if err != nil {
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
+				return err
 			}
-		}(f + "/" + *file.Name)
+			files[i] = &forge_types.FileMeta{
+				Name: path,
+				Data: content,
+			}
+			return nil
+		})
 	}
-
-	var files []*forge_types.FileMeta
-
-	for range data {
-		select {
-		case err := <-errChan:
-			return nil, err
-		case fileMeta := <-fc:
-			files = append(files, fileMeta)
-		}
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
-
-	close(fc)
-	close(errChan)
 
 	return files, nil
 }
@@ -347,11 +348,9 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+		State:   "open",
 	})
 	if err != nil {
 		return nil, err
@@ -530,7 +529,7 @@ func (c *client) newClientToken(ctx context.Context, token string) (*github.Clie
 	// Wrap the base transport with User-Agent support
 	tp.Base = httputil.NewUserAgentRoundTripper(baseTransport, "forge-github")
 
-	return github.NewClient(github.WithURLs(github.Ptr(c.API), nil), github.WithHTTPClient(tc))
+	return github.NewClient(github.WithURLs(new(c.API), nil), github.WithHTTPClient(tc))
 }
 
 // matchingEmail returns matching user email.
@@ -590,17 +589,17 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 
 		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), github.DeploymentStatusRequest{
 			State:       convertStatus(pipeline.Status),
-			Description: github.Ptr(common.GetPipelineStatusDescription(pipeline.Status)),
-			LogURL:      github.Ptr(common.GetPipelineStatusURL(repo, pipeline, nil)),
+			Description: new(common.GetPipelineStatusDescription(pipeline.Status)),
+			LogURL:      new(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
 		return err
 	}
 
 	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
-		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
-		State:       github.Ptr(convertStatus(workflow.State)),
-		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   github.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       new(convertStatus(workflow.State)),
+		Description: new(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -616,7 +615,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		return err
 	}
 	hook := &github.Hook{
-		Name: github.Ptr("web"),
+		Name: new("web"),
 		Events: []string{
 			"push",
 			"pull_request",
@@ -625,7 +624,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		},
 		Config: &github.HookConfig{
 			URL:         &link,
-			ContentType: github.Ptr("form"),
+			ContentType: new("form"),
 		},
 	}
 	_, _, err = client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
@@ -641,10 +640,8 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
 	})
 	if err != nil {
 		return nil, err

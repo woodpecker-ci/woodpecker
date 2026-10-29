@@ -1,9 +1,9 @@
 # renovate: datasource=github-releases depName=mvdan/gofumpt
-GOFUMPT_VERSION := v0.11.0
+GOFUMPT_VERSION := v0.12.0
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-GOLANGCI_LINT_VERSION := v2.12.2
+GOLANGCI_LINT_VERSION := v2.15.0
 # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-XGO_VERSION := go-1.26.x
+XGO_VERSION := go-1.27.x
 
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
 
@@ -102,32 +102,49 @@ vendor: ## Update the vendor directory
 	go mod tidy
 	go mod vendor
 
-format: install-gofumpt ## Format source code
-	@gofumpt -extra -w .
+format: ## Format source code
+	@if command -v gofumpt > /dev/null 2>&1; then \
+		gofumpt -extra -w .; \
+	else \
+		go run mvdan.cc/gofumpt@$(GOFUMPT_VERSION) -extra -w .; \
+	fi
 
 .PHONY: clean
 clean: ## Clean build artifacts
 	go clean -i ./...
 	rm -rf build
-	@[ "1" != "$(shell docker image ls woodpecker/make:local -a | wc -l)" ] && docker image rm woodpecker/make:local || echo no docker image to clean
+	@if ! command -v docker > /dev/null 2>&1; then \
+		echo "docker not installed, skipping image cleanup"; \
+	elif [ -n "$$(docker image ls -q woodpecker/make:local)" ]; then \
+		docker image rm woodpecker/make:local; \
+	else \
+		echo "no docker image to clean"; \
+	fi
 
 .PHONY: clean-all
 clean-all: clean ## Clean all artifacts
 	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
-	rm -rf docs/docs/40-cli.md docs/openapi.json
+	rm -rf docs/docs/40-cli/90-reference.md docs/openapi.json
 
 .PHONY: generate
-generate: install-mockery generate-openapi ## Run all code generations
-	mockery
+generate: generate-openapi ## Run all code generations
+	@if command -v mockery > /dev/null 2>&1; then \
+		mockery; \
+	else \
+		go run github.com/vektra/mockery/v3@latest; \
+	fi
 	CGO_ENABLED=0 go generate ./...
 
-generate-openapi: ## Run openapi code generation and format it
-	CGO_ENABLED=0 go run github.com/swaggo/swag/cmd/swag fmt --exclude rpc/proto
+generate-openapi: ## Run openapi code generation
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
-generate-license-header: install-addlicense
-	addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go
+generate-license-header:
+	@if command -v addlicense > /dev/null 2>&1; then \
+		addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	else \
+		go run github.com/google/addlicense@latest -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \
+	fi
 
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -135,24 +152,16 @@ check-xgo: ## Check if xgo is installed
 	fi
 
 install-golangci-lint:
-	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) ; \
-	fi
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
 
 install-gofumpt:
-	@hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION); \
-	fi
+	go install mvdan.cc/gofumpt@$(GOFUMPT_VERSION)
 
 install-addlicense:
-	@hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/google/addlicense@latest; \
-	fi
+	go install github.com/google/addlicense@latest
 
 install-mockery:
-	@hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/vektra/mockery/v3@latest; \
-	fi
+	go install github.com/vektra/mockery/v3@latest
 
 install-protoc-gen-go:
 	@hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
@@ -171,28 +180,33 @@ ui-dependencies: ## Install UI dependencies
 ##@ Test
 
 .PHONY: lint
-lint: install-golangci-lint ## Lint code
+lint: ## Lint code
 	@echo "Running golangci-lint"
-	golangci-lint run
+	@if command -v golangci-lint > /dev/null 2>&1; then \
+		golangci-lint run; \
+	else \
+		go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run; \
+	fi
 
 lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
-	go test -race -cover -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
+	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
+	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
+	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
 
+# Migration tests reset the shared database, so datastore packages must run serially.
 test-server-datastore: ## Test server datastore
-	go test -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -race -timeout 120s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -race -timeout 300s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -201,7 +215,7 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test-e2e: ## Test by running yaml config and compare expected result
 	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...

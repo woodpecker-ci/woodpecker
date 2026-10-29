@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	scheduler_mocks "go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -110,6 +111,28 @@ func TestRegisterAgent(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.EqualValues(t, 1337, agentID)
+	})
+}
+
+func TestRPCNext(t *testing.T) {
+	t.Run("When the agent sends no labels it should poll with the server labels", func(t *testing.T) {
+		agent := defaultAgent()
+		serverLabels, err := agent.GetServerLabels()
+		require.NoError(t, err)
+
+		store := store_mocks.NewMockStore(t)
+		store.On("AgentFind", agent.ID).Once().Return(agent, nil)
+		sched := scheduler_mocks.NewMockScheduler(t)
+		sched.On("Poll", mock.Anything, agent.ID, rpc.Filter{Labels: serverLabels}, mock.Anything).Once().Return(nil, nil)
+		grpc := RPC{
+			store:     store,
+			scheduler: sched,
+		}
+
+		ctx := context.WithValue(t.Context(), agentIDKey, agent.ID)
+		workflow, err := grpc.Next(ctx, rpc.Filter{})
+		require.NoError(t, err)
+		assert.Nil(t, workflow)
 	})
 }
 

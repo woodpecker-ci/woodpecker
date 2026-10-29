@@ -30,6 +30,8 @@ WOODPECKER_MAX_WORKFLOWS=4
 
 When the agent starts it connects to the server using the token from `WOODPECKER_AGENT_SECRET`. The server identifies the agent and registers the agent in its database if it wasn't connected before.
 
+Also see [security boundaries](../../20-usage/17-security-boundaries.md#agents-and-backends).
+
 There are two types of tokens to connect an agent to the server:
 
 ### Using system token
@@ -55,6 +57,45 @@ To get an _agent token_ you have to register the agent manually in the server us
 1. The generated token from the previous step has to be provided to the agent using `WOODPECKER_AGENT_SECRET`
 1. The agent will connect to the server using the provided token and will update its status in the UI:
    ![Agent connected](./new-agent-connected.png)
+
+## Agent filters
+
+Labels set with [`WOODPECKER_AGENT_LABELS`](#agent_labels) are reported by the agent itself. An agent can therefore claim any label it likes, which makes them unsuitable to restrict what an agent is allowed to pick up.
+
+_Agent filters_ are the server-side counterpart: they are stored in the server database and are applied by the server every time the agent asks for work. An agent cannot see, change or drop them.
+
+Filters use the same syntax as agent labels:
+
+- `key=value` matches workflows whose label `key` is `value`
+- `key=*` matches workflows with any value for `key`
+- `!key=value` additionally requires the workflow to have that label set and matched
+
+Filters are managed as a key-value list in the UI when creating or editing an agent:
+
+- instance-wide agents at `Settings -> Agents`
+- organization agents at `Organization settings -> Agents`
+- personal agents at `User settings -> Agents`
+
+If a filter uses the same key as a label reported by the agent, the filter wins.
+
+:::info
+Changes to the filters of an agent apply the next time that agent requests a workflow.
+:::
+
+Organization and personal agents always get the `org-id` filter enforced on top of the configured filters, so they can never pick up workflows of another organization.
+
+### Organization agents only
+
+By default, instance-wide agents can also pick up workflows of an organization. To run them only on the organization's own agents, enable the option at:
+
+- `Organization settings -> Agents` for organizations
+- `User settings -> Agents` for personal repositories
+
+Instance-wide agents and agents of other organizations then never pick up these workflows. If no organization agent is online, the workflows stay pending.
+
+:::info
+The option applies to pipelines started after it was changed. Workflows already waiting in the queue keep their previous behavior.
+:::
 
 ## Environment variables
 
@@ -171,6 +212,8 @@ Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as 
 If you use `!` as key prefix it is mandatory for the workflow to have that label set (without !) set and matched.
 By default, agents provide four additional labels `platform=os/arch`, `hostname=my-agent`, `backend=my-backend` and `repo=*` which can be overwritten if needed.
 To learn how labels work, check out the [pipeline syntax page](../../20-usage/20-workflow-syntax.md#labels).
+
+Labels set here are reported by the agent and can be overruled by the server-side [agent filters](#agent-filters).
 
 ---
 

@@ -19,7 +19,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"maps"
+	"runtime/debug"
 
 	"github.com/rs/zerolog/log"
 
@@ -35,7 +35,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) ([]*builder.Item, error) {
+func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, forgeYamls []*forge_types.FileMeta, envs map[string]string) (items []*builder.Item, err error) {
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
@@ -85,7 +85,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	if envs == nil {
-		envs = map[string]string{}
+		envs = make(map[string]string)
 	}
 
 	environmentService := server.Config.Services.Manager.EnvironmentService()
@@ -98,8 +98,6 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			envs[global.Name] = global.Value
 		}
 	}
-
-	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
 	serverMetadata := metadata.NewServerMetadata(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
@@ -114,6 +112,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	b := builder.PipelineBuilder{
 		GetWorkflowMetadata: serverMetadata.GetWorkflowMetadata,
 		Envs:                envs,
+		AdditionalEnvs:      currentPipeline.AdditionalVariables,
 		Yamls:               yamls,
 		TrustedClonePlugins: append(repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...),
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
@@ -122,7 +121,8 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Volumes:  repo.Trusted.Volumes,
 			Security: repo.Trusted.Security,
 		},
-		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
+		DefaultLabels:    server.Config.Pipeline.DefaultWorkflowLabels,
+		SelectedWorkflow: currentPipeline.SelectedWorkflow,
 		CompilerOptions: []compiler.Option{
 			compiler.WithLocal(false),
 			compiler.WithRegistry(registries...),
@@ -151,6 +151,19 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	if server.Config.Pipeline.ForceIgnoreServiceFailure {
 		b.CompilerOptions = append(b.CompilerOptions, compiler.WithForceIgnoreServiceFailure())
 	}
+
+	// config is user controlled, so a panic in parser would crash the whole server
+	defer func() {
+		if r := recover(); r != nil {
+			const report = "This is a bug in Woodpecker, please report it at https://github.com/woodpecker-ci/woodpecker/issues"
+			log.Error().Str("repo", repo.FullName).Interface("recovered", r).Str("stack", string(debug.Stack())).
+				Msg("recovered panic while parsing pipeline config. " + report)
+			items, err = nil, &pipeline_errors.PipelineError{
+				Type:    pipeline_errors.PipelineErrorTypeGeneric,
+				Message: fmt.Sprintf("unexpected internal error while parsing config: %v. %s", r, report),
+			}
+		}
+	}()
 
 	return b.Build()
 }
@@ -195,12 +208,13 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
+	savedPipeline, err := saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
 	if err != nil {
+		// callers use the returned pipeline before they check err, so never return nil
 		return currentPipeline, nil, parseErr, err
 	}
 
-	return currentPipeline, pipelineItems, parseErr, nil
+	return savedPipeline, pipelineItems, parseErr, nil
 }
 
 // enrichPipelineItemSteps stamps server-side fields onto the backend step
@@ -267,6 +281,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 			State:      model.StatusPending,
 			Environ:    item.Workflow.Environ,
 			AxisID:     item.Workflow.AxisID,
+			DependsOn:  item.DependsOn.Names(),
 		}
 
 		if pipeline.Status == model.StatusBlocked {
@@ -286,6 +301,7 @@ func workflowsFromPipelineBuilder(pipeline *model.Pipeline, pipelineItems []*bui
 					State:      model.StatusPending,
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
+					DependsOn:  step.DependsOn,
 				}
 
 				if pipeline.Status == model.StatusBlocked {
