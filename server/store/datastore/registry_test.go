@@ -101,6 +101,30 @@ func TestRegistryUpdate(t *testing.T) {
 	assert.Equal(t, "qux", updated.Password)
 }
 
+func TestRegistrySwapPassword(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	registry := &model.Registry{RepoID: 1, Address: "index.docker.io", Username: "foo", Password: "old"}
+	assert.NoError(t, store.RegistryCreate(registry))
+
+	// a stale old password changes nothing
+	swapped, err := store.RegistrySwapPassword(&model.Registry{ID: registry.ID, Password: "stale"}, "other", "")
+	assert.NoError(t, err)
+	assert.False(t, swapped)
+
+	// only password and key id are written
+	swapped, err = store.RegistrySwapPassword(&model.Registry{ID: registry.ID, Password: "new", EncryptionKeyID: "key"}, "old", "")
+	assert.NoError(t, err)
+	assert.True(t, swapped)
+
+	got, err := store.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
+	assert.NoError(t, err)
+	assert.Equal(t, "new", got.Password)
+	assert.Equal(t, "key", got.EncryptionKeyID)
+	assert.Equal(t, "foo", got.Username)
+}
+
 func TestRegistryIndexes(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()

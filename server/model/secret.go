@@ -29,20 +29,6 @@ var (
 	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
-// SecretStore persists secret information to storage.
-type SecretStore interface {
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
-	SecretCreate(*Secret) error
-	SecretUpdate(*Secret) error
-	SecretDelete(*Secret) error
-	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
-	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
-	SecretListAll() ([]*Secret, error)
-}
-
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'id'"`
@@ -53,6 +39,9 @@ type Secret struct {
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
 	Note   string         `json:"note"            xorm:"note"`
+	// EncryptionKeyID is the id of the key the stored value is encrypted
+	// with, empty for plaintext.
+	EncryptionKeyID string `json:"-" xorm:"NOT NULL DEFAULT '' varchar(255) 'encryption_key_id'"`
 } //	@name	Secret
 
 // TableName return database table name for xorm.
