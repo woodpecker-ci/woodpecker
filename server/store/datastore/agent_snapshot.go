@@ -18,7 +18,9 @@ import (
 	"errors"
 	"maps"
 
+	"xorm.io/builder"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -46,9 +48,8 @@ func (s storage) WorkflowUpdateWithSnapshot(workflow *model.Workflow, snapshot *
 			return err
 		}
 
-		// Lock an existing snapshot before reading it. A no-op write also acquires
-		// SQLite's write lock, and waits for concurrent cleanup to commit first.
-		if err := wrapUpdate(sess.Where("hash = ?", hash).SetExpr("hash", "hash").Update(new(model.AgentSnapshot))); err != nil {
+		// Lock an existing snapshot before reading it, so concurrent cleanup commits first.
+		if err := agentSnapshotsLock(sess.Where("hash = ?", hash)); err != nil {
 			return err
 		}
 		stored, err := s.agentSnapshotFindByHash(sess, hash)
@@ -72,6 +73,48 @@ func (s storage) WorkflowUpdateWithSnapshot(workflow *model.Workflow, snapshot *
 		}
 		return wrapUpdate(0, sess.Commit())
 	})
+}
+
+// agentSnapshotsDeleteUnused deletes the snapshots referenced only by workflows of
+// this pipeline. It must run in the transaction that deletes these workflows.
+func (s storage) agentSnapshotsDeleteUnused(sess *xorm.Session, pipelineID int64) error {
+	var ids []int64
+	// Ascending IDs keep the lock order equal for concurrent cleanups.
+	if err := sess.Table(new(model.Workflow)).Distinct("agent_snapshot_id").
+		Where("pipeline_id = ? AND agent_snapshot_id > 0", pipelineID).
+		OrderBy("agent_snapshot_id").Find(&ids); err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		// Wait for an assignment that is about to reference this snapshot.
+		if err := agentSnapshotsLock(sess.ID(id)); err != nil {
+			return err
+		}
+		usedElsewhere := sess.Select("1").Where(builder.Eq{"agent_snapshot_id": id}.
+			And(builder.Neq{"pipeline_id": pipelineID}))
+		if s.engine.Dialect().URI().DBType != schemas.SQLITE {
+			// Use a current read even under MySQL's default repeatable-read isolation.
+			usedElsewhere = usedElsewhere.ForUpdate()
+		}
+		used, err := usedElsewhere.Exist(new(model.Workflow))
+		if err != nil {
+			return wrapUpdate(0, err)
+		}
+		if used {
+			continue
+		}
+		if _, err := sess.ID(id).Delete(new(model.AgentSnapshot)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// agentSnapshotsLock locks the snapshots matched by sess with a no-op write,
+// which also acquires SQLite's write lock.
+func agentSnapshotsLock(sess *xorm.Session) error {
+	return wrapUpdate(sess.SetExpr("hash", "hash").Update(new(model.AgentSnapshot)))
 }
 
 func (s storage) AgentSnapshotFind(id int64) (*model.AgentSnapshot, error) {
