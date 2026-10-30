@@ -22,11 +22,19 @@
             withGo =
               pkg:
               let
+                # keep upstream Go toolchain for these
+                skip = [
+                  "trivy"
+                  "syft"
+                ];
                 builderArgs = lib.filterAttrs (name: _: lib.hasPrefix "buildGo" name) (
                   if pkg ? override then lib.functionArgs pkg.override else { }
                 );
               in
-              if builderArgs == { } then pkg else pkg.override (lib.mapAttrs (_: _: buildGoModule) builderArgs);
+              if lib.elem (lib.getName pkg) skip || builderArgs == { } then
+                pkg
+              else
+                pkg.override (lib.mapAttrs (_: _: buildGoModule) builderArgs);
           in
           pkgs.mkShell {
             buildInputs = map withGo [

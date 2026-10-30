@@ -6,6 +6,7 @@ GOLANGCI_LINT_VERSION := v2.15.0
 XGO_VERSION := go-1.27.x
 
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
+GO_MODULE ?= $(shell go list -m)
 
 TARGETOS ?= $(shell go env GOOS)
 TARGETARCH ?= $(shell go env GOARCH)
@@ -485,6 +486,10 @@ sbom-syft: ## Generate binary-specific dependency lists with Syft
 .PHONY: sbom-calc
 sbom-calc: ## Calculate and filter final SBOMs with jq
 	@mkdir -p dist
+	@# The main module's license is declared in this repository, outside the dependency cache.
+	@jq '(.packages[] | select(.name == "${GO_MODULE}")) |= (.licenseDeclared = "Apache-2.0" | .licenseConcluded = "Apache-2.0")' \
+		${DIST_DIR}/base.go.spdx.json > ${DIST_DIR}/base.go.spdx.json.tmp
+	@mv ${DIST_DIR}/base.go.spdx.json.tmp ${DIST_DIR}/base.go.spdx.json
 	@echo "=== Filtering base SBOM for each binary ==="
 	@# Filter Server
 	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .SPDXID]) as $$valid_ids | $$base | .packages |= map(select(.name as $$n | $$binary.packages[] | select(.name == $$n))) | (.packages[0].SPDXID) as $$first_pkg | .relationships |= (map(select(.spdxElementId as $$e | $$valid_ids | contains([$$e])) | select(.relatedSpdxElement as $$r | ($$r == "SPDXRef-DOCUMENT") or ($$valid_ids | contains([$$r])))) + [{spdxElementId: "SPDXRef-DOCUMENT", relationshipType: "DESCRIBES", relatedSpdxElement: $$first_pkg}]) | .name = "woodpecker-server" | .creationInfo.creators += ["Tool: syft"] | .creationInfo.created = (now | strftime("%Y-%m-%dT%H:%M:%SZ"))' \
