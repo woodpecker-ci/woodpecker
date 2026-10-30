@@ -38,6 +38,9 @@ const HookPushEmptyHash = `
 //go:embed HookPull.json
 var HookPull string
 
+//go:embed HookPullRequestCreated.json
+var HookPullRequestCreated string
+
 //go:embed HookPullRequestMerged.json
 var HookPullRequestMerged string
 

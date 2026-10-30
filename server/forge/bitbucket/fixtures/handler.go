@@ -41,11 +41,16 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
-	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
+	e.GET("/2.0/repositories/:owner/:name/diffstat/*spec", getCommitDiffstat)
 	return e
 }
 
 func getCommitDiffstat(c *gin.Context) {
+	// only the diffstat link of a pull request has this query
+	if c.Query("from_pullrequest_id") != "" {
+		c.String(http.StatusOK, APIPullDiffStat)
+		return
+	}
 	c.String(http.StatusOK, diffStatPayload)
 }
 
@@ -95,6 +100,8 @@ func getRepo(c *gin.Context) {
 		c.String(http.StatusOK, fmt.Sprintf(permissionRepoPayload, c.Param("name")))
 	case "{898477b2-a080-4089-b385-597a783db392}":
 		c.String(http.StatusOK, repoPayloadFromHook)
+	case "{cbddcb41-064e-4190-9685-c0540c2ec622}":
+		c.String(http.StatusOK, APIRepo)
 	default:
 		c.String(http.StatusOK, repoPayload)
 	}
@@ -226,6 +233,11 @@ func getPermissions(c *gin.Context) {
 			// Handle hook test cases
 			if q == "repository.full_name=\"martinherren1984/publictestrepo\"" {
 				c.String(http.StatusOK, permissionHookPayLoad)
+				return
+			}
+		case "6543":
+			if q == "repository.full_name=\"6543/collect-webhooks\"" {
+				c.String(http.StatusOK, permissionPullHookPayLoad)
 				return
 			}
 		}
@@ -621,6 +633,21 @@ const permissionHookPayLoad = `
 		{
 			"repository": {
 				"full_name": "martinherren1984/publictestrepo"
+			},
+			"permission": "admin"
+		}
+	]
+}
+`
+
+const permissionPullHookPayLoad = `
+{
+	"pagelen": 100,
+	"page": 1,
+	"values": [
+		{
+			"repository": {
+				"full_name": "6543/collect-webhooks"
 			},
 			"permission": "admin"
 		}
