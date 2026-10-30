@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -122,6 +123,26 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-kubernetes-backend-tolerations.yaml",
 			fail:     false,
 		},
+		{
+			name:     "Concurrency",
+			testFile: ".woodpecker/test-concurrency.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency shorthand",
+			testFile: ".woodpecker/test-concurrency-shorthand.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Concurrency invalid",
+			testFile: ".woodpecker/test-concurrency-invalid.yaml",
+			fail:     true,
+		},
+		{
+			name:     "Service without name in array syntax",
+			testFile: ".woodpecker/test-broken-service-without-name.yaml",
+			fail:     true,
+		},
 	}
 
 	for _, tt := range testTable {
@@ -143,6 +164,93 @@ func TestSchema(t *testing.T) {
 					assert.NoError(t, err, "if schema lint passes, we should be able to parse it")
 					assert.NotNil(t, parsedConfig)
 				})
+			}
+		})
+	}
+}
+
+func TestSchemaFiltersRedundantCompositionErrors(t *testing.T) {
+	t.Parallel()
+
+	configErrors, err := schema.LintString(`steps:
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+      tags: latest
+    environment:
+      CGO: 0
+`)
+	require.Error(t, err)
+
+	descriptions := make([]string, 0, len(configErrors))
+	for _, configError := range configErrors {
+		descriptions = append(descriptions, configError.Description())
+	}
+
+	assert.NotContains(t, descriptions, "Must validate one and only one schema (oneOf)")
+	assert.NotContains(t, descriptions, "Must validate at least one schema (anyOf)")
+	assert.Contains(t, descriptions, "Additional property settings is not allowed")
+}
+
+func TestLintConcurrent(t *testing.T) {
+	const config = `steps:
+  test:
+    image: alpine
+    commands:
+      - echo hello
+`
+
+	for i := range 16 {
+		t.Run(fmt.Sprintf("worker-%d", i), func(t *testing.T) {
+			t.Parallel()
+
+			for range 10 {
+				configErrors, err := schema.LintString(config)
+
+				require.NoError(t, err)
+				require.Empty(t, configErrors)
+			}
+		})
+	}
+}
+
+func TestMatrixSchemaWorkflowLimit(t *testing.T) {
+	tests := []struct {
+		name    string
+		count   int
+		include bool
+		wantErr bool
+	}{
+		{name: "10 axis values", count: 10},
+		{name: "11 axis values", count: 11, wantErr: true},
+		{name: "64 include entries", count: 64, include: true},
+		{name: "65 include entries", count: 65, include: true, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var matrix string
+			if tt.include {
+				entries := make([]string, tt.count)
+				for i := range entries {
+					entries[i] = fmt.Sprintf("  - VERSION: %d", i)
+				}
+				matrix = "matrix:\n  include:\n" + strings.Join(entries, "\n")
+			} else {
+				values := make([]string, tt.count)
+				for i := range values {
+					values[i] = fmt.Sprintf("    - %d", i)
+				}
+				matrix = "matrix:\n  VERSION:\n" + strings.Join(values, "\n")
+			}
+			config := "steps:\n  test:\n    image: alpine\n    commands: [echo test]\n" + matrix
+
+			_, err := schema.LintString(config)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}

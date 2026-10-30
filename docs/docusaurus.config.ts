@@ -290,7 +290,7 @@ const config = {
         },
         blog: {
           blogTitle: 'Blog',
-          blogDescription: 'A blog for release announcements, turorials...',
+          blogDescription: 'A blog for release announcements, tutorials...',
           onInlineAuthors: 'ignore',
         },
         theme: {

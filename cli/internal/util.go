@@ -65,7 +65,8 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(ctx,
+	client := config.Client(
+		ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},
@@ -79,10 +80,14 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 		if err != nil {
 			return nil, err
 		}
+		contextDialer, ok := dialer.(proxy.ContextDialer)
+		if !ok {
+			return nil, fmt.Errorf("failed to create SOCKS5 dialer with context support")
+		}
 		baseTransport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 			Proxy:           http.ProxyFromEnvironment,
-			Dial:            dialer.Dial,
+			DialContext:     contextDialer.DialContext,
 		}
 	} else {
 		baseTransport = &http.Transport{
@@ -156,7 +161,7 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 
 // ParseKeyPair parses a key=value pair.
 func ParseKeyPair(p []string) map[string]string {
-	params := map[string]string{}
+	params := make(map[string]string)
 	for _, i := range p {
 		before, after, ok := strings.Cut(i, "=")
 		if !ok || before == "" {

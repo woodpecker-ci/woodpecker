@@ -21,6 +21,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -222,7 +223,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:      "echo 1",
 				Image:     "bash",
 				Commands:  []string{"echo 1"},
-				DependsOn: []string{"echo env", "echo 2"},
+				DependsOn: constraint.DependsOn{{Name: "echo env"}, {Name: "echo 2"}},
 			}, {
 				Name:     "echo 2",
 				Image:    "bash",
@@ -263,6 +264,7 @@ func TestCompilerCompile(t *testing.T) {
 						Type:          backend_types.StepTypeCommands,
 						Image:         "bash",
 						Commands:      []string{"echo 1"},
+						DependsOn:     []string{"echo env", "echo 2"},
 						OnSuccess:     true,
 						Failure:       "fail",
 						Volumes:       []string{defaultVolume + ":/test"},
@@ -292,19 +294,38 @@ func TestCompilerCompile(t *testing.T) {
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:      "dummy",
 				Image:     "dummy_img",
-				DependsOn: []string{"not exist"},
+				DependsOn: constraint.DependsOn{{Name: "not exist"}},
 			}}}},
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
 		},
+		{
+			name: "workflow with step depending on filtered-out step",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{
+				{
+					Name:  "build",
+					Image: "bash",
+					When: constraint.When{Constraints: []constraint.Constraint{{
+						Event: yaml_base_types.StringOrSlice{"tag"},
+					}}},
+				},
+				{
+					Name:      "deploy",
+					Image:     "bash",
+					DependsOn: constraint.DependsOn{{Name: "build"}},
+				},
+			}}},
+			backConf:    nil,
+			expectedErr: "step 'deploy' depends on step 'build' which is filtered out by its conditions",
+		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			backConf, err := compiler.Compile(test.fronConf)
-			if test.expectedErr != "" {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			backConf, err := compiler.Compile(tt.fronConf)
+			if tt.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, test.expectedErr, err.Error())
+				assert.Equal(t, tt.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
@@ -317,7 +338,7 @@ func TestCompilerCompile(t *testing.T) {
 					}
 				}
 				// check if we get an expected backend config based on a frontend config
-				assert.EqualValues(t, *test.backConf, *backConf)
+				assert.EqualValues(t, *tt.backConf, *backConf)
 			}
 		})
 	}
@@ -409,12 +430,12 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			backConf, err := compiler.Compile(test.fronConf)
-			if test.expectedErr != "" {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			backConf, err := compiler.Compile(tt.fronConf)
+			if tt.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, test.expectedErr, err.Error())
+				assert.Equal(t, tt.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
@@ -430,7 +451,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 					}
 				}
 				// check if we get an expected backend config based on a frontend config
-				assert.EqualValues(t, *test.backConf, *backConf)
+				assert.EqualValues(t, *tt.backConf, *backConf)
 			}
 		})
 	}
@@ -475,9 +496,9 @@ func TestSecretMatch(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tcl {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
+	for _, tt := range tcl {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.match, tt.secret.Match(tt.event))
 		})
 	}
 }
@@ -494,7 +515,7 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 				{
 					Name:      "privileged-plugin",
 					Image:     "test/image",
-					DependsOn: []string{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
+					DependsOn: constraint.DependsOn{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
 				},
 				{
 					Name:     "no-plugin",
@@ -517,4 +538,36 @@ func TestCompilerCompilePrivileged(t *testing.T) {
 	assert.True(t, backConf.Stages[0].Steps[0].Privileged)
 	assert.False(t, backConf.Stages[0].Steps[1].Privileged)
 	assert.False(t, backConf.Stages[0].Steps[2].Privileged)
+}
+
+func TestCompilerCompileDefaultCloneStep(t *testing.T) {
+	repoURL := "https://github.com/octocat/hello-world"
+	compiler := New(
+		WithMetadata(metadata.Metadata{
+			Repo: metadata.Repo{
+				Owner:    "octacat",
+				Name:     "hello-world",
+				Private:  true,
+				ForgeURL: repoURL,
+				CloneURL: "https://github.com/octocat/hello-world.git",
+			},
+		}),
+		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
+		WithWorkspaceFromURL("/test", repoURL),
+		WithNetrc("user", "pass", "example.com"),
+	)
+
+	// empty workflow, but with default clone step
+	backConf, err := compiler.Compile(&yaml_types.Workflow{})
+	assert.NoError(t, err)
+
+	assert.Len(t, backConf.Stages, 1)
+	assert.Len(t, backConf.Stages[0].Steps, 1)
+	// make sure we have the clone environment
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_USERNAME")
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_PASSWORD")
+	assert.Contains(t, backConf.Stages[0].Steps[0].Environment, "CI_NETRC_MACHINE")
+	assert.Equal(t, "user", backConf.Stages[0].Steps[0].Environment["CI_NETRC_USERNAME"])
+	assert.Equal(t, "pass", backConf.Stages[0].Steps[0].Environment["CI_NETRC_PASSWORD"])
+	assert.Equal(t, "example.com", backConf.Stages[0].Steps[0].Environment["CI_NETRC_MACHINE"])
 }

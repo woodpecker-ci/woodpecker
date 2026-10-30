@@ -25,11 +25,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v85/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -123,7 +123,11 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, redirectURL, err
 	}
 
-	client := c.newClientToken(ctx, token.AccessToken)
+	client, err := c.newClientToken(ctx, token.AccessToken)
+	if err != nil {
+		return nil, redirectURL, err
+	}
+
 	user, _, err := client.Users.Get(ctx, "")
 	if err != nil {
 		return nil, redirectURL, err
@@ -159,10 +163,9 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 	config := c.newConfig()
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -178,7 +181,10 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 // Teams returns a list of all team membership for the GitHub account.
 func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	list, _, err := client.Organizations.List(ctx, "", &github.ListOptions{
 		Page:    p.Page,
@@ -192,7 +198,10 @@ func (c *client) Teams(ctx context.Context, u *model.User, p *model.ListOptions)
 
 // Repo returns the GitHub repository.
 func (c *client) Repo(ctx context.Context, u *model.User, id model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	if id.IsValid() {
 		intID, err := strconv.ParseInt(string(id), 10, 64)
@@ -227,7 +236,10 @@ func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 		return nil, nil
 	}
 
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	opts := new(github.RepositoryListByAuthenticatedUserOptions)
 	opts.PerPage = 100
@@ -252,7 +264,10 @@ func (c *client) Repos(ctx context.Context, u *model.User, p *model.ListOptions)
 
 // File fetches the file from the GitHub repository and returns its contents.
 func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
@@ -270,8 +285,14 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
+// maxParallelFileFetches bounds how many files of a config folder Dir loads at once.
+const maxParallelFileFetches = 10
+
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = b.Commit
@@ -283,53 +304,53 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *forge_types.FileMeta)
-	errChan := make(chan error)
-
+	// sub folders, symlinks and submodules are no pipeline files
+	var paths []string
 	for _, file := range data {
-		go func(path string) {
-			content, err := c.File(ctx, u, r, b, path)
+		if file.GetType() == "file" {
+			paths = append(paths, f+"/"+file.GetName())
+		}
+	}
+
+	// load the files in parallel with a bounded number of workers,
+	// the first error cancels the fetches still running
+	files := make([]*forge_types.FileMeta, len(paths))
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelFileFetches)
+	for i, path := range paths {
+		g.Go(func() error {
+			content, err := c.File(gCtx, u, r, b, path)
 			if err != nil {
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errChan <- err
-			} else {
-				fc <- &forge_types.FileMeta{
-					Name: path,
-					Data: content,
-				}
+				return err
 			}
-		}(f + "/" + *file.Name)
+			files[i] = &forge_types.FileMeta{
+				Name: path,
+				Data: content,
+			}
+			return nil
+		})
 	}
-
-	var files []*forge_types.FileMeta
-
-	for range data {
-		select {
-		case err := <-errChan:
-			return nil, err
-		case fileMeta := <-fc:
-			files = append(files, fileMeta)
-		}
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
-
-	close(fc)
-	close(errChan)
 
 	return files, nil
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := common.UserToken(ctx, r, u)
-	client := c.newClientToken(ctx, token)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+		State:   "open",
 	})
 	if err != nil {
 		return nil, err
@@ -373,7 +394,10 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 // Deactivate deactivates the repository be removing registered push hooks from
 // the GitHub repository.
 func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return err
+	}
 
 	// make sure a repo rename does not trick us
 	forgeRepo, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name)
@@ -396,7 +420,10 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 	org, _, err := client.Organizations.GetOrgMembership(ctx, u.Login, owner)
 	if err != nil {
 		return nil, err
@@ -406,7 +433,10 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 }
 
 func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 
 	org, _, err := client.Organizations.Get(ctx, owner)
 	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
@@ -473,10 +503,10 @@ func (c *client) newConfig() *oauth2.Config {
 
 // newClientToken returns the GitHub oauth2 client.
 // It first checks if a client is available in the context, otherwise creates a new one.
-func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
+func (c *client) newClientToken(ctx context.Context, token string) (*github.Client, error) {
 	// Check if a client is already in the context
 	if ctxClient, ok := ctx.Value(githubClientKey).(*github.Client); ok {
-		return ctxClient
+		return ctxClient, nil
 	}
 
 	ts := oauth2.StaticTokenSource(
@@ -499,9 +529,7 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	// Wrap the base transport with User-Agent support
 	tp.Base = httputil.NewUserAgentRoundTripper(baseTransport, "forge-github")
 
-	client := github.NewClient(tc)
-	client.BaseURL, _ = url.Parse(c.API)
-	return client
+	return github.NewClient(github.WithURLs(new(c.API), nil), github.WithHTTPClient(tc))
 }
 
 // matchingEmail returns matching user email.
@@ -545,7 +573,10 @@ var reDeploy = regexp.MustCompile(`.+/deployments/(\d+)`)
 // Status sends the commit status to the forge.
 // An example would be the GitHub pull request status.
 func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	client := c.newClientToken(ctx, user.AccessToken)
+	client, err := c.newClientToken(ctx, user.AccessToken)
+	if err != nil {
+		return err
+	}
 
 	if pipeline.Event == model.EventDeploy {
 		// Get id from url. If not found, skip.
@@ -556,19 +587,19 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		}
 		id, _ := strconv.Atoi(matches[1])
 
-		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
-			State:       github.Ptr(convertStatus(pipeline.Status)),
-			Description: github.Ptr(common.GetPipelineStatusDescription(pipeline.Status)),
-			LogURL:      github.Ptr(common.GetPipelineStatusURL(repo, pipeline, nil)),
+		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), github.DeploymentStatusRequest{
+			State:       convertStatus(pipeline.Status),
+			Description: new(common.GetPipelineStatusDescription(pipeline.Status)),
+			LogURL:      new(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
 		return err
 	}
 
-	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
-		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
-		State:       github.Ptr(convertStatus(workflow.State)),
-		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   github.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
+		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       new(convertStatus(workflow.State)),
+		Description: new(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   new(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -579,9 +610,12 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	if err := c.Deactivate(ctx, u, r, link); err != nil {
 		return err
 	}
-	client := c.newClientToken(ctx, u.AccessToken)
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return err
+	}
 	hook := &github.Hook{
-		Name: github.Ptr("web"),
+		Name: new("web"),
 		Events: []string{
 			"push",
 			"pull_request",
@@ -590,23 +624,24 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		},
 		Config: &github.HookConfig{
 			URL:         &link,
-			ContentType: github.Ptr("form"),
+			ContentType: new("form"),
 		},
 	}
-	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
+	_, _, err = client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
 	return err
 }
 
 // Branches returns the names of all branches for the named repository.
 func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	token := common.UserToken(ctx, r, u)
-	client := c.newClientToken(ctx, token)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
 	})
 	if err != nil {
 		return nil, err
@@ -622,7 +657,11 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 // BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
-	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
+	client, err := c.newClientToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+	b, _, err := client.Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -640,13 +679,20 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
-		tagName := strings.Split(pipeline.Ref, "/")[2]
-		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
-		if err != nil {
-			return nil, nil, err
+	if pipeline != nil {
+		switch pipeline.Event { //nolint:gocritic // ignore lint issue as this will get more cases later
+		case model.EventRelease:
+			if pipeline.TagTitle == "" {
+				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
+			}
+			if pipeline.Commit == "" {
+				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+				if err != nil {
+					return nil, nil, err
+				}
+				pipeline.Commit = sha
+			}
 		}
-		pipeline.Commit = sha
 	}
 
 	if pull != nil {
@@ -687,7 +733,10 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	// would fail with an authentication error.
 	forge.Refresh(ctx, c, _store, user)
 
-	gh := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newClientToken(ctx, user.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 	fileList := make([]string, 0, 16)
 
 	opts := &github.ListOptions{Page: 1}
@@ -730,12 +779,15 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	// would fail with an authentication error.
 	forge.Refresh(ctx, c, _store, user)
 
-	gh := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newClientToken(ctx, user.AccessToken)
+	if err != nil {
+		return "", err
+	}
 
-	page := 1
+	opts := &github.ListOptions{Page: 1}
 	var tag *github.RepositoryTag
-	for {
-		tags, _, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, &github.ListOptions{Page: page})
+	for opts.Page > 0 {
+		tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
 		if err != nil {
 			return "", err
 		}
@@ -749,6 +801,8 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 		if tag != nil {
 			break
 		}
+
+		opts.Page = resp.NextPage
 	}
 	if tag == nil {
 		return "", fmt.Errorf("could not find tag %s", tagName)
@@ -771,8 +825,7 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 		prev = ""
 		fallthrough
 	case "":
-		// For tag events, prev is empty, but we can still fetch the changed files using the current commit
-		log.Trace().Msg("GitHub tag event, fetching changed files using current commit")
+		log.Trace().Msg("GitHub force push or tag event, fetching changed files using current commit")
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, tmpRepo.ForgeRemoteID, tmpRepo.FullName)
@@ -790,7 +843,10 @@ func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model
 	// would fail with an authentication error.
 	forge.Refresh(ctx, c, _store, user)
 
-	gh := c.newClientToken(ctx, user.AccessToken)
+	gh, err := c.newClientToken(ctx, user.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 	fileList := make([]string, 0, 16)
 
 	if prev == "" {

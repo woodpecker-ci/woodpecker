@@ -74,19 +74,18 @@ func TestInfraSmoke(t *testing.T) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	draftPipeline := &model.Pipeline{
-		Event:  model.EventPush,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	}
-	createdPipeline, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, draftPipeline)
+	createdPipeline, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
 	require.NoError(t, err, "create pipeline")
 	require.NotNil(t, createdPipeline)
 	t.Logf("pipeline %d created with status=%s", createdPipeline.ID, createdPipeline.Status)
 
 	finished := setup.WaitForPipeline(t, env.Store, createdPipeline.ID)
 	assert.Equal(t, model.StatusSuccess, finished.Status, "pipeline should succeed")
+
+	workflows, err := env.Store.WorkflowGetTree(finished)
+	require.NoError(t, err)
+	require.Len(t, workflows, 1, "smoke test expects exactly one workflow")
+	assert.Equal(t, "woodpecker", workflows[0].Name)
+	assert.Equal(t, model.StatusSuccess, workflows[0].State)
+	assert.Greater(t, workflows[0].AgentID, int64(0), "workflow should record agent that ran it")
 }

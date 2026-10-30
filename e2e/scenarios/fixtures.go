@@ -76,12 +76,18 @@ type ExpectedStep struct {
 	Name     string            `json:"name"`
 	Status   model.StatusValue `json:"status"`
 	ExitCode int               `json:"exit_code"`
+	// Error must be contained in the error stored for the step, as runtime
+	// errors embed the random step UUID. Empty means no error is stored.
+	Error string `json:"error"`
 }
 
 // ExpectedWorkflow describes what we expect for one named workflow after the pipeline finishes.
 type ExpectedWorkflow struct {
 	Name   string            `json:"name"`
 	Status model.StatusValue `json:"status"`
+	// Error is the runtime error reported by the agent. A failing step must not
+	// produce one, so it is empty for everything but real runtime failures.
+	Error string `json:"error"`
 }
 
 // LoadScenarios reads all fixture pairs and subdirectories from the embedded
@@ -137,9 +143,8 @@ func LoadScenarios(t *testing.T) []Scenario {
 			{Name: ".woodpecker.yaml", Data: yamlData},
 		}
 
-		if s.Event == "" {
-			s.Event = model.EventPush
-		}
+		s.check(t, stem+".json")
+
 		scenarios = append(scenarios, s)
 	}
 
@@ -178,13 +183,24 @@ func loadMultiWorkflowScenario(t *testing.T, dirName string) Scenario {
 			})
 		}
 	}
-
 	require.NotEmpty(t, files, "no YAML files in multi-workflow dir %s", dirName)
-	require.NotEmpty(t, s.Name, "scenario.json missing 'name' in %s", dirName)
 
-	s.Files = forge_types.SortByName(files)
+	s.check(t, dirName+"/scenario.json")
+
+	s.Files = files
 	if s.Event == "" {
 		s.Event = model.EventPush
 	}
 	return s
+}
+
+func (s Scenario) check(t *testing.T, location string) {
+	t.Helper()
+
+	if s.Name == "" {
+		t.Fatalf("fixture '%s' missing name", location)
+	}
+	if s.Event == "" {
+		t.Fatalf("fixture '%s' missing event", location)
+	}
 }

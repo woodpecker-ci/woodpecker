@@ -39,7 +39,7 @@ func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error
 	return user, wrapGet(sess.Where("forge_id = ? AND login=?", forgeID, login).Get(user))
 }
 
-func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
+func (s storage) GetUserList(p *model.ListOptionsWithAll) ([]*model.User, error) {
 	var users []*model.User
 	return users, s.paginate(p).OrderBy("login").Find(&users)
 }
@@ -81,28 +81,31 @@ func (s storage) CreateUser(user *model.User) error {
 }
 
 func (s storage) UpdateUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).AllCols().Update(user)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(user.ID).AllCols().Update(user))
+	})
 }
 
 func (s storage) DeleteUser(user *model.User) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
 
-	if err := s.orgDelete(sess, user.OrgID); err != nil {
-		return fmt.Errorf("failed to delete org: %w", err)
-	}
+		if err := s.orgDelete(sess, user.OrgID); err != nil {
+			return fmt.Errorf("failed to delete org: %w", err)
+		}
 
-	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
-	}
+		if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
 
-	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
-		return fmt.Errorf("failed to delete perms: %w", err)
-	}
+		if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+			return fmt.Errorf("failed to delete perms: %w", err)
+		}
 
-	return sess.Commit()
+		return sess.Commit()
+	})
 }

@@ -191,6 +191,7 @@
     "repo": {
         "activity": "Activité",
         "add": "Ajouter un dépôt",
+        "refresh": "Actualiser la liste dépots",
         "branches": "Branches",
         "deploy_pipeline": {
             "enter_target": "Environnement de 'déploiement' ciblé",
@@ -212,7 +213,11 @@
             "enabled": "Déjà activé",
             "list_reloaded": "Liste des dépôts actualisée",
             "reload": "Actualiser les dépôts",
-            "success": "Dépôt activé"
+            "success": "Dépôt activé",
+            "new_forge_repo": "nouveau dépôt sur la forge",
+            "stale_wp_repo": "dépôt Woodpecker obsolète",
+            "conflict": "Conflit",
+            "forge_repo_missing": "Le dépôt de la forge est manquant !"
         },
         "manual_pipeline": {
             "select_branch": "Sélectionner une branche",
@@ -226,7 +231,11 @@
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
             },
-            "show_pipelines": "Afficher les pipelines"
+            "show_pipelines": "Afficher les pipelines",
+            "message": {
+                "title": "Message",
+                "desc": "Ce message est ajouté aux messages du pipeline comme information supplémentaire."
+            }
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
@@ -374,13 +383,15 @@
                 "general": "Général",
                 "netrc_only_trusted": {
                     "desc": "Les plugins listés ici auront accès aux identifiants netrc qui peuvent être utiliser pour cloner des dépôts depuis la forge, ou pour pousser vers celle-ci.",
-                    "netrc_only_trusted": "Plugins de clonage personnalisés de confiance"
+                    "netrc_only_trusted": "Plugins de clonage personnalisés de confiance",
+                    "placeholder": "Image du plugin"
                 },
                 "pipeline_path": {
                     "default": "Par défaut : .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Le chemin vers votre configuration de pipeline (par example {0}). Les dossiers doivent finir par {1}.",
                     "desc_path_example": "mon/chemin/",
-                    "path": "Chemin vers le pipeline"
+                    "path": "Chemin vers le pipeline",
+                    "by_default": "Par défaut : {paths}"
                 },
                 "project": "Paramètres du projet",
                 "protected": {
@@ -497,7 +508,8 @@
             "desc": "Dépôts classés par date de création du dernier pipeline"
         },
         "last": {
-            "title": "Dernière visite"
+            "title": "Dernière visite",
+            "desc": "Dépôts visités le plus récemment triés par date d'accès"
         }
     },
     "running_version": "Vous utilisez Woodpecker {0}",
@@ -651,5 +663,12 @@
     "pipeline_since": "Pipeline crée {created} minutes ago",
     "pipeline_has_warnings": "Le pipeline a des alertes",
     "pipeline_has_errors": "Le pipeline a des erreurs",
-    "login_with": "Se connecter avec {forge}"
+    "login_with": "Se connecter avec {forge}",
+    "login_to_woodpecker_with": "Se connecter à Woodpecker avec",
+    "extensions_signatures_public_key": "Clés publiques pour les signatures",
+    "extensions_signatures_public_key_description": "Cette clé publique devrait être utilisée par vos extensions pour vérifier que le webhook provient de Woodpecker.",
+    "disabled": "Désactivé",
+    "fullscreen": "Plein écran",
+    "exit_fullscreen": "Quitter le plein écran",
+    "help_translating": "Vous pouvez aider à traduire Woodpecker dans votre lanage sur {0}."
 }

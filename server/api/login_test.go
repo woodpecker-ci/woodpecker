@@ -171,6 +171,7 @@ func TestHandleAuth(t *testing.T) {
 		}
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
 		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
@@ -179,6 +180,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -207,11 +209,13 @@ func TestHandleAuth(t *testing.T) {
 		}
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgGet", org.ID).Return(org, nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -240,6 +244,7 @@ func TestHandleAuth(t *testing.T) {
 		}
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
 		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
@@ -248,9 +253,12 @@ func TestHandleAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		assert.Equal(t, "/login?error=registration_closed", c.Writer.Header().Get("Location"))
+		// a rejected login must not persist any (broken) user/org row, see #6769
+		_store.AssertNotCalled(t, "CreateUser", mock.Anything)
+		_store.AssertNotCalled(t, "OrgCreate", mock.Anything)
 	})
 
-	t.Run("should deny a user with missing org access", func(t *testing.T) {
+	t.Run("should deny a login if the forge cannot be loaded", func(t *testing.T) {
 		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
@@ -269,8 +277,43 @@ func TestHandleAuth(t *testing.T) {
 		}
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		// without the forge we cannot tell which orgs are allowed, so the login must fail
+		_store.On("ForgeGet", int64(1)).Return(nil, types.ErrRecordNotExist)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-		_forge.On("Teams", mock.Anything, user, mock.Anything).Return([]*model.Team{
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=internal_error", c.Writer.Header().Get("Location"))
+		_forge.AssertNotCalled(t, "Teams", mock.Anything, mock.Anything, mock.Anything)
+	})
+
+	t.Run("should stop requesting teams once a page is not full", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{
+			Header: make(http.Header),
+			URL: &url.URL{
+				Scheme: "https",
+			},
+		}
+
+		teamsCalls := 0
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		// a single team is less than a full page, so there is nothing more to fetch
+		_forge.On("Teams", mock.Anything, user, mock.Anything).Run(func(mock.Arguments) {
+			teamsCalls++
+		}).Return([]*model.Team{
 			{
 				Login: "org2",
 			},
@@ -280,6 +323,41 @@ func TestHandleAuth(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		// without stopping early this would walk through all maxPage pages
+		assert.Equal(t, 1, teamsCalls)
+	})
+
+	t.Run("should stop requesting teams if the forge does not implement it", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{
+			Header: make(http.Header),
+			URL: &url.URL{
+				Scheme: "https",
+			},
+		}
+
+		teamsCalls := 0
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		_forge.On("Teams", mock.Anything, user, mock.Anything).Run(func(mock.Arguments) {
+			teamsCalls++
+		}).Return(nil, forge_types.ErrNotImplemented)
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		assert.Equal(t, 1, teamsCalls)
 	})
 
 	t.Run("should create an user org if it does not exists", func(t *testing.T) {
@@ -302,12 +380,14 @@ func TestHandleAuth(t *testing.T) {
 		user.OrgID = 0
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -337,12 +417,14 @@ func TestHandleAuth(t *testing.T) {
 		user.OrgID = 0
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(org, nil)
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -372,12 +454,14 @@ func TestHandleAuth(t *testing.T) {
 		org.Name = "not-the-user-name"
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgGet", user.OrgID).Return(org, nil)
 		_store.On("OrgUpdate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 		api.HandleAuth(c)
@@ -386,4 +470,253 @@ func TestHandleAuth(t *testing.T) {
 		assert.Equal(t, "/", c.Writer.Header().Get("Location"))
 		assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
 	})
+}
+
+func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	now := time.Now()
+	server.Config.Server.SessionExpires = time.Hour
+
+	tests := []struct {
+		name         string
+		storedExpiry int64
+		newExpiry    int64
+		refreshToken string
+	}{
+		{
+			name:         "replaces later stored expiry",
+			storedExpiry: now.Add(7 * 24 * time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "replaces expired token",
+			storedExpiry: now.Add(-time.Hour).Unix(),
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "enables expiring tokens",
+			storedExpiry: 0,
+			newExpiry:    now.Add(8 * time.Hour).Unix(),
+			refreshToken: "new-refresh-token",
+		},
+		{
+			name:         "clears expiry for non-expiring tokens",
+			storedExpiry: now.Add(time.Hour).Unix(),
+			newExpiry:    time.Time{}.Unix(),
+			refreshToken: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_manager := manager_mocks.NewMockManager(t)
+			_forge := forge_mocks.NewMockForge(t)
+			_store := store_mocks.NewMockStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+
+			stored := &model.User{
+				ID: 1, OrgID: 1, ForgeID: 1, ForgeRemoteID: "remote-id-1",
+				Login: "test", Email: "test@example.com",
+				AccessToken: "old-access-token", RefreshToken: "old-refresh-token", Expiry: tt.storedExpiry,
+			}
+			// The forge result and database record must be separate objects: a
+			// successful login returns a new credential set for an existing user.
+			fromForge := *stored
+			fromForge.AccessToken = "new-access-token"
+			fromForge.RefreshToken = tt.refreshToken
+			fromForge.Expiry = tt.newExpiry
+
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(&fromForge, "", nil)
+			_store.On("GetUserByRemoteID", stored.ForgeID, stored.ForgeRemoteID).Return(stored, nil)
+			_store.On("OrgGet", stored.OrgID).Return(&model.Org{ID: stored.OrgID, Name: stored.Login}, nil)
+			_store.On("UpdateUser", mock.Anything).Run(func(args mock.Arguments) {
+				updated, ok := args.Get(0).(*model.User)
+				assert.True(t, ok)
+				assert.Equal(t, fromForge.AccessToken, updated.AccessToken)
+				assert.Equal(t, fromForge.RefreshToken, updated.RefreshToken)
+				assert.Equal(t, fromForge.Expiry, updated.Expiry, "persist the expiry belonging to the new tokens")
+			}).Return(nil).Once()
+			_store.On("PermPrune", stored.ID, []int64(nil)).Return(nil)
+			_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{Header: make(http.Header), URL: &url.URL{Scheme: "https"}}
+
+			api.HandleAuth(c)
+
+			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(t, "/", w.Header().Get("Location"))
+			assert.NotEmpty(t, w.Header().Get("Set-Cookie"))
+		})
+	}
+}
+
+// TestHandleAuthAllowedOrgs walks through the combinations of WOODPECKER_ORGS
+// and the orgs of the forge a user logs in with. The global list applies to
+// every forge, the orgs of a forge are allowed in addition to it. Org names are
+// only matched against the memberships reported by that very forge, a name
+// allowed for one forge never grants access on another one (#6852).
+func TestHandleAuthAllowedOrgs(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	user := &model.User{
+		ID:            1,
+		OrgID:         1,
+		ForgeID:       1,
+		ForgeRemoteID: "remote-id-1",
+		Login:         "test",
+		Email:         "test@example.com",
+	}
+	org := &model.Org{
+		ID:   1,
+		Name: user.Login,
+	}
+
+	server.Config.Server.SessionExpires = time.Hour
+
+	tests := []struct {
+		name       string
+		globalOrgs []string
+		forgeOrgs  []string
+		teams      []string
+		allow      bool
+	}{
+		{
+			name:  "nothing configured lets everybody in",
+			teams: []string{"github-org"},
+			allow: true,
+		},
+		{
+			name:       "global org matching a membership of this forge",
+			globalOrgs: []string{"github-org"},
+			teams:      []string{"github-org"},
+			allow:      true,
+		},
+		{
+			name:       "global org matching a membership on another forge only",
+			globalOrgs: []string{"github-org"},
+			teams:      []string{"gitlab-org"},
+			allow:      false,
+		},
+		{
+			name:      "forge org matching a membership of this forge",
+			forgeOrgs: []string{"github-org"},
+			teams:     []string{"github-org"},
+			allow:     true,
+		},
+		{
+			name:  "orgs of another forge do not gate this one",
+			teams: []string{"gitlab-org"},
+			allow: true,
+		},
+		{
+			name:      "forge org naming a group of another forge",
+			forgeOrgs: []string{"gitlab-org"},
+			teams:     []string{"github-org"},
+			allow:     false,
+		},
+		{
+			name:       "global org while the forge lists other orgs",
+			globalOrgs: []string{"github-org"},
+			forgeOrgs:  []string{"dummy-org"},
+			teams:      []string{"github-org"},
+			allow:      true,
+		},
+		{
+			name:       "forge org while the global list holds other orgs",
+			globalOrgs: []string{"dummy-org"},
+			forgeOrgs:  []string{"gitlab-org"},
+			teams:      []string{"gitlab-org"},
+			allow:      true,
+		},
+		{
+			name:       "member of neither the global nor the forge orgs",
+			globalOrgs: []string{"dummy"},
+			forgeOrgs:  []string{"dummy-org"},
+			teams:      []string{"github-org"},
+			allow:      false,
+		},
+		{
+			name:       "orgs are matched case-insensitively",
+			globalOrgs: []string{"GITHUB-ORG"},
+			forgeOrgs:  []string{"GITLAB-ORG"},
+			teams:      []string{"gitlab-org"},
+			allow:      true,
+		},
+		{
+			name:      "membership in a parent group is not membership in a subgroup",
+			forgeOrgs: []string{"gitlab-org/some-subgroup"},
+			teams:     []string{"gitlab-org"},
+			allow:     false,
+		},
+		{
+			name:       "no membership matches although both lists are set",
+			globalOrgs: []string{"github-org"},
+			forgeOrgs:  []string{"github-org"},
+			teams:      []string{"gitlab-org"},
+			allow:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_manager := manager_mocks.NewMockManager(t)
+			_forge := forge_mocks.NewMockForge(t)
+			_store := store_mocks.NewMockStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(tt.globalOrgs)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{
+				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme: "https",
+				},
+			}
+
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1, Orgs: tt.forgeOrgs}, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+
+			// memberships are only requested if there is a list to check against
+			if len(tt.globalOrgs)+len(tt.forgeOrgs) > 0 {
+				teams := make([]*model.Team, 0, len(tt.teams))
+				for _, team := range tt.teams {
+					teams = append(teams, &model.Team{Login: team})
+				}
+				_forge.On("Teams", mock.Anything, user, mock.Anything).Return(teams, nil)
+			}
+
+			if tt.allow {
+				_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
+				_store.On("OrgGet", org.ID).Return(org, nil)
+				_store.On("UpdateUser", mock.Anything).Return(nil)
+				_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+				_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+				_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			}
+
+			api.HandleAuth(c)
+
+			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+			if tt.allow {
+				assert.Equal(t, "/", c.Writer.Header().Get("Location"))
+			} else {
+				assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+			}
+		})
+	}
 }

@@ -18,14 +18,12 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
 	"strconv"
 	"time"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rs/zerolog/log"
 	grpc_metadata "google.golang.org/grpc/metadata"
@@ -34,13 +32,18 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
+
+type ctxKey struct{}
+
+// agentIDKey is a non imitable context key.
+var agentIDKey = &ctxKey{}
 
 // updateAgentLastWorkDelay the delay before the LastWork info should be updated.
 const updateAgentLastWorkDelay = time.Minute
@@ -54,7 +57,6 @@ type RPC struct {
 }
 
 // Next blocks until it provides the next workflow to execute.
-// TODO (6038): Server does not release waiting agents on graceful shutdown.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -76,30 +78,31 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	// enforce labels from server by overwriting agent labels
+	if agentFilter.Labels == nil {
+		agentFilter.Labels = make(map[string]string)
+	}
 	maps.Copy(agentFilter.Labels, agentServerLabels)
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
-	filterFn := createFilterFunc(agentFilter)
-
-	for {
-		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.scheduler.Poll(c, agent.ID, filterFn)
-		if err != nil || task == nil {
-			return nil, err
+	rpcWorkflow, err := s.scheduler.Poll(c, agent.ID, agentFilter, func(taskID string) error {
+		// a skipped workflow is finalized through the regular Done flow; it
+		// was never initialized by an agent, so lock it to this agent first
+		// to satisfy the workflow ownership check.
+		if err := s.lockAgentToWorkflow(c, agent, taskID); err != nil {
+			return err
 		}
-
-		if task.ShouldRun() {
-			workflow := new(rpc.Workflow)
-			err = json.Unmarshal(task.Data, workflow)
-			return workflow, err
-		}
-
-		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
-			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
-		}
+		return s.Done(c, taskID, rpc.WorkflowState{})
+	})
+	if err != nil || rpcWorkflow == nil {
+		return nil, err
 	}
+
+	if err := s.lockAgentToWorkflow(c, agent, rpcWorkflow.ID); err != nil {
+		return nil, err
+	}
+
+	return rpcWorkflow, nil
 }
 
 // Wait blocks until the workflow with the given ID is completed or got canceled.
@@ -208,8 +211,27 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
+	if metric.FailurePipelineStepInfoCount != nil &&
+		state.Exited &&
+		(step.State == model.StatusFailure ||
+			step.State == model.StatusKilled ||
+			step.State == model.StatusError) {
+		metric.FailurePipelineStepInfoCount.WithLabelValues(workflow.Name, repo.FullName, step.Name, string(step.Type)).Inc()
+	}
+
+	if metric.StepDurationRecord != nil && state.Exited && step.Started > 0 && step.Finished >= step.Started {
+		duration := step.Finished - step.Started
+		metric.StepDurationRecord.WithLabelValues(
+			workflow.Name,
+			repo.FullName,
+			step.Name,
+			string(step.Type),
+		).Observe(float64(duration))
+	}
 	if state.Exited {
-		server.Config.Services.LogStore.StepFinished(step)
+		if err := server.Config.Services.LogStore.StepFinished(c, step); err != nil {
+			log.Error().Err(err).Int64("step", step.ID).Msg("log store could not finalize the step log")
+		}
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
@@ -217,7 +239,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	return s.notify(c, repo, currentPipeline)
+	return s.scheduler.PublishPipelineEvent(c, repo, currentPipeline)
 }
 
 // Init signals the workflow is initialized.
@@ -237,8 +259,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-
-	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
@@ -262,6 +282,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedInitState(agent.ID, state); err != nil {
+		return err
+	}
+
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
@@ -273,7 +298,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 
-		if err := s.notify(c, repo, currentPipeline); err != nil {
+		if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
 			log.Error().Err(err).Msg("could not publish pipeline state change to pubsub")
 		}
 	}()
@@ -332,6 +357,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	// sanitize agent input: reject states no compatible agent can produce
+	if err := checkAgentReportedDoneState(agent.ID, state); err != nil {
+		return err
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -372,7 +402,16 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
+		// use the latest finish time of all workflows
+		finished := workflow.Finished
+		for _, w := range currentPipeline.Workflows {
+			finished = max(finished, w.Finished)
+		}
+		if finished == 0 {
+			finished = time.Now().Unix()
+		}
+
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, pipeline.PipelineStatus(currentPipeline.Workflows), finished); err != nil {
 			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}
 	}
@@ -384,13 +423,18 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		for _, step := range workflow.Children {
 			if step.State != model.StatusSkipped {
 				if err := s.logger.Close(c, step.ID); err != nil {
-					logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+					// A step killed before it ran never opened a stream.
+					if errors.Is(err, logging.ErrNotFound) {
+						logger.Debug().Err(err).Msgf("done: no log stream to close for step %d", step.ID)
+					} else {
+						logger.Error().Err(err).Msgf("done: cannot close log stream for step %d", step.ID)
+					}
 				}
 			}
 		}
 	}()
 
-	if err := s.notify(c, repo, currentPipeline); err != nil {
+	if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
 		return err
 	}
 
@@ -424,8 +468,14 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		return err
 	}
 
+	workflow, err := s.store.WorkflowByStep(step)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow for step uuid %s", stepUUID)
+		return err
+	}
+
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strconv.FormatInt(workflow.ID, 10), currentPipeline, nil); err != nil {
 		return err
 	}
 
@@ -462,7 +512,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
+	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil {
 		log.Error().Err(err).Msg("could not store log entries")
 	}
 
@@ -566,42 +616,13 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	}
 }
 
-// Notify push to our pubsub infra pipeline state changes.
-func (s *RPC) notify(c context.Context, repo *model.Repo, pipeline *model.Pipeline) (err error) {
-	message := pubsub.Message{ID: ulid.Make().String()}
-	message.Data, err = json.Marshal(model.Event{
-		Repo:     *repo,
-		Pipeline: *pipeline,
-	})
-	if err != nil {
-		return fmt.Errorf("can't marshal JSON: %w", err)
-	}
-
-	subTopics := make(map[string]struct{})
-	// if repo is public, push to public topic
-	if !repo.IsSCMPrivate {
-		subTopics[pubsub.PublicTopic] = struct{}{}
-	}
-	// publish to repo specific topic
-	subTopics[pubsub.GetRepoTopic(repo)] = struct{}{}
-
-	return s.scheduler.Publish(c, subTopics, message)
-}
-
 func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
-	md, ok := grpc_metadata.FromIncomingContext(ctx)
-	if !ok {
-		return nil, errors.New("metadata is not provided")
-	}
-
-	values := md["agent_id"]
-	if len(values) == 0 {
+	rawAgentID := ctx.Value(agentIDKey)
+	if rawAgentID == nil {
 		return nil, errors.New("agent_id is not provided")
 	}
-
-	_agentID := values[0]
-	agentID, err := strconv.ParseInt(_agentID, 10, 64)
-	if err != nil {
+	agentID, ok := rawAgentID.(int64)
+	if !ok {
 		return nil, errors.New("agent_id is not a valid integer")
 	}
 

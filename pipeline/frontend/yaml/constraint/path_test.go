@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 func TestConstraintPath(t *testing.T) {
@@ -145,9 +145,9 @@ func TestConstraintPath(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		c := parseConstraintPath(t, test.conf)
-		assert.Equal(t, test.want, c.Match(test.with, test.message))
+	for _, tt := range testdata {
+		c := parseConstraintPath(t, tt.conf)
+		assert.Equal(t, tt.want, c.Match(tt.with, tt.message))
 	}
 }
 

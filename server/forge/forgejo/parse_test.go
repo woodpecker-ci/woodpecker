@@ -166,11 +166,11 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
+				Event:    model.EventTag,
+				TagTitle: "v1.0.0",
 				Author:   "gordon",
-				Event:    "tag",
 				Commit:   "ef98532add3b2feb7a137426bba1248724367df5",
 				Ref:      "refs/tags/v1.0.0",
-				Message:  "created tag v1.0.0",
 				Sender:   "gordon",
 				Avatar:   "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				Email:    "gordon@golang.org",
@@ -428,11 +428,14 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
+				Event: model.EventRelease,
+				Release: &model.Release{
+					Title: "Version 0.0.5",
+				},
 				Author:   "anbraten",
-				Event:    "release",
 				Branch:   "main",
 				Ref:      "refs/tags/0.0.5",
-				Message:  "created release Version 0.0.5",
+				TagTitle: "0.0.5",
 				Sender:   "anbraten",
 				Avatar:   "https://git.xxx/user/avatar/anbraten/-1",
 				Email:    "anbraten@noreply.xxx",
@@ -759,19 +762,56 @@ func TestForgejoParser(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tc.data))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tt.data))
 			req.Header = http.Header{}
-			req.Header.Set(hookEvent, tc.event)
+			req.Header.Set(hookEvent, tt.event)
 			r, p, err := parseHook(req)
-			if tc.err != nil {
-				assert.ErrorIs(t, err, tc.err)
+			if tt.err != nil {
+				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
-				assert.EqualValues(t, tc.repo, r)
+				assert.EqualValues(t, tt.repo, r)
 				p.Timestamp = 0
-				assert.EqualValues(t, tc.pipe, p)
+				assert.EqualValues(t, tt.pipe, p)
 			}
+		})
+	}
+}
+
+func TestParseIncompleteHookPayloads(t *testing.T) {
+	incomplete := []string{
+		`{}`,
+		`{"repository": {}}`,
+		`{"repository": {"full_name": "noslash"}, "sender": {}}`,
+	}
+	for _, payload := range incomplete {
+		t.Run(payload, func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_, _, err := parsePushHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseCreatedHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parsePullRequestHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+			})
+		})
+	}
+
+	incompletePullRequest := []string{
+		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {}}`,
+		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {"user": {}}}`,
+	}
+	for _, payload := range incompletePullRequest {
+		t.Run(payload, func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_, _, err := parsePullRequestHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				assert.Error(t, err)
+			})
 		})
 	}
 }

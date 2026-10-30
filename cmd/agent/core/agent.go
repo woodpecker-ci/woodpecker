@@ -17,12 +17,12 @@ package core
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"maps"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -30,11 +30,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	grpc_credentials "google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
@@ -102,62 +98,51 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 					log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
 				}
 				return nil
-			})
+			},
+		)
 	}
-
-	var transport grpc.DialOption
-	if c.Bool("grpc-secure") {
-		log.Trace().Msg("use ssl for grpc")
-		transport = grpc.WithTransportCredentials(grpc_credentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
-	} else {
-		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
-	}
-
-	authConn, err := grpc.NewClient(
-		c.String("server"),
-		transport,
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("grpc-keepalive-time"),
-			Timeout: c.Duration("grpc-keepalive-timeout"),
-		}),
-	)
-	if err != nil {
-		return fmt.Errorf("could not create new gRPC 'channel' for authentication: %w", err)
-	}
-	defer authConn.Close()
 
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	agentToken := c.String("grpc-token")
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
-	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
-	if err != nil {
-		return fmt.Errorf("agent could not auth: %w", err)
+
+	if c.Bool("grpc-secure") {
+		log.Trace().Msg("use ssl for grpc")
 	}
 
-	conn, err := grpc.NewClient(
-		c.String("server"),
-		transport,
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:    c.Duration("grpc-keepalive-time"),
-			Timeout: c.Duration("grpc-keepalive-timeout"),
-		}),
-		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
-		grpc.WithStreamInterceptor(authInterceptor.Stream()),
-	)
-	if err != nil {
-		return fmt.Errorf("could not create new gRPC 'channel' for normal orchestration: %w", err)
+	skipInsecure := c.Bool("grpc-skip-insecure")
+	if c.IsSet("grpc-skip-insecure-deprecated") && !c.IsSet("grpc-skip-insecure") {
+		skipInsecure = c.Bool("grpc-skip-insecure-deprecated")
+		log.Warn().Msg("WOODPECKER_GRPC_VERIFY is deprecated, use WOODPECKER_GRPC_SKIP_VERIFY")
 	}
-	defer conn.Close()
 
-	client := agent_rpc.NewGrpcClient(ctx, conn,
+	agentConn, err := agent_rpc.Dial(grpcClientCtx, grpcDialConfig(c, agentConfig, skipInsecure)) //nolint:contextcheck
+	if err != nil {
+		return err
+	}
+	defer agentConn.Close()
+
+	// Persist the agent ID received during auth so that crashloops reuse the
+	// same server-side entry instead of creating a new one on every restart.
+	if agentConfigPath != "" {
+		agentConfig.AgentID = agentConn.AgentID
+		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
+			log.Debug().Msgf("persisted agent ID %d after auth", agentConfig.AgentID)
+		}
+	}
+
+	client := agent_rpc.NewGrpcClient(
+		ctx, agentConn.MainConn,
 		agent_rpc.SetConnectionRetryTimeout(c.Duration("retry-timeout")),
+		agent_rpc.SetLogEntryBufferSize(c.Int("log-entry-stream-buffer-size")),
 	)
 	agentConfigPersisted := atomic.Bool{}
 
-	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs(
+		"hostname", hostname,
+		"proto-version", strconv.Itoa(int(agent_rpc.ClientGrpcVersion)),
+	))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
@@ -283,7 +268,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	// https://go.dev/blog/go1.22 fixed scope for goroutines in loops
 	for i := range maxWorkflows {
 		serviceWaitingGroup.Go(func() error {
-			runner := agent.NewRunner(client, filter, hostname, counter, backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, agentConfig.AgentID, counter, backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -349,7 +334,8 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for range retryCount {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			err = run(ctx, c, backendEngines)
+			if code := status.Code(err); code == codes.Unavailable || code == codes.DeadlineExceeded {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to %s, retrying in %v", c.String("server"), retryDelay))
 				time.Sleep(retryDelay)
 			} else {
@@ -376,4 +362,17 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		}
 	}
 	return nil
+}
+
+func grpcDialConfig(c *cli.Command, agentConfig AgentConfig, skipInsecure bool) agent_rpc.DialConfig {
+	return agent_rpc.DialConfig{
+		ServerAddr:       c.String("server"),
+		AgentToken:       c.String("grpc-token"),
+		AgentID:          agentConfig.AgentID,
+		Secure:           c.Bool("grpc-secure"),
+		SkipTLSVerify:    skipInsecure,
+		KeepaliveTime:    c.Duration("keepalive-time"),
+		KeepaliveTimeout: c.Duration("keepalive-timeout"),
+		AuthRefreshEvery: authInterceptorRefreshInterval,
+	}
 }

@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
@@ -45,17 +45,17 @@ func TestConstraintStatusSuccessFailure(t *testing.T) {
 		{conf: "[{event: push, status: success},{status: failure}]", wantSuccess: false, wantFail: true},
 		{conf: "[{status: failure},{event: push, status: success}]", wantSuccess: false, wantFail: true},
 	}
-	for _, test := range testdata {
-		t.Run(test.conf, func(t *testing.T) {
-			c := parseConstraints(t, test.conf)
+	for _, tt := range testdata {
+		t.Run(tt.conf, func(t *testing.T) {
+			c := parseConstraints(t, tt.conf)
 			assert.Equalf(t,
-				test.wantSuccess,
-				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
-				"include success is wrong for when: '%s'", test.conf)
+				tt.wantSuccess,
+				c.IncludesStatusSuccess(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
+				"include success is wrong for when: '%s'", tt.conf)
 			assert.Equal(t,
-				test.wantFail,
-				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, map[string]string{}),
-				"include fail is wrong for when: '%s'", test.conf)
+				tt.wantFail,
+				c.IncludesStatusFailure(metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPull}}, true, make(map[string]string)),
+				"include fail is wrong for when: '%s'", tt.conf)
 		})
 	}
 }
@@ -185,16 +185,83 @@ func TestConstraints(t *testing.T) {
 			env:  map[string]string{"TESTVAR": "qwe"},
 			want: false,
 		},
+		{
+			desc: "filter by eval with escaped regex matches release tag",
+			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventTag, Commit: metadata.Commit{Ref: "refs/tags/v3.20.0"}}},
+			want: true,
+		},
+		{
+			desc: "filter by eval with escaped regex skips pre-release tag",
+			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventTag, Commit: metadata.Commit{Ref: "refs/tags/v3.20.0-rc.1"}}},
+			want: false,
+		},
+		{
+			desc: "filter by branch with escaped slash matches one slash",
+			conf: `{ branch: '*\\/*' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x"}}},
+			want: true,
+		},
+		{
+			desc: "filter by branch with escaped slash skips two slashes",
+			conf: `{ branch: '*\\/*' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x/y"}}},
+			want: false,
+		},
+		{
+			desc: "filter by branch with escaped slash and globstar matches two slashes",
+			conf: `{ branch: '*\\/**' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x/y"}}},
+			want: true,
+		},
 	}
 
-	for _, test := range testdata {
-		t.Run(test.desc, func(t *testing.T) {
-			conf, err := metadata.EnvVarSubst(test.conf, test.with.Environ())
+	for _, tt := range testdata {
+		t.Run(tt.desc, func(t *testing.T) {
+			conf, err := metadata.EnvVarSubst(tt.conf, tt.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
-			got, err := c.Match(test.with, false, test.env)
+			got, err := c.Match(tt.with, false, tt.env)
 			assert.NoError(t, err)
-			assert.Equal(t, test.want, got)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestConstraintsMatchIgnoringEvaluate(t *testing.T) {
+	testdata := []struct {
+		desc string
+		conf string
+		with metadata.Metadata
+		want bool
+	}{
+		{
+			desc: "eval on unknown variable is treated as matching",
+			conf: `{ event: manual, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: true,
+		},
+		{
+			desc: "other conditions still apply",
+			conf: `{ event: push, evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			want: false,
+		},
+		{
+			desc: "branch still applies",
+			conf: `{ branch: main, evaluate: 'true' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual, Commit: metadata.Commit{Branch: "dev"}}},
+			want: false,
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.desc, func(t *testing.T) {
+			c := parseConstraints(t, tt.conf)
+			got, err := c.MatchIgnoringEvaluate(tt.with, true, nil)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

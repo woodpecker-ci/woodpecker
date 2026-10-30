@@ -23,7 +23,7 @@ linters:
     - godot
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - govet
     - importas
@@ -31,11 +31,13 @@ linters:
     - makezero
     - misspell
     - mnd
+    - modernize
     - nolintlint
     - revive
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
+    - tagalign
     - unconvert
     - unparam
     - unused
@@ -46,6 +48,13 @@ linters:
   settings:
     depguard:
       rules:
+        deprecated:
+          list-mode: lax
+          files:
+            - $all
+          deny:
+            - pkg: golang.org/x/crypto/openpgp
+              desc: deprecated and frozen, use github.com/ProtonMail/go-crypto/openpgp instead
         agent:
           list-mode: lax
           files:
@@ -104,6 +113,7 @@ linters:
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/agent
             - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend
             - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
         rpc:
           list-mode: lax
@@ -228,6 +238,10 @@ linters:
           alias: config_service_mocks
         - pkg: go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks
           alias: log_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/rpc/mocks
+          alias: rpc_mocks
+        - pkg: go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks
+          alias: scheduler_mocks
 
         # kubernetes
         - pkg: k8s.io/api/core/v1
@@ -236,8 +250,12 @@ linters:
           alias: kube_meta_v1
         - pkg: k8s.io/apimachinery/pkg/api/errors
           alias: kube_errors
+        - pkg: k8s.io/apimachinery/pkg/runtime
+          alias: kube_runtime
         - pkg: k8s.io/client-go/tools/clientcmd
           alias: kube_client_cmd
+        - pkg: k8s.io/client-go/testing
+          alias: kube_testing
 
         # docker
         - pkg: github.com/docker/cli/cli/config/types
@@ -254,8 +272,10 @@ linters:
           alias: insecure_clear_text_keyset
         - pkg: github.com/migueleliasweb/go-github-mock/src/mock
           alias: github_mock
-        - pkg: gitlab.com/gitlab-org/api/client-go/v2
+        - pkg: gitlab.com/gitlab-org/api/client-go/v3
           alias: gitlab
+        - pkg: go.yaml.in/yaml/v4
+          alias: go_yaml
     misspell:
       locale: US
     mnd:
@@ -273,11 +293,16 @@ linters:
         - random.GetRandomBytes
     revive:
       rules:
+        - name: enforce-map-style
+          arguments: [make]
         - name: var-naming
           arguments:
             - []
             - []
             - - skipPackageNameChecks: true
+    usetesting:
+      context-background: true
+      context-todo: true
   exclusions:
     generated: lax
     presets:
@@ -298,6 +323,7 @@ formatters:
     - gci
     - gofmt
     - gofumpt
+    - swaggo
   settings:
     gci:
       sections:
@@ -311,7 +337,10 @@ formatters:
         - pattern: interface{}
           replacement: any
     gofumpt:
-      extra-rules: true
+      extra:
+        group-params: true
+        clothe-returns: true
+        balance-calls: true
   exclusions:
     generated: lax
     paths:

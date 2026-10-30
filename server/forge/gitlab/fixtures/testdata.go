@@ -61,6 +61,9 @@ func NewServer(t *testing.T) *httptest.Server {
 		case "/api/v4/projects/4/hooks/10717088":
 			w.WriteHeader(201)
 			return
+		case "/api/v4/projects/4/merge_requests":
+			_, _ = w.Write(project4PayloadMergeRequests)
+			return
 		case "/api/v4/projects/4/members/all/3":
 			_, _ = w.Write(project4PayloadMembers)
 			return
@@ -75,6 +78,9 @@ func NewServer(t *testing.T) *httptest.Server {
 			return
 		case "/api/v4/user":
 			_, _ = w.Write(currentUserPayload)
+			return
+		case "/api/v4/groups":
+			_, _ = w.Write(groupsPayload)
 			return
 		}
 

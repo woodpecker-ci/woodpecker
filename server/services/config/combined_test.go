@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestFetchFromConfigService(t *testing.T) {
@@ -53,14 +54,14 @@ func TestFetchFromConfigService(t *testing.T) {
 		repoConfig        string
 		files             []file
 		expectedFileNames []string
-		expectedError     bool
+		wantErr           bool
 	}{
 		{
 			name:              "External Fetch empty repo",
 			repoConfig:        "",
 			files:             []file{},
 			expectedFileNames: []string{"override1", "override2", "override3"},
-			expectedError:     false,
+			wantErr:           false,
 		},
 		{
 			name:       "Default config - Additional sub-folders",
@@ -73,7 +74,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{"override1", "override2", "override3"},
-			expectedError:     false,
+			wantErr:           false,
 		},
 		{
 			name:       "Fetch empty",
@@ -89,7 +90,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				data: dummyData,
 			}},
 			expectedFileNames: []string{},
-			expectedError:     true,
+			wantErr:           true,
 		},
 		{
 			name:       "Use old config",
@@ -110,14 +111,12 @@ func TestFetchFromConfigService(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 	}
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		t.Fatal("can't generate ed25519 key pair")
-	}
+	require.NoError(t, err, "can't generate ed25519 key pair")
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
@@ -198,7 +197,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: tt.name, Config: tt.repoConfig} // Using test name as repo name to provide different responses in mock server
 
 			f := new(mocks.MockForge)
-			dirs := map[string][]*forge_types.FileMeta{}
+			dirs := make(map[string][]*forge_types.FileMeta)
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
 				path := filepath.Dir(file.name)
@@ -220,7 +219,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
-			forgeFetcher := config.NewForge(time.Second*3, 3)
+			forgeFetcher := config.NewForge(time.Second*3, 3, constant.DefaultConfigOrder, []string{".yaml", ".yml"})
 			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
 				t.Context(),
@@ -231,10 +230,10 @@ func TestFetchFromConfigService(t *testing.T) {
 				[]*forge_types.FileMeta{},
 				false,
 			)
-			if tt.expectedError && err == nil {
-				t.Fatal("expected an error")
-			} else if !tt.expectedError && err != nil {
-				t.Fatal("error fetching config:", err)
+			if tt.wantErr {
+				require.Error(t, err, "expected an error")
+			} else {
+				require.NoError(t, err, "error fetching config")
 			}
 
 			matchingFiles := make([]string, len(files))

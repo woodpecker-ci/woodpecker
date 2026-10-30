@@ -8,6 +8,10 @@ There is currently one type of extension available:
 - [Registry extension](./50-registry-extension.md) to get registry credentials from the extension.
 - [Secret extension](./55-secret-extension.md) to get secrets from an external service.
 
+:::note
+Woodpecker's permission handling is linked to the forge. A user on your forge that has admin access to the repo will also get admin permissions for the repository in Woodpecker and can then change the configured extensions. This could be used to get credentials of the forge user. Make sure you trust the repo admins that can sign in to Woodpecker.
+:::
+
 ## Security
 
 :::warning
@@ -18,6 +22,8 @@ data like malicious pipeline configurations that could be executed.
 To prevent your extensions from such attacks, Woodpecker is signing all HTTP requests using [HTTP signatures](https://tools.ietf.org/html/draft-cavage-http-signatures). Woodpecker therefore uses a public-private ed25519 key pair.
 To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsign](https://github.com/yaronf/httpsign).
 You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
+
+Also see [security boundaries](../17-security-boundaries.md#extensions).
 
 ## Example extensions
 

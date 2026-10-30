@@ -19,13 +19,15 @@ package main
 import (
 	"fmt"
 
-	_ "github.com/joho/godotenv/autoload"
 	docs "github.com/urfave/cli-docs/v3"
 
 	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/dot_env"
 )
 
 func main() {
+	dot_env.Load()
+
 	app := genApp()
 	md, err := docs.ToMan(app)
 	if err != nil {

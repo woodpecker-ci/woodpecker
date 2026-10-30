@@ -2,6 +2,7 @@
   "name": "woodpecker",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
     "start": "cd ../ && make generate-docs && cd docs && docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
@@ -16,10 +17,10 @@
     "format:check": "prettier -c ."
   },
   "dependencies": {
-    "@docusaurus/core": "^3.9.2",
-    "@docusaurus/faster": "^3.9.2",
-    "@docusaurus/plugin-content-blog": "^3.9.2",
-    "@docusaurus/preset-classic": "^3.9.2",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/faster": "^3.10.1",
+    "@docusaurus/plugin-content-blog": "^3.10.1",
+    "@docusaurus/preset-classic": "^3.10.1",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
@@ -40,22 +41,16 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.9.2",
-    "@docusaurus/tsconfig": "3.10.0",
-    "@docusaurus/types": "^3.9.2",
+    "@docusaurus/module-type-aliases": "^3.10.1",
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "^3.10.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
-    "@types/node": "^25.3.3",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.2.14",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
+    "@vue/compiler-sfc": "^3.5.43",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "serialize-javascript": "^7.0.3",
-      "follow-redirects": "^1.16.0",
-      "uuid": "^14.0.0"
-    }
   }
 }

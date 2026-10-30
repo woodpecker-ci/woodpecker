@@ -32,10 +32,10 @@ func NewTable(out io.Writer) *Table {
 
 	return &Table{
 		w:             tabwriter.NewWriter(out, 0, 0, padding, ' ', 0),
-		columns:       map[string]bool{},
-		fieldMapping:  map[string]FieldFn{},
-		fieldAlias:    map[string]string{},
-		allowedFields: map[string]bool{},
+		columns:       make(map[string]bool),
+		fieldMapping:  make(map[string]FieldFn),
+		fieldAlias:    make(map[string]string),
+		allowedFields: make(map[string]bool),
 	}
 }
 
@@ -148,7 +148,7 @@ func (o *Table) Write(columns []string, obj any) error {
 		return fmt.Errorf("failed to decode object: %w", err)
 	}
 
-	dataL := map[string]any{}
+	dataL := make(map[string]any)
 	for key, value := range data {
 		dataL[strings.ToLower(key)] = value
 	}
@@ -202,7 +202,7 @@ func fieldName(name string) string {
 	r := []rune(name)
 	var out []rune
 	for i := range r {
-		if i > 0 && (unicode.IsUpper(r[i])) && (i+1 < len(r) && unicode.IsLower(r[i+1]) || unicode.IsLower(r[i-1])) {
+		if i > 0 && unicode.IsUpper(r[i]) && (i+1 < len(r) && unicode.IsLower(r[i+1]) || unicode.IsLower(r[i-1])) {
 			out = append(out, '_')
 		}
 		out = append(out, unicode.ToLower(r[i]))

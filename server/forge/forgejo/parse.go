@@ -93,6 +93,9 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipelin
 	if err != nil {
 		return nil, nil, err
 	}
+	if err := push.validate(); err != nil {
+		return nil, nil, err
+	}
 
 	// ignore push events for tags
 	if strings.HasPrefix(push.Ref, "refs/tags/") {
@@ -116,6 +119,9 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipe
 	if err != nil {
 		return nil, nil, err
 	}
+	if err := push.validate(); err != nil {
+		return nil, nil, err
+	}
 
 	if push.RefType != refTag {
 		return nil, nil, nil
@@ -135,6 +141,9 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 
 	pr, err := parsePullRequest(payload)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := pr.validate(); err != nil {
 		return nil, nil, err
 	}
 
@@ -171,6 +180,9 @@ func parseReleaseHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
 
 	release, err := parseRelease(payload)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := release.validate(); err != nil {
 		return nil, nil, err
 	}
 

@@ -133,6 +133,9 @@ type (
 		Reviewer    string           `json:"reviewed_by"`
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
+		Release     *Release         `json:"release,omitempty"`
+		// SelectedWorkflow limits a manual pipeline to this workflow and its hard dependencies.
+		SelectedWorkflow string `json:"selected_workflow,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -174,6 +177,12 @@ type (
 		Password string `json:"password,omitempty"`
 	}
 
+	// Release represents pipeline release metadata.
+	Release struct {
+		Title        string `json:"title,omitempty"`
+		IsPrerelease bool   `json:"is_prerelease,omitempty"`
+	}
+
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
 		ID     int64    `json:"id"`
@@ -189,6 +198,7 @@ type (
 	// Feed represents an item in the user's feed or timeline.
 	Feed struct {
 		RepoID   int64  `json:"repo_id"`
+		FullName string `json:"full_name,omitempty"`
 		ID       int64  `json:"id,omitempty"`
 		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`
@@ -264,6 +274,7 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+		Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 	}
 
 	// Agent is the JSON data for an agent.
@@ -297,8 +308,14 @@ type (
 
 	// Org is the JSON data for an organization.
 	Org struct {
-		ID     int64  `json:"id"`
-		Name   string `json:"name"`
-		IsUser bool   `json:"is_user"`
+		ID               int64  `json:"id"`
+		Name             string `json:"name"`
+		IsUser           bool   `json:"is_user"`
+		RequireOrgAgents bool   `json:"require_org_agents"`
+	}
+
+	// OrgPatch defines an organization patch request.
+	OrgPatch struct {
+		RequireOrgAgents *bool `json:"require_org_agents,omitempty"`
 	}
 )

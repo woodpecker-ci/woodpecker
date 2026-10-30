@@ -79,7 +79,7 @@ func (c *combined) SecretFind(repo *model.Repo, name string) (*model.Secret, err
 	return c.base.SecretFind(repo, name)
 }
 
-func (c *combined) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret, error) {
+func (c *combined) SecretList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return c.base.SecretList(repo, p)
 }
 
@@ -99,7 +99,7 @@ func (c *combined) OrgSecretFind(orgID int64, name string) (*model.Secret, error
 	return c.base.OrgSecretFind(orgID, name)
 }
 
-func (c *combined) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
+func (c *combined) OrgSecretList(orgID int64, p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return c.base.OrgSecretList(orgID, p)
 }
 
@@ -119,7 +119,7 @@ func (c *combined) GlobalSecretFind(name string) (*model.Secret, error) {
 	return c.base.GlobalSecretFind(name)
 }
 
-func (c *combined) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+func (c *combined) GlobalSecretList(p *model.ListOptionsWithAll) ([]*model.Secret, error) {
 	return c.base.GlobalSecretList(p)
 }
 

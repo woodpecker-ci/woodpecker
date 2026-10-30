@@ -187,7 +187,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1}, nil)
+	pipelines, err := _store.GetPipelineList(repo, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 1}}, nil)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		log.Warn().Err(err).Msg("could not get pipeline list")
 		c.AbortWithStatus(http.StatusInternalServerError)

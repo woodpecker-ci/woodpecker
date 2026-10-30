@@ -26,7 +26,6 @@ import (
 	"runtime"
 	"slices"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -44,7 +43,7 @@ func TestIsAvailable(t *testing.T) {
 
 		t.Setenv("WOODPECKER_IN_CONTAINER", "true")
 
-		available := backend.IsAvailable(context.Background())
+		available := backend.IsAvailable(t.Context())
 		assert.False(t, available)
 	})
 
@@ -52,7 +51,7 @@ func TestIsAvailable(t *testing.T) {
 		backend := New()
 
 		os.Unsetenv("WOODPECKER_IN_CONTAINER")
-		available := backend.IsAvailable(context.Background())
+		available := backend.IsAvailable(t.Context())
 		assert.True(t, available)
 	})
 }
@@ -61,7 +60,7 @@ func TestLoad(t *testing.T) {
 	backend, _ := New().(*local)
 
 	t.Run("load without cli context", func(t *testing.T) {
-		ctx := context.Background()
+		ctx := t.Context()
 		info, err := backend.Load(ctx)
 
 		require.NoError(t, err)
@@ -78,7 +77,7 @@ func TestLoad(t *testing.T) {
 				Value: tmpDir,
 			},
 		}
-		ctx := context.WithValue(context.Background(), types.CliCommand, cmd)
+		ctx := context.WithValue(t.Context(), types.CliCommand, cmd)
 
 		info, err := backend.Load(ctx)
 
@@ -93,7 +92,7 @@ func TestSetupWorkflow(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-task-uuid-123"
 	config := &types.Config{}
 
@@ -125,7 +124,7 @@ func TestDestroyWorkflow(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	taskUUID := "test-destroy-task"
 	config := &types.Config{}
 
@@ -221,19 +220,17 @@ func TestRunStep(t *testing.T) {
 			stepState, _ := stepStateWraped.(*stepState)
 			assert.NotNil(t, stepState.cmd)
 
-			var outputData []byte
-			outputDataMutex := sync.Mutex{}
-			go t.Run("TailStep", func(t *testing.T) {
-				outputDataMutex.Lock()
-				go outputDataMutex.Unlock()
+			outputDataCh := make(chan []byte)
+			go func() {
 				output, err := backend.TailStep(ctx, step, taskUUID)
 				require.NoError(t, err)
 				assert.NotNil(t, output)
 
 				// Read output
-				outputData, err = io.ReadAll(output)
+				data, err := io.ReadAll(output)
 				require.NoError(t, err)
-			})
+				outputDataCh <- data
+			}()
 
 			// Wait for step to finish
 			t.Run("TestWaitStep", func(t *testing.T) {
@@ -245,15 +242,20 @@ func TestRunStep(t *testing.T) {
 			})
 
 			// Verify output
-			outputDataMutex.Lock()
-			go outputDataMutex.Unlock()
+			var outputData []byte
+			select {
+			case outputData = <-outputDataCh:
+			case <-t.Context().Done():
+				t.Fail()
+				return
+			}
 			outputLines := strings.Split(strings.TrimSpace(string(outputData)), "\n")
 			require.Truef(t, len(outputLines) > 3, "output of lines must be bigger than 3 at least but we got: %#v", outputLines)
 			// we first test output without environments
 			wantBeforeEnvs := []string{
-				"+ echo hello",
+				"▶  echo hello",
 				"hello",
-				"+ env",
+				"▶  env",
 			}
 			gotBeforeEnvs := outputLines[:len(wantBeforeEnvs)]
 			assert.Equal(t, wantBeforeEnvs, gotBeforeEnvs)
@@ -332,7 +334,7 @@ func TestRunStep(t *testing.T) {
 			Name:        "test-plugin",
 			Type:        types.StepTypePlugin,
 			Image:       "echo", // Use a binary that exists
-			Environment: map[string]string{},
+			Environment: make(map[string]string),
 		}
 
 		t.Run("start", func(t *testing.T) {
@@ -411,7 +413,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 	backend, _ := New().(*local)
 	backend.tempDir = t.TempDir()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// Create multiple workflows concurrently
 	taskUUIDs := []string{"task-1", "task-2", "task-3"}
@@ -423,9 +425,10 @@ func TestConcurrentWorkflows(t *testing.T) {
 
 	counter := atomic.Int32{}
 	counter.Store(0)
+	t.Parallel()
 	for _, uuid := range taskUUIDs {
-		go t.Run("start step in "+uuid, func(t *testing.T) {
-			for i := 0; i < 3; i++ {
+		t.Run("start step in "+uuid, func(t *testing.T) {
+			for i := range 3 {
 				counter.Store(counter.Load() + 1)
 				step := &types.Step{
 					UUID:        fmt.Sprintf("step-%s-%d", uuid, i),
@@ -433,7 +436,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 					Type:        types.StepTypePlugin,
 					Image:       "sh",
 					Commands:    []string{fmt.Sprintf("echo %s %d", uuid, i)},
-					Environment: map[string]string{},
+					Environment: make(map[string]string),
 				}
 				require.NoError(t, backend.StartStep(ctx, step, uuid))
 				_, err := backend.WaitStep(ctx, step, uuid)
@@ -473,7 +476,7 @@ loop:
 	// Cleanup all workflows
 	for _, uuid := range taskUUIDs {
 		// Cleanup all steps
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			stepUUID := fmt.Sprintf("step-%s-%d", uuid, i)
 			assert.NoError(t, backend.DestroyStep(ctx, &types.Step{UUID: stepUUID}, uuid))
 		}

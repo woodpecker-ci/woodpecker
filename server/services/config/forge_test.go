@@ -22,11 +22,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestFetch(t *testing.T) {
@@ -44,7 +46,7 @@ func TestFetch(t *testing.T) {
 		repoConfig        string
 		files             []file
 		expectedFileNames []string
-		expectedError     bool
+		wantErr           bool
 	}{
 		{
 			name:       "Default config - .woodpecker/",
@@ -62,7 +64,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker/release.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Default config with .yaml - .woodpecker/",
@@ -80,7 +82,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker/release.yaml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Default config with .yaml, .yml mix - .woodpecker/",
@@ -102,7 +104,7 @@ func TestFetch(t *testing.T) {
 				".woodpecker/release.yaml",
 				".woodpecker/other.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Default config check .woodpecker.yaml before .woodpecker.yml",
@@ -117,7 +119,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker.yaml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Override via API with custom config",
@@ -129,7 +131,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Use old config on 204 response",
@@ -141,14 +143,14 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker.yaml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:              "Default config - Empty repo",
 			repoConfig:        "",
 			files:             []file{},
 			expectedFileNames: []string{},
-			expectedError:     true,
+			wantErr:           true,
 		},
 		{
 			name:       "Default config - Additional sub-folders",
@@ -163,7 +165,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Default config - Additional none .yml files",
@@ -181,7 +183,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Default config - Empty Folder",
@@ -199,7 +201,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".woodpecker.yaml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Special config - folder (ignoring default files)",
@@ -220,7 +222,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Special config - folder",
@@ -232,7 +234,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Special config - subfolder",
@@ -244,7 +246,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/my-config/test.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Special config - file",
@@ -256,7 +258,7 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".config.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:       "Special config - file inside subfolder",
@@ -268,14 +270,14 @@ func TestFetch(t *testing.T) {
 			expectedFileNames: []string{
 				".my-ci-folder/sub-folder/config.yml",
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:              "Special config - empty repo",
 			repoConfig:        ".config.yml",
 			files:             []file{},
 			expectedFileNames: []string{},
-			expectedError:     true,
+			wantErr:           true,
 		},
 	}
 
@@ -284,7 +286,7 @@ func TestFetch(t *testing.T) {
 			repo := &model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig}
 
 			f := new(mocks.MockForge)
-			dirs := map[string][]*forge_types.FileMeta{}
+			dirs := make(map[string][]*forge_types.FileMeta)
 			for _, file := range tt.files {
 				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
 				path := filepath.Dir(file.name)
@@ -307,6 +309,8 @@ func TestFetch(t *testing.T) {
 			configFetcher := config.NewForge(
 				time.Second*3,
 				3,
+				constant.DefaultConfigOrder,
+				[]string{".yaml", ".yml"},
 			)
 			files, err := configFetcher.Fetch(
 				t.Context(),
@@ -317,10 +321,10 @@ func TestFetch(t *testing.T) {
 				nil,
 				false,
 			)
-			if tt.expectedError && err == nil {
-				t.Fatal("expected an error")
-			} else if !tt.expectedError && err != nil {
-				t.Fatal("error fetching config:", err)
+			if tt.wantErr {
+				require.Error(t, err, "expected an error")
+			} else {
+				require.NoError(t, err, "error fetching config")
 			}
 
 			matchingFiles := make([]string, len(files))

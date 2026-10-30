@@ -209,7 +209,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("step running always allowed", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			name   string
 			status model.StatusValue
 			finish int64
@@ -219,9 +219,9 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{"pipeline failure stale", model.StatusFailure, staleFinish},
 			{"pipeline killed stale", model.StatusKilled, staleFinish},
 		} {
-			t.Run(tc.name, func(t *testing.T) {
+			t.Run(tt.name, func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.status, Finished: tc.finish}
+				p := &model.Pipeline{Status: tt.status, Finished: tt.finish}
 				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: model.StatusRunning}))
 			})
 		}
@@ -246,7 +246,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("recent finish drain allowed", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			pStatus model.StatusValue
 			sState  model.StatusValue
 		}{
@@ -254,10 +254,10 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{model.StatusFailure, model.StatusFailure},
 			{model.StatusKilled, model.StatusPending},
 		} {
-			t.Run(fmt.Sprintf("%s/%s", tc.pStatus, tc.sState), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/%s", tt.pStatus, tt.sState), func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.pStatus, Finished: recentFinish}
-				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: tc.sState}))
+				p := &model.Pipeline{Status: tt.pStatus, Finished: recentFinish}
+				assert.NoError(t, allowAppendingLogs(p, &model.Step{State: tt.sState}))
 			})
 		}
 	})
@@ -266,7 +266,7 @@ func TestAllowAppendingLogs(t *testing.T) {
 	t.Run("stale finish drain rejected", func(t *testing.T) {
 		t.Parallel()
 
-		for _, tc := range []struct {
+		for _, tt := range []struct {
 			pStatus model.StatusValue
 			sState  model.StatusValue
 			finish  int64
@@ -277,12 +277,33 @@ func TestAllowAppendingLogs(t *testing.T) {
 			{model.StatusError, model.StatusCreated, staleFinish},
 			{model.StatusSuccess, model.StatusSuccess, 0}, // zero = never recorded
 		} {
-			t.Run(fmt.Sprintf("%s/%s/fin=%d", tc.pStatus, tc.sState, tc.finish), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%s/%s/fin=%d", tt.pStatus, tt.sState, tt.finish), func(t *testing.T) {
 				t.Parallel()
-				p := &model.Pipeline{Status: tc.pStatus, Finished: tc.finish}
-				assert.ErrorIs(t, allowAppendingLogs(p, &model.Step{State: tc.sState}), ErrAgentIllegalLogStreaming)
+				p := &model.Pipeline{Status: tt.pStatus, Finished: tt.finish}
+				assert.ErrorIs(t, allowAppendingLogs(p, &model.Step{State: tt.sState}), ErrAgentIllegalLogStreaming)
 			})
 		}
+	})
+}
+
+// TestAllowAppendingLogsStepFinished ensures the drain window also starts at
+// the step's own finish time, so a pipeline without a recorded finish time
+// does not reject logs of a step that just finished.
+func TestAllowAppendingLogsStepFinished(t *testing.T) {
+	t.Parallel()
+
+	p := &model.Pipeline{Status: model.StatusFailure, Finished: 0}
+
+	t.Run("recent step finish allowed", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-time.Second).Unix()}
+		assert.NoError(t, allowAppendingLogs(p, step))
+	})
+
+	t.Run("stale step finish rejected", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix()}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }
 
@@ -309,5 +330,55 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 			Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix(),
 		}
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+}
+
+func TestCheckAgentReportedInitState(t *testing.T) {
+	t.Parallel()
+
+	t.Run("started set and not canceled is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedInitState(1, rpc.WorkflowState{Started: time.Now().Unix()}))
+	})
+
+	t.Run("zero started is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{}), ErrAgentImpossibleWorkflowState)
+	})
+
+	t.Run("canceled on init is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{Started: time.Now().Unix(), Canceled: true}), ErrAgentImpossibleWorkflowState)
+	})
+
+	t.Run("pre proto version 16 init signature is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedInitState(1, rpc.WorkflowState{Canceled: true}), ErrAgentImpossibleWorkflowState)
+	})
+}
+
+func TestCheckAgentReportedDoneState(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now().Unix()
+
+	t.Run("finished workflow is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Started: now, Finished: now}))
+	})
+
+	t.Run("canceled workflow with started set is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Started: now, Finished: now, Canceled: true}))
+	})
+
+	t.Run("zero-value state used to finalize skipped workflows is allowed", func(t *testing.T) {
+		t.Parallel()
+		assert.NoError(t, checkAgentReportedDoneState(1, rpc.WorkflowState{}))
+	})
+
+	t.Run("pre proto version 16 done signature is rejected", func(t *testing.T) {
+		t.Parallel()
+		assert.ErrorIs(t, checkAgentReportedDoneState(1, rpc.WorkflowState{Canceled: true}), ErrAgentImpossibleWorkflowState)
 	})
 }

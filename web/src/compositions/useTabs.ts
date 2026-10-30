@@ -12,6 +12,7 @@ export interface Tab {
   icon?: IconNames;
   iconClass?: string;
   matchChildren?: boolean;
+  anchor?: HTMLElement;
 }
 
 export function useTabsProvider() {

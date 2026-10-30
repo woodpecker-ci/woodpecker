@@ -15,11 +15,13 @@
 package rpc
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -28,6 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
@@ -52,7 +55,7 @@ func newTestRPC(t *testing.T, mockStore *store_mocks.MockStore, q queue.Queue) R
 
 	return RPC{
 		store:         mockStore,
-		scheduler:     scheduler.NewScheduler(q, memory.New()),
+		scheduler:     scheduler.NewScheduler(t.Context(), mockStore, q, memory.New()),
 		logger:        logging.New(),
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
@@ -98,6 +101,7 @@ func defaultWorkflow(state model.StatusValue) *model.Workflow {
 	return &model.Workflow{
 		ID:         30,
 		PipelineID: 20,
+		AgentID:    1,
 		State:      state,
 		Name:       "test-workflow",
 	}
@@ -136,7 +140,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{
 			StepUUID: "step-uuid-123",
@@ -167,10 +171,10 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything).Return()
+		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Step reports exit → it will transition to success/failure (terminal)
 		err := rpcInst.Update(ctx, "30", rpc.StepState{
@@ -197,7 +201,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Step reports started but not exited → still running (non-terminal)
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
@@ -218,7 +222,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -242,7 +246,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
@@ -264,7 +268,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
@@ -274,7 +278,7 @@ func TestRPCUpdate(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "not-a-number", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.Error(t, err)
@@ -285,7 +289,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("WorkflowLoad", int64(999)).Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "999", rpc.StepState{StepUUID: "step-uuid-123"})
 		assert.Error(t, err)
@@ -303,7 +307,7 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("StepByUUID", "nonexistent").Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "nonexistent"})
 		assert.Error(t, err)
@@ -350,7 +354,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.NoError(t, err)
@@ -374,7 +378,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.NoError(t, err)
@@ -392,7 +396,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -410,7 +414,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
@@ -428,7 +432,7 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
 		require.Error(t, err)
@@ -438,7 +442,7 @@ func TestRPCInit(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Init(ctx, "not-a-number", rpc.WorkflowState{})
 		assert.Error(t, err)
@@ -473,10 +477,48 @@ func TestRPCDone(t *testing.T) {
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Started: 100, Finished: 200})
 		assert.NoError(t, err)
+	})
+
+	t.Run("skipped last workflow keeps pipeline finish time", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		mockQueue := queue_mocks.NewMockQueue(t)
+
+		agent := defaultAgent()
+		repo := defaultRepo()
+		pipeline := defaultPipeline(model.StatusRunning)
+		// a dependent workflow that never ran, because the workflow it depends on failed
+		workflow := defaultWorkflow(model.StatusPending)
+		workflow.Children = []*model.Step{}
+		failedWorkflow := &model.Workflow{ID: 31, PipelineID: 20, State: model.StatusFailure, Started: 100, Finished: 200}
+		// workflow tree as stored after this Done call marked the workflow skipped
+		storedWorkflow := &model.Workflow{ID: 30, PipelineID: 20, State: model.StatusSkipped}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("StepListFromWorkflowFind", mock.Anything).Return([]*model.Step{}, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{failedWorkflow, storedWorkflow}, nil)
+		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
+		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, mockQueue)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		// skipped workflows report neither a start nor a finish time
+		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{})
+		require.NoError(t, err)
+
+		mockStore.AssertCalled(t, "UpdatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
+			return p.Status == model.StatusFailure && p.Finished == 200
+		}))
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
@@ -492,7 +534,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowReRunStateChange)
@@ -511,7 +553,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		assert.ErrorIs(t, err, ErrAgentIllegalWorkflowRun)
@@ -530,7 +572,7 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("AgentFind", int64(2)).Return(agent, nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Done(ctx, "30", rpc.WorkflowState{Finished: 200})
 		require.Error(t, err)
@@ -540,7 +582,7 @@ func TestRPCDone(t *testing.T) {
 	t.Run("reject invalid workflow ID", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Done(ctx, "invalid", rpc.WorkflowState{})
 		assert.Error(t, err)
@@ -575,14 +617,16 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
-		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		entries := []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Line: 0, Data: []byte("hello")},
@@ -604,14 +648,16 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)         // but step already finished
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
-		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("late log")},
@@ -631,14 +677,16 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)       // but step is still running
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
-		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("running log")},
@@ -658,14 +706,16 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
-		mockLogStore.On("LogAppend", mock.Anything, mock.Anything).Return(nil)
+		mockLogStore.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("drain log")},
@@ -680,12 +730,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -702,12 +754,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusFailure)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -723,12 +777,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusPending)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -745,12 +801,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusSuccess)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -766,12 +824,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusKilled)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -792,13 +852,15 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		// Second entry has a rogue UUID — agent trying to inject into another step.
 		entries := []*rpc.LogEntry{
@@ -817,12 +879,14 @@ func TestRPCLog(t *testing.T) {
 		step := defaultStep(model.StatusRunning)
 
 		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+		mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
 		mockStore.On("AgentFind", int64(2)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
 			{StepUUID: "step-uuid-123", Data: []byte("test")},
@@ -836,7 +900,7 @@ func TestRPCLog(t *testing.T) {
 		mockStore.On("StepByUUID", "nonexistent").Return(nil, errors.New("not found"))
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "1"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
 
 		err := rpcInst.Log(ctx, "nonexistent", []*rpc.LogEntry{
 			{StepUUID: "nonexistent", Data: []byte("test")},
@@ -861,7 +925,7 @@ func TestRPCExtend(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		err := rpcInst.Extend(ctx, "30")
 		require.Error(t, err)
@@ -883,10 +947,196 @@ func TestRPCWait(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
-		ctx := metadata.NewIncomingContext(t.Context(), metadata.Pairs("agent_id", "2"))
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(2))
 
 		_, err := rpcInst.Wait(ctx, "30")
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "not allowed to interact")
+	})
+}
+
+func TestRPCUpdateStepTypeMetric(t *testing.T) {
+	t.Run("failure counter uses type=commands for a commands step", func(t *testing.T) {
+		// Each subtest gets its own unregistered metric instances so counters
+		// do not bleed between subtests.
+		origFailure := metric.FailurePipelineStepInfoCount
+		origDuration := metric.StepDurationRecord
+		t.Cleanup(func() {
+			metric.FailurePipelineStepInfoCount = origFailure
+			metric.StepDurationRecord = origDuration
+		})
+		metric.FailurePipelineStepInfoCount = prometheus.NewCounterVec(
+			prometheus.CounterOpts{Namespace: "woodpecker_test", Name: "step_failures_commands", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+		metric.StepDurationRecord = prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{Namespace: "woodpecker_test", Name: "step_duration_commands", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		workflow := defaultWorkflow(model.StatusRunning)
+		step := &model.Step{
+			ID:         50,
+			UUID:       "step-uuid-commands",
+			PipelineID: 20,
+			Name:       "build",
+			State:      model.StatusRunning,
+			Started:    100,
+			Type:       model.StepTypeCommands,
+		}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+		mockStore.On("StepByUUID", "step-uuid-commands").Return(step, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Update(ctx, "30", rpc.StepState{
+			StepUUID: "step-uuid-commands",
+			Exited:   true,
+			Finished: 200,
+			ExitCode: 1,
+		})
+		require.NoError(t, err)
+
+		cStep, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "commands")
+		require.NoError(t, err)
+		assert.Equal(t, float64(1), testutil.ToFloat64(cStep))
+
+		cSvc, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "service")
+		require.NoError(t, err)
+		assert.Zero(t, testutil.ToFloat64(cSvc))
+	})
+
+	t.Run("failure counter uses type=service for a service step", func(t *testing.T) {
+		origFailure := metric.FailurePipelineStepInfoCount
+		origDuration := metric.StepDurationRecord
+		t.Cleanup(func() {
+			metric.FailurePipelineStepInfoCount = origFailure
+			metric.StepDurationRecord = origDuration
+		})
+		metric.FailurePipelineStepInfoCount = prometheus.NewCounterVec(
+			prometheus.CounterOpts{Namespace: "woodpecker_test", Name: "step_failures_service", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+		metric.StepDurationRecord = prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{Namespace: "woodpecker_test", Name: "step_duration_service", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		workflow := defaultWorkflow(model.StatusRunning)
+		step := &model.Step{
+			ID:         51,
+			UUID:       "step-uuid-service",
+			PipelineID: 20,
+			Name:       "redis",
+			State:      model.StatusRunning,
+			Started:    100,
+			Type:       model.StepTypeService,
+		}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+		mockStore.On("StepByUUID", "step-uuid-service").Return(step, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Update(ctx, "30", rpc.StepState{
+			StepUUID: "step-uuid-service",
+			Exited:   true,
+			Finished: 200,
+			ExitCode: 1,
+		})
+		require.NoError(t, err)
+
+		cSvc, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "service")
+		require.NoError(t, err)
+		assert.Equal(t, float64(1), testutil.ToFloat64(cSvc))
+
+		cStep, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "commands")
+		require.NoError(t, err)
+		assert.Zero(t, testutil.ToFloat64(cStep))
+	})
+
+	t.Run("failure counter is not incremented when step exits successfully", func(t *testing.T) {
+		origFailure := metric.FailurePipelineStepInfoCount
+		origDuration := metric.StepDurationRecord
+		t.Cleanup(func() {
+			metric.FailurePipelineStepInfoCount = origFailure
+			metric.StepDurationRecord = origDuration
+		})
+		metric.FailurePipelineStepInfoCount = prometheus.NewCounterVec(
+			prometheus.CounterOpts{Namespace: "woodpecker_test", Name: "step_failures_success_exit", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+		metric.StepDurationRecord = prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{Namespace: "woodpecker_test", Name: "step_duration_success_exit", Help: "test"},
+			[]string{"workflow", "repo", "step", "type"},
+		)
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockLogStore := log_mocks.NewMockService(t)
+		origLogStore := server.Config.Services.LogStore
+		server.Config.Services.LogStore = mockLogStore
+		t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+		workflow := defaultWorkflow(model.StatusRunning)
+		step := &model.Step{
+			ID:         52,
+			UUID:       "step-uuid-success",
+			PipelineID: 20,
+			Name:       "test",
+			State:      model.StatusRunning,
+			Started:    100,
+			Type:       model.StepTypeCommands,
+		}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+		mockStore.On("StepByUUID", "step-uuid-success").Return(step, nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("StepUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Update(ctx, "30", rpc.StepState{
+			StepUUID: "step-uuid-success",
+			Exited:   true,
+			Finished: 200,
+			ExitCode: 0,
+		})
+		require.NoError(t, err)
+
+		c, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "step")
+		require.NoError(t, err)
+		assert.Zero(t, testutil.ToFloat64(c))
 	})
 }

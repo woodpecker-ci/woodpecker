@@ -17,9 +17,11 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -39,18 +41,35 @@ type Runner struct {
 	client   rpc.Peer
 	filter   rpc.Filter
 	hostname string
+	agentID  int64
 	counter  *State
 	backend  backend_types.Backend
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend backend_types.Backend) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, agentID int64, state *State, backend backend_types.Backend) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
+		agentID:  agentID,
 		counter:  state,
 		backend:  backend,
 	}
+}
+
+// formatAgentLabels renders the agent's labels as a JSON object so they can be
+// exposed to steps through a single environment variable. JSON keeps the format
+// consistent with other structured pipeline data such as CI_PIPELINE_FILES.
+// Map keys are sorted by json.Marshal, so the output is deterministic across runs.
+func formatAgentLabels(labels map[string]string) string {
+	if len(labels) == 0 {
+		return ""
+	}
+	out, err := json.Marshal(labels)
+	if err != nil {
+		return ""
+	}
+	return string(out)
 }
 
 func GetShutdownContext() (context.Context, context.CancelFunc) {
@@ -165,6 +184,8 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		for _, step := range stage.Steps {
 			step.Environment["CI_MACHINE"] = r.hostname
 			step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
+			step.Environment["CI_AGENT_ID"] = strconv.FormatInt(r.agentID, 10)
+			step.Environment["CI_AGENT_LABELS"] = formatAgentLabels(r.filter.Labels)
 		}
 	}
 
@@ -186,11 +207,13 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state.Finished = time.Now().Unix()
 
 	if err != nil {
-		state.Error = err.Error()
 		if errors.Is(err, pipeline_errors.ErrCancel) {
+			// A canceled workflow did not fail. The server stores Error as the
+			// workflow error and shows it as a runtime error, so only report
+			// the cancellation itself.
 			state.Canceled = true
-			// cleanup joined error messages
-			state.Error = pipeline_errors.ErrCancel.Error()
+		} else {
+			state.Error = err.Error()
 		}
 	}
 
@@ -204,7 +227,8 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	if doneCtx.Err() != nil {
 		shutdownCtx, shutdownCtxCancel := GetShutdownContext()
 		defer shutdownCtxCancel()
-		doneCtx = shutdownCtx
+		// keep the gRPC metadata
+		doneCtx = metadata.NewOutgoingContext(shutdownCtx, meta)
 	}
 
 	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {

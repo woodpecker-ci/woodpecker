@@ -21,6 +21,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -37,11 +38,14 @@ const (
 // Bitbucket commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusCreated:
 		return statusPending
 	case model.StatusSuccess:
 		return statusSuccess
+	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined, model.StatusSkipped, model.StatusCanceled:
+		return statusFailure
 	default:
+		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return statusFailure
 	}
 }
@@ -169,7 +173,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		Event:  event,
 		Commit: from.PullRequest.Source.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
-		Refspec: fmt.Sprintf("%s:%s",
+		Refspec: fmt.Sprintf(
+			"%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
@@ -209,6 +214,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	case "tag", "annotated_tag", "bookmark":
 		pipeline.Event = model.EventTag
 		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		pipeline.TagTitle = change.New.Name
 	default:
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)

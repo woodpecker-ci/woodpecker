@@ -27,14 +27,21 @@ import (
 func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
+		apiBase.GET("/version", api.Version)
+		apiBase.GET("/healthz", api.Health)
+
 		user := apiBase.Group("/user")
 		{
 			user.Use(session.MustUser())
 			user.GET("", api.GetSelf)
 			user.GET("/feed", api.GetFeed)
-			user.GET("/repos", api.GetRepos)
 			user.POST("/token", api.PostToken)
 			user.DELETE("/token", api.DeleteToken)
+			repoUserBase := user.Group("/repos")
+			{
+				repoUserBase.GET("", api.GetRepos)
+				repoUserBase.POST("/refresh", api.RefreshRepos)
+			}
 		}
 
 		users := apiBase.Group("/users")
@@ -61,6 +68,7 @@ func apiRoutes(e *gin.RouterGroup) {
 				org := orgBase.Group("")
 				{
 					org.Use(session.MustOrgMember(true))
+					org.PATCH("", api.PatchOrg)
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 
 					org.GET("/secrets", api.GetOrgSecretList)
@@ -109,22 +117,24 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					repo.GET("/pipelines", api.GetPipelines)
 					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
-					repo.DELETE("/pipelines/:pipeline_number", session.MustRepoAdmin(), api.DeletePipeline)
+					repo.GET("/workflows", session.MustPush, api.GetRepoWorkflows)
+					repo.DELETE("/pipelines/:pipeline_number", session.MustRepoAdmin(), session.SetPipeline(), api.DeletePipeline)
 					repo.GET("/pipelines/:pipeline_number", api.GetPipeline)
-					repo.GET("/pipelines/:pipeline_number/config", api.GetPipelineConfig)
-					repo.GET("/pipelines/:pipeline_number/metadata", session.MustPush, api.GetPipelineMetadata)
+					repo.GET("/pipelines/:pipeline_number/config", session.SetPipeline(), api.GetPipelineConfig)
+					repo.GET("/pipelines/:pipeline_number/metadata", session.MustPush, session.SetPipeline(), api.GetPipelineMetadata)
 
 					// requires push permissions
-					repo.POST("/pipelines/:pipeline_number", session.MustPush, api.PostPipeline)
-					repo.POST("/pipelines/:pipeline_number/cancel", session.MustPush, api.CancelPipeline)
-					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, api.PostApproval)
-					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, api.PostDecline)
+					repo.POST("/pipelines/:pipeline_number", session.MustPush, session.SetPipeline(), api.PostPipeline)
+					repo.POST("/pipelines/:pipeline_number/cancel", session.MustPush, session.SetPipeline(), api.CancelPipeline)
+					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, session.SetPipeline(), api.PostApproval)
+					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, session.SetPipeline(), api.PostDecline)
 
-					repo.GET("/logs/:pipeline_number/:step_id", api.GetStepLogs)
-					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, api.DeleteStepLogs)
+					repo.GET("/logs/:pipeline_number/:step_id", session.SetPipeline(), session.SetStep(), api.GetStepLogs)
+					repo.GET("/logs/:pipeline_number/:step_id/download", session.SetPipeline(), session.SetStep(), api.DownloadStepLogs)
+					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, session.SetPipeline(), session.SetStep(), api.DeleteStepLogs)
 
 					// requires push permissions
-					repo.DELETE("/logs/:pipeline_number", session.MustPush, api.DeletePipelineLogs)
+					repo.DELETE("/logs/:pipeline_number", session.MustPush, session.SetPipeline(), api.DeletePipelineLogs)
 
 					// requires push permissions
 					repo.GET("/secrets", session.MustPush, api.GetSecretList)

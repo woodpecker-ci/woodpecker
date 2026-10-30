@@ -34,7 +34,8 @@ func TestPubSub(t *testing.T) {
 }
 
 func testPubSub(t *testing.T, adapter pubsub.PubSub) {
-	assert.NoError(t,
+	assert.NoError(
+		t,
 		adapter.Publish(t.Context(), pubsub.Topics{"a": {}}, pubsub.Message{ID: "1", Data: []byte(`dummy`)}),
 		"expect no issue publish to a pubsub with no subscribers",
 	)

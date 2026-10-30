@@ -55,7 +55,7 @@ func TestMetadataFromContext(t *testing.T) {
 		runCommand(flags, func(c *cli.Command) {
 			_ = c.Set("metadata-file", tempFileName)
 
-			m, err := metadataFromContext(t.Context(), c, nil, nil)
+			m, err := metadataFromContext(t.Context(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "test-repo", m.Repo.Name)
 			assert.Equal(t, int64(5), m.Curr.Number)
@@ -68,17 +68,20 @@ func TestMetadataFromContext(t *testing.T) {
 		flags := []cli.Flag{
 			&cli.StringFlag{Name: "metadata-file"},
 			&cli.StringFlag{Name: "repo-name"},
+			&cli.Int64Flag{Name: "repo-id"},
 			&cli.Int64Flag{Name: "pipeline-number"},
 		}
 
 		runCommand(flags, func(c *cli.Command) {
 			_ = c.Set("metadata-file", tempFileName)
 			_ = c.Set("repo-name", "aUser/override-repo")
+			_ = c.Set("repo-id", "42")
 			_ = c.Set("pipeline-number", "10")
 
-			m, err := metadataFromContext(t.Context(), c, nil, nil)
+			m, err := metadataFromContext(t.Context(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "override-repo", m.Repo.Name)
+			assert.Equal(t, int64(42), m.Repo.ID)
 			assert.Equal(t, int64(10), m.Curr.Number)
 		})
 	})
@@ -98,7 +101,7 @@ func TestMetadataFromContext(t *testing.T) {
 		runCommand(flags, func(c *cli.Command) {
 			_ = c.Set("metadata-file", tempFile.Name())
 
-			_, err = metadataFromContext(t.Context(), c, nil, nil)
+			_, err = metadataFromContext(t.Context(), c, nil)
 			assert.Error(t, err)
 		})
 	})
@@ -110,7 +113,7 @@ func TestMetadataFromContext(t *testing.T) {
 		}
 
 		runCommand(flags, func(c *cli.Command) {
-			m, err := metadataFromContext(t.Context(), c, nil, nil)
+			m, err := metadataFromContext(t.Context(), c, nil)
 			require.NoError(t, err)
 			if assert.NotNil(t, m) {
 				assert.Equal(t, "test", m.Repo.Owner)
@@ -123,7 +126,7 @@ func TestMetadataFromContext(t *testing.T) {
 	t.Run("MatrixAxis", func(t *testing.T) {
 		runCommand([]cli.Flag{}, func(c *cli.Command) {
 			axis := matrix.Axis{"go": "1.16", "os": "linux"}
-			m, err := metadataFromContext(t.Context(), c, axis, nil)
+			m, err := metadataFromContext(t.Context(), c, axis)
 			require.NoError(t, err)
 			assert.EqualValues(t, map[string]string{"go": "1.16", "os": "linux"}, m.Workflow.Matrix)
 		})

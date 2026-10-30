@@ -137,7 +137,15 @@ func HandleAuth(c *gin.Context) {
 
 	// if organization filter is enabled, we need to check if the user is a member of one
 	// of the configured organizations
-	if server.Config.Permissions.Orgs.IsConfigured {
+	forgeModel, err := _store.ForgeGet(forgeID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot get forge by id %d", forgeID)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
+
+	allowedOrgs := server.Config.Permissions.Orgs.With(forgeModel.Orgs)
+	if allowedOrgs.IsConfigured {
 		isMember := false
 		for page := 1; page <= maxPage; page++ {
 			teams, terr := _forge.Teams(c, userFromForge, &model.ListOptions{
@@ -151,8 +159,12 @@ func HandleAuth(c *gin.Context) {
 				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 				return
 			}
-			if server.Config.Permissions.Orgs.IsMember(teams) {
+			if allowedOrgs.IsMember(teams) {
 				isMember = true
+				break
+			}
+			// we don't want to walk through 10k page requests if there are no more teams
+			if len(teams) < perPage {
 				break
 			}
 		}
@@ -270,6 +282,7 @@ func HandleAuth(c *gin.Context) {
 	// update the user meta data and authorization data.
 	user.AccessToken = userFromForge.AccessToken
 	user.RefreshToken = userFromForge.RefreshToken
+	user.Expiry = userFromForge.Expiry
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
 	user.ForgeID = forgeID
@@ -293,19 +306,37 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	err = updateRepoPermissions(c, user, _store, _forge, forgeID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
+	var noStoredRepositories bool
+	if repos, err := _store.RepoList(user, false, false, &model.RepoFilter{}); err != nil {
+		log.Error().Err(err).Msgf("Could not list stored repositories for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
+	} else {
+		noStoredRepositories = len(repos) == 0
+	}
+
+	if !server.Config.Server.AsyncRepositoryUpdate || noStoredRepositories {
+		if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
+			}
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	} else {
+		go func() {
+			if err := updateRepoPermissions(c, user, _store, _forge, forgeID); err != nil {
+				log.Error().Err(err).Msgf("could not update repo permissions for user %s in background", user.Login)
+			}
+		}()
 	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
-
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
 func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge, forgeID int64) error {
+	start := time.Now()
 	repos, err := utils.Paginate(func(page int) ([]*model.Repo, error) {
 		return _forge.Repos(c, user, &model.ListOptions{
 			Page:    page,
@@ -350,6 +381,7 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		return err
 	}
 
+	log.Debug().Msgf("update repo permissions for user %s in %dms", user.Login, time.Since(start).Milliseconds())
 	return nil
 }
 

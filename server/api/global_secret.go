@@ -36,7 +36,7 @@ import (
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetGlobalSecretList(c *gin.Context) {
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.GlobalSecretList(session.Pagination(c))
+	list, err := secretService.GlobalSecretList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting global secret list. %s", err)
 		return
@@ -92,7 +92,7 @@ func PostGlobalSecret(c *gin.Context) {
 		Note:   in.Note,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusBadRequest, "Error inserting global secret. %s", err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting global secret. %s", err)
 		return
 	}
 

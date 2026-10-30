@@ -15,10 +15,19 @@ func NewMockTracer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockTracer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockTracer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -60,7 +69,7 @@ type MockTracer_Trace_Call struct {
 
 // Trace is a helper method to define mock.On call
 //   - state1 *state.State
-func (_e *MockTracer_Expecter) Trace(state1 interface{}) *MockTracer_Trace_Call {
+func (_e *MockTracer_Expecter) Trace(state1 any) *MockTracer_Trace_Call {
 	return &MockTracer_Trace_Call{Call: _e.mock.On("Trace", state1)}
 }
 

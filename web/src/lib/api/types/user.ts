@@ -21,6 +21,12 @@ export interface User {
   admin: boolean;
   // Whether the account has administrative privileges.
 
+  admin_env: boolean;
+  // Whether the administrative privileges are defined at env var level.
+
+  admin_revoked?: boolean;
+  // Whether admin from the env var was revoked until the next server restart.
+
   active: boolean;
   // Whether the account is currently active.
 

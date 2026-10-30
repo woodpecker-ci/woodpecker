@@ -138,7 +138,6 @@ func TestBitbucket(t *testing.T) {
 	assert.Error(t, err)
 
 	listOpts := model.ListOptions{
-		All:     false,
 		Page:    1,
 		PerPage: 10,
 	}
@@ -151,11 +150,14 @@ func TestBitbucket(t *testing.T) {
 	_, err = c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
 	assert.Error(t, err)
 
+	// sub directories are skipped, files are loaded with their content
 	files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir")
 	assert.NoError(t, err)
-	assert.Len(t, files, 3)
-	assert.Equal(t, "README.md", files[0].Name)
-	assert.Equal(t, "dummy payload", string(files[0].Data))
+	if assert.Len(t, files, 2) {
+		assert.Equal(t, "README.md", files[0].Name)
+		assert.Equal(t, "dummy payload", string(files[0].Data))
+		assert.Equal(t, ".gitignore", files[1].Name)
+	}
 
 	_, err = c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found")
 	assert.Error(t, err)
@@ -174,6 +176,9 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 
 	err = c.Deactivate(ctx, fakeUser, fakeRepoEmptyHook, "http://127.0.0.1")
+	assert.NoError(t, err)
+
+	err = c.Deactivate(ctx, fakeUser, fakeRepoHooksNoNext, "http://127.0.0.1")
 	assert.NoError(t, err)
 
 	hooks := []*internal.Hook{
@@ -266,6 +271,12 @@ var (
 		Owner:    "test_name",
 		Name:     "hook_empty",
 		FullName: "test_name/hook_empty",
+	}
+
+	fakeRepoHooksNoNext = &model.Repo{
+		Owner:    "test_name",
+		Name:     "repo_hooks_no_next",
+		FullName: "test_name/repo_hooks_no_next",
 	}
 
 	fakeRepoFromHook = &model.Repo{

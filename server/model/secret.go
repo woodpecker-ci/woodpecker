@@ -52,7 +52,7 @@ type Secret struct {
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'value'"`
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
-	Note   string         `json:"note" xorm:"note"`
+	Note   string         `json:"note"            xorm:"note"`
 } //	@name	Secret
 
 // TableName return database table name for xorm.
@@ -88,6 +88,7 @@ var validDockerImageString = regexp.MustCompile(
 		`([\w\d\-_\.][\w\d\-_\.\/]*/)?` + // optional url prefix
 		`([\w\d\-_\.]+)` + // image name
 		`(:[\w\d\-_]+)?` + // optional image tag
+		`(@sha256:[a-f\d]{64})?` + // optional sha256 digest
 		`$`,
 )
 
@@ -140,9 +141,9 @@ func sortEvents(wel WebhookEventList) WebhookEventList {
 }
 
 type SecretPatch struct {
-	Name   *string        `json:"name"            `
-	Value  *string        `json:"value,omitempty" `
-	Images []string       `json:"images"          `
-	Events []WebhookEvent `json:"events"          `
-	Note   *string        `json:"note" `
+	Name   *string        `json:"name"`
+	Value  *string        `json:"value,omitempty"`
+	Images []string       `json:"images"`
+	Events []WebhookEvent `json:"events"`
+	Note   *string        `json:"note"`
 } //	@name	SecretPatch

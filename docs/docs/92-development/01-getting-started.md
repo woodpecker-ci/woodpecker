@@ -1,28 +1,30 @@
 # Getting started
 
-You can develop on your local computer by following the [steps below](#preparation-for-local-development) or you can start with a fully prepared online setup using [Gitpod](https://github.com/gitpod-io/gitpod) and [Gitea](https://github.com/go-gitea/gitea).
+## Nix development shell
 
-## Gitpod
+If you use [Nix](https://nixos.org/), you can skip the install steps below. The repository contains a `flake.nix` that does it all for you:
 
-If you want to start development or updating docs as easy as possible, you can use our pre-configured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
+```bash
+nix develop
+```
 
-- An IDE in the browser or bridged to your local VS-Code or Jetbrains
-- A pre-configured [Gitea](https://github.com/go-gitea/gitea) instance as forge
-- A pre-configured Woodpecker server
-- A single pre-configured Woodpecker agent node
-- Our docs preview server
+This opens a shell with Go, make, Node.js, `pnpm`, `protoc` and all development tools. The tools are built with the same Go version as Woodpecker. Only [`pre-commit`](#install-pre-commit-optional) is not included.
 
-Start Woodpecker in Gitpod by clicking on the following badge. You can log in with `woodpecker` and `password`.
+## Install Go
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/woodpecker-ci/woodpecker)
+Install Golang as described by [this guide](https://go.dev/doc/install). You need at least the version that is set in the `go.mod` file.
 
-## Preparation for local development
+:::info
+An older Go version can still build Woodpecker, as it downloads the needed toolchain on its own. But tools that are installed with `go install`, like `golangci-lint`, are then built with the old version and refuse to work:
 
-### Install Go
+```none
+Error: can't load config: the Go language version (go1.26) used to build golangci-lint is lower than the targeted Go version (1.27.0)
+```
 
-Install Golang as described by [this guide](https://go.dev/doc/install).
+In this case update Go and install the tools again.
+:::
 
-### Install make
+## Install make
 
 > GNU Make is a tool which controls the generation of executables and other non-source files of a program from the program's source files (<https://www.gnu.org/software/make/>).
 
@@ -32,19 +34,33 @@ Install make on:
 - [Windows](https://stackoverflow.com/a/32127632/8461267)
 - Mac OS: `brew install make`
 
-### Install Node.js & `pnpm`
+## Install development tools (optional)
+
+The make targets use some tools to lint, format and generate code. You can install them with:
+
+```bash
+make install-tools
+```
+
+They are installed with `go install`, so make sure that the `bin` folder of your Go path (`go env GOPATH`) is part of your `PATH`.
+
+If a tool is not installed, `make lint`, `make format` and `make generate` start it with `go run` instead. This works too, but is slower.
+
+To generate the gRPC code, which is part of `make generate`, you also need [`protoc`](https://protobuf.dev/installation/). It is not installed by `make install-tools`.
+
+## Install Node.js & `pnpm`
 
 Install [Node.js](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
 [This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
 
-### Install `pre-commit` (optional)
+## Install `pre-commit` (optional)
 
 Woodpecker uses [`pre-commit`](https://pre-commit.com/) to allow you to easily autofix your code.
 To apply it during local development, take a look at [`pre-commit`s documentation](https://pre-commit.com/#usage).
 
-### Create a `.env` file with your development configuration
+## Create a `.env` file with your development configuration
 
 Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` file in the root of the Woodpecker project and add any needed config to it.
 
@@ -79,7 +95,7 @@ WOODPECKER_HEALTHCHECK=false
 # WOODPECKER_LOG_LEVEL=trace
 ```
 
-### Setup OAuth
+## Setup OAuth
 
 Create an OAuth app for your forge as described in the [forges documentation](../30-administration/10-configuration/12-forges/11-overview.md).
 
@@ -102,34 +118,45 @@ The Woodpecker source code already includes launch configurations for the Woodpe
 
 To test or lint parts of Woodpecker, you can run one of the following commands:
 
-```bash
-# test server code
+```bash title="test server code"
 make test-server
+```
 
-# test agent code
+```bash title="test agent code"
 make test-agent
+```
 
-# test cli code
+```bash title="test cli code"
 make test-cli
+```
 
-# test datastore / database related code like migrations of the server
+```bash title="test datastore/database related code like migrations of the server"
 make test-server-datastore
+```
 
-# lint go code
+```bash title="lint go code"
 make lint
+```
 
-# lint UI code
-make lint-frontend
+```bash title="lint UI code"
+make lint-ui
+```
 
-# test UI code
-make test-frontend
+```bash title="test UI code"
+make test-ui
 ```
 
 If you want to test a specific Go file, you can also use:
 
 ```bash
-go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v3/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s -tags test go.woodpecker-ci.org/woodpecker/v3/<path-to-the-package-or-file-to-test>
 ```
+
+:::warning
+Always pass `-tags test`. Many test files and test helpers, like the [dummy backend](./09-testing.md#dummy-backend),
+are only compiled with the `test` build tag. Without it `go test` skips these tests without any hint!
+Make targets do it for you.
+:::
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:
 
@@ -142,6 +169,21 @@ If you want to run a Woodpecker applications from your terminal, you can use one
 ```bash title="start server"
 go run ./cmd/server
 ```
+
+:::info
+The server embeds the web UI from `web/dist/` at compile time. If the UI is not built yet, compiling and running the server with `go run` will fail with:
+
+```none
+web/web.go:26:12: pattern all:dist/*: no matching files found
+```
+
+Either build the UI once with `make build-ui` or create a placeholder with:
+
+```bash
+mkdir -p web/dist/ && echo "test" > web/dist/index.html
+```
+
+:::
 
 ```bash title="start agent"
 go run ./cmd/agent

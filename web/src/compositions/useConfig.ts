@@ -10,6 +10,8 @@ declare global {
     WOODPECKER_ENABLE_SWAGGER: boolean | undefined;
     WOODPECKER_USER_REGISTERED_AGENTS: boolean | undefined;
     WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT: number | undefined;
+    WOODPECKER_DEFAULT_CONFIG_PATHS: string[] | undefined;
+    WOODPECKER_PERM_SYNC_INTERVAL: number | undefined;
   }
 }
 
@@ -22,4 +24,6 @@ export default () => ({
   enableSwagger: window.WOODPECKER_ENABLE_SWAGGER === true || false,
   userRegisteredAgents: window.WOODPECKER_USER_REGISTERED_AGENTS || false,
   maxPipelineLogLineCount: window.WOODPECKER_MAX_PIPELINE_LOG_LINE_COUNT ?? 5000,
+  defaultConfigPaths: window.WOODPECKER_DEFAULT_CONFIG_PATHS || [],
+  permSyncInterval: window.WOODPECKER_PERM_SYNC_INTERVAL ?? 3600,
 });

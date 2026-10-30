@@ -35,7 +35,8 @@ func generateScriptPosix(commands []string, workDir string) string {
 	}
 
 	for _, command := range commands {
-		fmt.Fprintf(&buf,
+		fmt.Fprintf(
+			&buf,
 			traceScript,
 			shellescape.Quote(command),
 			command,
@@ -68,6 +69,6 @@ var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-echo + %s
+echo '` + CommandMarker + `'%s
 %s
 `

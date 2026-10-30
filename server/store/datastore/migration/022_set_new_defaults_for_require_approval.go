@@ -45,7 +45,8 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalForks}).
 				From("repos").
-				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated, "visibility": "public"})); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated, "visibility": "public"}),
+		); err != nil {
 			return err
 		}
 
@@ -53,7 +54,8 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalNone}).
 				From("repos").
-				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated}.And(builder.Neq{"visibility": "public"}))); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated}.And(builder.Neq{"visibility": "public"})),
+		); err != nil {
 			return err
 		}
 

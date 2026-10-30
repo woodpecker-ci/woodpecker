@@ -33,6 +33,7 @@ func Handler() http.Handler {
 	e.GET("/api/v1/repos/:owner/:name/hooks", listRepoHooks)
 	e.DELETE("/api/v1/repos/:owner/:name/hooks/:id", deleteRepoHook)
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
+	e.GET("/api/v1/repos/:owner/:name/pulls", listRepoPulls)
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
@@ -137,6 +138,15 @@ func getPRFiles(c *gin.Context) {
 	}
 }
 
+func listRepoPulls(c *gin.Context) {
+	// Repositories without commits answer with an empty list and status code 404
+	if c.Param("name") == "repo_without_commits" {
+		c.String(http.StatusNotFound, "[]")
+		return
+	}
+	c.String(http.StatusOK, listRepoPullsPayload)
+}
+
 const listRepoHookPayloads = `
 [
 	{
@@ -171,6 +181,17 @@ const repoPayload = `
 `
 
 const repoFilePayload = `{ platform: linux/amd64 }`
+
+const listRepoPullsPayload = `
+[
+	{
+		"id": 1,
+		"number": 1,
+		"title": "add feature X",
+		"state": "open"
+	}
+]
+`
 
 const userRepoPayload = `
 [

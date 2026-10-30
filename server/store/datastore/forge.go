@@ -23,7 +23,7 @@ func (s storage) ForgeGet(id int64) (*model.Forge, error) {
 	return forge, wrapGet(s.engine.ID(id).Get(forge))
 }
 
-func (s storage) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
+func (s storage) ForgeList(p *model.ListOptionsWithAll) ([]*model.Forge, error) {
 	forges := make([]*model.Forge, 0, 10)
 	return forges, s.paginate(p).Find(&forges)
 }
@@ -34,20 +34,23 @@ func (s storage) ForgeCreate(forge *model.Forge) error {
 }
 
 func (s storage) ForgeUpdate(forge *model.Forge) error {
-	_, err := s.engine.ID(forge.ID).AllCols().Update(forge)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(forge.ID).AllCols().Update(forge))
+	})
 }
 
 func (s storage) ForgeDelete(forge *model.Forge) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
 
-	if _, err := sess.ID(forge.ID).Delete(new(model.Forge)); err != nil {
-		return err
-	}
+		if err := wrapDelete(sess.ID(forge.ID).Delete(new(model.Forge))); err != nil {
+			return err
+		}
 
-	return sess.Commit()
+		return sess.Commit()
+	})
 }

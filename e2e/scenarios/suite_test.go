@@ -50,14 +50,7 @@ func runScenario(t *testing.T, sc Scenario) {
 	agent := setup.StartAgent(t, env.GRPCAddr)
 	setup.WaitForAgentRegistered(t, env.Store, agent)
 
-	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, &model.Pipeline{
-		Event:  sc.Event,
-		Branch: "main",
-		Commit: "deadbeef",
-		Ref:    "refs/heads/main",
-		Author: env.Fixtures.Owner.Login,
-		Sender: env.Fixtures.Owner.Login,
-	})
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(sc.Event))
 	require.NoError(t, err, "create pipeline")
 	require.NotNil(t, created)
 
@@ -86,6 +79,11 @@ func runScenario(t *testing.T, sc Scenario) {
 		}
 		assert.Equalf(t, want.Status, step.State, "step %q status", want.Name)
 		assert.Equalf(t, want.ExitCode, step.ExitCode, "step %q exit code", want.Name)
+		if want.Error == "" {
+			assert.Emptyf(t, step.Error, "step %q error", want.Name)
+		} else {
+			assert.Containsf(t, step.Error, want.Error, "step %q error", want.Name)
+		}
 	}
 
 	if len(sc.ExpectedWorkflows) == 0 {
@@ -108,6 +106,7 @@ func runScenario(t *testing.T, sc Scenario) {
 			continue
 		}
 		assert.Equalf(t, want.Status, wf.State, "workflow %q status", want.Name)
+		assert.Equalf(t, want.Error, wf.Error, "workflow %q error", want.Name)
 	}
 }
 

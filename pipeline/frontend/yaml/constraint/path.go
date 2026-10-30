@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/optional"
@@ -35,6 +35,9 @@ type Path struct {
 
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
+	if value.Kind == yaml.DocumentNode && len(value.Content) == 1 {
+		value = value.Content[0]
+	}
 	out1 := struct {
 		Include       yaml_base_types.StringOrSlice `yaml:"include"`
 		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude"`

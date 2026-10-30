@@ -22,8 +22,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -44,10 +46,15 @@ const defaultForgeID = 1
 //	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetUsers(c *gin.Context) {
-	users, err := store.FromContext(c).GetUserList(session.Pagination(c))
+	users, err := store.FromContext(c).GetUserList(session.Pagination(c).All())
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
+	}
+	admins := server.Config.Permissions.Admins
+	for _, user := range users {
+		user.AdminRevoked = admins.IsRevoked(user)
+		user.AdminEnv = user.AdminRevoked || admins.IsAdmin(user)
 	}
 	c.JSON(http.StatusOK, users)
 }
@@ -126,6 +133,13 @@ func PatchUser(c *gin.Context) {
 		}
 	}
 
+	// a revoked admin from WOODPECKER_ADMIN would get admin back at the next sign in
+	admins := server.Config.Permissions.Admins
+	if !in.Admin && admins.IsAdmin(user) {
+		admins.Revoke(user.Login)
+		log.Warn().Str("user", user.Login).Msg("admin from WOODPECKER_ADMIN is revoked until the server restarts, also remove the user from WOODPECKER_ADMIN")
+	}
+
 	// TODO: disallow to change login, email, avatar if the user is using oauth
 	user.Login = in.Login
 	user.Email = in.Email
@@ -158,6 +172,11 @@ func PostUser(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
+
+	if in.ForgeID < defaultForgeID {
+		in.ForgeID = defaultForgeID
+	}
+
 	user := &model.User{
 		Login:  in.Login,
 		Email:  in.Email,

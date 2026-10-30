@@ -52,7 +52,7 @@ func TestRunSuccess(t *testing.T) {
 				Steps: []*backend_types.Step{{
 					Name: "build", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo hello"},
+					Environment: make(map[string]string), Commands: []string{"echo hello"},
 				}},
 			}},
 		},
@@ -77,12 +77,12 @@ func TestRunMultipleStages(t *testing.T) {
 				{Steps: []*backend_types.Step{{
 					Name: "stage1", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo 1"},
+					Environment: make(map[string]string), Commands: []string{"echo 1"},
 				}}},
 				{Steps: []*backend_types.Step{{
 					Name: "stage2", UUID: "u2",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo 2"},
+					Environment: make(map[string]string), Commands: []string{"echo 2"},
 				}}},
 			},
 		},
@@ -119,9 +119,12 @@ func TestRunStepError(t *testing.T) {
 
 	err := r.Run(t.Context())
 
-	assert.Error(t, err)
+	// a failing step is a successful runtime task, the failure is reported
+	// via the step state and Err() only.
+	assert.NoError(t, err)
+
 	var exitErr *pipeline_errors.ExitError
-	assert.True(t, errors.As(err, &exitErr))
+	assert.True(t, errors.As(r.Err(), &exitErr))
 	assert.Equal(t, 1, exitErr.Code)
 }
 
@@ -136,7 +139,7 @@ func TestRunContextCanceled(t *testing.T) {
 				Steps: []*backend_types.Step{{
 					Name: "s1", UUID: "u1",
 					Type: backend_types.StepTypeCommands, OnSuccess: true,
-					Environment: map[string]string{}, Commands: []string{"echo hello"},
+					Environment: make(map[string]string), Commands: []string{"echo hello"},
 				}},
 			}},
 		},
@@ -192,33 +195,33 @@ func TestRunSetupWorkflowInvalidSetupError(t *testing.T) {
 
 func TestRunDestroyWorkflowAlwaysCalled(t *testing.T) {
 	t.Parallel()
-	var destroyed int32
+	var destroyed atomic.Int32
 	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
-		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+		Run(func(_ mock.Arguments) { destroyed.Add(1) }).Return(nil)
 
 	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&destroyed))
+	assert.Equal(t, int32(1), destroyed.Load())
 }
 
 func TestRunDestroyWorkflowCalledOnSetupError(t *testing.T) {
 	t.Parallel()
-	var destroyed int32
+	var destroyed atomic.Int32
 	engine := mocks.NewMockBackend(t)
 	engine.On("SetupWorkflow", mock.Anything, mock.Anything, mock.Anything).
 		Return(errors.New("setup boom"))
 	engine.On("DestroyWorkflow", mock.Anything, mock.Anything, mock.Anything).
-		Run(func(_ mock.Arguments) { atomic.AddInt32(&destroyed, 1) }).Return(nil)
+		Run(func(_ mock.Arguments) { destroyed.Add(1) }).Return(nil)
 
 	r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
 
 	_ = r.Run(t.Context())
 
-	assert.Equal(t, int32(1), atomic.LoadInt32(&destroyed))
+	assert.Equal(t, int32(1), destroyed.Load())
 }
 
 func TestTraceWorkflowSetupError(t *testing.T) {
@@ -272,9 +275,9 @@ func TestRunStage(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend_types.Step{
-			{Name: "a", UUID: "ua", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo a"}},
-			{Name: "b", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo b"}},
-			{Name: "c", UUID: "uc", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo c"}},
+			{Name: "a", UUID: "ua", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo a"}},
+			{Name: "b", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo b"}},
+			{Name: "c", UUID: "uc", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo c"}},
 		}
 
 		err := <-r.runStage(t.Context(), steps)
@@ -289,7 +292,7 @@ func TestRunStage(t *testing.T) {
 		r := newDummyRuntime(t, tracer)
 
 		steps := []*backend_types.Step{
-			{Name: "good", UUID: "ug", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{}, Commands: []string{"echo ok"}},
+			{Name: "good", UUID: "ug", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: make(map[string]string), Commands: []string{"echo ok"}},
 			{Name: "bad", UUID: "ub", Type: backend_types.StepTypeCommands, OnSuccess: true, Environment: map[string]string{dummy.EnvKeyStepExitCode: "1"}, Commands: []string{"exit 1"}},
 		}
 
@@ -317,10 +320,11 @@ func TestWithOptions(t *testing.T) {
 	t.Parallel()
 	engine := dummy.New()
 	tracer := newTestTracer(t)
-	ctx := context.Background()
+	ctx := t.Context()
 	desc := map[string]string{"repo": "test"}
 
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		engine,
 		WithTracer(tracer),
 		WithContext(ctx),
@@ -347,7 +351,8 @@ func TestGetShutdownCtx(t *testing.T) {
 // Gap A: logger == nil guard.
 func TestRunNilLogger(t *testing.T) {
 	t.Parallel()
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		dummy.New(),
 		WithTracer(newTestTracer(t)),
 		// WithLogger intentionally omitted
@@ -372,10 +377,11 @@ func TestRunDestroyWorkflowFallsBackToShutdownCtx(t *testing.T) {
 		}).Return(nil)
 
 	// Pass a pre-canceled runnerCtx so ctx.Err() != nil in the defer.
-	runnerCtx, cancel := context.WithCancelCause(context.Background())
+	runnerCtx, cancel := context.WithCancelCause(t.Context())
 	cancel(nil)
 
-	r := New(&backend_types.Config{},
+	r := New(
+		&backend_types.Config{},
 		engine,
 		WithTracer(newTestTracer(t)),
 		WithLogger(newTestLogger(t)),

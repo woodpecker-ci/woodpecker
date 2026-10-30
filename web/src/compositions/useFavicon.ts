@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentScope, onScopeDispose, ref, watch } from 'vue';
 
 import useConfig from '~/compositions/useConfig';
 import { useTheme } from '~/compositions/useTheme';
@@ -47,7 +47,23 @@ function convertStatus(status: PipelineStatus): Status {
   return 'default';
 }
 
+// number of component/effect scopes currently consuming the favicon status;
+// the status is global, so it is reset once the last consumer is disposed
+let activeScopes = 0;
+
 export function useFavicon() {
+  if (getCurrentScope()) {
+    activeScopes += 1;
+    onScopeDispose(() => {
+      activeScopes -= 1;
+      if (activeScopes === 0) {
+        // no consumer left (e.g. user navigated away from the pipeline
+        // view), so the status must not stick around globally
+        faviconStatus.value = 'default';
+      }
+    });
+  }
+
   return {
     updateStatus(status?: PipelineStatus | 'default') {
       if (status === undefined || status === 'default') {

@@ -67,8 +67,9 @@ func TestHeadlessService(t *testing.T) {
 }
 
 func TestInvalidHeadlessService(t *testing.T) {
-	_, err := mkHeadlessService("foo", "invalid_task_uuid!")
-	assert.Error(t, err, "expected error due to invalid task UUID")
+	svc, err := mkHeadlessService("foo", "invalid_task_uuid!")
+	assert.NoError(t, err, "invalid characters are sanitized")
+	assert.Equal(t, "wp-hsvc-invalid-task-uuid", svc.Name)
 }
 
 func TestStartHeadlessService(t *testing.T) {
@@ -93,14 +94,15 @@ func TestStartHeadlessService(t *testing.T) {
 		assert.Equal(t, svc.Name, createdSvc.Name, "expected created service name to match")
 	})
 
-	t.Run("error on invalid task UUID resulting in invalid domain-name", func(t *testing.T) {
+	t.Run("sanitizes invalid task UUID", func(t *testing.T) {
 		engine := &kube{
 			client: fake.NewClientset(),
 			config: &config{Namespace: "test-namespace"},
 		}
 
-		_, err := startHeadlessService(t.Context(), engine, "test-namespace", "invalid_task_uuid!")
-		assert.Error(t, err, "expected error due to invalid task UUID")
+		svc, err := startHeadlessService(t.Context(), engine, "test-namespace", "invalid_task_uuid!")
+		assert.NoError(t, err, "invalid characters are sanitized")
+		assert.Equal(t, "wp-hsvc-invalid-task-uuid", svc.Name)
 	})
 }
 
@@ -138,13 +140,13 @@ func TestStopHeadlessService(t *testing.T) {
 		assert.NoError(t, err, "expected no error when deleting a non-existent service")
 	})
 
-	t.Run("error on invalid task UUID resulting in invalid domain-name", func(t *testing.T) {
+	t.Run("sanitizes invalid task UUID", func(t *testing.T) {
 		engine := &kube{
 			client: fake.NewClientset(),
 			config: &config{Namespace: "test-namespace"},
 		}
 
 		err := engine.stopHeadlessService(t.Context(), engine, "test-namespace", "invalid_task_uuid!")
-		assert.Error(t, err, "expected error due to invalid task UUID")
+		assert.NoError(t, err, "invalid characters are sanitized and missing service is tolerated")
 	})
 }

@@ -24,7 +24,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -39,7 +38,21 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return &ErrNotFound{Msg: err.Error()}
 	}
 
-	// First cancel/evict workflows in the queue in one go
+	// Mark pending steps canceled before evicting their workflows: eviction
+	// signals the agents, and an agent reporting its workflow done kills every
+	// step still pending. Writing them afterwards from this stale tree races
+	// with that and can leave them killed.
+	for _, workflow := range workflows {
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
+				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
+					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+				}
+			}
+		}
+	}
+
+	// Then cancel/evict the running and pending workflows from the queue
 	var workflowsToCancel []string
 	for _, w := range workflows {
 		if w.State == model.StatusRunning || w.State == model.StatusPending {
@@ -47,10 +60,8 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 	}
 
-	if len(workflowsToCancel) != 0 {
-		if err := server.Config.Services.Scheduler.ErrorAtOnce(ctx, workflowsToCancel, queue.ErrCancel); err != nil {
-			log.Error().Err(err).Msgf("queue: evict_at_once: %v", workflowsToCancel)
-		}
+	if err := server.Config.Services.Scheduler.CancelWorkflows(ctx, workflowsToCancel); err != nil {
+		log.Error().Err(err).Msgf("cancel workflows: %v", workflowsToCancel)
 	}
 
 	hasPendingOnly := true
@@ -64,13 +75,6 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 			}
 		} else {
 			hasPendingOnly = false
-		}
-		for _, step := range workflow.Children {
-			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
-					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-				}
-			}
 		}
 	}
 
@@ -90,7 +94,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return err
 	}
 
-	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
+	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, killedPipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
 	}
 

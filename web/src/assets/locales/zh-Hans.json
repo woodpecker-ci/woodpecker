@@ -2,8 +2,8 @@
     "admin": {
         "settings": {
             "agents": {
-                "add": "添加 Agent",
-                "agents": "Agents",
+                "add": "添加代理",
+                "agents": "代理",
                 "backend": {
                     "backend": "后端",
                     "badge": "后端"
@@ -13,11 +13,11 @@
                     "capacity": "容量",
                     "desc": "该 Agent 并行执行流水线的最大数量。"
                 },
-                "created": "已创建 Agent",
+                "created": "已创建代理",
                 "delete_agent": "删除 Agent",
                 "delete_confirm": "你真的要删除该 Agent 吗？删除后它将无法再次连接到此服务器。",
-                "deleted": "已删除 Agent",
-                "desc": "注册到此服务器的 Agents。",
+                "deleted": "已删除代理",
+                "desc": "注册到此服务器的代理。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
                 "last_contact": {
@@ -26,21 +26,21 @@
                 },
                 "name": {
                     "name": "名称",
-                    "placeholder": "Agent 名称"
+                    "placeholder": "代理名称"
                 },
                 "never": "从未",
                 "no_schedule": {
-                    "name": "禁用 Agent",
-                    "placeholder": "阻止 Agent 接受新任务"
+                    "name": "禁用代理",
+                    "placeholder": "阻止代理接受新任务"
                 },
-                "none": "还未添加任何 Agents.",
+                "none": "还未添加任何代理。",
                 "platform": {
                     "badge": "平台",
                     "platform": "平台"
                 },
-                "save": "保存 Agent",
-                "saved": "已保存 Agent",
-                "show": "显示 Agents",
+                "save": "保存代理",
+                "saved": "已保存代理",
+                "show": "查看代理",
                 "token": "Token",
                 "version": "版本",
                 "custom_labels": {
@@ -49,6 +49,13 @@
                 },
                 "org": {
                     "badge": "组织"
+                },
+                "filters": {
+                    "delete": "删除筛选器",
+                    "name": "筛选器",
+                    "desc": "由服务端强制指定的代理标签用于筛选工作流",
+                    "key": "标签名称",
+                    "value": "筛选值"
                 }
             },
             "not_allowed": "你没有访问服务器设置的权限",
@@ -123,9 +130,14 @@
                 "add": "添加用户",
                 "admin": {
                     "admin": "管理员",
-                    "placeholder": "此用户是管理员"
+                    "placeholder": "此用户是管理员",
+                    "admin_warning": "该用户已列在 WOODPECKER_ADMIN 环境配置中。在此处撤销的管理员权限仅在下次服务器重启前有效。如需永久撤销，还需将该用户从环境变量中移除。",
+                    "admin_env": "管理员 (环境变量)",
+                    "admin_env_desc": "该用户已列在 WOODPECKER_ADMIN 中，因此拥有管理员权限。",
+                    "admin_revoked": "管理员权限已临时撤销",
+                    "admin_revoked_desc": "该用户已列在 WOODPECKER_ADMIN 环境配置中，但其管理员权限已在此处撤销。除非将其从 WOODPECKER_ADMIN 中移除，否则下次服务器重启后，该用户首次登录时将重新获得管理员权限。"
                 },
-                "avatar_url": "Avatar URL",
+                "avatar_url": "头像链接",
                 "cancel": "取消",
                 "created": "用户已创建",
                 "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
@@ -133,13 +145,14 @@
                 "deleted": "删除用户",
                 "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
-                "email": "Email",
-                "login": "登录",
+                "email": "邮箱",
+                "login": "用户名",
                 "none": "还没有任何用户。",
                 "save": "保存用户",
                 "saved": "已保存用户",
                 "show": "显示用户",
-                "users": "用户"
+                "users": "用户",
+                "forge": "代码托管平台"
             },
             "registries": {
                 "desc": "可以添加全局注册凭据以在所有流水线中使用私有镜像。",
@@ -152,7 +165,7 @@
     "cancel": "取消",
     "default": "默认",
     "docs": "文档",
-    "documentation_for": "\"{topic}\"的文档",
+    "documentation_for": "\"{topic}\" 的文档",
     "errors": {
         "not_found": "服务器找不到请求的对象"
     },
@@ -190,7 +203,12 @@
             },
             "settings": "设置",
             "agents": {
-                "desc": "注册到此组织的 Agents。"
+                "desc": "注册到此组织代理。",
+                "require_org_agents": {
+                    "require": "仅在组织代理上运行流水线",
+                    "desc": "此组织下仓库的工作流仅由注册到此组织的代理执行，不会由全局代理执行。",
+                    "saved": "组织设置已保存"
+                }
             },
             "registries": {
                 "desc": "可以为组织添加注册表凭据，以便在所有流水线中使用私有镜像。"
@@ -243,7 +261,17 @@
                 "delete": "删除变量"
             },
             "show_pipelines": "查看流水线",
-            "no_manual_workflows": "未找到匹配的工作流。请确保至少有一个手动触发的工作流运行。"
+            "no_manual_workflows": "未找到匹配的工作流。请确保至少有一个手动触发的工作流运行。",
+            "message": {
+                "title": "消息",
+                "desc": "该消息将作为附加说明添加到流水线消息中。"
+            },
+            "workflow": {
+                "title": "工作流",
+                "desc": "仅运行所选工作流及其硬依赖。",
+                "all": "所有工作流",
+                "load_error": "无法加载此分支的工作流。请检查该分支是否存在，以及其流水线配置是否有效。"
+            }
         },
         "not_allowed": "你没有权限访问这个仓库",
         "open_in_forge": "在代码托管平台中打开",
@@ -259,7 +287,9 @@
                 "restart": "重启",
                 "restart_success": "流水线已重启",
                 "log_delete": "删除",
-                "skipped": "此步骤已被跳过。"
+                "skipped": "此步骤已被跳过。",
+                "expand_all": "展开全部",
+                "collapse_all": "收起全部"
             },
             "config": "配置",
             "errors": "错误",
@@ -335,7 +365,9 @@
             },
             "load_more": "加载更多",
             "version": "此流水线在该 Woodpecker 版本上执行。",
-            "version_header": "Woodpecker 版本"
+            "version_header": "Woodpecker 版本",
+            "parse_errors": "解析错误",
+            "runtime_errors": "运行时错误"
         },
         "pull_requests": "合并请求",
         "settings": {
@@ -394,10 +426,14 @@
                 "saved": "计划已保存",
                 "schedule": {
                     "placeholder": "计划任务",
-                    "title": "计划任务（基于 UTC）"
+                    "title": "计划任务"
                 },
                 "show": "显示所有计划",
-                "enabled": "启用"
+                "enabled": "启用",
+                "next_exec_local": "下一次执行时间: {local}",
+                "next_exec_both": "下一次执行时间: {local} ({zoned} {timezone})",
+                "timezone": "时区",
+                "your_timezone": "使用你的当前浏览器时区。"
             },
             "general": {
                 "allow_pr": {
@@ -411,13 +447,15 @@
                 "general": "项目",
                 "netrc_only_trusted": {
                     "desc": "可获取用于克隆或推送仓库至代码托管平台的 netrc 凭证的插件。",
-                    "netrc_only_trusted": "自定义信任的插件"
+                    "netrc_only_trusted": "自定义信任的插件",
+                    "placeholder": "插件镜像"
                 },
                 "pipeline_path": {
                     "default": "默认: .woodpecker/*.yml -> .woodpecker.yml",
                     "desc": "流水线配置文件的路径（例如 {0}）。文件夹路径应以 {1} 结尾。",
                     "desc_path_example": "my/path/",
-                    "path": "流水线路径"
+                    "path": "流水线路径",
+                    "by_default": "默认: {paths}"
                 },
                 "project": "项目设置",
                 "protected": {
@@ -517,17 +555,19 @@
             "visibility": "项目可见性",
             "public": {
                 "desc": "任何用户无需登录即可看到你的项目。",
-                "public": "公共的"
+                "public": "公共"
             },
             "private": {
-                "private": "私有的",
+                "private": "私有",
                 "desc": "只有你和其他仓库拥有者才能看到这个项目。"
             },
             "internal": {
-                "internal": "内部的",
-                "desc": "只有Woodpecker的登录用户可以看到这个项目。"
+                "internal": "内部",
+                "desc": "只有 Woodpecker 的登录用户可以看到这个项目。"
             }
-        }
+        },
+        "refresh": "刷新仓库列表",
+        "perm_sync_failed": "无法与代码托管平台同步你在此仓库的权限，你的访问权限已暂时降为只读。"
     },
     "repos": "仓库",
     "repositories": {
@@ -581,6 +621,13 @@
                     "dark": "暗色",
                     "light": "亮色",
                     "theme": "主题"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "流水线日志",
+                    "collapse_groups": {
+                        "collapse": "默认折叠日志分组",
+                        "desc": "打开已完成的步骤时，折叠所有命令组以仅显示概要。"
+                    }
                 }
             },
             "secrets": {
@@ -620,7 +667,12 @@
                 "desc": "可以添加用户注册表凭据，以便在所有个人流水线中使用私有镜像。"
             },
             "agents": {
-                "desc": "在您的账号仓库中已注册的 Agent。"
+                "desc": "在您的账号仓库中已注册的 Agent。",
+                "require_user_agents": {
+                    "require": "仅在你的代理上运行流水线",
+                    "desc": "你的个人仓库的工作流仅由注册到你账户的代理执行，不会由全局代理执行。",
+                    "saved": "用户设置已保存"
+                }
             }
         }
     },
@@ -633,7 +685,7 @@
     "abort": "中止",
     "cli_login_success": "登录到 CLI 成功",
     "cli_login_failed": "登录到 CLI 失败",
-    "cli_login_denied": "登录 CLI 被拒绝",
+    "cli_login_denied": "登录到 CLI 时被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
     "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
     "login_with": "使用 {forge} 登录",
@@ -769,5 +821,9 @@
     "secret_extension_netrc": "包含 netrc 凭证",
     "secret_extension_netrc_desc": "将代码托管平台 netrc 凭证发送给密钥扩展程序。",
     "extension_netrc": "包含 netrc 凭证",
-    "extension_netrc_desc": "向扩展程序发送代码托管平台的 netrc 凭证。"
+    "extension_netrc_desc": "向扩展程序发送代码托管平台的 netrc 凭证。",
+    "delete": "删除",
+    "allowed_orgs": "允许的组织",
+    "allowed_orgs_desc": "指定允许其成员通过此代码托管平台登录的组织，作为全局 WOODPECKER_ORGS 设置的补充。",
+    "allowed_orgs_placeholder": "组织名称"
 }

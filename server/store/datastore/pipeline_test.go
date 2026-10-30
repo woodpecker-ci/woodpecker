@@ -16,11 +16,16 @@
 package datastore
 
 import (
+	"context"
+	"database/sql"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"xorm.io/xorm"
+	"xorm.io/xorm/contexts"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -115,7 +120,7 @@ func TestPipelines(t *testing.T) {
 	}
 	require.NoError(t, store.CreatePipeline(pipeline3))
 
-	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.ID)
+	GetPipeline, err5 := store.GetPipelineLastBefore(&model.Repo{ID: 1}, pipeline3.Branch, pipeline3.Number)
 	require.NoError(t, err5)
 	assert.EqualValues(t, pipeline2, GetPipeline)
 }
@@ -154,9 +159,9 @@ func TestPipelineListFilter(t *testing.T) {
 	err = store.CreatePipeline(pipeline2, []*model.Step{}...)
 	assert.NoError(t, err)
 
-	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
+	pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, nil)
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 2)
+	assert.Len(t, pipelines, 2)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 	assert.Equal(t, pipeline2.RepoID, pipelines[0].RepoID)
 	assert.Equal(t, pipeline2.Status, pipelines[0].Status)
@@ -180,10 +185,10 @@ func TestPipelineListFilter(t *testing.T) {
 		RefContains: "32",
 	})
 	assert.NoError(t, err)
-	assert.Len(t, (pipelines), 1)
+	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline2.ID, pipelines[0].ID)
 
-	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: before})
+	pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}}, &model.PipelineFilter{Before: before})
 	assert.NoError(t, err3)
 	assert.Len(t, pipelines, 1)
 	assert.Equal(t, pipeline1.ID, pipelines[0].ID)
@@ -216,6 +221,32 @@ func TestPipelineIncrement(t *testing.T) {
 	pipelineC := &model.Pipeline{RepoID: 2}
 	assert.NoError(t, store.CreatePipeline(pipelineC))
 	assert.EqualValues(t, 1, pipelineC.Number)
+}
+
+// Duplicates must surface as ErrInsertDuplicateDetected so the retry sees them as retryable (#6067).
+func TestCreatePipelineDuplicateIsRetryable(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	require.NoError(t, store.CreateRepo(&model.Repo{ID: 1, Owner: "1", Name: "1", FullName: "1/1", ForgeRemoteID: "1"}))
+
+	// Duplicate step: UNIQUE(pipeline_id, pid).
+	err := store.CreatePipeline(
+		&model.Pipeline{RepoID: 1},
+		&model.Step{PID: 1, Name: "clone"},
+		&model.Step{PID: 1, Name: "dup"},
+	)
+	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
+
+	// Every attempt rolled back.
+	count, err := store.GetPipelineCount()
+	assert.NoError(t, err)
+	assert.Zero(t, count)
+
+	// Same for the pipeline insert. Forced through the PK: the number is MAX+1, it can't collide on demand.
+	existing := &model.Pipeline{RepoID: 1}
+	require.NoError(t, store.CreatePipeline(existing))
+	assert.ErrorIs(t, store.CreatePipeline(&model.Pipeline{ID: existing.ID, RepoID: 1}), types.ErrInsertDuplicateDetected)
 }
 
 func TestDeletePipeline(t *testing.T) {
@@ -267,7 +298,7 @@ func TestDeletePipeline(t *testing.T) {
 	assert.NoError(t, err)
 
 	// delete non existing pipeline
-	assert.ErrorIs(t, types.ErrRecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+	assert.ErrorIs(t, store.DeletePipeline(&model.Pipeline{ID: 1}), types.ErrRecordNotExist)
 
 	// delete pipeline with shares config
 	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
@@ -280,4 +311,141 @@ func TestDeletePipeline(t *testing.T) {
 	count, err = store.engine.Count(new(model.Config))
 	assert.NoError(t, err)
 	assert.EqualValues(t, 1, count)
+}
+
+// TestGetRepoLatestPipelinesUsesNumber checks a repo's latest pipeline is
+// picked by number rather than by id, in the case where the two sequences
+// disagree: the newest pipeline of each repo is given the lowest id. TiDB can
+// produce that state, as it allocates auto-increment values from per-node
+// caches instead of in insertion order.
+func TestGetRepoLatestPipelinesUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline))
+	defer closer()
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: 1, Number: 1, Status: model.StatusFailure},
+		{ID: 100, RepoID: 1, Number: 2, Status: model.StatusRunning},
+		{ID: 800, RepoID: 2, Number: 1, Status: model.StatusFailure},
+		{ID: 200, RepoID: 2, Number: 2, Status: model.StatusKilled},
+	})))
+
+	pipelines, err := store.GetRepoLatestPipelines([]int64{1, 2})
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 2)
+
+	latest := make(map[int64]*model.Pipeline, len(pipelines))
+	for _, pipeline := range pipelines {
+		latest[pipeline.RepoID] = pipeline
+	}
+
+	assert.EqualValues(t, 2, latest[1].Number)
+	assert.EqualValues(t, model.StatusRunning, latest[1].Status)
+	assert.EqualValues(t, 2, latest[2].Number)
+	assert.EqualValues(t, model.StatusKilled, latest[2].Status)
+}
+
+// TestGetPipelineLastBeforeUsesNumber checks the preceding pipeline is found
+// by number, in the case where the two sequences disagree: the pipelines are
+// created in number order while their ids run the other way. TiDB can produce
+// that state, as it allocates auto-increment values from per-node caches
+// instead of in insertion order.
+func TestGetPipelineLastBeforeUsesNumber(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Repo), new(model.Pipeline))
+	defer closer()
+
+	repo := &model.Repo{ID: 1, Owner: "bradrydzewski", Name: "test", FullName: "bradrydzewski/test"}
+
+	assert.NoError(t, wrapInsert(store.engine.Insert([]*model.Pipeline{
+		{ID: 900, RepoID: repo.ID, Number: 1, Branch: "main", Status: model.StatusSuccess},
+		{ID: 800, RepoID: repo.ID, Number: 2, Branch: "main", Status: model.StatusFailure},
+		{ID: 700, RepoID: repo.ID, Number: 3, Branch: "main", Status: model.StatusRunning},
+	})))
+
+	previous, err := store.GetPipelineLastBefore(repo, "main", 3)
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, previous.Number)
+	assert.EqualValues(t, model.StatusFailure, previous.Status)
+}
+
+// pipelineLockHook releases a competing transaction after the first failed
+// attempt, so retries can succeed without timing-dependent sleeps.
+type pipelineLockHook struct {
+	releaseOn string
+	release   func() error
+	released  bool
+	attempts  int
+	commitErr error
+}
+
+func (h *pipelineLockHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
+	if c.SQL == "BEGIN TRANSACTION" {
+		h.attempts++
+	}
+	return c.Ctx, nil
+}
+
+func (h *pipelineLockHook) AfterProcess(c *contexts.ContextHook) error {
+	if c.SQL != h.releaseOn || h.released {
+		return nil
+	}
+	h.commitErr = c.Err
+	h.released = true
+	return h.release()
+}
+
+func TestCreatePipelineRetriesSQLiteLocks(t *testing.T) {
+	for _, phase := range []string{"read", "commit"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx := t.Context()
+			// Rollback journaling lets a reader block COMMIT after INSERT succeeds.
+			dsn := "file:" + filepath.Join(t.TempDir(), "pipeline.db") + "?_busy_timeout=0&_journal_mode=DELETE"
+			engine, err := xorm.NewEngine("sqlite3", dsn)
+			require.NoError(t, err)
+			defer engine.Close()
+			require.NoError(t, engine.Sync(new(model.Repo), new(model.Pipeline)))
+
+			s := storage{engine: engine}
+			repo := &model.Repo{Name: "test", Owner: "test", FullName: "test/test"}
+			require.NoError(t, s.CreateRepo(repo))
+
+			lockDSN := dsn
+			releaseOn := "COMMIT"
+			if phase == "read" {
+				// An exclusive transaction blocks CreatePipeline's initial reads.
+				lockDSN += "&_txlock=exclusive"
+				releaseOn = "ROLLBACK"
+			}
+			other, err := sql.Open("sqlite3", lockDSN)
+			require.NoError(t, err)
+			defer other.Close()
+			holder, err := other.BeginTx(ctx, nil)
+			require.NoError(t, err)
+			defer holder.Rollback() //nolint:errcheck
+			if phase == "commit" {
+				// Keep a shared read lock while CreatePipeline writes and commits.
+				var count int
+				require.NoError(t, holder.QueryRowContext(ctx, "SELECT COUNT(*) FROM repos").Scan(&count))
+			}
+
+			hook := &pipelineLockHook{releaseOn: releaseOn, release: holder.Rollback}
+			engine.AddHook(hook)
+			pipeline := &model.Pipeline{RepoID: repo.ID, Status: model.StatusPending}
+			err = s.CreatePipeline(pipeline)
+
+			require.True(t, hook.released, "the first failed attempt must release the competing lock")
+			if phase == "commit" {
+				require.ErrorContains(t, hook.commitErr, "database is locked", "the lock must occur at COMMIT")
+			}
+			require.NoError(t, err, "pipeline creation must retry after a transient %s lock", phase)
+			require.Greater(t, hook.attempts, 1, "retry must start a fresh transaction")
+
+			count, err := s.GetPipelineCount()
+			require.NoError(t, err)
+			require.EqualValues(t, 1, count, "retry must create exactly one pipeline")
+			stored, err := s.GetPipeline(pipeline.ID)
+			require.NoError(t, err)
+			require.Equal(t, repo.ID, stored.RepoID)
+			require.EqualValues(t, 1, stored.Number)
+		})
+	}
 }

@@ -30,19 +30,18 @@ import (
 const logStreamDelayAllowed = 5 * time.Minute
 
 func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, p *model.Pipeline, repo *model.Repo) error {
-	var err error
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	workflow, err := s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+		return err
+	}
+
 	if repo == nil && p == nil {
-		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		workflow, err := s.store.WorkflowLoad(workflowID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
-			return err
-		}
-
 		p, err = s.store.GetPipeline(workflow.PipelineID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
@@ -58,12 +57,33 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 		}
 	}
 
-	if agent.CanAccessRepo(repo) {
-		return nil
+	if !agent.CanAccessRepo(repo) {
+		log.Error().Err(ErrAgentIllegalRepo).Int64("agentID", agent.ID).Int64("repoId", repo.ID).Send()
+		return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
 	}
 
-	log.Error().Err(ErrAgentIllegalRepo).Int64("agentID", agent.ID).Int64("repoId", repo.ID).Send()
-	return fmt.Errorf("%w: agentId=%d repoID=%d", ErrAgentIllegalRepo, agent.ID, repo.ID)
+	if workflow.AgentID != agent.ID {
+		log.Error().Err(ErrAgentIllegalWorkflowAgentID).Int64("agentID", agent.ID).Int64("workflowAgentId", workflow.AgentID).Send()
+		return fmt.Errorf("%w: agentId=%d workflowAgentId=%d", ErrAgentIllegalWorkflowAgentID, agent.ID, workflow.AgentID)
+	}
+
+	return nil
+}
+
+func (s *RPC) lockAgentToWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	workflow, err := s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+		return err
+	}
+
+	workflow.AgentID = agent.ID
+	return s.store.WorkflowUpdate(workflow)
 }
 
 // isActiveState returns true for states where work is in progress or not yet started.
@@ -118,6 +138,31 @@ func checkWorkflowAllowsStepUpdate(workflowState model.StatusValue, step *model.
 	return retErr
 }
 
+// checkAgentReportedInitState validates the workflow state an agent reports
+// on Init. An agent always stamps Started before calling Init and cannot know
+// a cancel result yet, so a zero Started or a set Canceled flag cannot come
+// from a compatible agent.
+func checkAgentReportedInitState(agentID int64, state rpc.WorkflowState) error {
+	if state.Started == 0 || state.Canceled {
+		retErr := ErrAgentImpossibleWorkflowState
+		log.Error().Err(retErr).Int64("agentID", agentID).Msgf("init: impossible workflow state reported: %#v", state)
+		return retErr
+	}
+	return nil
+}
+
+// checkAgentReportedDoneState validates the workflow state an agent reports
+// on Done. A canceled workflow was necessarily started, so Canceled combined
+// with a zero Started timestamp cannot come from a compatible agent.
+func checkAgentReportedDoneState(agentID int64, state rpc.WorkflowState) error {
+	if state.Canceled && state.Started == 0 {
+		retErr := ErrAgentImpossibleWorkflowState
+		log.Error().Err(retErr).Int64("agentID", agentID).Msgf("done: impossible workflow state reported: %#v", state)
+		return retErr
+	}
+	return nil
+}
+
 // checkWorkflowState checks if a workflow's own state allows it to be
 // initialized or marked as done. A workflow that is already in a terminal
 // state (success, failure, killed, …) must not be re-run, and a blocked
@@ -148,7 +193,7 @@ func allowAppendingLogs(currPipeline *model.Pipeline, currStep *model.Step) erro
 		return nil
 	}
 	// else give some delay where log caches can drain and be send ... because of network outage / server restart / ...
-	if time.Unix(currPipeline.Finished, 0).Add(logStreamDelayAllowed).After(time.Now()) {
+	if time.Unix(max(currPipeline.Finished, currStep.Finished), 0).Add(logStreamDelayAllowed).After(time.Now()) {
 		return nil
 	}
 

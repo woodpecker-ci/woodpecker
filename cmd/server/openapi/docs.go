@@ -82,7 +82,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -990,40 +990,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{id}": {
-            "delete": {
-                "description": "Deletes the given org. Requires admin rights.",
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Orgs"
-                ],
-                "summary": "Delete an organization",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
         "/orgs/{org_id}": {
             "get": {
                 "produces": [
@@ -1058,6 +1024,81 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/Org"
                             }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes the given org. Requires admin rights.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Delete an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Update an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the org's updated data",
+                        "name": "org",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/OrgPatch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
                         }
                     }
                 }
@@ -1141,7 +1182,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "description": "the agent's data (only 'name', 'no_schedule' and 'filters' are read)",
                         "name": "agent",
                         "in": "body",
                         "required": true,
@@ -2833,6 +2874,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/logs/{pipeline_number}/{step_id}/download": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Download logs for a pipeline step",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "step_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
@@ -3933,6 +4024,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/workflows": {
+            "get": {
+                "description": "Fetches the pipeline config of the branch head and lists the workflows that run on the manual event.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "List workflows a manual pipeline would run",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the branch to load the config from, defaults to the default branch",
+                        "name": "branch",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkflowInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/secrets": {
             "get": {
                 "produces": [
@@ -4639,6 +4776,13 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "filters": {
+                    "description": "Server side enforced agent filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4739,6 +4883,9 @@ const docTemplate = `{
                     "description": "@weekly,\t3min, ...",
                     "type": "string"
                 },
+                "timezone": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
@@ -4760,6 +4907,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "schedule": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "variables": {
@@ -4792,15 +4942,19 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "event": {
-                    "type": "string"
+                    "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished": {
                     "type": "integer"
+                },
+                "full_name": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "message": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "number": {
@@ -4812,6 +4966,14 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
+                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -4819,6 +4981,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "tag_title": {
                     "type": "string"
                 },
                 "title": {
@@ -4842,6 +5007,13 @@ const docTemplate = `{
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
+                },
+                "orgs": {
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "skip_verify": {
                     "type": "boolean"
@@ -4873,6 +5045,13 @@ const docTemplate = `{
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
+                },
+                "orgs": {
+                    "description": "members of those orgs may log in using this forge, in addition to the globally allowed ones",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "skip_verify": {
                     "type": "boolean"
@@ -4942,6 +5121,18 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "require_org_agents": {
+                    "description": "RequireOrgAgents restricts workflows of the organization's repos to agents of this organization",
+                    "type": "boolean"
+                }
+            }
+        },
+        "OrgPatch": {
+            "type": "object",
+            "properties": {
+                "require_org_agents": {
+                    "type": "boolean"
                 }
             }
         },
@@ -4983,9 +5174,11 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "TODO: only // The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
+                    "description": "TODO: only \u0026 rename to AuthorAvatar // Avatar URL of the author of the commit",
                     "type": "string"
                 },
                 "author_email": {
@@ -5047,6 +5240,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "is_prerelease": {
+                    "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
                 "message": {
@@ -5057,6 +5251,9 @@ const docTemplate = `{
                 },
                 "parent": {
                     "type": "integer"
+                },
+                "pr_draft": {
+                    "type": "boolean"
                 },
                 "pr_labels": {
                     "type": "array",
@@ -5073,10 +5270,25 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
+                "release": {
+                    "description": "Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626\n// New",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Release"
+                        }
+                    ]
+                },
+                "rerun_count": {
+                    "type": "integer"
+                },
                 "reviewed": {
                     "type": "integer"
                 },
                 "reviewed_by": {
+                    "type": "string"
+                },
+                "selected_workflow": {
+                    "description": "only run this workflow and its hard dependencies",
                     "type": "string"
                 },
                 "sender": {
@@ -5089,10 +5301,14 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "tag_title": {
+                    "type": "string"
+                },
                 "timestamp": {
                     "type": "integer"
                 },
                 "title": {
+                    "description": "// Deprecated",
                     "type": "string"
                 },
                 "updated": {
@@ -5121,11 +5337,18 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
+                "message": {
+                    "type": "string"
+                },
                 "variables": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "workflow": {
+                    "description": "only run this workflow and its hard dependencies",
+                    "type": "string"
                 }
             }
         },
@@ -5205,6 +5428,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -5647,6 +5881,12 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "error": {
                     "type": "string"
                 },
@@ -5708,6 +5948,18 @@ const docTemplate = `{
                 "agent_id": {
                     "type": "integer"
                 },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -5754,6 +6006,13 @@ const docTemplate = `{
             "properties": {
                 "admin": {
                     "description": "Admin indicates the user is a system administrator.\n\nNOTE: If the username is part of the WOODPECKER_ADMIN\nenvironment variable, this value will be set to true on login.",
+                    "type": "boolean"
+                },
+                "admin_env": {
+                    "type": "boolean"
+                },
+                "admin_revoked": {
+                    "description": "AdminRevoked is set when the user is listed in WOODPECKER_ADMIN, but admin\nwas revoked and is not granted again before the next server restart.",
                     "type": "boolean"
                 },
                 "avatar_url": {
@@ -5808,6 +6067,20 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "WorkflowInfo": {
+            "type": "object",
+            "properties": {
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "errors.PipelineError": {
             "type": "object",
@@ -5881,7 +6154,7 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "is_prerelease": {
+                "draft": {
                     "type": "boolean"
                 },
                 "labels": {
@@ -5904,6 +6177,9 @@ const docTemplate = `{
                 },
                 "sha": {
                     "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
                 }
             }
         },
@@ -6011,6 +6287,12 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
+                "release": {
+                    "$ref": "#/definitions/metadata.Release"
+                },
+                "rerun_count": {
+                    "type": "integer"
+                },
                 "started": {
                     "type": "integer"
                 },
@@ -6021,6 +6303,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -6045,6 +6338,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "org_id": {
+                    "type": "integer"
                 },
                 "owner": {
                     "type": "string"
@@ -6179,6 +6475,18 @@ const docTemplate = `{
                 "agent_name": {
                     "type": "string"
                 },
+                "concurrency_group": {
+                    "description": "ConcurrencyGroup identifies tasks that are limited against each other.\nIt is empty when no concurrency limit applies.",
+                    "type": "string"
+                },
+                "concurrency_limit": {
+                    "description": "ConcurrencyLimit is the maximum number of tasks sharing the same\nConcurrencyGroup that may run at once. A value \u003c= 0 means unlimited.",
+                    "type": "integer"
+                },
+                "created": {
+                    "description": "Created is the unix timestamp the task's pipeline was created at. It\ndefines the queue ordering across pipelines.",
+                    "type": "integer"
+                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
@@ -6261,6 +6569,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Step"
+                    }
+                },
+                "depends_on": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 },
                 "environ": {

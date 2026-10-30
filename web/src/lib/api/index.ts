@@ -18,9 +18,10 @@ import type {
   RepoSettings,
   Secret,
   User,
+  WorkflowInfo,
 } from './types';
 
-const DEFAULT_FORGE_ID = 1;
+export const DEFAULT_FORGE_ID = 1;
 
 interface RepoListOptions {
   all?: boolean;
@@ -30,6 +31,8 @@ interface RepoListOptions {
 interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
+  // only run this workflow and its hard dependencies
+  workflow?: string;
 }
 
 interface DeploymentOptions {
@@ -48,6 +51,10 @@ export default class WoodpeckerClient extends ApiClient {
   async getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/user/repos?${query}`) as Promise<Repo[]>;
+  }
+
+  async refreshRepoList(): Promise<unknown> {
+    return this._post(`/api/user/repos/refresh`);
   }
 
   async lookupRepo(owner: string, name: string): Promise<Repo | undefined> {
@@ -87,6 +94,11 @@ export default class WoodpeckerClient extends ApiClient {
 
   async repairRepo(repoId: number): Promise<unknown> {
     return this._post(`/api/repos/${repoId}/repair`);
+  }
+
+  async getRepoWorkflows(repoId: number, branch: string): Promise<WorkflowInfo[]> {
+    const query = encodeQueryString({ branch });
+    return this._get(`/api/repos/${repoId}/workflows?${query}`) as Promise<WorkflowInfo[]>;
   }
 
   async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline | string> {
@@ -252,6 +264,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   async getOrg(orgId: number): Promise<Org> {
     return this._get(`/api/orgs/${orgId}`) as Promise<Org>;
+  }
+
+  async updateOrg(orgId: number, org: Partial<Org>): Promise<Org> {
+    return this._patch(`/api/orgs/${orgId}`, org) as Promise<Org>;
   }
 
   async lookupOrg(name: string): Promise<Org> {

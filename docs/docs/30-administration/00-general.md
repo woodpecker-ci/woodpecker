@@ -41,3 +41,5 @@ Images are pushed to DockerHub and Quay.
 - woodpecker-agent ([DockerHub](https://hub.docker.com/r/woodpeckerci/woodpecker-agent) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-agent))
 - woodpecker-cli ([DockerHub](https://hub.docker.com/r/woodpeckerci/woodpecker-cli) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-cli))
 - woodpecker-autoscaler ([DockerHub](https://hub.docker.com/r/woodpeckerci/autoscaler))
+
+For the full list of operating systems and architectures each component is built for, along with which execution backends are supported on each platform, see [Supported platforms](./05-installation/05-supported-platforms.md).

@@ -17,7 +17,7 @@
       <div
         class="bg-wp-code-100 fixed top-0 left-0 flex w-full flex-row items-center px-4 py-2 md:relative md:top-auto md:left-auto"
       >
-        <span class="text-wp-code-text-alt-100 text-base font-bold">
+        <span class="text-wp-code-text-100 text-base font-bold">
           <span class="md:display-unset hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>
         </span>
@@ -31,11 +31,10 @@
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
-            :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
             class="hover:bg-white/10!"
             icon="download"
-            @click="download"
+            :href="logDownloadUrl"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
@@ -53,50 +52,104 @@
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
           />
-          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
+          <template v-if="hasGroupedLogs">
+            <div class="border-wp-background-400 dark:border-wp-background-100 mx-1 h-5 border-l" />
+            <IconButton
+              :title="$t('repo.pipeline.actions.expand_all')"
+              class="hover:bg-white/10!"
+              icon="expand-all"
+              @click="expandAll"
+            />
+            <IconButton
+              :title="$t('repo.pipeline.actions.collapse_all')"
+              class="hover:bg-white/10!"
+              icon="collapse-all"
+              @click="collapseAll"
+            />
+          </template>
+          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:stepId', null)" />
         </div>
       </div>
 
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm"
+        class="grid w-full max-w-full grow scroll-pt-8 auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm"
       >
-        <div v-for="line in log" :key="line.index" class="contents font-mono">
-          <a
-            :id="`L${line.number}`"
-            :href="`#L${line.number}`"
-            class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-              underline: isSelected(line),
-            }"
+        <div v-for="group in groupedLogs" :key="group.id" class="contents">
+          <div
+            v-if="group.isActualCommand && group.command"
+            class="sticky -top-4 z-10 col-span-3 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs"
+            :class="[isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
+            @click="toggleGroup(group.id)"
           >
-            {{ line.number }}
-          </a>
-          <!-- eslint-disable vue/no-v-html -->
-          <span
-            class="wrap-break-words align-top whitespace-pre-wrap"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-            }"
-            v-html="line.text"
-          />
-          <!-- eslint-enable vue/no-v-html -->
-          <span
-            class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
-            :class="{
-              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
-              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
-              'bg-blue-600/30': isSelected(line),
-            }"
-          >
-            {{ formatTime(line.time) }}
-          </span>
+            <a
+              :id="`L${group.command.number}`"
+              :href="`#L${group.command.number}`"
+              class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+              :class="{ underline: isSelected(group.command) }"
+              @click.stop
+            >
+              {{ group.command.number }}
+            </a>
+            <div class="flex min-w-0 items-center">
+              <Icon
+                name="chevron-right"
+                class="mr-1 size-4 shrink-0 transition-transform"
+                :class="{
+                  'rotate-90': !collapsedCommands.has(group.id),
+                  invisible: group.lines.length === 0,
+                }"
+              />
+              <span class="flex-1 truncate" :title="group.command.rawText?.trim().slice(commandMarker.length).trim()">
+                <span class="text-[0px] whitespace-pre" aria-hidden="true" v-text="commandMarker" />
+                <!-- eslint-disable vue/no-v-html -->
+                <span v-html="group.command.text?.substring(3)" />
+              </span>
+            </div>
+            <span class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none">
+              {{ formatTime(group.command.time) }}
+            </span>
+          </div>
+
+          <template v-if="!collapsedCommands.has(group.id)">
+            <div v-for="line in group.lines" :key="line.index" class="contents font-mono">
+              <a
+                :id="`L${line.number}`"
+                :href="`#L${line.number}`"
+                class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
+                  underline: isSelected(line),
+                }"
+              >
+                {{ line.number }}
+              </a>
+              <!-- eslint-disable vue/no-v-html -->
+              <span
+                class="wrap-break-words align-top whitespace-pre-wrap"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
+                }"
+                v-html="line.text"
+              />
+              <!-- eslint-enable vue/no-v-html -->
+              <span
+                class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
+                :class="{
+                  'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
+                  'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
+                  'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
+                }"
+              >
+                {{ formatTime(line.time) }}
+              </span>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -110,11 +163,11 @@
 
       <div
         v-if="step?.finished !== undefined"
-        class="text-md bg-wp-code-100 text-wp-code-text-alt-100 flex w-full items-center p-4 font-bold"
+        class="text-md bg-wp-code-100 text-wp-code-text-100 flex w-full items-center gap-2 p-4 font-bold"
       >
-        <PipelineStatusIcon :status="step.state" class="h-4! w-4!" />
-        <span v-if="step?.error" class="px-2">{{ step.error }}</span>
-        <span v-else class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
+        <PipelineStatusIcon :status="step.state" class="shrink-0 [&_svg]:h-6 [&_svg]:w-6" />
+        <span v-if="step?.error">{{ step.error }}</span>
+        <span v-else>{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>
     </div>
   </div>
@@ -130,12 +183,14 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } fro
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import useUserConfig from '~/compositions/useUserConfig';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 import { debounce } from '~/lib/utils';
 
@@ -143,8 +198,16 @@ interface LogLine {
   index: number;
   number: number;
   text?: string;
+  rawText?: string;
   time?: number;
   type: 'error' | 'warning' | null;
+}
+
+interface LogBlock {
+  command: LogLine | null;
+  lines: LogLine[];
+  id: number;
+  isActualCommand: boolean;
 }
 
 const props = defineProps<{
@@ -153,17 +216,20 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'update:step-id', stepId: number | null): true;
+  (event: 'update:stepId', stepId: number | null): true;
 }>();
 
 const notifications = useNotifications();
 const i18n = useI18n();
+const { userConfig } = useUserConfig();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
+
+const config = useConfig();
 
 const loadedStepSlug = ref<string>();
 const stepSlug = computed(() => `${repo?.value.owner} - ${repo?.value.name} - ${pipeline.value.id} - ${stepId.value}`);
@@ -172,6 +238,9 @@ const stream = ref<EventSource>();
 const log = ref<LogLine[]>();
 const consoleElement = ref<Element>();
 const fullscreen = ref(false);
+const logDownloadUrl = computed(
+  () => `${config.rootPath}/api/repos/${repo.value.id}/logs/${pipeline.value.number}/${step.value?.id}/download`,
+);
 
 const loadedLogs = computed(() => !!log.value);
 const hasLogs = computed(
@@ -181,17 +250,59 @@ const hasLogs = computed(
 );
 const autoScroll = useStorage('woodpecker:log-auto-scroll', true);
 const showActions = ref(false);
-const downloadInProgress = ref(false);
 const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const config = useConfig();
-
 const maxLineCount = config.maxPipelineLogLineCount; // TODO(2653): implement lazy-loading support
 const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
-const urlRegex = /https?:\/\/\S+/g;
+const collapsedCommands = ref(new Set<number>());
+
+const commandMarker = '▶  ';
+
+const groupedLogs = computed(() => {
+  if (!log.value) return [];
+
+  const blocks: LogBlock[] = [];
+  let currentBlock: LogBlock | null = null;
+
+  log.value.forEach((line) => {
+    const trimmedText = (line.rawText || '').trim();
+    const isCommand = trimmedText.startsWith(commandMarker) && trimmedText.slice(3).trim().length > 0;
+
+    if (isCommand) {
+      currentBlock = {
+        command: line,
+        lines: [],
+        id: line.number,
+        isActualCommand: true,
+      };
+      blocks.push(currentBlock);
+    } else {
+      if (!currentBlock) {
+        currentBlock = {
+          command: { number: 0, text: 'Initialization', type: null, index: -1 } as LogLine,
+          lines: [],
+          id: 0,
+          isActualCommand: false,
+        };
+        blocks.push(currentBlock);
+      }
+      currentBlock.lines.push(line);
+    }
+  });
+
+  return blocks;
+});
+
+const hasGroupedLogs = computed(() => {
+  return groupedLogs.value.find((g) => g.isActualCommand);
+});
+
+// Stop a URL at a '<' so that if we are also converting ansi escapes at the end of a URL
+// we don't include their closing </span> in the URL match.
+const urlRegex = /https?:\/\/[^\s<]+/g;
 
 function isScrolledToBottom(): boolean {
   if (!consoleElement.value) {
@@ -209,6 +320,28 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
+function toggleGroup(id: number) {
+  if (collapsedCommands.value.has(id)) {
+    collapsedCommands.value.delete(id);
+  } else {
+    collapsedCommands.value.add(id);
+  }
+}
+
+function expandAll() {
+  collapsedCommands.value.clear();
+}
+
+function collapseAll() {
+  const newSet = new Set<number>();
+  groupedLogs.value.forEach((group) => {
+    if (group.isActualCommand) {
+      newSet.add(group.id);
+    }
+  });
+  collapsedCommands.value = newSet;
+}
+
 function processText(text: string): string {
   let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
   txt = txt.replace(
@@ -219,10 +352,12 @@ function processText(text: string): string {
 }
 
 function writeLog(line: Partial<LogLine>) {
+  const rawText = decode(line.text ?? '');
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
     text: processText(line.text ?? ''),
+    rawText,
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
@@ -277,39 +412,6 @@ const flushLogs = debounce((scroll: boolean) => {
   }
 }, 500);
 
-async function download() {
-  if (!repo?.value || !pipeline.value || !step.value) {
-    throw new Error('The repository, pipeline or step was undefined');
-  }
-  let logs;
-  try {
-    downloadInProgress.value = true;
-    logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-  } catch (e) {
-    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
-    return;
-  } finally {
-    downloadInProgress.value = false;
-  }
-  const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
-      type: 'text/plain',
-    }),
-  );
-  const fileLink = document.createElement('a');
-
-  fileLink.href = fileURL;
-  fileLink.setAttribute(
-    'download',
-    `${repo.value.owner}-${repo.value.name}-${pipeline.value.number}-${step.value.name}.log`,
-  );
-  document.body.appendChild(fileLink);
-
-  fileLink.click();
-  document.body.removeChild(fileLink);
-  window.URL.revokeObjectURL(fileURL);
-}
-
 async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
@@ -359,10 +461,11 @@ async function deleteLogs() {
   }
 }
 
+// A stepless workflow has no `children`, so the deref is guarded.
 function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
     (prev, workflow) => {
-      const result = workflow.children.reduce(
+      const result = (workflow.children ?? []).reduce(
         (prevChild, step) => {
           if (step.pid === pid) {
             return step;
@@ -405,4 +508,39 @@ watch(step, async (newStep, oldStep) => {
     }
   }
 });
+
+const expandLogGroupWithPageHash = (hash: string) => {
+  if (hash.startsWith('#L')) {
+    const lineNum = Number.parseInt(hash.substring(2));
+    const parentGroup = groupedLogs.value.find((g) => lineNum === g.id || g.lines.some((l) => l.number === lineNum));
+    if (parentGroup && collapsedCommands.value.has(parentGroup.id)) {
+      collapsedCommands.value.delete(parentGroup.id);
+    }
+  }
+};
+
+// When a user opens a step that has already finished running, collapse all log
+// groups by default so they see only the command outline. This is opt-out via
+// the "collapse log groups by default" user preference.
+watch(loadedLogs, async (isLoaded, wasLoaded) => {
+  // Only trigger when transitioning from unloaded to loaded state
+  if (isLoaded && !wasLoaded && userConfig.value.collapseLogGroupsByDefault) {
+    const isFinished = step.value && !['running', 'pending', 'started'].includes(step.value.state);
+    if (isFinished) {
+      // Wait for groupedLogs computed property to update
+      await nextTick();
+      collapseAll();
+      expandLogGroupWithPageHash(route.hash);
+    }
+  }
+});
+
+// If route hash contain line that is in a collapsed log group, expand it
+watch(
+  () => route.hash,
+  (newHash) => {
+    expandLogGroupWithPageHash(newHash);
+  },
+  { immediate: true },
+);
 </script>

@@ -56,7 +56,11 @@
             "trigger": "Executar pipeline",
             "select_branch": "Selecionar branch",
             "show_pipelines": "Mostrar pipelines",
-            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual."
+            "no_manual_workflows": "Nenhum fluxo de trabalho correspondente foi encontrado. Certifique-se de que pelo menos um fluxo de trabalho seja executado no evento manual.",
+            "message": {
+                "title": "Mensagem",
+                "desc": "Esta mensagem é adicionada à mensagem de pipeline como uma informação adicional."
+            }
         },
         "not_allowed": "Você não está autorizado a acessar este repositório",
         "open_in_forge": "Abrir repositório na forja",
@@ -115,13 +119,15 @@
                 },
                 "netrc_only_trusted": {
                     "desc": "Plugins que obtêm acesso para credenciais netrc que podem ser usadas para clonar repositórios da forja ou fazer push para a forja.",
-                    "netrc_only_trusted": "Contêineres confiáveis personalizados"
+                    "netrc_only_trusted": "Contêineres confiáveis personalizados",
+                    "placeholder": "Image do plugin"
                 },
                 "pipeline_path": {
                     "path": "Caminho do pipeline",
                     "default": "Por padrão: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "desc": "Caminho para a configuração do pipeline (por exemplo, {0}). As pastas devem terminar com {1}.",
-                    "desc_path_example": "meu/caminho/"
+                    "desc_path_example": "meu/caminho/",
+                    "by_default": "Por padrão: {paths}"
                 },
                 "allow_deploy": {
                     "allow": "Permitir implantações",
@@ -178,11 +184,15 @@
                     "placeholder": "Nome do trabalho cron"
                 },
                 "schedule": {
-                    "title": "Programação (com base no UTC)",
+                    "title": "Programação",
                     "placeholder": "Programação"
                 },
                 "edit": "Editar cron",
-                "enabled": "Habilitado"
+                "enabled": "Habilitado",
+                "next_exec_local": "Próxima execução: {local}",
+                "next_exec_both": "Próxima execução: {local} ({zoned} {timezone})",
+                "timezone": "Fuso horário",
+                "your_timezone": "No fuso horário do seu navegador."
             },
             "actions": {
                 "repair": {
@@ -273,7 +283,9 @@
                 "log_download": "Baixar",
                 "log_auto_scroll": "Habilitar rolagem automática",
                 "log_delete": "Excluir",
-                "skipped": "Essa etapa foi ignorada."
+                "skipped": "Essa etapa foi ignorada.",
+                "expand_all": "Expandir tudo",
+                "collapse_all": "Recolher tudo"
             },
             "tasks": "Tarefas",
             "config": "Configuração",
@@ -323,7 +335,9 @@
             },
             "load_more": "Carregar mais",
             "version": "A versão do Woodpecker na qual este pipeline foi executado.",
-            "version_header": "Versão do Woodpecker"
+            "version_header": "Versão do Woodpecker",
+            "parse_errors": "Erros de análise",
+            "runtime_errors": "Erros em tempo de execução"
         },
         "branches": "Branches",
         "pull_requests": "Pull requests",
@@ -341,7 +355,9 @@
                 "desc": "Apenas usuários autenticados da instância Woodpecker podem ver este projeto.",
                 "internal": "Interno"
             }
-        }
+        },
+        "refresh": "Atualizar lista de repositórios",
+        "perm_sync_failed": "Não foi possível sincronizar suas permissões para este repositório com a plataforma. Seu acesso foi temporariamente reduzido para apenas leitura."
     },
     "repos": "Repos",
     "repositories": {
@@ -400,7 +416,7 @@
                 "edit_user": "Editar usuário",
                 "users": "Usuários",
                 "desc": "Usuários registrados para este servidor.",
-                "login": "Login",
+                "login": "Nome de usuário",
                 "email": "Email",
                 "avatar_url": "URL do avatar",
                 "save": "Salvar usuário",
@@ -411,9 +427,11 @@
                 "saved": "Usuário salvo",
                 "admin": {
                     "admin": "Admin",
-                    "placeholder": "O usuário é um administrador"
+                    "placeholder": "O usuário é um administrador",
+                    "admin_warning": "Este usuário possui permissões de administrador devido à configuração do seu ambiente. Se você revogar as permissões aqui, o usuário as recuperará ao fazer login na próxima vez."
                 },
-                "delete_user": "Excluir usuário"
+                "delete_user": "Excluir usuário",
+                "forge": "Forja"
             },
             "orgs": {
                 "delete_org": "Excluir organização",
@@ -496,6 +514,13 @@
                 "custom_labels": {
                     "custom_labels": "Etiquetas personalizadas",
                     "desc": "As etiquetas personalizadas definidas pelo administrador do agente na inicialização do agente."
+                },
+                "filters": {
+                    "name": "Filtros",
+                    "desc": "Etiquetas de agentes aplicadas no lado do servidor para filtrar fluxos de trabalho",
+                    "key": "Nome da etiqueta",
+                    "value": "Valor do filtro",
+                    "delete": "Excluir filtro"
                 }
             },
             "settings": "Configurações administrativas",
@@ -545,7 +570,12 @@
             "settings": "Configurações",
             "not_allowed": "Você não tem permissão para acessar as configurações desta organização",
             "agents": {
-                "desc": "Agentes registrados para esta organização."
+                "desc": "Agentes registrados para esta organização.",
+                "require_org_agents": {
+                    "require": "Executar pipelines apenas em agentes da organização",
+                    "desc": "Os fluxos de trabalho dos repositórios desta organização são processados apenas por agentes registrados para esta organização, e não por agentes que operam em todo o servidor.",
+                    "saved": "Configurações da organização salvas"
+                }
             },
             "registries": {
                 "desc": "As credenciais de registry da organização podem ser adicionados para usar imagens privadas para todos os pipelines de uma organização."
@@ -600,6 +630,13 @@
                     "light": "Claro",
                     "dark": "Escuro",
                     "auto": "Auto"
+                },
+                "pipeline_logs": {
+                    "pipeline_logs": "Logs de pipeline",
+                    "collapse_groups": {
+                        "collapse": "Recolher grupos de logs por padrão",
+                        "desc": "Ao abrir uma etapa concluída, recolhe todos os grupos de comandos para mostrar apenas o resumo."
+                    }
                 }
             },
             "registries": {
@@ -616,7 +653,12 @@
                 "swagger_ui": "Swagger UI"
             },
             "agents": {
-                "desc": "Os agentes registrados para os repositórios da sua conta."
+                "desc": "Os agentes registrados para os repositórios da sua conta.",
+                "require_user_agents": {
+                    "require": "Executar pipelines apenas em seus agentes",
+                    "desc": "Os fluxos de trabalho dos seus repositórios pessoais são processados apenas por agentes registrados na sua conta, e não por agentes que operam em nível de servidor.",
+                    "saved": "Configurações de usuário salvas"
+                }
             }
         },
         "oauth_error": "Erro ao autenticar no provedor OAuth",
@@ -650,7 +692,7 @@
         "show": "Mostrar registries"
     },
     "login_to_cli_description": "Se continuar, você será conectado à CLI.",
-    "cli_login_failed": "Login na CLI falhou",
+    "cli_login_failed": "Acesso à CLI falhou",
     "secrets": {
         "add": "Adicionar segredo",
         "plugins": {
@@ -695,14 +737,14 @@
     "org_access_denied": "Você não tem permissão para acessar esta organização",
     "login_to_cli": "Acessar com CLI",
     "abort": "Abortar",
-    "cli_login_success": "Login na CLI bem-sucedido",
+    "cli_login_success": "Acesso à CLI bem-sucedido",
     "settings": "Configurações",
     "oauth_error": "Erro ao autenticar no provedor de OAuth",
     "return_to_cli": "Agora você pode fechar esta aba e retornar à CLI.",
     "internal_error": "Ocorreu um erro interno",
     "registration_closed": "O registro está fechado",
     "login_with": "Acessar com {forge}",
-    "cli_login_denied": "Login na CLI negado",
+    "cli_login_denied": "Acesso à CLI negado",
     "forges": "Forjas",
     "add_forge": "Adicionar forja",
     "show_forges": "Mostrar forjas",
@@ -771,5 +813,9 @@
     "secret_extension_netrc": "Incluir cerdenciais de netrc",
     "secret_extension_netrc_desc": "Envia as credenciais de netrc da forja para a extensão de segredos.",
     "extension_netrc": "Incluir credenciais netrc",
-    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão."
+    "extension_netrc_desc": "Envia credenciais netrc da forja para a extensão.",
+    "delete": "Excluir",
+    "allowed_orgs": "Organizações permitidas",
+    "allowed_orgs_desc": "Organizações cujos membros podem fazer login usando esta forja, além da configuração global WOODPECKER_ORGS.",
+    "allowed_orgs_placeholder": "Nome da organização"
 }

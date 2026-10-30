@@ -15,17 +15,20 @@
 package pipeline
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/step_builder"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
@@ -40,8 +43,9 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	pipelineItems := []*step_builder.Item{{
-		Workflow: &model.Workflow{
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{
+			ID:  1,
 			PID: 1,
 		},
 		Config: &backend_types.Config{
@@ -63,7 +67,12 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 			},
 		},
 	}}
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowsCreate", mock.Anything).Return(nil)
+
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, false)
+	require.NoError(t, err)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
@@ -73,6 +82,85 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	if pipeline.Workflows[0].Children[0].PPID != 1 {
 		t.Fatal("Should set step PPID")
 	}
+}
+
+func TestSaveWorkflowsReplaceExisting(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:    1,
+		Event: model.EventPush,
+		// a gated pipeline already carries persisted workflows on approval
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	pipelineItems := []*builder.Item{{
+		Workflow: &builder.Workflow{ID: 1, PID: 1},
+		Config: &backend_types.Config{
+			Stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{{Name: "clone"}}},
+			},
+		},
+	}}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("WorkflowsReplace", mock.Anything, mock.Anything).Return(nil)
+
+	pipeline, err := saveWorkflowsFromPipelineBuilder(s, pipeline, pipelineItems, true)
+	require.NoError(t, err)
+	assert.Len(t, pipeline.Workflows, 1)
+	assert.Equal(t, int64(1), pipeline.Workflows[0].PipelineID)
+}
+
+func TestSaveWorkflowsRejectsExistingWithoutReplace(t *testing.T) {
+	t.Parallel()
+
+	pipeline := &model.Pipeline{
+		ID:        1,
+		Event:     model.EventPush,
+		Workflows: []*model.Workflow{{ID: 99, PID: 1}},
+	}
+
+	s := store_mocks.NewMockStore(t)
+
+	_, err := saveWorkflowsFromPipelineBuilder(s, pipeline, nil, false)
+	require.Error(t, err)
+}
+
+// Create, Approve and Restart all use the returned pipeline before they check
+// err, so a failure to persist the workflows must not return a nil pipeline.
+func TestCreatePipelineItemsKeepsPipelineOnSaveError(t *testing.T) {
+	pipeline := &model.Pipeline{ID: 1, Event: model.EventPush}
+	repo := &model.Repo{ID: 1}
+	yamls := []*forge_types.FileMeta{{
+		Name: "woodpecker.yml",
+		Data: []byte("steps:\n  - name: test\n    image: alpine\n"),
+	}}
+
+	forge := forge_mocks.NewMockForge(t)
+	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
+	forge.On("Name").Return("github")
+	forge.On("URL").Return("https://github.com")
+
+	store := store_mocks.NewMockStore(t)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)
+	store.On("WorkflowsCreate", mock.Anything).Return(errors.New("database is locked"))
+
+	mockManager := manager_mocks.NewMockManager(t)
+	server.Config.Services.Manager = mockManager
+	secretService := secret_service_mocks.NewMockService(t)
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
+	registryService := registry_service_mocks.NewMockService(t)
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("RegistryServiceFromRepo", mock.Anything).Return(registryService, nil)
+	mockManager.On("EnvironmentService").Return(nil, nil)
+
+	got, items, parseErr, err := createPipelineItems(t.Context(), forge, store, pipeline, &model.User{ID: 1}, repo, yamls, nil, false)
+	assert.ErrorContains(t, err, "database is locked")
+	assert.False(t, pipeline_errors.HasBlockingErrors(parseErr))
+	assert.Nil(t, items)
+	assert.Same(t, pipeline, got)
 }
 
 func TestParsePipeline(t *testing.T) {
@@ -126,7 +214,7 @@ steps:
 	forge.On("URL").Return("https://github.com")
 
 	store := store_mocks.NewMockStore(t)
-	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.ID).Return(&model.Pipeline{}, nil)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)
 	server.Config.Services.Manager = mockManager
@@ -163,4 +251,44 @@ steps:
 	assert.Equal(t, "value", step.Environment["ADDITIONAL"])
 	assert.Equal(t, "bar", step.Environment["FOO"])
 	assert.Equal(t, "secret world", step.Environment["HELLO"])
+}
+
+// A panic while building the pipeline must not crash the server. The panic is
+// injected through the forge mock, so the test does not depend on a parser bug.
+func TestParsePipelineRecoversPanic(t *testing.T) {
+	pipeline := &model.Pipeline{ID: 1, Event: model.EventPush}
+	repo := &model.Repo{ID: 1}
+
+	forge := forge_mocks.NewMockForge(t)
+	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
+	// Name is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
+	forge.On("Name").Panic("injected test panic")
+
+	store := store_mocks.NewMockStore(t)
+	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)
+
+	mockManager := manager_mocks.NewMockManager(t)
+	server.Config.Services.Manager = mockManager
+	secretService := secret_service_mocks.NewMockService(t)
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil)
+	registryService := registry_service_mocks.NewMockService(t)
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	mockManager.On("RegistryServiceFromRepo", mock.Anything).Return(registryService, nil)
+	mockManager.On("EnvironmentService").Return(nil, nil)
+
+	yamls := []*forge_types.FileMeta{{
+		Name: "woodpecker.yml",
+		Data: []byte("steps:\n  - name: test\n    image: alpine\n"),
+	}}
+
+	var items []*builder.Item
+	var err error
+	require.NotPanics(t, func() {
+		items, err = parsePipeline(t.Context(), forge, store, pipeline, &model.User{ID: 1}, repo, yamls, nil)
+	})
+	assert.Nil(t, items)
+	assert.True(t, pipeline_errors.HasBlockingErrors(err))
+	assert.ErrorContains(t, err, "injected test panic")
+	assert.ErrorContains(t, err, "please report it at https://github.com/woodpecker-ci/woodpecker/issues")
 }

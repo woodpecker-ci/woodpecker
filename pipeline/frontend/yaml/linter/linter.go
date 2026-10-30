@@ -16,11 +16,13 @@ package linter
 
 import (
 	"fmt"
+	"regexp"
+	"slices"
 
-	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -97,6 +99,9 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	if err := l.lintContainers(config, "services"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
+	if err := l.lintServiceNames(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
 
 	if err := l.lintSchema(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
@@ -124,13 +129,39 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
-			linterErr = multierr.Append(linterErr,
+			linterErr = multierr.Append(
+				linterErr,
 				newLinterError(
 					"Specified clone image does not match allow list, netrc is not injected",
-					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+					config.File, fmt.Sprintf("clone.%s", container.Name), true,
+				),
 			)
 		}
 	}
+	return linterErr
+}
+
+// lintServiceNames rejects services sharing a name. A service's name becomes
+// the network alias other containers address it by, so two services with the
+// same name make that hostname resolve to either of them at random.
+func (l *Linter) lintServiceNames(config *WorkflowConfig) error {
+	var linterErr error
+
+	seen := make(map[string]struct{}, len(config.Workflow.Services.ContainerList))
+	for _, container := range config.Workflow.Services.ContainerList {
+		if _, ok := seen[container.Name]; ok {
+			linterErr = multierr.Append(
+				linterErr,
+				newLinterError(
+					fmt.Sprintf("Service names must be unique, `%s` is used more than once", container.Name),
+					config.File, fmt.Sprintf("services.%s", container.Name), false,
+				),
+			)
+			continue
+		}
+		seen[container.Name] = struct{}{}
+	}
+
 	return linterErr
 }
 
@@ -178,14 +209,18 @@ func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area 
 	}
 
 	var linterErr error
-check:
 	for _, dep := range c.DependsOn {
-		for _, step := range config.Workflow.Steps.ContainerList {
-			if dep == step.Name {
-				continue check
-			}
+		if slices.ContainsFunc(
+			config.Workflow.Steps.ContainerList,
+			func(step *types.Container) bool { return dep.Name == step.Name },
+		) {
+			continue
 		}
-		linterErr = multierr.Append(linterErr,
+		if dep.Optional {
+			continue
+		}
+		linterErr = multierr.Append(
+			linterErr,
 			newLinterError(
 				"One or more of the specified dependencies do not exist",
 				config.File, fmt.Sprintf("%s.%s.depends_on", area, c.Name), false,
@@ -303,7 +338,7 @@ func (l *Linter) lintSchema(config *WorkflowConfig) error {
 
 func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 	parsed := new(types.Workflow)
-	err := xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err := yaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}
@@ -321,12 +356,52 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) error {
 		})
 	}
 
+	for _, dep := range deprecatedEnvVars {
+		// TODO in next major: make this a failing lint error (IsWarning: false)
+		// instead of a warning; only remove the scan once the env vars themselves
+		// are removed (the major after).
+		if dep.re.MatchString(config.RawConfig) {
+			err = multierr.Append(err, &pipeline_errors.PipelineError{
+				Type:      pipeline_errors.PipelineErrorTypeDeprecation,
+				IsWarning: true,
+				Message:   fmt.Sprintf("Usage of `%s` is deprecated, use `%s`", dep.old, dep.replacement),
+				Data: pipeline_errors.DeprecationErrorData{
+					File:  config.File,
+					Field: config.File,
+					Docs:  "https://woodpecker-ci.org/docs/usage/environment",
+				},
+			})
+		}
+	}
+
 	return err
+}
+
+// deprecatedEnvVars lists env vars that are deprecated but still emitted as
+// aliases. The linter warns when a config references one of them.
+// TODO in next major: escalate the warning above to a failing lint error
+// before the env vars are actually removed.
+var deprecatedEnvVars = []struct {
+	old         string
+	replacement string
+	re          *regexp.Regexp
+}{
+	{"CI_COMMIT_PRERELEASE", "CI_PIPELINE_RELEASE_PRE", deprecatedEnvVarRefRegexp("CI_COMMIT_PRERELEASE")},
+	{"CI_COMMIT_AUTHOR_AVATAR", "CI_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_COMMIT_AUTHOR_AVATAR")},
+	{"CI_PREV_COMMIT_AUTHOR_AVATAR", "CI_PREV_PIPELINE_AVATAR", deprecatedEnvVarRefRegexp("CI_PREV_COMMIT_AUTHOR_AVATAR")},
+}
+
+// deprecatedEnvVarRefRegexp builds a regexp matching the substitution forms of
+// an env var reference: $NAME, $$NAME and ${NAME}. A trailing word boundary on
+// the bare forms avoids matching longer names (e.g. NAME vs NAME_SUFFIX).
+func deprecatedEnvVarRefRegexp(name string) *regexp.Regexp {
+	q := regexp.QuoteMeta(name)
+	return regexp.MustCompile(`\$\{` + q + `\}|\$\$?` + q + `\b`)
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 	parsed := new(types.Workflow)
-	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	err = yaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
 	}

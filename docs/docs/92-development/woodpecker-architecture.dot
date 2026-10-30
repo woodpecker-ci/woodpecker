@@ -81,15 +81,16 @@ digraph WoodpeckerArchitecture {
     fontcolor="black"
     style="rounded,filled"
 
-    srv_cmd     [label="cmd/server/"]
-    srv_router  [label="server/router/"]
-    srv_api     [label="server/api/"]
-    srv_grpc    [label="server/rpc/"]
-    srv_queue   [label="server/queue/"]
-    srv_pubsub  [label="server/pubsub/"]
-    srv_store   [label="server/store/"]
-    srv_model   [label="server/model/"]
-    srv_forge   [label="server/forge/"]
+    srv_cmd       [label="cmd/server/"]
+    srv_router    [label="server/router/"]
+    srv_api       [label="server/api/"]
+    srv_grpc      [label="server/rpc/"]
+    srv_scheduler [label="server/scheduler/"]
+    srv_queue     [label="server/queue/"]
+    srv_pubsub    [label="server/pubsub/"]
+    srv_store     [label="server/store/"]
+    srv_model     [label="server/model/"]
+    srv_forge     [label="server/forge/"]
   }
 
   /* ===================== Shared Libs ===================== */
@@ -137,13 +138,14 @@ digraph WoodpeckerArchitecture {
   pipe_core     -> pipe_backend
 
   /* Server internal flow */
-  srv_cmd    -> srv_router
-  srv_router -> srv_api
-  srv_api    -> srv_store
-  srv_api    -> srv_pubsub
-  srv_api    -> srv_queue
-  srv_grpc   -> srv_queue
-  srv_store  -> srv_model
+  srv_cmd       -> srv_router
+  srv_router    -> srv_api
+  srv_api       -> srv_store
+  srv_api       -> srv_scheduler
+  srv_grpc      -> srv_scheduler
+  srv_scheduler -> srv_queue
+  srv_scheduler -> srv_pubsub
+  srv_store     -> srv_model
 
   /* External integrations */
   srv_forge -> ext_scm [xlabel="SCM API"]

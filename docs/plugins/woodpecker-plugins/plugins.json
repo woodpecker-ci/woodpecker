@@ -151,11 +151,6 @@
       "verified": false
     },
     {
-      "name": "Codeberg Pages Deploy",
-      "docs": "https://codeberg.org/sugar700/plugin-codeberg-pages-deploy/raw/branch/master/README.md",
-      "verified": false
-    },
-    {
       "name": "Reviewdog golangci-lint",
       "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
       "verified": true
@@ -191,6 +186,11 @@
       "verified": true
     },
     {
+      "name": "Mastodon Profile",
+      "docs": "https://codeberg.org/woodpecker-plugins/mastodon-profile/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
       "name": "Bluesky Post",
       "docs": "https://codeberg.org/woodpecker-plugins/bluesky-post/raw/branch/main/docs.md",
       "verified": true
@@ -204,11 +204,6 @@
       "name": "Forge deployments",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-deployments/main/docs.md",
       "verified": true
-    },
-    {
-      "name": "Twine",
-      "docs": "https://gitea.elara.ws/music-kraken/plugin-twine/raw/branch/master/docs.md",
-      "verified": false
     },
     {
       "name": "Gitea Package",
@@ -328,6 +323,51 @@
     {
       "name": "Laravel Forge",
       "docs": "https://raw.githubusercontent.com/njaaazi/laravel-forge-woodpecker/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Podman",
+      "docs": "https://codeberg.org/head1328/woodpecker-ci-plugin-podman/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Git-pages",
+      "docs": "https://codeberg.org/gedankenstuecke/git-pages-woodpecker-plugin/raw/branch/main/README.md",
+      "verified": false
+    },
+    {
+      "name": "NestGuard",
+      "docs": "https://codeberg.org/woodpecker-community/nestguard/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Asyntai AI Chatbot Docs Sync",
+      "docs": "https://raw.githubusercontent.com/asyntai/woodpecker-ai-docs-sync/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPCS",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpcs/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPMD",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpmd/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog PHPStan",
+      "docs": "https://raw.githubusercontent.com/njaaazi/woodpecker-reviewdog-phpstan/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "OpenArtifact",
+      "docs": "https://raw.githubusercontent.com/openartifact/drone-openartifact/refs/heads/main/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "Supabase Backup",
+      "docs": "https://raw.githubusercontent.com/backupdrill/woodpecker-backupdrill/main/docs.md",
       "verified": false
     }
   ]

@@ -24,6 +24,7 @@ import (
 
 func (s storage) getFeedSelect() string {
 	const feedTemplate = `repos.id as repo_id,
+repos.full_name as repo_full_name,
 pipelines.id as pipeline_id,
 pipelines.number as pipeline_number,
 pipelines.event as pipeline_event,
@@ -39,7 +40,9 @@ pipelines.title as pipeline_title,
 pipelines.message as pipeline_message,
 pipelines.author as pipeline_author,
 pipelines.email as pipeline_email,
-pipelines.avatar as pipeline_avatar`
+pipelines.avatar as pipeline_avatar,
+pipelines.release as pipeline_release,
+pipelines.tag_title as pipeline_tag_title`
 
 	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }
@@ -61,7 +64,7 @@ func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 		Join("INNER", "perms", "repos.id = perms.repo_id").
 		Join("INNER", "pipelines", "repos.id = pipelines.repo_id").
 		Where(userPushOrAdminCondition(user.ID)).
-		Desc("pipelines.id").
+		Desc("pipelines.created", "pipelines.id").
 		Limit(perPage).
 		Find(&feed)
 
@@ -77,7 +80,7 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 		Join("LEFT", "pipelines", "pipelines.id = "+`(
 			SELECT pipelines.id FROM pipelines
 			WHERE pipelines.repo_id = repos.id
-			ORDER BY pipelines.id DESC
+			ORDER BY pipelines.number DESC
 			LIMIT 1
 			)`).
 		Where(userPushOrAdminCondition(user.ID)).

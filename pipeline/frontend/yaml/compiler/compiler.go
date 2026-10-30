@@ -15,6 +15,7 @@
 package compiler
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"path"
@@ -85,6 +86,7 @@ type Compiler struct {
 	volumes                 []string
 	networks                []string
 	env                     map[string]string
+	nonPluginEnv            map[string]string
 	cloneEnv                map[string]string
 	workspaceBase           string
 	workspacePath           string
@@ -101,9 +103,10 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:                 map[string]string{},
-		cloneEnv:            map[string]string{},
-		secrets:             map[string]Secret{},
+		env:                 make(map[string]string),
+		nonPluginEnv:        make(map[string]string),
+		cloneEnv:            make(map[string]string),
+		secrets:             make(map[string]Secret),
 		defaultClonePlugin:  constant.DefaultClonePlugin,
 		trustedClonePlugins: constant.TrustedClonePlugins,
 	}
@@ -118,7 +121,11 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	if match, err := conf.When.Match(c.metadata, true, c.env); !match && err == nil {
+	whenEnv := make(map[string]string)
+	maps.Copy(whenEnv, c.env)
+	maps.Copy(whenEnv, c.nonPluginEnv)
+
+	if match, err := conf.When.Match(c.metadata, true, whenEnv); !match && err == nil {
 		// This pipeline does not match the configured filter so return an empty config and stop further compilation.
 		// An empty pipeline will just be skipped completely.
 		return config, nil
@@ -161,13 +168,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Settings:    cloneSettings,
 			Environment: make(map[string]any),
 		}
-		for k, v := range c.cloneEnv {
-			container.Environment[k] = v
-		}
 		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
+
+		maps.Copy(step.Environment, c.cloneEnv)
 
 		stage := new(backend_types.Stage)
 		stage.Steps = append(stage.Steps, step)
@@ -175,7 +181,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Stages = append(config.Stages, stage)
 	} else if !c.local && !conf.SkipClone {
 		for _, container := range conf.Clone.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -204,7 +210,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		stage := new(backend_types.Stage)
 
 		for _, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 				continue
 			} else if err != nil {
 				return nil, err
@@ -221,6 +227,11 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// add pipeline steps
+	stepNames := make(map[string]struct{}, len(conf.Steps.ContainerList))
+	for _, container := range conf.Steps.ContainerList {
+		stepNames[container.Name] = struct{}{}
+	}
+
 	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
 	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
@@ -228,7 +239,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			continue
 		}
 
-		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+		if match, err := container.When.Match(c.metadata, false, whenEnv); !match && err == nil {
 			continue
 		} else if err != nil {
 			return nil, err
@@ -259,6 +270,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// generate stages out of steps
 	stepStages, err := newDAGCompiler(steps).compile()
 	if err != nil {
+		// If the missing dep exists in the config but isn't in the surviving
+		// step list, it was filtered out by its 'when' conditions. Surface a
+		// more actionable error.
+		if missingDepErr, ok := errors.AsType[*ErrStepMissingDependency](err); ok {
+			if _, inConfig := stepNames[missingDepErr.dep]; inConfig {
+				return nil, &ErrStepFilteredDependency{name: missingDepErr.name, dep: missingDepErr.dep}
+			}
+		}
 		return nil, err
 	}
 

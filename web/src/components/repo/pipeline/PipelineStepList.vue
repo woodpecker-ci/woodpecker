@@ -74,7 +74,7 @@
               </div>
             </div>
             <button
-              v-if="!singleConfig"
+              v-if="!singleWorkflow"
               type="button"
               :title="workflow.name"
               class="hover:bg-wp-control-neutral-200 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
@@ -96,7 +96,7 @@
           </div>
           <div
             class="transition-height overflow-hidden duration-150"
-            :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleConfig }"
+            :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleWorkflow }"
           >
             <button
               v-for="step in workflow.children"
@@ -108,9 +108,9 @@
               class="hover:bg-wp-control-neutral-200 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
               :class="{
                 'bg-wp-control-neutral-200': selectedStepId && selectedStepId === step.pid,
-                'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
+                'mt-1': !singleWorkflow || step.pid !== workflow.children?.[0]?.pid,
               }"
-              @click="$emit('update:selected-step-id', step.pid)"
+              @click="$emit('update:selectedStepId', step.pid)"
             >
               <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="h-4! w-4!" />
               <span class="truncate">{{ step.name }}</span>
@@ -131,7 +131,6 @@ import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
-import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
 import type { Pipeline, PipelineStep } from '~/lib/api/types';
@@ -142,13 +141,12 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (event: 'update:selected-step-id', selectedStepId: number): void;
+  (event: 'update:selectedStepId', selectedStepId: number): void;
 }>();
 
 const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
-const pipelineConfigs = requiredInject('pipeline-configs');
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   pipeline.value.workflows && pipeline.value.workflows.length > 1
@@ -157,16 +155,14 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
           ...collapsed,
           [workflow.id]:
             ['success', 'skipped', 'blocked'].includes(workflow.state) &&
-            !workflow.children.some((child) => child.pid === selectedStepId.value),
+            !(workflow.children ?? []).some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )
     : {},
 );
 
-const singleConfig = computed(
-  () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
-);
+const singleWorkflow = computed(() => pipeline.value.workflows && pipeline.value.workflows.length === 1);
 
 const steps = useTemplateRef('steps');
 watch(selectedStepId, async (newSelectedStepId, oldSelectedStepId) => {

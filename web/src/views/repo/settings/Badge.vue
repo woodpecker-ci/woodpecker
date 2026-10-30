@@ -40,10 +40,10 @@
       />
     </InputField>
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.workflow')">
-      <TextField :id="id" v-model="workflow" />
+      <TextField :id="id" v-model="workflow" :placeholder="$t('repo.settings.badge.workflow')" />
     </InputField>
     <InputField v-slot="{ id }" :label="$t('repo.settings.badge.step')">
-      <TextField :id="id" v-model="step" />
+      <TextField :id="id" v-model="step" :placeholder="$t('repo.settings.badge.step')" />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">

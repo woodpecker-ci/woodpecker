@@ -29,12 +29,12 @@ func main() {
 		panic(err)
 	}
 
-	fi, err := os.Create("../../docs/docs/40-cli.md")
+	fi, err := os.Create("../../docs/docs/40-cli/90-reference.md")
 	if err != nil {
 		panic(err)
 	}
 	defer fi.Close()
-	if _, err := fi.WriteString("# CLI\n\n" + md); err != nil {
+	if _, err := fi.WriteString("# Reference\n\n" + md); err != nil {
 		panic(err)
 	}
 }

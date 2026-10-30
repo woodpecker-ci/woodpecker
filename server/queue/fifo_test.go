@@ -15,6 +15,7 @@
 package queue
 
 import (
+	"container/list"
 	"context"
 	"errors"
 	"fmt"
@@ -23,6 +24,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -43,9 +45,7 @@ func setupTestQueue(t *testing.T) (context.Context, context.CancelCauseFunc, *fi
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
-	if q == nil {
-		t.Fatal("Failed to create queue")
-	}
+	require.NotNil(t, q, "Failed to create queue")
 
 	return ctx, cancel, q
 }
@@ -188,7 +188,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		// Start multiple waiters
 		numWaiters := 3
 		waitResults := make(chan error, numWaiters)
-		for i := 0; i < numWaiters; i++ {
+		for range numWaiters {
 			go func() {
 				waitResults <- q.Wait(ctx, got3.ID)
 			}()
@@ -201,7 +201,7 @@ func TestFifoBasicOperations(t *testing.T) {
 		assert.NoError(t, q.ErrorAtOnce(ctx, []string{got3.ID}, batchErr))
 
 		// All waiters should return nil (external error filtered)
-		for i := 0; i < numWaiters; i++ {
+		for i := range numWaiters {
 			select {
 			case err := <-waitResults:
 				assert.NoError(t, err, "All waiters should get nil when ErrExternal is filtered")
@@ -318,11 +318,9 @@ func TestFifoBasicOperations(t *testing.T) {
 		dummyTask := &model.Task{ID: "pause-1"}
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			_, _ = q.Poll(ctx, 99, filterFnTrue)
-			wg.Done()
-		}()
+		})
 
 		q.Pause()
 		t0 := time.Now()
@@ -671,6 +669,508 @@ func TestFifoDependencies(t *testing.T) {
 	})
 }
 
+func TestFifoFilterWaiting(t *testing.T) {
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		waiting []*model.Task
+		running []string
+		ready   []string
+		blocked []string
+	}{
+		{
+			name: "independent tasks keep their order",
+			pending: []*model.Task{
+				{ID: "first"},
+				{ID: "second"},
+			},
+			ready: []string{"first", "second"},
+		},
+		{
+			name: "chain checks the full pending snapshot",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+				{ID: "parent", Dependencies: []string{"grandparent"}},
+				{ID: "grandparent"},
+			},
+			ready:   []string{"grandparent"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "waiting tasks can be dependencies",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+			},
+			waiting: []*model.Task{
+				{ID: "parent", Dependencies: []string{"root"}},
+			},
+			running: []string{"root"},
+			blocked: []string{"child", "parent"},
+		},
+		{
+			name: "missing dependencies release waiting tasks at the tail",
+			pending: []*model.Task{
+				{ID: "ready"},
+			},
+			waiting: []*model.Task{
+				{ID: "released", Dependencies: []string{"finished"}},
+			},
+			ready: []string{"ready", "released"},
+		},
+		{
+			name: "only changed tasks move and keep their order",
+			pending: []*model.Task{
+				{ID: "ready"},
+				{ID: "newly-blocked", Dependencies: []string{"root"}},
+			},
+			waiting: []*model.Task{
+				{ID: "still-blocked", Dependencies: []string{"root"}},
+				{ID: "released", Dependencies: []string{"finished"}},
+			},
+			running: []string{"root"},
+			ready:   []string{"ready", "released"},
+			blocked: []string{"newly-blocked", "still-blocked"},
+		},
+		{
+			name: "cycles remain blocked",
+			pending: []*model.Task{
+				{ID: "first", Dependencies: []string{"second"}},
+				{ID: "second", Dependencies: []string{"first"}},
+			},
+			blocked: []string{"first", "second"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.waiting {
+				q.waitingOnDeps.PushBack(task)
+			}
+			for _, id := range tt.running {
+				q.running[id] = &entry{item: &model.Task{ID: id}}
+			}
+			ids := func(tasks *list.List) []string {
+				var result []string
+				for element := tasks.Front(); element != nil; element = element.Next() {
+					task, _ := element.Value.(*model.Task)
+					result = append(result, task.ID)
+				}
+				return result
+			}
+			for range 2 {
+				q.filterWaiting()
+				assert.Equal(t, tt.ready, ids(q.pending))
+				assert.Equal(t, tt.blocked, ids(q.waitingOnDeps))
+			}
+		})
+	}
+}
+
+func TestFifoAssignToWorker(t *testing.T) {
+	group := func(id string, pipeline int64) *model.Task {
+		return &model.Task{ID: id, PipelineID: pipeline, Created: pipeline, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1}
+	}
+	only := func(id string, score int) func(*model.Task) (bool, int) {
+		return func(task *model.Task) (bool, int) { return task.ID == id, score }
+	}
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		running []*model.Task
+		workers map[int64]func(*model.Task) (bool, int)
+		task    string
+		agent   int64
+	}{
+		{
+			name:    "no idle worker",
+			pending: []*model.Task{{ID: "free"}},
+		},
+		{
+			name:    "first task with a matching worker wins",
+			pending: []*model.Task{{ID: "unmatched"}, {ID: "matched"}},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("matched", 1)},
+			task:    "matched",
+			agent:   1,
+		},
+		{
+			name:    "highest score wins",
+			pending: []*model.Task{{ID: "free"}},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("free", 1), 2: only("free", 5)},
+			task:    "free",
+			agent:   2,
+		},
+		{
+			name:    "blocked task is skipped for the next one",
+			pending: []*model.Task{group("blocked", 2), {ID: "free"}},
+			running: []*model.Task{group("active", 1)},
+			workers: map[int64]func(*model.Task) (bool, int){1: filterFnTrue},
+			task:    "free",
+			agent:   1,
+		},
+		{
+			name:    "blocked task does not leak its worker",
+			pending: []*model.Task{group("blocked", 2), {ID: "unmatched"}},
+			running: []*model.Task{group("active", 1)},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("blocked", 1)},
+		},
+		{
+			name:    "earlier pipeline keeps its slot without a worker",
+			pending: []*model.Task{group("first", 1), group("second", 2)},
+			workers: map[int64]func(*model.Task) (bool, int){1: only("second", 1)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+				workers:       make(map[*worker]struct{}),
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.running {
+				q.running[task.ID] = &entry{item: task}
+			}
+			for agent, filter := range tt.workers {
+				q.workers[&worker{agentID: agent, filter: filter}] = struct{}{}
+			}
+
+			element, worker := q.assignToWorker()
+			if tt.task == "" {
+				assert.Nil(t, element)
+				assert.Nil(t, worker)
+				return
+			}
+			require.NotNil(t, element)
+			require.NotNil(t, worker)
+			task, _ := element.Value.(*model.Task)
+			assert.Equal(t, tt.task, task.ID)
+			assert.Equal(t, tt.agent, worker.agentID)
+		})
+	}
+}
+
+func TestFifoConcurrencySlots(t *testing.T) {
+	member := func(id string, pipeline, created int64, limit int) *model.Task {
+		return &model.Task{ID: id, Name: id, PipelineID: pipeline, Created: created, ConcurrencyGroup: "deploy", ConcurrencyLimit: limit}
+	}
+	tests := []struct {
+		name    string
+		pending []*model.Task
+		waiting []*model.Task
+		running []*model.Task
+		task    string
+	}{
+		{
+			name:    "same pipeline does not reserve slots",
+			pending: []*model.Task{member("b", 1, 2, 1), member("a", 1, 1, 1)},
+			task:    "b",
+		},
+		{
+			name:    "earlier waiting pipeline reserves the slot",
+			pending: []*model.Task{member("late", 2, 2, 1)},
+			waiting: []*model.Task{member("early", 1, 1, 1)},
+		},
+		{
+			name:    "later waiting pipeline does not reserve the slot",
+			pending: []*model.Task{member("early", 1, 1, 1)},
+			waiting: []*model.Task{member("late", 2, 2, 1)},
+			task:    "early",
+		},
+		{
+			name:    "name breaks a creation tie",
+			pending: []*model.Task{member("b", 1, 5, 1), member("a", 2, 5, 1)},
+			task:    "a",
+		},
+		{
+			name: "equal order does not reserve the slot",
+			pending: []*model.Task{
+				{ID: "x", Name: "deploy", PipelineID: 1, Created: 5, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+				{ID: "y", Name: "deploy", PipelineID: 2, Created: 5, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+			},
+			task: "x",
+		},
+		{
+			name:    "running and reserved slots add up",
+			pending: []*model.Task{member("late", 3, 3, 2)},
+			waiting: []*model.Task{member("early", 1, 1, 2)},
+			running: []*model.Task{member("active", 2, 2, 2)},
+		},
+		{
+			name:    "free slot is granted",
+			pending: []*model.Task{member("next", 3, 3, 2)},
+			running: []*model.Task{member("active", 2, 2, 2)},
+			task:    "next",
+		},
+		{
+			name:    "other groups do not count",
+			pending: []*model.Task{member("deploy", 2, 2, 1)},
+			waiting: []*model.Task{{ID: "build", PipelineID: 1, Created: 1, ConcurrencyGroup: "build", ConcurrencyLimit: 1}},
+			running: []*model.Task{{ID: "test", PipelineID: 1, Created: 1, ConcurrencyGroup: "test", ConcurrencyLimit: 1}},
+			task:    "deploy",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			q := &fifo{
+				pending:       list.New(),
+				waitingOnDeps: list.New(),
+				running:       make(map[string]*entry),
+				workers:       map[*worker]struct{}{{filter: filterFnTrue}: {}},
+			}
+			for _, task := range tt.pending {
+				q.pending.PushBack(task)
+			}
+			for _, task := range tt.waiting {
+				q.waitingOnDeps.PushBack(task)
+			}
+			for _, task := range tt.running {
+				q.running[task.ID] = &entry{item: task}
+			}
+
+			element, _ := q.assignToWorker()
+			if tt.task == "" {
+				assert.Nil(t, element)
+				return
+			}
+			require.NotNil(t, element)
+			task, _ := element.Value.(*model.Task)
+			assert.Equal(t, tt.task, task.ID)
+		})
+	}
+}
+
+func TestFifoConcurrency(t *testing.T) {
+	ctx, cancel, q := setupTestQueue(t)
+	defer cancel(nil)
+
+	t.Run("limit serializes group in instantiation order", func(t *testing.T) {
+		// Lower Created == instantiated earlier. taskB is pushed first to
+		// prove the queue serializes by creation order, not by push/ready
+		// order. Distinct pipeline IDs model two pipelines of the same
+		// workflow. Ordering must not depend on the task ID, so taskA (the
+		// earlier one) deliberately has the higher ID.
+		taskA := &model.Task{ID: "200", PipelineID: 1, Created: 100, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{taskB, taskA}))
+		waitForProcess()
+
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", got.ID) // earliest instantiated (lowest Created) runs first
+
+		waitForProcess()
+		info := q.Info(ctx)
+		assert.Len(t, info.Running, 1)
+		assert.Len(t, info.Pending, 1) // taskB deferred by concurrency limit
+
+		// taskB cannot be polled while taskA holds the only slot.
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 2, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err)
+
+		// finishing taskA frees the slot for taskB.
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		got2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", got2.ID)
+		assert.NoError(t, q.Done(ctx, got2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("preserves instantiation order over readiness", func(t *testing.T) {
+		// Pipeline 1's deploy (taskA) waits on its own slow check (dep), while
+		// pipeline 2's deploy (taskB) is immediately ready. taskB must still
+		// wait for the earlier taskA. Ordering is by Created, not ID, so taskA
+		// has the higher ID but the lower Created.
+		dep := &model.Task{ID: "50", PipelineID: 1, Created: 100}
+		taskA := &model.Task{
+			ID:               "200",
+			PipelineID:       1,
+			Created:          100,
+			ConcurrencyGroup: "repo:deploy2",
+			ConcurrencyLimit: 1,
+			Dependencies:     []string{"50"},
+			DepStatus:        make(map[string]model.StatusValue),
+			RunOn:            []string{"success", "failure"},
+		}
+		taskB := &model.Task{ID: "100", PipelineID: 2, Created: 200, ConcurrencyGroup: "repo:deploy2", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dep, taskA, taskB}))
+		waitForProcess()
+
+		info := q.Info(ctx)
+		assert.Equal(t, 1, info.Stats.WaitingOnDeps) // taskA waiting on dep
+
+		// only the dependency is runnable; taskB is held back behind taskA.
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "50", got.ID)
+
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 2, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err, "taskB must not overtake the earlier taskA")
+
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotA, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", gotA.ID)
+		assert.NoError(t, q.Done(ctx, gotA.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotB, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", gotB.ID)
+		assert.NoError(t, q.Done(ctx, gotB.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("limit greater than one allows parallelism", func(t *testing.T) {
+		t1 := &model.Task{ID: "300", PipelineID: 1, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+		t2 := &model.Task{ID: "400", PipelineID: 2, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+		t3 := &model.Task{ID: "500", PipelineID: 3, ConcurrencyGroup: "repo:build", ConcurrencyLimit: 2}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2, t3}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"300", "400"}, []string{g1.ID, g2.ID})
+
+		waitForProcess()
+		info := q.Info(ctx)
+		assert.Len(t, info.Running, 2)
+		assert.Len(t, info.Pending, 1) // third deferred until a slot frees
+
+		pollCtx, pollCancel := context.WithTimeout(ctx, 200*time.Millisecond)
+		_, err = q.Poll(pollCtx, 3, filterFnTrue)
+		pollCancel()
+		assert.Error(t, err)
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		waitForProcess()
+		g3, err := q.Poll(ctx, 3, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "500", g3.ID)
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g3.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("same pipeline dependency does not deadlock", func(t *testing.T) {
+		// Within one pipeline, deploy.yaml (lower ID, alphabetically first)
+		// depends on test.yaml (higher ID), and both share a concurrency group.
+		// The ordering reservation must not treat the dependent deploy as
+		// "ahead" of its own dependency, otherwise neither can ever run.
+		deploy := &model.Task{
+			ID:               "100",
+			PipelineID:       1,
+			ConcurrencyGroup: "repo:ci",
+			ConcurrencyLimit: 1,
+			Dependencies:     []string{"200"},
+			DepStatus:        make(map[string]model.StatusValue),
+			RunOn:            []string{"success", "failure"},
+		}
+		test := &model.Task{
+			ID:               "200",
+			PipelineID:       1,
+			ConcurrencyGroup: "repo:ci",
+			ConcurrencyLimit: 1,
+		}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{deploy, test}))
+		waitForProcess()
+
+		// test must be runnable even though deploy has a lower ID.
+		got, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "200", got.ID, "the dependency must not be starved by the dependent")
+		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+		waitForProcess()
+
+		gotDeploy, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		assert.Equal(t, "100", gotDeploy.ID)
+		assert.NoError(t, q.Done(ctx, gotDeploy.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("different groups do not block each other", func(t *testing.T) {
+		t1 := &model.Task{ID: "600", ConcurrencyGroup: "repo:a", ConcurrencyLimit: 1}
+		t2 := &model.Task{ID: "700", ConcurrencyGroup: "repo:b", ConcurrencyLimit: 1}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"600", "700"}, []string{g1.ID, g2.ID})
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("no limit keeps default behavior", func(t *testing.T) {
+		t1 := &model.Task{ID: "800"}
+		t2 := &model.Task{ID: "900"}
+
+		assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{t1, t2}))
+		waitForProcess()
+
+		g1, err := q.Poll(ctx, 1, filterFnTrue)
+		assert.NoError(t, err)
+		g2, err := q.Poll(ctx, 2, filterFnTrue)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, []string{"800", "900"}, []string{g1.ID, g2.ID})
+
+		assert.NoError(t, q.Done(ctx, g1.ID, model.StatusSuccess))
+		assert.NoError(t, q.Done(ctx, g2.ID, model.StatusSuccess))
+		waitForProcess()
+	})
+
+	t.Run("task ordering uses Created with name tiebreak", func(t *testing.T) {
+		// earlier Created sorts first, regardless of ID.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "999", Created: 100},
+			&model.Task{ID: "1", Created: 200},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 200},
+			&model.Task{ID: "999", Created: 100},
+		))
+		// equal Created falls back to the workflow name, alphabetically.
+		assert.True(t, taskOrderLess(
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+		))
+		assert.False(t, taskOrderLess(
+			&model.Task{ID: "1", Created: 100, Name: "beta"},
+			&model.Task{ID: "2", Created: 100, Name: "alpha"},
+		))
+	})
+}
+
 func TestFifoLeaseManagement(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)
@@ -730,7 +1230,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 		assert.ErrorIs(t, q.Extend(ctx, 1, "non-existent"), ErrNotFound)
 
 		// Edge case: extend multiple times rapidly
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			time.Sleep(30 * time.Millisecond)
 			assert.NoError(t, q.Extend(ctx, 5, got.ID))
 		}
@@ -763,11 +1263,9 @@ func TestFifoLeaseManagement(t *testing.T) {
 		got, _ := q.Poll(ctx, 1, filterFnTrue)
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			assert.NoError(t, q.Wait(ctx, got.ID))
-			wg.Done()
-		}()
+		})
 
 		time.Sleep(time.Millisecond)
 		assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
@@ -807,7 +1305,7 @@ func TestFifoLeaseManagement(t *testing.T) {
 
 		var wg2 sync.WaitGroup
 		wg2.Add(3)
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				assert.NoError(t, q.Wait(ctx, got3.ID))
 				wg2.Done()
@@ -854,7 +1352,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 	t.Run("kick agent workers", func(t *testing.T) {
 		pollResults := make(chan error, 5)
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			go func() {
 				_, err := q.Poll(ctx, 42, filterFnTrue)
 				pollResults <- err
@@ -870,7 +1368,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		q.KickAgentWorkers(42)
 
 		kickedCount := 0
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			select {
 			case err := <-pollResults:
 				if errors.Is(err, context.Canceled) {
@@ -899,7 +1397,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}, 10)
 
 		// Start workers for agent 1
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				_, err := q.Poll(ctx, 1, filterFnTrue)
 				pollResults <- struct {
@@ -910,7 +1408,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 		}
 
 		// Start workers for agent 2
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			go func() {
 				_, err := q.Poll(ctx, 2, filterFnTrue)
 				pollResults <- struct {
@@ -929,7 +1427,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 		kickedAgent1 := 0
 		kickedAgent2 := 0
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			select {
 			case result := <-pollResults:
 				if errors.Is(result.err, context.Canceled) {
@@ -949,7 +1447,7 @@ func TestFifoWorkerManagement(t *testing.T) {
 
 		// Clean up agent 2 workers
 		q.KickAgentWorkers(2)
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			<-pollResults
 		}
 	})
@@ -994,7 +1492,7 @@ func TestFifoLabelBasedScoring(t *testing.T) {
 	}()
 
 	receivedTasks := make(map[string]int64)
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		select {
 		case task := <-results:
 			receivedTasks[task.ID] = task.AgentID

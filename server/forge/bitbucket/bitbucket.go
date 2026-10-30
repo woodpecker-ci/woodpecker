@@ -34,7 +34,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
-	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -124,7 +123,8 @@ func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	source := config.TokenSource(
-		ctx, &oauth2.Token{RefreshToken: user.RefreshToken})
+		ctx, &oauth2.Token{RefreshToken: user.RefreshToken},
+	)
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
@@ -271,18 +271,20 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
+			// sub directories are no pipeline files
+			if file.Type != "commit_file" {
+				continue
+			}
 			_, filename := filepath.Split(file.Path)
 			repoFile := forge_types.FileMeta{
 				Name: filename,
 			}
-			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
-				if err != nil {
-					return nil, err
-				}
-				if fileData != nil {
-					repoFile.Data = []byte(*fileData)
-				}
+			fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+			if err != nil {
+				return nil, err
+			}
+			if fileData != nil {
+				repoFile.Data = []byte(*fileData)
 			}
 			repoPathFiles = append(repoPathFiles, &repoFile)
 		}
@@ -352,15 +354,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 		return fmt.Errorf("repo online check failed: %w", err)
 	}
 
-	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
-		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
-			Page: page,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return hooks.Values, nil
-	}, -1)
+	hooks, err := client.ListHooksAll(r.Owner, r.Name)
 	if err != nil {
 		return err
 	}

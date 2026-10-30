@@ -29,6 +29,14 @@
         ]"
       />
     </InputField>
+
+    <InputField :label="$t('user.settings.general.pipeline_logs.pipeline_logs')">
+      <Checkbox
+        v-model="collapseLogGroupsByDefault"
+        :label="$t('user.settings.general.pipeline_logs.collapse_groups.collapse')"
+        :description="$t('user.settings.general.pipeline_logs.collapse_groups.desc')"
+      />
+    </InputField>
   </Settings>
 </template>
 
@@ -38,15 +46,27 @@ import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 import { useTheme } from '~/compositions/useTheme';
+import useUserConfig from '~/compositions/useUserConfig';
 import { useWPTitle } from '~/compositions/useWPTitle';
 
 const { locale, t } = useI18n();
 const { storeTheme } = useTheme();
+const { userConfig, setUserConfig } = useUserConfig();
+
+const collapseLogGroupsByDefault = computed<boolean>({
+  get() {
+    return userConfig.value.collapseLogGroupsByDefault;
+  },
+  set(value) {
+    setUserConfig('collapseLogGroupsByDefault', value);
+  },
+});
 
 const localeOptions = computed(() =>
   SUPPORTED_LOCALES.map((supportedLocale) => ({

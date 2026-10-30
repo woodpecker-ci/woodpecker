@@ -18,14 +18,12 @@ package setup
 
 import (
 	"context"
+	"maps"
 	"testing"
 	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent"
@@ -33,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
@@ -50,11 +49,6 @@ type AgentEnv struct {
 
 	// name is used for logging and as the hostname label.
 	name string
-
-	// requestedOrgID is applied to the DB record by WaitForAgentRegistered
-	// so the server's GetServerLabels returns the right org-id filter.
-	// model.IDNotSet (-1) means global (default).
-	requestOrgID int64
 }
 
 // AgentOption configures an agent before it registers with the server.
@@ -68,10 +62,15 @@ type agentConfig struct {
 	// They are matched against task Labels set in pipeline YAML (labels: key: value).
 	customLabels map[string]string
 
-	// orgID pins the agent to a specific organization (-1 = global).
-	// Org agents score higher than global agents for tasks in the same org,
-	// so they are always preferred by the queue when available.
+	// orgID pins the agent to a specific organization. See WithOrgID.
 	orgID int64
+
+	// store is used to create the org agent record. See WithOrgID.
+	store store.Store
+
+	// capacity is the number of workflows the agent runs in parallel
+	// (advertised to the server and number of runner goroutines).
+	capacity int
 }
 
 // WithHostname sets the agent's hostname label (default: "test-agent").
@@ -82,7 +81,7 @@ func WithHostname(name string) AgentOption {
 // WithCustomLabels merges extra labels into the agent's filter set.
 // Use this to test label-based task routing, e.g.:
 //
-//	setup.StartAgent(ctx, t, addr, setup.WithCustomLabels(map[string]string{"gpu": "true"}))
+//	setup.StartAgent(t, addr, setup.WithCustomLabels(map[string]string{"gpu": "true"}))
 //
 // The pipeline YAML must set a matching label:
 //
@@ -90,24 +89,38 @@ func WithHostname(name string) AgentOption {
 //	  gpu: "true"
 func WithCustomLabels(labels map[string]string) AgentOption {
 	return func(c *agentConfig) {
-		for k, v := range labels {
-			c.customLabels[k] = v
-		}
+		maps.Copy(c.customLabels, labels)
 	}
 }
 
-// WithOrgID restricts the agent to a specific organization. Org agents score
-// 10× higher than global agents (score 1) for tasks from the same org, so the
-// queue always prefers them when both are available. Pass model.IDNotSet (-1)
-// for a global agent (the default).
-func WithOrgID(id int64) AgentOption {
-	return func(c *agentConfig) { c.orgID = id }
+// WithOrgID restricts the agent to a specific organization. Like a real org
+// agent, the agent record is created in the store with the OrgID and its own
+// token before the agent connects, so every poll carries the org-id filter.
+// Org agents score 10× higher than global agents (score 1) for tasks from the
+// same org. Without this option the agent is a global agent.
+func WithOrgID(s store.Store, id int64) AgentOption {
+	return func(c *agentConfig) {
+		c.store = s
+		c.orgID = id
+	}
+}
+
+// WithCapacity sets how many workflows the agent runs in parallel. This is the
+// value advertised to the server (RegisterAgent capacity) and the number of
+// runner goroutines started. Defaults to AgentMaxWorkflows when unset or <= 0.
+func WithCapacity(n int) AgentOption {
+	return func(c *agentConfig) { c.capacity = n }
 }
 
 // StartAgent connects an in-process agent using the dummy backend to the gRPC
 // server at grpcAddr and returns an *AgentEnv whose AgentID is populated once
 // the agent has registered. Pass AgentOption values to configure labels, hostname,
 // or org-scoping; multiple agents can be started in the same test.
+//
+// The agent owns its own lifetime via an internal context canceled through
+// t.Cleanup. This decouples agent shutdown from the test's own context: the
+// agent keeps running until the test completes, regardless of which ctx the
+// caller's pipeline operations use.
 func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Helper()
 
@@ -115,47 +128,49 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		hostname:     "test-agent",
 		customLabels: make(map[string]string),
 		orgID:        model.IDNotSet, // global by default
+		capacity:     AgentMaxWorkflows,
 	}
 	for _, o := range opts {
 		o(cfg)
 	}
+	if cfg.capacity <= 0 {
+		cfg.capacity = AgentMaxWorkflows
+	}
 
 	env := &AgentEnv{name: cfg.hostname}
-
-	transport := grpc.WithTransportCredentials(insecure.NewCredentials())
-	keepaliveOpts := grpc.WithKeepaliveParams(keepalive.ClientParameters{
-		Time:    defaultTimeout,
-		Timeout: shortTimeout,
-	})
 
 	agentCtx, agentCancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { agentCancel(nil) })
 
-	authConn, err := grpc.NewClient(grpcAddr, transport, keepaliveOpts)
-	if err != nil {
-		t.Fatalf("StartAgent(%s): create auth gRPC connection: %v", cfg.hostname, err)
+	// Global agents authenticate with the shared system token, org agents with
+	// the individual token of their pre-created agent record.
+	agentToken := TestAgentToken
+	if cfg.orgID != model.IDNotSet {
+		agent := &model.Agent{
+			Name:    cfg.hostname,
+			OwnerID: model.IDNotSet,
+			OrgID:   cfg.orgID,
+			Token:   model.GenerateNewAgentToken(),
+		}
+		require.NoErrorf(t, cfg.store.AgentCreate(agent), "StartAgent(%s): create org agent", cfg.hostname)
+		agentToken = agent.Token
 	}
-	t.Cleanup(func() { authConn.Close() })
 
-	authClient := agent_rpc.NewAuthGrpcClient(authConn, TestAgentToken, -1)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(agentCtx, authClient, agentAuthRefreshEvery)
+	agentConn, err := agent_rpc.Dial(agentCtx, agent_rpc.DialConfig{
+		ServerAddr:       grpcAddr,
+		AgentToken:       agentToken,
+		AgentID:          -1,
+		Secure:           false,
+		KeepaliveTime:    defaultTimeout,
+		KeepaliveTimeout: shortTimeout,
+		AuthRefreshEvery: agentAuthRefreshEvery,
+	})
 	if err != nil {
-		t.Fatalf("StartAgent(%s): authenticate with server: %v", cfg.hostname, err)
+		t.Fatalf("StartAgent(%s): dial gRPC: %v", cfg.hostname, err)
 	}
+	t.Cleanup(agentConn.Close)
 
-	conn, err := grpc.NewClient(
-		grpcAddr,
-		transport,
-		keepaliveOpts,
-		grpc.WithUnaryInterceptor(authInterceptor.Unary()),
-		grpc.WithStreamInterceptor(authInterceptor.Stream()),
-	)
-	if err != nil {
-		t.Fatalf("StartAgent(%s): create main gRPC connection: %v", cfg.hostname, err)
-	}
-	t.Cleanup(func() { conn.Close() })
-
-	client := agent_rpc.NewGrpcClient(agentCtx, conn)
+	client := agent_rpc.NewGrpcClient(agentCtx, agentConn.MainConn)
 
 	grpcCtx := metadata.NewOutgoingContext(agentCtx, metadata.Pairs("hostname", cfg.hostname))
 
@@ -172,19 +187,10 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 		Version:      version.String(),
 		Backend:      backend.Name(),
 		Platform:     engInfo.Platform,
-		Capacity:     AgentMaxWorkflows,
+		Capacity:     cfg.capacity,
 		CustomLabels: cfg.customLabels,
 	})
 	require.NoErrorf(t, err, "StartAgent(%s): register with server: %v", cfg.hostname, err)
-
-	// If a non-global org is requested, update the agent's OrgID in the DB so
-	// the server's GetServerLabels returns the right org-id filter (score 10).
-	if cfg.orgID != model.IDNotSet {
-		// The server stores agents; we patch via the store after registration.
-		// This is done in WaitForAgentRegistered which the caller must invoke.
-		// We stash the requested orgID so the wait helper can apply it.
-		env.requestOrgID = cfg.orgID
-	}
 
 	t.Cleanup(func() {
 		if err := client.UnregisterAgent(grpcCtx); err != nil {
@@ -204,18 +210,16 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 			"repo":     "*",
 		},
 	}
-	for k, v := range cfg.customLabels {
-		filter.Labels[k] = v
-	}
+	maps.Copy(filter.Labels, cfg.customLabels)
 
 	counter := &agent.State{
-		Polling:  AgentMaxWorkflows,
+		Polling:  cfg.capacity,
 		Metadata: make(map[string]agent.Info),
 	}
 
-	for i := range AgentMaxWorkflows {
+	for i := range cfg.capacity {
 		go func(slot int) {
-			runner := agent.NewRunner(client, filter, cfg.hostname, counter, backend)
+			runner := agent.NewRunner(client, filter, cfg.hostname, env.AgentID, counter, backend)
 			log.Debug().Int("slot", slot).Str("hostname", cfg.hostname).Msg("test agent: runner started")
 			for {
 				if agentCtx.Err() != nil {

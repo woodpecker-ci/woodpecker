@@ -4,6 +4,10 @@ As the owner of a project in Woodpecker you can change project related settings 
 
 ![project settings](./project-settings.png)
 
+:::note
+Woodpecker's permission handling is linked to the forge. A user on your forge that has admin access to the repo will also get admin permissions for the repository in Woodpecker and can then change the settings here.
+:::
+
 ## Pipeline path
 
 The path to the pipeline config file or folder. By default it is left empty which will use the following configuration resolution `.woodpecker/*.{yaml,yml}` -> `.woodpecker.yaml` -> `.woodpecker.yml`. If you set a custom path Woodpecker tries to load your configuration or fails if no configuration could be found at the specified location. To use a [multiple workflows](./25-workflows.md) with a custom path you have to change it to a folder path ending with a `/` like `.woodpecker/`.
@@ -29,6 +33,8 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
+Also see [security boundaries](./17-security-boundaries.md#approval-of-pipelines).
+
 ## Trusted
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
@@ -38,6 +44,8 @@ If you set your project to trusted, a pipeline step and by this the underlying c
 Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
+
+Also see [security boundaries](./17-security-boundaries.md#trusted-repositories).
 
 ## Custom trusted clone plugins
 
@@ -54,6 +62,8 @@ Without an explicit allowlist, a malicious contributor could exploit a custom cl
 This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
 To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/git-push).
 :::
+
+Also see [security boundaries](./17-security-boundaries.md#git-credentials).
 
 ## Project visibility
 

@@ -15,15 +15,50 @@
 package datastore
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"runtime"
 	"strings"
 
+	"github.com/cenkalti/backoff/v7"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
+
+// maxRetries is the number of retry attempts for transient database errors.
+const maxRetries = 3
+
+// retryWrite runs fn with exponential backoff, retrying on transient database errors
+// (ErrDatabaseLocked, ErrInsertDuplicateDetected).
+func retryWrite(fn func() error) error {
+	return retryWriteCtx(context.Background(), fn)
+}
+
+// retryWriteCtx is retryWrite that stops once ctx is done.
+func retryWriteCtx(ctx context.Context, fn func() error) error {
+	_, err := backoff.Retry(ctx, func() (struct{}, error) {
+		err := fn()
+		if errors.Is(err, types.ErrDatabaseLocked) || errors.Is(err, types.ErrInsertDuplicateDetected) {
+			return struct{}{}, err
+		}
+		return struct{}{}, backoff.Permanent(err)
+	}, backoff.WithBackOff(backoff.NewExponentialBackOff()), backoff.WithMaxTries(maxRetries))
+	return err
+}
+
+// isErrDatabaseLocked reports whether err is a transient SQLite lock error
+// (SQLITE_BUSY "database is locked" or SQLITE_LOCKED "database table is locked").
+func isErrDatabaseLocked(err error) bool {
+	if err == nil {
+		return false
+	}
+	errMsg := err.Error()
+	return strings.Contains(errMsg, "database is locked") ||
+		strings.Contains(errMsg, "database table is locked")
+}
 
 // wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
@@ -40,6 +75,9 @@ func wrapGet(exist bool, err error) error {
 
 // wrapDelete return error if err not nil or if requested entry do not exist.
 func wrapDelete(c int64, err error) error {
+	if isErrDatabaseLocked(err) {
+		return types.ErrDatabaseLocked
+	}
 	if c == 0 {
 		return types.ErrRecordNotExist
 	}
@@ -51,12 +89,27 @@ func wrapDelete(c int64, err error) error {
 	return nil
 }
 
+// wrapUpdate wraps an update error and detects transient "database is locked" errors.
+func wrapUpdate(_ int64, err error) error {
+	if isErrDatabaseLocked(err) {
+		return types.ErrDatabaseLocked
+	}
+	return err
+}
+
 func wrapInsert(c int64, err error) error {
 	if err != nil {
-		if errMsg := err.Error(); strings.HasPrefix(errMsg, "UNIQUE constraint failed") ||
-			strings.HasPrefix(errMsg, "pq: duplicate key value violates unique constraint") ||
+		// Common unique constraint violation patterns across the supported drivers.
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "UNIQUE constraint failed") ||
+			strings.Contains(errMsg, "UNIQUE violation") ||
+			strings.Contains(errMsg, "duplicate key") ||
+			strings.Contains(errMsg, "unique constraint") ||
 			strings.Contains(errMsg, "Duplicate entry") {
 			return types.ErrInsertDuplicateDetected
+		}
+		if isErrDatabaseLocked(err) {
+			return types.ErrDatabaseLocked
 		}
 		return err
 	}
@@ -64,7 +117,7 @@ func wrapInsert(c int64, err error) error {
 	return nil
 }
 
-func (s storage) paginate(p *model.ListOptions) *xorm.Session {
+func (s storage) paginate(p *model.ListOptionsWithAll) *xorm.Session {
 	if p == nil || p.All {
 		return s.engine.NewSession()
 	}

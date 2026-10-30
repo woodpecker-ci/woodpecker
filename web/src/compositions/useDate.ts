@@ -21,10 +21,11 @@ function splitDuration(durationMs: number) {
   };
 }
 
-function toLocaleString(date: Date) {
+function toLocaleString(date: Date, tz?: string) {
   return date.toLocaleString(currentLocale, {
     dateStyle: 'short',
     timeStyle: 'short',
+    timeZone: tz,
   });
 }
 
@@ -60,16 +61,16 @@ function prettyDuration(durationMs: number) {
   const t = splitDuration(durationMs);
 
   if (t.totalHours > 1) {
-    return Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(
+    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(
       Math.round(t.totalHours),
     );
   }
   if (t.totalMinutes > 1) {
-    return Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(
+    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(
       Math.round(t.totalMinutes),
     );
   }
-  return Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(
+  return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(
     Math.round(t.totalSeconds),
   );
 }
