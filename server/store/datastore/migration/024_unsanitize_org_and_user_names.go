@@ -15,10 +15,7 @@
 package migration
 
 import (
-	"fmt"
-
 	"src.techknowlogick.com/xormigrate"
-	"xorm.io/builder"
 	"xorm.io/xorm"
 )
 
