@@ -28,7 +28,7 @@ Only **one** forge can be configured using environment variables. Enabling sever
 ### Granting admin
 
 By default [`WOODPECKER_ADMIN`](../10-server.md#admin) is matched by login name only. A user with a matching login on **any** connected forge becomes an admin.
-Set [`WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY=true`](../10-server.md#admin-primary-forge-only) to only make users of the primary forge admin (recommended).
+Set [`WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY=true`](../10-server.md#admin_primary_forge_only) to only make users of the primary forge admin (recommended).
 
 ### Restricting who can log in
 
