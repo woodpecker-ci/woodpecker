@@ -41,6 +41,8 @@ Extension HTTP calls (as of now the configuration extension) will by default onl
 
 ### Internal changes
 
+- Forge addon implementations must provide `Config() types.Config` with their public host configuration when rebuilding against the updated forge interface. Existing addon binaries continue to derive the host from their root URL.
+
 - Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
 
 ## 3.0.0

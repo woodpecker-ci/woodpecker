@@ -90,6 +90,11 @@ func (c *Forgejo) URL() string {
 	return c.url
 }
 
+// Config returns the public configuration of this forge.
+func (c *Forgejo) Config() forge_types.Config {
+	return forge_types.ConfigFromURL(c.url)
+}
+
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
 	return &oauth2.Config{
 			ClientID:     c.oAuthClientID,

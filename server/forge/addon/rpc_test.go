@@ -18,8 +18,10 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/rpc"
 	"strings"
 	"testing"
 
@@ -81,6 +83,29 @@ func testRepo() *model.Repo {
 	}
 }
 
+// LegacyForgeRPC exposes the URL method used by older addon binaries.
+type LegacyForgeRPC struct{}
+
+func (*LegacyForgeRPC) URL(_ []byte, resp *string) error {
+	*resp = "https://git.example.com:8443/forgejo/"
+	return nil
+}
+
+func TestConfigWithLegacyAddon(t *testing.T) {
+	serverConn, clientConn := net.Pipe()
+	server := rpc.NewServer()
+	require.NoError(t, server.RegisterName("Plugin", &LegacyForgeRPC{}))
+	go server.ServeConn(serverConn)
+	client := rpc.NewClient(clientConn)
+	t.Cleanup(func() {
+		_ = client.Close()
+		_ = serverConn.Close()
+	})
+
+	f := &RPC{client: client}
+	assert.Equal(t, types.Config{Host: "git.example.com:8443"}, f.Config())
+}
+
 func TestRPCRoundTrip(t *testing.T) {
 	ctx := t.Context()
 	user := testUser()
@@ -88,14 +113,16 @@ func TestRPCRoundTrip(t *testing.T) {
 	pipeline := &model.Pipeline{Number: 6, Event: model.EventPush, Commit: "abc", Ref: "refs/heads/main"}
 	listOpts := &model.ListOptions{Page: 2, PerPage: 10}
 
-	t.Run("name and url", func(t *testing.T) {
+	t.Run("name url and config", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
 		impl.On("Name").Return("addon")
 		impl.On("URL").Return("https://forge.example.com")
+		impl.On("Config").Return(types.Config{Host: "registry.example.com:8443"})
 
 		f := newRPCForge(t, impl)
 		assert.Equal(t, "addon", f.Name())
 		assert.Equal(t, "https://forge.example.com", f.URL())
+		assert.Equal(t, types.Config{Host: "registry.example.com:8443"}, f.Config())
 	})
 
 	t.Run("login", func(t *testing.T) {

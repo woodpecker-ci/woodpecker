@@ -68,6 +68,7 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	mockForge := forge_mocks.NewMockForge(t)
 	mockForge.On("Name").Return("github")
 	mockForge.On("URL").Return("https://github.com")
+	mockForge.On("Config").Return(forge_types.Config{Host: "github.com"})
 	mockForge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)

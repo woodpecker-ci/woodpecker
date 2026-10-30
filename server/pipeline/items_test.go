@@ -212,6 +212,7 @@ steps:
 	}, nil)
 	forge.On("Name").Return("github")
 	forge.On("URL").Return("https://github.com")
+	forge.On("Config").Return(forge_types.Config{Host: "github.com"})
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)

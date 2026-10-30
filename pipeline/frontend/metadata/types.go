@@ -14,6 +14,8 @@
 
 package metadata
 
+import "go.woodpecker-ci.org/woodpecker/v3/shared/forge"
+
 type (
 	// Metadata defines runtime m.
 	Metadata struct {
@@ -115,6 +117,7 @@ type (
 	// Forge defines runtime metadata about the forge that host the repo.
 	Forge struct {
 		Type string `json:"type,omitempty"`
+		Host string `json:"host,omitempty"`
 		URL  string `json:"url,omitempty"`
 	}
 
@@ -124,6 +127,8 @@ type (
 		Name() string
 		// URL returns the root url of a configured forge
 		URL() string
+		// Config returns the public configuration of a configured forge.
+		Config() forge.Config
 	}
 
 	TrustedConfiguration struct {

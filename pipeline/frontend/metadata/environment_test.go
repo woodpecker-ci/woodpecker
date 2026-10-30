@@ -22,7 +22,8 @@ import (
 
 func TestEnviron(t *testing.T) {
 	m := Metadata{
-		Sys: System{Name: "wp"},
+		Sys:   System{Name: "wp"},
+		Forge: Forge{Type: "gitea", Host: "gitea.com", URL: "https://gitea.com"},
 		Repo: Repo{
 			ID: 42,
 		},
@@ -60,6 +61,7 @@ func TestEnviron(t *testing.T) {
 	assert.Equal(t, "v1.2.3", envs["CI_COMMIT_TAG"])
 	assert.Equal(t, "1722617519", envs["CI_COMMIT_TIMESTAMP"])
 	assert.Equal(t, "1722610173", envs["CI_PREV_COMMIT_TIMESTAMP"])
+	assert.Equal(t, "gitea.com", envs["CI_FORGE_HOST"])
 
 	m = Metadata{
 		Sys: System{Name: "wp"},
@@ -82,6 +84,8 @@ func TestEnviron(t *testing.T) {
 	envs = m.Environ()
 
 	_, ok := envs["CI_COMMIT_TAG"]
+	assert.False(t, ok)
+	_, ok = envs["CI_FORGE_HOST"]
 	assert.False(t, ok)
 
 	assert.Equal(t, `["readme","license"]`, envs["CI_PIPELINE_FILES"])

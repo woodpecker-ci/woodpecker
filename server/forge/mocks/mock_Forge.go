@@ -278,6 +278,50 @@ func (_c *MockForge_Branches_Call) RunAndReturn(run func(ctx context.Context, u 
 	return _c
 }
 
+// Config provides a mock function for the type MockForge
+func (_mock *MockForge) Config() types.Config {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Config")
+	}
+
+	var r0 types.Config
+	if returnFunc, ok := ret.Get(0).(func() types.Config); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(types.Config)
+	}
+	return r0
+}
+
+// MockForge_Config_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Config'
+type MockForge_Config_Call struct {
+	*mock.Call
+}
+
+// Config is a helper method to define mock.On call
+func (_e *MockForge_Expecter) Config() *MockForge_Config_Call {
+	return &MockForge_Config_Call{Call: _e.mock.On("Config")}
+}
+
+func (_c *MockForge_Config_Call) Run(run func()) *MockForge_Config_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockForge_Config_Call) Return(config types.Config) *MockForge_Config_Call {
+	_c.Call.Return(config)
+	return _c
+}
+
+func (_c *MockForge_Config_Call) RunAndReturn(run func() types.Config) *MockForge_Config_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Deactivate provides a mock function for the type MockForge
 func (_mock *MockForge) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	ret := _mock.Called(ctx, u, r, link)
