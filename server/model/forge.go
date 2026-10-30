@@ -14,6 +14,12 @@
 
 package model
 
+const (
+	// ID of the primary forge.
+	// This forge is set up via environment variables.
+	PrimaryForgeID = 1
+)
+
 type ForgeType string
 
 const (
