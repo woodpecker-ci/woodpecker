@@ -5013,6 +5013,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
@@ -5047,6 +5050,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "oauth_client_secret": {
                     "type": "string"
