@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -96,6 +97,24 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 
 		for i := range stepIDs {
 			if err := deleteStep(sess, stepIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+
+	var snapshotIDs []int64
+	if err := sess.Table(new(model.Workflow)).Distinct("agent_snapshot_id").
+		Where("pipeline_id = ? AND agent_snapshot_id > 0", pipelineID).Find(&snapshotIDs); err != nil {
+		return err
+	}
+	for _, snapshotID := range snapshotIDs {
+		exist, err := sess.Select("1").Where(builder.Eq{"agent_snapshot_id": snapshotID}.
+			And(builder.Neq{"pipeline_id": pipelineID})).Exist(new(model.Workflow))
+		if err != nil {
+			return err
+		}
+		if !exist {
+			if _, err := sess.ID(snapshotID).Delete(new(model.AgentSnapshot)); err != nil {
 				return err
 			}
 		}
