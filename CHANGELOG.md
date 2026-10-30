@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@hippi345, @roian6
+@hippi345, @roian6, @slayerjain
 
 ### 📈 Enhancement
 
+- Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
 - Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
 
 ### 📚 Documentation
