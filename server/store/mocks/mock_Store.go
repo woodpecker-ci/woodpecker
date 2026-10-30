@@ -465,68 +465,6 @@ func (_c *MockStore_AgentSnapshotFind_Call) RunAndReturn(run func(n int64) (*mod
 	return _c
 }
 
-// AgentSnapshotPersist provides a mock function for the type MockStore
-func (_mock *MockStore) AgentSnapshotPersist(agentSnapshot *model.AgentSnapshot) (*model.AgentSnapshot, error) {
-	ret := _mock.Called(agentSnapshot)
-
-	if len(ret) == 0 {
-		panic("no return value specified for AgentSnapshotPersist")
-	}
-
-	var r0 *model.AgentSnapshot
-	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.AgentSnapshot) (*model.AgentSnapshot, error)); ok {
-		return returnFunc(agentSnapshot)
-	}
-	if returnFunc, ok := ret.Get(0).(func(*model.AgentSnapshot) *model.AgentSnapshot); ok {
-		r0 = returnFunc(agentSnapshot)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.AgentSnapshot)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(*model.AgentSnapshot) error); ok {
-		r1 = returnFunc(agentSnapshot)
-	} else {
-		r1 = ret.Error(1)
-	}
-	return r0, r1
-}
-
-// MockStore_AgentSnapshotPersist_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentSnapshotPersist'
-type MockStore_AgentSnapshotPersist_Call struct {
-	*mock.Call
-}
-
-// AgentSnapshotPersist is a helper method to define mock.On call
-//   - agentSnapshot *model.AgentSnapshot
-func (_e *MockStore_Expecter) AgentSnapshotPersist(agentSnapshot any) *MockStore_AgentSnapshotPersist_Call {
-	return &MockStore_AgentSnapshotPersist_Call{Call: _e.mock.On("AgentSnapshotPersist", agentSnapshot)}
-}
-
-func (_c *MockStore_AgentSnapshotPersist_Call) Run(run func(agentSnapshot *model.AgentSnapshot)) *MockStore_AgentSnapshotPersist_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.AgentSnapshot
-		if args[0] != nil {
-			arg0 = args[0].(*model.AgentSnapshot)
-		}
-		run(
-			arg0,
-		)
-	})
-	return _c
-}
-
-func (_c *MockStore_AgentSnapshotPersist_Call) Return(agentSnapshot1 *model.AgentSnapshot, err error) *MockStore_AgentSnapshotPersist_Call {
-	_c.Call.Return(agentSnapshot1, err)
-	return _c
-}
-
-func (_c *MockStore_AgentSnapshotPersist_Call) RunAndReturn(run func(agentSnapshot *model.AgentSnapshot) (*model.AgentSnapshot, error)) *MockStore_AgentSnapshotPersist_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // AgentUpdate provides a mock function for the type MockStore
 func (_mock *MockStore) AgentUpdate(agent *model.Agent) error {
 	ret := _mock.Called(agent)
@@ -6736,6 +6674,63 @@ func (_c *MockStore_WorkflowUpdate_Call) Return(err error) *MockStore_WorkflowUp
 }
 
 func (_c *MockStore_WorkflowUpdate_Call) RunAndReturn(run func(workflow *model.Workflow) error) *MockStore_WorkflowUpdate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// WorkflowUpdateWithSnapshot provides a mock function for the type MockStore
+func (_mock *MockStore) WorkflowUpdateWithSnapshot(workflow *model.Workflow, agentSnapshot *model.AgentSnapshot) error {
+	ret := _mock.Called(workflow, agentSnapshot)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowUpdateWithSnapshot")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Workflow, *model.AgentSnapshot) error); ok {
+		r0 = returnFunc(workflow, agentSnapshot)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockStore_WorkflowUpdateWithSnapshot_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowUpdateWithSnapshot'
+type MockStore_WorkflowUpdateWithSnapshot_Call struct {
+	*mock.Call
+}
+
+// WorkflowUpdateWithSnapshot is a helper method to define mock.On call
+//   - workflow *model.Workflow
+//   - agentSnapshot *model.AgentSnapshot
+func (_e *MockStore_Expecter) WorkflowUpdateWithSnapshot(workflow any, agentSnapshot any) *MockStore_WorkflowUpdateWithSnapshot_Call {
+	return &MockStore_WorkflowUpdateWithSnapshot_Call{Call: _e.mock.On("WorkflowUpdateWithSnapshot", workflow, agentSnapshot)}
+}
+
+func (_c *MockStore_WorkflowUpdateWithSnapshot_Call) Run(run func(workflow *model.Workflow, agentSnapshot *model.AgentSnapshot)) *MockStore_WorkflowUpdateWithSnapshot_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Workflow
+		if args[0] != nil {
+			arg0 = args[0].(*model.Workflow)
+		}
+		var arg1 *model.AgentSnapshot
+		if args[1] != nil {
+			arg1 = args[1].(*model.AgentSnapshot)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_WorkflowUpdateWithSnapshot_Call) Return(err error) *MockStore_WorkflowUpdateWithSnapshot_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockStore_WorkflowUpdateWithSnapshot_Call) RunAndReturn(run func(workflow *model.Workflow, agentSnapshot *model.AgentSnapshot) error) *MockStore_WorkflowUpdateWithSnapshot_Call {
 	_c.Call.Return(run)
 	return _c
 }

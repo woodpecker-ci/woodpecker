@@ -127,16 +127,15 @@ func TestLockAgentToWorkflow(t *testing.T) {
 		workflow.AgentSnapshotID = 41
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("AgentSnapshotPersist", &model.AgentSnapshot{
+		mockStore.On("WorkflowUpdateWithSnapshot", mock.MatchedBy(func(wf *model.Workflow) bool {
+			return wf.ID == 30 && wf.AgentID == agent.ID
+		}), &model.AgentSnapshot{
 			OrgID:        999,
 			Name:         "org-agent",
 			Platform:     "linux/arm64",
 			Backend:      "kubernetes",
 			CustomLabels: map[string]string{"zone": "eu"},
-		}).Return(&model.AgentSnapshot{ID: 42}, nil)
-		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(wf *model.Workflow) bool {
-			return wf.ID == 30 && wf.AgentID == agent.ID && wf.AgentSnapshotID == 42
-		})).Return(nil)
+		}).Return(nil)
 
 		require.NoError(t, rpcInst.lockAgentToWorkflow(t.Context(), agent, "30"))
 	})
@@ -149,7 +148,7 @@ func TestLockAgentToWorkflow(t *testing.T) {
 		workflow.AgentSnapshotID = 41
 
 		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
-		mockStore.On("AgentSnapshotPersist", mock.Anything).Return(nil, errors.New("db gone"))
+		mockStore.On("WorkflowUpdateWithSnapshot", workflow, mock.Anything).Return(errors.New("db gone"))
 		mockStore.On("WorkflowUpdate", mock.MatchedBy(func(wf *model.Workflow) bool {
 			// never keep the snapshot of the previous agent
 			return wf.ID == 30 && wf.AgentID == agent.ID && wf.AgentSnapshotID == 0

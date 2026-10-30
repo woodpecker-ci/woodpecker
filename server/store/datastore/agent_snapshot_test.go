@@ -15,14 +15,12 @@
 package datastore
 
 import (
-	"context"
-	"regexp"
+	"errors"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"xorm.io/xorm/contexts"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -38,18 +36,35 @@ func testAgentSnapshot() *model.AgentSnapshot {
 	}
 }
 
-func TestAgentSnapshotPersist(t *testing.T) {
-	store, closer := newTestStore(t, new(model.AgentSnapshot))
+// assignSnapshot links the snapshot to the workflow and returns the stored snapshot.
+func assignSnapshot(t *testing.T, store *storage, workflow *model.Workflow, snapshot *model.AgentSnapshot) *model.AgentSnapshot {
+	t.Helper()
+	require.NoError(t, store.WorkflowUpdateWithSnapshot(workflow, snapshot))
+	stored, err := store.AgentSnapshotFind(workflow.AgentSnapshotID)
+	require.NoError(t, err)
+	return stored
+}
+
+// persistSnapshot assigns the snapshot to a new workflow and returns the stored snapshot.
+func persistSnapshot(t *testing.T, store *storage, snapshot *model.AgentSnapshot) *model.AgentSnapshot {
+	t.Helper()
+	count, err := store.engine.Count(new(model.Workflow))
+	require.NoError(t, err)
+	workflow := &model.Workflow{PipelineID: 1, PID: int(count) + 1}
+	require.NoError(t, store.WorkflowsCreate([]*model.Workflow{workflow}))
+	return assignSnapshot(t, store, workflow, snapshot)
+}
+
+func TestWorkflowUpdateWithSnapshot(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow))
 	defer closer()
 
-	first, err := store.AgentSnapshotPersist(testAgentSnapshot())
-	require.NoError(t, err)
+	first := persistSnapshot(t, store, testAgentSnapshot())
 	assert.NotZero(t, first.ID)
 	assert.NotEmpty(t, first.Hash)
 
 	// identical content is stored once and referenced again
-	second, err := store.AgentSnapshotPersist(testAgentSnapshot())
-	require.NoError(t, err)
+	second := persistSnapshot(t, store, testAgentSnapshot())
 	assert.Equal(t, first.ID, second.ID)
 
 	// every field is part of the identity
@@ -64,8 +79,7 @@ func TestAgentSnapshotPersist(t *testing.T) {
 	for _, change := range changes {
 		snapshot := testAgentSnapshot()
 		change(snapshot)
-		persisted, err := store.AgentSnapshotPersist(snapshot)
-		require.NoError(t, err)
+		persisted := persistSnapshot(t, store, snapshot)
 		assert.False(t, ids[persisted.ID], "changed snapshot %+v must not reuse an existing one", snapshot)
 		ids[persisted.ID] = true
 	}
@@ -82,8 +96,8 @@ func TestAgentSnapshotPersist(t *testing.T) {
 	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 }
 
-func TestAgentSnapshotPersistTreatsNoLabelsAlike(t *testing.T) {
-	store, closer := newTestStore(t, new(model.AgentSnapshot))
+func TestWorkflowUpdateWithSnapshotTreatsNoLabelsAlike(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow))
 	defer closer()
 
 	withNil := testAgentSnapshot()
@@ -91,73 +105,47 @@ func TestAgentSnapshotPersistTreatsNoLabelsAlike(t *testing.T) {
 	withEmpty := testAgentSnapshot()
 	withEmpty.CustomLabels = make(map[string]string)
 
-	first, err := store.AgentSnapshotPersist(withNil)
-	require.NoError(t, err)
-	second, err := store.AgentSnapshotPersist(withEmpty)
-	require.NoError(t, err)
+	first := persistSnapshot(t, store, withNil)
+	second := persistSnapshot(t, store, withEmpty)
 	assert.Equal(t, first.ID, second.ID)
 }
 
-// concurrentAgentSnapshotInsertHook simulates a concurrent request that persists the
-// same snapshot after AgentSnapshotPersist looked it up but before it inserts its own.
-type concurrentAgentSnapshotInsertHook struct {
-	store    *storage
-	snapshot model.AgentSnapshot
-	fired    bool
-	err      error
-}
-
-var agentSnapshotInsertRe = regexp.MustCompile("(?i)^INSERT INTO [`\"]?agent_snapshots[`\"]? ")
-
-func (h *concurrentAgentSnapshotInsertHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
-	if !h.fired && agentSnapshotInsertRe.MatchString(c.SQL) {
-		h.fired = true
-		snapshot := h.snapshot
-		// bounded, so an AgentSnapshotPersist that holds the only connection fails instead of hanging
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		_, h.err = h.store.engine.Context(ctx).Insert(&snapshot)
-	}
-	return c.Ctx, nil
-}
-
-func (h *concurrentAgentSnapshotInsertHook) AfterProcess(*contexts.ContextHook) error {
-	return nil
-}
-
-// agents poll concurrently, so the same snapshot can be persisted twice at once
+// agents poll concurrently, so the same new snapshot can be assigned by many requests at once
 // (same race as https://github.com/woodpecker-ci/woodpecker/issues/7173 for configs).
-func TestAgentSnapshotPersistConcurrentDuplicate(t *testing.T) {
-	store, closer := newTestStore(t, new(model.AgentSnapshot))
+func TestWorkflowUpdateWithSnapshotConcurrent(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow))
 	defer closer()
+	if driver, _ := testDriverConfig(); driver == DriverMysql || driver == DriverPostgres {
+		// Unlike in-memory sqlite, these databases must see the requests in parallel.
+		store.engine.SetMaxOpenConns(8)
+		store.engine.SetMaxIdleConns(8)
+	}
 
-	// what the concurrent request stores: same content, so same hash
-	reference, err := store.AgentSnapshotPersist(testAgentSnapshot())
-	require.NoError(t, err)
-	_, err = store.engine.ID(reference.ID).Delete(new(model.AgentSnapshot))
-	require.NoError(t, err)
+	workflows := make([]*model.Workflow, 8)
+	for i := range workflows {
+		workflows[i] = &model.Workflow{PipelineID: 1, PID: i + 1}
+	}
+	require.NoError(t, store.WorkflowsCreate(workflows))
 
-	hook := &concurrentAgentSnapshotInsertHook{store: store, snapshot: *testAgentSnapshot()}
-	hook.snapshot.Hash = reference.Hash
-	store.engine.AddHook(hook)
-
-	snapshot, err := store.AgentSnapshotPersist(testAgentSnapshot())
-	require.True(t, hook.fired)
-	require.NoError(t, hook.err)
-	require.NoError(t, err)
+	errs := make([]error, len(workflows))
+	var wg sync.WaitGroup
+	for i := range workflows {
+		wg.Go(func() { errs[i] = store.WorkflowUpdateWithSnapshot(workflows[i], testAgentSnapshot()) })
+	}
+	wg.Wait()
+	require.NoError(t, errors.Join(errs...))
 
 	count, err := store.engine.Count(new(model.AgentSnapshot))
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, count)
-	assert.NotZero(t, snapshot.ID)
-	existing, err := store.AgentSnapshotFind(snapshot.ID)
-	require.NoError(t, err)
-	assert.Equal(t, reference.Hash, existing.Hash)
+	for _, workflow := range workflows {
+		assert.Equal(t, workflows[0].AgentSnapshotID, workflow.AgentSnapshotID)
+	}
 }
 
 // Autoscaled agents with the same metadata must not create a row each.
-func TestAgentSnapshotPersistSharedByAgents(t *testing.T) {
-	store, closer := newTestStore(t, new(model.AgentSnapshot))
+func TestWorkflowUpdateWithSnapshotSharedByAgents(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow))
 	defer closer()
 
 	first := testAgentSnapshot()
@@ -165,10 +153,8 @@ func TestAgentSnapshotPersistSharedByAgents(t *testing.T) {
 	second := testAgentSnapshot()
 	second.AgentID = 4
 
-	persistedFirst, err := store.AgentSnapshotPersist(first)
-	require.NoError(t, err)
-	persistedSecond, err := store.AgentSnapshotPersist(second)
-	require.NoError(t, err)
+	persistedFirst := persistSnapshot(t, store, first)
+	persistedSecond := persistSnapshot(t, store, second)
 
 	assert.Equal(t, persistedFirst.ID, persistedSecond.ID)
 	count, err := store.engine.Count(new(model.AgentSnapshot))
@@ -228,14 +214,7 @@ func TestAgentSnapshotCleanup(t *testing.T) {
 				new(model.Registry), new(model.Redirection), new(model.Org))
 			defer closer()
 
-			shared, err := store.AgentSnapshotPersist(testAgentSnapshot())
-			require.NoError(t, err)
-			unique := testAgentSnapshot()
-			unique.Name = "unique-builder"
-			unique, err = store.AgentSnapshotPersist(unique)
-			require.NoError(t, err)
-
-			_, err = store.engine.Insert(
+			_, err := store.engine.Insert(
 				&model.Org{ID: 1, Name: "one"},
 				&model.Org{ID: 2, Name: "two"},
 				&model.Repo{ID: 1, OrgID: 1, ForgeRemoteID: "1", Owner: "org", Name: "one", FullName: "org/one"},
@@ -245,15 +224,23 @@ func TestAgentSnapshotCleanup(t *testing.T) {
 				&model.Pipeline{ID: 3, RepoID: 2, Number: 1},
 			)
 			require.NoError(t, err)
-			require.NoError(t, store.WorkflowsCreate([]*model.Workflow{
-				{PipelineID: 1, PID: 1, AgentID: 1, AgentSnapshotID: shared.ID},
-				{PipelineID: 1, PID: 2, AgentID: 2, AgentSnapshotID: shared.ID},
-				{PipelineID: 1, PID: 3, AgentID: 3, AgentSnapshotID: unique.ID},
+			workflows := []*model.Workflow{
+				{PipelineID: 1, PID: 1, AgentID: 1},
+				{PipelineID: 1, PID: 2, AgentID: 2},
+				{PipelineID: 1, PID: 3, AgentID: 3},
 				// Workflows from before snapshots were introduced have no reference.
 				{PipelineID: 1, PID: 4, AgentID: 4},
-				{PipelineID: 2, PID: 1, AgentID: 2, AgentSnapshotID: shared.ID},
-				{PipelineID: 3, PID: 1, AgentID: 5, AgentSnapshotID: shared.ID},
-			}))
+				{PipelineID: 2, PID: 1, AgentID: 2},
+				{PipelineID: 3, PID: 1, AgentID: 5},
+			}
+			require.NoError(t, store.WorkflowsCreate(workflows))
+			uniqueSnapshot := testAgentSnapshot()
+			uniqueSnapshot.Name = "unique-builder"
+			unique := assignSnapshot(t, store, workflows[2], uniqueSnapshot)
+			var shared *model.AgentSnapshot
+			for _, workflow := range []*model.Workflow{workflows[0], workflows[1], workflows[4], workflows[5]} {
+				shared = assignSnapshot(t, store, workflow, testAgentSnapshot())
+			}
 
 			require.NoError(t, tt.remove(store, tt.ids[0]))
 			_, err = store.AgentSnapshotFind(unique.ID)
@@ -275,12 +262,10 @@ func TestAgentSnapshotCleanupRollback(t *testing.T) {
 	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow), new(model.Step))
 	defer closer()
 
-	snapshot, err := store.AgentSnapshotPersist(testAgentSnapshot())
-	require.NoError(t, err)
 	pipeline := &model.Pipeline{ID: 1}
-	require.NoError(t, store.WorkflowsCreate([]*model.Workflow{
-		{PipelineID: pipeline.ID, PID: 1, AgentID: 1, AgentSnapshotID: snapshot.ID},
-	}))
+	workflow := &model.Workflow{PipelineID: pipeline.ID, PID: 1, AgentID: 1}
+	require.NoError(t, store.WorkflowsCreate([]*model.Workflow{workflow}))
+	snapshot := assignSnapshot(t, store, workflow, testAgentSnapshot())
 
 	// A failed replacement must restore both workflows and their snapshots.
 	replacement := &model.Workflow{PipelineID: pipeline.ID, PID: 1}

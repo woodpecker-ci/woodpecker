@@ -17,6 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -85,6 +86,15 @@ func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.W
 }
 
 func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
+	// Keep snapshot locks until the workflows are deleted. WorkflowsReplace
+	// already owns a transaction; other callers need one for this operation.
+	ownTransaction := !sess.IsInTx()
+	if ownTransaction {
+		if err := sess.Begin(); err != nil {
+			return err
+		}
+		defer sess.Rollback() //nolint:errcheck
+	}
 	// delete related steps
 	for {
 		stepIDs := make([]int64, 0, perPage)
@@ -104,14 +114,23 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 
 	var snapshotIDs []int64
 	if err := sess.Table(new(model.Workflow)).Distinct("agent_snapshot_id").
-		Where("pipeline_id = ? AND agent_snapshot_id > 0", pipelineID).Find(&snapshotIDs); err != nil {
+		Where("pipeline_id = ? AND agent_snapshot_id > 0", pipelineID).OrderBy("agent_snapshot_id").Find(&snapshotIDs); err != nil {
 		return err
 	}
 	for _, snapshotID := range snapshotIDs {
-		exist, err := sess.Select("1").Where(builder.Eq{"agent_snapshot_id": snapshotID}.
-			And(builder.Neq{"pipeline_id": pipelineID})).Exist(new(model.Workflow))
-		if err != nil {
+		// Assignment locks this same row until its workflow reference is stored.
+		if err := wrapUpdate(sess.ID(snapshotID).SetExpr("hash", "hash").Update(new(model.AgentSnapshot))); err != nil {
 			return err
+		}
+		query := sess.Select("1").Where(builder.Eq{"agent_snapshot_id": snapshotID}.
+			And(builder.Neq{"pipeline_id": pipelineID}))
+		if s.engine.Dialect().URI().DBType != schemas.SQLITE {
+			// Use a current read even under MySQL's default repeatable-read isolation.
+			query = query.ForUpdate()
+		}
+		exist, err := query.Exist(new(model.Workflow))
+		if err != nil {
+			return wrapUpdate(0, err)
 		}
 		if !exist {
 			if _, err := sess.ID(snapshotID).Delete(new(model.AgentSnapshot)); err != nil {
@@ -120,8 +139,13 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 		}
 	}
 
-	_, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
-	return err
+	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow)); err != nil {
+		return err
+	}
+	if ownTransaction {
+		return wrapUpdate(0, sess.Commit())
+	}
+	return nil
 }
 
 func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {

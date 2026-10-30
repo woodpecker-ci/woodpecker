@@ -32,44 +32,46 @@ func (s storage) agentSnapshotFindByHash(sess *xorm.Session, hash string) (*mode
 	return snapshot, nil
 }
 
-// AgentSnapshotPersist stores the snapshot unless an identical one exists, and returns
-// the stored one.
-func (s storage) AgentSnapshotPersist(snapshot *model.AgentSnapshot) (*model.AgentSnapshot, error) {
+// WorkflowUpdateWithSnapshot persists the snapshot and its workflow reference together.
+func (s storage) WorkflowUpdateWithSnapshot(workflow *model.Workflow, snapshot *model.AgentSnapshot) error {
 	hash, err := snapshot.ContentHash()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// no transaction: it would not stop a concurrent insert anyway, and on postgres a
-	// failed insert aborts the transaction, which would break the lookup below
-	sess := s.engine.NewSession()
-	defer sess.Close()
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
 
-	existing, err := s.agentSnapshotFindByHash(sess, hash)
-	if err == nil {
-		return existing, nil
-	}
-	if !errors.Is(err, types.ErrRecordNotExist) {
-		return nil, err
-	}
+		// Lock an existing snapshot before reading it. A no-op write also acquires
+		// SQLite's write lock, and waits for concurrent cleanup to commit first.
+		if err := wrapUpdate(sess.Where("hash = ?", hash).SetExpr("hash", "hash").Update(new(model.AgentSnapshot))); err != nil {
+			return err
+		}
+		stored, err := s.agentSnapshotFindByHash(sess, hash)
+		if errors.Is(err, types.ErrRecordNotExist) {
+			// Do not change the caller's snapshot.
+			insert := *snapshot
+			insert.ID = 0
+			insert.Hash = hash
+			insert.AgentID = 0
+			insert.CustomLabels = maps.Clone(snapshot.CustomLabels)
+			stored = &insert
+			err = wrapInsert(sess.Insert(stored))
+		}
+		if err != nil {
+			return err
+		}
 
-	// do not change the caller's snapshot
-	stored := *snapshot
-	stored.ID = 0
-	stored.Hash = hash
-	stored.AgentID = 0
-	stored.CustomLabels = maps.Clone(snapshot.CustomLabels)
-	err = wrapInsert(sess.Insert(&stored))
-	if errors.Is(err, types.ErrInsertDuplicateDetected) {
-		// a concurrent request persisted the identical snapshot after our lookup, so use
-		// that one (same race as https://github.com/woodpecker-ci/woodpecker/issues/7173)
-		return s.agentSnapshotFindByHash(sess, hash)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return &stored, nil
+		workflow.AgentSnapshotID = stored.ID
+		if err := wrapUpdate(sess.ID(workflow.ID).AllCols().Update(workflow)); err != nil {
+			return err
+		}
+		return wrapUpdate(0, sess.Commit())
+	})
 }
 
 func (s storage) AgentSnapshotFind(id int64) (*model.AgentSnapshot, error) {
