@@ -642,6 +642,8 @@
   "forgejo": "Forgejo",
   "addon": "Addon",
   "forge_type": "Forge type",
+  "forge_name": "Display name",
+  "forge_name_placeholder": "Optional label shown on the login page",
   "oauth_client_id": "OAuth Client ID",
   "oauth_client_secret": "OAuth Client Secret",
   "oauth_host": "OAuth host",
