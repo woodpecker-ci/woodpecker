@@ -100,6 +100,70 @@ func TestGithub(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
 	})
+
+	t.Run("dir is fetched with a single graphql request", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "somedir/a.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir returns config-not-found for missing directories", func(t *testing.T) {
+		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "no-such-dir")
+		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+	})
+
+	t.Run("dir skips symlinks", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+		}, files)
+	})
+
+	t.Run("dir loads symlinks over rest when following them", func(t *testing.T) {
+		followSymlinks = true
+		t.Cleanup(func() { followSymlinks = false })
+
+		// the graphql entry carries the link target as its text, which must
+		// never be used as the file content
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "symlink-dir/link.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir loads large and binary files over rest", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "large-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "large-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "large-dir/large.yaml", Data: []byte("pipeline:")},
+			{Name: "large-dir/binary.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "rest-fallback-dir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "rest-fallback-dir/b.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir falls back instead of reporting config-not-found for an unexpected graphql response", func(t *testing.T) {
+		// a 200 without a repository object must not be mistaken for a missing
+		// path: config-not-found makes the caller drop the pipeline silently
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "null-repo-dir")
+		require.NoError(t, err)
+		assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+		require.Len(t, files, 1)
+		assert.Equal(t, "null-repo-dir/c.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
 }
 
 func TestStatusDeployment(t *testing.T) {
