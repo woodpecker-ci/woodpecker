@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gzm0, @hippi345, @roian6, @slayerjain
+@gzm0, @hippi345, @roian6, @sarankumar1325, @slayerjain
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📚 Documentation
 
+- Fix dead links in CLI readme and docs pages [[#7451](https://github.com/woodpecker-ci/woodpecker/pull/7451)]
 - Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
 
 ### 📦️ Dependency
