@@ -3,6 +3,7 @@ export type ForgeType = 'github' | 'gitlab' | 'gitea' | 'bitbucket' | 'bitbucket
 export interface Forge {
   id: number;
   type: ForgeType;
+  name?: string;
   url: string;
   client?: string;
   oauth_client_secret?: string;
