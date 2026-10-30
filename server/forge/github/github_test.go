@@ -114,14 +114,36 @@ func TestGithub(t *testing.T) {
 		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
 	})
 
-	t.Run("dir with symlinks falls back to per-file fetching", func(t *testing.T) {
-		// the graphql entry carries the link target as its text, so the fetch
-		// must be retried over REST rather than used as the file content
+	t.Run("dir skips symlinks", func(t *testing.T) {
 		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
-		assert.NoError(t, err)
-		require.Len(t, files, 1)
-		assert.Equal(t, "pipeline:", string(files[0].Data))
-		assert.NotEqual(t, "../target.yaml", string(files[0].Data), "the symlink target must not be used as the file content")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+		}, files)
+	})
+
+	t.Run("dir loads symlinks over rest when following them", func(t *testing.T) {
+		followSymlinks = true
+		t.Cleanup(func() { followSymlinks = false })
+
+		// the graphql entry carries the link target as its text, which must
+		// never be used as the file content
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "symlink-dir/link.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir loads large and binary files over rest", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "large-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "large-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "large-dir/large.yaml", Data: []byte("pipeline:")},
+			{Name: "large-dir/binary.yaml", Data: []byte("pipeline:")},
+		}, files)
 	})
 
 	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
@@ -629,8 +651,6 @@ func TestFileAndDir(t *testing.T) {
 				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: a")})
 			case "/repos/octocat/hello-world/contents/.woodpecker/b.yaml":
 				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: b")})
-			case "/repos/octocat/hello-world/contents/.woodpecker/link.yaml":
-				writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: encoded("steps: link")})
 			case "/repos/octocat/hello-world/contents/.woodpecker":
 				writeJSON(t, w, []github.RepositoryContent{
 					{Type: new("file"), Name: new("a.yaml")},
@@ -688,12 +708,11 @@ func TestFileAndDir(t *testing.T) {
 		}
 	}
 
-	// sub folders are skipped, files and symlinks are loaded with their content
+	// sub folders and symlinks are skipped, files are loaded with their content
 	metas, err := dir(".woodpecker")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*forge_types.FileMeta{
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
-		{Name: ".woodpecker/link.yaml", Data: []byte("steps: link")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
 

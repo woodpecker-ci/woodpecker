@@ -56,10 +56,18 @@ func graphqlDir(c *gin.Context) {
 			{"name": "sub", "type": "tree", "mode": 16384, "object": {}}
 		]}}}}`)
 	case strings.HasSuffix(req.Variables.Expression, ":symlink-dir"):
-		// symlink blobs carry the link target as text, the forge must fall
-		// back to the REST path which resolves them
+		// symlink blobs carry the link target as text, the forge must load the
+		// linked file over REST or skip it
 		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: a", "isTruncated": false, "isBinary": false}},
 			{"name": "link.yaml", "type": "blob", "mode": 40960, "object": {"text": "../target.yaml", "isTruncated": false, "isBinary": false}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":large-dir"):
+		// no usable text for large or binary files, the forge must load them over REST
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: a", "isTruncated": false, "isBinary": false}},
+			{"name": "large.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: partial", "isTruncated": true, "isBinary": false}},
+			{"name": "binary.yaml", "type": "blob", "mode": 33188, "object": {"text": null, "isTruncated": false, "isBinary": true}}
 		]}}}}`)
 	case strings.HasSuffix(req.Variables.Expression, ":rest-fallback-dir"):
 		// force the caller onto the per-file REST fallback
@@ -85,10 +93,6 @@ func getContents(c *gin.Context) {
 	}
 	if strings.HasSuffix(c.Param("path"), "null-repo-dir") {
 		c.String(http.StatusOK, `[{"type": "file", "name": "c.yaml", "path": "null-repo-dir/c.yaml"}]`)
-		return
-	}
-	if strings.HasSuffix(c.Param("path"), "symlink-dir") {
-		c.String(http.StatusOK, `[{"type": "symlink", "name": "link.yaml", "path": "symlink-dir/link.yaml"}]`)
 		return
 	}
 	// base64 of "pipeline:"

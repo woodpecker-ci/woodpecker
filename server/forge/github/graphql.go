@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // graphqlURL derives the GraphQL endpoint from the REST API url.
@@ -91,13 +92,13 @@ type graphqlDirResponse struct {
 // GraphQL request instead of one REST request per file, so a directory with
 // many files neither multiplies the fetch latency nor the exposure to
 // transient forge errors.
-func (c *client) dirFromGraphQL(ctx context.Context, token, owner, name, ref, path string) ([]*forge_types.FileMeta, error) {
+func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
 	body, err := json.Marshal(map[string]any{
 		"query": dirQuery,
 		"variables": map[string]string{
-			"owner":      owner,
-			"name":       name,
-			"expression": ref + ":" + strings.TrimPrefix(path, "/"),
+			"owner":      r.Owner,
+			"name":       r.Name,
+			"expression": b.Commit + ":" + strings.TrimPrefix(path, "/"),
 		},
 	})
 	if err != nil {
@@ -113,13 +114,13 @@ func (c *client) dirFromGraphQL(ctx context.Context, token, owner, name, ref, pa
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+u.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	// reuse the REST client's http client, so the transport (and any client
 	// injected into the context) is shared instead of allocating a new
 	// connection pool per directory fetch
-	restClient, err := c.newClientToken(ctx, token)
+	restClient, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -165,22 +166,27 @@ func (c *client) dirFromGraphQL(ctx context.Context, token, owner, name, ref, pa
 
 	files := make([]*forge_types.FileMeta, 0, len(object.Entries))
 	for _, entry := range object.Entries {
-		// nested directories are not descended into
+		// sub folders and submodules are no pipeline files
 		if entry.Type != "blob" {
 			continue
 		}
-		if entry.Mode == gitModeSymlink {
-			// the graphql api returns the link target instead of the linked
-			// content, the per-file REST fallback resolves symlinks properly
-			return nil, fmt.Errorf("%s in %s is a symlink", entry.Name, path)
+		isSymlink := entry.Mode == gitModeSymlink
+		if isSymlink && !followSymlinks {
+			continue
 		}
-		if entry.Object.Text == nil || entry.Object.IsTruncated || (entry.Object.IsBinary != nil && *entry.Object.IsBinary) {
-			return nil, fmt.Errorf("file %s in %s is binary or too large for the graphql api", entry.Name, path)
+		filePath := path + "/" + entry.Name
+		text := entry.Object.Text
+		if isSymlink || text == nil || entry.Object.IsTruncated || (entry.Object.IsBinary != nil && *entry.Object.IsBinary) {
+			// GraphQL returns a symlink's target instead of the linked file,
+			// and no full text for large or binary files: load this one over REST
+			file, err := c.dirFile(ctx, u, r, b, filePath)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, file)
+			continue
 		}
-		files = append(files, &forge_types.FileMeta{
-			Name: path + "/" + entry.Name,
-			Data: []byte(*entry.Object.Text),
-		})
+		files = append(files, &forge_types.FileMeta{Name: filePath, Data: []byte(*text)})
 	}
 	return files, nil
 }
