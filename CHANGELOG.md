@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@hippi345, @roian6, @slayerjain
+@gzm0, @hippi345, @roian6, @slayerjain
+
+### 🔒 Security
+
+- Add flag to restrict admins to the primary forge [[#7430](https://github.com/woodpecker-ci/woodpecker/pull/7430)]
 
 ### 📈 Enhancement
 
