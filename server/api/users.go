@@ -32,8 +32,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-const defaultForgeID = model.PrimaryForgeID // TODO: replace defaultForgeID.
-
 // GetUsers
 //
 //	@Summary		List users
