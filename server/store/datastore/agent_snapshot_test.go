@@ -182,3 +182,114 @@ func TestAgentSnapshotPersistSharedByAgents(t *testing.T) {
 	require.NoError(t, err)
 	assert.Zero(t, loaded.AgentID)
 }
+
+func TestAgentSnapshotCleanup(t *testing.T) {
+	tests := []struct {
+		name   string
+		remove func(*storage, int64) error
+		ids    []int64
+	}{
+		{
+			name: "delete pipelines",
+			remove: func(store *storage, id int64) error {
+				return store.DeletePipeline(&model.Pipeline{ID: id})
+			},
+			ids: []int64{1, 2, 3},
+		},
+		{
+			name: "delete repositories",
+			remove: func(store *storage, id int64) error {
+				return store.DeleteRepo(&model.Repo{ID: id})
+			},
+			ids: []int64{1, 2},
+		},
+		{
+			name: "delete organizations",
+			remove: func(store *storage, id int64) error {
+				return store.OrgDelete(id)
+			},
+			ids: []int64{1, 2},
+		},
+		{
+			name: "replace workflows",
+			remove: func(store *storage, id int64) error {
+				return store.WorkflowsReplace(&model.Pipeline{ID: id}, []*model.Workflow{
+					{PipelineID: id, PID: 1, Name: "replacement"},
+				})
+			},
+			ids: []int64{1, 2, 3},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow),
+				new(model.Pipeline), new(model.Step), new(model.LogEntry), new(model.PipelineConfig),
+				new(model.Config), new(model.Repo), new(model.Perm), new(model.Secret),
+				new(model.Registry), new(model.Redirection), new(model.Org))
+			defer closer()
+
+			shared, err := store.AgentSnapshotPersist(testAgentSnapshot())
+			require.NoError(t, err)
+			unique := testAgentSnapshot()
+			unique.Name = "unique-builder"
+			unique, err = store.AgentSnapshotPersist(unique)
+			require.NoError(t, err)
+
+			_, err = store.engine.Insert(
+				&model.Org{ID: 1, Name: "one"},
+				&model.Org{ID: 2, Name: "two"},
+				&model.Repo{ID: 1, OrgID: 1, ForgeRemoteID: "1", Owner: "org", Name: "one", FullName: "org/one"},
+				&model.Repo{ID: 2, OrgID: 2, ForgeRemoteID: "2", Owner: "org", Name: "two", FullName: "org/two"},
+				&model.Pipeline{ID: 1, RepoID: 1, Number: 1},
+				&model.Pipeline{ID: 2, RepoID: 1, Number: 2},
+				&model.Pipeline{ID: 3, RepoID: 2, Number: 1},
+			)
+			require.NoError(t, err)
+			require.NoError(t, store.WorkflowsCreate([]*model.Workflow{
+				{PipelineID: 1, PID: 1, AgentID: 1, AgentSnapshotID: shared.ID},
+				{PipelineID: 1, PID: 2, AgentID: 2, AgentSnapshotID: shared.ID},
+				{PipelineID: 1, PID: 3, AgentID: 3, AgentSnapshotID: unique.ID},
+				// Workflows from before snapshots were introduced have no reference.
+				{PipelineID: 1, PID: 4, AgentID: 4},
+				{PipelineID: 2, PID: 1, AgentID: 2, AgentSnapshotID: shared.ID},
+				{PipelineID: 3, PID: 1, AgentID: 5, AgentSnapshotID: shared.ID},
+			}))
+
+			require.NoError(t, tt.remove(store, tt.ids[0]))
+			_, err = store.AgentSnapshotFind(unique.ID)
+			assert.ErrorIs(t, err, types.ErrRecordNotExist)
+			loaded, err := store.AgentSnapshotFind(shared.ID)
+			require.NoError(t, err, "another pipeline still references this snapshot")
+			assert.Equal(t, shared, loaded)
+
+			for _, id := range tt.ids[1:] {
+				require.NoError(t, tt.remove(store, id))
+			}
+			_, err = store.AgentSnapshotFind(shared.ID)
+			assert.ErrorIs(t, err, types.ErrRecordNotExist, "the final reference was removed")
+		})
+	}
+}
+
+func TestAgentSnapshotCleanupRollback(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow), new(model.Step))
+	defer closer()
+
+	snapshot, err := store.AgentSnapshotPersist(testAgentSnapshot())
+	require.NoError(t, err)
+	pipeline := &model.Pipeline{ID: 1}
+	require.NoError(t, store.WorkflowsCreate([]*model.Workflow{
+		{PipelineID: pipeline.ID, PID: 1, AgentID: 1, AgentSnapshotID: snapshot.ID},
+	}))
+
+	// A failed replacement must restore both workflows and their snapshots.
+	replacement := &model.Workflow{PipelineID: pipeline.ID, PID: 1}
+	require.Error(t, store.WorkflowsReplace(pipeline, []*model.Workflow{replacement, replacement}))
+	loaded, err := store.AgentSnapshotFind(snapshot.ID)
+	require.NoError(t, err)
+	assert.Equal(t, snapshot, loaded)
+	workflows, err := store.WorkflowList(pipeline)
+	require.NoError(t, err)
+	require.Len(t, workflows, 1)
+	assert.Equal(t, snapshot.ID, workflows[0].AgentSnapshotID)
+}
