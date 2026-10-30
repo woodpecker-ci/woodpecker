@@ -26,26 +26,23 @@ import (
 )
 
 func (svc *aesEncryptionService) loadCipher(password string) error {
-	key, err := svc.hash([]byte(password))
-	if err != nil {
-		return fmt.Errorf(errTemplateAesFailedGeneratingKey, err)
-	}
-	keyID, err := svc.deriveKeyID(key)
-	if err != nil {
-		return fmt.Errorf(errTemplateAesFailedGeneratingKeyID, err)
-	}
-	svc.keyID = keyID
-
+	key := sha3.SumSHAKE256([]byte(password), aesKeySize)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedLoadingCipher, err)
 	}
-
-	aead, err := cipher.NewGCM(block)
+	aead, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedLoadingCipher, err)
 	}
 	svc.cipher = aead
+
+	// The key id is derived with domain separation, so storing it (encrypted)
+	// leaks nothing about the key. It must be deterministic: it is compared
+	// against the sample stored in the database to validate the key across
+	// server restarts.
+	keyID := sha3.SumSHAKE256(append([]byte(keyIDDomainSeparation), key...), aesKeySize)
+	svc.keyID = hex.EncodeToString(keyID)
 	return nil
 }
 
@@ -65,43 +62,4 @@ func (svc *aesEncryptionService) validateKey() error {
 		return errEncryptionKeyInvalid
 	}
 	return nil
-}
-
-// deriveKeyID derives a deterministic, non-reversible identifier for the
-// encryption key. Domain separation ensures the id differs from the key
-// derivation of the password, so storing it (encrypted) leaks nothing about
-// the key itself. It must be deterministic: it is compared against the
-// sample stored in the database to validate the key across server restarts.
-func (svc *aesEncryptionService) deriveKeyID(key []byte) (string, error) {
-	result := make([]byte, 32)
-	sha := sha3.NewSHAKE256()
-
-	_, err := sha.Write([]byte(keyIDDomainSeparation))
-	if err != nil {
-		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
-	}
-	_, err = sha.Write(key)
-	if err != nil {
-		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
-	}
-	_, err = sha.Read(result)
-	if err != nil {
-		return "", fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
-	}
-	return hex.EncodeToString(result), nil
-}
-
-func (svc *aesEncryptionService) hash(data []byte) ([]byte, error) {
-	result := make([]byte, 32)
-	sha := sha3.NewSHAKE256()
-
-	_, err := sha.Write(data)
-	if err != nil {
-		return nil, fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
-	}
-	_, err = sha.Read(result)
-	if err != nil {
-		return nil, fmt.Errorf(errTemplateAesFailedCalculatingHash, err)
-	}
-	return result, nil
 }
