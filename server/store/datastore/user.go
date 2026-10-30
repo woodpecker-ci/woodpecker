@@ -49,7 +49,13 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
+	// one transaction, so a failed user insert does not leave its org behind
 	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
 	org := &model.Org{
 		Name:    user.Login,
 		ForgeID: user.ForgeID,
@@ -77,7 +83,11 @@ func (s storage) CreateUser(user *model.User) error {
 	}
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	return wrapInsert(sess.Insert(user))
+	if err := wrapInsert(sess.Insert(user)); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) UpdateUser(user *model.User) error {
