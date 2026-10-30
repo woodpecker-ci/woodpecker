@@ -110,7 +110,7 @@ func TestAgentSnapshotContentHash(t *testing.T) {
 	t.Run("missing and empty labels are the same", func(t *testing.T) {
 		withNil, withEmpty := base(), base()
 		withNil.CustomLabels = nil
-		withEmpty.CustomLabels = map[string]string{}
+		withEmpty.CustomLabels = make(map[string]string)
 		nilHash, err := withNil.ContentHash()
 		require.NoError(t, err)
 		emptyHash, err := withEmpty.ContentHash()

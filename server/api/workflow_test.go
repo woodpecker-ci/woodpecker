@@ -38,7 +38,7 @@ func TestGetWorkflowAgent(t *testing.T) {
 	pipeline := &model.Pipeline{ID: 10, RepoID: 1, Number: 3}
 	user := &model.User{ID: 2, Login: "alice", ForgeID: 1}
 
-	globalAgent := &model.AgentSnapshot{ID: 101, OrgID: model.IDNotSet, Name: "global-builder", CustomLabels: map[string]string{}}
+	globalAgent := &model.AgentSnapshot{ID: 101, OrgID: model.IDNotSet, Name: "global-builder", CustomLabels: make(map[string]string)}
 	orgAgent := &model.AgentSnapshot{ID: 102, OrgID: 5, Name: "acme-builder", CustomLabels: map[string]string{"zone": "eu"}}
 	otherOrgAgent := &model.AgentSnapshot{ID: 103, OrgID: 6, Name: "other-builder"}
 	snapshots := map[int64]*model.AgentSnapshot{101: globalAgent, 102: orgAgent, 103: otherOrgAgent}

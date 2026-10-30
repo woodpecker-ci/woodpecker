@@ -89,7 +89,7 @@ func TestAgentSnapshotPersistTreatsNoLabelsAlike(t *testing.T) {
 	withNil := testAgentSnapshot()
 	withNil.CustomLabels = nil
 	withEmpty := testAgentSnapshot()
-	withEmpty.CustomLabels = map[string]string{}
+	withEmpty.CustomLabels = make(map[string]string)
 
 	first, err := store.AgentSnapshotPersist(withNil)
 	require.NoError(t, err)
