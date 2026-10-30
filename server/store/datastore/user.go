@@ -15,11 +15,9 @@
 package datastore
 
 import (
-	"errors"
 	"fmt"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -41,43 +39,17 @@ func (s storage) GetUserByLogin(forgeID int64, login string) (*model.User, error
 
 func (s storage) GetUserList(p *model.ListOptionsWithAll) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).OrderBy("login").Find(&users)
+	return users, s.paginate(p).OrderBy(conflictsFirst + ", login").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
 	return s.engine.Count(new(model.User))
 }
 
+// CreateUser creates the user. Its org is linked on login, by the forge remote id of the user.
 func (s storage) CreateUser(user *model.User) error {
-	sess := s.engine.NewSession()
-	org := &model.Org{
-		Name:    user.Login,
-		ForgeID: user.ForgeID,
-		IsUser:  true,
-	}
-
-	existingOrg, err := s.orgFindByName(sess, org.Name, user.ForgeID)
-	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
-		return fmt.Errorf("failed to check if org exists: %w", err)
-	}
-
-	if !errors.Is(err, types.ErrRecordNotExist) {
-		org = existingOrg
-		org.IsUser = true
-		org.Name = user.Login
-		err = s.orgUpdate(sess, org)
-		if err != nil {
-			return fmt.Errorf("failed to update existing org: %w", err)
-		}
-	} else {
-		err = s.orgCreate(org, sess)
-		if err != nil {
-			return fmt.Errorf("failed to create new org: %w", err)
-		}
-	}
-	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	return wrapInsert(sess.Insert(user))
+	return wrapInsert(s.engine.Insert(user))
 }
 
 func (s storage) UpdateUser(user *model.User) error {
@@ -94,8 +66,10 @@ func (s storage) DeleteUser(user *model.User) error {
 			return err
 		}
 
-		if err := s.orgDelete(sess, user.OrgID); err != nil {
-			return fmt.Errorf("failed to delete org: %w", err)
+		if user.OrgID != 0 {
+			if err := s.orgDelete(sess, user.OrgID); err != nil {
+				return fmt.Errorf("failed to delete org: %w", err)
+			}
 		}
 
 		if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {

@@ -450,7 +450,12 @@
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user",
-        "forge": "Forge"
+        "forge": "Forge",
+        "name_conflict": "Name conflict",
+        "name_conflict_desc": "Another forge account now uses this login and can't log in until this is resolved.",
+        "remap": "Give to the new forge account",
+        "remap_confirm": "The new forge account gets this user with all its repositories, secrets and its organization. Only do this if it belongs to the same person. Continue?",
+        "remapped": "User given to the new forge account"
       },
       "orgs": {
         "orgs": "Organizations",
@@ -460,7 +465,12 @@
         "delete_org": "Delete organization",
         "deleted": "Organization deleted",
         "delete_confirm": "Do you really want to delete this organization? This will also delete all repositories owned by this organization.",
-        "view": "View organization"
+        "view": "View organization",
+        "name_conflict": "Name conflict",
+        "name_conflict_desc": "Another forge account now uses this name and can't use Woodpecker until this is resolved.",
+        "remap": "Give to the new forge account",
+        "remap_confirm": "The new forge account gets this organization with all its repositories, secrets and agents. Only do this if it belongs to the same people. Continue?",
+        "remapped": "Organization given to the new forge account"
       },
       "repos": {
         "repos": "Repositories",
@@ -588,6 +598,7 @@
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
   "org_access_denied": "You are not allowed to access this organization",
+  "name_conflict": "Your name is still used by another account in Woodpecker. Ask an admin to resolve the conflict.",
   "invalid_state": "The OAuth state is invalid",
   "extensions": "Extensions",
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",

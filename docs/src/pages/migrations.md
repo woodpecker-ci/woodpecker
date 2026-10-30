@@ -42,6 +42,7 @@ Extension HTTP calls (as of now the configuration extension) will by default onl
 ### Internal changes
 
 - Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
+- Forge addons must implement the new `OrgByRemoteID` method and return the `ForgeRemoteID` of orgs from `Org`
 
 ## 3.0.0
 

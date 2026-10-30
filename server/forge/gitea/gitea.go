@@ -567,8 +567,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	org, _, orgErr := client.GetOrg(owner)
 	if orgErr == nil && org != nil {
 		return &model.Org{
-			Name:    org.Name,
-			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(org.ID)),
+			Name:          org.Name,
+			Private:       gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
 		}, nil
 	}
 
@@ -580,9 +581,42 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 	return &model.Org{
-		Name:    user.UserName,
-		IsUser:  true,
-		Private: user.Visibility != gitea.VisibleTypePublic,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.ID)),
+		Name:          user.UserName,
+		IsUser:        true,
+		Private:       user.Visibility != gitea.VisibleTypePublic,
+	}, nil
+}
+
+func (c *Gitea) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error) {
+	// the API can only find users by id, not orgs
+	if !isUser {
+		return nil, forge_types.ErrNotImplemented
+	}
+
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.ParseInt(string(remoteID), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	user, resp, err := client.GetUserByID(id)
+	if err != nil {
+		// the user search answers with an empty list if no user has the id
+		if resp != nil && resp.StatusCode == http.StatusOK {
+			return nil, errors.Join(err, forge_types.ErrOrgNotFound)
+		}
+		return nil, err
+	}
+
+	return &model.Org{
+		ForgeRemoteID: remoteID,
+		Name:          user.UserName,
+		IsUser:        true,
 	}, nil
 }
 

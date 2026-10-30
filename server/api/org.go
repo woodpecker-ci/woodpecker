@@ -86,7 +86,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
+	if org.ID == user.OrgID || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
@@ -104,13 +104,38 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", org.ID, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, perm)
+}
+
+// RemapOrg
+//
+//	@Summary		Give an org to the forge account that now uses its name
+//	@Description	Gives the org with all its data to the forge account in its name conflict. Only allowed if the old forge account is gone. Requires admin rights.
+//	@Router			/orgs/{org_id}/remap [post]
+//	@Produce		json
+//	@Success		200	{object}	Org
+//	@Tags			Orgs
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			org_id			path	string	true	"the org's id"
+func RemapOrg(c *gin.Context) {
+	org := session.Org(c)
+	if !remapAllowed(c, org.ForgeID, org.ForgeRemoteID, org.ConflictForgeRemoteID, org.IsUser) {
+		return
+	}
+
+	org.ForgeRemoteID = org.ConflictForgeRemoteID
+	org.ConflictForgeRemoteID = ""
+	if err := store.FromContext(c).OrgUpdate(org); err != nil {
+		handleDBError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, org)
 }
 
 // LookupOrg
@@ -160,11 +185,11 @@ func LookupOrg(c *gin.Context) {
 			return
 		}
 
-		if !user.Admin && org.Name != user.Login {
+		if !user.Admin && org.ID != user.OrgID {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		} else if !user.Admin {
-			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)

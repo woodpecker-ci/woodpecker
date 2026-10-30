@@ -16,14 +16,18 @@ package model
 
 // Org represents an organization.
 type Org struct {
-	ID      int64  `json:"id,omitempty"       xorm:"pk autoincr 'id'"`
-	ForgeID int64  `json:"forge_id,omitempty" xorm:"forge_id UNIQUE(s)"`
-	Name    string `json:"name"               xorm:"'name' UNIQUE(s)"`
-	IsUser  bool   `json:"is_user"            xorm:"is_user"`
+	ID      int64 `json:"id,omitempty"       xorm:"pk autoincr 'id'"`
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id UNIQUE(s) UNIQUE(forge)"`
+	// ForgeRemoteID is the unique identifier for the org on the forge.
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id" xorm:"UNIQUE(forge) forge_remote_id"`
+	Name          string        `json:"name"            xorm:"'name' UNIQUE(s)"`
+	IsUser        bool          `json:"is_user"         xorm:"is_user"`
 	// if name lookup has to check for membership or not
 	Private bool `json:"-" xorm:"private"`
 	// RequireOrgAgents restricts workflows of the organization's repos to agents of this organization
 	RequireOrgAgents bool `json:"require_org_agents" xorm:"DEFAULT FALSE 'require_org_agents'"`
+	// ConflictForgeRemoteID is the forge remote id of another forge account that now uses the name of this org
+	ConflictForgeRemoteID ForgeRemoteID `json:"conflict_forge_remote_id,omitempty" xorm:"conflict_forge_remote_id"`
 } //	@name	Org
 
 // OrgPatch represents an organization patch object.

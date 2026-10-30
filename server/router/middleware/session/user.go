@@ -137,7 +137,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 		}
 
 		// User can access his own, admin can access all
-		if (org.Name == user.Login && org.ForgeID == user.ForgeID) || user.Admin {
+		if org.ID == user.OrgID || user.Admin {
 			c.Next()
 			return
 		}
@@ -158,7 +158,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

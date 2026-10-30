@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -98,45 +99,42 @@ func TestUsers(t *testing.T) {
 	assert.Error(t, err3)
 }
 
-func TestCreateUserWithExistingOrg(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Perm))
+func TestCreateUserDoesNotLinkOrgByName(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Perm), new(model.Secret), new(model.Repo))
 	defer closer()
 
-	existingOrg := &model.Org{
-		ForgeID: 1,
-		IsUser:  true,
-		Name:    "existingOrg",
-		Private: false,
+	// an org of another forge account with the same name as the new user
+	org := &model.Org{ForgeID: 1, ForgeRemoteID: "1", Name: "taken"}
+	require.NoError(t, store.OrgCreate(org))
+
+	user := &model.User{ForgeID: 1, ForgeRemoteID: "2", Login: "taken", Hash: "A"}
+	require.NoError(t, store.CreateUser(user))
+	assert.Zero(t, user.OrgID)
+
+	// a user without org can be deleted, and other orgs stay
+	require.NoError(t, store.DeleteUser(user))
+	_, err := store.OrgGet(org.ID)
+	assert.NoError(t, err)
+}
+
+func TestUserListConflictsFirst(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User))
+	defer closer()
+
+	for i, user := range []*model.User{
+		{ForgeID: 1, ForgeRemoteID: "1", Login: "anna"},
+		{ForgeID: 1, ForgeRemoteID: "2", Login: "zoe", ConflictForgeRemoteID: "9"},
+		{ForgeID: 1, ForgeRemoteID: "3", Login: "bob"},
+	} {
+		user.Hash = string(rune('a' + i))
+		require.NoError(t, store.CreateUser(user))
 	}
 
-	err := store.OrgCreate(existingOrg)
-	assert.NoError(t, err)
-	assert.EqualValues(t, "existingOrg", existingOrg.Name)
-
-	// Create a new user with the same name as the existing organization
-	newUser := &model.User{
-		Login:         "existingOrg",
-		ForgeRemoteID: "A",
-		Hash:          "A",
-		ForgeID:       1,
+	users, err := store.GetUserList(&model.ListOptionsWithAll{All: true})
+	require.NoError(t, err)
+	logins := make([]string, 0, len(users))
+	for _, user := range users {
+		logins = append(logins, user.Login)
 	}
-	err = store.CreateUser(newUser)
-	assert.NoError(t, err)
-
-	updatedOrg, err := store.OrgGet(existingOrg.ID)
-	assert.NoError(t, err)
-	assert.Equal(t, "existingOrg", updatedOrg.Name)
-
-	newUser2 := &model.User{
-		Login:         "new-user",
-		ForgeRemoteID: "B",
-		ForgeID:       1,
-		Hash:          "B",
-	}
-	err = store.CreateUser(newUser2)
-	assert.NoError(t, err)
-
-	newOrg, err := store.OrgFindByName("new-user", 1)
-	assert.NoError(t, err)
-	assert.Equal(t, "new-user", newOrg.Name)
+	assert.Equal(t, []string{"zoe", "anna", "bob"}, logins)
 }

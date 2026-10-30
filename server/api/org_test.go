@@ -39,7 +39,7 @@ type fakeMembership struct {
 	called bool
 }
 
-func (f *fakeMembership) Get(_ context.Context, _ forge.Forge, _ *model.User, _ string) (*model.OrgPerm, error) {
+func (f *fakeMembership) Get(_ context.Context, _ forge.Forge, _ *model.User, _ *model.Org) (*model.OrgPerm, error) {
 	f.called = true
 	if f.perm == nil {
 		return &model.OrgPerm{}, nil
@@ -131,7 +131,7 @@ func TestGetOrgPermissions(t *testing.T) {
 		server.Config.Services.Membership = membership
 
 		tc := newTestContext(t, s)
-		user := &model.User{ID: 1, Login: "alice", ForgeID: 1}
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 4}
 		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
 		withUser(user)(tc)
 		tc.Ctx.Set("org", org)
@@ -143,6 +143,24 @@ func TestGetOrgPermissions(t *testing.T) {
 		tc.decodeJSON(t, perm)
 		assert.True(t, perm.Member)
 		assert.True(t, perm.Admin)
+	})
+
+	t.Run("user-org named like the user but not its own grants nothing", func(t *testing.T) {
+		installOrgForgeManager(t)
+		server.Config.Services.Membership = &fakeMembership{}
+
+		tc := newTestContext(t, s)
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 5}
+		withUser(user)(tc)
+		tc.Ctx.Set("org", &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true})
+
+		GetOrgPermissions(tc.Ctx)
+
+		require.Equal(t, http.StatusOK, tc.Recorder.Code)
+		perm := new(model.OrgPerm)
+		tc.decodeJSON(t, perm)
+		assert.False(t, perm.Member)
+		assert.False(t, perm.Admin)
 	})
 
 	t.Run("membership check runs for org on user's own forge", func(t *testing.T) {

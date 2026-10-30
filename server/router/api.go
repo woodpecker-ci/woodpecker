@@ -52,6 +52,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			users.GET("/:login", api.GetUser)
 			users.PATCH("/:login", api.PatchUser)
 			users.DELETE("/:login", api.DeleteUser)
+			users.POST("/:login/remap", api.RemapUser)
 		}
 
 		orgs := apiBase.Group("/orgs")
@@ -70,6 +71,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.Use(session.MustOrgMember(true))
 					org.PATCH("", api.PatchOrg)
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
+					org.POST("/remap", session.MustAdmin(), api.RemapOrg)
 
 					org.GET("/secrets", api.GetOrgSecretList)
 					org.POST("/secrets", api.PostOrgSecret)

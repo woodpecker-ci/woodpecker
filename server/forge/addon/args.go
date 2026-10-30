@@ -67,6 +67,12 @@ type argumentsOrgMembershipOrg struct {
 	Org string     `json:"org"`
 }
 
+type argumentsOrgByRemoteID struct {
+	U        *modelUser          `json:"u"`
+	RemoteID model.ForgeRemoteID `json:"remote_id"`
+	IsUser   bool                `json:"is_user"`
+}
+
 type argumentsTeams struct {
 	U *modelUser         `json:"u"`
 	P *model.ListOptions `json:"p"`

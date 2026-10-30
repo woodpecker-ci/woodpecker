@@ -724,7 +724,7 @@ func TestOrg(t *testing.T) {
 		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetOrgsByOrg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/orgs/org" {
-				writeJSON(t, w, github.Organization{Login: new("org")})
+				writeJSON(t, w, github.Organization{Login: new("org"), ID: new(int64(10))})
 				return
 			}
 			w.WriteHeader(http.StatusNotFound)
@@ -732,7 +732,7 @@ func TestOrg(t *testing.T) {
 		})),
 		github_mock.WithRequestMatchHandler(github_mock.GetUsersByUsername, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/users/octocat" {
-				writeJSON(t, w, github.User{Login: new("octocat")})
+				writeJSON(t, w, github.User{Login: new("octocat"), ID: new(int64(20))})
 				return
 			}
 			w.WriteHeader(http.StatusNotFound)
@@ -744,14 +744,44 @@ func TestOrg(t *testing.T) {
 
 	org, err := c.Org(ctx, user, "org")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "org"}, org)
+	assert.Equal(t, &model.Org{Name: "org", ForgeRemoteID: "10"}, org)
 
 	org, err = c.Org(ctx, user, "octocat")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "octocat", IsUser: true}, org)
+	assert.Equal(t, &model.Org{Name: "octocat", IsUser: true, ForgeRemoteID: "20"}, org)
 
 	_, err = c.Org(ctx, user, "missing")
 	assert.Error(t, err)
+}
+
+func TestOrgByRemoteID(t *testing.T) {
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatchHandler(github_mock.GetUserByAccountId, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case "/user/10":
+				writeJSON(t, w, github.User{Login: new("org"), ID: new(int64(10)), Type: new("Organization")})
+			case "/user/20":
+				writeJSON(t, w, github.User{Login: new("octocat"), ID: new(int64(20)), Type: new("User")})
+			default:
+				w.WriteHeader(http.StatusNotFound)
+				writeJSON(t, w, map[string]string{"message": "Not Found"})
+			}
+		})),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+	user := &model.User{AccessToken: "token"}
+
+	org, err := c.OrgByRemoteID(ctx, user, "10", false)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "org", ForgeRemoteID: "10"}, org)
+
+	org, err = c.OrgByRemoteID(ctx, user, "20", true)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "octocat", IsUser: true, ForgeRemoteID: "20"}, org)
+
+	_, err = c.OrgByRemoteID(ctx, user, "30", true)
+	assert.ErrorIs(t, err, forge_types.ErrOrgNotFound)
 }
 
 func TestRefreshWithoutRefreshToken(t *testing.T) {

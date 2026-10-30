@@ -442,8 +442,9 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
 	if org != nil && err == nil {
 		return &model.Org{
-			Name:   org.GetLogin(),
-			IsUser: false,
+			ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(org.GetID())),
+			Name:          org.GetLogin(),
+			IsUser:        false,
 		}, nil
 	}
 
@@ -454,8 +455,36 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}
 
 	return &model.Org{
-		Name:   user.GetLogin(),
-		IsUser: true,
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(user.GetID())),
+		Name:          user.GetLogin(),
+		IsUser:        true,
+	}, nil
+}
+
+func (c *client) OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, _ bool) (*model.Org, error) {
+	client, err := c.newClientToken(ctx, u.AccessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.ParseInt(string(remoteID), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	// users and orgs share the same ids, and both can be fetched by id as user
+	account, resp, err := client.Users.GetByID(ctx, id)
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return nil, errors.Join(err, forge_types.ErrOrgNotFound)
+		}
+		return nil, err
+	}
+
+	return &model.Org{
+		ForgeRemoteID: remoteID,
+		Name:          account.GetLogin(),
+		IsUser:        account.GetType() == "User",
 	}, nil
 }
 

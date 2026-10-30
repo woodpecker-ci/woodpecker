@@ -18,6 +18,11 @@
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
+        <Badge
+          v-if="user.conflict_forge_remote_id"
+          :label="$t('admin.settings.users.name_conflict')"
+          :title="$t('admin.settings.users.name_conflict_desc')"
+        />
         <span class="ml-auto flex gap-2">
           <Badge
             v-if="forgesMap.has(user.forge_id)"
@@ -43,6 +48,14 @@
           />
         </span>
         <div class="flex items-center gap-2">
+          <IconButton
+            v-if="user.conflict_forge_remote_id"
+            icon="heal"
+            :title="$t('admin.settings.users.remap')"
+            class="h-8 w-8"
+            :is-loading="isRemapping"
+            @click="remapUser(user)"
+          />
           <IconButton
             icon="edit"
             :title="$t('admin.settings.users.edit_user')"
@@ -231,6 +244,17 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
+  await resetPage();
+});
+
+const { doSubmit: remapUser, isLoading: isRemapping } = useAsyncAction(async (_user: User) => {
+  // eslint-disable-next-line no-alert
+  if (!confirm(t('admin.settings.users.remap_confirm'))) {
+    return;
+  }
+
+  await apiClient.remapUser(_user);
+  notifications.notify({ title: t('admin.settings.users.remapped'), type: 'success' });
   await resetPage();
 });
 

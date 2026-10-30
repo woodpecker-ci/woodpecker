@@ -1557,6 +1557,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/orgs/{org_id}/remap": {
+            "post": {
+                "description": "Gives the org with all its data to the forge account in its name conflict. Only allowed if the old forge account is gone. Requires admin rights.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orgs"
+                ],
+                "summary": "Give an org to the forge account that now uses its name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Org"
+                        }
+                    }
+                }
+            }
+        },
         "/orgs/{org_id}/secrets": {
             "get": {
                 "produces": [
@@ -4728,6 +4765,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{login}/remap": {
+            "post": {
+                "description": "Gives the user and its org with all their data to the forge account in its name conflict. Only allowed if the old forge account is gone. Requires admin rights.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Give a user to the forge account that now uses its login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the user's login name",
+                        "name": "login",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "specify forge (else default will be used)",
+                        "name": "forge_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/User"
+                        }
+                    }
+                }
+            }
+        },
         "/version": {
             "get": {
                 "description": "Endpoint returns the server version and build information.",
@@ -5110,8 +5191,16 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "conflict_forge_remote_id": {
+                    "description": "ConflictForgeRemoteID is the forge remote id of another forge account that now uses the name of this org",
+                    "type": "string"
+                },
                 "forge_id": {
                     "type": "integer"
+                },
+                "forge_remote_id": {
+                    "description": "ForgeRemoteID is the unique identifier for the org on the forge.",
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -6017,6 +6106,10 @@ const docTemplate = `{
                 },
                 "avatar_url": {
                     "description": "the avatar url for this user.",
+                    "type": "string"
+                },
+                "conflict_forge_remote_id": {
+                    "description": "ConflictForgeRemoteID is the forge remote id of another forge account that now uses the login of this user.",
                     "type": "string"
                 },
                 "email": {

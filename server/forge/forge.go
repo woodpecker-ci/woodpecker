@@ -174,5 +174,13 @@ type Forge interface {
 
 	// Org fetches organization details.
 	// If identifier is a user, return org with IsUser: true.
+	// ForgeRemoteID must be unique per forge for users and orgs together,
+	// and the org of a user must have the ForgeRemoteID of that user.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
+
+	// OrgByRemoteID fetches the user (isUser) or org with the given ForgeRemoteID.
+	// Errors:
+	//  - Expect types.ErrOrgNotFound to be returned if it does not exist
+	//  - Expect types.ErrNotImplemented to be returned if the forge can not look it up
+	OrgByRemoteID(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, isUser bool) (*model.Org, error)
 }

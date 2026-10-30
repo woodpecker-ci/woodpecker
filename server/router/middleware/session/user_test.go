@@ -40,7 +40,7 @@ type fakeMembership struct {
 	called bool
 }
 
-func (f *fakeMembership) Get(_ context.Context, _ forge.Forge, _ *model.User, _ string) (*model.OrgPerm, error) {
+func (f *fakeMembership) Get(_ context.Context, _ forge.Forge, _ *model.User, _ *model.Org) (*model.OrgPerm, error) {
 	f.called = true
 	if f.perm == nil {
 		return &model.OrgPerm{}, nil
@@ -107,7 +107,7 @@ func TestMustOrgMember(t *testing.T) {
 		membership := &fakeMembership{}
 		server.Config.Services.Membership = membership
 
-		user := &model.User{ID: 1, Login: "alice", ForgeID: 1}
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 4}
 		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
 		c, rec := newOrgMemberTestContext(user, org)
 
@@ -115,6 +115,22 @@ func TestMustOrgMember(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.False(t, c.IsAborted())
+	})
+
+	t.Run("org named like the user is not its own", func(t *testing.T) {
+		installMemberForgeManager(t)
+		membership := &fakeMembership{}
+		server.Config.Services.Membership = membership
+
+		// e.g. the org of a gone forge account, whose name the user took
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 5}
+		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
+		c, rec := newOrgMemberTestContext(user, org)
+
+		MustOrgMember(true)(c)
+
+		assert.Equal(t, http.StatusForbidden, rec.Code)
+		assert.True(t, c.IsAborted())
 	})
 
 	t.Run("instance admin is allowed across forges", func(t *testing.T) {

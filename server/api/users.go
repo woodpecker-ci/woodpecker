@@ -155,6 +155,59 @@ func PatchUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// RemapUser
+//
+//	@Summary		Give a user to the forge account that now uses its login
+//	@Description	Gives the user and its org with all their data to the forge account in its name conflict. Only allowed if the old forge account is gone. Requires admin rights.
+//	@Router			/users/{login}/remap [post]
+//	@Produce		json
+//	@Success		200	{object}	User
+//	@Tags			Users
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string	true	"the user's login name"
+//	@Param			forge_id		query	string	true	"specify forge (else default will be used)"
+func RemapUser(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	user, err := _store.GetUserByLogin(forgeID, c.Param("login"))
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	if !remapAllowed(c, user.ForgeID, user.ForgeRemoteID, user.ConflictForgeRemoteID, true) {
+		return
+	}
+
+	// the org of the user has the forge remote id of the user, so it moves along
+	if user.OrgID != 0 {
+		org, err := _store.OrgGet(user.OrgID)
+		if err != nil {
+			handleDBError(c, err)
+			return
+		}
+		org.ForgeRemoteID = user.ConflictForgeRemoteID
+		org.ConflictForgeRemoteID = ""
+		if err := _store.OrgUpdate(org); err != nil {
+			handleDBError(c, err)
+			return
+		}
+	}
+
+	user.ForgeRemoteID = user.ConflictForgeRemoteID
+	user.ConflictForgeRemoteID = ""
+	if err := _store.UpdateUser(user); err != nil {
+		handleDBError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+
 // PostUser
 //
 //	@Summary		Create a user

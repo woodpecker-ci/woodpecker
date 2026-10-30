@@ -35,6 +35,7 @@ const (
 	pathPermissions   = "%s/2.0/user/workspaces/%s/permissions/repositories?%s"
 	pathWorkspaces    = "%s/2.0/user/workspaces/?%s"
 	pathWorkspace     = "%s/2.0/workspaces/%s"
+	pathAccount       = "%s/2.0/users/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
 	pathRepos         = "%s/2.0/repositories/%s?%s"
 	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
@@ -293,6 +294,14 @@ func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {
 	out := new(Workspace)
 	uri := fmt.Sprintf(pathWorkspace, c.base, name)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
+}
+
+// GetAccount returns the account with the given UUID, account id or username.
+func (c *Client) GetAccount(name string) (*Account, error) {
+	out := new(Account)
+	uri := fmt.Sprintf(pathAccount, c.base, name)
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }

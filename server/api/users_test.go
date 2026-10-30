@@ -43,10 +43,8 @@ func TestPostUser(t *testing.T) {
 		tc.decodeJSON(t, created)
 		assert.EqualValues(t, defaultForgeID, created.ForgeID, "user must never be created with forge id 0")
 
-		// the user's org must be forge-scoped as well
-		org, err := s.OrgGet(created.OrgID)
-		require.NoError(t, err)
-		assert.EqualValues(t, defaultForgeID, org.ForgeID, "org must never be created with forge id 0")
+		// the org of the user is linked on its first login, by its forge remote id
+		assert.Zero(t, created.OrgID)
 	})
 
 	t.Run("explicit forge_id is kept", func(t *testing.T) {

@@ -52,8 +52,10 @@ func TestHandleAuth(t *testing.T) {
 		Admin:         false,
 	}
 	org := &model.Org{
-		ID:   1,
-		Name: user.Login,
+		ID:            1,
+		ForgeID:       1,
+		ForgeRemoteID: user.ForgeRemoteID,
+		Name:          user.Login,
 	}
 
 	server.Config.Server.SessionExpires = time.Hour
@@ -176,7 +178,8 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
 		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(nil, types.ErrRecordNotExist)
 		_store.On("CreateUser", mock.Anything).Return(nil)
-		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
@@ -213,6 +216,7 @@ func TestHandleAuth(t *testing.T) {
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgGet", org.ID).Return(org, nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(org, nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
@@ -383,6 +387,7 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
@@ -397,7 +402,7 @@ func TestHandleAuth(t *testing.T) {
 		assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
 	})
 
-	t.Run("should link an user org if it has the same name as the user", func(t *testing.T) {
+	t.Run("should link an user org stored without forge remote id", func(t *testing.T) {
 		_manager := manager_mocks.NewMockManager(t)
 		_forge := forge_mocks.NewMockForge(t)
 		_store := store_mocks.NewMockStore(t)
@@ -420,8 +425,14 @@ func TestHandleAuth(t *testing.T) {
 		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
-		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(org, nil)
-		_store.On("OrgUpdate", mock.Anything).Return(nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(&model.Org{ID: 1, ForgeID: 1, Name: user.Login}, nil)
+		_store.On("OrgUpdate", mock.Anything).Run(func(args mock.Arguments) {
+			linked, ok := args.Get(0).(*model.Org)
+			assert.True(t, ok)
+			assert.Equal(t, user.ForgeRemoteID, linked.ForgeRemoteID)
+			assert.True(t, linked.IsUser)
+		}).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
@@ -451,6 +462,7 @@ func TestHandleAuth(t *testing.T) {
 				Scheme: "https",
 			},
 		}
+		user.OrgID = org.ID
 		org.Name = "not-the-user-name"
 
 		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
@@ -458,7 +470,12 @@ func TestHandleAuth(t *testing.T) {
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 		_store.On("OrgGet", user.OrgID).Return(org, nil)
-		_store.On("OrgUpdate", mock.Anything).Return(nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(org, nil)
+		_store.On("OrgUpdate", mock.Anything).Run(func(args mock.Arguments) {
+			renamed, ok := args.Get(0).(*model.Org)
+			assert.True(t, ok)
+			assert.Equal(t, user.Login, renamed.Name)
+		}).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
@@ -469,6 +486,81 @@ func TestHandleAuth(t *testing.T) {
 		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		assert.Equal(t, "/", c.Writer.Header().Get("Location"))
 		assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
+	})
+
+	t.Run("should deny a login used by the user of a gone forge account", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{Header: make(http.Header), URL: &url.URL{Scheme: "https"}}
+		stale := &model.User{ID: 2, ForgeID: 1, ForgeRemoteID: "old-remote-id", Login: user.Login}
+
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(stale, nil)
+		_forge.On("OrgByRemoteID", mock.Anything, user, stale.ForgeRemoteID, true).Return(nil, forge_types.ErrOrgNotFound)
+		_store.On("UpdateUser", mock.Anything).Run(func(args mock.Arguments) {
+			marked, ok := args.Get(0).(*model.User)
+			assert.True(t, ok)
+			assert.Equal(t, stale.ID, marked.ID)
+			assert.Equal(t, user.ForgeRemoteID, marked.ConflictForgeRemoteID)
+		}).Return(nil).Once()
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/login?error=name_conflict", c.Writer.Header().Get("Location"))
+		assert.Empty(t, c.Writer.Header().Get("Set-Cookie"))
+		_store.AssertNotCalled(t, "CreateUser", mock.Anything)
+	})
+
+	t.Run("should register a new user if the old owner of the login was renamed", func(t *testing.T) {
+		_manager := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		_store := store_mocks.NewMockStore(t)
+		server.Config.Services.Manager = _manager
+		server.Config.Permissions.Open = true
+		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", _store)
+		c.Request = &http.Request{Header: make(http.Header), URL: &url.URL{Scheme: "https"}}
+		stale := &model.User{ID: 2, ForgeID: 1, ForgeRemoteID: "old-remote-id", Login: user.Login}
+
+		_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+		_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("GetUserByLogin", user.ForgeID, user.Login).Return(stale, nil)
+		_forge.On("OrgByRemoteID", mock.Anything, user, stale.ForgeRemoteID, true).Return(&model.Org{Name: "moved"}, nil)
+		_store.On("CreateUser", mock.Anything).Run(func(args mock.Arguments) {
+			created, ok := args.Get(0).(*model.User)
+			assert.True(t, ok)
+			assert.Equal(t, user.ForgeRemoteID, created.ForgeRemoteID)
+			assert.Equal(t, "moved", stale.Login, "the old user takes the new name of its forge account first")
+		}).Return(nil)
+		_store.On("UpdateUser", mock.Anything).Return(nil)
+		_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, types.ErrRecordNotExist)
+		_store.On("OrgCreate", mock.Anything).Return(nil)
+		_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
+		_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+		_forge.On("Repos", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+
+		api.HandleAuth(c)
+
+		assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
+		assert.Equal(t, "/", c.Writer.Header().Get("Location"))
 	})
 }
 
@@ -535,7 +627,9 @@ func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
 			_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(&fromForge, "", nil)
 			_store.On("GetUserByRemoteID", stored.ForgeID, stored.ForgeRemoteID).Return(stored, nil)
-			_store.On("OrgGet", stored.OrgID).Return(&model.Org{ID: stored.OrgID, Name: stored.Login}, nil)
+			storedOrg := &model.Org{ID: stored.OrgID, ForgeID: 1, ForgeRemoteID: stored.ForgeRemoteID, Name: stored.Login}
+			_store.On("OrgGet", stored.OrgID).Return(storedOrg, nil)
+			_store.On("OrgFindByRemoteID", stored.ForgeID, stored.ForgeRemoteID).Return(storedOrg, nil)
 			_store.On("UpdateUser", mock.Anything).Run(func(args mock.Arguments) {
 				updated, ok := args.Get(0).(*model.User)
 				assert.True(t, ok)
@@ -578,8 +672,10 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 		Email:         "test@example.com",
 	}
 	org := &model.Org{
-		ID:   1,
-		Name: user.Login,
+		ID:            1,
+		ForgeID:       1,
+		ForgeRemoteID: user.ForgeRemoteID,
+		Name:          user.Login,
 	}
 
 	server.Config.Server.SessionExpires = time.Hour
@@ -703,6 +799,7 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 			if tt.allow {
 				_store.On("GetUserByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(user, nil)
 				_store.On("OrgGet", org.ID).Return(org, nil)
+				_store.On("OrgFindByRemoteID", user.ForgeID, user.ForgeRemoteID).Return(org, nil)
 				_store.On("UpdateUser", mock.Anything).Return(nil)
 				_store.On("PermPrune", mock.Anything, []int64(nil)).Return(nil)
 				_store.On("RepoList", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)

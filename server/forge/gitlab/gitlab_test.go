@@ -1063,18 +1063,46 @@ func TestOrg(t *testing.T) {
 
 	org, err := client.Org(t.Context(), user, "jane")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, Private: true}, org)
+	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, Private: true, ForgeRemoteID: "5"}, org)
 
 	org, err = client.Org(t.Context(), user, "parent/sub")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "parent/sub", Private: true}, org)
+	assert.Equal(t, &model.Org{Name: "parent/sub", Private: true, ForgeRemoteID: "group-2"}, org)
 
 	org, err = client.Org(t.Context(), user, "public")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Org{Name: "public", Private: false}, org)
+	assert.Equal(t, &model.Org{Name: "public", Private: false, ForgeRemoteID: "group-3"}, org)
 
 	_, err = client.Org(t.Context(), user, "missing")
 	assert.ErrorContains(t, err, "could not find org missing")
+}
+
+func TestOrgByRemoteID(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v4/users/5", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":5,"username":"jane"}`))
+	})
+	mux.HandleFunc("/api/v4/groups/2", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":2,"full_path":"parent/sub"}`))
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := &model.User{AccessToken: "token"}
+
+	org, err := client.OrgByRemoteID(t.Context(), user, "5", true)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "jane", IsUser: true, ForgeRemoteID: "5"}, org)
+
+	org, err = client.OrgByRemoteID(t.Context(), user, "group-2", false)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Org{Name: "parent/sub", ForgeRemoteID: "group-2"}, org)
+
+	_, err = client.OrgByRemoteID(t.Context(), user, "6", true)
+	assert.ErrorIs(t, err, types.ErrOrgNotFound)
+
+	_, err = client.OrgByRemoteID(t.Context(), user, "group-3", false)
+	assert.ErrorIs(t, err, types.ErrOrgNotFound)
 }
 
 func TestNetrc(t *testing.T) {
