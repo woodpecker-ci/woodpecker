@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.20.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.2) - 2026-10-30
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-10-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@roian6
+@hippi345, @roian6
+
+### 📈 Enhancement
+
+- Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
 
 ### 📚 Documentation
 
