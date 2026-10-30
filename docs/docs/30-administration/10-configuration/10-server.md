@@ -728,6 +728,7 @@ Enable step-level metrics, including failed step counters and step duration hist
 
 Comma-separated list of users who become server admins when they sign in.
 The list is read at server start.
+With [multiple forges](./12-forges/11-overview.md#known-limitations), a user with a listed login on any connected forge becomes admin.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 

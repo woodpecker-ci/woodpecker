@@ -8,7 +8,7 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.27'
-  - &node_image 'docker.io/node:24-alpine'
+  - &node_image 'docker.io/node:26-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.27.x'
 
 # cspell:words bindata netgo
@@ -18,7 +18,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm install --frozen-lockfile
       - pnpm build
 
