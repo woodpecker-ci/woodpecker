@@ -27,6 +27,8 @@ steps:
   vendor:
     image: *golang_image
     commands:
+      - export GOPATH="$${PWD}/dist/.sbom-go"
+      - go mod download
       - go mod vendor
 
   cross-compile-server:
@@ -85,6 +87,7 @@ steps:
       - build-web
     image: ghcr.io/aquasecurity/trivy:0.76.1
     commands:
+      - export GOPATH="$${PWD}/dist/.sbom-go"
       - mkdir -p dist
       - trivy fs --scanners license --license-full --format spdx-json -o dist/base.go.spdx.json go.mod
       - trivy fs --scanners license --license-full --format spdx-json -o dist/webui.spdx.json web/
