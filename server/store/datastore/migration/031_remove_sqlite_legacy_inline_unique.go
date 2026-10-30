@@ -80,12 +80,79 @@ type permV031 struct {
 
 func (permV031) TableName() string { return "perms" }
 
+type stepV031 struct {
+	ID         int64    `xorm:"pk autoincr 'id'"`
+	UUID       string   `xorm:"INDEX 'uuid'"`
+	PipelineID int64    `xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID        int      `xorm:"UNIQUE(s) 'pid'"`
+	PPID       int      `xorm:"ppid"`
+	Name       string   `xorm:"name"`
+	State      string   `xorm:"state"`
+	Error      string   `xorm:"TEXT 'error'"`
+	Failure    string   `xorm:"failure"`
+	ExitCode   int      `xorm:"exit_code"`
+	Started    int64    `xorm:"started"`
+	Finished   int64    `xorm:"finished"`
+	Type       string   `xorm:"type"`
+	DependsOn  []string `xorm:"json 'depends_on'"`
+}
+
+func (stepV031) TableName() string { return "steps" }
+
+type pipelineV031 struct {
+	ID                   int64             `xorm:"pk autoincr 'id'"`
+	RepoID               int64             `xorm:"UNIQUE(s) INDEX 'repo_id'"`
+	Number               int64             `xorm:"UNIQUE(s) 'number'"`
+	Author               string            `xorm:"INDEX 'author'"`
+	Parent               int64             `xorm:"parent"`
+	Event                string            `xorm:"event"`
+	EventReason          []string          `xorm:"json 'event_reason'"`
+	Status               string            `xorm:"INDEX 'status'"`
+	Errors               []string          `xorm:"json 'errors'"`
+	Created              int64             `xorm:"'created' NOT NULL DEFAULT 0 created"`
+	Updated              int64             `xorm:"'updated' NOT NULL DEFAULT 0 updated"`
+	Started              int64             `xorm:"started"`
+	Finished             int64             `xorm:"finished"`
+	DeployTo             string            `xorm:"deploy"`
+	DeployTask           string            `xorm:"deploy_task"`
+	Commit               string            `xorm:"commit"`
+	Branch               string            `xorm:"branch"`
+	RerunCount           int64             `xorm:"rerun_count"`
+	Ref                  string            `xorm:"ref"`
+	Refspec              string            `xorm:"refspec"`
+	Avatar               string            `xorm:"varchar(500) avatar"`
+	ForgeURL             string            `xorm:"forge_url"`
+	Reviewer             string            `xorm:"reviewer"`
+	Reviewed             int64             `xorm:"reviewed"`
+	CancelInfo           map[string]any    `xorm:"json 'cancel_info'"`
+	ChangedFiles         []string          `xorm:"LONGTEXT 'changed_files'"`
+	AdditionalVariables  map[string]string `xorm:"json 'additional_variables'"`
+	PullRequestLabels    []string          `xorm:"json 'pr_labels'"`
+	PullRequestMilestone string            `xorm:"pr_milestone"`
+	PullRequestDraft     bool              `xorm:"pr_draft"`
+	Cron                 string            `xorm:"cron"`
+	FromFork             bool              `xorm:"from_fork"`
+	SelectedWorkflow     string            `xorm:"selected_workflow"`
+	Version              string            `xorm:"'version'"`
+	Release              map[string]any    `xorm:"json 'release'"`
+	TagTitle             string            `xorm:"tag_title"`
+	Title                string            `xorm:"title"`
+	Message              string            `xorm:"TEXT 'message'"`
+	Timestamp            int64             `xorm:"'timestamp'"`
+	Sender               string            `xorm:"sender"`
+	Email                string            `xorm:"varchar(500) email"`
+}
+
+func (pipelineV031) TableName() string { return "pipelines" }
+
 // Databases that started on the schema before xorm still carry inline
 // UNIQUE table constraints. Sync cannot see them (they have no index SQL),
 // so it never drops them, and some are stricter than the models: they block
 // the same login on another forge, the same config under another name and the
-// same secret name in two orgs. Only SQLite keeps them; there each affected
-// table is rebuilt from its model and the rows are copied over.
+// same secret name in two orgs. The ones on perms, steps and pipelines only
+// repeat a model index. Only SQLite keeps them; there each affected table is
+// rebuilt from its model and the rows are copied over. Columns the model no
+// longer has are not copied.
 var removeSQLiteLegacyInlineUnique = xormigrate.Migration{
 	ID: "remove-sqlite-legacy-inline-unique",
 	MigrateSession: func(sess *xorm.Session) error {
@@ -99,6 +166,7 @@ var removeSQLiteLegacyInlineUnique = xormigrate.Migration{
 
 		for _, bean := range []interface{ TableName() string }{
 			new(userV031), new(configV031), new(secretV031), new(permV031),
+			new(stepV031), new(pipelineV031),
 		} {
 			if err := rebuildSQLiteTableWithoutInlineUnique(sess, bean); err != nil {
 				return fmt.Errorf("table %s: %w", bean.TableName(), err)

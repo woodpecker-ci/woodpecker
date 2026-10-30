@@ -25,7 +25,7 @@ import (
 	"xorm.io/xorm"
 )
 
-var legacyInlineUniqueTablesV031 = []string{"users", "configs", "secrets", "perms"}
+var legacyInlineUniqueTablesV031 = []string{"users", "configs", "secrets", "perms", "steps", "pipelines"}
 
 func skipIfNotSQLite(t *testing.T) {
 	t.Helper()
@@ -105,6 +105,8 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	configsBefore := rowCount(t, engine, "config")
 	secretsBefore := rowCount(t, engine, "secrets")
 	permsBefore := rowCount(t, engine, "perms")
+	stepsBefore := rowCount(t, engine, "steps")
+	pipelinesBefore := rowCount(t, engine, "pipelines")
 	// pretend users with higher ids were deleted: their ids must not come back
 	_, err := engine.Exec("UPDATE sqlite_sequence SET seq = 1000 WHERE name = 'users'")
 	require.NoError(t, err)
@@ -124,6 +126,8 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	assert.Equal(t, configsBefore, rowCount(t, engine, "configs"))
 	assert.Equal(t, secretsBefore, rowCount(t, engine, "secrets"))
 	assert.Equal(t, permsBefore, rowCount(t, engine, "perms"))
+	assert.Equal(t, stepsBefore, rowCount(t, engine, "steps"))
+	assert.Equal(t, pipelinesBefore, rowCount(t, engine, "pipelines"))
 	assert.Equal(t, 1000, sequence(t, engine, "users"))
 	seqTypes, err := engine.QueryString("SELECT DISTINCT typeof(seq) AS t FROM sqlite_sequence")
 	require.NoError(t, err)
