@@ -152,18 +152,20 @@ type Forge interface {
 	// Webhook Processing Flow:
 	//  1. HTTP request arrives at /api/hook with forge-specific format
 	//  2. Webhook token verified against repo.WebhookSecret
-	//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
+	//  3. Hook() verifies the body signature with the secret if the forge signs it,
+	//     then parses webhook and returns (Repo, Pipeline, error)
 	//
 	// Return Semantics:
 	// - (repo, pipeline, nil): Execute pipeline for this event
 	// - (repo, nil, nil): Valid webhook, no pipeline should run
 	// - (nil, nil, types.ErrIgnoreEvent): Event ignored (logged)
+	// - (nil, nil, types.ErrInvalidWebhookSignature): Body signature does not match the secret
 	// - (nil, nil, error): Invalid webhook or parsing error
 	//
 	// Must verify webhook signature to prevent spoofing.
 	// Should return types.ErrIgnoreEvent for non-pipeline events
 	// (e.g. repository settings changed).
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
+	Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error)
 
 	// OrgMembership checks if user is member of organization and their permission.
 	// Should return (Member: false, Admin: false) if not a member.

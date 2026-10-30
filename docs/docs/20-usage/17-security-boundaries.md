@@ -22,8 +22,8 @@ Woodpecker generates a random secret for every repository when it is activated.
 The webhook URL carries a non-expiring token signed with this secret, which names the forge and repository and is checked on each received hook.
 A secret only allows tokens for its own repository.
 
-The token does not cover the body, so keep the webhook URL private: whoever has it can send forged requests for its repository.
-<!-- TODO: Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret and Woodpecker verifies it, so do not leak the secret either. (only Bitbucket Data Center is verified for now) -->
+Gitea, Forgejo and Bitbucket Data Center also sign the body with the secret, and Woodpecker rejects webhooks without a valid signature, so do not leak the secret either.
+On the other forges the token does not cover the body, so keep the webhook URL private: whoever has it can send forged requests for its repository.
 
 This only protects against a leaked URL, not against admins of the repository on the forge, who can read the URL and, depending on your forge, the secret.
 

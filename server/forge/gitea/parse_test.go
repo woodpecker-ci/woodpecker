@@ -17,7 +17,6 @@ package gitea
 
 import (
 	"bytes"
-	"net/http"
 	"strings"
 	"testing"
 
@@ -671,10 +670,7 @@ func TestGiteaParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tt.data))
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, tt.event)
-			r, p, err := parseHook(req)
+			r, p, err := parseHook(tt.event, []byte(tt.data))
 			if tt.err != nil {
 				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
@@ -693,11 +689,7 @@ func TestParsePullRequestDraft(t *testing.T) {
 		`"state": "open",`+"\n    "+`"draft": true,`,
 		1,
 	)
-	req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(payload))
-	req.Header = http.Header{}
-	req.Header.Set(hookEvent, "pull_request")
-
-	_, p, err := parseHook(req)
+	_, p, err := parseHook(hookPullRequest, []byte(payload))
 	assert.NoError(t, err)
 	if assert.NotNil(t, p) {
 		assert.True(t, p.PullRequestDraft)
