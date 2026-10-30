@@ -100,3 +100,26 @@ func TestEnviron(t *testing.T) {
 	envs = m.Environ()
 	assert.Equal(t, "false", envs["CI_COMMIT_PULL_REQUEST_DRAFT"])
 }
+
+func TestEnvironForgeHost(t *testing.T) {
+	tests := []struct {
+		name  string
+		forge Forge
+		want  string
+	}{
+		{name: "host of the forge", forge: Forge{Type: "gitea", URL: "https://git.example.com", Host: "git.example.com"}, want: "git.example.com"},
+		{name: "port is kept", forge: Forge{Type: "forgejo", URL: "http://forgejo.internal:3000", Host: "forgejo.internal:3000"}, want: "forgejo.internal:3000"},
+		{name: "no forge configured", forge: Forge{}, want: ""},
+		{name: "an url on its own adds no host", forge: Forge{Type: "gitea", URL: "https://git.example.com"}, want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := Metadata{Forge: tt.forge}
+			envs := m.Environ()
+			assert.Equal(t, tt.want, envs["CI_FORGE_HOST"])
+			_, ok := envs["CI_FORGE_HOST"]
+			assert.Equal(t, tt.want != "", ok)
+		})
+	}
+}

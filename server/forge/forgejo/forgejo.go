@@ -27,6 +27,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -88,6 +89,11 @@ func (c *Forgejo) Name() string {
 // URL returns the root url of a configured forge.
 func (c *Forgejo) URL() string {
 	return c.url
+}
+
+// Config returns the metadata of the configured forge.
+func (c *Forgejo) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {

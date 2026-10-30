@@ -24,6 +24,7 @@ import (
 	"context"
 	"net/http"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -62,6 +63,9 @@ type Forge interface {
 	// URL returns the root URL of the forge instance.
 	// Examples: "https://github.com", "https://gitlab.example.com"
 	URL() string
+
+	// Config returns the metadata of the forge instance.
+	Config() metadata.Forge
 
 	// Login authenticates a user via OAuth2.
 	//
