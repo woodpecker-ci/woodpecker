@@ -83,7 +83,7 @@ steps:
     depends_on:
       - vendor
       - build-web
-    image: ghcr.io/aquasecurity/trivy
+    image: ghcr.io/aquasecurity/trivy:0.76.1
     commands:
       - mkdir -p dist
       - trivy fs --scanners license --license-full --format spdx-json -o dist/base.go.spdx.json go.mod
@@ -95,8 +95,11 @@ steps:
       - build-agent
       - build-cli
     image: *golang_image
+    environment:
+      # renovate: datasource=github-releases depName=anchore/syft
+      SYFT_VERSION: v1.55.0
     commands:
-      - curl -sSfL https://get.anchore.io/syft | sh -s -- -b /usr/local/bin
+      - curl -sSfL https://get.anchore.io/syft | sh -s -- -b /usr/local/bin "$${SYFT_VERSION}"
       - syft scan file:dist/server/linux_amd64/woodpecker-server -o spdx-json > dist/server-deps.spdx.json
       - syft scan file:dist/agent/linux_amd64/woodpecker-agent -o spdx-json   > dist/agent-deps.spdx.json
       - syft scan file:dist/cli/linux_amd64/woodpecker-cli -o spdx-json       > dist/cli-deps.spdx.json
