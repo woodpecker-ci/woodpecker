@@ -86,7 +86,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
+	if user.OwnsOrg(org) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,

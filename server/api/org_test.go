@@ -131,7 +131,7 @@ func TestGetOrgPermissions(t *testing.T) {
 		server.Config.Services.Membership = membership
 
 		tc := newTestContext(t, s)
-		user := &model.User{ID: 1, Login: "alice", ForgeID: 1}
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 4}
 		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
 		withUser(user)(tc)
 		tc.Ctx.Set("org", org)
