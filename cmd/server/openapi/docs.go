@@ -3116,7 +3116,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "the options for the pipeline to run",
-                        "name": "options",
+                        "name": "pipelineOptions",
                         "in": "body",
                         "required": true,
                         "schema": {
