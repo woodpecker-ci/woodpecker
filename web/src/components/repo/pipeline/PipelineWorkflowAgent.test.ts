@@ -317,12 +317,21 @@ describe('pipelineWorkflowAgent', () => {
 
     const agentLink = (wrapper: Wrapper) => wrapper.findComponent(RouterLinkStub);
 
-    it('links a global agent to the admin agents settings for instance admins, in a new tab', async () => {
-      const wrapper = await openPopover(makeAgent());
+    it.each([
+      [-1, true],
+      [-1, false],
+      [1, true],
+      [1, false],
+      [5, true],
+      [5, false],
+    ] as const)('links agent org %i to admin settings when user registration is %s', async (orgId, registration) => {
+      window.WOODPECKER_USER_REGISTERED_AGENTS = registration;
+      const wrapper = await openPopover(makeAgent({ org_id: orgId }));
 
       expect(agentLink(wrapper).props('to')).toStrictEqual({ name: 'admin-settings-agents', query: { agent: 3 } });
       expect(agentLink(wrapper).attributes('target')).toBe('_blank');
       expect(agentLink(wrapper).text()).toBe('builder-03');
+      expect(getOrgPermissions).not.toHaveBeenCalled();
     });
 
     it('does not link a global agent for other users', async () => {
@@ -364,9 +373,10 @@ describe('pipelineWorkflowAgent', () => {
     });
 
     it('does not link org or user agents when user agent registration is disabled, like the settings tabs', async () => {
+      window.WOODPECKER_USER = { id: 2, login: 'dev', admin: false, org_id: 2 } as User;
       window.WOODPECKER_USER_REGISTERED_AGENTS = false;
       getOrgPermissions.mockResolvedValue({ member: true, admin: true });
-      const wrapper = await openPopover(makeAgent({ org_id: 1 }));
+      const wrapper = await openPopover(makeAgent({ org_id: 2 }));
       expect(agentLink(wrapper).exists()).toBe(false);
 
       const other = await openPopover(makeAgent({ org_id: 5 }));

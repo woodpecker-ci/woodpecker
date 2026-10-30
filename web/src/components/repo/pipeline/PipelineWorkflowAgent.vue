@@ -174,12 +174,11 @@ watch(
 // The agent settings page with this agent, if the user may open that settings page.
 async function agentSettingsLink(snapshot: AgentSnapshot): Promise<RouteLocationRaw | undefined> {
   const query = { agent: snapshot.id };
-  // global agent
-  if (snapshot.org_id === -1) {
-    return user?.admin ? { name: 'admin-settings-agents', query } : undefined;
+  if (user?.admin) {
+    return { name: 'admin-settings-agents', query };
   }
-  // like the settings tabs, org and user agents are only shown with user agent registration
-  if (!userRegisteredAgents) {
+  // Other users need user agent registration and permission for the agent's scope.
+  if (snapshot.org_id === -1 || !userRegisteredAgents) {
     return undefined;
   }
   if (snapshot.org_id === user?.org_id) {
