@@ -15,8 +15,8 @@
 package migration
 
 import (
+	"cmp"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"src.techknowlogick.com/xormigrate"
@@ -111,21 +111,9 @@ var removeSQLiteLegacyInlineUnique = xormigrate.Migration{
 func rebuildSQLiteTableWithoutInlineUnique(sess *xorm.Session, bean interface{ TableName() string }) error {
 	table := bean.TableName()
 
-	exist, err := sess.IsTableExist(table)
-	if err != nil || !exist {
-		return err
-	}
-	inline, err := sqliteInlineUniqueCount(sess, table)
-	if err != nil || inline == 0 {
-		return err
-	}
-
-	seq, err := sess.QueryString("SELECT seq FROM sqlite_sequence WHERE name = ?", table)
-	if err != nil {
-		return err
-	}
-	oldCols, err := sqliteColumns(sess, table)
-	if err != nil {
+	// no rows for a missing table or one without inline constraints
+	inline, err := sess.QueryString("SELECT 1 FROM pragma_index_list(?) WHERE origin = 'u'", table)
+	if err != nil || len(inline) == 0 {
 		return err
 	}
 
@@ -147,109 +135,34 @@ func rebuildSQLiteTableWithoutInlineUnique(sess *xorm.Session, bean interface{ T
 	if err := sess.Sync(bean); err != nil {
 		return err
 	}
-	newCols, err := sqliteColumns(sess, table)
+
+	// copy the columns both tables have; a NULL in a NOT NULL column gets its default
+	cols, err := sess.QueryString(`SELECT n.name, n."notnull", n.dflt_value FROM pragma_table_info(?) n
+		JOIN pragma_table_info(?) o ON o.name = n.name`, table, legacy)
 	if err != nil {
 		return err
 	}
-
 	var names, values []string
-	for _, col := range newCols {
-		old, ok := oldCols[col.name]
-		if !ok {
-			continue
+	for _, col := range cols {
+		name := "`" + col["name"] + "`"
+		names = append(names, name)
+		if col["notnull"] == "1" {
+			name = "COALESCE(" + name + ", " + cmp.Or(col["dflt_value"], "''") + ")"
 		}
-		value := "`" + col.name + "`"
-		if col.notNull && !old.notNull {
-			value = "COALESCE(" + value + ", " + col.fallback() + ")"
-		}
-		names = append(names, "`"+col.name+"`")
-		values = append(values, value)
+		values = append(values, name)
 	}
 	if _, err := sess.Exec("INSERT INTO `" + table + "` (" + strings.Join(names, ", ") + ") SELECT " + strings.Join(values, ", ") + " FROM `" + legacy + "`"); err != nil {
 		return err
 	}
 
-	copied, err := sqliteRowCount(sess, table)
-	if err != nil {
+	// keep the old sequence, so ids of deleted rows are not handed out again
+	if _, err := sess.Exec("DELETE FROM sqlite_sequence WHERE name = ?", table); err != nil {
 		return err
 	}
-	total, err := sqliteRowCount(sess, legacy)
-	if err != nil {
-		return err
-	}
-	if copied != total {
-		return fmt.Errorf("copied %d of %d rows", copied, total)
-	}
-
-	if _, err := sess.Exec("DROP TABLE `" + legacy + "`"); err != nil {
+	if _, err := sess.Exec("UPDATE sqlite_sequence SET name = ? WHERE name = ?", table, legacy); err != nil {
 		return err
 	}
 
-	// keep ids of deleted rows from being handed out again
-	if len(seq) == 1 {
-		if _, err := sess.Exec("INSERT INTO sqlite_sequence (name, seq) SELECT ?, 0 WHERE NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = ?)", table, table); err != nil {
-			return err
-		}
-		if _, err := sess.Exec("UPDATE sqlite_sequence SET seq = MAX(seq, CAST(? AS INTEGER)) WHERE name = ?", seq[0]["seq"], table); err != nil {
-			return err
-		}
-	}
-
-	if inline, err = sqliteInlineUniqueCount(sess, table); err != nil {
-		return err
-	} else if inline != 0 {
-		return fmt.Errorf("still has %d inline UNIQUE constraints", inline)
-	}
-	return nil
-}
-
-type sqliteColumn struct {
-	name     string
-	colType  string
-	notNull  bool
-	defValue string
-}
-
-// fallback is the value a NULL gets when copied into a NOT NULL column.
-func (c sqliteColumn) fallback() string {
-	if c.defValue != "" {
-		return c.defValue
-	}
-	if t := strings.ToUpper(c.colType); strings.Contains(t, "INT") || strings.Contains(t, "BOOL") {
-		return "0"
-	}
-	return "''"
-}
-
-func sqliteColumns(sess *xorm.Session, table string) (map[string]sqliteColumn, error) {
-	rows, err := sess.QueryString("SELECT name, type, \"notnull\", dflt_value FROM pragma_table_info(?)", table)
-	if err != nil {
-		return nil, err
-	}
-	cols := make(map[string]sqliteColumn, len(rows))
-	for _, row := range rows {
-		cols[row["name"]] = sqliteColumn{
-			name:     row["name"],
-			colType:  row["type"],
-			notNull:  row["notnull"] == "1",
-			defValue: row["dflt_value"],
-		}
-	}
-	return cols, nil
-}
-
-func sqliteInlineUniqueCount(sess *xorm.Session, table string) (int, error) {
-	rows, err := sess.QueryString("SELECT COUNT(*) AS n FROM pragma_index_list(?) WHERE origin = 'u'", table)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(rows[0]["n"])
-}
-
-func sqliteRowCount(sess *xorm.Session, table string) (int, error) {
-	rows, err := sess.QueryString("SELECT COUNT(*) AS n FROM `" + table + "`")
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(rows[0]["n"])
+	_, err = sess.Exec("DROP TABLE `" + legacy + "`")
+	return err
 }

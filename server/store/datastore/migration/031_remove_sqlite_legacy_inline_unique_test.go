@@ -105,10 +105,12 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	configsBefore := rowCount(t, engine, "config")
 	secretsBefore := rowCount(t, engine, "secrets")
 	permsBefore := rowCount(t, engine, "perms")
-	usersSeqBefore := sequence(t, engine, "users")
+	// pretend users with higher ids were deleted: their ids must not come back
+	_, err := engine.Exec("UPDATE sqlite_sequence SET seq = 1000 WHERE name = 'users'")
+	require.NoError(t, err)
 
 	// a NULL in a column that is NOT NULL in the model must not stop the copy
-	_, err := engine.Exec("UPDATE secrets SET secret_repo_id = NULL WHERE secret_id = (SELECT MIN(secret_id) FROM secrets)")
+	_, err = engine.Exec("UPDATE secrets SET secret_repo_id = NULL WHERE secret_id = (SELECT MIN(secret_id) FROM secrets)")
 	require.NoError(t, err)
 
 	require.NoError(t, Migrate(t.Context(), engine, true))
@@ -122,7 +124,7 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	assert.Equal(t, configsBefore, rowCount(t, engine, "configs"))
 	assert.Equal(t, secretsBefore, rowCount(t, engine, "secrets"))
 	assert.Equal(t, permsBefore, rowCount(t, engine, "perms"))
-	assert.GreaterOrEqual(t, sequence(t, engine, "users"), usersSeqBefore)
+	assert.Equal(t, 1000, sequence(t, engine, "users"))
 	seqTypes, err := engine.QueryString("SELECT DISTINCT typeof(seq) AS t FROM sqlite_sequence")
 	require.NoError(t, err)
 	assert.Equal(t, []map[string]string{{"t": "integer"}}, seqTypes)
