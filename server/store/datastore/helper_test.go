@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -66,6 +67,7 @@ func TestWrapUpdate(t *testing.T) {
 		errors.New("database table is locked"),
 		&mysql.MySQLError{Number: 1213}, // Deadlock victim.
 		&mysql.MySQLError{Number: 1205}, // Lock wait timeout.
+		&mysql.MySQLError{Number: 1020}, // MariaDB snapshot isolation conflict.
 		&pq.Error{Code: "40P01"},        // Deadlock victim.
 		&pq.Error{Code: "40001"},        // Serialization failure.
 	} {
@@ -147,13 +149,27 @@ func serializationFailure(t *testing.T, store *storage) error {
 	sess := store.engine.NewSession()
 	defer sess.Close()
 	require.NoError(t, sess.Begin())
-	_, err := sess.Exec("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
-	require.NoError(t, err)
-	_, err = sess.ID("a").Get(new(model.ServerConfig))
+	if store.engine.Dialect().URI().DBType == schemas.POSTGRES {
+		// MySQL/MariaDB default to repeatable read, PostgreSQL to read committed.
+		_, err := sess.Exec("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
+		require.NoError(t, err)
+	}
+	_, err := sess.ID("a").Get(new(model.ServerConfig))
 	require.NoError(t, err)
 	_, err = store.engine.ID("a").Update(&model.ServerConfig{Value: "other"})
 	require.NoError(t, err)
 	return lockRow(t.Context(), sess, "a")
+}
+
+// snapshotIsolationConflict is a serializationFailure on MariaDB, which reports it only
+// with innodb_snapshot_isolation (the default since MariaDB 11.6). MySQL does not have it.
+func snapshotIsolationConflict(t *testing.T, store *storage) error {
+	t.Helper()
+	var enabled bool
+	if has, err := store.engine.SQL("SELECT @@innodb_snapshot_isolation").Get(&enabled); err != nil || !has || !enabled {
+		t.Skip("needs MariaDB with innodb_snapshot_isolation")
+	}
+	return serializationFailure(t, store)
 }
 
 // The drivers must return the lock errors that isErrDatabaseLocked looks for.
@@ -179,6 +195,7 @@ func TestDatabaseLockErrors(t *testing.T) {
 	}{
 		{"mysql deadlock", DriverMysql, deadlock, mysqlNumber(1213)},
 		{"mysql lock wait timeout", DriverMysql, lockWaitTimeout, mysqlNumber(1205)},
+		{"mariadb snapshot isolation conflict", DriverMysql, snapshotIsolationConflict, mysqlNumber(1020)},
 		{"postgres deadlock", DriverPostgres, deadlock, postgresCode("40P01")},
 		{"postgres serialization failure", DriverPostgres, serializationFailure, postgresCode("40001")},
 	}

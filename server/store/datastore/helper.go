@@ -51,14 +51,15 @@ func retryWriteCtx(ctx context.Context, fn func() error) error {
 }
 
 // isErrDatabaseLocked reports whether err is a lock conflict that a retry resolves: SQLite
-// "database is locked", MySQL/MariaDB deadlock (1213) and lock wait timeout (1205), and
-// PostgreSQL deadlock (40P01) and serialization failure (40001).
+// "database is locked", MySQL/MariaDB deadlock (1213) and lock wait timeout (1205), MariaDB
+// snapshot isolation conflict (1020), and PostgreSQL deadlock (40P01) and serialization
+// failure (40001).
 func isErrDatabaseLocked(err error) bool {
 	if err == nil {
 		return false
 	}
 	var mysqlErr *mysql.MySQLError
-	if errors.As(err, &mysqlErr) && (mysqlErr.Number == 1213 || mysqlErr.Number == 1205) {
+	if errors.As(err, &mysqlErr) && (mysqlErr.Number == 1213 || mysqlErr.Number == 1205 || mysqlErr.Number == 1020) {
 		return true
 	}
 	var sqlState interface{ SQLState() string }

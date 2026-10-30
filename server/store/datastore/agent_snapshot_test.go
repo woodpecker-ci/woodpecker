@@ -15,12 +15,17 @@
 package datastore
 
 import (
+	"context"
 	"errors"
+	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"xorm.io/xorm/contexts"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -277,4 +282,147 @@ func TestAgentSnapshotCleanupRollback(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, workflows, 1)
 	assert.Equal(t, snapshot.ID, workflows[0].AgentSnapshotID)
+}
+
+// snapshotAssignmentHook pauses a query before it reaches the database.
+type snapshotAssignmentHook struct {
+	match  func(string) bool
+	once   sync.Once
+	paused chan struct{}
+	resume chan struct{}
+}
+
+func (h *snapshotAssignmentHook) BeforeProcess(c *contexts.ContextHook) (context.Context, error) {
+	if h.match(c.SQL) {
+		h.once.Do(func() {
+			close(h.paused)
+			select {
+			case <-h.resume:
+			case <-c.Ctx.Done():
+			}
+		})
+	}
+	return c.Ctx, c.Ctx.Err()
+}
+
+func (*snapshotAssignmentHook) AfterProcess(*contexts.ContextHook) error { return nil }
+
+func TestWorkflowSnapshotConcurrentCleanup(t *testing.T) {
+	for _, cleanupFirst := range []bool{true, false} {
+		name := "assignment locks first"
+		if cleanupFirst {
+			name = "cleanup commits first"
+		}
+		t.Run(name, func(t *testing.T) {
+			if driver, _ := testDriverConfig(); driver != DriverMysql && driver != DriverPostgres {
+				// Separate connections must share the same SQLite database.
+				t.Setenv("WOODPECKER_DATABASE_DRIVER", DriverSqlite)
+				t.Setenv("WOODPECKER_DATABASE_DATASOURCE", filepath.Join(t.TempDir(), "snapshots.sqlite")+"?_busy_timeout=5000&_journal_mode=WAL")
+			}
+			store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow),
+				new(model.Pipeline), new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
+			defer closer()
+			store.engine.SetMaxOpenConns(4)
+			store.engine.SetMaxIdleConns(4)
+
+			oldPipeline := &model.Pipeline{ID: 1}
+			_, err := store.engine.Insert(oldPipeline, &model.Pipeline{ID: 2, Number: 2})
+			require.NoError(t, err)
+			oldWorkflow := &model.Workflow{PipelineID: 1, PID: 1}
+			workflow := &model.Workflow{PipelineID: 2, PID: 1, AgentID: 7}
+			require.NoError(t, store.WorkflowsCreate([]*model.Workflow{oldWorkflow, workflow}))
+			snapshot := assignSnapshot(t, store, oldWorkflow, testAgentSnapshot())
+
+			ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+			defer cancel()
+			hook := &snapshotAssignmentHook{
+				match: func(query string) bool {
+					isUpdate := strings.HasPrefix(query, "UPDATE ")
+					// Pause before the snapshot lock, or before linking the workflow
+					// after the snapshot has been found and locked.
+					return isUpdate && (strings.Contains(query, "workflows") ||
+						(cleanupFirst && strings.Contains(query, "agent_snapshots") && strings.Contains(query, "WHERE (hash")))
+				},
+				paused: make(chan struct{}), resume: make(chan struct{}),
+			}
+			defer func() {
+				select {
+				case <-hook.resume:
+				default:
+					close(hook.resume)
+				}
+			}()
+			store.engine.AddHook(hook)
+
+			assigned := make(chan error, 1)
+			go func() { assigned <- store.WorkflowUpdateWithSnapshot(workflow, testAgentSnapshot()) }()
+			select {
+			case <-hook.paused:
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			}
+			if cleanupFirst {
+				// Reproduce cleanup deleting the last old consumer while assignment
+				// is in flight. Assignment must recreate the snapshot before linking.
+				require.NoError(t, store.DeletePipeline(oldPipeline))
+				_, err = store.AgentSnapshotFind(snapshot.ID)
+				require.ErrorIs(t, err, types.ErrRecordNotExist)
+				close(hook.resume)
+			} else {
+				// Cleanup must wait for the assignment's transaction, then see its
+				// new consumer even under repeatable-read isolation.
+				cleanupStarted := make(chan struct{})
+				cleanup := &snapshotAssignmentHook{
+					match: func(query string) bool {
+						return strings.HasPrefix(query, "UPDATE ") && strings.Contains(query, "agent_snapshots")
+					},
+					paused: cleanupStarted, resume: hook.resume,
+				}
+				store.engine.AddHook(cleanup)
+				deleted := make(chan error, 1)
+				go func() { deleted <- store.DeletePipeline(oldPipeline) }()
+				select {
+				case <-cleanupStarted:
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+				close(hook.resume)
+				select {
+				case err := <-deleted:
+					require.NoError(t, err)
+				case <-ctx.Done():
+					t.Fatal(ctx.Err())
+				}
+			}
+			select {
+			case err := <-assigned:
+				require.NoError(t, err)
+			case <-ctx.Done():
+				t.Fatal(ctx.Err())
+			}
+			loaded, err := store.WorkflowLoad(workflow.ID)
+			require.NoError(t, err)
+			stored, err := store.AgentSnapshotFind(loaded.AgentSnapshotID)
+			require.NoError(t, err, "a successful assignment must never reference a deleted snapshot")
+			assert.Equal(t, testAgentSnapshot().CustomLabels, stored.CustomLabels)
+			assert.Equal(t, testAgentSnapshot().Platform, stored.Platform)
+			assert.Equal(t, testAgentSnapshot().Backend, stored.Backend)
+		})
+	}
+}
+
+func TestWorkflowUpdateWithSnapshotRollback(t *testing.T) {
+	store, closer := newTestStore(t, new(model.AgentSnapshot), new(model.Workflow))
+	defer closer()
+
+	workflow := &model.Workflow{PipelineID: 1, PID: 1}
+	require.NoError(t, store.WorkflowsCreate([]*model.Workflow{workflow, {PipelineID: 1, PID: 2}}))
+	workflow.PID = 2 // Make the workflow update violate its unique constraint.
+	require.Error(t, store.WorkflowUpdateWithSnapshot(workflow, testAgentSnapshot()))
+	count, err := store.engine.Count(new(model.AgentSnapshot))
+	require.NoError(t, err)
+	assert.Zero(t, count, "failed linking must roll back a new snapshot")
+	loaded, err := store.WorkflowLoad(workflow.ID)
+	require.NoError(t, err)
+	assert.Zero(t, loaded.AgentSnapshotID)
 }
