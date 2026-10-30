@@ -129,7 +129,8 @@ func TestStepCancelKillsGrandchildren(t *testing.T) {
 	taskUUID := "test-cancel-grandchild"
 	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
 	t.Cleanup(func() {
-		_ = backend.DestroyWorkflow(context.Background(), &types.Config{}, taskUUID)
+		// Cleanup runs after the test context is canceled.
+		_ = backend.DestroyWorkflow(context.WithoutCancel(t.Context()), &types.Config{}, taskUUID)
 	})
 
 	pidFile := filepath.Join(t.TempDir(), "grandchild.pid")
