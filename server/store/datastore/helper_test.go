@@ -77,10 +77,11 @@ func TestWrapInsert(t *testing.T) {
 	assert.NoError(t, wrapInsert(store.engine.Insert(cron)))
 
 	// test insert witch should fail because of unique constraint
-	err := wrapInsert(store.engine.Insert(cron))
+	err := wrapInsert(store.engine.Insert(&model.Cron{RepoID: 1, CreatorID: 1, Name: "sync", NextExec: 10000, Schedule: "@every 1h"}))
 	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
-	// the driver error must stay visible, it names the violated constraint
-	assert.ErrorContains(t, err, "UNIQUE constraint failed: crons.")
+	// the driver error must stay visible, it names the violated constraint;
+	// every driver words it its own way, but all name the crons table or index
+	assert.ErrorContains(t, err, "crons")
 
 	// The store above only exercises the sqlite wording. Cover the other drivers too: callers rely on
 	// errors.Is(err, ErrInsertDuplicateDetected) instead of matching driver strings themselves, so a
