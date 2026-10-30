@@ -52,7 +52,7 @@ func TestHook(t *testing.T) {
 	server.Config.Services.Manager = _manager
 	server.Config.Permissions.Open = true
 	server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-	server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+	server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Set("store", _store)
