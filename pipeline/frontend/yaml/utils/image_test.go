@@ -307,6 +307,24 @@ func TestMatchImageDynamic(t *testing.T) {
 			to:   []string{"golang:latest", "golang:1.0"},
 			want: true,
 		},
+		{
+			name: "registry port in list entry without tag is not a tag requirement",
+			from: "registry.local:5000/plugins/git:2.0",
+			to:   []string{"registry.local:5000/plugins/git"},
+			want: true,
+		},
+		{
+			name: "registry port in list entry with tag requirement",
+			from: "registry.local:5000/plugins/git:2.0",
+			to:   []string{"registry.local:5000/plugins/git:1.0"},
+			want: false,
+		},
+		{
+			name: "registry port in list entry with matching tag requirement",
+			from: "registry.local:5000/plugins/git:1.0",
+			to:   []string{"registry.local:5000/plugins/git:1.0"},
+			want: true,
+		},
 	}
 	for _, tt := range testdata {
 		if !assert.Equal(t, tt.want, MatchImageDynamic(tt.from, tt.to...)) {
