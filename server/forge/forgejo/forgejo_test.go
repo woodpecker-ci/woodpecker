@@ -16,6 +16,10 @@ package forgejo
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -144,7 +148,7 @@ func TestForgejo(t *testing.T) {
 		req.Header.Set(hookEvent, hookPullRequest)
 		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(fakeRepo, nil)
 		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
-		r, b, err := c.Hook(ctx, req)
+		r, b, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.NoError(t, err)
@@ -248,16 +252,71 @@ func respond(status int, body string) http.HandlerFunc {
 	}
 }
 
+// testHookSecret is the webhook secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs the body of req with testHookSecret like Forgejo does.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	mac := hmac.New(sha256.New, []byte(testHookSecret))
+	_, _ = mac.Write(body)
+	req.Header.Set("X-Forgejo-Signature", hex.EncodeToString(mac.Sum(nil)))
+	return req
+}
+
+func TestHookVerifiesSignature(t *testing.T) {
+	// test vector of https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries,
+	// Forgejo signs the body the same way, only without the sha256= prefix
+	const (
+		secret    = "It's a Secret to Everybody"
+		body      = "Hello, World!"
+		signature = "757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"
+	)
+	g := newTestForge(t, nil)
+
+	for _, tc := range []struct {
+		name      string
+		secret    string
+		body      string
+		signature []string
+		valid     bool
+	}{
+		{name: "valid", secret: secret, body: body, signature: []string{signature}, valid: true},
+		{name: "wrong secret", secret: "other secret", body: body, signature: []string{signature}},
+		{name: "changed body", secret: secret, body: body + "!", signature: []string{signature}},
+		{name: "missing signature", secret: secret, body: body},
+		{name: "no secret on both sides", body: body, signature: []string{""}},
+		{name: "malformed signature", secret: secret, body: body, signature: []string{"not hex"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/hook", strings.NewReader(tc.body))
+			req.Header.Set(hookEvent, "ping")
+			req.Header["X-Forgejo-Signature"] = tc.signature
+
+			_, _, err := g.Hook(t.Context(), req, tc.secret)
+			if tc.valid {
+				// ping is no pipeline event, so a valid hook ends here
+				assert.ErrorIs(t, err, &forge_types.ErrIgnoreEvent{})
+			} else {
+				assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
+			}
+		})
+	}
+}
+
 func TestHookLoadsTagCommit(t *testing.T) {
 	newRequest := func() *http.Request {
 		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookRelease))
 		req.Header.Set(hookEvent, hookRelease)
-		return req
+		return signHookRequest(t, req)
 	}
 	newTagRequest := func() *http.Request {
 		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookTag))
 		req.Header.Set(hookEvent, hookCreated)
-		return req
+		return signHookRequest(t, req)
 	}
 
 	s := store_mocks.NewMockStore(t)
@@ -272,7 +331,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 			"/api/v1/repos/anbraten/demo/tags/0.0.5": respond(http.StatusOK, `{"name":"0.0.5","commit":{"sha":"abc123"}}`),
 		})
 
-		_, pipeline, err := g.Hook(ctx, newRequest())
+		_, pipeline, err := g.Hook(ctx, newRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
@@ -285,7 +344,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
 		})
 
-		_, pipeline, err := g.Hook(ctx, newTagRequest())
+		_, pipeline, err := g.Hook(ctx, newTagRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
@@ -295,7 +354,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 	t.Run("missing tag fails the hook", func(t *testing.T) {
 		g := newTestForge(t, nil)
 
-		_, _, err := g.Hook(ctx, newRequest())
+		_, _, err := g.Hook(ctx, newRequest(), testHookSecret)
 		assert.Error(t, err)
 	})
 }

@@ -22,8 +22,9 @@ import (
 )
 
 var (
-	ErrNotImplemented = errors.New("not implemented")
-	ErrRepoNotFound   = errors.New("repo not found")
+	ErrNotImplemented          = errors.New("not implemented")
+	ErrRepoNotFound            = errors.New("repo not found")
+	ErrInvalidWebhookSignature = errors.New("invalid webhook signature")
 )
 
 type ErrIgnoreEvent struct {

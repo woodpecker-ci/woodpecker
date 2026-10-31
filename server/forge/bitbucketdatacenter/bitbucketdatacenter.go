@@ -490,20 +490,19 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return nil
 }
 
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
 	hook, currCommit, prevCommit, err := parseHook(r, c.url)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
 
+	if err := bitbucket.ValidateSignature(r, hook.Payload, []byte(secret)); err != nil {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+
 	user, repo, err := c.getUserAndRepo(ctx, hook.Repo)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
-	}
-
-	err = bitbucket.ValidateSignature(r, hook.Payload, []byte(repo.WebhookSecret))
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}
 
 	var pipe *model.Pipeline

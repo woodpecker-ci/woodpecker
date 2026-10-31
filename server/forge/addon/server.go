@@ -60,10 +60,11 @@ func (s *RPCServer) Teams(args []byte, resp *[]byte) error {
 		return err
 	}
 	teams, err := s.Impl.Teams(mkCtx(), a.U.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(teams)
+	*resp, err = json.Marshal(&responseTeams{baseErrorResponse: base, Teams: teams})
 	return err
 }
 
@@ -74,10 +75,11 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 		return err
 	}
 	repos, err := s.Impl.Repo(mkCtx(), a.U.asModel(), a.RemoteID, a.Owner, a.Name)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(modelRepoFromModel(repos))
+	*resp, err = json.Marshal(&responseRepo{baseErrorResponse: base, Repo: modelRepoFromModel(repos)})
 	return err
 }
 
@@ -105,7 +107,12 @@ func (s *RPCServer) File(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp, err = s.Impl.File(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	file, err := s.Impl.File(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	base, err := errorResponse(err)
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(&responseFile{baseErrorResponse: base, File: file})
 	return err
 }
 
@@ -116,10 +123,11 @@ func (s *RPCServer) Dir(args []byte, resp *[]byte) error {
 		return err
 	}
 	meta, err := s.Impl.Dir(mkCtx(), a.U.asModel(), a.R.asModel(), a.B, a.F)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(meta)
+	*resp, err = json.Marshal(&responseDir{baseErrorResponse: base, Files: meta})
 	return err
 }
 
@@ -163,8 +171,12 @@ func (s *RPCServer) Deactivate(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	*resp = []byte{}
-	return s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link)
+	base, err := errorResponse(s.Impl.Deactivate(mkCtx(), a.U.asModel(), a.R.asModel(), a.Link))
+	if err != nil {
+		return err
+	}
+	*resp, err = json.Marshal(&base)
+	return err
 }
 
 func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
@@ -174,10 +186,11 @@ func (s *RPCServer) Branches(args []byte, resp *[]byte) error {
 		return err
 	}
 	branches, err := s.Impl.Branches(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(branches)
+	*resp, err = json.Marshal(&responseBranches{baseErrorResponse: base, Branches: branches})
 	return err
 }
 
@@ -202,10 +215,11 @@ func (s *RPCServer) PullRequests(args []byte, resp *[]byte) error {
 		return err
 	}
 	prs, err := s.Impl.PullRequests(mkCtx(), a.U.asModel(), a.R.asModel(), a.P)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(prs)
+	*resp, err = json.Marshal(&responsePullRequests{baseErrorResponse: base, PullRequests: prs})
 	return err
 }
 
@@ -216,10 +230,11 @@ func (s *RPCServer) OrgMembership(args []byte, resp *[]byte) error {
 		return err
 	}
 	org, err := s.Impl.OrgMembership(mkCtx(), a.U.asModel(), a.Org)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
-	*resp, err = json.Marshal(org)
+	*resp, err = json.Marshal(&responseOrgMembership{baseErrorResponse: base, Perm: org})
 	return err
 }
 
@@ -249,13 +264,15 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	}
 	req.Header = a.Header
 	req.Form = a.Form
-	repo, pipeline, err := s.Impl.Hook(mkCtx(), req)
+	repo, pipeline, err := s.Impl.Hook(mkCtx(), req, a.Secret)
+	base, err := errorResponse(err)
 	if err != nil {
 		return err
 	}
 	*resp, err = json.Marshal(&responseHook{
-		Repo:     modelRepoFromModel(repo),
-		Pipeline: pipeline,
+		baseErrorResponse: base,
+		Repo:              modelRepoFromModel(repo),
+		Pipeline:          pipeline,
 	})
 	return err
 }

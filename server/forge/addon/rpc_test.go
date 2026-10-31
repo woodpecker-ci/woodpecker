@@ -17,6 +17,7 @@ package addon
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -218,9 +219,9 @@ func TestRPCRoundTrip(t *testing.T) {
 		assert.False(t, org.IsUser)
 	})
 
-	t.Run("hook forwards method, url, header and body", func(t *testing.T) {
+	t.Run("hook forwards method, url, header, body and secret", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
-		impl.On("Hook", mock.Anything, mock.Anything).Return(func(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+		impl.On("Hook", mock.Anything, mock.Anything, repo.WebhookSecret).Return(func(_ context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			assert.Equal(t, http.MethodPost, r.Method)
@@ -233,7 +234,7 @@ func TestRPCRoundTrip(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/hook?access_token=tok", strings.NewReader(`{"ref":"refs/heads/main"}`))
 		req.Header.Set("X-Event", "push")
 
-		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req)
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, repo.WebhookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, repo, gotRepo)
 		assert.Equal(t, pipeline, gotPipeline)
@@ -241,13 +242,142 @@ func TestRPCRoundTrip(t *testing.T) {
 
 	t.Run("hook without pipeline", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
-		impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, nil)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
-		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req)
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
 		require.NoError(t, err)
 		assert.Nil(t, gotRepo)
 		assert.Nil(t, gotPipeline)
+	})
+
+	t.Run("hook keeps ignored event", func(t *testing.T) {
+		ignored := &types.ErrIgnoreEvent{Event: "ping", Reason: "no pipeline event"}
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, ignored)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		assert.ErrorIs(t, err, &ErrAddon{})
+		assert.Equal(t, ignored.Error(), err.Error())
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
+
+	for name, hookErr := range map[string]error{
+		"hook keeps invalid signature":         types.ErrInvalidWebhookSignature,
+		"hook keeps wrapped invalid signature": fmt.Errorf("verify hook: %w", types.ErrInvalidWebhookSignature),
+	} {
+		t.Run(name, func(t *testing.T) {
+			impl := forge_mocks.NewMockForge(t)
+			impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, hookErr)
+
+			req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+			gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+			assert.ErrorIs(t, err, types.ErrInvalidWebhookSignature)
+			assert.ErrorIs(t, err, &ErrAddon{})
+			assert.Equal(t, hookErr.Error(), err.Error())
+			assert.Nil(t, gotRepo)
+			assert.Nil(t, gotPipeline)
+		})
+	}
+}
+
+func TestDecodeErrorKinds(t *testing.T) {
+	// an addon built with a newer woodpecker may send kinds this server does not know
+	err := decodeErrorKinds("future_kind", "something new")
+	assert.EqualError(t, err, "something new")
+	assert.ErrorIs(t, err, &ErrAddon{})
+	assert.ErrorContains(t, errors.Unwrap(err), "future_kind")
+	assert.NotErrorIs(t, err, types.ErrInvalidWebhookSignature)
+	assert.NotErrorIs(t, err, &types.ErrIgnoreEvent{})
+}
+
+func TestEncodeErrorKinds(t *testing.T) {
+	found, kind, msg := encodeErrorKinds(fmt.Errorf("verify hook: %w", types.ErrInvalidWebhookSignature))
+	assert.True(t, found)
+	assert.Equal(t, errorKindInvalidSignature, kind)
+	assert.Equal(t, "verify hook: invalid webhook signature", msg)
+
+	found, kind, msg = encodeErrorKinds(&types.ErrIgnoreEvent{Event: "ping"})
+	assert.True(t, found)
+	assert.Equal(t, errorKindIgnoreEvent, kind)
+	assert.Equal(t, "explicit ignored event 'ping'", msg)
+
+	found, kind, msg = encodeErrorKinds(errors.New("forge unavailable"))
+	assert.False(t, found)
+	assert.Empty(t, kind)
+	assert.Empty(t, msg)
+}
+
+func TestErrorKindsOfForgeErrors(t *testing.T) {
+	for _, forgeErr := range []error{
+		fmt.Errorf("teams: %w", types.ErrNotImplemented),
+		errors.Join(errors.New("404"), types.ErrRepoNotFound),
+		errors.Join(errors.New("404"), &types.ErrConfigNotFound{Configs: []string{".woodpecker.yaml"}}),
+	} {
+		t.Run(forgeErr.Error(), func(t *testing.T) {
+			base, err := errorResponse(forgeErr)
+			require.NoError(t, err)
+
+			assertAddonError(t, forgeErr, base.asError())
+		})
+	}
+}
+
+// assertAddonError checks that got is the error of the addon for want: same
+// message and the same errors of errorKindMap match.
+func assertAddonError(t *testing.T, want, got error) {
+	t.Helper()
+	assert.EqualError(t, got, want.Error())
+	assert.ErrorIs(t, got, &ErrAddon{})
+	for kind, target := range errorKindMap {
+		assert.Equal(t, errors.Is(want, target), errors.Is(got, target), kind)
+	}
+}
+
+func TestErrorResponse(t *testing.T) {
+	base, err := errorResponse(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, baseErrorResponse{}, base)
+	assert.NoError(t, base.asError())
+
+	// errors without kind stay errors of the RPC call
+	other := errors.New("forge unavailable")
+	_, err = errorResponse(other)
+	assert.Same(t, other, err)
+}
+
+func TestRPCHookAddonError(t *testing.T) {
+	ctx := t.Context()
+
+	t.Run("error of the addon", func(t *testing.T) {
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("parse hook: %w", errors.New("bad payload")))
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+		assert.ErrorIs(t, err, &ErrAddon{})
+		assert.EqualError(t, err, "parse hook: bad payload")
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
+
+	t.Run("error of the addon system", func(t *testing.T) {
+		client, _ := plugin.TestPluginRPCConn(t, map[string]plugin.Plugin{
+			pluginKey: &Plugin{Impl: forge_mocks.NewMockForge(t)},
+		}, nil)
+		raw, err := client.Dispense(pluginKey)
+		require.NoError(t, err)
+		f, ok := raw.(forge.Forge)
+		require.True(t, ok)
+		require.NoError(t, client.Close())
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		_, _, err = f.Hook(ctx, req, "")
+		require.Error(t, err)
+		assert.NotErrorIs(t, err, &ErrAddon{})
 	})
 }
 
@@ -273,7 +403,7 @@ func TestRPCErrors(t *testing.T) {
 	impl.On("PullRequests", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("OrgMembership", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("Org", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
-	impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, errForge)
+	impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, errForge)
 
 	f := newRPCForge(t, impl)
 
@@ -311,6 +441,124 @@ func TestRPCErrors(t *testing.T) {
 	assertForgeErr(t, err)
 	_, err = f.Org(ctx, user, "org")
 	assertForgeErr(t, err)
-	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")))
+	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")), "")
 	assertForgeErr(t, err)
+}
+
+func TestRPCErrorKinds(t *testing.T) {
+	ctx := t.Context()
+	user := testUser()
+
+	for _, tc := range []struct {
+		name string
+		err  error
+		mock func(impl *forge_mocks.MockForge, err error)
+		call func(f forge.Forge) error
+	}{
+		{
+			name: "teams not implemented",
+			err:  fmt.Errorf("teams: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Teams", mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Teams(ctx, user, &model.ListOptions{})
+				return err
+			},
+		},
+		{
+			name: "repo not found",
+			err:  errors.Join(errors.New("404 Not Found"), types.ErrRepoNotFound),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Repo", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Repo(ctx, user, "5", "octocat", "hello")
+				return err
+			},
+		},
+		{
+			name: "file config not found",
+			err:  errors.Join(errors.New("404 Not Found"), &types.ErrConfigNotFound{Configs: []string{".woodpecker"}}),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.File(ctx, user, testRepo(), &model.Pipeline{}, ".woodpecker")
+				return err
+			},
+		},
+		{
+			name: "dir not implemented",
+			err:  fmt.Errorf("dir: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Dir(ctx, user, testRepo(), &model.Pipeline{}, ".woodpecker")
+				return err
+			},
+		},
+		{
+			name: "dir config not found",
+			err:  errors.Join(errors.New("404 Not Found"), &types.ErrConfigNotFound{Configs: []string{".woodpecker"}}),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Dir(ctx, user, testRepo(), &model.Pipeline{}, ".woodpecker")
+				return err
+			},
+		},
+		{
+			name: "deactivate repo not found",
+			err:  errors.Join(errors.New("404 Not Found"), types.ErrRepoNotFound),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(err)
+			},
+			call: func(f forge.Forge) error {
+				return f.Deactivate(ctx, user, testRepo(), "link")
+			},
+		},
+		{
+			name: "branches not implemented",
+			err:  fmt.Errorf("branches: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("Branches", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.Branches(ctx, user, testRepo(), &model.ListOptions{})
+				return err
+			},
+		},
+		{
+			name: "pull requests not implemented",
+			err:  fmt.Errorf("pull requests: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("PullRequests", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.PullRequests(ctx, user, testRepo(), &model.ListOptions{})
+				return err
+			},
+		},
+		{
+			name: "org membership not implemented",
+			err:  fmt.Errorf("org membership: %w", types.ErrNotImplemented),
+			mock: func(impl *forge_mocks.MockForge, err error) {
+				impl.On("OrgMembership", mock.Anything, mock.Anything, mock.Anything).Return(nil, err)
+			},
+			call: func(f forge.Forge) error {
+				_, err := f.OrgMembership(ctx, user, "org")
+				return err
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			impl := forge_mocks.NewMockForge(t)
+			tc.mock(impl, tc.err)
+
+			assertAddonError(t, tc.err, tc.call(newRPCForge(t, impl)))
+		})
+	}
 }
