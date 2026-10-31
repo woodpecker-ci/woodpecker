@@ -44,40 +44,37 @@ const (
 
 // Opts defines configuration options.
 type Opts struct {
-	URL                          string // Bitbucket server url for API access.
-	Username                     string // Git machine account username.
-	Password                     string // Git machine account password.
-	OAuthClientID                string // OAuth 2.0 client id
-	OAuthClientSecret            string // OAuth 2.0 client secret
-	OAuthHost                    string // OAuth 2.0 host
-	OAuthEnableProjectAdminScope bool   // Whether to enable project admin scope. Should be set as default in the next major version.
+	URL               string // Bitbucket server url for API access.
+	Username          string // Git machine account username.
+	Password          string // Git machine account password.
+	OAuthClientID     string // OAuth 2.0 client id
+	OAuthClientSecret string // OAuth 2.0 client secret
+	OAuthHost         string // OAuth 2.0 host
 }
 
 type client struct {
-	forgeID                      int64
-	url                          string
-	urlAPI                       string
-	clientID                     string
-	clientSecret                 string
-	oauthHost                    string
-	username                     string
-	password                     string
-	oauthEnableProjectAdminScope bool
+	forgeID      int64
+	url          string
+	urlAPI       string
+	clientID     string
+	clientSecret string
+	oauthHost    string
+	username     string
+	password     string
 }
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
 // the on-premise edition of Bitbucket Cloud, formerly known as Stash.
 func New(id int64, opts Opts) (forge.Forge, error) {
 	config := &client{
-		forgeID:                      id,
-		url:                          opts.URL,
-		urlAPI:                       fmt.Sprintf("%s/rest", opts.URL),
-		clientID:                     opts.OAuthClientID,
-		clientSecret:                 opts.OAuthClientSecret,
-		oauthHost:                    opts.OAuthHost,
-		username:                     opts.Username,
-		password:                     opts.Password,
-		oauthEnableProjectAdminScope: opts.OAuthEnableProjectAdminScope,
+		forgeID:      id,
+		url:          opts.URL,
+		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
+		clientID:     opts.OAuthClientID,
+		clientSecret: opts.OAuthClientSecret,
+		oauthHost:    opts.OAuthHost,
+		username:     opts.Username,
+		password:     opts.Password,
 	}
 
 	switch {
@@ -662,10 +659,6 @@ func (*client) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (c *client) OrgMembership(ctx context.Context, u *model.User, org string) (*model.OrgPerm, error) {
-	if !c.oauthEnableProjectAdminScope {
-		// This method cannot be implemented without the PROJECT_ADMIN scope included in the OAuth2 configuration
-		return nil, nil
-	}
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
@@ -750,11 +743,7 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 		string(bitbucket.PermissionRepoRead),
 		string(bitbucket.PermissionRepoWrite),
 		string(bitbucket.PermissionRepoAdmin),
-	}
-
-	// TODO: Remove this feature flag in the next major version and always include project admin scope
-	if c.oauthEnableProjectAdminScope {
-		scopes = append(scopes, string(bitbucket.PermissionProjectAdmin))
+		string(bitbucket.PermissionProjectAdmin),
 	}
 
 	return &oauth2.Config{
