@@ -29,20 +29,6 @@ var (
 	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
-// SecretStore persists secret information to storage.
-type SecretStore interface {
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
-	SecretCreate(*Secret) error
-	SecretUpdate(*Secret) error
-	SecretDelete(*Secret) error
-	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
-	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
-	SecretListAll() ([]*Secret, error)
-}
-
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'id'"`
