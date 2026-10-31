@@ -173,6 +173,14 @@ func TestImageHasTag(t *testing.T) {
 			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
 			want: true,
 		},
+		{
+			from: "registry.local:5000/plugins/git",
+			want: false,
+		},
+		{
+			from: "registry.local:5000/plugins/git:1.0",
+			want: true,
+		},
 	}
 	for _, tt := range testdata {
 		assert.Equal(t, tt.want, imageHasTag(tt.from))
@@ -324,6 +332,18 @@ func TestMatchImageDynamic(t *testing.T) {
 			from: "registry.local:5000/plugins/git:1.0",
 			to:   []string{"registry.local:5000/plugins/git:1.0"},
 			want: true,
+		},
+		{
+			name: "registry port without tag in image and list entry",
+			from: "registry.local:5000/plugins/git",
+			to:   []string{"registry.local:5000/plugins/git"},
+			want: true,
+		},
+		{
+			name: "registry port without tag in image and list entry with tag requirement",
+			from: "registry.local:5000/plugins/git",
+			to:   []string{"registry.local:5000/plugins/git:1.0"},
+			want: false,
 		},
 	}
 	for _, tt := range testdata {
