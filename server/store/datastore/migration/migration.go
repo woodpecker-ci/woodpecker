@@ -52,7 +52,6 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameTokenFields,
 	&setNewDefaultsForRequireApproval,
 	&removeRepoScm,
-	&unsanitizeOrgAndUserNames,
 	&replaceZeroForgeIDsInOrgs,
 	&fixForgeColumns,
 	&addCronField,
