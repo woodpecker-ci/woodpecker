@@ -224,6 +224,7 @@
     "typecheck",
     "Typeflag",
     "tzdata",
+    "Unfinalized",
     "unplugin",
     "unsanitize",
     "Upsert",

@@ -36,9 +36,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
+
+// errLogBusy is returned when a step log is claimed by the log finalizer or another delete.
+var errLogBusy = errors.New("the log is being finalized or deleted, try again")
 
 // CreatePipeline
 //
@@ -243,6 +247,7 @@ func GetPipelines(c *gin.Context) {
 //	@Router		/repos/{repo_id}/pipelines/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
+//	@Failure	409	"a step log is being finalized or deleted, try again later"
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -258,7 +263,7 @@ func DeletePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	if err := deleteStoredLogs(c, _store, pl.ID); err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
+		c.String(deleteLogsStatus(err), "Error deleting pipeline logs. %s", err)
 		return
 	}
 
@@ -269,6 +274,32 @@ func DeletePipeline(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// deleteStepLog deletes the log of a step from the log store. It claims the log first,
+// so the log finalizer cannot pack it meanwhile and bring it back.
+func deleteStepLog(ctx context.Context, _store store.Store, step *model.Step) error {
+	state := step.LogState
+	if state != model.LogStateOpen && state != model.LogStateFinalized {
+		return errLogBusy
+	}
+	if claimed, err := _store.StepLogStateSwap(ctx, step, model.LogStateDeleting); !claimed {
+		return errors.Join(errLogBusy, err)
+	}
+	err := server.Config.Services.LogStore.LogDelete(ctx, step)
+	releaseCtx, cancel := service_log.ReleaseContext(ctx)
+	defer cancel()
+	_, reopenErr := _store.StepLogStateSwap(releaseCtx, step, state)
+	return errors.Join(err, reopenErr)
+}
+
+// deleteLogsStatus is the HTTP status of a failed log delete: a log the log finalizer
+// or another delete works on is a conflict to retry later.
+func deleteLogsStatus(err error) int {
+	if errors.Is(err, errLogBusy) {
+		return http.StatusConflict
+	}
+	return http.StatusInternalServerError
 }
 
 // deleteStoredLogs deletes the logs of every step of a pipeline from the log store.
@@ -282,7 +313,7 @@ func deleteStoredLogs(ctx context.Context, _store store.Store, pipelineID int64)
 
 	var errs error
 	for _, step := range steps {
-		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(ctx, step))
+		errs = errors.Join(errs, deleteStepLog(ctx, _store, step))
 	}
 	return errs
 }
@@ -438,7 +469,11 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err := server.Config.Services.LogStore.LogDelete(c, _step)
+	err := deleteStepLog(c, store.FromContext(c), _step)
+	if errors.Is(err, errLogBusy) {
+		c.String(http.StatusConflict, "Error deleting the log of the step. %s", err)
+		return
+	}
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -693,6 +728,7 @@ func PostPipeline(c *gin.Context) {
 //	@Router		/repos/{repo_id}/logs/{pipeline_number} [delete]
 //	@Produce	plain
 //	@Success	204
+//	@Failure	409	"a step log is being finalized or deleted, try again later"
 //	@Tags		Pipeline logs
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -713,12 +749,12 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := server.Config.Services.LogStore.LogDelete(c, step); lErr != nil {
+		if lErr := deleteStepLog(c, _store, step); lErr != nil {
 			err = errors.Join(err, lErr)
 		}
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
+		c.String(deleteLogsStatus(err), "Error deleting pipeline logs. %s", err)
 		return
 	}
 

@@ -36,7 +36,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/finalizer"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -171,7 +174,6 @@ func TestRPCUpdate(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -594,7 +596,7 @@ func TestRPCLog(t *testing.T) {
 	// that it is outside the drain window, so log appending is rejected.
 	stalePipeline := func(status model.StatusValue) *model.Pipeline {
 		p := defaultPipeline(status)
-		p.Finished = time.Now().Add(-(logStreamDelayAllowed + time.Minute)).Unix()
+		p.Finished = time.Now().Add(-(service_log.StreamDelayAllowed + time.Minute)).Unix()
 		return p
 	}
 
@@ -910,6 +912,54 @@ func TestRPCLog(t *testing.T) {
 	})
 }
 
+// TestRPCLogFinalizeOverlap ensures the log finalizer cannot finalize a step while an append that
+// was admitted inside the late-log window may still be written: the append has a deadline and the
+// finalizer waits past it.
+func TestRPCLogFinalizeOverlap(t *testing.T) {
+	s := datastore.NewTestStore(t)
+	agent := &model.Agent{Name: "agent", OrgID: model.IDNotSet}
+	require.NoError(t, s.AgentCreate(agent))
+	repo := &model.Repo{ForgeRemoteID: "1", FullName: "owner/repo", Owner: "owner", Name: "repo"}
+	require.NoError(t, s.CreateRepo(repo))
+
+	// two seconds before the window closes the append is admitted
+	finished := time.Now().Add(-service_log.StreamDelayAllowed + 2*time.Second).Unix()
+	p := &model.Pipeline{RepoID: repo.ID, Status: model.StatusSuccess, Finished: finished}
+	require.NoError(t, s.CreatePipeline(p))
+	step := &model.Step{UUID: "step", Name: "step", PipelineID: p.ID, PID: 2, PPID: 1, State: model.StatusSuccess, Started: finished - 5, Finished: finished}
+	require.NoError(t, s.WorkflowsCreate([]*model.Workflow{{
+		PipelineID: p.ID, PID: 1, Name: "workflow", State: model.StatusSuccess, AgentID: agent.ID, Children: []*model.Step{step},
+	}}))
+
+	var deadline time.Time
+	logs := log_mocks.NewMockService(t)
+	logs.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(func(ctx context.Context, _ *model.Step, _ []*model.LogEntry) error {
+		var ok bool
+		deadline, ok = ctx.Deadline()
+		assert.True(t, ok, "an append without deadline may outlast the finalizer cutoff")
+		return nil
+	})
+	origLogStore := server.Config.Services.LogStore
+	server.Config.Services.LogStore = logs
+	t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+	rpcInst := RPC{store: s, logger: logging.New()}
+	ctx := context.WithValue(t.Context(), agentIDKey, agent.ID)
+	called := time.Now()
+	require.NoError(t, rpcInst.Log(ctx, "step", []*rpc.LogEntry{{StepUUID: "step", Data: []byte("last line")}}))
+	assert.WithinDuration(t, called.Add(service_log.AppendTimeout), deadline, time.Second)
+
+	fin := &finalizer.Finalizer{Store: s, Logs: logs, Interval: time.Minute, Batch: 10}
+	res, err := fin.Tick(t.Context(), deadline)
+	require.NoError(t, err)
+	assert.Equal(t, finalizer.Result{}, res, "finalized while the append may still run")
+
+	logs.On("StepFinished", mock.Anything, mock.Anything).Return(nil).Once()
+	res, err = fin.Tick(t.Context(), deadline.Add(3*time.Second))
+	require.NoError(t, err)
+	assert.Equal(t, finalizer.Result{Done: 1}, res)
+}
+
 func TestRPCExtend(t *testing.T) {
 	t.Run("reject agent wrong org via permission check", func(t *testing.T) {
 		mockStore := store_mocks.NewMockStore(t)
@@ -998,7 +1048,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1060,7 +1109,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
@@ -1122,7 +1170,6 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
 		mockStore.On("StepUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
-		mockLogStore.On("StepFinished", mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))

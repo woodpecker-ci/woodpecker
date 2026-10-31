@@ -148,6 +148,14 @@ type Store interface {
 	LogDelete(context.Context, *model.Step) error
 	StepFinished(context.Context, *model.Step) error
 
+	// StepListByLogState lists the steps the filter selects, oldest first (ordered by step ID).
+	StepListByLogState(ctx context.Context, filter *model.StepLogFilter) ([]*model.Step, error)
+	// StepCountByLogState counts the steps the filter selects, ignoring Limit.
+	StepCountByLogState(ctx context.Context, filter *model.StepLogFilter) (int64, error)
+	// StepLogStateSwap moves the log of a step to the given state, if its state is still the one of step,
+	// and updates step. It reports whether it did, so only one concurrent call wins a claim.
+	StepLogStateSwap(ctx context.Context, step *model.Step, to model.LogState) (bool, error)
+
 	// Tasks
 	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)

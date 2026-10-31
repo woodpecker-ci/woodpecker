@@ -16,11 +16,14 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -37,10 +40,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/finalizer"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
 	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -162,6 +167,14 @@ func TestDownloadStepLogs(t *testing.T) {
 	assert.Equal(t, "first line\n\x1b[31msecond line\x1b[0m", w.Body.String())
 }
 
+// claimingStore returns a store mock on which every claim of a step log succeeds.
+func claimingStore(t *testing.T) *store_mocks.MockStore {
+	t.Helper()
+	s := store_mocks.NewMockStore(t)
+	s.On("StepLogStateSwap", mock.Anything, mock.Anything, mock.Anything).Return(true, nil)
+	return s
+}
+
 func TestDeleteStepLogs(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -180,9 +193,9 @@ func TestDeleteStepLogs(t *testing.T) {
 		mockLogStore := setLogStore(t)
 		mockLogStore.On("LogDelete", mock.Anything, step).Return(nil)
 
-		// the store must not be used to delete logs, the configured log store may not be the database
+		// the store only claims the log, the configured log store may not be the database
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
-		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("store", claimingStore(t))
 		c.Set("step", step)
 
 		DeleteStepLogs(c)
@@ -196,7 +209,7 @@ func TestDeleteStepLogs(t *testing.T) {
 		mockLogStore.On("LogDelete", mock.Anything, step).Return(assert.AnError)
 
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
-		c.Set("store", store_mocks.NewMockStore(t))
+		c.Set("store", claimingStore(t))
 		c.Set("step", step)
 
 		DeleteStepLogs(c)
@@ -234,7 +247,7 @@ func TestDeletePipeline(t *testing.T) {
 	}
 
 	t.Run("should delete pipeline", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 		mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
@@ -254,7 +267,7 @@ func TestDeletePipeline(t *testing.T) {
 	})
 
 	t.Run("should keep the pipeline if its logs cannot be deleted", func(t *testing.T) {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", fakePipeline.ID).Return(steps, nil)
 
 		mockLogStore := setLogStore(t)
@@ -703,7 +716,7 @@ func TestDeletePipelineLogs(t *testing.T) {
 	steps := []*model.Step{{ID: 3, PipelineID: 2}, {ID: 4, PipelineID: 2}}
 
 	run := func(t *testing.T, firstErr, secondErr error) int {
-		mockStore := store_mocks.NewMockStore(t)
+		mockStore := claimingStore(t)
 		mockStore.On("StepList", pipeline.ID).Return(steps, nil)
 
 		mockLogStore := log_mocks.NewMockService(t)
@@ -735,6 +748,167 @@ func TestDeletePipelineLogs(t *testing.T) {
 	t.Run("reports a failed delete of the last step", func(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, run(t, nil, assert.AnError))
 	})
+}
+
+// TestDeleteLogsBusy ensures every way of deleting logs leaves a log alone that the log finalizer
+// or another delete claimed, so the finalizer cannot pack a log while it is deleted.
+func TestDeleteLogsBusy(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	for name, deleteLogs := range map[string]gin.HandlerFunc{
+		"log of a step": DeleteStepLogs,
+		"pipeline logs": DeletePipelineLogs,
+		"pipeline":      DeletePipeline,
+	} {
+		for claim, setup := range map[string]func(*store_mocks.MockStore, *model.Step){
+			"claimed before loaded": func(_ *store_mocks.MockStore, step *model.Step) {
+				step.LogState = model.LogStateFinalizing
+			},
+			"claimed after loaded": func(s *store_mocks.MockStore, _ *model.Step) {
+				s.On("StepLogStateSwap", mock.Anything, mock.Anything, model.LogStateDeleting).Return(false, nil)
+			},
+		} {
+			t.Run(name+"/"+claim, func(t *testing.T) {
+				step := &model.Step{ID: 3, UUID: "finalizing", PipelineID: fakePipeline.ID, State: model.StatusSuccess}
+				mockStore := store_mocks.NewMockStore(t)
+				mockStore.On("StepList", fakePipeline.ID).Return([]*model.Step{step}, nil).Maybe()
+				setup(mockStore, step)
+				// no LogDelete expected: the mock fails the test if it is called
+				originalLogStore := server.Config.Services.LogStore
+				server.Config.Services.LogStore = log_mocks.NewMockService(t)
+				t.Cleanup(func() { server.Config.Services.LogStore = originalLogStore })
+
+				c, _ := gin.CreateTestContext(httptest.NewRecorder())
+				c.Set("store", mockStore)
+				c.Set("pipeline", fakePipeline)
+				c.Set("step", step)
+				deleteLogs(c)
+
+				assert.Equal(t, http.StatusConflict, c.Writer.Status())
+				mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
+			})
+		}
+	}
+}
+
+// TestDeleteStepLogReleasesClaim ensures a delete hands its claim back even when the request is
+// gone, else the log stays claimed until the log finalizer recovers it half an hour later.
+func TestDeleteStepLogReleasesClaim(t *testing.T) {
+	s := datastore.NewTestStore(t)
+	repo := &model.Repo{ForgeRemoteID: "1", FullName: "owner/repo", Owner: "owner", Name: "repo"}
+	require.NoError(t, s.CreateRepo(repo))
+	step := &model.Step{UUID: "deleted", Name: "build", PID: 1, State: model.StatusSuccess, Started: 1, Finished: 2}
+	require.NoError(t, s.CreatePipeline(&model.Pipeline{RepoID: repo.ID, Status: model.StatusSuccess, Finished: 2}, step))
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	mockLogStore := log_mocks.NewMockService(t)
+	// the client disconnects while the log is deleted
+	mockLogStore.On("LogDelete", mock.Anything, mock.Anything).Run(func(mock.Arguments) { cancel(nil) }).Return(context.Canceled)
+	originalLogStore := server.Config.Services.LogStore
+	server.Config.Services.LogStore = mockLogStore
+	t.Cleanup(func() { server.Config.Services.LogStore = originalLogStore })
+
+	require.ErrorIs(t, deleteStepLog(ctx, s, step), context.Canceled)
+	stored, err := s.StepByUUID("deleted")
+	require.NoError(t, err)
+	assert.Equal(t, model.LogStateOpen, stored.LogState)
+}
+
+// packingLogStore keeps logs in memory. StepFinished packs a log: it reads it, takes a while
+// (until pack is closed) and stores the packed copy.
+type packingLogStore struct {
+	mu      sync.Mutex
+	logs    map[int64][]*model.LogEntry
+	packing chan struct{}
+	pack    chan struct{}
+}
+
+func (p *packingLogStore) LogFind(_ context.Context, step *model.Step) ([]*model.LogEntry, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return append([]*model.LogEntry(nil), p.logs[step.ID]...), nil
+}
+
+func (p *packingLogStore) LogAppend(_ context.Context, step *model.Step, entries []*model.LogEntry) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.logs[step.ID] = append(p.logs[step.ID], entries...)
+	return nil
+}
+
+func (p *packingLogStore) LogDelete(_ context.Context, step *model.Step) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	delete(p.logs, step.ID)
+	return nil
+}
+
+func (p *packingLogStore) StepFinished(ctx context.Context, step *model.Step) error {
+	packed, err := p.LogFind(ctx, step)
+	if err != nil {
+		return err
+	}
+	close(p.packing)
+	<-p.pack
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.logs[step.ID] = packed
+	return nil
+}
+
+// TestDeleteStepLogsDuringPacking ensures a log cannot be deleted while the log finalizer packs it,
+// so the packed copy cannot bring it back, and can be once it is packed.
+func TestDeleteStepLogsDuringPacking(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	s := datastore.NewTestStore(t)
+	repo := &model.Repo{ForgeRemoteID: "1", FullName: "owner/repo", Owner: "owner", Name: "repo"}
+	require.NoError(t, s.CreateRepo(repo))
+	finished := time.Now().Add(-time.Hour).Unix()
+	step := &model.Step{UUID: "packed", Name: "build", PID: 1, State: model.StatusSuccess, Started: finished - 5, Finished: finished}
+	require.NoError(t, s.CreatePipeline(&model.Pipeline{RepoID: repo.ID, Status: model.StatusSuccess, Finished: finished}, step))
+
+	logs := &packingLogStore{
+		logs:    map[int64][]*model.LogEntry{step.ID: {{StepID: step.ID, Data: []byte("secret")}}},
+		packing: make(chan struct{}),
+		pack:    make(chan struct{}),
+	}
+	originalLogStore := server.Config.Services.LogStore
+	server.Config.Services.LogStore = logs
+	t.Cleanup(func() { server.Config.Services.LogStore = originalLogStore })
+
+	finishPacking := sync.OnceFunc(func() { close(logs.pack) })
+	t.Cleanup(finishPacking)
+	ticked := make(chan finalizer.Result, 1)
+	go func() {
+		res, _ := (&finalizer.Finalizer{Store: s, Logs: logs, Interval: time.Minute, Batch: 10}).Tick(t.Context(), time.Now())
+		ticked <- res
+	}()
+	<-logs.packing
+
+	deleteLog := func() int {
+		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		c.Set("store", s)
+		c.Set("step", step) // loaded before the finalizer claimed it
+		DeleteStepLogs(c)
+		return c.Writer.Status()
+	}
+	assert.Equal(t, http.StatusConflict, deleteLog(), "deleted while it was packed")
+	finishPacking()
+	assert.Equal(t, finalizer.Result{Done: 1}, <-ticked)
+	left, err := logs.LogFind(t.Context(), step)
+	require.NoError(t, err)
+	assert.Len(t, left, 1, "the refused delete changed the log")
+
+	stored, err := s.StepByUUID("packed")
+	require.NoError(t, err)
+	step = stored
+	assert.Equal(t, http.StatusNoContent, deleteLog())
+	left, err = logs.LogFind(t.Context(), step)
+	require.NoError(t, err)
+	assert.Empty(t, left)
+	stored, err = s.StepByUUID("packed")
+	require.NoError(t, err)
+	assert.Equal(t, model.LogStateFinalized, stored.LogState, "a deleted log stays finalized")
 }
 
 func TestGetRepoWorkflows(t *testing.T) {

@@ -37,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -228,12 +229,6 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 			string(step.Type),
 		).Observe(float64(duration))
 	}
-	if state.Exited {
-		if err := server.Config.Services.LogStore.StepFinished(c, step); err != nil {
-			log.Error().Err(err).Int64("step", step.ID).Msg("log store could not finalize the step log")
-		}
-	}
-
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
 		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
@@ -452,6 +447,10 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 // Log writes a log entry to the database and publishes it to the pubsub.
 // An explicit stepUUID makes it obvious that all entries must come from the same step.
 func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEntry) error {
+	// the log finalizer only takes the log once an append admitted inside the late-log window is over
+	ctx, cancel := context.WithTimeout(c, service_log.AppendTimeout)
+	defer cancel()
+
 	step, err := s.store.StepByUUID(stepUUID)
 	if err != nil {
 		return fmt.Errorf("could not find step with uuid %s in store: %w", stepUUID, err)
@@ -512,7 +511,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil {
+	if err = server.Config.Services.LogStore.LogAppend(ctx, step, logEntries); err != nil {
 		log.Error().Err(err).Msg("could not store log entries")
 	}
 
