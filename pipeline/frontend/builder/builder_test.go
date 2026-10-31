@@ -388,13 +388,6 @@ func TestRunsOnStatus(t *testing.T) {
 			when: "when:\n  event: push\n",
 			want: []string{"success"},
 		},
-		{
-			// The deprecated spelling must keep deciding on its own, even
-			// though the when above it sets no status.
-			name: "deprecated runs_on wins over when",
-			when: "when:\n  event: push\nruns_on: [ failure ]\n",
-			want: []string{"failure"},
-		},
 	}
 
 	for _, tt := range tests {
@@ -413,12 +406,31 @@ func TestRunsOnStatus(t *testing.T) {
 				},
 			}
 
-			// runs_on is deprecated, so Build reports a warning for that case.
 			items, _ := b.Build()
 			assert.Len(t, items, 1, "Should have generated 1 pipeline")
 			assert.ElementsMatch(t, tt.want, items[0].RunsOn)
 		})
 	}
+}
+
+func TestRunsOnDeprecatedFails(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{
+		pipelineEvent: "push",
+	}
+
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Data: []byte("runs_on: [ failure ]\nsteps:\n  - name: deploy\n    image: scratch\n")},
+		},
+	}
+
+	items, err := b.Build()
+	assert.True(t, errors.HasBlockingErrors(err))
+	assert.Empty(t, items)
 }
 
 func TestPipelineName(t *testing.T) {
