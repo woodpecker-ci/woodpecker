@@ -15,6 +15,8 @@
 package config_test
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -24,6 +26,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -332,6 +335,153 @@ func TestFetch(t *testing.T) {
 				matchingFiles[i] = files[i].Name
 			}
 			assert.ElementsMatch(t, tt.expectedFileNames, matchingFiles, "expected some other pipeline files")
+		})
+	}
+}
+
+// configsForge is a forge that can fetch all config candidates at once.
+type configsForge struct {
+	*mocks.MockForge
+	configs    func(candidates []string) ([][]*forge_types.FileMeta, error)
+	candidates []string
+}
+
+var _ forge.ConfigsFetcher = (*configsForge)(nil)
+
+func (f *configsForge) Configs(_ context.Context, _ *model.User, _ *model.Repo, _ *model.Pipeline, candidates []string) ([][]*forge_types.FileMeta, error) {
+	f.candidates = candidates
+	return f.configs(candidates)
+}
+
+func TestFetchConfigsAtOnce(t *testing.T) {
+	t.Parallel()
+
+	file := func(name, data string) *forge_types.FileMeta {
+		return &forge_types.FileMeta{Name: name, Data: []byte(data)}
+	}
+
+	tests := []struct {
+		name               string
+		repoConfig         string
+		configs            [][]*forge_types.FileMeta
+		expectedCandidates []string
+		expectedFileNames  []string
+		notFound           bool
+	}{
+		{
+			name: "folder with pipeline files",
+			configs: [][]*forge_types.FileMeta{
+				{file(".woodpecker/b.yml", "b"), file(".woodpecker/a.yaml", "a"), file(".woodpecker/readme.md", "r")},
+				{file(".woodpecker.yaml", "root")},
+				nil,
+			},
+			expectedFileNames: []string{".woodpecker/a.yaml", ".woodpecker/b.yml"},
+		},
+		{
+			name: "folder without pipeline files falls through to the file",
+			configs: [][]*forge_types.FileMeta{
+				{file(".woodpecker/readme.md", "r")},
+				{file(".woodpecker.yaml", "root")},
+				nil,
+			},
+			expectedFileNames: []string{".woodpecker.yaml"},
+		},
+		{
+			name:              ".woodpecker.yaml before .woodpecker.yml",
+			configs:           [][]*forge_types.FileMeta{nil, {file(".woodpecker.yaml", "yaml")}, {file(".woodpecker.yml", "yml")}},
+			expectedFileNames: []string{".woodpecker.yaml"},
+		},
+		{
+			name:              "empty file is skipped",
+			configs:           [][]*forge_types.FileMeta{nil, {file(".woodpecker.yaml", "")}, {file(".woodpecker.yml", "yml")}},
+			expectedFileNames: []string{".woodpecker.yml"},
+		},
+		{
+			name:     "nothing found",
+			configs:  [][]*forge_types.FileMeta{nil, nil, nil},
+			notFound: true,
+		},
+		{
+			name:               "user defined config",
+			repoConfig:         ".ci/pipeline.yml",
+			configs:            [][]*forge_types.FileMeta{{file(".ci/pipeline.yml", "user")}},
+			expectedCandidates: []string{".ci/pipeline.yml"},
+			expectedFileNames:  []string{".ci/pipeline.yml"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			// no File or Dir expectations: the candidates fetched at once must be used
+			f := &configsForge{
+				MockForge: mocks.NewMockForge(t),
+				configs: func([]string) ([][]*forge_types.FileMeta, error) {
+					return tt.configs, nil
+				},
+			}
+
+			files, err := config.NewForge(time.Second*3, 1, constant.DefaultConfigOrder, []string{".yaml", ".yml"}).Fetch(
+				t.Context(), f, &model.User{AccessToken: "xxx"},
+				&model.Repo{Owner: "laszlocph", Name: "multipipeline", Config: tt.repoConfig},
+				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"}, nil, false,
+			)
+
+			expectedCandidates := tt.expectedCandidates
+			if expectedCandidates == nil {
+				expectedCandidates = constant.DefaultConfigOrder
+			}
+			assert.Equal(t, expectedCandidates, f.candidates)
+
+			if tt.notFound {
+				assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+				return
+			}
+			require.NoError(t, err)
+			fileNames := make([]string, len(files))
+			for i := range files {
+				fileNames[i] = files[i].Name
+			}
+			assert.Equal(t, tt.expectedFileNames, fileNames)
+		})
+	}
+}
+
+func TestFetchConfigsAtOnceFallback(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		configs [][]*forge_types.FileMeta
+		err     error
+	}{
+		{name: "error", err: errors.New("graphql request failed with status 502")},
+		{name: "result does not match the candidates", configs: [][]*forge_types.FileMeta{nil}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			f := &configsForge{
+				MockForge: mocks.NewMockForge(t),
+				configs: func([]string) ([][]*forge_types.FileMeta, error) {
+					return tt.configs, tt.err
+				},
+			}
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker").Return(nil, &forge_types.ErrConfigNotFound{})
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker.yaml").Return([]byte("root"), nil)
+
+			files, err := config.NewForge(time.Second*3, 1, constant.DefaultConfigOrder, []string{".yaml", ".yml"}).Fetch(
+				t.Context(), f, &model.User{AccessToken: "xxx"},
+				&model.Repo{Owner: "laszlocph", Name: "multipipeline"},
+				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"}, nil, false,
+			)
+			require.NoError(t, err)
+			require.Len(t, files, 1)
+			assert.Equal(t, ".woodpecker.yaml", files[0].Name)
+			assert.Equal(t, "root", string(files[0].Data))
 		})
 	}
 }

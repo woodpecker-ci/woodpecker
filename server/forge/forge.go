@@ -46,7 +46,8 @@ import (
 //
 // Configuration Fetching:
 // Pipeline configurations retrieved via File() or Dir() from Repo.Config path
-// with fallback to defaults.
+// with fallback to defaults. Forges implementing the optional ConfigsFetcher
+// interface are asked for all candidates at once first.
 //
 // Error Handling:
 // - types.ErrIgnoreEvent: Skippable webhook events

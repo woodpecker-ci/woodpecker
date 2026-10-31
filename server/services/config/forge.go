@@ -151,6 +151,19 @@ func (f *forgeFetcherContext) checkPipelineFile(c context.Context, config string
 }
 
 func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
+	// fetch all candidates at once if the forge supports it, instead of one
+	// request per candidate
+	if fetcher, ok := f.forge.(forge.ConfigsFetcher); ok {
+		candidates, err := fetcher.Configs(c, f.user, f.repo, f.pipeline, configs)
+		if err == nil && len(candidates) != len(configs) {
+			err = fmt.Errorf("forge returned %d results for %d config candidates", len(candidates), len(configs))
+		}
+		if err == nil {
+			return f.firstAvailableCandidate(configs, candidates)
+		}
+		log.Debug().Err(err).Msgf("configFetcher[%s]: could not fetch config candidates at once, fetching them one by one", f.repo.FullName)
+	}
+
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
 		log.Trace().Msgf("fetching %s from forge", fileOrFolder)
@@ -189,5 +202,24 @@ func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs
 	}
 
 	// nothing found
+	return nil, &types.ErrConfigNotFound{Configs: configs}
+}
+
+// firstAvailableCandidate picks the config from candidates fetched at once,
+// with the same precedence and filtering as fetching them one by one.
+func (f *forgeFetcherContext) firstAvailableCandidate(configs []string, candidates [][]*types.FileMeta) ([]*types.FileMeta, error) {
+	for i, fileOrFolder := range configs {
+		if strings.HasSuffix(fileOrFolder, "/") {
+			if files := f.filterPipelineFiles(candidates[i]); len(files) != 0 {
+				log.Trace().Msgf("configFetcher[%s]: found %d files in '%s'", f.repo.FullName, len(files), fileOrFolder)
+				return files, nil
+			}
+			continue
+		}
+		if len(candidates[i]) == 1 && len(candidates[i][0].Data) != 0 {
+			log.Trace().Msgf("configFetcher[%s]: found file: '%s'", f.repo.FullName, fileOrFolder)
+			return []*types.FileMeta{{Name: fileOrFolder, Data: candidates[i][0].Data}}, nil
+		}
+	}
 	return nil, &types.ErrConfigNotFound{Configs: configs}
 }

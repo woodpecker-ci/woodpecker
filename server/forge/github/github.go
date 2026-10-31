@@ -362,6 +362,12 @@ func (c *client) dirFile(ctx context.Context, u *model.User, r *model.Repo, b *m
 	return &forge_types.FileMeta{Name: path, Data: data}, nil
 }
 
+// Configs fetches all config candidates with a single GraphQL request, see
+// forge.ConfigsFetcher.
+func (c *client) Configs(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, candidates []string) ([][]*forge_types.FileMeta, error) {
+	return c.configsFromGraphQL(ctx, u, r, b, candidates)
+}
+
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
@@ -800,6 +806,17 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	// The token may be expired, and without this refresh the API calls below
 	// would fail with an authentication error.
 	forge.Refresh(ctx, c, _store, user)
+
+	// resolve the tag with a single GraphQL request: the tag list is paged
+	// and the tag can be on any page
+	sha, err := c.tagCommitFromGraphQL(ctx, user.AccessToken, repo.Owner, repo.Name, tagName)
+	if err == nil {
+		return sha, nil
+	}
+	if errors.Is(err, errTagNotFound) {
+		return "", fmt.Errorf("could not find tag %s", tagName)
+	}
+	log.Debug().Err(err).Msgf("github: graphql lookup of tag %s failed, falling back to the tag list", tagName)
 
 	gh, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
