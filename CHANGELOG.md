@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @dgesteves, @gzm0, @hippi345, @roian6, @sarankumar1325, @slayerjain
+@6543, @dgesteves, @gzm0, @hippi345, @qwerty287, @roian6, @sarankumar1325, @slayerjain
 
 ### 🔒 Security
 
@@ -17,7 +17,12 @@
 
 ### 🐛 Bug Fixes
 
+- Add `/tmp` to server & agent scratch images [[#7452](https://github.com/woodpecker-ci/woodpecker/pull/7452)]
 - Fix addon logger dropping log fields [[#7453](https://github.com/woodpecker-ci/woodpecker/pull/7453)]
+
+### 🧪 Tests
+
+- Make sure test file names map source files names [[#7338](https://github.com/woodpecker-ci/woodpecker/pull/7338)]
 
 ### 📚 Documentation
 
