@@ -35,6 +35,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.3 [[#7460](https://github.com/woodpecker-ci/woodpecker/pull/7460)]
 - Update dependency eslint to v10.14.0 [[#7459](https://github.com/woodpecker-ci/woodpecker/pull/7459)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.40.0 [[#7438](https://github.com/woodpecker-ci/woodpecker/pull/7438)]
 
