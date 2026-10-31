@@ -218,9 +218,9 @@ func TestRPCRoundTrip(t *testing.T) {
 		assert.False(t, org.IsUser)
 	})
 
-	t.Run("hook forwards method, url, header and body", func(t *testing.T) {
+	t.Run("hook forwards method, url, header, body and secret", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
-		impl.On("Hook", mock.Anything, mock.Anything).Return(func(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+		impl.On("Hook", mock.Anything, mock.Anything, repo.WebhookSecret).Return(func(_ context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 			body, err := io.ReadAll(r.Body)
 			require.NoError(t, err)
 			assert.Equal(t, http.MethodPost, r.Method)
@@ -233,7 +233,7 @@ func TestRPCRoundTrip(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/hook?access_token=tok", strings.NewReader(`{"ref":"refs/heads/main"}`))
 		req.Header.Set("X-Event", "push")
 
-		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req)
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, repo.WebhookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, repo, gotRepo)
 		assert.Equal(t, pipeline, gotPipeline)
@@ -241,11 +241,37 @@ func TestRPCRoundTrip(t *testing.T) {
 
 	t.Run("hook without pipeline", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
-		impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, nil)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil)
 
 		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
-		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req)
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
 		require.NoError(t, err)
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
+
+	t.Run("hook keeps ignored event", func(t *testing.T) {
+		ignored := &types.ErrIgnoreEvent{Event: "ping", Reason: "no pipeline event"}
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, ignored)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		assert.Equal(t, ignored.Error(), err.Error())
+		assert.Nil(t, gotRepo)
+		assert.Nil(t, gotPipeline)
+	})
+
+	t.Run("hook keeps ignored event", func(t *testing.T) {
+		ignored := &types.ErrIgnoreEvent{Event: "ping", Reason: "no pipeline event"}
+		impl := forge_mocks.NewMockForge(t)
+		impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, ignored)
+
+		req := httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}"))
+		gotRepo, gotPipeline, err := newRPCForge(t, impl).Hook(ctx, req, "")
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		assert.Equal(t, ignored.Error(), err.Error())
 		assert.Nil(t, gotRepo)
 		assert.Nil(t, gotPipeline)
 	})
@@ -273,7 +299,7 @@ func TestRPCErrors(t *testing.T) {
 	impl.On("PullRequests", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("OrgMembership", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
 	impl.On("Org", mock.Anything, mock.Anything, mock.Anything).Return(nil, errForge)
-	impl.On("Hook", mock.Anything, mock.Anything).Return(nil, nil, errForge)
+	impl.On("Hook", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, errForge)
 
 	f := newRPCForge(t, impl)
 
@@ -311,6 +337,6 @@ func TestRPCErrors(t *testing.T) {
 	assertForgeErr(t, err)
 	_, err = f.Org(ctx, user, "org")
 	assertForgeErr(t, err)
-	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")))
+	_, _, err = f.Hook(ctx, httptest.NewRequest(http.MethodPost, "/api/hook", strings.NewReader("{}")), "")
 	assertForgeErr(t, err)
 }

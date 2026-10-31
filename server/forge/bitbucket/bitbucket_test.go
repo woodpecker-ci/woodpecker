@@ -17,6 +17,11 @@ package bitbucket
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,6 +29,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -210,12 +216,76 @@ func TestBitbucket(t *testing.T) {
 	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 	mockStore.On("GetRepoForgeID", mock.Anything, mock.Anything).Return(fakeRepoFromHook, nil)
 
-	r, b, err := c.Hook(ctx, req)
+	r, b, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
+}
+
+func TestActivateSetsWebhookSecret(t *testing.T) {
+	// field of POST /repositories/{workspace}/{repo_slug}/hooks in
+	// https://dac-static.atlassian.com/cloud/bitbucket/swagger.v3.json
+	var created map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodPost {
+			assert.NoError(t, json.NewDecoder(r.Body).Decode(&created))
+			_, _ = w.Write([]byte(`{}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"values":[]}`))
+	}))
+	t.Cleanup(server.Close)
+	c := &config{url: server.URL, api: server.URL}
+
+	repo := &model.Repo{Owner: "owner", Name: "repo", WebhookSecret: "repo-secret"}
+	require.NoError(t, c.Activate(t.Context(), fakeUser, repo, "https://ci.example.com/api/hook?access_token=jwt"))
+	require.NotNil(t, created)
+	assert.Equal(t, "repo-secret", created["secret"])
+}
+
+func TestHookVerifiesSignature(t *testing.T) {
+	// test vector of https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries,
+	// Bitbucket signs the body the same way
+	const (
+		secret    = "It's a Secret to Everybody"
+		body      = "Hello, World!"
+		signature = "sha256=757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"
+	)
+	c := &config{url: "https://bitbucket.org", api: "https://api.bitbucket.org"}
+
+	for _, tc := range []struct {
+		name      string
+		secret    string
+		body      string
+		signature string
+		valid     bool
+	}{
+		{name: "valid", secret: secret, body: body, signature: signature, valid: true},
+		{name: "wrong secret", secret: "other secret", body: body, signature: signature},
+		{name: "changed body", secret: secret, body: body + "!", signature: signature},
+		{name: "missing signature", secret: secret, body: body},
+		{name: "unsupported algorithm", secret: secret, body: body, signature: "sha1=757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"},
+		{name: "malformed signature", secret: secret, body: body, signature: "sha256=not hex"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(tc.body))
+			req.Header.Set(hookEvent, "repo:updated")
+			if tc.signature != "" {
+				req.Header.Set("X-Hub-Signature", tc.signature)
+			}
+
+			_, _, err := c.Hook(t.Context(), req, tc.secret)
+			if tc.valid {
+				// repo:updated is no pipeline event, so a valid hook ends here
+				assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+			} else {
+				assert.ErrorIs(t, err, types.ErrInvalidWebhookSignature)
+			}
+		})
+	}
 }
 
 var (
@@ -295,3 +365,18 @@ var (
 		State: model.StatusSuccess,
 	}
 )
+
+// testHookSecret is the webhook secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs the body of req with testHookSecret like Bitbucket does.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	mac := hmac.New(sha256.New, []byte(testHookSecret))
+	_, _ = mac.Write(body)
+	req.Header.Set("X-Hub-Signature", "sha256="+hex.EncodeToString(mac.Sum(nil)))
+	return req
+}

@@ -18,8 +18,12 @@ package gitlab
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -167,7 +171,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, pipeline.Event, model.EventPush)
@@ -190,7 +194,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "test", hookRepo.Owner)
@@ -213,7 +217,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
@@ -228,7 +232,7 @@ func TestGitLab(t *testing.T) {
 			req.Header = fixtures.ServiceHookHeaders
 
 			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
@@ -251,7 +255,7 @@ func TestGitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -278,7 +282,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			_, pipeline, err := client.Hook(ctx, req)
+			_, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, pipeline) {
 				assert.True(t, pipeline.PullRequestDraft)
@@ -293,7 +297,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
 			if assert.ErrorIs(t, err, &types.ErrIgnoreEvent{}) {
@@ -311,7 +315,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
 			if assert.ErrorIs(t, err, &types.ErrIgnoreEvent{}) {
@@ -330,7 +334,7 @@ func TestGitLab(t *testing.T) {
 			req.Header = fixtures.ServiceHookHeaders
 
 			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -350,7 +354,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ServiceHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -371,7 +375,7 @@ func TestGitLab(t *testing.T) {
 			req.Header = fixtures.ServiceHookHeaders
 
 			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -392,7 +396,7 @@ func TestGitLab(t *testing.T) {
 			req.Header = fixtures.MergeRequestHookHeaders
 
 			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -413,7 +417,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.ReleaseHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
@@ -431,7 +435,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
@@ -445,7 +449,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -466,7 +470,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -486,7 +490,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -506,7 +510,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -526,7 +530,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -546,7 +550,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -566,7 +570,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -586,7 +590,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.NoError(t, err)
 			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 				assert.Equal(t, "main", hookRepo.Branch)
@@ -606,7 +610,7 @@ func TestGitLab(t *testing.T) {
 			)
 			req.Header = fixtures.MergeRequestHookHeaders
 
-			hookRepo, pipeline, err := client.Hook(ctx, req)
+			hookRepo, pipeline, err := client.Hook(ctx, signHookRequest(t, req), testHookSecret)
 			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 			assert.Nil(t, hookRepo)
 			assert.Nil(t, pipeline)
@@ -675,6 +679,48 @@ func TestExtractFromPath(t *testing.T) {
 			assert.NoError(t, err)
 			assert.EqualValues(t, tt.wantOwner, owner)
 			assert.EqualValues(t, tt.wantName, name)
+		})
+	}
+}
+
+func TestActivateSetsSigningToken(t *testing.T) {
+	for _, supported := range []bool{true, false} {
+		t.Run(fmt.Sprintf("signing token supported: %t", supported), func(t *testing.T) {
+			var created map[string]any
+			var deleted bool
+			// signing_token and signing_token_present of https://docs.gitlab.com/api/project_webhooks/
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				switch {
+				case r.Method == http.MethodPost && r.URL.Path == "/api/v4/projects/4/hooks":
+					assert.NoError(t, json.NewDecoder(r.Body).Decode(&created))
+					w.WriteHeader(http.StatusCreated)
+					_, _ = w.Write([]byte(`{"id":9}`))
+				case r.Method == http.MethodGet && r.URL.Path == "/api/v4/projects/4/hooks/9":
+					_, _ = fmt.Fprintf(w, `{"id":9,"signing_token_present":%t}`, supported)
+				case r.Method == http.MethodDelete && r.URL.Path == "/api/v4/projects/4/hooks/9":
+					deleted = true
+					w.WriteHeader(http.StatusNoContent)
+				default:
+					_, _ = w.Write([]byte(`{"id":4}`))
+				}
+			}))
+			t.Cleanup(srv.Close)
+
+			repo := &model.Repo{ForgeRemoteID: "4", Owner: "owner", Name: "repo", WebhookSecret: testHookSecret}
+			err := load(srv.URL).Activate(t.Context(), &model.User{AccessToken: "token"}, repo, "https://ci.example.com/api/hook?access_token=jwt")
+
+			require.NotNil(t, created)
+			assert.Equal(t, "jwt", created["token"])
+			assert.Equal(t, "whsec_nK8Gu0Q2zb+iCvkSGmJrwQk8T1SzHA+pN5V4VhNTRbY=", created["signing_token"])
+			if supported {
+				assert.NoError(t, err)
+				assert.False(t, deleted)
+			} else {
+				// GitLab before 19.0 ignores the signing token, every delivery would fail the check
+				assert.Error(t, err)
+				assert.True(t, deleted, "the unsigned hook must be removed again")
+			}
 		})
 	}
 }
@@ -887,7 +933,7 @@ func hookRequest(t *testing.T, body []byte, header http.Header) *http.Request {
 	req, err := http.NewRequest(fixtures.ServiceHookMethod, fixtures.ServiceHookURL.String(), bytes.NewReader(body))
 	require.NoError(t, err)
 	req.Header = header
-	return req
+	return signHookRequest(t, req)
 }
 
 func TestHookLoadsMetadataFromForge(t *testing.T) {
@@ -901,7 +947,7 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 			"/api/v4/projects/4/milestones/6088906": `{"id":6088906,"title":"v1.0"}`,
 		})
 
-		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, fixtures.HookPullRequestMilestoned, fixtures.ServiceHookHeaders))
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, fixtures.HookPullRequestMilestoned, fixtures.ServiceHookHeaders), testHookSecret)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{"new.go", "old.go", "main.go"}, pipeline.ChangedFiles)
 		assert.Equal(t, "v1.0", pipeline.PullRequestMilestone)
@@ -922,7 +968,7 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 				`"author_name":"Jane","author_email":"jane@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
 		})
 
-		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "Release v22", pipeline.Message)
@@ -953,7 +999,7 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 				`"author_name":"Jane","author_email":"jane@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
 		})
 
-		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v22", pipeline.Ref)
@@ -967,7 +1013,7 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 			"/api/v4/projects/4/releases/0.0.2": `{"tag_name":"0.0.2","author":{"username":"releaser","avatar_url":"https://avatar/releaser"}}`,
 		})
 
-		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, fixtures.WebhookReleaseBody, fixtures.ReleaseHookHeaders))
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, fixtures.WebhookReleaseBody, fixtures.ReleaseHookHeaders), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "releaser", pipeline.Author)
@@ -977,9 +1023,9 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 	t.Run("forge errors fail the hook", func(t *testing.T) {
 		client := newTestServer(t, map[string]string{"/api/v4/projects/4": `{"id":4}`})
 
-		_, _, err := client.Hook(storeContext(t), hookRequest(t, fixtures.HookPullRequestMilestoned, fixtures.ServiceHookHeaders))
+		_, _, err := client.Hook(storeContext(t), hookRequest(t, fixtures.HookPullRequestMilestoned, fixtures.ServiceHookHeaders), testHookSecret)
 		assert.Error(t, err)
-		_, _, err = client.Hook(storeContext(t), hookRequest(t, fixtures.WebhookReleaseBody, fixtures.ReleaseHookHeaders))
+		_, _, err = client.Hook(storeContext(t), hookRequest(t, fixtures.WebhookReleaseBody, fixtures.ReleaseHookHeaders), testHookSecret)
 		assert.Error(t, err)
 	})
 }
@@ -1230,9 +1276,29 @@ func TestTagAuthorNotSpoofedFromCommit(t *testing.T) {
 			`"author_name":"trusted-admin","author_email":"x@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
 	})
 
-	_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+	_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders), testHookSecret)
 	require.NoError(t, err)
 	assert.Equal(t, model.EventTag, pipeline.Event)
 	// "test" is user_username in the fixture; "trusted-admin" is the spoofable git author name.
 	assert.Equal(t, "test", pipeline.Author)
+}
+
+// testHookSecret is the repository secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs req like GitLab does with the signing token
+// Activate derives from testHookSecret.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	req.Header = req.Header.Clone()
+	req.Header.Set("webhook-id", "msg_test")
+	req.Header.Set("webhook-timestamp", strconv.FormatInt(time.Now().Unix(), 10))
+	key := sha256.Sum256([]byte(testHookSecret))
+	mac := hmac.New(sha256.New, key[:])
+	_, _ = fmt.Fprintf(mac, "%s.%s.%s", req.Header.Get("webhook-id"), req.Header.Get("webhook-timestamp"), body)
+	req.Header.Set("webhook-signature", "v1,"+base64.StdEncoding.EncodeToString(mac.Sum(nil)))
+	return req
 }

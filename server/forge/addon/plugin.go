@@ -22,10 +22,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 )
 
-const pluginKey = "forge"
+const (
+	pluginKey = "forge"
+	// Version 2 rejects addons built before Hook got the webhook secret,
+	// they cannot check webhook signatures.
+	protocolVersion = 2
+)
 
 var HandshakeConfig = plugin.HandshakeConfig{
-	ProtocolVersion:  1,
+	ProtocolVersion:  protocolVersion,
 	MagicCookieKey:   "WOODPECKER_FORGE_ADDON_PLUGIN",
 	MagicCookieValue: "woodpecker-plugin-magic-cookie-value",
 }

@@ -15,6 +15,7 @@
 package addon
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -78,8 +79,9 @@ type argumentsRepos struct {
 }
 
 type responseHook struct {
-	Repo     *modelRepo      `json:"repo"`
-	Pipeline *model.Pipeline `json:"pipeline"`
+	Repo        *modelRepo            `json:"repo"`
+	Pipeline    *model.Pipeline       `json:"pipeline"`
+	IgnoreEvent *types.ErrIgnoreEvent `json:"ignore_event,omitempty"`
 }
 
 type responseLogin struct {
@@ -93,6 +95,7 @@ type httpRequest struct {
 	Header map[string][]string `json:"header"`
 	Form   map[string][]string `json:"form"`
 	Body   []byte              `json:"body"`
+	Secret string              `json:"secret"`
 }
 
 // modelUser is an extension of model.User to marshal all fields to JSON.

@@ -19,11 +19,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"strconv"
 
+	"github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -341,6 +343,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Desc:   rawURL.Host,
 		Events: []string{"repo:push", "pullrequest:created", "pullrequest:updated", "pullrequest:fulfilled", "pullrequest:rejected"},
 		URL:    link,
+		Secret: r.WebhookSecret,
 	})
 }
 
@@ -425,8 +428,16 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	pr, repo, pl, err := parseHook(req)
+func (c *config) Hook(ctx context.Context, req *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	payload, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := bitbucket.ValidateSignature(req, payload, []byte(secret)); err != nil {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+
+	pr, repo, pl, err := parseHook(req.Header.Get(hookEvent), payload)
 	if err != nil {
 		return nil, nil, err
 	}

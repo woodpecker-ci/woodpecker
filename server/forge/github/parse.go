@@ -16,10 +16,7 @@
 package github
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 
 	"github.com/google/go-github/v93/github"
@@ -31,8 +28,6 @@ import (
 )
 
 const (
-	hookField = "payload"
-
 	actionOpen             = "opened"
 	actionReopen           = "reopened"
 	actionClose            = "closed"
@@ -53,23 +48,6 @@ const (
 	labelCleared = "label_cleared"
 	labelUpdated = "label_updated"
 )
-
-// parseHook parses a GitHub hook from an http.Request request and returns
-// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, string, string, error) {
-	var reader io.Reader = r.Body
-
-	if payload := r.FormValue(hookField); payload != "" {
-		reader = bytes.NewBufferString(payload)
-	}
-
-	raw, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, nil, nil, "", "", err
-	}
-
-	return parseHookPayload(github.WebHookType(r), raw, merge)
-}
 
 // parseHookPayload parses a raw GitHub hook payload of the given webhook type
 // and returns Repo and Pipeline detail. If a hook type is unsupported nil

@@ -16,8 +16,6 @@
 package github
 
 import (
-	"bytes"
-	"net/http"
 	"sort"
 	"strings"
 	"testing"
@@ -30,25 +28,15 @@ import (
 )
 
 const (
-	hookEvent   = "X-GitHub-Event"
 	hookDeploy  = "deployment"
 	hookPush    = "push"
 	hookPull    = "pull_request"
 	hookRelease = "release"
 )
 
-func testHookRequest(payload []byte, event string) *http.Request {
-	buf := bytes.NewBuffer(payload)
-	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-	req.Header = http.Header{}
-	req.Header.Set(hookEvent, event)
-	return req
-}
-
 func TestParseHook(t *testing.T) {
 	t.Run("ignore unsupported hook events", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequest), "issues")
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload("issues", []byte(fixtures.HookPullRequest), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.Nil(t, r)
@@ -59,8 +47,7 @@ func TestParseHook(t *testing.T) {
 
 	t.Run("reject null payload", func(t *testing.T) {
 		for _, event := range []string{hookDeploy, hookPush, hookPull, hookRelease} {
-			req := testHookRequest([]byte("null"), event)
-			p, r, b, cc, pc, err := parseHook(req, false)
+			p, r, b, cc, pc, err := parseHookPayload(event, []byte("null"), false)
 			assert.Empty(t, pc, event)
 			assert.Empty(t, cc, event)
 			assert.Nil(t, r, event)
@@ -71,8 +58,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("skip skip push hook when action is deleted", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPushDeleted), hookPush)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPush, []byte(fixtures.HookPushDeleted), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.Nil(t, r)
@@ -81,8 +67,7 @@ func TestParseHook(t *testing.T) {
 		assert.Nil(t, p)
 	})
 	t.Run("push hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPush), hookPush)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPush, []byte(fixtures.HookPush), false)
 		assert.Equal(t, "2f780193b136b72bfea4eeb640786a8c4450c7a2", pc)
 		assert.Equal(t, "366701fde727cb7a9e7f21eb88264f59f6f9b89c", cc)
 		assert.NoError(t, err)
@@ -98,8 +83,7 @@ func TestParseHook(t *testing.T) {
 		// history rewrite. Comparing against it (CompareCommits) fails with a
 		// 404 on the forge, so the previous commit must be empty to make the
 		// downstream changed-files lookup fall back to the head commit only.
-		req := testHookRequest([]byte(fixtures.HookPushForced), hookPush)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPush, []byte(fixtures.HookPushForced), false)
 		assert.NoError(t, err)
 		assert.Equal(t, "f7220f1f753260bf6f1c533357c70213e9fd4abe", cc)
 		assert.Empty(t, pc, "forced push must not expose the unreachable before commit")
@@ -110,8 +94,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("PR hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequest), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequest), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -129,16 +112,14 @@ func TestParseHook(t *testing.T) {
 			`"state": "open",`+"\n    "+`"draft": true,`,
 			1,
 		)
-		req := testHookRequest([]byte(payload), hookPull)
-		_, _, b, _, _, err := parseHook(req, false)
+		_, _, b, _, _, err := parseHookPayload(hookPull, []byte(payload), false)
 		assert.NoError(t, err)
 		if assert.NotNil(t, b) {
 			assert.True(t, b.PullRequestDraft)
 		}
 	})
 	t.Run("PR closed hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestClosed), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -149,8 +130,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("reopen a pull", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestReopened), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestReopened), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -161,8 +141,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("PR merged hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestMerged), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestMerged), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -173,8 +152,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("PR edited hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestEdited), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestEdited), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -186,8 +164,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("deploy hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookDeploy), hookDeploy)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookDeploy, []byte(fixtures.HookDeploy), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -200,8 +177,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("release hook", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookRelease), hookRelease)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookRelease, []byte(fixtures.HookRelease), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -214,8 +190,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull review requested", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestReviewRequested), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestReviewRequested), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
@@ -225,8 +200,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull milestoned", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneAdded), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestMilestoneAdded), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -274,8 +248,7 @@ func TestParseHook(t *testing.T) {
 	// milestone change will result two webhooks an demilestoned and milestoned
 
 	t.Run("pull request demilestoned", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneRemoved), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestMilestoneRemoved), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -311,8 +284,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull request labele added", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestLabelAdded), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestLabelAdded), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -363,8 +335,7 @@ func TestParseHook(t *testing.T) {
 	// lable change will result two webhooks an unlable and labeled
 
 	t.Run("pull request got label removed", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestLabelRemoved), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestLabelRemoved), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -399,8 +370,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull request got all label removed", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestLabelsCleared), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestLabelsCleared), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -430,8 +400,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull request assigned", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeAdded), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestAssigneeAdded), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)
@@ -471,8 +440,7 @@ func TestParseHook(t *testing.T) {
 	// assigne change will result two webhooks an assigned and unassigned
 
 	t.Run("pull request unassigned", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeRemoved), hookPull)
-		p, r, b, cc, pc, err := parseHook(req, false)
+		p, r, b, cc, pc, err := parseHookPayload(hookPull, []byte(fixtures.HookPullRequestAssigneeRemoved), false)
 		assert.Empty(t, pc)
 		assert.Empty(t, cc)
 		assert.NoError(t, err)

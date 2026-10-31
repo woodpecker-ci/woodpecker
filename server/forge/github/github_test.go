@@ -16,11 +16,17 @@
 package github
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -239,6 +245,48 @@ var (
 	}
 )
 
+func TestHookVerifiesSignature(t *testing.T) {
+	// test vector of https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
+	const (
+		secret    = "It's a Secret to Everybody"
+		body      = "Hello, World!"
+		signature = "sha256=757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	for _, tc := range []struct {
+		name      string
+		secret    string
+		body      string
+		signature string
+		valid     bool
+	}{
+		{name: "valid", secret: secret, body: body, signature: signature, valid: true},
+		{name: "wrong secret", secret: "other secret", body: body, signature: signature},
+		{name: "changed body", secret: secret, body: body + "!", signature: signature},
+		{name: "missing signature", secret: secret, body: body},
+		{name: "no secret on both sides", body: body},
+		{name: "malformed signature", secret: secret, body: body, signature: "sha256=not hex"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/hook", strings.NewReader(tc.body))
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("X-GitHub-Event", "ping")
+			if tc.signature != "" {
+				req.Header.Set("X-Hub-Signature-256", tc.signature)
+			}
+
+			_, _, err := c.Hook(t.Context(), req, tc.secret)
+			if tc.valid {
+				// the body is no JSON, parsing fails after the signature check
+				assert.NotErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
+			} else {
+				assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
+			}
+		})
+	}
+}
+
 func TestHook(t *testing.T) {
 	// Mock GitHub API for changed files
 	mockedHTTPClient := github_mock.NewMockedHTTPClient(
@@ -306,7 +354,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "push")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -330,7 +378,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "pull_request")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -355,7 +403,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "deployment")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -377,7 +425,7 @@ func TestHook(t *testing.T) {
 		req.Header.Set("X-GitHub-Event", "push")
 
 		// Call the Hook function
-		repo, pipeline, err := c.Hook(ctx, req)
+		repo, pipeline, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, repo)
@@ -392,6 +440,20 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Email)
 		assert.Empty(t, pipeline.ChangedFiles)
+	})
+
+	t.Run("a payload in the query does not replace the signed body", func(t *testing.T) {
+		// the signature covers only the body
+		req := httptest.NewRequest("POST", "/hook?payload="+url.QueryEscape(fixtures.HookDeploy), strings.NewReader(fixtures.HookTag))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-GitHub-Event", "push")
+
+		_, pipeline, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
+
+		assert.NoError(t, err)
+		if assert.NotNil(t, pipeline) {
+			assert.Equal(t, model.EventTag, pipeline.Event)
+		}
 	})
 }
 
@@ -520,14 +582,15 @@ func TestActivate(t *testing.T) {
 	)
 
 	c := &client{API: defaultAPI, url: defaultURL}
-	err := c.Activate(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, "https://ci.example.com/api/hook?access_token=new")
+	err := c.Activate(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world", WebhookSecret: "repo-secret"}, "https://ci.example.com/api/hook?access_token=new")
 	require.NoError(t, err)
 
 	// the old hook of this server is replaced, hooks of others are kept
 	assert.Equal(t, []string{"/repos/octocat/hello-world/hooks/2"}, deleted)
 	require.NotNil(t, created)
 	assert.Equal(t, "https://ci.example.com/api/hook?access_token=new", created.GetConfig().GetURL())
-	assert.Equal(t, "form", created.GetConfig().GetContentType())
+	assert.Equal(t, "json", created.GetConfig().GetContentType())
+	assert.Equal(t, "repo-secret", created.GetConfig().GetSecret())
 	assert.ElementsMatch(t, []string{"push", "pull_request", "pull_request_review", "deployment"}, created.Events)
 }
 
@@ -826,4 +889,19 @@ func TestRefreshWithoutRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, refreshed)
 	assert.Equal(t, "token", user.AccessToken)
+}
+
+// testHookSecret is the webhook secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs the body of req with testHookSecret like GitHub does.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	mac := hmac.New(sha256.New, []byte(testHookSecret))
+	_, _ = mac.Write(body)
+	req.Header.Set("X-Hub-Signature-256", "sha256="+hex.EncodeToString(mac.Sum(nil)))
+	return req
 }

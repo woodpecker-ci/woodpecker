@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
@@ -545,17 +546,30 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return fmt.Errorf("no token found")
 	}
 
-	_, _, err = client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
+	hook, _, err := client.Projects.AddProjectHook(_repo.ID, &gitlab.AddProjectHookOptions{
 		URL:                   new(webURL),
 		Token:                 new(token),
+		SigningToken:          new(webhookSigningToken(repo.WebhookSecret)),
 		PushEvents:            new(true),
 		TagPushEvents:         new(true),
 		MergeRequestsEvents:   new(true),
 		DeploymentEvents:      new(true),
 		EnableSSLVerification: new(!g.skipVerify),
 	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return err
+	}
 
-	return err
+	// GitLab before 19.0 ignores the signing token, Hook would reject every delivery
+	hook, _, err = client.Projects.GetProjectHook(_repo.ID, hook.ID, gitlab.WithContext(ctx))
+	if err != nil {
+		return err
+	}
+	if !hook.SigningTokenPresent {
+		_, err = client.Projects.DeleteProjectHook(_repo.ID, hook.ID, gitlab.WithContext(ctx))
+		return errors.Join(errors.New("GitLab ignored the webhook signing token, signed webhooks need GitLab 19.0 or newer"), err)
+	}
+	return nil
 }
 
 // Deactivate removes a repository by removing all the post-commit hooks
@@ -660,10 +674,13 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *GitLab) Hook(ctx context.Context, req *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
+		return nil, nil, err
+	}
+	if err := verifyWebhook(req.Header, payload, webhookSigningKey(secret), time.Now()); err != nil {
 		return nil, nil, err
 	}
 

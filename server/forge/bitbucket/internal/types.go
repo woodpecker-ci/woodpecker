@@ -82,6 +82,7 @@ type Hook struct {
 	URL    string   `json:"url"`
 	Events []string `json:"events"`
 	Active bool     `json:"active"`
+	Secret string   `json:"secret,omitempty"`
 }
 
 type HookResp struct {

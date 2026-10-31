@@ -28,6 +28,13 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
+- GitHub webhooks are now signed with the secret of the repository, and Woodpecker rejects webhooks without a valid signature.
+  Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise GitHub repositories get no new pipelines.
+- Bitbucket Cloud webhooks are now signed with the secret of the repository, and Woodpecker rejects webhooks without a valid signature.
+  Hooks created by older versions have no secret: run **Repair all** in the admin settings under Repositories after the upgrade, otherwise Bitbucket repositories get no new pipelines.
+- GitLab webhooks are now signed with a signing token, which needs GitLab 19.0 or newer, and Woodpecker rejects webhooks without a valid signature.
+  Upgrade GitLab first, then run **Repair all** in the admin settings under Repositories, otherwise GitLab repositories get no new pipelines.
+- Forge addons must be built against this version: their `Hook` gets the webhook secret of the repository to check the signature, and the server rejects addons built for older versions.
 
 #### Extensions
 

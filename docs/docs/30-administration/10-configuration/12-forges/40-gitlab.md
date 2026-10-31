@@ -4,7 +4,7 @@ toc_max_heading_level: 2
 
 # GitLab
 
-Woodpecker comes with built-in support for the GitLab version 12.4 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with built-in support for the GitLab version 19.0 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
 ```ini
 WOODPECKER_GITLAB=true
@@ -12,6 +12,9 @@ WOODPECKER_GITLAB_URL=http://gitlab.mycompany.com
 WOODPECKER_GITLAB_CLIENT=95c0282573633eb25e82
 WOODPECKER_GITLAB_SECRET=30f5064039e6b359e075
 ```
+
+Woodpecker rejects webhooks without a valid signature of their [signing token](https://docs.gitlab.com/user/project/integrations/webhooks/), which GitLab supports since 19.0.
+Keep the clocks of GitLab and the Woodpecker server in sync, webhooks sent more than five minutes off are rejected.
 
 ## Registration
 

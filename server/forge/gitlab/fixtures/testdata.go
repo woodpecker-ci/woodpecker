@@ -59,6 +59,10 @@ func NewServer(t *testing.T) *httptest.Server {
 			}
 			return
 		case "/api/v4/projects/4/hooks/10717088":
+			if r.Method == http.MethodGet {
+				_, _ = w.Write(project4PayloadHook)
+				return
+			}
 			w.WriteHeader(201)
 			return
 		case "/api/v4/projects/4/merge_requests":

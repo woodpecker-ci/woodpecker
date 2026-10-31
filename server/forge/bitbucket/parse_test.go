@@ -15,8 +15,6 @@
 package bitbucket
 
 import (
-	"bytes"
-	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,34 +26,19 @@ import (
 
 func TestParseHook(t *testing.T) {
 	t.Run("unsupported hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, "issue:created")
-
-		_, r, b, err := parseHook(req)
+		_, r, b, err := parseHook("issue:created", []byte(fixtures.HookPush))
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 	})
 
 	t.Run("malformed pull-request hook", func(t *testing.T) {
-		buf := bytes.NewBufferString("[]")
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullCreated)
-
-		_, _, _, err := parseHook(req)
+		_, _, _, err := parseHook(hookPullCreated, []byte("[]"))
 		assert.Error(t, err)
 	})
 
 	t.Run("pull-request", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPull)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullCreated)
-
-		pr, r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(hookPullCreated, []byte(fixtures.HookPull))
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "user_name/repo_name", r.FullName)
@@ -64,12 +47,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull-request merged", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullMerged)
-
-		pr, r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(hookPullMerged, []byte(fixtures.HookPullRequestMerged))
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
@@ -78,12 +56,7 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("pull-request closed", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPullDeclined)
-
-		pr, r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(hookPullDeclined, []byte(fixtures.HookPullRequestDeclined))
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
@@ -92,34 +65,19 @@ func TestParseHook(t *testing.T) {
 	})
 
 	t.Run("malformed push", func(t *testing.T) {
-		buf := bytes.NewBufferString("[]")
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		_, _, _, err := parseHook(req)
+		_, _, _, err := parseHook(hookPush, []byte("[]"))
 		assert.Error(t, err)
 	})
 
 	t.Run("missing commit sha", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		_, r, b, err := parseHook(req)
+		_, r, b, err := parseHook(hookPush, []byte(fixtures.HookPushEmptyHash))
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
 	})
 
 	t.Run("push hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-		req.Header = http.Header{}
-		req.Header.Set(hookEvent, hookPush)
-
-		pr, r, b, err := parseHook(req)
+		pr, r, b, err := parseHook(hookPush, []byte(fixtures.HookPush))
 		assert.NoError(t, err)
 		assert.Nil(t, pr)
 		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)

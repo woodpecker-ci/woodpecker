@@ -258,6 +258,7 @@ var project6Payload = []byte(`
 var project4PayloadHook = []byte(`
 {
 	"id": 10717088,
+	"signing_token_present": true,
 	"url": "http://example.com/api/hook",
 	"created_at": "2021-12-18T23:29:33.852Z",
 	"push_events": true,
