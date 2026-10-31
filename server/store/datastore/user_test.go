@@ -164,4 +164,7 @@ func TestCreateUserFailureKeepsOrgs(t *testing.T) {
 	org, err := store.OrgGet(existingOrg.ID)
 	assert.NoError(t, err)
 	assert.False(t, org.IsUser)
+
+	_, err = store.GetUserByLogin(1, "existing")
+	assert.ErrorIs(t, err, types.ErrRecordNotExist, "failed user insert must not leave a user behind")
 }
