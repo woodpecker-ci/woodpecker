@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gzm0, @hippi345, @roian6, @sarankumar1325, @slayerjain
+@6543, @dgesteves, @gzm0, @hippi345, @roian6, @sarankumar1325, @slayerjain
 
 ### 🔒 Security
 
@@ -15,8 +15,13 @@
 - Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
 - Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
 
+### 🐛 Bug Fixes
+
+- Fix addon logger dropping log fields [[#7453](https://github.com/woodpecker-ci/woodpecker/pull/7453)]
+
 ### 📚 Documentation
 
+- Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
 - Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
 - Fix dead links in CLI readme and docs pages [[#7451](https://github.com/woodpecker-ci/woodpecker/pull/7451)]
 - Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
