@@ -3116,7 +3116,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "the options for the pipeline to run",
-                        "name": "options",
+                        "name": "pipelineOptions",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -5004,6 +5004,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
@@ -5038,6 +5041,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "oauth_client_secret": {
                     "type": "string"
