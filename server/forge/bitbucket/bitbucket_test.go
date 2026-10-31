@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -216,6 +217,18 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
+
+	// the changed files of a pull come from the diffstat link in the hook
+	buf = bytes.NewBufferString(strings.ReplaceAll(fixtures.HookPullRequestCreated, "https://api.bitbucket.org", s.URL))
+	req, _ = http.NewRequest(http.MethodPost, "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, hookPullCreated)
+
+	r, b, err = c.Hook(ctx, req)
+	assert.NoError(t, err)
+	assert.Equal(t, "6543/collect-webhooks", r.FullName)
+	assert.Equal(t, model.EventPull, b.Event)
+	assert.ElementsMatch(t, []string{"a", "b", "emos", "dir/dir2/dir3/emos", "dir/dir2/dir3/some-file"}, b.ChangedFiles)
 }
 
 var (
