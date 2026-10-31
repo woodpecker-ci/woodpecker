@@ -844,7 +844,7 @@ func TestFifoAssignToWorker(t *testing.T) {
 				q.workers[&worker{agentID: agent, filter: filter}] = struct{}{}
 			}
 
-			element, worker := q.assignToWorker()
+			element, worker := q.assignToWorker(q.newConcurrencyIndex())
 			if tt.task == "" {
 				assert.Nil(t, element)
 				assert.Nil(t, worker)
@@ -937,7 +937,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 				q.running[task.ID] = &entry{item: task}
 			}
 
-			element, _ := q.assignToWorker()
+			element, _ := q.assignToWorker(q.newConcurrencyIndex())
 			if tt.task == "" {
 				assert.Nil(t, element)
 				return
