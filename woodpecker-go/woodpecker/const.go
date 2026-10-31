@@ -61,4 +61,4 @@ const (
 	StepTypeCache    StepType = "cache"
 )
 
-const defaultForgeID = 1
+const primaryForgeID = 1
