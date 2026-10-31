@@ -17,6 +17,7 @@
 
 ### 🐛 Bug Fixes
 
+- CreateUser in one SQL session and report back constrain name on insert error [[#7439](https://github.com/woodpecker-ci/woodpecker/pull/7439)]
 - Add `/tmp` to server & agent scratch images [[#7452](https://github.com/woodpecker-ci/woodpecker/pull/7452)]
 - Fix addon logger dropping log fields [[#7453](https://github.com/woodpecker-ci/woodpecker/pull/7453)]
 
@@ -33,7 +34,6 @@
 
 ### 📦️ Dependency
 
-- Update web npm deps non-major [[#7456](https://github.com/woodpecker-ci/woodpecker/pull/7456)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.40.0 [[#7438](https://github.com/woodpecker-ci/woodpecker/pull/7438)]
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
