@@ -41,7 +41,11 @@ type Contexts struct {
 	Contexts       map[string]Context `json:"contexts"`
 }
 
-func getContextsPath() (string, error) {
+func getContextsPath(c *cli.Command) (string, error) {
+	if path := c.String("contexts-file"); path != "" {
+		return path, nil
+	}
+
 	configPath, err := xdg.ConfigFile("woodpecker/contexts.json")
 	if err != nil {
 		return "", err
@@ -50,8 +54,8 @@ func getContextsPath() (string, error) {
 }
 
 // LoadContexts loads all contexts from the contexts file.
-func LoadContexts() (*Contexts, error) {
-	contextsPath, err := getContextsPath()
+func LoadContexts(c *cli.Command) (*Contexts, error) {
+	contextsPath, err := getContextsPath(c)
 	if err != nil {
 		return nil, err
 	}
@@ -80,13 +84,13 @@ func LoadContexts() (*Contexts, error) {
 }
 
 // SaveContexts saves all contexts to the contexts file.
-func SaveContexts(contexts *Contexts) error {
+func SaveContexts(c *cli.Command, contexts *Contexts) error {
 	data, err := json.MarshalIndent(contexts, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	contextsPath, err := getContextsPath()
+	contextsPath, err := getContextsPath(c)
 	if err != nil {
 		return err
 	}
@@ -102,7 +106,7 @@ func SaveContexts(contexts *Contexts) error {
 
 // GetCurrentContext returns the current active context.
 func GetCurrentContext(ctx context.Context, c *cli.Command) (*Config, error) {
-	contexts, err := LoadContexts()
+	contexts, err := LoadContexts(c)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +150,7 @@ func GetContextConfig(c *cli.Command, ctx *Context) (*Config, error) {
 
 // AddOrUpdateContext adds or updates a context and optionally sets it as current.
 func AddOrUpdateContext(c *cli.Command, name, serverURL, token, logLevel string, setCurrent bool) error {
-	contexts, err := LoadContexts()
+	contexts, err := LoadContexts(c)
 	if err != nil {
 		return err
 	}
@@ -168,12 +172,12 @@ func AddOrUpdateContext(c *cli.Command, name, serverURL, token, logLevel string,
 		return err
 	}
 
-	return SaveContexts(contexts)
+	return SaveContexts(c, contexts)
 }
 
 // DeleteContext removes a context.
 func DeleteContext(c *cli.Command, name string) error {
-	contexts, err := LoadContexts()
+	contexts, err := LoadContexts(c)
 	if err != nil {
 		return err
 	}
@@ -197,12 +201,12 @@ func DeleteContext(c *cli.Command, name string) error {
 		contexts.CurrentContext = ""
 	}
 
-	return SaveContexts(contexts)
+	return SaveContexts(c, contexts)
 }
 
 // SetCurrentContext sets the current active context.
-func SetCurrentContext(name string) error {
-	contexts, err := LoadContexts()
+func SetCurrentContext(c *cli.Command, name string) error {
+	contexts, err := LoadContexts(c)
 	if err != nil {
 		return err
 	}
@@ -212,12 +216,12 @@ func SetCurrentContext(name string) error {
 	}
 
 	contexts.CurrentContext = name
-	return SaveContexts(contexts)
+	return SaveContexts(c, contexts)
 }
 
 // RenameContext renames an existing context.
-func RenameContext(oldName, newName string) error {
-	contexts, err := LoadContexts()
+func RenameContext(c *cli.Command, oldName, newName string) error {
+	contexts, err := LoadContexts(c)
 	if err != nil {
 		return err
 	}
@@ -241,5 +245,5 @@ func RenameContext(oldName, newName string) error {
 		contexts.CurrentContext = newName
 	}
 
-	return SaveContexts(contexts)
+	return SaveContexts(c, contexts)
 }
