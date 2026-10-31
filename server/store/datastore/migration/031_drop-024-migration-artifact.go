@@ -21,7 +21,7 @@ import (
 	"xorm.io/xorm"
 )
 
-var dropStrayUserOrgTables = xormigrate.Migration{
+var drop024MigrationArtifacts = xormigrate.Migration{
 	ID: "drop-024-migration-artifacts",
 	MigrateSession: func(sess *xorm.Session) error {
 		for _, table := range []string{"user", "org"} {
