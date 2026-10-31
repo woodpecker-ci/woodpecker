@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency eslint to v10.14.0 [[#7459](https://github.com/woodpecker-ci/woodpecker/pull/7459)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.40.0 [[#7438](https://github.com/woodpecker-ci/woodpecker/pull/7438)]
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
