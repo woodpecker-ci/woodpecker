@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -99,6 +100,70 @@ func TestGithub(t *testing.T) {
 	t.Run("repo not found error", func(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
+	})
+
+	t.Run("dir is fetched with a single graphql request", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "somedir/a.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir returns config-not-found for missing directories", func(t *testing.T) {
+		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "no-such-dir")
+		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+	})
+
+	t.Run("dir skips symlinks", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+		}, files)
+	})
+
+	t.Run("dir loads symlinks over rest when following them", func(t *testing.T) {
+		followSymlinks = true
+		t.Cleanup(func() { followSymlinks = false })
+
+		// the graphql entry carries the link target as its text, which must
+		// never be used as the file content
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "symlink-dir/link.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir loads large and binary files over rest", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "large-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "large-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "large-dir/large.yaml", Data: []byte("pipeline:")},
+			{Name: "large-dir/binary.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "rest-fallback-dir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "rest-fallback-dir/b.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir falls back instead of reporting config-not-found for an unexpected graphql response", func(t *testing.T) {
+		// a 200 without a repository object must not be mistaken for a missing
+		// path: config-not-found makes the caller drop the pipeline silently
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "null-repo-dir")
+		require.NoError(t, err)
+		assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+		require.Len(t, files, 1)
+		assert.Equal(t, "null-repo-dir/c.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
 	})
 }
 
@@ -762,4 +827,39 @@ func TestRefreshWithoutRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, refreshed)
 	assert.Equal(t, "token", user.AccessToken)
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*client)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }
