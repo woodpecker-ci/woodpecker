@@ -28,6 +28,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
+// SkipExitCode is the exit code a step can use to finish successfully and
+// skip all remaining steps of the workflow (same convention as Drone).
+const SkipExitCode = 78
+
 // executeStep is the single entry point called per step from runStage.
 // It checks whether the step should be skipped, emits a "started" trace,
 // sets up drone-compat env vars, then hands off to blocking or detached execution.
@@ -65,6 +69,13 @@ func (r *Runtime) executeStep(runnerCtx context.Context, step *backend_types.Ste
 func (r *Runtime) shouldSkipStep(step *backend_types.Step) bool {
 	logger := r.makeLogger()
 	currentErr := r.err.Get()
+
+	if r.skipRemaining.Load() {
+		logger.Debug().
+			Str("step", step.Name).
+			Msgf("skipped because a previous step exited with %d", SkipExitCode)
+		return true
+	}
 
 	if currentErr != nil && !step.OnFailure {
 		logger.Debug().
@@ -207,6 +218,13 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 		waitState.Error = errors.Join(waitState.Error, err)
 
 		return waitState, err
+	}
+	if waitState.ExitCode == SkipExitCode {
+		// The step asked to skip the rest of the workflow: report it as
+		// successful and mark all steps that have not started as skipped.
+		r.skipRemaining.Store(true)
+		waitState.ExitCode = 0
+		return waitState, nil
 	}
 	if waitState.ExitCode != 0 {
 		return waitState, &pipeline_errors.ExitError{
