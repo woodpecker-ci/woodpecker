@@ -163,6 +163,15 @@ func (s storage) RepoList(user *model.User, owned, active bool, f *model.RepoFil
 		Find(&repos)
 }
 
+// RepoListOrphaned list all active repos that no longer exist at their forge.
+func (s storage) RepoListOrphaned() ([]*model.Repo, error) {
+	repos := make([]*model.Repo, 0)
+	return repos, s.engine.
+		Where(builder.Eq{"active": true, "has_no_forge_repo": true}).
+		Asc("full_name").
+		Find(&repos)
+}
+
 // RepoListAll list all repos.
 func (s storage) RepoListAll(active bool, p *model.ListOptionsWithAll) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
