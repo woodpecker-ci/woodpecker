@@ -187,33 +187,45 @@ func TestConstraints(t *testing.T) {
 		},
 		{
 			desc: "filter by eval with escaped regex matches release tag",
-			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"' }`,
+			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventTag, Commit: metadata.Commit{Ref: "refs/tags/v3.20.0"}}},
 			want: true,
 		},
 		{
 			desc: "filter by eval with escaped regex skips pre-release tag",
-			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"' }`,
+			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\.[0-9]+\\.[0-9]+$"' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventTag, Commit: metadata.Commit{Ref: "refs/tags/v3.20.0-rc.1"}}},
 			want: false,
 		},
 		{
+			desc: "filter by eval with double escaped regex no longer matches release tag",
+			conf: `{ evaluate: 'CI_COMMIT_TAG matches "^v?[0-9]+\\\\.[0-9]+\\\\.[0-9]+$"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventTag, Commit: metadata.Commit{Ref: "refs/tags/v3.20.0"}}},
+			want: false,
+		},
+		{
 			desc: "filter by branch with escaped slash matches one slash",
-			conf: `{ branch: '*\\/*' }`,
+			conf: `{ branch: '*\/*' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x"}}},
 			want: true,
 		},
 		{
 			desc: "filter by branch with escaped slash skips two slashes",
-			conf: `{ branch: '*\\/*' }`,
+			conf: `{ branch: '*\/*' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x/y"}}},
 			want: false,
 		},
 		{
 			desc: "filter by branch with escaped slash and globstar matches two slashes",
-			conf: `{ branch: '*\\/**' }`,
+			conf: `{ branch: '*\/**' }`,
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x/y"}}},
 			want: true,
+		},
+		{
+			desc: "filter by branch with double escaped slash no longer matches one slash",
+			conf: `{ branch: '*\\/*' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "feat/x"}}},
+			want: false,
 		},
 	}
 
