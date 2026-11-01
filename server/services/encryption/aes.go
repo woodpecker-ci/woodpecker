@@ -19,8 +19,6 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/tink-crypto/tink-go/v2/subtle/random"
-
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
@@ -33,17 +31,8 @@ type aesEncryptionService struct {
 }
 
 func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
-	msg := []byte(plaintext)
-	aad := []byte(associatedData)
-
-	nonce := random.GetRandomBytes(uint32(AES_GCM_SIV_NonceSize))
-	ciphertext := svc.cipher.Seal(nil, nonce, msg, aad)
-
-	result := make([]byte, 0, AES_GCM_SIV_NonceSize+len(ciphertext))
-	result = append(result, nonce...)
-	result = append(result, ciphertext...)
-
-	return base64.StdEncoding.EncodeToString(result), nil
+	ciphertext := svc.cipher.Seal(nil, nil, []byte(plaintext), []byte(associatedData))
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
@@ -52,10 +41,7 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (str
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
 
-	nonce := bytes[:AES_GCM_SIV_NonceSize]
-	message := bytes[AES_GCM_SIV_NonceSize:]
-
-	plaintext, err := svc.cipher.Open(nil, nonce, message, []byte(associatedData))
+	plaintext, err := svc.cipher.Open(nil, nil, bytes, []byte(associatedData))
 	if err != nil {
 		return "", fmt.Errorf(errTemplateDecryptionFailed, err)
 	}

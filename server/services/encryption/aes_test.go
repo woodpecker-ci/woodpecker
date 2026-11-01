@@ -16,7 +16,6 @@ package encryption
 
 import (
 	"encoding/base64"
-	"encoding/hex"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -110,9 +109,7 @@ func TestDecryptTamperedCiphertext(t *testing.T) {
 	require.NoError(t, err)
 
 	// Tamper with the ciphertext (flip a bit in the middle)
-	if len(decoded) > AES_GCM_SIV_NonceSize+1 {
-		decoded[AES_GCM_SIV_NonceSize+1] ^= 0xFF
-	}
+	decoded[len(decoded)/2] ^= 0xFF
 	tampered := base64.StdEncoding.EncodeToString(decoded)
 
 	_, err = aes.Decrypt(tampered, "")
@@ -144,6 +141,10 @@ func TestDecryptTruncatedCiphertext(t *testing.T) {
 	truncated := base64.StdEncoding.EncodeToString(decoded[:len(decoded)/2])
 	_, err = aes.Decrypt(truncated, "")
 	assert.Error(t, err, "decryption of truncated ciphertext should fail")
+
+	// shorter than the nonce
+	_, err = aes.Decrypt(base64.StdEncoding.EncodeToString(decoded[:4]), "")
+	assert.Error(t, err, "decryption of ciphertext shorter than the nonce should fail")
 }
 
 func TestRandomBytesUniqueness(t *testing.T) {
@@ -167,12 +168,17 @@ func TestRandomBytesLength(t *testing.T) {
 }
 
 func TestKeyDerivationKnownVector(t *testing.T) {
-	// Pins the password -> AES key derivation (SHAKE256, 32 bytes) so that
-	// refactorings do not silently break decryption of existing data.
+	// Pins the password -> AES key derivation (SHAKE256, 32 bytes), the key
+	// id and the ciphertext format (nonce, then sealed data) so that
+	// refactorings do not silently break decryption of existing data. The
+	// ciphertext was made with another AES-GCM implementation.
 	aes := &aesEncryptionService{}
-	key, err := aes.hash([]byte("this-is-a-test-password"))
+	require.NoError(t, aes.loadCipher("this-is-a-test-password"))
+	assert.Equal(t, "da16b2a62af81502faa8906f134df2220dcaa1bd44ef8112810b150d4e7563a2", aes.keyID)
+
+	plaintext, err := aes.Decrypt("AAECAwQFBgcICQoLf+8y1zKVbljfIM/6J1LKLDEEh4t5+hYlGw==", "associated-data")
 	require.NoError(t, err)
-	assert.Equal(t, "fd0331e5103fcd88306554e97f1e25e1b7fa73622ed18dd8a396d194f9271f6a", hex.EncodeToString(key))
+	assert.Equal(t, "plaintext", plaintext)
 }
 
 func TestKeyIDDeterministic(t *testing.T) {
@@ -204,13 +210,13 @@ func TestKeyIDDiffersFromKey(t *testing.T) {
 	// The key id is stored (encrypted) in the database and must never leak
 	// the raw AES key or the plain key derivation of the password.
 	aes := &aesEncryptionService{}
-	require.NoError(t, aes.loadCipher("some-password"))
+	require.NoError(t, aes.loadCipher("this-is-a-test-password"))
 
-	key, err := aes.hash([]byte("some-password"))
-	require.NoError(t, err)
+	// the AES key derived from this password
+	key := "fd0331e5103fcd88306554e97f1e25e1b7fa73622ed18dd8a396d194f9271f6a"
 
-	assert.NotEqual(t, hex.EncodeToString(key), aes.keyID)
-	assert.NotContains(t, aes.keyID, hex.EncodeToString(key))
+	assert.NotEqual(t, key, aes.keyID)
+	assert.NotContains(t, aes.keyID, key)
 }
 
 func TestValidateKeyAcrossRestart(t *testing.T) {
