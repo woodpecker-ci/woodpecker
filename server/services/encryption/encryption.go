@@ -56,6 +56,7 @@ func (b builder) Build() error {
 		if err != nil {
 			return fmt.Errorf(errTemplateFailedInitializingUnencrypted, err)
 		}
+		return nil
 	}
 	svc, err := b.getService(keyType)
 	if err != nil {
