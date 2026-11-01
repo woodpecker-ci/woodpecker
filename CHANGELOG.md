@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @dgesteves, @gzm0, @hippi345, @qwerty287, @roian6, @sarankumar1325, @slayerjain
+@6543, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
 - Use OrgID to match Orgs belong to users [[#7441](https://github.com/woodpecker-ci/woodpecker/pull/7441)]
 - CreateUser in one SQL session and report back constrain name on insert error [[#7439](https://github.com/woodpecker-ci/woodpecker/pull/7439)]
 - Add `/tmp` to server & agent scratch images [[#7452](https://github.com/woodpecker-ci/woodpecker/pull/7452)]
