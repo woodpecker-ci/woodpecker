@@ -17,10 +17,13 @@ package encryption
 import (
 	"context"
 	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tink-crypto/tink-go/v2/aead"
+	"github.com/tink-crypto/tink-go/v2/keyset"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 	"github.com/urfave/cli/v3"
 
@@ -279,5 +282,44 @@ func TestValidateKey(t *testing.T) {
 		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
 
 		assert.NoError(t, svc.validateKey())
+	})
+}
+
+func TestValidateKeyset(t *testing.T) {
+	t.Parallel()
+
+	newService := func(t *testing.T, s *store_mocks.MockStore) *tinkEncryptionService {
+		handle, err := keyset.NewHandle(aead.AES256GCMKeyTemplate())
+		require.NoError(t, err)
+		encryption, err := aead.New(handle)
+		require.NoError(t, err)
+		return &tinkEncryptionService{
+			store:        s,
+			encryption:   encryption,
+			primaryKeyID: strconv.FormatUint(uint64(handle.KeysetInfo().PrimaryKeyId), 10),
+		}
+	}
+
+	t.Run("rotated when sample holds another key id of the keyset", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		svc := newService(t, s)
+		sample, err := svc.Encrypt("old-key-id", keyIDAssociatedData)
+		require.NoError(t, err)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
+
+		assert.ErrorIs(t, svc.validateKeyset(), errEncryptionKeyRotated)
+	})
+
+	t.Run("invalid when sample is encrypted with another keyset", func(t *testing.T) {
+		t.Parallel()
+		s := store_mocks.NewMockStore(t)
+		svc := newService(t, s)
+		other := newService(t, s)
+		sample, err := other.Encrypt(other.primaryKeyID, keyIDAssociatedData)
+		require.NoError(t, err)
+		s.On("ServerConfigGet", ciphertextSampleConfigKey).Return(sample, nil)
+
+		assert.ErrorIs(t, svc.validateKeyset(), errEncryptionKeyInvalid)
 	})
 }
