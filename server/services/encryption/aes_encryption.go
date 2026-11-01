@@ -35,7 +35,7 @@ func (svc *aesEncryptionService) loadCipher(password string) error {
 	if err != nil {
 		return fmt.Errorf(errTemplateAesFailedLoadingCipher, err)
 	}
-	svc.cipher = aead
+	svc.key = aesGCM{aead}
 
 	// The key id is derived with domain separation, so storing it (encrypted)
 	// leaks nothing about the key. It must be deterministic: it is compared
@@ -62,4 +62,17 @@ func (svc *aesEncryptionService) validateKey() error {
 		return errEncryptionKeyInvalid
 	}
 	return nil
+}
+
+// aesGCM adapts AES-GCM with random nonces to tink.AEAD.
+type aesGCM struct {
+	cipher.AEAD
+}
+
+func (a aesGCM) Encrypt(plaintext, associatedData []byte) ([]byte, error) {
+	return a.Seal(nil, nil, plaintext, associatedData), nil
+}
+
+func (a aesGCM) Decrypt(ciphertext, associatedData []byte) ([]byte, error) {
+	return a.Open(nil, nil, ciphertext, associatedData)
 }

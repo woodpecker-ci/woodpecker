@@ -15,9 +15,6 @@
 package encryption
 
 import (
-	"encoding/base64"
-	"fmt"
-
 	"github.com/tink-crypto/tink-go/v2/tink"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
@@ -33,26 +30,11 @@ type tinkEncryptionService struct {
 }
 
 func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {
-	msg := []byte(plaintext)
-	aad := []byte(associatedData)
-	ciphertext, err := svc.encryption.Encrypt(msg, aad)
-	if err != nil {
-		return "", fmt.Errorf(errTemplateEncryptionFailed, err)
-	}
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	return encrypt(svc.encryption, plaintext, associatedData)
 }
 
 func (svc *tinkEncryptionService) Decrypt(ciphertext, associatedData string) (string, error) {
-	ct, err := base64.StdEncoding.DecodeString(ciphertext)
-	if err != nil {
-		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
-	}
-
-	plaintext, err := svc.encryption.Decrypt(ct, []byte(associatedData))
-	if err != nil {
-		return "", fmt.Errorf(errTemplateDecryptionFailed, err)
-	}
-	return string(plaintext), nil
+	return decrypt(svc.encryption, ciphertext, associatedData)
 }
 
 func (svc *tinkEncryptionService) Disable() error {

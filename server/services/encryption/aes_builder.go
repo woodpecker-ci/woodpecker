@@ -42,7 +42,7 @@ func (c aesConfiguration) WithClients(clients []types.EncryptionClient) types.En
 
 func (c aesConfiguration) Build() (types.EncryptionService, error) {
 	svc := &aesEncryptionService{
-		cipher:  nil,
+		key:     nil,
 		store:   c.store,
 		clients: c.clients,
 	}

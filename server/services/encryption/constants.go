@@ -48,9 +48,6 @@ const (
 	errTemplateFailedUpdatingServerConfig    = "failed updating server encryption configuration: %w"
 	errTemplateFailedInitializingClients     = "failed initializing encryption clients: %w"
 	errTemplateFailedValidatingKey           = "failed validating encryption key: %w"
-	errTemplateEncryptionFailed              = "encryption error: %w"
-	errTemplateBase64DecryptionFailed        = "decryption error: Base64 decryption failed. Cause: %w"
-	errTemplateDecryptionFailed              = "decryption error: %w"
 
 	// Error messages.
 	errMessageTemplateUnsupportedKeyType = "unsupported encryption key type: %s"
