@@ -88,6 +88,11 @@ func (User) TableName() string {
 	return "users"
 }
 
+// OwnsOrg reports whether org is the user's linked personal organization.
+func (u *User) OwnsOrg(org *Org) bool {
+	return org.IsUser && u.OrgID != 0 && u.OrgID == org.ID && u.ForgeID == org.ForgeID
+}
+
 // Validate validates the required fields and formats.
 func (u *User) Validate() error {
 	switch {
