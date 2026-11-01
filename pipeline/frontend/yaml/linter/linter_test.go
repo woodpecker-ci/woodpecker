@@ -97,7 +97,7 @@ steps:
 	for _, testd := range testdatas {
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
 				Network:  true,
@@ -267,7 +267,7 @@ func TestDeprecations(t *testing.T) {
 
 	for _, tt := range testdata {
 		conf, err := yaml.ParseString(tt.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      tt.from,
@@ -307,7 +307,7 @@ func TestBadHabits(t *testing.T) {
 
 	for _, tt := range testdata {
 		conf, err := yaml.ParseString(tt.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      tt.from,
