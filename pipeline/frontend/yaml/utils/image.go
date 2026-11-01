@@ -15,8 +15,6 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/distribution/reference"
 )
 
@@ -85,8 +83,7 @@ func MatchImageDynamic(from string, to ...string) bool {
 func imageHasTag(name string) bool {
 	named, err := ParseNamed(name)
 	if err != nil {
-		// fall back to only look at the last path component, to skip a registry port
-		return strings.Contains(name[strings.LastIndex(name, "/")+1:], ":")
+		return false
 	}
 	_, tagged := named.(reference.Tagged)
 	_, digested := named.(reference.Digested)

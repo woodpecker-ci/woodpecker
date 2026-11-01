@@ -170,7 +170,11 @@ func TestImageHasTag(t *testing.T) {
 			want: true,
 		},
 		{
-			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
+			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803b",
+			want: false,
+		},
+		{
+			from: "codeberg.org/6543/hello:latest@sha256:2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803b",
 			want: true,
 		},
 		{
@@ -183,7 +187,7 @@ func TestImageHasTag(t *testing.T) {
 		},
 	}
 	for _, tt := range testdata {
-		assert.Equal(t, tt.want, imageHasTag(tt.from))
+		assert.Equal(t, tt.want, imageHasTag(tt.from), "image: %q", tt.from)
 	}
 }
 
@@ -338,6 +342,18 @@ func TestMatchImageDynamic(t *testing.T) {
 			from: "registry.local:5000/plugins/git",
 			to:   []string{"registry.local:5000/plugins/git"},
 			want: true,
+		},
+		{
+			name: "invalid list entry only matches the same string",
+			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
+			to:   []string{"codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803"},
+			want: true,
+		},
+		{
+			name: "invalid list entry does not match a valid image",
+			from: "codeberg.org/6543/hello:latest",
+			to:   []string{"codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803"},
+			want: false,
 		},
 		{
 			name: "registry port without tag in image and list entry with tag requirement",
