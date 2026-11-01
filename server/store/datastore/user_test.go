@@ -142,6 +142,33 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	assert.Equal(t, "new-user", newOrg.Name)
 }
 
+<<<<<<< HEAD
+func TestUserSwapTokens(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User), new(model.Org))
+	defer closer()
+
+	user := &model.User{Login: "joe", Email: "foo@bar.com", Hash: "hash", AccessToken: "old-access", RefreshToken: "old-refresh"}
+	assert.NoError(t, store.CreateUser(user))
+
+	// stale old tokens change nothing
+	swapped, err := store.UserSwapTokens(&model.User{ID: user.ID, AccessToken: "stale"}, "old-access", "other", "")
+	assert.NoError(t, err)
+	assert.False(t, swapped)
+
+	// only tokens and key id are written
+	swapped, err = store.UserSwapTokens(&model.User{ID: user.ID, AccessToken: "new-access", RefreshToken: "new-refresh", EncryptionKeyID: "key"}, "old-access", "old-refresh", "")
+	assert.NoError(t, err)
+	assert.True(t, swapped)
+
+	got, err := store.GetUser(user.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, "new-access", got.AccessToken)
+	assert.Equal(t, "new-refresh", got.RefreshToken)
+	assert.Equal(t, "key", got.EncryptionKeyID)
+	assert.Equal(t, "joe", got.Login)
+	assert.Equal(t, "foo@bar.com", got.Email)
+}
+
 func TestCreateUserFailureKeepsOrgs(t *testing.T) {
 	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Perm))
 	defer closer()

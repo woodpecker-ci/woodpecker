@@ -96,6 +96,18 @@ func (s storage) UpdateUser(user *model.User) error {
 	})
 }
 
+func (s storage) UserSwapTokens(user *model.User, oldAccessToken, oldRefreshToken, oldKeyID string) (bool, error) {
+	var swapped int64
+	err := retryWrite(func() error {
+		n, err := s.engine.
+			Where("id = ? AND access_token = ? AND refresh_token = ? AND encryption_key_id = ?", user.ID, oldAccessToken, oldRefreshToken, oldKeyID).
+			Cols("access_token", "refresh_token", "encryption_key_id").Update(user)
+		swapped = n
+		return wrapUpdate(n, err)
+	})
+	return swapped == 1, err
+}
+
 func (s storage) DeleteUser(user *model.User) error {
 	return retryWrite(func() error {
 		sess := s.engine.NewSession()
