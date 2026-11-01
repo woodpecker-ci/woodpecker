@@ -109,7 +109,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 }
 
 func setupForgeService(c *cli.Command, _store store.Store) error {
-	_forge, err := _store.ForgeGet(1)
+	_forge, err := _store.ForgeGet(model.PrimaryForgeID)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
 	}

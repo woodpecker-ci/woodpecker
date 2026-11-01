@@ -743,7 +743,7 @@ Enable step-level metrics, including failed step counters and step duration hist
 
 Comma-separated list of users who become server admins when they sign in.
 The list is read at server start.
-With [multiple forges](./12-forges/11-overview.md#known-limitations), a user with a listed login on any connected forge becomes admin.
+With [multiple forges](./12-forges/11-overview.md#granting-admin), a user with a listed login on any connected forge becomes admin, unless you explicitly set `WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY=false`.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 
@@ -752,6 +752,13 @@ The list only grants admin access, it never revokes it.
 To revoke a listed user, revoke admin access in the admin settings or with the users API and also remove them from the list.
 Otherwise they are admin again at their first sign in after the next server restart.
 :::
+
+### ADMIN_PRIMARY_FORGE_ONLY
+
+- Name: `WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY`
+- Default: false
+
+Only ever grant admin access to users of the primary forge (the one configured via environment variables).
 
 ---
 

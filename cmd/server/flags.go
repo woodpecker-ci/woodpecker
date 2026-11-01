@@ -154,6 +154,12 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY"),
+		Name:    "admin-primary-forge-only",
+		Usage:   "only accept users of the primary forge as admins",
+		Value:   false,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ORGS"),
 		Name:    "orgs",
