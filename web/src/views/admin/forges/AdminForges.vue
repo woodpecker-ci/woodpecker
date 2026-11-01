@@ -10,7 +10,7 @@
         :key="forge.id"
         class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
-        <span>{{ forge.url.replace(/http(s):\/\//, '') }}</span>
+        <span>{{ forgeDisplayName(forge) }}</span>
         <Badge class="md:display-unset ml-auto hidden" :value="forge.type" />
         <div class="flex items-center gap-2">
           <IconButton
@@ -50,6 +50,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { forgeDisplayName } from '~/lib/forgeDisplayName';
 import type { Forge } from '~/lib/api/types';
 
 const apiClient = useApiClient();
