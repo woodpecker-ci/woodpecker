@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-10-31
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -36,6 +36,7 @@
 
 ### 📦️ Dependency
 
+- Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.3 [[#7460](https://github.com/woodpecker-ci/woodpecker/pull/7460)]
 - Update dependency eslint to v10.14.0 [[#7459](https://github.com/woodpecker-ci/woodpecker/pull/7459)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.40.0 [[#7438](https://github.com/woodpecker-ci/woodpecker/pull/7438)]
