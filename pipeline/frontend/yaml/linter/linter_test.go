@@ -91,7 +91,7 @@ steps:
 `,
 	}, {
 		Title: "explicitly privileged container",
-		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 	}}
 
 	for _, testd := range testdatas {
@@ -206,7 +206,7 @@ func TestLintErrors(t *testing.T) {
 			want: "Additional property pipeline is not allowed",
 		},
 		{
-			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 			want: "The formerly privileged plugin `plugins/docker` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`",
 		},
 		{
