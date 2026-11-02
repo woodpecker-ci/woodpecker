@@ -167,6 +167,8 @@ By default, setting `nodeSelector` from a step's backend options is **not allowe
 When you use `nodeSelector` and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule Pods with matching taints.
 See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
 
+By default, setting `tolerations` from a step's backend options is **not allowed**, as it would otherwise let any user with push access run pipeline pods on tainted nodes. To enable it, set [`WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP`](#backend_k8s_pod_tolerations_allow_from_step) on the agent.
+
 Example pipeline configuration:
 
 ```yaml
@@ -609,7 +611,7 @@ Additional tolerations to apply to worker Pods. Must be a YAML object, e.g. `[{"
 ### BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP
 
 - Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP`
-- Default: `true`
+- Default: `false`
 
 Determines if Pod tolerations can be defined from a step's backend options.
 

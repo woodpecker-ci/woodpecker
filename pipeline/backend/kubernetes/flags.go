@@ -95,7 +95,7 @@ var Flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-tolerations-allow-from-step",
 		Usage:   "whether to allow using tolerations from step's backend options",
-		Value:   true,
+		Value:   false,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR_ALLOW_FROM_STEP"),
