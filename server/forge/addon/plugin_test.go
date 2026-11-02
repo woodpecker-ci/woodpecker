@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -88,14 +89,21 @@ func TestRPCRoundTrip(t *testing.T) {
 	pipeline := &model.Pipeline{Number: 6, Event: model.EventPush, Commit: "abc", Ref: "refs/heads/main"}
 	listOpts := &model.ListOptions{Page: 2, PerPage: 10}
 
-	t.Run("name and url", func(t *testing.T) {
+	t.Run("name and config", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
 		impl.On("Name").Return("addon")
-		impl.On("URL").Return("https://forge.example.com")
+		// Type and Host differ from what Name() and URL would give, to show
+		// the addon config is passed through as is.
+		config := metadata.Forge{
+			Type: "addon-type",
+			URL:  "https://forge.example.com",
+			Host: "git.example.com:8443",
+		}
+		impl.On("Config").Return(config)
 
 		f := newRPCForge(t, impl)
 		assert.Equal(t, "addon", f.Name())
-		assert.Equal(t, "https://forge.example.com", f.URL())
+		assert.Equal(t, config, f.Config())
 	})
 
 	t.Run("login", func(t *testing.T) {

@@ -22,6 +22,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -88,8 +89,7 @@ func TestCreateWorkflowSaveErrorReturnsError(t *testing.T) {
 	mockStore.On("WorkflowsCreate", mock.Anything).Return(errors.New("database is locked"))
 
 	mockForge := forge_mocks.NewMockForge(t)
-	mockForge.On("Name").Return("github")
-	mockForge.On("URL").Return("https://github.com")
+	mockForge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 	mockForge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)
@@ -160,8 +160,7 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	mockStore.On("DeletePipeline", mock.Anything).Return(nil).Once()
 
 	mockForge := forge_mocks.NewMockForge(t)
-	mockForge.On("Name").Return("github")
-	mockForge.On("URL").Return("https://github.com")
+	mockForge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 	mockForge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 
 	mockManager := manager_mocks.NewMockManager(t)
