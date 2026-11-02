@@ -123,8 +123,6 @@ type (
 	ServerForge interface {
 		// Name returns the string name of this driver
 		Name() string
-		// URL returns the root url of a configured forge
-		URL() string
 		// Config returns the metadata of a configured forge
 		Config() Forge
 	}

@@ -76,11 +76,6 @@ func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// URL returns the root url of a configured forge.
-func (c *config) URL() string {
-	return c.url
-}
-
 // Config returns the metadata of the configured forge.
 func (c *config) Config() metadata.Forge {
 	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}

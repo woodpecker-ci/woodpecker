@@ -60,10 +60,6 @@ type Forge interface {
 	// Must be unique and constant across all implementations.
 	Name() string
 
-	// URL returns the root URL of the forge instance.
-	// Examples: "https://github.com", "https://gitlab.example.com"
-	URL() string
-
 	// Config returns the metadata of the forge instance.
 	Config() metadata.Forge
 

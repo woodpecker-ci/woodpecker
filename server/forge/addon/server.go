@@ -49,7 +49,7 @@ func (s *RPCServer) Name(_ []byte, resp *string) error {
 }
 
 func (s *RPCServer) URL(_ []byte, resp *string) error {
-	*resp = s.Impl.URL()
+	*resp = s.Impl.Config().URL
 	return nil
 }
 

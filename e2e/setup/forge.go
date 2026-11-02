@@ -35,7 +35,6 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 
 	// Identity.
 	m.On("Name").Return("mock").Maybe()
-	m.On("URL").Return("https://forge.example.test").Maybe()
 	m.On("Config").Return(metadata.Forge{
 		Type: "mock",
 		URL:  "https://forge.example.test",

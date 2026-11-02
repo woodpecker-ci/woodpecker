@@ -85,11 +85,6 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// URL returns the root url of a configured forge.
-func (g *GitLab) URL() string {
-	return g.url
-}
-
 // Config returns the metadata of the configured forge.
 func (g *GitLab) Config() metadata.Forge {
 	return metadata.Forge{Type: g.Name(), URL: g.url, Host: common.HostFromURL(g.url)}
