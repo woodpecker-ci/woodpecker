@@ -116,6 +116,7 @@ type (
 	Forge struct {
 		Type string `json:"type,omitempty"`
 		URL  string `json:"url,omitempty"`
+		Host string `json:"host,omitempty"`
 	}
 
 	// ServerForge represent the needed func of a server forge to get its metadata.
@@ -124,6 +125,8 @@ type (
 		Name() string
 		// URL returns the root url of a configured forge
 		URL() string
+		// Config returns the metadata of a configured forge
+		Config() Forge
 	}
 
 	TrustedConfiguration struct {

@@ -26,6 +26,7 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -78,6 +79,11 @@ func (c *config) Name() string {
 // URL returns the root url of a configured forge.
 func (c *config) URL() string {
 	return c.url
+}
+
+// Config returns the metadata of the configured forge.
+func (c *config) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
