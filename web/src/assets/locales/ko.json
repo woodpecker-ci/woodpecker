@@ -53,6 +53,12 @@
             "message": {
                 "title": "메세지",
                 "desc": "이 메세지는 파이프라인 메세지에 추가적인 정보로 추가되었습니다."
+            },
+            "workflow": {
+                "title": "워크플로우",
+                "desc": "지정된 워크플로우와 필수 종속성만 실행합니다.",
+                "all": "모든 워크플로우",
+                "load_error": "이 브랜치의 워크플로우를 불러올 수 없었습니다. 브랜치가 존재하고 파이프라인 설정이 유효한지 확인하시오."
             }
         },
         "deploy_pipeline": {
@@ -394,7 +400,8 @@
                     "name": "필터",
                     "key": "라벨 이름",
                     "value": "값 필터",
-                    "delete": "필터 삭제"
+                    "delete": "필터 삭제",
+                    "desc": "서버 측 에이전트 라벨 강제"
                 }
             },
             "queue": {
@@ -507,7 +514,12 @@
                 "swagger_ui": "Swagger UI"
             },
             "agents": {
-                "desc": "귀하의 계정 저장소에 등록된 에이전트입니다."
+                "desc": "귀하의 계정 저장소에 등록된 에이전트입니다.",
+                "require_user_agents": {
+                    "require": "내 에이전트에서만 파이프라인 실행",
+                    "desc": "개인 저장소의 워크플로우는 서버 전체의 에이전트가 아닌 당신의 계정에 등록된 에이전트에게만 실행됩니다.",
+                    "saved": "사용자 설정 저장됨"
+                }
             }
         }
     },
@@ -654,5 +666,11 @@
     "exit_fullscreen": "전체 화면 종료",
     "help_translating": "{0}에서 Woodpecker 번역에 참여하실 수 있습니다.",
     "weblate": "우리의 Weblate",
-    "disabled": "비활성화됨"
+    "disabled": "비활성화됨",
+    "forge_name": "표시 이름",
+    "forge_name_placeholder": "로그인 페이지에 보여지는 추가적인 라벨",
+    "delete": "삭제",
+    "allowed_orgs": "허가된 조직",
+    "allowed_orgs_desc": "전역 WOODPECKER_ORGS 설정 외에도, 본 포지를 이용해 로그인할 수 있는 조직들.",
+    "allowed_orgs_placeholder": "조직 이름"
 }
