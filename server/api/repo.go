@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -61,6 +62,28 @@ func getOrCreateOrg(c *gin.Context, _store store.Store, _forge forge.Forge, user
 	}
 
 	return org, nil
+}
+
+// updateRepo applies the forge data to the repo. If the owner changed, the repo
+// is linked to the org of the new owner, so org secrets, registries and agents
+// of the old owner no longer apply.
+func updateRepo(c *gin.Context, _store store.Store, _forge forge.Forge, user *model.User, repo, from *model.Repo) error {
+	ownerChanged := !strings.EqualFold(repo.Owner, from.Owner)
+	repo.Update(from)
+	if !ownerChanged {
+		return nil
+	}
+	return linkOrg(c, _store, _forge, user, repo)
+}
+
+// linkOrg links the repo to the org of its owner.
+func linkOrg(c *gin.Context, _store store.Store, _forge forge.Forge, user *model.User, repo *model.Repo) error {
+	org, err := getOrCreateOrg(c, _store, _forge, user, repo.ForgeID, repo.Owner)
+	if err != nil {
+		return fmt.Errorf("could not find or create organization %s: %w", repo.Owner, err)
+	}
+	repo.OrgID = org.ID
+	return nil
 }
 
 // PostRepo
@@ -640,18 +663,11 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	repo.Update(from)
-
-	// the owner changed, so re-resolve the org of the repo: org-level
-	// secrets and registries of the old owner must no longer apply
-	org, err := getOrCreateOrg(c, _store, _forge, user, repo.ForgeID, repo.Owner)
-	if err != nil {
-		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
+	if err := updateRepo(c, _store, _forge, user, repo, from); err != nil {
+		log.Error().Err(err).Msg("could not update repo")
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	repo.OrgID = org.ID
 
 	errStore := _store.UpdateRepo(repo)
 	if errStore != nil {
@@ -808,6 +824,10 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 	}
 
 	repo.Update(from)
+	// also fixes repos that still have the org of a former owner
+	if err := linkOrg(c, _store, _forge, repoUser, repo); err != nil {
+		return err
+	}
 
 	if updatePermissions {
 		repo.Perm = from.Perm
