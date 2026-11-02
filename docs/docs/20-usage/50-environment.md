@@ -256,7 +256,7 @@ For pull request events, `CI_COMMIT_PULL_REQUEST_DRAFT` is set to `true` or `fal
 | GitHub               | :white_check_mark: |                                                                   |
 | Gitea                | :white_check_mark: |                                                                   |
 | GitLab               | :white_check_mark: | Uses `draft`; falls back to legacy `work_in_progress` when needed |
-| Forgejo              | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Forgejo              | :white_check_mark: |                                                                   |
 | Bitbucket            | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
 | Bitbucket Datacenter | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
 
