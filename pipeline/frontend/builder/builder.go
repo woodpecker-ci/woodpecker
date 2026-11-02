@@ -113,6 +113,14 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
+	// workflows in a cycle would wait for each other in the queue forever
+	if cycle := findDependencyCycle(items); cycle != nil {
+		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+			Message: fmt.Sprintf("workflow dependency cycle: %s", strings.Join(cycle, " -> ")),
+		})
+	}
+
 	if b.SelectedWorkflow != "" && !ContainsItemWithName(selected, items) {
 		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
 			Type:    pipeline_errors.PipelineErrorTypeGeneric,
