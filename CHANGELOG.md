@@ -1,5 +1,49 @@
 # Changelog
 
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-02
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain
+
+### 🔒 Security
+
+- Add flag to restrict admins to the primary forge [[#7430](https://github.com/woodpecker-ci/woodpecker/pull/7430)]
+
+### 📈 Enhancement
+
+- Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
+- Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
+
+### 🐛 Bug Fixes
+
+- Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
+- Use OrgID to match Orgs belong to users [[#7441](https://github.com/woodpecker-ci/woodpecker/pull/7441)]
+- CreateUser in one SQL session and report back constrain name on insert error [[#7439](https://github.com/woodpecker-ci/woodpecker/pull/7439)]
+- Add `/tmp` to server & agent scratch images [[#7452](https://github.com/woodpecker-ci/woodpecker/pull/7452)]
+- Fix addon logger dropping log fields [[#7453](https://github.com/woodpecker-ci/woodpecker/pull/7453)]
+
+### 🧪 Tests
+
+- Make sure test file names map source files names [[#7338](https://github.com/woodpecker-ci/woodpecker/pull/7338)]
+
+### 📚 Documentation
+
+- Lock file maintenance [[#7466](https://github.com/woodpecker-ci/woodpecker/pull/7466)]
+- Update dependency tslib to v2.9.1 [[#7461](https://github.com/woodpecker-ci/woodpecker/pull/7461)]
+- Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
+- Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
+- Fix dead links in CLI readme and docs pages [[#7451](https://github.com/woodpecker-ci/woodpecker/pull/7451)]
+- Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
+
+### 📦️ Dependency
+
+- Update golang-packages [[#7465](https://github.com/woodpecker-ci/woodpecker/pull/7465)]
+- Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
+- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.3 [[#7460](https://github.com/woodpecker-ci/woodpecker/pull/7460)]
+- Update dependency eslint to v10.14.0 [[#7459](https://github.com/woodpecker-ci/woodpecker/pull/7459)]
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.40.0 [[#7438](https://github.com/woodpecker-ci/woodpecker/pull/7438)]
+
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
