@@ -50,9 +50,8 @@ Plugins are just pipeline steps. They share the build workspace, mounted as a vo
 While normal steps are all about arbitrary code execution, plugins should only allow the functions intended by the plugin author.
 
 That's why there are a few limitations. The workspace base is always mounted at `/woodpecker`, but the working directory is dynamically
-adjusted accordingly, as user of a plugin you should not have to care about this. Also, you cannot use the plugin together with `commands`
-or `entrypoint` which will fail. Using `environment` is possible, but in this case, the plugin is internally not treated as plugin
-anymore. The container then cannot access secrets with plugin filter anymore and the containers won't be privileged without explicit definition.
+adjusted accordingly, as user of a plugin you should not have to care about this. Also, you cannot use `settings` together with `commands`,
+`entrypoint` or `environment` which will fail. Pass all configuration to a plugin via `settings`.
 
 Also see [security boundaries](../17-security-boundaries.md#plugins).
 
