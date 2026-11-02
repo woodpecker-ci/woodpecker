@@ -26,7 +26,9 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ### Admin-facing migrations
 
-- changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
+- removed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT`, use `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
+- removed env var `WOODPECKER_LOG_XORM`, use `WOODPECKER_DATABASE_LOG`
+- removed env var `WOODPECKER_LOG_XORM_SQL`, use `WOODPECKER_DATABASE_LOG_SQL`
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
 
 #### Extensions
@@ -41,7 +43,11 @@ Extension HTTP calls (as of now the configuration extension) will by default onl
 
 ### Internal changes
 
-- Renamed the server flag `config-service-endpoint` to `config-extension-endpoint`
+- Removed the server flag `config-service-endpoint`, use `config-extension-endpoint`
+- removed server flag `log-xorm`, use `db-log`
+- removed server flag `log-xorm-sql`, use `db-log-sql`
+- removed server flag `driver`, use `db-driver`
+- removed server flag `datasource`, use `db-datasource`
 
 ## 3.0.0
 
