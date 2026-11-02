@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
@@ -46,7 +47,7 @@ const (
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
+	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s"
 	pageSize          = 100
 )
 
@@ -254,13 +255,27 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	return out.Values, err
 }
 
-func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err error) {
+func (c *Client) ListChangedFiles(owner, name, ref string) ([]string, error) {
+	return c.ListChangedFilesByURL(fmt.Sprintf(pathDiffStat, c.base, owner, name, ref))
+}
+
+// ListChangedFilesByURL lists the changed files of a diff stat API URL,
+// e.g. the diff stat link of a pull request.
+func (c *Client) ListChangedFilesByURL(diffStatURL string) (result []string, err error) {
+	uri, err := url.Parse(diffStatURL)
+	if err != nil {
+		return nil, err
+	}
+	query := uri.Query()
+	query.Set("pagelen", strconv.Itoa(pageSize))
+
 	paths := make(map[string]struct{})
-	opts := &ListOpts{Page: 1, PageLen: pageSize}
-	for {
+	for page := 1; ; page++ {
+		query.Set("page", strconv.Itoa(page))
+		uri.RawQuery = query.Encode()
+
 		var resp DiffStatResp
-		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, ref, opts.Encode())
-		if _, err = c.do(uri, http.MethodGet, nil, &resp); err != nil {
+		if _, err = c.do(uri.String(), http.MethodGet, nil, &resp); err != nil {
 			return nil, err
 		}
 
@@ -280,7 +295,6 @@ func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err
 		if resp.Next == nil {
 			break
 		}
-		opts.Page++
 	}
 
 	result = make([]string, 0, len(paths))
