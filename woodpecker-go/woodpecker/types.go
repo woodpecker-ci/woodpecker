@@ -86,9 +86,7 @@ type (
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config *string `json:"config_file,omitempty"`
-		// Deprecated: use Trusted (broken - only exists for backwards compatibility)
-		IsTrusted       *bool                      `json:"-"`
+		Config          *string                    `json:"config_file,omitempty"`
 		Trusted         *TrustedConfigurationPatch `json:"trusted,omitempty"`
 		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
 		Timeout         *int64                     `json:"timeout,omitempty"`
