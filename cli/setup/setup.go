@@ -57,7 +57,7 @@ func setup(ctx context.Context, c *cli.Command) error {
 	}
 
 	// Check if context already exists
-	contexts, err := config.LoadContexts()
+	contexts, err := config.LoadContexts(c)
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- woodpecker-cli no longer falls back to the legacy `config.json` file. Run `woodpecker-cli setup` to create a context, or set `--server` and `--token`.
+- removed the woodpecker-cli global flag `--config` (`-c`) and its env var `WOODPECKER_CONFIG`
 
 ### API changes
 
