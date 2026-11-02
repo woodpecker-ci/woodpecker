@@ -107,7 +107,7 @@ func TestMustOrgMember(t *testing.T) {
 		membership := &fakeMembership{}
 		server.Config.Services.Membership = membership
 
-		user := &model.User{ID: 1, Login: "alice", ForgeID: 1}
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 4}
 		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
 		c, rec := newOrgMemberTestContext(user, org)
 
@@ -146,4 +146,67 @@ func TestMustOrgMember(t *testing.T) {
 		assert.False(t, c.IsAborted())
 		assert.True(t, membership.called)
 	})
+}
+
+func TestMustOrgMemberPersonalOrg(t *testing.T) {
+	tests := []struct {
+		name  string
+		user  model.User
+		org   model.Org
+		allow bool
+	}{
+		{
+			name:  "different casing on linked org",
+			user:  model.User{Login: "Alice", ForgeID: 1, OrgID: 10},
+			org:   model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+			allow: true,
+		},
+		{
+			name:  "renamed user keeps linked org",
+			user:  model.User{Login: "new-name", ForgeID: 1, OrgID: 10},
+			org:   model.Org{ID: 10, Name: "old-name", ForgeID: 1, IsUser: true},
+			allow: true,
+		},
+		{
+			name: "same name does not grant another personal org",
+			user: model.User{Login: "alice", ForgeID: 1, OrgID: 20},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+		},
+		{
+			name: "missing link does not fall back to name",
+			user: model.User{Login: "alice", ForgeID: 1},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+		},
+		{
+			name: "invalid cross-forge link is denied",
+			user: model.User{Login: "alice", ForgeID: 1, OrgID: 10},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 2, IsUser: true},
+		},
+		{
+			name: "ordinary org does not become personal through a stale link",
+			user: model.User{Login: "alice", ForgeID: 1, OrgID: 10},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			installMemberForgeManager(t)
+			membership := &fakeMembership{}
+			if tt.org.IsUser {
+				membership.perm = &model.OrgPerm{Member: true, Admin: true}
+			}
+			server.Config.Services.Membership = membership
+			c, rec := newOrgMemberTestContext(&tt.user, &tt.org)
+
+			MustOrgMember(true)(c)
+
+			assert.Equal(t, !tt.allow, c.IsAborted())
+			if tt.allow {
+				assert.Equal(t, http.StatusOK, rec.Code)
+			} else {
+				assert.Equal(t, http.StatusForbidden, rec.Code)
+			}
+			assert.Equal(t, !tt.org.IsUser, membership.called)
+		})
+	}
 }

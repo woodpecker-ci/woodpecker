@@ -106,7 +106,7 @@ func wrapInsert(c int64, err error) error {
 			strings.Contains(errMsg, "duplicate key") ||
 			strings.Contains(errMsg, "unique constraint") ||
 			strings.Contains(errMsg, "Duplicate entry") {
-			return types.ErrInsertDuplicateDetected
+			return fmt.Errorf("%w: %w", types.ErrInsertDuplicateDetected, err)
 		}
 		if isErrDatabaseLocked(err) {
 			return types.ErrDatabaseLocked

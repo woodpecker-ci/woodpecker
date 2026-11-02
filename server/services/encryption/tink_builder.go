@@ -42,12 +42,11 @@ func (c tinkConfiguration) WithClients(clients []types.EncryptionClient) types.E
 
 func (c tinkConfiguration) Build() (types.EncryptionService, error) {
 	svc := &tinkEncryptionService{
-		keysetFilePath:    c.keysetFilePath,
-		primaryKeyID:      "",
-		encryption:        nil,
-		store:             c.store,
-		keysetFileWatcher: nil,
-		clients:           c.clients,
+		keysetFilePath: c.keysetFilePath,
+		primaryKeyID:   "",
+		encryption:     nil,
+		store:          c.store,
+		clients:        c.clients,
 	}
 
 	if err := svc.initClients(); err != nil {
@@ -67,10 +66,6 @@ func (c tinkConfiguration) Build() (types.EncryptionService, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf(errTemplateTinkFailedValidatingKeyset, err)
-	}
-
-	if err := svc.initFileWatcher(); err != nil {
-		return nil, fmt.Errorf(errTemplateTinkFailedInitializeFileWatcher, err)
 	}
 	return svc, nil
 }
