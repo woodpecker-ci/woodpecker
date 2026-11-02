@@ -734,9 +734,10 @@ Otherwise they are admin again at their first sign in after the next server rest
 ### ADMIN_PRIMARY_FORGE_ONLY
 
 - Name: `WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY`
-- Default: false
+- Default: true
 
 Only ever grant admin access to users of the primary forge (the one configured via environment variables).
+If you set this to false, a user with a matching login on **any** connected forge becomes an admin.
 
 ---
 
