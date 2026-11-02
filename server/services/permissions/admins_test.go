@@ -29,22 +29,17 @@ const (
 )
 
 func TestAdmins(t *testing.T) {
-	a := NewAdmins([]string{"woodpecker-ci"}, false)
-	assert.True(t, a.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: anyForgeID}))
-	assert.False(t, a.IsAdmin(&model.User{Login: "not-woodpecker-ci", ForgeID: anyForgeID}))
-	empty := NewAdmins([]string{}, false)
+	a := NewAdmins([]string{"woodpecker-ci"})
+	assert.True(t, a.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: model.PrimaryForgeID}))
+	assert.False(t, a.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: anyForgeID}))
+	assert.False(t, a.IsAdmin(&model.User{Login: "not-woodpecker-ci", ForgeID: model.PrimaryForgeID}))
+	empty := NewAdmins([]string{})
 	assert.False(t, empty.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: anyForgeID}))
 	assert.False(t, empty.IsAdmin(&model.User{Login: "not-woodpecker-ci", ForgeID: anyForgeID}))
 }
 
-func TestAdminsPrimaryForgeOnly(t *testing.T) {
-	a := NewAdmins([]string{"woodpecker-ci"}, true)
-	assert.True(t, a.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: model.PrimaryForgeID}))
-	assert.False(t, a.IsAdmin(&model.User{Login: "woodpecker-ci", ForgeID: anyForgeID}))
-}
-
 func TestAdminsRevoke(t *testing.T) {
-	a := NewAdmins([]string{"Alice", "bob"}, false)
+	a := NewAdmins([]string{"Alice", "bob"})
 
 	a.Revoke("ALICE")
 	alice := &model.User{Login: "alice", ForgeID: model.PrimaryForgeID}
@@ -62,7 +57,7 @@ func TestAdminsRevoke(t *testing.T) {
 
 // A revoke in the admin settings can run while other users sign in.
 func TestAdminsRevokeConcurrentWithIsAdmin(t *testing.T) {
-	a := NewAdmins([]string{"alice", "bob"}, false)
+	a := NewAdmins([]string{"alice", "bob"})
 	user := &model.User{Login: "bob", ForgeID: model.PrimaryForgeID}
 
 	var wg sync.WaitGroup

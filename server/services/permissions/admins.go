@@ -22,24 +22,22 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-func NewAdmins(admins []string, primaryForgeOnly bool) *Admins {
+func NewAdmins(admins []string) *Admins {
 	adminsLowercase := make([]string, len(admins))
 	for i, a := range admins {
 		adminsLowercase[i] = strings.ToLower(a)
 	}
 	return &Admins{
-		admins:           utils.SliceToBoolMap(adminsLowercase),
-		revoked:          make(map[string]bool),
-		primaryForgeOnly: primaryForgeOnly,
+		admins:  utils.SliceToBoolMap(adminsLowercase),
+		revoked: make(map[string]bool),
 	}
 }
 
 type Admins struct {
 	mu sync.RWMutex
 	// admins is the list read at server start, it never changes
-	admins           map[string]bool
-	revoked          map[string]bool
-	primaryForgeOnly bool
+	admins  map[string]bool
+	revoked map[string]bool
 }
 
 // IsAdmin reports whether the user gets admin at sign in: listed and not revoked.
@@ -47,7 +45,7 @@ func (a *Admins) IsAdmin(user *model.User) bool {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 
-	if a.primaryForgeOnly && user.ForgeID != model.PrimaryForgeID {
+	if user.ForgeID != model.PrimaryForgeID {
 		return false
 	}
 

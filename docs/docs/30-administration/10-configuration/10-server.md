@@ -731,13 +731,6 @@ To revoke a listed user, revoke admin access in the admin settings or with the u
 Otherwise they are admin again at their first sign in after the next server restart.
 :::
 
-### ADMIN_PRIMARY_FORGE_ONLY
-
-- Name: `WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY`
-- Default: false
-
-Only ever grant admin access to users of the primary forge (the one configured via environment variables).
-
 ---
 
 ### ORGS
