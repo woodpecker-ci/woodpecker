@@ -5,6 +5,7 @@ import { reactive, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
+import PipelineWorkflowAgent from '~/components/repo/pipeline/PipelineWorkflowAgent.vue';
 import useUserConfig from '~/compositions/useUserConfig';
 import type { PipelineLog as ApiLog, Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
@@ -145,6 +146,21 @@ async function loadLog(lines: string[], running = false) {
 }
 
 describe('pipelineLog', () => {
+  it('passes the workflow of the selected step to the agent info, also after pipeline updates', async () => {
+    const pending: LooseWorkflow = { ...makeWorkflow(1, [makeStep(7)]), state: 'pending' };
+    const other: LooseWorkflow = { ...makeWorkflow(2, [makeStep(8)]), agent_id: 4 };
+    const wrapper = mountLog(makePipeline([pending, other]), 7);
+    const agentInfo = () => wrapper.getComponent(PipelineWorkflowAgent);
+    expect(agentInfo().props('workflow')).toEqual(pending);
+
+    const running: LooseWorkflow = { ...pending, state: 'running', agent_id: 3 };
+    await wrapper.setProps({ pipeline: makePipeline([running, other]) });
+    expect(agentInfo().props('workflow')).toEqual(running);
+
+    await wrapper.setProps({ stepId: 8 });
+    expect(agentInfo().props('workflow')).toEqual(other);
+  });
+
   it('finds a step past a workflow whose children key is absent', () => {
     const pipeline = makePipeline([makeWorkflow(1, undefined), makeWorkflow(2, [makeStep(7)])]);
 

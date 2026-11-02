@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/cenkalti/backoff/v7"
+	"github.com/go-sql-driver/mysql"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -49,11 +50,21 @@ func retryWriteCtx(ctx context.Context, fn func() error) error {
 	return err
 }
 
-// isErrDatabaseLocked reports whether err is a transient SQLite lock error
-// (SQLITE_BUSY "database is locked" or SQLITE_LOCKED "database table is locked").
+// isErrDatabaseLocked reports whether err is a lock conflict that a retry resolves: SQLite
+// "database is locked", MySQL/MariaDB deadlock (1213) and lock wait timeout (1205), MariaDB
+// snapshot isolation conflict (1020), and PostgreSQL deadlock (40P01) and serialization
+// failure (40001).
 func isErrDatabaseLocked(err error) bool {
 	if err == nil {
 		return false
+	}
+	var mysqlErr *mysql.MySQLError
+	if errors.As(err, &mysqlErr) && (mysqlErr.Number == 1213 || mysqlErr.Number == 1205 || mysqlErr.Number == 1020) {
+		return true
+	}
+	var sqlState interface{ SQLState() string }
+	if errors.As(err, &sqlState) && (sqlState.SQLState() == "40P01" || sqlState.SQLState() == "40001") {
+		return true
 	}
 	errMsg := err.Error()
 	return strings.Contains(errMsg, "database is locked") ||
