@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain
+@6543, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Add CI_FORGE_HOST as a built-in environment variable [[#7391](https://github.com/woodpecker-ci/woodpecker/pull/7391)]
 - Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
 - Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
 
@@ -29,7 +30,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7466](https://github.com/woodpecker-ci/woodpecker/pull/7466)]
 - Update dependency tslib to v2.9.1 [[#7461](https://github.com/woodpecker-ci/woodpecker/pull/7461)]
 - Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
 - Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
@@ -39,6 +39,7 @@
 ### 📦️ Dependency
 
 - Update golang-packages [[#7465](https://github.com/woodpecker-ci/woodpecker/pull/7465)]
+- Lock file maintenance [[#7466](https://github.com/woodpecker-ci/woodpecker/pull/7466)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.3 [[#7460](https://github.com/woodpecker-ci/woodpecker/pull/7460)]
 - Update dependency eslint to v10.14.0 [[#7459](https://github.com/woodpecker-ci/woodpecker/pull/7459)]
