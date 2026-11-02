@@ -6217,6 +6217,9 @@ const docTemplate = `{
         "metadata.Forge": {
             "type": "object",
             "properties": {
+                "host": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 },
