@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -50,6 +51,10 @@ type Runtime struct {
 
 	taskUUID    string
 	description map[string]string
+
+	// skipRemaining is set when a step exits with SkipExitCode.
+	// All steps that have not started yet are then traced as skipped.
+	skipRemaining atomic.Bool
 }
 
 // New returns a new Runtime for the given workflow spec and options.
