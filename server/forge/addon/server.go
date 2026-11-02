@@ -48,9 +48,10 @@ func (s *RPCServer) Name(_ []byte, resp *string) error {
 	return nil
 }
 
-func (s *RPCServer) URL(_ []byte, resp *string) error {
-	*resp = s.Impl.Config().URL
-	return nil
+func (s *RPCServer) Config(_ []byte, resp *[]byte) error {
+	var err error
+	*resp, err = json.Marshal(s.Impl.Config())
+	return err
 }
 
 func (s *RPCServer) Teams(args []byte, resp *[]byte) error {

@@ -92,16 +92,18 @@ func TestRPCRoundTrip(t *testing.T) {
 	t.Run("name and config", func(t *testing.T) {
 		impl := forge_mocks.NewMockForge(t)
 		impl.On("Name").Return("addon")
-		impl.On("Config").Return(metadata.Forge{
-			Type: "addon",
+		// Type and Host differ from what Name() and URL would give, to show
+		// the addon config is passed through as is.
+		config := metadata.Forge{
+			Type: "addon-type",
 			URL:  "https://forge.example.com",
-			Host: "forge.example.com",
-		})
+			Host: "git.example.com:8443",
+		}
+		impl.On("Config").Return(config)
 
 		f := newRPCForge(t, impl)
 		assert.Equal(t, "addon", f.Name())
-		assert.Equal(t, "https://forge.example.com", f.Config().URL)
-		assert.Equal(t, metadata.Forge{Type: "addon", URL: "https://forge.example.com", Host: "forge.example.com"}, f.Config())
+		assert.Equal(t, config, f.Config())
 	})
 
 	t.Run("login", func(t *testing.T) {
