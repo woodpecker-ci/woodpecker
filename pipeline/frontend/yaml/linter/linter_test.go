@@ -286,6 +286,30 @@ func TestDeprecations(t *testing.T) {
 	}
 }
 
+func TestRunsOnDeprecation(t *testing.T) {
+	from := `{ runs_on: [success], steps: { build: { image: golang } } }`
+	conf, err := yaml.ParseString(from)
+	assert.NoError(t, err)
+
+	lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+		File:      from,
+		RawConfig: from,
+		Workflow:  conf,
+	}})
+
+	var found *errors.PipelineError
+	for _, e := range errors.GetPipelineErrors(lerr) {
+		if e.Type == errors.PipelineErrorTypeDeprecation && strings.Contains(e.Message, "runs_on") {
+			found = e
+			break
+		}
+	}
+	if assert.NotNil(t, found) {
+		assert.Equal(t, "Usage of `runs_on` is deprecated, use `when.status`", found.Message)
+		assert.False(t, found.IsWarning)
+	}
+}
+
 func TestBadHabits(t *testing.T) {
 	testdata := []struct {
 		from string
