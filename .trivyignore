@@ -9,3 +9,9 @@ GO-2026-5932
 # build-time globs we control, never on user input.
 # Remove once upstream ships a fix: https://github.com/micromatch/braces/issues/70
 CVE-2026-93687
+
+# deepmerge 4.3.1 (via @svgr/plugin-svgo in docs/) has a low-severity prototype
+# poisoning issue in mergeObject and no fixed release (4.3.1 is the latest).
+# It only merges SVGO configs at docs build time, never user-controlled input.
+# Remove once upstream ships a fix.
+CVE-2026-93753
