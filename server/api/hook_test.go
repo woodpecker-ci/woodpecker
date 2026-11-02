@@ -73,7 +73,8 @@ func TestHook(t *testing.T) {
 	}
 
 	repoToken := token.New(token.HookToken)
-	repoToken.Set("repo-id", fmt.Sprintf("%d", repo.ID))
+	repoToken.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	repoToken.Set("forge-id", fmt.Sprintf("%d", repo.ForgeID))
 	signedToken, err := repoToken.Sign("secret-123-this-is-a-secret")
 	assert.NoError(t, err)
 
@@ -88,7 +89,7 @@ func TestHook(t *testing.T) {
 
 	_manager.On("ForgeFromRepo", repo).Return(_forge, nil)
 	_forge.On("Hook", mock.Anything, mock.Anything).Return(repo, pipeline, nil)
-	_store.On("GetRepo", repo.ID).Return(repo, nil)
+	_store.On("GetRepoForgeID", repo.ForgeID, repo.ForgeRemoteID).Return(repo, nil)
 	_store.On("GetUser", user.ID).Return(user, nil)
 	_store.On("UpdateRepo", repo).Return(nil)
 	_store.On("CreatePipeline", mock.Anything).Return(nil)
@@ -107,4 +108,31 @@ func TestHook(t *testing.T) {
 
 	assert.Equal(t, http.StatusNoContent, c.Writer.Status())
 	assert.Equal(t, "true", w.Header().Get("Pipeline-Filtered"))
+}
+
+func TestHookRejectsLegacyRepoIDToken(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	_store := store_mocks.NewMockStore(t)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", _store)
+
+	repoToken := token.New(token.HookToken)
+	repoToken.Set("repo-id", "123")
+	signedToken, err := repoToken.Sign("secret-123-this-is-a-secret")
+	assert.NoError(t, err)
+
+	header := http.Header{}
+	header.Set("Authorization", fmt.Sprintf("Bearer %s", signedToken))
+	c.Request = &http.Request{
+		Header: header,
+		URL: &url.URL{
+			Scheme: "https",
+		},
+	}
+
+	api.PostHook(c)
+
+	assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
 }
