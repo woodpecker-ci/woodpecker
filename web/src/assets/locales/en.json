@@ -52,6 +52,12 @@
         "title": "Message",
         "desc": "This message is added to the pipeline's message as additional information."
       },
+      "workflow": {
+        "title": "Workflow",
+        "desc": "Run only the selected workflow and its hard dependencies.",
+        "all": "All workflows",
+        "load_error": "Could not load the workflows of this branch. Check that the branch exists and its pipeline config is valid."
+      },
       "show_pipelines": "Show pipelines",
       "no_manual_workflows": "No matching workflows found. Make sure at least one workflow runs on the manual event."
     },
@@ -436,7 +442,11 @@
         "admin": {
           "admin": "Admin",
           "placeholder": "User is an admin",
-          "admin_warning": "This user has admin permissions because of your environment configuration. If you revoke the permission here, the user will regain them when they sign in next time."
+          "admin_warning": "This user is listed in WOODPECKER_ADMIN environment configuration. Revoking admin here lasts until the next server restart. To revoke it for good, also remove the user from your environment variables.",
+          "admin_env": "Admin (env)",
+          "admin_env_desc": "Admin because the user is listed in WOODPECKER_ADMIN.",
+          "admin_revoked": "Admin temporarily revoked",
+          "admin_revoked_desc": "The user is listed in WOODPECKER_ADMIN environment configuration, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN."
         },
         "delete_user": "Delete user",
         "edit_user": "Edit user",
@@ -618,6 +628,8 @@
   "forgejo": "Forgejo",
   "addon": "Addon",
   "forge_type": "Forge type",
+  "forge_name": "Display name",
+  "forge_name_placeholder": "Optional label shown on the login page",
   "oauth_client_id": "OAuth Client ID",
   "oauth_client_secret": "OAuth Client Secret",
   "oauth_host": "OAuth host",

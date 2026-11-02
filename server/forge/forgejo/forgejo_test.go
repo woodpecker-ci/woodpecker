@@ -16,9 +16,11 @@ package forgejo
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -248,10 +250,15 @@ func respond(status int, body string) http.HandlerFunc {
 	}
 }
 
-func TestHookReleaseLoadsTagCommit(t *testing.T) {
+func TestHookLoadsTagCommit(t *testing.T) {
 	newRequest := func() *http.Request {
 		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookRelease))
 		req.Header.Set(hookEvent, hookRelease)
+		return req
+	}
+	newTagRequest := func() *http.Request {
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookTag))
+		req.Header.Set(hookEvent, hookCreated)
 		return req
 	}
 
@@ -271,6 +278,19 @@ func TestHookReleaseLoadsTagCommit(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
+		assert.Equal(t, "abc123", pipeline.Commit)
+	})
+
+	t.Run("tag events get the commit of their tag, not the annotated tag object", func(t *testing.T) {
+		// the create hook of a pushed annotated tag holds the SHA of the tag object
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
+		})
+
+		_, pipeline, err := g.Hook(ctx, newTagRequest())
+		require.NoError(t, err)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
 		assert.Equal(t, "abc123", pipeline.Commit)
 	})
 
@@ -445,7 +465,7 @@ func TestToPermWithoutPermissions(t *testing.T) {
 
 func TestMatchingHooks(t *testing.T) {
 	hooks := []*forgejo.Hook{
-		{ID: 1, Config: map[string]string{}},
+		{ID: 1, Config: make(map[string]string)},
 		{ID: 2, Config: map[string]string{"url": "https://other.example.com/hook"}},
 		{ID: 3, Config: map[string]string{"url": "https://ci.example.com/api/hook?access_token=old"}},
 	}
@@ -474,4 +494,39 @@ func TestPerPage(t *testing.T) {
 		g := &Forgejo{pageSize: 7}
 		assert.Equal(t, 7, g.perPage(t.Context()))
 	})
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*Forgejo)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }

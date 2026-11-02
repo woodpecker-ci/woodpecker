@@ -91,7 +91,7 @@ func forgeCommand(flags ...cli.Flag) *cli.Command {
 		&cli.BoolFlag{Name: "forge-skip-verify"},
 	}
 	// later flags with the same name replace the defaults
-	byName := map[string]int{}
+	byName := make(map[string]int)
 	for i, f := range defaults {
 		byName[f.Names()[0]] = i
 	}
@@ -125,27 +125,27 @@ func TestSetupForgeService(t *testing.T) {
 			flags:   []cli.Flag{&cli.BoolFlag{Name: "gitlab", Value: true}},
 			want:    model.ForgeTypeGitlab,
 			url:     "https://gitlab.com",
-			options: map[string]any{},
+			options: make(map[string]any),
 		},
 		{
 			name:    "gitea keeps a configured url",
 			flags:   []cli.Flag{&cli.BoolFlag{Name: "gitea", Value: true}, &cli.StringFlag{Name: "forge-url", Value: "https://gitea.example.com"}},
 			want:    model.ForgeTypeGitea,
 			url:     "https://gitea.example.com",
-			options: map[string]any{},
+			options: make(map[string]any),
 		},
 		{
 			name:    "forgejo defaults to next.forgejo.org",
 			flags:   []cli.Flag{&cli.BoolFlag{Name: "forgejo", Value: true}},
 			want:    model.ForgeTypeForgejo,
 			url:     "https://next.forgejo.org",
-			options: map[string]any{},
+			options: make(map[string]any),
 		},
 		{
 			name:    "bitbucket",
 			flags:   []cli.Flag{&cli.BoolFlag{Name: "bitbucket", Value: true}},
 			want:    model.ForgeTypeBitbucket,
-			options: map[string]any{},
+			options: make(map[string]any),
 		},
 		{
 			name: "bitbucket data center with machine account",

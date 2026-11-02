@@ -204,7 +204,10 @@
                 "value": "Wartość zmiennej",
                 "delete": "Delete variable"
             },
-            "show_pipelines": "Pokaż potoki"
+            "show_pipelines": "Pokaż potoki",
+            "message": {
+                "title": "Wiadomość"
+            }
         },
         "not_allowed": "Nie masz pozwolenia na dostęp do tego repozytorium",
         "open_in_forge": "Otwórz repozytorium w systemie kontroli wersji",

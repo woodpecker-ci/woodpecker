@@ -132,7 +132,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	server.Config.Pipeline.MaxTimeout = 60
 
 	server.Config.Permissions.Open = true
-	server.Config.Permissions.Admins = permissions.NewAdmins([]string{})
+	server.Config.Permissions.Admins = permissions.NewAdmins([]string{}, false)
 	server.Config.Permissions.Orgs = permissions.NewOrgs([]string{})
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist([]string{})
 

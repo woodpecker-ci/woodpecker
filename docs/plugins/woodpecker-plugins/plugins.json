@@ -364,6 +364,16 @@
       "name": "OpenArtifact",
       "docs": "https://raw.githubusercontent.com/openartifact/drone-openartifact/refs/heads/main/DOCS.md",
       "verified": false
+    },
+    {
+      "name": "Supabase Backup",
+      "docs": "https://raw.githubusercontent.com/backupdrill/woodpecker-backupdrill/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Betterleaks",
+      "docs": "https://codeberg.org/woodpecker-plugins/betterleaks/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }

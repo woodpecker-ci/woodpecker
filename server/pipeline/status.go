@@ -46,7 +46,7 @@ var statusPriorityOrder = []model.StatusValue{
 var priorityMap map[model.StatusValue]int = buildPriorityMap()
 
 func buildPriorityMap() map[model.StatusValue]int {
-	m := map[model.StatusValue]int{}
+	m := make(map[model.StatusValue]int)
 	for i, s := range statusPriorityOrder {
 		m[s] = i
 	}

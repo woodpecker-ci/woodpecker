@@ -173,7 +173,7 @@ func TestStepNameAsLabelInPod(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}
 	meta, err := podMeta(step, &config{Namespace: "woodpecker"}, BackendOptions{}, "wp-01he8bebctabr3kgk0qj36d2me-1", taskUUID)
 	assert.NoError(t, err)
@@ -196,7 +196,7 @@ func TestPodHostnameSanitized(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 	assert.Equal(t, "update-repos", pod.Spec.Hostname)
@@ -318,7 +318,7 @@ func TestServiceWorkspaceVolume(t *testing.T) {
 		Type:          types.StepTypeService,
 		WorkingDir:    "/woodpecker/src",
 		WorkspaceBase: "/woodpecker",
-		Environment:   map[string]string{},
+		Environment:   make(map[string]string),
 		Volumes:       []string{"workspace:/woodpecker", "cache:/cache"},
 	}
 
@@ -1658,4 +1658,31 @@ func TestUnrequiredInitContainer(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.InitContainers)
+}
+
+func TestNodeSelectorAllowFromStep(t *testing.T) {
+	step := &types.Step{
+		Name:  "ns-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	// When disabled (default), a step-provided node selector must be ignored.
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector: map[string]string{"attacker-target": "sensitive-node"},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.NotContains(t, pod.Spec.NodeSelector, "attacker-target")
+
+	// When explicitly enabled by the admin, the step value is honored.
+	pod, err = mkPod(step, &config{
+		Namespace:                    "woodpecker",
+		PodNodeSelectorAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector: map[string]string{"attacker-target": "sensitive-node"},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "sensitive-node", pod.Spec.NodeSelector["attacker-target"])
 }

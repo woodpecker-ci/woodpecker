@@ -23,6 +23,8 @@ To prevent your extensions from such attacks, Woodpecker is signing all HTTP req
 To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsign](https://github.com/yaronf/httpsign).
 You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
 
+Also see [security boundaries](../17-security-boundaries.md#extensions).
+
 ## Example extensions
 
 A simplistic service providing endpoints for a config and secrets extension can be found here: [https://github.com/woodpecker-ci/example-extensions](https://github.com/woodpecker-ci/example-extensions)

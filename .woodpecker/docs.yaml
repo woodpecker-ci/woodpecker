@@ -1,6 +1,6 @@
 variables:
   - &golang_image 'docker.io/golang:1.27'
-  - &node_image 'docker.io/node:24-alpine'
+  - &node_image 'docker.io/node:26-alpine'
   - &alpine_image 'docker.io/alpine:3.24'
   - path: &when_path
       - 'docs/**'
@@ -41,7 +41,9 @@ steps:
     image: *node_image
     directory: docs/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm install --frozen-lockfile
     when:
       - path: *when_path
@@ -52,7 +54,9 @@ steps:
     image: *node_image
     directory: docs/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm format:check
     when:
       - path: *when_path
@@ -71,7 +75,9 @@ steps:
     image: *node_image
     directory: docs/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm build
     when:
       - path: *when_path

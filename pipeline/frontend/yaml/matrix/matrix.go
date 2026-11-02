@@ -117,7 +117,7 @@ func calcAxes(matrix Matrix) ([]Axis, error) {
 
 	// for each axis calculate the unique set of values that should be used.
 	for axisIndex := 0; axisIndex < axisCount; axisIndex++ {
-		axis := map[string]string{}
+		axis := make(map[string]string)
 		// number of consecutive axes that share the same value of a variable
 		axesPerValue := axisCount
 		for _, name := range names {

@@ -229,7 +229,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		).Observe(float64(duration))
 	}
 	if state.Exited {
-		if err := server.Config.Services.LogStore.StepFinished(step); err != nil {
+		if err := server.Config.Services.LogStore.StepFinished(c, step); err != nil {
 			log.Error().Err(err).Int64("step", step.ID).Msg("log store could not finalize the step log")
 		}
 	}
@@ -512,7 +512,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
+	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil {
 		log.Error().Err(err).Msg("could not store log entries")
 	}
 

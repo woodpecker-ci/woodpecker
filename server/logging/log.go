@@ -61,7 +61,7 @@ type logger struct {
 // New returns a new logger.
 func New() Log {
 	return &logger{
-		streams: map[int64]*stream{},
+		streams: make(map[int64]*stream),
 	}
 }
 

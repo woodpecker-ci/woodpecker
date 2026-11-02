@@ -926,10 +926,39 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "Release v22", pipeline.Message)
-		assert.Equal(t, "Jane", pipeline.Author)
+		// the author stays the authenticated webhook username, not the git
+		// commit author name (CVE-2026-58370 approval-bypass fix)
+		assert.Equal(t, "test", pipeline.Author)
 		assert.Equal(t, "jane@example.com", pipeline.Email)
 		assert.Equal(t, time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC).Unix(), pipeline.Timestamp)
 		assert.NotEmpty(t, pipeline.Avatar)
+	})
+
+	t.Run("annotated tag records the tagged commit, not the tag object", func(t *testing.T) {
+		// an annotated tag's `after` is the tag object's SHA; the commits
+		// endpoint resolves it to the tagged commit, whose ID differs
+		tagObjectSHA := "187b97cf74a1c2d3e4f5a6b7c8d9e0f1a2b3c4d5"
+		commitSHA := "afd225e8b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+
+		var payload map[string]any
+		require.NoError(t, json.Unmarshal(fixtures.HookTag, &payload))
+		payload["message"] = ""
+		payload["after"] = tagObjectSHA
+		body, err := json.Marshal(payload)
+		require.NoError(t, err)
+
+		client := newTestServer(t, map[string]string{
+			"/api/v4/projects/4": `{"id":4}`,
+			"/api/v4/projects/4/repository/commits/" + tagObjectSHA: `{"id":"` + commitSHA + `","message":"Release v22",` +
+				`"author_name":"Jane","author_email":"jane@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
+		})
+
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+		require.NoError(t, err)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+		assert.Equal(t, commitSHA, pipeline.Commit)
+		assert.Equal(t, "Release v22", pipeline.Message)
 	})
 
 	t.Run("release gets the release author", func(t *testing.T) {
@@ -1178,4 +1207,67 @@ func TestBranchHead(t *testing.T) {
 	commit, err := client.BranchHead(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{ForgeRemoteID: "4"}, "main")
 	require.NoError(t, err)
 	assert.Equal(t, &model.Commit{SHA: "abc", ForgeURL: "https://gitlab.example.com/commit/abc"}, commit)
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/oauth/token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*GitLab)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
+}
+
+// TestTagAuthorNotSpoofedFromCommit is a regression for the incomplete fix of
+// CVE-2026-58370: a GitLab tag event whose commit message is not in the webhook
+// payload falls back to loadCommitFromSHA, which must not overwrite
+// pipeline.Author (the authenticated webhook username) with the git commit
+// author name, which a pusher controls and could set to an
+// ApprovalAllowedUsers entry to skip approval.
+func TestTagAuthorNotSpoofedFromCommit(t *testing.T) {
+	var payload map[string]any
+	require.NoError(t, json.Unmarshal(fixtures.HookTag, &payload))
+	payload["message"] = ""
+	body, err := json.Marshal(payload)
+	require.NoError(t, err)
+	sha, ok := payload["after"].(string)
+	require.True(t, ok)
+
+	client := newTestServer(t, map[string]string{
+		"/api/v4/projects/4": `{"id":4}`,
+		"/api/v4/projects/4/repository/commits/" + sha: `{"id":"` + sha + `","message":"Release v22",` +
+			`"author_name":"trusted-admin","author_email":"x@example.com","committed_date":"2026-01-02T03:04:05Z"}`,
+	})
+
+	_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders))
+	require.NoError(t, err)
+	assert.Equal(t, model.EventTag, pipeline.Event)
+	// "test" is user_username in the fixture; "trusted-admin" is the spoofable git author name.
+	assert.Equal(t, "test", pipeline.Author)
 }

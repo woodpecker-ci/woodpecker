@@ -15,6 +15,7 @@
 package addon
 
 import (
+	"context"
 	"encoding/json"
 	"net/rpc"
 	"os/exec"
@@ -61,13 +62,13 @@ type RPC struct {
 	client *rpc.Client
 }
 
-func (g *RPC) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+func (g *RPC) LogFind(ctx context.Context, step *model.Step) ([]*model.LogEntry, error) {
 	args, err := json.Marshal(step)
 	if err != nil {
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.LogFind", args, &jsonResp)
+	err = g.call(ctx, "Plugin.LogFind", args, &jsonResp)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func (g *RPC) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	return resp, nil
 }
 
-func (g *RPC) LogAppend(step *model.Step, logEntries []*model.LogEntry) error {
+func (g *RPC) LogAppend(ctx context.Context, step *model.Step, logEntries []*model.LogEntry) error {
 	args, err := json.Marshal(&argumentsAppend{
 		Step:       step,
 		LogEntries: logEntries,
@@ -90,23 +91,33 @@ func (g *RPC) LogAppend(step *model.Step, logEntries []*model.LogEntry) error {
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.LogAppend", args, &jsonResp)
+	return g.call(ctx, "Plugin.LogAppend", args, &jsonResp)
 }
 
-func (g *RPC) LogDelete(step *model.Step) error {
+func (g *RPC) LogDelete(ctx context.Context, step *model.Step) error {
 	args, err := json.Marshal(step)
 	if err != nil {
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.LogDelete", args, &jsonResp)
+	return g.call(ctx, "Plugin.LogDelete", args, &jsonResp)
 }
 
-func (g *RPC) StepFinished(step *model.Step) error {
+func (g *RPC) StepFinished(ctx context.Context, step *model.Step) error {
 	args, err := json.Marshal(step)
 	if err != nil {
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.StepFinished", args, &jsonResp)
+	return g.call(ctx, "Plugin.StepFinished", args, &jsonResp)
+}
+
+func (g *RPC) call(ctx context.Context, method string, args []byte, resp *[]byte) error {
+	c := g.client.Go(method, args, resp, make(chan *rpc.Call, 1))
+	select {
+	case <-c.Done:
+		return c.Error
+	case <-ctx.Done():
+		return context.Cause(ctx)
+	}
 }

@@ -125,7 +125,7 @@ type Forge interface {
 
 	// Activate creates a webhook pointing to Woodpecker.
 	// Called when user activates a repository.
-	// Must verify user has admin access. Should set webhook secret from r.Hash.
+	// Must verify user has admin access. Should set webhook secret from r.WebhookSecret.
 	// Configure webhook for all events Hook() can parse.
 	Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
@@ -155,7 +155,7 @@ type Forge interface {
 	//
 	// Webhook Processing Flow:
 	//  1. HTTP request arrives at /api/hook with forge-specific format
-	//  2. Webhook token verified against repo.Hash
+	//  2. Webhook token verified against repo.WebhookSecret
 	//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
 	//
 	// Return Semantics:

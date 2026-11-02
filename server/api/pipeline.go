@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -48,7 +49,7 @@ import (
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int				true	"the repository id"
-//	@Param		options			body	PipelineOptions	true	"the options for the pipeline to run"
+//	@Param		pipelineOptions	body	PipelineOptions	true	"the options for the pipeline to run"
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -102,6 +103,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 		Ref:                 "refs/heads/" + opts.Branch,
 		AdditionalVariables: opts.Variables,
+		SelectedWorkflow:    opts.Workflow,
 
 		Author: user.Login,
 		Email:  user.Email,
@@ -114,6 +116,45 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 	}
 
 	return pl
+}
+
+// GetRepoWorkflows
+//
+//	@Summary		List workflows a manual pipeline would run
+//	@Description	Fetches the pipeline config of the branch head and lists the workflows that run on the manual event.
+//	@Router			/repos/{repo_id}/workflows [get]
+//	@Produce		json
+//	@Success		200	{array}	WorkflowInfo
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			branch			query	string	false	"the branch to load the config from, defaults to the default branch"
+func GetRepoWorkflows(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	user := session.User(c)
+	opts := model.PipelineOptions{Branch: c.DefaultQuery("branch", repo.Branch)}
+
+	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		return
+	}
+
+	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(model.EventManual, lastCommit, user, &opts))
+	if err != nil {
+		handlePipelineErr(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, workflows)
 }
 
 // GetPipelines
@@ -216,7 +257,7 @@ func DeletePipeline(c *gin.Context) {
 
 	_store := store.FromContext(c)
 
-	if err := deleteStoredLogs(_store, pl.ID); err != nil {
+	if err := deleteStoredLogs(c, _store, pl.ID); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
 		return
 	}
@@ -233,7 +274,7 @@ func DeletePipeline(c *gin.Context) {
 // deleteStoredLogs deletes the logs of every step of a pipeline from the log store.
 // Deleting steps from the database only removes logs kept in the database,
 // so logs kept by other log stores would stay behind.
-func deleteStoredLogs(_store store.Store, pipelineID int64) error {
+func deleteStoredLogs(ctx context.Context, _store store.Store, pipelineID int64) error {
 	steps, err := _store.StepList(pipelineID)
 	if err != nil {
 		return err
@@ -241,7 +282,7 @@ func deleteStoredLogs(_store store.Store, pipelineID int64) error {
 
 	var errs error
 	for _, step := range steps {
-		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(step))
+		errs = errors.Join(errs, server.Config.Services.LogStore.LogDelete(ctx, step))
 	}
 	return errs
 }
@@ -315,7 +356,7 @@ func GetPipelineLastByBranch(c *gin.Context) {
 func GetStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -338,7 +379,7 @@ func GetStepLogs(c *gin.Context) {
 func DownloadStepLogs(c *gin.Context) {
 	step := session.Step(c)
 
-	logs, err := server.Config.Services.LogStore.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(c, step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -397,7 +438,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	err := server.Config.Services.LogStore.LogDelete(_step)
+	err := server.Config.Services.LogStore.LogDelete(c, _step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -619,10 +660,12 @@ func PostPipeline(c *gin.Context) {
 		pl.Sender = deployer.Login
 
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
+		// a workflow picked for the manual run must not narrow the deployment
+		pl.SelectedWorkflow = ""
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
-	envs := map[string]string{}
+	envs := make(map[string]string)
 	for key, val := range c.Request.URL.Query() {
 		switch key {
 		// Skip some options of the endpoint
@@ -670,7 +713,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := server.Config.Services.LogStore.LogDelete(step); lErr != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(c, step); lErr != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

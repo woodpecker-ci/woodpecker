@@ -104,6 +104,48 @@ describe('adminUsers', () => {
     expect(forgeInput!.element.disabled).toBe(true);
   });
 
+  it('marks where the admin of a listed user comes from', async () => {
+    getUsers.mockResolvedValue([
+      { id: 1, login: 'db-admin', forge_id: 1, admin: true, admin_env: false } as User,
+      { id: 2, login: 'env-admin', forge_id: 1, admin: true, admin_env: true } as User,
+      { id: 3, login: 'revoked', forge_id: 1, admin: false, admin_env: true, admin_revoked: true } as User,
+      { id: 4, login: 'user', forge_id: 1, admin: false, admin_env: false } as User,
+      { id: 5, login: 'not-signed-in', forge_id: 1, admin: false, admin_env: true } as User,
+    ]);
+    const wrapper = await mountAdminUsers();
+
+    const rowOf = (login: string) =>
+      wrapper.findAll('span').find((span) => span.text() === login)!.element.parentElement!;
+    // the forge badge has no hover text, the admin badges do
+    const badgesOf = (login: string) =>
+      [...rowOf(login).querySelectorAll('span[title]')].map((badge) => ({
+        text: badge.textContent?.trim(),
+        title: badge.getAttribute('title'),
+      }));
+    const adminTexts = (login: string) => rowOf(login).textContent;
+
+    expect(adminTexts('db-admin')).toContain('Admin');
+    expect(badgesOf('db-admin')).toEqual([]);
+
+    expect(badgesOf('env-admin')).toEqual([
+      { text: 'Admin (env)', title: 'Admin because the user is listed in WOODPECKER_ADMIN.' },
+    ]);
+    expect(badgesOf('revoked')).toEqual([
+      {
+        text: 'Admin temporarily revoked',
+        title:
+          'The user is listed in WOODPECKER_ADMIN environment configuration, but admin was revoked here. They are admin again at their first sign in after the next server restart, unless they are removed from WOODPECKER_ADMIN.',
+      },
+    ]);
+
+    expect(adminTexts('user')).not.toContain('Admin');
+
+    // a listed user gets admin at the first sign in, nothing was revoked
+    expect(badgesOf('not-signed-in')).toEqual([
+      { text: 'Admin (env)', title: 'Admin because the user is listed in WOODPECKER_ADMIN.' },
+    ]);
+  });
+
   it('creates the user on the forge picked in the form', async () => {
     const wrapper = await mountAdminUsers();
     await openAddUserForm(wrapper);

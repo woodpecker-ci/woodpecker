@@ -26,7 +26,7 @@ func TestMatrix(t *testing.T) {
 	axis, _ := parseString(fakeMatrix)
 	assert.Len(t, axis, 24)
 
-	set := map[string]bool{}
+	set := make(map[string]bool)
 	for _, perm := range axis {
 		set[fmt.Sprint(perm)] = true
 	}
@@ -216,7 +216,7 @@ func TestMatrixMaxAxes(t *testing.T) {
 			assert.NoError(t, err)
 
 			// every generated workflow gets its own combination
-			distinct := map[string]bool{}
+			distinct := make(map[string]bool)
 			for _, axis := range axes {
 				distinct[fmt.Sprint(map[string]string(axis))] = true
 			}

@@ -141,9 +141,12 @@
                 "value": "Variabl-Wert"
             },
             "show_pipelines": "Pipelines zoang",
-            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf das zumindest oa Workflow auf des von hand lafa Ereignis head."
+            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf das zumindest oa Workflow auf des von hand lafa Ereignis head.",
+            "message": {
+                "desc": "De nachricht wird zu de Pipeline Nachrichtn dazougschrimm als weidere Infos."
+            }
         },
-        "activity": "Ois da Reih nach",
+        "activity": "Des wos bassiert is",
         "branches": "Branches",
         "pull_requests": "Pull Requests",
         "add": "Repo dazua doa",
@@ -154,7 +157,7 @@
             "not_allowed": "Du deafst de Eistellunga von dem Repo ned ändarn",
             "general": {
                 "general": "Repo",
-                "project": "Repo-Eistellunga",
+                "project": "Projekt eistölln",
                 "save": "Eistellunga speichan",
                 "success": "Repo-Eistellunga gändert",
                 "pipeline_path": {

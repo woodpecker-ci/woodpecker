@@ -50,7 +50,7 @@ func TestHook(t *testing.T) {
 	server.Config.Services.Manager = _manager
 	server.Config.Permissions.Open = true
 	server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-	server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+	server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Set("store", _store)
@@ -64,7 +64,7 @@ func TestHook(t *testing.T) {
 		Name:          "name",
 		IsActive:      true,
 		UserID:        user.ID,
-		Hash:          "secret-123-this-is-a-secret",
+		WebhookSecret: "secret-123-this-is-a-secret",
 	}
 	pipeline := &model.Pipeline{
 		ID:     123,

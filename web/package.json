@@ -3,7 +3,7 @@
   "author": "Woodpecker CI",
   "version": "0.0.0",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.15.0",
+  "packageManager": "pnpm@12.16.1",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -45,7 +45,7 @@
     "@intlify/unplugin-vue-i18n": "^11.0.7",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "4.3.3",
-    "@types/node": "^24.12.2",
+    "@types/node": "^26.0.0",
     "@types/prismjs": "^1.26.6",
     "@types/semver": "^7.7.1",
     "@types/tinycolor2": "^1.4.6",

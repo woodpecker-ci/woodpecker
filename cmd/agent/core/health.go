@@ -77,7 +77,7 @@ type versionResp struct {
 
 // Default statistics counter.
 var counter = &agent.State{
-	Metadata: map[string]agent.Info{},
+	Metadata: make(map[string]agent.Info),
 }
 
 // handles pinging the endpoint and returns an error if the

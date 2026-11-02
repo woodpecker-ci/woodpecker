@@ -334,7 +334,7 @@ func TestRunStep(t *testing.T) {
 			Name:        "test-plugin",
 			Type:        types.StepTypePlugin,
 			Image:       "echo", // Use a binary that exists
-			Environment: map[string]string{},
+			Environment: make(map[string]string),
 		}
 
 		t.Run("start", func(t *testing.T) {
@@ -436,7 +436,7 @@ func TestConcurrentWorkflows(t *testing.T) {
 					Type:        types.StepTypePlugin,
 					Image:       "sh",
 					Commands:    []string{fmt.Sprintf("echo %s %d", uuid, i)},
-					Environment: map[string]string{},
+					Environment: make(map[string]string),
 				}
 				require.NoError(t, backend.StartStep(ctx, step, uuid))
 				_, err := backend.WaitStep(ctx, step, uuid)

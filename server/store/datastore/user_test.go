@@ -21,6 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestUsers(t *testing.T) {
@@ -139,4 +140,31 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	newOrg, err := store.OrgFindByName("new-user", 1)
 	assert.NoError(t, err)
 	assert.Equal(t, "new-user", newOrg.Name)
+}
+
+func TestCreateUserFailureKeepsOrgs(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Perm))
+	defer closer()
+
+	assert.NoError(t, store.CreateUser(&model.User{Login: "taken", ForgeRemoteID: "A", Hash: "A", ForgeID: 1}))
+
+	// same hash as the first user: the user insert fails after the org was written
+	err := store.CreateUser(&model.User{Login: "fresh", ForgeRemoteID: "B", Hash: "A", ForgeID: 1})
+	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
+
+	_, err = store.OrgFindByName("fresh", 1)
+	assert.ErrorIs(t, err, types.ErrRecordNotExist, "failed user insert must not leave its org behind")
+
+	// an existing org must not be claimed as user org either
+	existingOrg := &model.Org{ForgeID: 1, Name: "existing"}
+	assert.NoError(t, store.OrgCreate(existingOrg))
+	err = store.CreateUser(&model.User{Login: "existing", ForgeRemoteID: "C", Hash: "A", ForgeID: 1})
+	assert.ErrorIs(t, err, types.ErrInsertDuplicateDetected)
+
+	org, err := store.OrgGet(existingOrg.ID)
+	assert.NoError(t, err)
+	assert.False(t, org.IsUser)
+
+	_, err = store.GetUserByLogin(1, "existing")
+	assert.ErrorIs(t, err, types.ErrRecordNotExist, "failed user insert must not leave a user behind")
 }

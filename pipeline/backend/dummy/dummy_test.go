@@ -56,7 +56,7 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 			Name:        "step1",
 			UUID:        "SID_1",
 			Type:        types.StepTypeCommands,
-			Environment: map[string]string{},
+			Environment: make(map[string]string),
 			Commands:    []string{"echo ja", "echo nein"},
 		}
 		workflowUUID := "WID_1"

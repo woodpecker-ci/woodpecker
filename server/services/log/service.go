@@ -14,11 +14,15 @@
 
 package log
 
-import "go.woodpecker-ci.org/woodpecker/v3/server/model"
+import (
+	"context"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+)
 
 type Service interface {
-	LogFind(step *model.Step) ([]*model.LogEntry, error)
-	LogAppend(step *model.Step, logEntries []*model.LogEntry) error
-	LogDelete(step *model.Step) error
-	StepFinished(step *model.Step) error
+	LogFind(ctx context.Context, step *model.Step) ([]*model.LogEntry, error)
+	LogAppend(ctx context.Context, step *model.Step, logEntries []*model.LogEntry) error
+	LogDelete(ctx context.Context, step *model.Step) error
+	StepFinished(ctx context.Context, step *model.Step) error
 }

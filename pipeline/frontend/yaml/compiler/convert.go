@@ -86,7 +86,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	}
 
 	// append default environment variables
-	environment := map[string]string{}
+	environment := make(map[string]string)
 	maps.Copy(environment, c.env)
 
 	if !container.IsPlugin() {
@@ -117,7 +117,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		return secret.Value, nil
 	}
 
-	secretMapping := map[string]string{}
+	secretMapping := make(map[string]string)
 
 	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue, secretMapping); err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		ports = append(ports, port)
 	}
 
-	whenEnv := map[string]string{}
+	whenEnv := make(map[string]string)
 	maps.Copy(whenEnv, c.env)
 	maps.Copy(whenEnv, c.nonPluginEnv)
 

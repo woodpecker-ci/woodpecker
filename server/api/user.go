@@ -114,9 +114,9 @@ func GetRepos(c *gin.Context) {
 			return
 		}
 
-		dbReposMap := map[model.ForgeRemoteID]*model.Repo{}
-		dbStaleReposMap := map[int64]*model.Repo{}
-		dbReposFullNameMap := map[string]*model.Repo{}
+		dbReposMap := make(map[model.ForgeRemoteID]*model.Repo)
+		dbStaleReposMap := make(map[int64]*model.Repo)
+		dbReposFullNameMap := make(map[string]*model.Repo)
 		for _, r := range dbRepos {
 			dbReposMap[r.ForgeRemoteID] = r
 			dbReposFullNameMap[strings.ToLower(r.FullName)] = r

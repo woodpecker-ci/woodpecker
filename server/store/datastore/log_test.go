@@ -15,9 +15,12 @@
 package datastore
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -45,16 +48,16 @@ func TestLogCreateFindDelete(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, store.LogAppend(&step, logEntries))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, logEntries))
 
 	// we want to find our inserted logs
-	_logEntries, err := store.LogFind(&step)
+	_logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, len(logEntries))
 
 	// delete and check
-	assert.NoError(t, store.LogDelete(&step))
-	_logEntries, err = store.LogFind(&step)
+	assert.NoError(t, store.LogDelete(t.Context(), &step))
+	_logEntries, err = store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, 0)
 }
@@ -81,7 +84,7 @@ func TestLogAppend(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, store.LogAppend(&step, logEntries))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, logEntries))
 
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
@@ -90,9 +93,9 @@ func TestLogAppend(t *testing.T) {
 		Time:   20,
 	}
 
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{logEntry}))
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{logEntry}))
 
-	_logEntries, err := store.LogFind(&step)
+	_logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 	assert.Len(t, _logEntries, len(logEntries)+1)
 }
@@ -107,16 +110,16 @@ func TestLogFindOrdersByLine(t *testing.T) {
 
 	// The first batch is written through a node holding the id cache 4000+,
 	// the second one through a node holding the lower cache 30+.
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{ID: 4000, StepID: step.ID, Data: []byte("first"), Line: 0, Time: 0},
 		{ID: 4001, StepID: step.ID, Data: []byte("second"), Line: 1, Time: 10},
 	}))
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{ID: 30, StepID: step.ID, Data: []byte("third"), Line: 2, Time: 20},
 		{ID: 31, StepID: step.ID, Data: []byte("fourth"), Line: 3, Time: 30},
 	}))
 
-	logEntries, err := store.LogFind(&step)
+	logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 
 	lines := make([]int, 0, len(logEntries))
@@ -138,17 +141,17 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 		ID: 1,
 	}
 
-	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.NoError(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 	// the agent retries with the batch it already sent
-	assert.Error(t, store.LogAppend(&step, []*model.LogEntry{
+	assert.Error(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 
-	logEntries, err := store.LogFind(&step)
+	logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
 
 	lines := make([]int, 0, len(logEntries))
@@ -160,4 +163,44 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 
 	assert.Equal(t, []int{0, 1}, lines)
 	assert.Equal(t, []string{"hello", "world"}, data)
+}
+
+// holdConnection takes the only connection of a test store (MaxOpenConns=1), like a hung database,
+// until release is called.
+func holdConnection(t *testing.T, s *storage) (release func()) {
+	t.Helper()
+	conn, err := s.engine.DB().Conn(t.Context())
+	require.NoError(t, err)
+	return func() { _ = conn.Close() }
+}
+
+// assertCanceled runs call with a context that ends soon and fails if call keeps waiting.
+func assertCanceled(t *testing.T, call func(ctx context.Context) error) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 50*time.Millisecond)
+	defer cancel()
+	errc := make(chan error, 1)
+	go func() { errc <- call(ctx) }()
+	select {
+	case err := <-errc:
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+	case <-time.After(5 * time.Second):
+		t.Fatal("still waiting for the database after the context ended")
+	}
+}
+
+func TestLogCanceled(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.LogEntry))
+	defer closer()
+	defer holdConnection(t, store)()
+	step := &model.Step{ID: 1}
+
+	assertCanceled(t, func(ctx context.Context) error {
+		_, err := store.LogFind(ctx, step)
+		return err
+	})
+	assertCanceled(t, func(ctx context.Context) error {
+		return store.LogAppend(ctx, step, []*model.LogEntry{{StepID: step.ID, Line: 1}})
+	})
+	assertCanceled(t, func(ctx context.Context) error { return store.LogDelete(ctx, step) })
 }

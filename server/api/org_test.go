@@ -131,7 +131,7 @@ func TestGetOrgPermissions(t *testing.T) {
 		server.Config.Services.Membership = membership
 
 		tc := newTestContext(t, s)
-		user := &model.User{ID: 1, Login: "alice", ForgeID: 1}
+		user := &model.User{ID: 1, Login: "alice", ForgeID: 1, OrgID: 4}
 		org := &model.Org{ID: 4, Name: "alice", ForgeID: 1, IsUser: true}
 		withUser(user)(tc)
 		tc.Ctx.Set("org", org)
@@ -164,6 +164,175 @@ func TestGetOrgPermissions(t *testing.T) {
 		assert.True(t, perm.Member)
 		assert.True(t, membership.called)
 	})
+}
+
+func TestGetOrgPermissionsPersonalOrg(t *testing.T) {
+	s := newTestStore(t)
+	tests := []struct {
+		name  string
+		user  model.User
+		org   model.Org
+		allow bool
+	}{
+		{
+			name:  "different casing on linked org",
+			user:  model.User{Login: "Alice", ForgeID: 1, OrgID: 10},
+			org:   model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+			allow: true,
+		},
+		{
+			name:  "renamed user keeps linked org",
+			user:  model.User{Login: "new-name", ForgeID: 1, OrgID: 10},
+			org:   model.Org{ID: 10, Name: "old-name", ForgeID: 1, IsUser: true},
+			allow: true,
+		},
+		{
+			name: "same name does not grant another personal org",
+			user: model.User{Login: "alice", ForgeID: 1, OrgID: 20},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+		},
+		{
+			name: "missing link does not fall back to name",
+			user: model.User{Login: "alice", ForgeID: 1},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 1, IsUser: true},
+		},
+		{
+			name: "invalid cross-forge link is denied",
+			user: model.User{Login: "alice", ForgeID: 1, OrgID: 10},
+			org:  model.Org{ID: 10, Name: "alice", ForgeID: 2, IsUser: true},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			installOrgForgeManager(t)
+			membership := &fakeMembership{perm: &model.OrgPerm{Member: true, Admin: true}}
+			server.Config.Services.Membership = membership
+			tc := newTestContext(t, s)
+			withUser(&tt.user)(tc)
+			tc.Ctx.Set("org", &tt.org)
+
+			GetOrgPermissions(tc.Ctx)
+
+			require.Equal(t, http.StatusOK, tc.Recorder.Code)
+			perm := new(model.OrgPerm)
+			tc.decodeJSON(t, perm)
+			assert.Equal(t, tt.allow, perm.Member)
+			assert.Equal(t, tt.allow, perm.Admin)
+			assert.False(t, membership.called, "personal ownership must not use forge membership")
+		})
+	}
+}
+
+func TestLookupOrgAccess(t *testing.T) {
+	tests := []struct {
+		name            string
+		user            model.User
+		org             model.Org
+		linked          bool
+		anonymous       bool
+		perm            *model.OrgPerm
+		status          int
+		checkMembership bool
+	}{
+		{
+			name:   "private personal org with different casing",
+			user:   model.User{Login: "Alice", ForgeID: 1},
+			org:    model.Org{Name: "alice", ForgeID: 1, IsUser: true, Private: true},
+			linked: true,
+			status: http.StatusOK,
+		},
+		{
+			name:   "private personal org after rename",
+			user:   model.User{Login: "new-name", ForgeID: 1},
+			org:    model.Org{Name: "old-name", ForgeID: 1, IsUser: true, Private: true},
+			linked: true,
+			status: http.StatusOK,
+		},
+		{
+			name:   "same name does not expose another private personal org",
+			user:   model.User{Login: "alice", ForgeID: 1, OrgID: 999},
+			org:    model.Org{Name: "alice", ForgeID: 1, IsUser: true, Private: true},
+			perm:   &model.OrgPerm{Member: true, Admin: true},
+			status: http.StatusNotFound,
+		},
+		{
+			name:   "missing link does not expose private personal org by name",
+			user:   model.User{Login: "alice", ForgeID: 1},
+			org:    model.Org{Name: "alice", ForgeID: 1, IsUser: true, Private: true},
+			perm:   &model.OrgPerm{Member: true, Admin: true},
+			status: http.StatusNotFound,
+		},
+		{
+			name:   "instance admin can look up private org",
+			user:   model.User{Login: "root", ForgeID: 1, Admin: true},
+			org:    model.Org{Name: "alice", ForgeID: 1, IsUser: true, Private: true},
+			status: http.StatusOK,
+		},
+		{
+			name:            "private ordinary org requires forge membership",
+			user:            model.User{Login: "alice", ForgeID: 1},
+			org:             model.Org{Name: "acme", ForgeID: 1, Private: true},
+			perm:            &model.OrgPerm{Member: true},
+			status:          http.StatusOK,
+			checkMembership: true,
+		},
+		{
+			name:            "nonmember cannot look up private ordinary org",
+			user:            model.User{Login: "alice", ForgeID: 1},
+			org:             model.Org{Name: "acme", ForgeID: 1, Private: true},
+			status:          http.StatusNotFound,
+			checkMembership: true,
+		},
+		{
+			name:            "stale link to ordinary org does not bypass membership",
+			user:            model.User{Login: "alice", ForgeID: 1},
+			org:             model.Org{Name: "alice", ForgeID: 1, Private: true},
+			linked:          true,
+			status:          http.StatusNotFound,
+			checkMembership: true,
+		},
+		{
+			name:      "anonymous user cannot look up private org",
+			org:       model.Org{Name: "alice", ForgeID: 1, IsUser: true, Private: true},
+			anonymous: true,
+			status:    http.StatusNotFound,
+		},
+		{
+			name:   "public personal org remains visible to other users",
+			user:   model.User{Login: "bob", ForgeID: 1},
+			org:    model.Org{Name: "alice", ForgeID: 1, IsUser: true},
+			status: http.StatusOK,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := newTestStore(t)
+			require.NoError(t, s.OrgCreate(&tt.org))
+			if tt.linked {
+				tt.user.OrgID = tt.org.ID
+			}
+			installOrgForgeManager(t)
+			membership := &fakeMembership{perm: tt.perm}
+			server.Config.Services.Membership = membership
+			tc := newTestContext(t, s)
+			if !tt.anonymous {
+				withUser(&tt.user)(tc)
+			}
+			withParam("org_full_name", "/"+tt.org.Name)(tc)
+
+			LookupOrg(tc.Ctx)
+
+			require.Equal(t, tt.status, tc.Recorder.Code)
+			assert.Equal(t, tt.checkMembership, membership.called)
+			if tt.status == http.StatusOK {
+				got := new(model.Org)
+				tc.decodeJSON(t, got)
+				assert.Equal(t, tt.org.ID, got.ID)
+			} else {
+				assert.Empty(t, tc.Recorder.Body.String(), "denied lookup must not expose org information")
+			}
+		})
+	}
 }
 
 func TestPatchOrg(t *testing.T) {
@@ -201,7 +370,7 @@ func TestPatchOrg(t *testing.T) {
 	})
 
 	t.Run("empty patch keeps the setting", func(t *testing.T) {
-		tc := patch(t, map[string]any{})
+		tc := patch(t, make(map[string]any))
 
 		require.Equal(t, http.StatusOK, tc.Recorder.Code)
 		stored, err := s.OrgGet(org.ID)

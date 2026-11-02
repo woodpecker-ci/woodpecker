@@ -26,7 +26,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 
 - [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
 - [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker CI and Gitea
-- [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook) - an Ansible playbook that can [set up Woodpecker CI](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/docs/services/woodpecker-ci.md) alongside 250+ other self-hosted services, including Forgejo and Gitea
+- [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook) - an Ansible playbook that can [set up Woodpecker CI](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/components/woodpecker_ci_server/README.md) alongside 250+ other self-hosted services, including Forgejo and Gitea
 - [picus](https://github.com/windsource/picus) - Picus connects to a Woodpecker CI server and creates an agent in the cloud when there are pending workflows.
 - [Hetzner cloud](https://www.hetzner.com/cloud) based [Woodpecker compatible autoscaler](https://git.ljoonal.xyz/ljoonal/hetzner-ci-autoscaler) - Creates and destroys VPS instances based on the count of pending & running jobs.
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a Woodpecker config file via pre-commit hook
@@ -70,7 +70,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Improving Multi-Arch Image Build Performance by not Emulating](https://blog.mei-home.net/posts/improving-container-image-build-perf-with-buildah/)
 - [CI pipelines with Woodpecker](https://blog.reinhard.codes/2024/11/19/ci-pipelines-with-woodpecker/)
 - [Setting up Woodpecker CI at home](https://jamesbrechtel.com/posts/wasting-time-for-misery-and-loss/)
-- [Woodpecker CI with automatic runner creation](https://planet.kde.org/jonah-bruchert-2023-05-13-woodpecker-ci-with-automatic-runner-creation/)
+- [Woodpecker CI with automatic runner creation](https://jbb.ghsq.de/2023/05/14/self-hosted-ci-hetzner.html)
 - [Self-Hosted CI: Install and Run Woodpecker CI on Your VPS](https://mangohost.net/blog/self-hosted-ci-install-and-run-woodpecker-ci-on-your-vps/)
 - [Automating My Blog With Gitea and Woodpecker](https://bgenc.net/2022.11.19.automating-my-blog-with-gitea-and-woodpecker/)
 - [Testcontainers in Woodpecker CI](https://gaborpihaj.com/posts/testcontainers-in-woodpecker-ci/)

@@ -86,7 +86,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
+	if user.OwnsOrg(org) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
@@ -160,10 +160,12 @@ func LookupOrg(c *gin.Context) {
 			return
 		}
 
-		if !user.Admin && org.Name != user.Login {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		} else if !user.Admin {
+		if !user.Admin && !user.OwnsOrg(org) {
+			if org.IsUser || org.ForgeID != user.ForgeID {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+
 			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to check membership")

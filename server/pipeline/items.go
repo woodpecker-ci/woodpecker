@@ -85,7 +85,7 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 	}
 
 	if envs == nil {
-		envs = map[string]string{}
+		envs = make(map[string]string)
 	}
 
 	environmentService := server.Config.Services.Manager.EnvironmentService()
@@ -121,7 +121,8 @@ func parsePipeline(ctx context.Context, forge forge.Forge, store store.Store, cu
 			Volumes:  repo.Trusted.Volumes,
 			Security: repo.Trusted.Security,
 		},
-		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
+		DefaultLabels:    server.Config.Pipeline.DefaultWorkflowLabels,
+		SelectedWorkflow: currentPipeline.SelectedWorkflow,
 		CompilerOptions: []compiler.Option{
 			compiler.WithLocal(false),
 			compiler.WithRegistry(registries...),
@@ -207,12 +208,13 @@ func createPipelineItems(ctx context.Context, forge forge.Forge, store store.Sto
 	}
 
 	enrichPipelineItemSteps(pipelineItems, repo)
-	currentPipeline, err = saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
+	savedPipeline, err := saveWorkflowsFromPipelineBuilder(store, currentPipeline, pipelineItems, replaceExisting)
 	if err != nil {
+		// callers use the returned pipeline before they check err, so never return nil
 		return currentPipeline, nil, parseErr, err
 	}
 
-	return currentPipeline, pipelineItems, parseErr, nil
+	return savedPipeline, pipelineItems, parseErr, nil
 }
 
 // enrichPipelineItemSteps stamps server-side fields onto the backend step

@@ -1,17 +1,16 @@
 # docker build --rm -f docker/Dockerfile.make -t woodpecker/make:local .
 FROM docker.io/golang:1.27-alpine AS golang_image
-FROM docker.io/node:24-alpine
+FROM docker.io/node:26-alpine
 
 RUN apk add --no-cache --update make gcc binutils-gold musl-dev && \
     apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main protoc && \
-  corepack enable
+  npx get-pnpm
 
 # Build packages.
 COPY --from=golang_image /usr/local/go /usr/local/go
 COPY Makefile /
-ENV PATH=$PATH:/usr/local/go/bin
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-ENV COREPACK_ENABLE_AUTO_PIN=0
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH=$PATH:/usr/local/go/bin:$PNPM_HOME/bin
 
 # Cache tools
 RUN GOBIN=/usr/local/go/bin make install-tools && \

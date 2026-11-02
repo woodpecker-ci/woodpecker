@@ -17,7 +17,6 @@
 package setup
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -190,12 +189,12 @@ func WaitForWorkersReady(t *testing.T, q queue.Queue, minWorkers int) {
 	t.Helper()
 
 	if pollUntil(shortTimeout, func() bool {
-		return q.Info(context.Background()).Stats.Workers >= minWorkers
+		return q.Info(t.Context()).Stats.Workers >= minWorkers
 	}) {
 		return
 	}
 
-	info := q.Info(context.Background())
+	info := q.Info(t.Context())
 	t.Fatalf("timeout waiting for %d workers to be ready in queue: got %d", minWorkers, info.Stats.Workers)
 }
 

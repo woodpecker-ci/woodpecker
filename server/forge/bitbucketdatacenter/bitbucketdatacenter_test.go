@@ -287,7 +287,7 @@ func TestHook(t *testing.T) {
 		defer s.Close()
 
 		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		dbRepo := &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", Hash: "secret"}
+		dbRepo := &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1684", dbRepo)
 
 		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"))
@@ -312,7 +312,7 @@ func TestHook(t *testing.T) {
 		defer s.Close()
 
 		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		dbRepo := &model.Repo{ID: 3, UserID: 1, Owner: "DEV", Name: "network-monitor", Hash: "secret"}
+		dbRepo := &model.Repo{ID: 3, UserID: 1, Owner: "DEV", Name: "network-monitor", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1079", dbRepo)
 
 		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "pr:opened", fixtures.HookPull, "secret"))
@@ -328,7 +328,7 @@ func TestHook(t *testing.T) {
 		defer s.Close()
 
 		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		ctx := hookContext(t, "1684", &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", Hash: "secret"})
+		ctx := hookContext(t, "1684", &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", WebhookSecret: "secret"})
 
 		_, _, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "other"))
 		assert.ErrorContains(t, err, "signature does not match")
@@ -348,7 +348,8 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 	)
 
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.GetCommit,
+		mock.WithRequestMatch(
+			mock.GetCommit,
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 		),
@@ -467,7 +468,8 @@ func TestOrgMembership(t *testing.T) {
 
 func TestTeams(t *testing.T) {
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.ListProjects,
+		mock.WithRequestMatch(
+			mock.ListProjects,
 			bitbucket.ProjectList{NextPageStart: 1, Projects: []*bitbucket.Project{{Key: "ONE"}}},
 			bitbucket.ProjectList{LastPage: true, Projects: []*bitbucket.Project{{Key: "TWO"}}},
 		),
@@ -676,7 +678,7 @@ func TestActivate(t *testing.T) {
 	defer s.Close()
 
 	c := &client{urlAPI: s.URL}
-	repo := &model.Repo{ForgeRemoteID: "1", Owner: "PRJ", Name: "repo", Hash: "repo-secret"}
+	repo := &model.Repo{ForgeRemoteID: "1", Owner: "PRJ", Name: "repo", WebhookSecret: "repo-secret"}
 
 	require.NoError(t, c.Activate(t.Context(), fakeUser, repo, "https://ci.example.com/api/hook?access_token=new"))
 

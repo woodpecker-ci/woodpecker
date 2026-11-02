@@ -78,26 +78,38 @@
       >
         <div v-for="group in groupedLogs" :key="group.id" class="contents">
           <div
-            v-if="group.isActualCommand"
-            class="sticky -top-4 z-10 col-span-3 my-1 flex cursor-pointer items-center rounded-sm px-2 py-1 font-mono text-sm shadow-xs"
-            :class="[group.command && isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
+            v-if="group.isActualCommand && group.command"
+            class="sticky -top-4 z-10 col-span-3 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs"
+            :class="[isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
             @click="toggleGroup(group.id)"
           >
-            <Icon
-              name="chevron-right"
-              class="mr-2 transition-transform"
-              :class="{
-                'rotate-90': !collapsedCommands.has(group.id),
-                invisible: group.lines.length === 0,
-              }"
-            />
-            <!-- eslint-disable vue/no-v-html -->
-            <span
-              v-if="group.command"
-              :id="`L${group.command?.number}`"
-              class="flex-1 truncate"
-              v-html="group.command.text?.substring(2)"
-            />
+            <a
+              :id="`L${group.command.number}`"
+              :href="`#L${group.command.number}`"
+              class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+              :class="{ underline: isSelected(group.command) }"
+              @click.stop
+            >
+              {{ group.command.number }}
+            </a>
+            <div class="flex min-w-0 items-center">
+              <Icon
+                name="chevron-right"
+                class="mr-1 size-4 shrink-0 transition-transform"
+                :class="{
+                  'rotate-90': !collapsedCommands.has(group.id),
+                  invisible: group.lines.length === 0,
+                }"
+              />
+              <span class="flex-1 truncate" :title="group.command.rawText?.trim().slice(commandMarker.length).trim()">
+                <span class="text-[0px] whitespace-pre" aria-hidden="true" v-text="commandMarker" />
+                <!-- eslint-disable vue/no-v-html -->
+                <span v-html="group.command.text?.substring(3)" />
+              </span>
+            </div>
+            <span class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none">
+              {{ formatTime(group.command.time) }}
+            </span>
           </div>
 
           <template v-if="!collapsedCommands.has(group.id)">
@@ -247,6 +259,8 @@ const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 const collapsedCommands = ref(new Set<number>());
 
+const commandMarker = '▶  ';
+
 const groupedLogs = computed(() => {
   if (!log.value) return [];
 
@@ -255,12 +269,12 @@ const groupedLogs = computed(() => {
 
   log.value.forEach((line) => {
     const trimmedText = (line.rawText || '').trim();
-    const isCommand = trimmedText.startsWith('▶  ') && trimmedText.slice(3).trim().length > 0;
+    const isCommand = trimmedText.startsWith(commandMarker) && trimmedText.slice(3).trim().length > 0;
 
     if (isCommand) {
       currentBlock = {
         command: line,
-        lines: [line],
+        lines: [],
         id: line.number,
         isActualCommand: true,
       };

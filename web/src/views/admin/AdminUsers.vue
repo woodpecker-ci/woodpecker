@@ -24,7 +24,23 @@
             class="md:display-unset hidden"
             :value="forgesMap.get(user.forge_id)"
           />
-          <Badge v-if="user.admin" class="md:display-unset hidden" :value="$t('admin.settings.users.admin.admin')" />
+          <Badge
+            v-if="user.admin_revoked"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_revoked')"
+            :title="$t('admin.settings.users.admin.admin_revoked_desc')"
+          />
+          <Badge
+            v-else-if="user.admin_env"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin_env')"
+            :title="$t('admin.settings.users.admin.admin_env_desc')"
+          />
+          <Badge
+            v-else-if="user.admin"
+            class="md:display-unset hidden"
+            :value="$t('admin.settings.users.admin.admin')"
+          />
         </span>
         <div class="flex items-center gap-2">
           <IconButton
@@ -138,6 +154,7 @@ import { usePagination } from '~/compositions/usePaginate';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { DEFAULT_FORGE_ID } from '~/lib/api';
 import type { User } from '~/lib/api/types';
+import { forgeDisplayName } from '~/lib/forgeDisplayName';
 import { deepClone } from '~/lib/utils';
 
 const apiClient = useApiClient();
@@ -162,18 +179,7 @@ const selectedForgeId = computed({
 async function loadForges() {
   const forges = await apiClient.getForges({ page: 1 });
   if (forges) {
-    forgesMap.value = new Map(
-      forges.map((forge) => {
-        let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
-
-        if (forge.url || forge.oauth_host) {
-          const url = new URL(forge.oauth_host || forge.url);
-          name = url.hostname;
-        }
-
-        return [forge.id, name];
-      }),
-    );
+    forgesMap.value = new Map(forges.map((forge) => [forge.id, forgeDisplayName(forge)]));
   }
 }
 

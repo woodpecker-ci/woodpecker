@@ -196,3 +196,44 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestMetadataPipelineFromModelPipelineRelease(t *testing.T) {
+	tests := []struct {
+		name             string
+		pipeline         *model.Pipeline
+		wantRelease      string
+		wantIsPrerelease bool
+	}{
+		{
+			name:     "no release leaves release fields empty and does not panic",
+			pipeline: &model.Pipeline{Number: 1, Event: model.EventPush},
+		},
+		{
+			name: "release populates release title and prerelease flag",
+			pipeline: &model.Pipeline{
+				Number:  2,
+				Event:   model.EventRelease,
+				Release: &model.Release{Title: "v1.0.0", IsPrerelease: true},
+			},
+			wantRelease:      "v1.0.0",
+			wantIsPrerelease: true,
+		},
+		{
+			name: "stable release keeps prerelease false",
+			pipeline: &model.Pipeline{
+				Number:  3,
+				Event:   model.EventRelease,
+				Release: &model.Release{Title: "v2.0.0"},
+			},
+			wantRelease: "v2.0.0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := metadataPipelineFromModelPipeline(tt.pipeline, false)
+			assert.Equal(t, tt.wantRelease, result.Release.Title)
+			assert.Equal(t, tt.wantIsPrerelease, result.Release.IsPrerelease)
+		})
+	}
+}

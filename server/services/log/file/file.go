@@ -16,6 +16,7 @@ package file
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -55,7 +56,7 @@ func (l logStore) filePath(id int64) string {
 	return filepath.Join(l.base, fmt.Sprintf("%d.json", id))
 }
 
-func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+func (l logStore) LogFind(_ context.Context, step *model.Step) ([]*model.LogEntry, error) {
 	filename := l.filePath(step.ID)
 	file, err := os.Open(filename)
 	if err != nil {
@@ -87,7 +88,7 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	return entries, nil
 }
 
-func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) error {
+func (l logStore) LogAppend(_ context.Context, step *model.Step, logEntries []*model.LogEntry) error {
 	path := l.filePath(step.ID)
 
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
@@ -114,7 +115,7 @@ func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) erro
 	return file.Close()
 }
 
-func (l logStore) LogDelete(step *model.Step) error {
+func (l logStore) LogDelete(_ context.Context, step *model.Step) error {
 	err := os.Remove(l.filePath(step.ID))
 	if os.IsNotExist(err) {
 		// a step that never wrote a log has nothing to delete
@@ -123,4 +124,4 @@ func (l logStore) LogDelete(step *model.Step) error {
 	return err
 }
 
-func (l logStore) StepFinished(_ *model.Step) error { return nil }
+func (l logStore) StepFinished(_ context.Context, _ *model.Step) error { return nil }

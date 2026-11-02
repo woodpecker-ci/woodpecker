@@ -25,7 +25,7 @@ import (
 
 func TestHealthy(t *testing.T) {
 	s := agent.State{}
-	s.Metadata = map[string]agent.Info{}
+	s.Metadata = make(map[string]agent.Info)
 
 	s.Add("1", time.Hour, "octocat/hello-world", "42")
 

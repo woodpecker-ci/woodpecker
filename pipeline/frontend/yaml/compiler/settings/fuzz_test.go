@@ -33,11 +33,11 @@ func FuzzParamsToEnv(f *testing.F) {
 	}
 
 	f.Fuzz(func(_ *testing.T, data string) {
-		from := map[string]any{}
+		from := make(map[string]any)
 		if err := yaml.Unmarshal([]byte(data), &from); err != nil {
 			return
 		}
-		to := map[string]string{}
+		to := make(map[string]string)
 		_ = ParamsToEnv(from, to, "PLUGIN_", true, getSecret, nil)
 	})
 }

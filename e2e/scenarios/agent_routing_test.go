@@ -101,12 +101,14 @@ func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	})
 
 	// Global agent: matches org-id=* (score 1).
-	globalAgent := setup.StartAgent(t, env.GRPCAddr,
+	globalAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("global-agent"),
 	)
 
 	// Org agent: created for the repo's OrgID (score 10).
-	orgAgent := setup.StartAgent(t, env.GRPCAddr,
+	orgAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("org-agent"),
 		setup.WithOrgID(env.Store, env.Fixtures.Repo.OrgID),
 	)
@@ -142,7 +144,8 @@ func TestRequireOrgAgents(t *testing.T) {
 	require.NoError(t, env.Store.OrgUpdate(env.Fixtures.Org), "require org agents")
 
 	// Global agent: matches org-id=*, which is rejected for this org.
-	globalAgent := setup.StartAgent(t, env.GRPCAddr,
+	globalAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("global-agent"),
 	)
 	setup.WaitForAgentRegistered(t, env.Store, globalAgent)
@@ -158,7 +161,8 @@ func TestRequireOrgAgents(t *testing.T) {
 	}, 2*time.Second, 100*time.Millisecond, "global agent must not pick up the workflow")
 
 	// Org agent: the only agent allowed to run workflows of this org.
-	orgAgent := setup.StartAgent(t, env.GRPCAddr,
+	orgAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("org-agent"),
 		setup.WithOrgID(env.Store, env.Fixtures.Repo.OrgID),
 	)

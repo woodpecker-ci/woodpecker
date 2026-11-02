@@ -15,8 +15,6 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/distribution/reference"
 )
 
@@ -80,8 +78,16 @@ func MatchImageDynamic(from string, to ...string) bool {
 	return false
 }
 
+// imageHasTag reports whether the image reference pins a tag or digest.
+// A colon alone is not enough, as it can also separate a registry host from its port.
 func imageHasTag(name string) bool {
-	return strings.Contains(name, ":")
+	named, err := ParseNamed(name)
+	if err != nil {
+		return false
+	}
+	_, tagged := named.(reference.Tagged)
+	_, digested := named.(reference.Digested)
+	return tagged || digested
 }
 
 // ParseNamed parses an image as a reference to validate it then parses it as a named reference.

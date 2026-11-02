@@ -57,8 +57,8 @@ func TestSliceToBoolMap(t *testing.T) {
 		"b": true,
 		"c": true,
 	}, SliceToBoolMap([]string{"a", "b", "c"}))
-	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{}))
-	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{""}))
+	assert.Equal(t, make(map[string]bool), SliceToBoolMap([]string{}))
+	assert.Equal(t, make(map[string]bool), SliceToBoolMap([]string{""}))
 }
 
 func TestStringSliceDeleteEmpty(t *testing.T) {

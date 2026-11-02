@@ -55,8 +55,6 @@ linters:
           deny:
             - pkg: golang.org/x/crypto/openpgp
               desc: deprecated and frozen, use github.com/ProtonMail/go-crypto/openpgp instead
-            - pkg: github.com/drone/envsubst
-              desc: unmaintained, use github.com/woodpecker-ci/envsubst instead
         agent:
           list-mode: lax
           files:
@@ -295,11 +293,16 @@ linters:
         - random.GetRandomBytes
     revive:
       rules:
+        - name: enforce-map-style
+          arguments: [make]
         - name: var-naming
           arguments:
             - []
             - []
             - - skipPackageNameChecks: true
+    usetesting:
+      context-background: true
+      context-todo: true
   exclusions:
     generated: lax
     presets:
