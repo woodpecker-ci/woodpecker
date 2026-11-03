@@ -35,7 +35,7 @@ function convertStatus(status: PipelineStatus): Status {
     return 'error';
   }
 
-  if (['blocked', 'started', 'running', 'pending'].includes(status)) {
+  if (['blocked', 'started', 'running', 'pending', 'paused'].includes(status)) {
     return 'pending';
   }
 

@@ -41,7 +41,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	// First cancel/evict the running and pending workflows from the queue
 	var workflowsToCancel []string
 	for _, w := range workflows {
-		if w.State == model.StatusRunning || w.State == model.StatusPending {
+		if w.State == model.StatusRunning || w.State == model.StatusPending || w.State == model.StatusPaused {
 			workflowsToCancel = append(workflowsToCancel, fmt.Sprint(w.ID))
 		}
 	}

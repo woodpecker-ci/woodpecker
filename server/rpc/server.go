@@ -123,6 +123,20 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 	return res, err
 }
 
+// Pause let agent signal to server the workflow is paused and waits until it gets resumed or declined.
+func (s *WoodpeckerServer) Pause(c context.Context, req *proto.PauseRequest) (*proto.PauseResponse, error) {
+	res := new(proto.PauseResponse)
+	result, err := s.peer.Pause(c, req.GetId(), req.GetStepUuid(), rpc.PauseOptions{
+		Deadline:        req.GetDeadline(),
+		ResumeOnTimeout: req.GetResumeOnTimeout(),
+	})
+	if result != nil {
+		res.Resume = result.Resume
+		res.TimedOut = result.TimedOut
+	}
+	return res, err
+}
+
 // Done let agent signal to server the workflow has stopped.
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.WorkflowState{

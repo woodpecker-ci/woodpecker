@@ -41,6 +41,7 @@ const statusDescriptions = {
   error: t('repo.pipeline.status.error'),
   failure: t('repo.pipeline.status.failure'),
   killed: t('repo.pipeline.status.killed'),
+  paused: t('repo.pipeline.status.paused'),
   pending: t('repo.pipeline.status.pending'),
   running: t('repo.pipeline.status.running'),
   skipped: t('repo.pipeline.status.skipped'),

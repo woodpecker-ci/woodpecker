@@ -37,9 +37,9 @@ func (Workflow) TableName() string {
 	return "workflows"
 }
 
-// Running returns true if the process state is pending or running.
+// Running returns true if the process state is pending, running or paused.
 func (p *Workflow) Running() bool {
-	return p.State == StatusPending || p.State == StatusRunning
+	return p.State == StatusPending || p.State == StatusRunning || p.State == StatusPaused
 }
 
 // Failing returns true if the process state is failed, killed or error.

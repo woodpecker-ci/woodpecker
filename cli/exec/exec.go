@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/oklog/ulid/v2"
@@ -325,7 +326,20 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
+// logWriters keeps one writer per step, so line numbers continue when the
+// logger is called again for the same step (e.g. after a restart signal).
+var (
+	logWritersMu sync.Mutex
+	logWriters   = map[string]io.WriteCloser{}
+)
+
 var defaultLogger = logging.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
-	logWriter := NewLineWriter(step.Name, step.UUID)
+	logWritersMu.Lock()
+	logWriter, ok := logWriters[step.UUID]
+	if !ok {
+		logWriter = NewLineWriter(step.Name, step.UUID)
+		logWriters[step.UUID] = logWriter
+	}
+	logWritersMu.Unlock()
 	return pipeline_utils.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })

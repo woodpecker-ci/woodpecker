@@ -92,6 +92,24 @@ steps:
 	}, {
 		Title: "explicitly privileged container",
 		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+	}, {
+		Title: "signals with single exit code",
+		Data:  "{steps: { check: { image: alpine, commands: [ 'exit 78' ], signals: { skip: 78 } } }, when: { event: push } }",
+	}, {
+		Title: "signals with list of exit codes",
+		Data:  "{steps: { check: { image: alpine, commands: [ 'exit 78' ], signals: { skip: [ 78, 79 ] } } }, when: { event: push } }",
+	}, {
+		Title: "restart with max_restarts",
+		Data:  "{steps: { flaky: { image: alpine, commands: [ 'exit 75' ], signals: { restart: { exit_codes: [ 75, 76 ], max_restarts: 5 } } } }, when: { event: push } }",
+	}, {
+		Title: "pause with timeout",
+		Data:  "{steps: { approve: { image: alpine, commands: [ 'exit 71' ], signals: { pause: { exit_codes: 71, timeout: 30m, on_timeout: resume } } } }, when: { event: push } }",
+	}, {
+		Title: "long form without options",
+		Data:  "{steps: { check: { image: alpine, commands: [ 'exit 78' ], signals: { skip: { exit_codes: 78 } } } }, when: { event: push } }",
+	}, {
+		Title: "all signals in one step",
+		Data:  "{steps: { check: { image: alpine, commands: [ 'exit 78' ], signals: { skip: 78, success: [ 1, 2 ], restart: 75, cancel: 70, pause: 71 } } }, when: { event: push } }",
 	}}
 
 	for _, testd := range testdatas {
@@ -216,6 +234,66 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
 			want: "One or more of the specified dependencies do not exist",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { pause_forever: 78 } } }",
+			want: "Unknown signal `pause_forever`",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: 78, success: 78 } } }",
+			want: "Exit code 78 is mapped to both signal `skip` and `success`",
+		},
+		{
+			from: "steps: { db: { image: postgres, detach: true, signals: { restart: 75 } } }",
+			want: "The `restart` signal is not applied to detached steps and services, its exit codes count as failure",
+		},
+		{
+			from: "steps: { flaky: { image: alpine, signals: { restart: { exit_codes: 75, max_restarts: 11 } } } }",
+			want: "`max_restarts` must be between 1 and 10",
+		},
+		{
+			from: "steps: { flaky: { image: alpine, signals: { restart: { exit_codes: 75, max_restarts: 0 } } } }",
+			want: "`max_restarts` must be between 1 and 10",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: { exit_codes: 78, max_restarts: 2 } } } }",
+			want: "`max_restarts` is only allowed for the `restart` signal",
+		},
+		{
+			from: "steps: { approve: { image: alpine, signals: { pause: { exit_codes: 71, timeout: soon } } } }",
+			want: "`timeout` \"soon\" must be a positive duration like `30m` or `1h`",
+		},
+		{
+			from: "steps: { approve: { image: alpine, signals: { pause: { exit_codes: 71, on_timeout: resume } } } }",
+			want: "`on_timeout` needs a `timeout`",
+		},
+		{
+			from: "steps: { approve: { image: alpine, signals: { pause: { exit_codes: 71, timeout: 5m, on_timeout: approve } } } }",
+			want: "`on_timeout` must be `decline` or `resume`",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: { exit_codes: 78, timeout: 5m } } } }",
+			want: "`timeout` and `on_timeout` are only allowed for the `pause` signal",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: [] } } }",
+			want: "No exit code configured for signal `skip`",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: 0 } } }",
+			want: "Exit code 0 is out of range 1-255",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: 256 } } }",
+			want: "Exit code 256 is out of range 1-255",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: [ 78, 78 ] } } }",
+			want: "Exit code 78 is mapped to both signal `skip` and `skip`",
+		},
+		{
+			from: "steps: { check: { image: alpine, signals: { skip: 137 } } }",
+			want: "Exit code 137 is used by shells or for processes killed by a signal (e.g. 137 = OOM/SIGKILL), consider a code between 64 and 113",
 		},
 	}
 

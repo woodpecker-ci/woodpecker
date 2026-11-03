@@ -36,6 +36,22 @@ type (
 		Skipped  bool   `json:"skipped"`
 	}
 
+	// PauseOptions configures a pause requested with Peer.Pause.
+	PauseOptions struct {
+		// Deadline is the unix time when the pause times out, 0 means no timeout.
+		Deadline int64 `json:"deadline"`
+		// ResumeOnTimeout resumes instead of declines the workflow at the deadline.
+		ResumeOnTimeout bool `json:"resume_on_timeout"`
+	}
+
+	// PauseResult is the outcome of a pause.
+	PauseResult struct {
+		// Resume is true if the workflow continues, false if it was declined.
+		Resume bool `json:"resume"`
+		// TimedOut is true if the decision was made because the deadline was reached.
+		TimedOut bool `json:"timed_out"`
+	}
+
 	// WorkflowState defines the workflow state.
 	WorkflowState struct {
 		Started  int64  `json:"started"`

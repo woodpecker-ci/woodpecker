@@ -176,6 +176,19 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		pipeline_runtime.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline_runtime.WithLogger(r.createLogger(logger, workflow)),
 		pipeline_runtime.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline_runtime.WithPauseFunc(func(ctx context.Context, step *backend_types.Step) (bool, bool, error) {
+			opts := rpc.PauseOptions{ResumeOnTimeout: step.PauseTimeoutResume}
+			if step.PauseTimeout > 0 {
+				// absolute deadline, so reconnects do not restart the timeout
+				opts.Deadline = time.Now().Add(step.PauseTimeout).Unix()
+			}
+			logger.Debug().Str("step", step.Name).Int64("deadline", opts.Deadline).Msg("workflow paused, waiting for resume")
+			res, err := r.client.Pause(ctx, workflow.ID, step.UUID, opts)
+			if err != nil || res == nil {
+				return false, false, err
+			}
+			return res.Resume, res.TimedOut, nil
+		}),
 		pipeline_runtime.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,

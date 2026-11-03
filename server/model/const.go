@@ -66,13 +66,14 @@ const (
 	StatusBlocked  StatusValue = "blocked"  // waiting for approval
 	StatusDeclined StatusValue = "declined" // blocked and declined
 	StatusCreated  StatusValue = "created"  // created / internal use only
+	StatusPaused   StatusValue = "paused"   // workflow paused by a step, waiting to be resumed
 )
 
 var ErrInvalidStatusValue = errors.New("invalid status value")
 
 func (s StatusValue) Validate() error {
 	switch s {
-	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusCanceled, StatusError, StatusBlocked, StatusDeclined, StatusCreated:
+	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusCanceled, StatusError, StatusBlocked, StatusDeclined, StatusCreated, StatusPaused:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidStatusValue, s)

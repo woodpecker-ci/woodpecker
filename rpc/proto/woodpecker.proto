@@ -35,6 +35,7 @@ service Woodpecker {
   rpc RegisterAgent   (RegisterAgentRequest) returns (RegisterAgentResponse) {}
   rpc UnregisterAgent (Empty)                returns (Empty) {}
   rpc ReportHealth    (ReportHealthRequest)  returns (Empty) {}
+  rpc Pause           (PauseRequest)         returns (PauseResponse) {}
 }
 
 //
@@ -94,6 +95,13 @@ message WaitRequest {
   string id = 1;
 }
 
+message PauseRequest {
+  string id = 1;
+  string step_uuid = 2;
+  int64  deadline = 3;          // unix time when the pause times out, 0 = no timeout
+  bool   resume_on_timeout = 4; // resume instead of decline when the deadline is reached
+}
+
 message DoneRequest {
   string id = 1;
   WorkflowState state = 2;
@@ -150,6 +158,11 @@ message RegisterAgentResponse {
 
 message WaitResponse {
   bool canceled = 1;
+};
+
+message PauseResponse {
+  bool resume = 1;
+  bool timed_out = 2;
 };
 
 // Woodpecker auth service is a simple service to authenticate agents and acquire a token

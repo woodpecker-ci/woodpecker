@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 )
@@ -56,5 +57,19 @@ func WithDescription(desc map[string]string) Option {
 func WithTaskUUID(uuid string) Option {
 	return func(r *Runtime) {
 		r.taskUUID = uuid
+	}
+}
+
+// PauseFunc is called when a step sent the pause signal and the workflow has
+// remaining steps. It blocks until the workflow is resumed (true) or declined
+// (false), until the step's pause timeout is reached (timedOut, see
+// Step.PauseTimeout and Step.PauseTimeoutResume), or until ctx is done.
+type PauseFunc func(ctx context.Context, step *backend_types.Step) (resume, timedOut bool, err error)
+
+// WithPauseFunc sets the function that pauses the workflow. Without it the
+// pause signal is logged and the workflow continues right away.
+func WithPauseFunc(f PauseFunc) Option {
+	return func(r *Runtime) {
+		r.pauseFunc = f
 	}
 }

@@ -93,6 +93,29 @@
                 class="pr-2px mr-1"
               />
             </button>
+            <div
+              v-if="workflow.state === 'paused'"
+              class="border-wp-background-400 dark:border-wp-background-100 flex flex-col gap-2 rounded-md border p-2"
+            >
+              <div class="flex items-center gap-2">
+                <Icon name="status-paused" class="text-wp-state-warn-100" />
+                <span class="text-sm">{{ $t('repo.pipeline.paused.awaits') }}</span>
+              </div>
+              <div v-if="repoPermissions.push" class="flex flex-wrap gap-2">
+                <Button
+                  color="green"
+                  :text="$t('repo.pipeline.paused.resume')"
+                  :is-loading="pendingWorkflowId === workflow.id && isResuming"
+                  @click="resumeWorkflow(workflow.id)"
+                />
+                <Button
+                  color="red"
+                  :text="$t('repo.pipeline.paused.decline')"
+                  :is-loading="pendingWorkflowId === workflow.id && isDeclining"
+                  @click="declineWorkflow(workflow.id)"
+                />
+              </div>
+            </div>
           </div>
           <div
             class="transition-height overflow-hidden duration-150"
@@ -125,13 +148,18 @@
 
 <script lang="ts" setup>
 import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
+import useApiClient from '~/compositions/useApiClient';
+import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { requiredInject } from '~/compositions/useInjectProvide';
+import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
 import type { Pipeline, PipelineStep } from '~/lib/api/types';
@@ -149,6 +177,26 @@ const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
 const pipelineConfigs = requiredInject('pipeline-configs');
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
+
+// id of the paused workflow a resume/decline request is running for
+const pendingWorkflowId = ref<number | null>(null);
+
+const { doSubmit: resumeWorkflow, isLoading: isResuming } = useAsyncAction(async (workflowId: number) => {
+  pendingWorkflowId.value = workflowId;
+  await apiClient.resumeWorkflow(repo.value.id, `${pipeline.value.number}`, workflowId);
+  notifications.notify({ title: i18n.t('repo.pipeline.paused.resume_success'), type: 'success' });
+});
+
+const { doSubmit: declineWorkflow, isLoading: isDeclining } = useAsyncAction(async (workflowId: number) => {
+  pendingWorkflowId.value = workflowId;
+  await apiClient.declineWorkflow(repo.value.id, `${pipeline.value.number}`, workflowId);
+  notifications.notify({ title: i18n.t('repo.pipeline.paused.decline_success'), type: 'success' });
+});
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   pipeline.value.workflows && pipeline.value.workflows.length > 1

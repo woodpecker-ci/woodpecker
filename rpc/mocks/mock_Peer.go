@@ -373,6 +373,86 @@ func (_c *MockPeer_Next_Call) RunAndReturn(run func(c context.Context, f rpc.Fil
 	return _c
 }
 
+// Pause provides a mock function for the type MockPeer
+func (_mock *MockPeer) Pause(c context.Context, workflowID string, stepUUID string, opts rpc.PauseOptions) (*rpc.PauseResult, error) {
+	ret := _mock.Called(c, workflowID, stepUUID, opts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Pause")
+	}
+
+	var r0 *rpc.PauseResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, rpc.PauseOptions) (*rpc.PauseResult, error)); ok {
+		return returnFunc(c, workflowID, stepUUID, opts)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, rpc.PauseOptions) *rpc.PauseResult); ok {
+		r0 = returnFunc(c, workflowID, stepUUID, opts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*rpc.PauseResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, rpc.PauseOptions) error); ok {
+		r1 = returnFunc(c, workflowID, stepUUID, opts)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockPeer_Pause_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Pause'
+type MockPeer_Pause_Call struct {
+	*mock.Call
+}
+
+// Pause is a helper method to define mock.On call
+//   - c context.Context
+//   - workflowID string
+//   - stepUUID string
+//   - opts rpc.PauseOptions
+func (_e *MockPeer_Expecter) Pause(c interface{}, workflowID interface{}, stepUUID interface{}, opts interface{}) *MockPeer_Pause_Call {
+	return &MockPeer_Pause_Call{Call: _e.mock.On("Pause", c, workflowID, stepUUID, opts)}
+}
+
+func (_c *MockPeer_Pause_Call) Run(run func(c context.Context, workflowID string, stepUUID string, opts rpc.PauseOptions)) *MockPeer_Pause_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 rpc.PauseOptions
+		if args[3] != nil {
+			arg3 = args[3].(rpc.PauseOptions)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockPeer_Pause_Call) Return(pauseResult *rpc.PauseResult, err error) *MockPeer_Pause_Call {
+	_c.Call.Return(pauseResult, err)
+	return _c
+}
+
+func (_c *MockPeer_Pause_Call) RunAndReturn(run func(c context.Context, workflowID string, stepUUID string, opts rpc.PauseOptions) (*rpc.PauseResult, error)) *MockPeer_Pause_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RegisterAgent provides a mock function for the type MockPeer
 func (_mock *MockPeer) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	ret := _mock.Called(ctx, info)

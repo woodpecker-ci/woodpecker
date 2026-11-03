@@ -32,6 +32,7 @@ var statusPriorityOrder = []model.StatusValue{
 	model.StatusCanceled,
 
 	// running states
+	model.StatusPaused,
 	model.StatusRunning,
 	model.StatusPending,
 

@@ -132,6 +132,112 @@ func (s *RPC) Wait(c context.Context, workflowID string) (canceled bool, err err
 }
 
 // Extend extends the lease for the workflow with the given ID.
+// Pause marks the workflow as paused and blocks until a user resumes or declines it,
+// or until opts.Deadline is reached.
+func (s *RPC) Pause(c context.Context, strWorkflowID, stepUUID string, opts rpc.PauseOptions) (*rpc.PauseResult, error) {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return nil, err
+	}
+
+	workflow, err := s.store.WorkflowLoad(workflowID)
+	if err != nil {
+		log.Error().Err(err).Msgf("rpc.pause: cannot find workflow with id %d", workflowID)
+		return nil, err
+	}
+
+	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
+	if err != nil {
+		log.Error().Err(err).Msgf("rpc.pause: cannot find pipeline with id %d", workflow.PipelineID)
+		return nil, err
+	}
+
+	repo, err := s.store.GetRepo(currentPipeline.RepoID)
+	if err != nil {
+		log.Error().Err(err).Msgf("rpc.pause: cannot find repo with id %d", currentPipeline.RepoID)
+		return nil, err
+	}
+
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return nil, err
+	}
+
+	step, err := s.store.StepByUUID(stepUUID)
+	if err != nil || step.PipelineID != currentPipeline.ID {
+		return nil, fmt.Errorf("rpc.pause: step %q does not belong to workflow %d", stepUUID, workflowID)
+	}
+
+	if workflow.State != model.StatusRunning && workflow.State != model.StatusPaused {
+		return nil, fmt.Errorf("rpc.pause: workflow %d has state %s and can not be paused", workflowID, workflow.State)
+	}
+
+	// A decision may already exist, e.g. when the agent reconnects after a user decided.
+	if resume, ok := pipeline.Pauses.Take(workflowID, stepUUID); ok {
+		return &rpc.PauseResult{Resume: resume}, nil
+	}
+
+	if workflow.State != model.StatusPaused {
+		if err := s.setWorkflowState(c, repo, currentPipeline, workflow, model.StatusPaused); err != nil {
+			return nil, err
+		}
+	}
+
+	waitCtx := c
+	if opts.Deadline > 0 {
+		var cancel context.CancelFunc
+		waitCtx, cancel = context.WithDeadline(c, time.Unix(opts.Deadline, 0))
+		defer cancel()
+	}
+
+	log.Debug().Str("workflowID", strWorkflowID).Str("step", step.Name).Int64("deadline", opts.Deadline).Msg("workflow paused, waiting for resume or decline")
+	resume, err := pipeline.Pauses.Wait(waitCtx, workflowID, stepUUID)
+	if err == nil {
+		return &rpc.PauseResult{Resume: resume}, nil
+	}
+
+	// the pause timed out (and not the agent connection): apply on_timeout
+	if c.Err() == nil && errors.Is(err, context.DeadlineExceeded) {
+		pipeline.Pauses.Forget(workflowID)
+		log.Debug().Str("workflowID", strWorkflowID).Bool("resume", opts.ResumeOnTimeout).Msg("pause timed out")
+		if opts.ResumeOnTimeout {
+			// a declined workflow keeps the paused state until the agent reports it as done.
+			if err := s.setWorkflowState(c, repo, currentPipeline, workflow, model.StatusRunning); err != nil {
+				return nil, err
+			}
+		}
+		return &rpc.PauseResult{Resume: opts.ResumeOnTimeout, TimedOut: true}, nil
+	}
+	return nil, err
+}
+
+// setWorkflowState stores the new workflow state and publishes the pipeline to the UI.
+func (s *RPC) setWorkflowState(c context.Context, repo *model.Repo, currentPipeline *model.Pipeline, workflow *model.Workflow, state model.StatusValue) error {
+	workflow.State = state
+	if err := s.store.WorkflowUpdate(workflow); err != nil {
+		return err
+	}
+	s.publishPipeline(c, repo, currentPipeline)
+	return nil
+}
+
+// publishPipeline sends the current state of the pipeline to the UI.
+func (s *RPC) publishPipeline(c context.Context, repo *model.Repo, currentPipeline *model.Pipeline) {
+	var err error
+	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
+		log.Error().Err(err).Msg("cannot build tree from step list")
+		return
+	}
+	if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
+		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
+	}
+}
+
 func (s *RPC) Extend(c context.Context, workflowID string) error {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
@@ -359,6 +465,8 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	// Complete any still-running children (e.g. service containers) before
 	// computing the workflow status, so their final state is reflected.
 	s.completeChildrenIfParentCompleted(workflow, state.Finished)
+
+	pipeline.Pauses.Forget(workflowID)
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
 		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)

@@ -14,6 +14,8 @@
 
 package types
 
+import "time"
+
 // Step defines a container process.
 type Step struct {
 	Name           string            `json:"name"`
@@ -45,6 +47,26 @@ type Step struct {
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 	WorkflowLabels map[string]string `json:"workflow_labels,omitempty"`
+	// ExitCodeSignals maps exit codes to the signal they send to the runtime.
+	ExitCodeSignals map[int]StepSignal `json:"exit_code_signals,omitempty"`
+	// MaxRestarts is the number of restarts after the first run for the restart
+	// signal. 0 means StepSignalRestartDefaultMax.
+	MaxRestarts int `json:"max_restarts,omitempty"`
+	// PauseTimeout is how long a workflow paused by this step waits for a
+	// decision before it is declined. 0 means no limit (only the workflow timeout).
+	PauseTimeout time.Duration `json:"pause_timeout,omitempty"`
+	// PauseTimeoutResume resumes the paused workflow when PauseTimeout is reached
+	// instead of declining it.
+	PauseTimeoutResume bool `json:"pause_timeout_resume,omitempty"`
+}
+
+// RestartMaxAttempts returns how often the step runs at most (first run included)
+// when it keeps sending the restart signal.
+func (s *Step) RestartMaxAttempts() int {
+	if s.MaxRestarts > 0 {
+		return s.MaxRestarts + 1
+	}
+	return StepSignalRestartDefaultMax + 1
 }
 
 // StepType identifies the type of step.
@@ -56,4 +78,65 @@ const (
 	StepTypePlugin   StepType = "plugin"
 	StepTypeCommands StepType = "commands"
 	StepTypeCache    StepType = "cache"
+)
+
+// StepSignal is an action a step can ask the runtime to perform,
+// e.g. by exiting with an exit code mapped to it via `signals:`.
+type StepSignal string
+
+const (
+	// StepSignalSkip marks the step as successful and skips all
+	// steps of the workflow that have not started yet.
+	StepSignalSkip StepSignal = "skip"
+	// StepSignalSuccess marks the step as successful and continues
+	// the workflow as usual (e.g. a linter that exits 1 on warnings).
+	StepSignalSuccess StepSignal = "success"
+	// StepSignalRestart runs the step again, up to Step.RestartMaxAttempts()
+	// attempts in total. If the last attempt still exits with a restart code,
+	// the step fails with that exit code.
+	StepSignalRestart StepSignal = "restart"
+	// StepSignalCancel marks the step as successful and cancels its workflow:
+	// running steps are stopped, the remaining steps do not run and the
+	// workflow is reported as killed. Other workflows are not affected.
+	StepSignalCancel StepSignal = "cancel"
+	// StepSignalPause marks the step as successful and pauses its workflow
+	// once the current stage has finished, until a user resumes or declines it.
+	StepSignalPause StepSignal = "pause"
+)
+
+const (
+	// PauseOnTimeoutDecline declines a paused workflow when its timeout is reached (default).
+	PauseOnTimeoutDecline = "decline"
+	// PauseOnTimeoutResume resumes a paused workflow when its timeout is reached.
+	PauseOnTimeoutResume = "resume"
+)
+
+const (
+	// StepSignalRestartDefaultMax is the number of restarts after the first run
+	// when `max_restarts` is not set (3 attempts in total).
+	StepSignalRestartDefaultMax = 2
+	// StepSignalRestartLimit is the highest allowed `max_restarts`.
+	StepSignalRestartLimit = 10
+)
+
+// ValidStepSignals lists all signals the runtime knows how to handle.
+var ValidStepSignals = map[StepSignal]struct{}{
+	StepSignalSkip:    {},
+	StepSignalSuccess: {},
+	StepSignalRestart: {},
+	StepSignalCancel:  {},
+	StepSignalPause:   {},
+}
+
+// IsValid reports whether the signal is known to the runtime.
+func (s StepSignal) IsValid() bool {
+	_, ok := ValidStepSignals[s]
+	return ok
+}
+
+const (
+	// MinSignalExitCode is the lowest exit code that can be mapped to a signal (0 means success).
+	MinSignalExitCode = 1
+	// MaxSignalExitCode is the highest exit code a process can return.
+	MaxSignalExitCode = 255
 )

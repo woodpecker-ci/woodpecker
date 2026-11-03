@@ -61,7 +61,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		return err
 	}
 
-	for _, stage := range r.spec.Stages {
+	for i, stage := range r.spec.Stages {
 		stageChan := r.runStage(runnerCtx, stage.Steps)
 		select {
 		case <-r.ctx.Done():
@@ -70,6 +70,17 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		case err := <-stageChan:
 			if err != nil {
 				r.err.Set(err)
+			}
+		}
+		// Like errors, a skip signal takes effect for the following stages only,
+		// so all steps of the current stage run regardless of goroutine timing.
+		if r.skipRequested.Load() {
+			r.skipRemaining.Store(true)
+		}
+		// Like skip, a pause signal takes effect once the current stage has finished.
+		if step := r.pauseRequested.Swap(nil); step != nil && i < len(r.spec.Stages)-1 && !r.skipRemaining.Load() {
+			if err := r.pause(step); err != nil {
+				return err
 			}
 		}
 	}
@@ -163,4 +174,49 @@ func (r *Runtime) runStage(runnerCtx context.Context, steps []*backend_types.Ste
 	}()
 
 	return done
+}
+
+// pause blocks until the paused workflow is resumed. It returns ErrCancel if the
+// workflow is declined (by a user or its pause timeout) or canceled while paused.
+func (r *Runtime) pause(step *backend_types.Step) error {
+	logger := r.makeLogger()
+	if r.pauseFunc == nil {
+		logger.Warn().Str("step", step.Name).Msg("step sent pause signal, but pausing is not supported here: continuing")
+		return nil
+	}
+
+	if step.PauseTimeout > 0 {
+		onTimeout := backend_types.PauseOnTimeoutDecline
+		if step.PauseTimeoutResume {
+			onTimeout = backend_types.PauseOnTimeoutResume
+		}
+		r.logSignal(step, fmt.Sprintf("workflow paused, waiting up to %s for resume or decline, then: %s", step.PauseTimeout, onTimeout))
+	} else {
+		r.logSignal(step, "workflow paused, waiting for resume or decline")
+	}
+
+	logger.Debug().Str("step", step.Name).Msg("workflow paused")
+	resume, timedOut, err := r.pauseFunc(r.ctx, step)
+	switch {
+	case r.ctx.Err() != nil:
+		return pipeline_errors.ErrCancel
+	case err != nil:
+		return fmt.Errorf("pause workflow: %w", err)
+	case !resume:
+		if timedOut {
+			r.logSignal(step, fmt.Sprintf("no decision within %s, workflow declined", step.PauseTimeout))
+		} else {
+			r.logSignal(step, "workflow declined")
+		}
+		logger.Debug().Str("step", step.Name).Bool("timed_out", timedOut).Msg("paused workflow was declined")
+		r.cancel(pipeline_errors.ErrCancel)
+		return pipeline_errors.ErrCancel
+	}
+	if timedOut {
+		r.logSignal(step, fmt.Sprintf("no decision within %s, workflow resumed", step.PauseTimeout))
+	} else {
+		r.logSignal(step, "workflow resumed")
+	}
+	logger.Debug().Str("step", step.Name).Bool("timed_out", timedOut).Msg("workflow resumed")
+	return nil
 }

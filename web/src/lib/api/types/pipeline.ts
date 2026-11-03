@@ -105,6 +105,7 @@ export type PipelineStatus =
   | 'error'
   | 'failure'
   | 'killed'
+  | 'paused'
   | 'pending'
   | 'running'
   | 'skipped'

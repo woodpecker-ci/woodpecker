@@ -18,7 +18,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -28,9 +30,50 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
 )
 
-// SkipExitCode is the exit code a step can use to finish successfully and
-// skip all remaining steps of the workflow (same convention as Drone).
-const SkipExitCode = 78
+// signalOutcome tells completeStep how to report a step that sent a signal.
+type signalOutcome int
+
+const (
+	// outcomeSuccess reports the step as successful (exit code 0).
+	outcomeSuccess signalOutcome = iota
+	// outcomeRestart asks the caller to run the step again.
+	outcomeRestart
+)
+
+// errStepRestart is returned by completeStep when the step sent the restart signal.
+var errStepRestart = errors.New("step requested restart")
+
+// signalHandler performs the action of a signal sent by a step.
+type signalHandler func(r *Runtime, step *backend_types.Step) signalOutcome
+
+// signalHandlers maps every signal a step can send (see backend_types.StepSignal)
+// to its action. New signals only need a new entry here.
+var signalHandlers = map[backend_types.StepSignal]signalHandler{
+	// skip: all steps of the following stages of this workflow are skipped.
+	// It takes effect once the current stage has finished (see Run).
+	backend_types.StepSignalSkip: func(r *Runtime, _ *backend_types.Step) signalOutcome {
+		r.skipRequested.Store(true)
+		return outcomeSuccess
+	},
+	// success: the step counts as successful, the workflow continues as usual.
+	backend_types.StepSignalSuccess: func(_ *Runtime, _ *backend_types.Step) signalOutcome {
+		return outcomeSuccess
+	},
+	// cancel: the workflow is canceled, running steps are stopped.
+	backend_types.StepSignalCancel: func(r *Runtime, _ *backend_types.Step) signalOutcome {
+		r.cancel(pipeline_errors.ErrCancel)
+		return outcomeSuccess
+	},
+	// pause: the workflow pauses once the current stage has finished (see Run).
+	backend_types.StepSignalPause: func(r *Runtime, step *backend_types.Step) signalOutcome {
+		r.pauseRequested.Store(step)
+		return outcomeSuccess
+	},
+	// restart: the step runs again (see runBlockingStep).
+	backend_types.StepSignalRestart: func(_ *Runtime, _ *backend_types.Step) signalOutcome {
+		return outcomeRestart
+	},
+}
 
 // executeStep is the single entry point called per step from runStage.
 // It checks whether the step should be skipped, emits a "started" trace,
@@ -73,7 +116,7 @@ func (r *Runtime) shouldSkipStep(step *backend_types.Step) bool {
 	if r.skipRemaining.Load() {
 		logger.Debug().
 			Str("step", step.Name).
-			Msgf("skipped because a previous step exited with %d", SkipExitCode)
+			Msg("skipped because a previous step sent the skip signal")
 		return true
 	}
 
@@ -194,12 +237,25 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 			Code: waitState.ExitCode,
 		}
 	}
-	if waitState.ExitCode == SkipExitCode {
-		// The step asked to skip the rest of the workflow: report it as
-		// successful and mark all steps that have not started as skipped.
-		r.skipRemaining.Store(true)
-		waitState.ExitCode = 0
-		return waitState, nil
+	if signal, ok := step.ExitCodeSignals[waitState.ExitCode]; ok && waitState.Error == nil {
+		if handler, known := signalHandlers[signal]; known {
+			// The exit code is mapped to a signal via `signals:`: perform its action.
+			logger := r.makeLogger()
+			logger.Debug().
+				Str("step", step.Name).
+				Int("exit_code", waitState.ExitCode).
+				Str("signal", string(signal)).
+				Msg("step sent signal")
+			switch handler(r, step) {
+			case outcomeRestart:
+				// keep the exit code: if no attempt is left the step fails with it.
+				return waitState, errStepRestart
+			default:
+				// the server treats exit code 0 without error as success.
+				waitState.ExitCode = 0
+				return waitState, nil
+			}
+		}
 	}
 	if waitState.ExitCode != 0 {
 		return waitState, &pipeline_errors.ExitError{
@@ -217,14 +273,40 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types.Step) error {
 	logger := r.makeLogger()
 
-	waitForLogs, startTime, err := r.startStep(step)
-	if err != nil {
-		// The step never ran — trace the start failure and surface it.
-		return r.traceStep(nil, err, step)
-	}
+	var (
+		processState *backend_types.State
+		err          error
+		firstStart   int64
+	)
+	for attempt := 1; ; attempt++ {
+		waitForLogs, startTime, startErr := r.startStep(step)
+		if startErr != nil {
+			// The step never ran — trace the start failure and surface it.
+			return r.traceStep(nil, startErr, step)
+		}
+		if attempt == 1 {
+			firstStart = startTime
+		}
 
-	processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
-	logger.Debug().Str("step", step.Name).Msg("complete")
+		processState, err = r.completeStep(runnerCtx, step, waitForLogs, startTime)
+		logger.Debug().Str("step", step.Name).Int("attempt", attempt).Msg("complete")
+
+		if !errors.Is(err, errStepRestart) {
+			break
+		}
+		if attempt >= step.RestartMaxAttempts() {
+			// no attempt left: fail with the exit code of the last attempt.
+			logger.Debug().Str("step", step.Name).Int("attempt", attempt).Msg("restart limit reached")
+			err = &pipeline_errors.ExitError{UUID: step.UUID, Code: processState.ExitCode}
+			break
+		}
+		logger.Debug().Str("step", step.Name).Int("attempt", attempt).Msg("restarting step")
+		r.logSignal(step, fmt.Sprintf("step sent restart signal, starting attempt %d of %d", attempt+1, step.RestartMaxAttempts()))
+	}
+	// report the step as started when its first attempt started.
+	if processState != nil && firstStart != 0 {
+		processState.Started = firstStart
+	}
 
 	if errors.Is(err, context.Canceled) {
 		err = pipeline_errors.ErrCancel
@@ -263,6 +345,10 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		if errors.Is(err, context.Canceled) {
 			err = pipeline_errors.ErrCancel
 		}
+		if errors.Is(err, errStepRestart) {
+			// detached steps are not restarted, the restart code counts as failure.
+			err = &pipeline_errors.ExitError{UUID: step.UUID, Code: processState.ExitCode}
+		}
 		if err != nil {
 			logger.Error().Err(err).Str("step", step.Name).Msg("detached step failed while running")
 		}
@@ -273,6 +359,19 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	}()
 
 	return nil
+}
+
+// logSignal writes a marker line about a signal into the step log, e.g. to
+// separate restart attempts or to show that the workflow is paused.
+func (r *Runtime) logSignal(step *backend_types.Step, msg string) {
+	if r.logger == nil {
+		return
+	}
+	line := fmt.Sprintf("--- woodpecker: %s ---\n", msg)
+	if err := r.logger(step, io.NopCloser(strings.NewReader(line))); err != nil {
+		logger := r.makeLogger()
+		logger.Error().Err(err).Str("step", step.Name).Msg("could not write signal marker to step log")
+	}
 }
 
 // traceStep reports the current state of a step to the tracer.

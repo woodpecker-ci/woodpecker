@@ -198,6 +198,27 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 If you would like to cancel the full pipeline once the step fails, you can set `failure: cancel`. For the default behaviour, use `failure: fail`.
 
+### `signals`
+
+A step can tell Woodpecker what to do next by exiting with an exit code that is mapped to a signal: skip the following steps, count as success, run again, cancel or pause the workflow.
+
+```diff
+ steps:
+   - name: check-affected
+     image: node
+     commands:
+       - npx nx show projects --affected --type app | grep -qx my-app || exit 78
++    signals:
++      skip: 78
+
+   - name: build
+     image: woodpeckerci/plugin-docker-buildx
+     settings:
+       repo: my-org/my-app
+```
+
+Available signals: `skip`, `success`, `restart`, `cancel` and `pause`. Read more: [Step signals](./55-step-signals.md)
+
 ### `when` - Conditional Execution
 
 Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ sub-conditions are true.

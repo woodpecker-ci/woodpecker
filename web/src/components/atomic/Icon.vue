@@ -18,6 +18,7 @@
   <SvgIcon v-else-if="name === 'trash'" :bg-circle="bgCircle" :path="mdiTrashCanOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-blocked'" :bg-circle="bgCircle" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :bg-circle="bgCircle" :path="mdiStopCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-paused'" :bg-circle="bgCircle" :path="mdiPauseCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list-group'" :bg-circle="bgCircle" :path="mdiFormatListGroup" size="1.3rem" />
   <SvgIcon v-else-if="name === 'secret'" :bg-circle="bgCircle" :path="mdiShieldKeyOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'console'" :bg-circle="bgCircle" :path="mdiConsole" size="1.3rem" />
@@ -169,6 +170,7 @@ import {
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPause,
+  mdiPauseCircle,
   mdiPencilOutline,
   mdiPlay,
   mdiPlayCircle,
@@ -221,6 +223,7 @@ export type IconNames =
   | 'status-error'
   | 'status-failure'
   | 'status-killed'
+  | 'status-paused'
   | 'status-pending'
   | 'status-created'
   | 'status-running'

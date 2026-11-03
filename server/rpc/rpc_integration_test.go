@@ -17,6 +17,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
@@ -1100,5 +1102,143 @@ func TestRPCUpdateStepTypeMetric(t *testing.T) {
 		c, err := metric.FailurePipelineStepInfoCount.GetMetricWithLabelValues(workflow.Name, defaultRepo().FullName, step.Name, "step")
 		require.NoError(t, err)
 		assert.Zero(t, testutil.ToFloat64(c))
+	})
+}
+
+func TestRPCPause(t *testing.T) {
+	pauseMocks := func(t *testing.T, agent *model.Agent, workflow *model.Workflow, step *model.Step) *store_mocks.MockStore {
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("AgentFind", agent.ID).Return(agent, nil)
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+		mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+		mockStore.On("StepByUUID", step.UUID).Return(step, nil).Maybe()
+		return mockStore
+	}
+	expectState := func(mockStore *store_mocks.MockStore, state model.StatusValue, done chan struct{}) {
+		call := mockStore.On("WorkflowUpdate", mock.MatchedBy(func(w *model.Workflow) bool { return w.State == state })).Return(nil).Once()
+		if done != nil {
+			call.Run(func(mock.Arguments) { close(done) })
+		}
+	}
+	agentCtx := func(t *testing.T, id int64) context.Context {
+		return context.WithValue(t.Context(), agentIDKey, id)
+	}
+
+	for _, resume := range []bool{true, false} {
+		t.Run(fmt.Sprintf("paused until decided (resume=%v)", resume), func(t *testing.T) {
+			t.Cleanup(func() { pipeline.Pauses.Forget(30) })
+			workflow := defaultWorkflow(model.StatusRunning)
+			mockStore := pauseMocks(t, defaultAgent(), workflow, defaultStep(model.StatusSuccess))
+			paused := make(chan struct{})
+			expectState(mockStore, model.StatusPaused, paused)
+			mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+			rpcInst := newTestRPC(t, mockStore, nil)
+
+			type result struct {
+				res *rpc.PauseResult
+				err error
+			}
+			done := make(chan result, 1)
+			go func() {
+				r, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{})
+				done <- result{r, err}
+			}()
+
+			<-paused
+			select {
+			case <-done:
+				t.Fatal("Pause must block until a decision is made")
+			case <-time.After(20 * time.Millisecond):
+			}
+
+			require.True(t, pipeline.Pauses.Decide(30, resume))
+			got := <-done
+			require.NoError(t, got.err)
+			assert.Equal(t, resume, got.res.Resume)
+			assert.False(t, got.res.TimedOut)
+		})
+	}
+
+	for _, resumeOnTimeout := range []bool{true, false} {
+		t.Run(fmt.Sprintf("timeout (resume_on_timeout=%v)", resumeOnTimeout), func(t *testing.T) {
+			t.Cleanup(func() { pipeline.Pauses.Forget(30) })
+			workflow := defaultWorkflow(model.StatusRunning)
+			mockStore := pauseMocks(t, defaultAgent(), workflow, defaultStep(model.StatusSuccess))
+			expectState(mockStore, model.StatusPaused, nil)
+			if resumeOnTimeout {
+				// the server sets the workflow running again, a declined one stays paused until Done.
+				expectState(mockStore, model.StatusRunning, nil)
+			}
+			mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+			rpcInst := newTestRPC(t, mockStore, nil)
+
+			res, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{
+				Deadline:        time.Now().Add(time.Second).Unix(),
+				ResumeOnTimeout: resumeOnTimeout,
+			})
+			require.NoError(t, err)
+			assert.True(t, res.TimedOut)
+			assert.Equal(t, resumeOnTimeout, res.Resume)
+		})
+	}
+
+	t.Run("deadline already passed (agent reconnects late)", func(t *testing.T) {
+		t.Cleanup(func() { pipeline.Pauses.Forget(30) })
+		mockStore := pauseMocks(t, defaultAgent(), defaultWorkflow(model.StatusPaused), defaultStep(model.StatusSuccess))
+		rpcInst := newTestRPC(t, mockStore, nil)
+
+		res, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{Deadline: time.Now().Add(-time.Minute).Unix()})
+		require.NoError(t, err)
+		assert.True(t, res.TimedOut)
+		assert.False(t, res.Resume)
+	})
+
+	t.Run("agent reconnects after the user resumed", func(t *testing.T) {
+		t.Cleanup(func() { pipeline.Pauses.Forget(30) })
+		// the user resumed: the workflow is running again in the store. No WorkflowUpdate
+		// is expected: the workflow must not be set back to paused.
+		mockStore := pauseMocks(t, defaultAgent(), defaultWorkflow(model.StatusRunning), defaultStep(model.StatusSuccess))
+		require.True(t, pipeline.Pauses.Decide(30, true))
+		rpcInst := newTestRPC(t, mockStore, nil)
+
+		res, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{})
+		require.NoError(t, err)
+		assert.True(t, res.Resume)
+		assert.False(t, res.TimedOut)
+	})
+
+	t.Run("context canceled while paused", func(t *testing.T) {
+		t.Cleanup(func() { pipeline.Pauses.Forget(30) })
+		mockStore := pauseMocks(t, defaultAgent(), defaultWorkflow(model.StatusPaused), defaultStep(model.StatusSuccess))
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx, cancel := context.WithTimeout(agentCtx(t, 1), 20*time.Millisecond)
+		defer cancel()
+
+		_, err := rpcInst.Pause(ctx, "30", "step-uuid-123", rpc.PauseOptions{})
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+	})
+
+	t.Run("reject finished workflow", func(t *testing.T) {
+		mockStore := pauseMocks(t, defaultAgent(), defaultWorkflow(model.StatusSuccess), defaultStep(model.StatusSuccess))
+		rpcInst := newTestRPC(t, mockStore, nil)
+		_, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{})
+		assert.ErrorContains(t, err, "can not be paused")
+	})
+
+	t.Run("reject step of another pipeline", func(t *testing.T) {
+		step := defaultStep(model.StatusSuccess)
+		step.PipelineID = 999
+		mockStore := pauseMocks(t, defaultAgent(), defaultWorkflow(model.StatusRunning), step)
+		rpcInst := newTestRPC(t, mockStore, nil)
+		_, err := rpcInst.Pause(agentCtx(t, 1), "30", "step-uuid-123", rpc.PauseOptions{})
+		assert.ErrorContains(t, err, "does not belong")
+	})
+
+	t.Run("reject agent wrong org", func(t *testing.T) {
+		mockStore := pauseMocks(t, orgAgent999(), defaultWorkflow(model.StatusRunning), defaultStep(model.StatusSuccess))
+		rpcInst := newTestRPC(t, mockStore, nil)
+		_, err := rpcInst.Pause(agentCtx(t, 2), "30", "step-uuid-123", rpc.PauseOptions{})
+		assert.ErrorContains(t, err, "not allowed to interact")
 	})
 }

@@ -253,6 +253,13 @@
         "approve_success": "Pipeline approved",
         "decline_success": "Pipeline declined"
       },
+      "paused": {
+        "awaits": "This workflow is paused and waits to be resumed",
+        "resume": "Resume",
+        "decline": "Decline",
+        "resume_success": "Workflow resumed",
+        "decline_success": "Workflow declined"
+      },
       "event": {
         "push": "Push",
         "tag": "Tag",
@@ -276,7 +283,8 @@
         "declined": "declined",
         "error": "error",
         "failure": "failure",
-        "killed": "killed"
+        "killed": "killed",
+        "paused": "paused"
       },
       "errors": "Errors",
       "warnings": "Warnings",

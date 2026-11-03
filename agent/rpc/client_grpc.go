@@ -271,6 +271,33 @@ func (c *client) Wait(ctx context.Context, workflowID string) (canceled bool, er
 	return resp.GetCanceled(), nil
 }
 
+// Pause marks the workflow as paused and blocks until a user resumes or declines it,
+// or until opts.Deadline is reached.
+func (c *client) Pause(ctx context.Context, workflowID, stepUUID string, opts rpc.PauseOptions) (*rpc.PauseResult, error) {
+	req := &proto.PauseRequest{
+		Id:              workflowID,
+		StepUuid:        stepUUID,
+		Deadline:        opts.Deadline,
+		ResumeOnTimeout: opts.ResumeOnTimeout,
+	}
+
+	resp, err := retryRPC(ctx, c, "pause", func() (*proto.PauseResponse, error) {
+		if !c.IsConnected() {
+			return nil, errNotConnected
+		}
+		r, err := c.client.Pause(ctx, req)
+		return r, classifyRPCErr(ctx, err)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		// context canceled while waiting
+		return nil, ctx.Err()
+	}
+	return &rpc.PauseResult{Resume: resp.GetResume(), TimedOut: resp.GetTimedOut()}, nil
+}
+
 // Init signals the workflow is initialized.
 func (c *client) Init(ctx context.Context, workflowID string, state rpc.WorkflowState) error {
 	req := &proto.InitRequest{

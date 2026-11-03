@@ -123,6 +123,8 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/pipelines/:pipeline_number/cancel", session.MustPush, api.CancelPipeline)
 					repo.POST("/pipelines/:pipeline_number/approve", session.MustPush, api.PostApproval)
 					repo.POST("/pipelines/:pipeline_number/decline", session.MustPush, api.PostDecline)
+					repo.POST("/pipelines/:pipeline_number/workflows/:workflow_id/resume", session.MustPush, api.PostWorkflowResume)
+					repo.POST("/pipelines/:pipeline_number/workflows/:workflow_id/decline", session.MustPush, api.PostWorkflowDecline)
 
 					repo.GET("/logs/:pipeline_number/:step_id", api.GetStepLogs)
 					repo.DELETE("/logs/:pipeline_number/:step_id", session.MustPush, api.DeleteStepLogs)

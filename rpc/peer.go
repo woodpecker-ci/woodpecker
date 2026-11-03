@@ -127,6 +127,29 @@ type Peer interface {
 	//   - canceled=false, err!=nil: Communication error, agent should retry or handle error
 	Wait(c context.Context, workflowID string) (canceled bool, err error)
 
+	// Pause marks the workflow as paused and blocks until a user resumes or
+	// declines it, or until opts.Deadline is reached. It is called when a step
+	// sent the pause signal (see the step `signals:` option) and the workflow has
+	// remaining steps.
+	//
+	// stepUUID identifies the step that sent the signal. Calling Pause again
+	// for the same step (e.g. after a reconnect) waits for the same decision,
+	// and with the same deadline the timeout is not restarted.
+	//
+	// At the deadline the workflow is resumed if opts.ResumeOnTimeout is set,
+	// otherwise declined, and the result has TimedOut set.
+	//
+	// Context Handling:
+	//   - This is a long-running blocking operation, it may block for hours
+	//   - When the context is canceled (e.g. the workflow got canceled), it
+	//     returns an error and the workflow stays paused on the server
+	//
+	// Returns:
+	//   - result.Resume=true: the workflow was resumed, continue with the next steps
+	//   - result.Resume=false: the workflow was declined, stop it as canceled
+	//   - err!=nil: communication error or context canceled
+	Pause(c context.Context, workflowID, stepUUID string, opts PauseOptions) (*PauseResult, error)
+
 	// Init signals to the server that the workflow has been initialized and execution has started.
 	//
 	// This is called once per workflow immediately after the agent accepts it from Next()

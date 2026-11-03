@@ -1,0 +1,10 @@
+steps:
+  approve:
+    image: alpine
+    commands:
+      - exit 71
+    signals:
+      pause:
+        exit_codes: 71
+        timeout: 30m
+        on_timeout: approve

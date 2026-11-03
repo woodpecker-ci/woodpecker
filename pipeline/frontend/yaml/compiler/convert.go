@@ -18,8 +18,10 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 
@@ -161,36 +163,120 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		failure = string(metadata.FailureIgnore)
 	}
 
+	signalCfg, err := convertSignals(container.Signals)
+	if err != nil {
+		return nil, fmt.Errorf("step %q: %w", container.Name, err)
+	}
+
 	return &backend_types.Step{
-		Name:           container.Name,
-		UUID:           uuid.String(),
-		Type:           stepType,
-		Image:          container.Image,
-		Pull:           container.Pull,
-		Detached:       detached,
-		Privileged:     privileged,
-		WorkingDir:     workingDir,
-		WorkspaceBase:  workspaceBase,
-		Environment:    environment,
-		SecretMapping:  secretMapping,
-		Commands:       container.Commands,
-		Entrypoint:     container.Entrypoint,
-		ExtraHosts:     extraHosts,
-		Volumes:        volumes,
-		Tmpfs:          container.Tmpfs,
-		Devices:        container.Devices,
-		Networks:       networks,
-		DNS:            container.DNS,
-		DNSSearch:      container.DNSSearch,
-		AuthConfig:     authConfig,
-		OnSuccess:      onSuccess,
-		OnFailure:      onFailure,
-		Failure:        failure,
-		NetworkMode:    networkMode,
-		Ports:          ports,
-		BackendOptions: container.BackendOptions,
-		WorkflowLabels: workflow.Labels,
+		Name:               container.Name,
+		UUID:               uuid.String(),
+		Type:               stepType,
+		Image:              container.Image,
+		Pull:               container.Pull,
+		Detached:           detached,
+		Privileged:         privileged,
+		WorkingDir:         workingDir,
+		WorkspaceBase:      workspaceBase,
+		Environment:        environment,
+		SecretMapping:      secretMapping,
+		Commands:           container.Commands,
+		Entrypoint:         container.Entrypoint,
+		ExtraHosts:         extraHosts,
+		Volumes:            volumes,
+		Tmpfs:              container.Tmpfs,
+		Devices:            container.Devices,
+		Networks:           networks,
+		DNS:                container.DNS,
+		DNSSearch:          container.DNSSearch,
+		AuthConfig:         authConfig,
+		OnSuccess:          onSuccess,
+		OnFailure:          onFailure,
+		Failure:            failure,
+		ExitCodeSignals:    signalCfg.exitCodeSignals,
+		MaxRestarts:        signalCfg.maxRestarts,
+		PauseTimeout:       signalCfg.pauseTimeout,
+		PauseTimeoutResume: signalCfg.pauseTimeoutResume,
+		NetworkMode:        networkMode,
+		Ports:              ports,
+		BackendOptions:     container.BackendOptions,
+		WorkflowLabels:     workflow.Labels,
 	}, nil
+}
+
+// signalConfig is the compiled `signals:` option of a step.
+type signalConfig struct {
+	exitCodeSignals    map[int]backend_types.StepSignal
+	maxRestarts        int
+	pauseTimeout       time.Duration
+	pauseTimeoutResume bool
+}
+
+// convertSignals turns the `signals:` map of a step (action -> exit codes and
+// options) into a lookup by exit code plus the signal options. It rejects
+// unknown actions, exit codes outside of 1..255, exit codes mapped more than
+// once and invalid options.
+func convertSignals(signals map[string]yaml_types.SignalConfig) (*signalConfig, error) {
+	result := &signalConfig{}
+	if len(signals) == 0 {
+		return result, nil
+	}
+
+	result.exitCodeSignals = make(map[int]backend_types.StepSignal)
+	// iterate in a stable order so the error for duplicated codes is deterministic
+	for _, action := range slices.Sorted(maps.Keys(signals)) {
+		signal := backend_types.StepSignal(action)
+		if !signal.IsValid() {
+			return nil, fmt.Errorf("unknown signal %q", action)
+		}
+		cfg := signals[action]
+
+		if cfg.MaxRestarts != nil {
+			if signal != backend_types.StepSignalRestart {
+				return nil, fmt.Errorf("signal %q: max_restarts is only allowed for the restart signal", action)
+			}
+			if *cfg.MaxRestarts < 1 || *cfg.MaxRestarts > backend_types.StepSignalRestartLimit {
+				return nil, fmt.Errorf("signal %q: max_restarts %d is out of range 1-%d",
+					action, *cfg.MaxRestarts, backend_types.StepSignalRestartLimit)
+			}
+			result.maxRestarts = *cfg.MaxRestarts
+		}
+
+		if cfg.Timeout != "" || cfg.OnTimeout != "" {
+			if signal != backend_types.StepSignalPause {
+				return nil, fmt.Errorf("signal %q: timeout and on_timeout are only allowed for the pause signal", action)
+			}
+			if cfg.Timeout == "" {
+				return nil, fmt.Errorf("signal %q: on_timeout needs a timeout", action)
+			}
+			timeout, err := time.ParseDuration(cfg.Timeout)
+			if err != nil || timeout <= 0 {
+				return nil, fmt.Errorf("signal %q: timeout %q is not a positive duration like 30m or 1h", action, cfg.Timeout)
+			}
+			result.pauseTimeout = timeout
+			switch cfg.OnTimeout {
+			case "", backend_types.PauseOnTimeoutDecline:
+			case backend_types.PauseOnTimeoutResume:
+				result.pauseTimeoutResume = true
+			default:
+				return nil, fmt.Errorf("signal %q: on_timeout must be %q or %q",
+					action, backend_types.PauseOnTimeoutDecline, backend_types.PauseOnTimeoutResume)
+			}
+		}
+
+		for _, code := range cfg.ExitCodes {
+			if code < backend_types.MinSignalExitCode || code > backend_types.MaxSignalExitCode {
+				return nil, fmt.Errorf("signal %q: exit code %d is out of range %d-%d",
+					action, code, backend_types.MinSignalExitCode, backend_types.MaxSignalExitCode)
+			}
+			if existing, ok := result.exitCodeSignals[code]; ok {
+				return nil, fmt.Errorf("exit code %d is mapped to both signal %q and %q", code, existing, action)
+			}
+			result.exitCodeSignals[code] = signal
+		}
+	}
+
+	return result, nil
 }
 
 func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {

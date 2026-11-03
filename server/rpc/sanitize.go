@@ -91,7 +91,8 @@ func isActiveState(state model.StatusValue) bool {
 	switch state {
 	case model.StatusCreated,
 		model.StatusPending,
-		model.StatusRunning:
+		model.StatusRunning,
+		model.StatusPaused:
 		return true
 	default:
 		return false
@@ -146,7 +147,8 @@ func checkWorkflowState(state model.StatusValue) (err error) {
 	switch state {
 	case model.StatusCreated,
 		model.StatusPending,
-		model.StatusRunning:
+		model.StatusRunning,
+		model.StatusPaused: // a paused workflow ends with Done when it gets declined or canceled
 		return nil
 
 	case model.StatusBlocked:

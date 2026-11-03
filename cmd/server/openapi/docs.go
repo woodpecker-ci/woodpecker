@@ -3391,6 +3391,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/decline": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Decline a paused workflow, it gets stopped and reported as killed",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the id of the paused workflow",
+                        "name": "workflow_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Pipeline"
+                        }
+                    }
+                }
+            }
+        },
+        "/repos/{repo_id}/pipelines/{pipeline_number}/workflows/{workflow_id}/resume": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Resume a paused workflow",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the id of the paused workflow",
+                        "name": "workflow_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Pipeline"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -5653,7 +5753,8 @@ const docTemplate = `{
                 "error",
                 "blocked",
                 "declined",
-                "created"
+                "created",
+                "paused"
             ],
             "x-enum-comments": {
                 "StatusBlocked": "waiting for approval",
@@ -5663,6 +5764,7 @@ const docTemplate = `{
                 "StatusError": "error with the config / while parsing / some other system problem",
                 "StatusFailure": "failed to finish (exit code != 0)",
                 "StatusKilled": "killed by user",
+                "StatusPaused": "workflow paused by a step, waiting to be resumed",
                 "StatusPending": "pending to be executed",
                 "StatusRunning": "currently running",
                 "StatusSkipped": "skipped as per condition of current workflow failed/success state",
@@ -5679,7 +5781,8 @@ const docTemplate = `{
                 "error with the config / while parsing / some other system problem",
                 "waiting for approval",
                 "blocked and declined",
-                "created / internal use only"
+                "created / internal use only",
+                "workflow paused by a step, waiting to be resumed"
             ],
             "x-enum-varnames": [
                 "StatusSkipped",
@@ -5692,7 +5795,8 @@ const docTemplate = `{
                 "StatusError",
                 "StatusBlocked",
                 "StatusDeclined",
-                "StatusCreated"
+                "StatusCreated",
+                "StatusPaused"
             ]
         },
         "Step": {

@@ -146,6 +146,14 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/decline`);
   }
 
+  async resumeWorkflow(repoId: number, pipelineNumber: string, workflowId: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/workflows/${workflowId}/resume`);
+  }
+
+  async declineWorkflow(repoId: number, pipelineNumber: string, workflowId: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/workflows/${workflowId}/decline`);
+  }
+
   async restartPipeline(
     repoId: number,
     pipeline: string,
