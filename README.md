@@ -49,6 +49,11 @@ Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
 Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/general)) and runs with SQLite as database by default.
 It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle mode.
 
+## One-Click Deploy
+
+<a href="https://repocloud.io/details/WoodPecker%20CI/"><img src="https://d16t0pc4846x52.cloudfront.net/deploylobe.svg" alt="Deploy on RepoCloud" height="42"></a>
+<a href="https://railway.com/deploy/woodpecker"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="42"></a>
+
 ## Support
 
 You can support the project by becoming a backer on [Open Collective](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE) or via [GitHub Sponsors](https://github.com/sponsors/woodpecker-ci).
