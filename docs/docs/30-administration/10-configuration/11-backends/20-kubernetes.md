@@ -373,6 +373,10 @@ spec:
 
 <!-- cspell:enable -->
 
+:::note
+`runAsUser: 0` and `runAsGroup: 0` are only applied if the step is privileged or runs in a [user namespace](#user-namespaces) (`hostUsers: false`). Otherwise they are ignored and the agent logs a warning.
+:::
+
 You can also restrict a syscalls of containers with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile.
 
 ```yaml
