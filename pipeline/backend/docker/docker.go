@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/cenkalti/backoff/v7"
@@ -52,6 +53,13 @@ type docker struct {
 	client client.APIClient
 	info   system.Info
 	config config
+
+	// stepStates tracks steps that were started and whose WaitStep has not
+	// returned yet. DestroyStep stores the exit state of such a step before it
+	// removes the container, so a WaitStep that only runs after the removal
+	// can still report how the step ended.
+	stepStatesMu sync.Mutex
+	stepStates   map[string]*backend_types.State
 }
 
 const (
@@ -275,35 +283,50 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 		}
 	}
 
-	_, err = e.client.ContainerStart(ctx, containerName, client.ContainerStartOptions{})
-	return err
+	if _, err = e.client.ContainerStart(ctx, containerName, client.ContainerStartOptions{}); err != nil {
+		return err
+	}
+	e.trackStep(containerName)
+	return nil
 }
 
-func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
-	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
-	log.Trace().Msgf("wait for step %s", step.Name)
-
-	containerName := toContainerName(step)
-
-	wait := e.client.ContainerWait(ctx, containerName, client.ContainerWaitOptions{})
-	select {
-	case resp := <-wait.Result:
-		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
-		if resp.Error != nil {
-			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
-		}
-	case err := <-wait.Error:
-		log.Trace().Msgf("ContainerWait returned with err: %v", err)
-		return nil, err
-	case <-ctx.Done():
-		return nil, ctx.Err()
+// trackStep marks a started container as waiting for its WaitStep to finish.
+func (e *docker) trackStep(containerName string) {
+	e.stepStatesMu.Lock()
+	defer e.stepStatesMu.Unlock()
+	if e.stepStates == nil {
+		e.stepStates = map[string]*backend_types.State{}
 	}
+	e.stepStates[containerName] = nil
+}
 
-	info, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{})
-	if err != nil {
-		return nil, err
+// untrackStep forgets a container and returns the state DestroyStep recorded for it, if any.
+func (e *docker) untrackStep(containerName string) *backend_types.State {
+	e.stepStatesMu.Lock()
+	defer e.stepStatesMu.Unlock()
+	st := e.stepStates[containerName]
+	delete(e.stepStates, containerName)
+	return st
+}
+
+// recordStepState stores the state of a tracked container. Containers that are
+// not tracked (WaitStep already returned) are ignored, so nothing piles up.
+func (e *docker) recordStepState(containerName string, st *backend_types.State) {
+	e.stepStatesMu.Lock()
+	defer e.stepStatesMu.Unlock()
+	if _, ok := e.stepStates[containerName]; ok {
+		e.stepStates[containerName] = st
 	}
+}
 
+func (e *docker) isStepTracked(containerName string) bool {
+	e.stepStatesMu.Lock()
+	defer e.stepStatesMu.Unlock()
+	_, ok := e.stepStates[containerName]
+	return ok
+}
+
+func stateFromInspect(info client.ContainerInspectResult) *backend_types.State {
 	exitCode := info.Container.State.ExitCode
 	// Windows Docker may return 4294967295 (uint32 max, i.e. int32(-1)) for abnormal exits.
 	if int64(exitCode) == int64(4294967295) { //nolint:mnd // because it is int(^uint32(0))
@@ -314,7 +337,49 @@ func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUI
 		Exited:    true,
 		ExitCode:  exitCode,
 		OOMKilled: info.Container.State.OOMKilled,
-	}, nil
+	}
+}
+
+func (e *docker) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
+	log := log.Logger.With().Str("taskUUID", taskUUID).Str("stepUUID", step.UUID).Logger()
+	log.Trace().Msgf("wait for step %s", step.Name)
+
+	containerName := toContainerName(step)
+
+	// If the container is removed by DestroyStep before we get to wait for it
+	// (a detached step whose log stream closed late), fall back to the state
+	// DestroyStep recorded instead of failing with "no such container".
+	defer e.untrackStep(containerName)
+	removed := func(err error) (*backend_types.State, error) {
+		if errdefs.IsNotFound(err) {
+			if st := e.untrackStep(containerName); st != nil {
+				log.Debug().Msgf("container of step %s was removed before wait, using recorded state", step.Name)
+				return st, nil
+			}
+		}
+		return nil, err
+	}
+
+	wait := e.client.ContainerWait(ctx, containerName, client.ContainerWaitOptions{})
+	select {
+	case resp := <-wait.Result:
+		log.Trace().Msgf("ContainerWait returned with resp: %v", resp)
+		if resp.Error != nil {
+			return nil, fmt.Errorf("ContainerWait error: %s", resp.Error.Message)
+		}
+	case err := <-wait.Error:
+		log.Trace().Msgf("ContainerWait returned with err: %v", err)
+		return removed(err)
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	}
+
+	info, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{})
+	if err != nil {
+		return removed(err)
+	}
+
+	return stateFromInspect(info), nil
 }
 
 func (e *docker) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
@@ -360,6 +425,15 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 		Signal: "9",
 	}); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return errors.Join(stopErr, fmt.Errorf("could not kill container '%s': %w", step.Name, err))
+	}
+
+	// A step that is still being waited on (a detached step stopped by the
+	// workflow teardown) may call WaitStep only after the container is gone.
+	// Keep its final state so WaitStep can still report it.
+	if e.isStepTracked(containerName) {
+		if info, err := e.client.ContainerInspect(ctx, containerName, client.ContainerInspectOptions{}); err == nil {
+			e.recordStepState(containerName, stateFromInspect(info))
+		}
 	}
 
 	// now we clean up files left
