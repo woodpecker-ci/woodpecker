@@ -223,13 +223,14 @@ func TestWorkflowWithServiceStep(t *testing.T) {
 	// db (service/detached), build, test — 3 * 2 = 6 traces total.
 	require.Len(t, traces, 6)
 
-	// Per-step invariants: started trace is the zero state, exited trace is
+	// Per-step invariants: started trace only carries the start time, exited trace is
 	// Exited=true with a monotonic Started timestamp.
 	for _, name := range []string{"db", "build", "test"} {
 		started := findFirstTraceByName(traces, name)
 		require.NotNil(t, started, "%s should have a started trace", name)
-		assert.EqualValues(t, backend_types.State{}, started.CurrStepState,
-			"%s started trace should be zero-valued", name)
+		assert.NotZero(t, started.CurrStepState.Started, "%s started trace should carry the start time", name)
+		assert.EqualValues(t, backend_types.State{Started: started.CurrStepState.Started}, started.CurrStepState,
+			"%s started trace should only carry the start time", name)
 
 		last := findLastTraceByName(traces, name)
 		require.NotNil(t, last, "%s should have an exited trace", name)
@@ -598,7 +599,8 @@ func TestWorkflowStepStartFailure(t *testing.T) {
 
 	deployTrace := findFirstTraceByName(getTracerStates(tracer), "build")
 	require.NotNil(t, deployTrace)
-	assert.EqualValues(t, backend_types.State{}, deployTrace.CurrStepState)
+	assert.NotZero(t, deployTrace.CurrStepState.Started)
+	assert.EqualValues(t, backend_types.State{Started: deployTrace.CurrStepState.Started}, deployTrace.CurrStepState)
 }
 
 func TestWorkflowContextCancelDuringExecution(t *testing.T) {

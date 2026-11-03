@@ -117,6 +117,7 @@ func TestTraceStep(t *testing.T) {
 		r.started = 1000
 		step := dummyStep("s1")
 
+		before := time.Now().Unix()
 		err := r.traceStep(nil, nil, step)
 
 		assert.NoError(t, err)
@@ -125,6 +126,8 @@ func TestTraceStep(t *testing.T) {
 		assert.Equal(t, int64(1000), calls[0].Workflow.Started)
 		assert.Equal(t, step, calls[0].CurrStep)
 		assert.False(t, calls[0].CurrStepState.Exited)
+		// start time must come from the agent clock, not be left for the server to fill in
+		assert.GreaterOrEqual(t, calls[0].CurrStepState.Started, before)
 	})
 
 	t.Run("StepFailedToStart", func(t *testing.T) {
