@@ -76,9 +76,85 @@
   margin-top: 0.5rem;
 }
 
-.wp-plugin-scan-badge {
-  font-size: 0.72rem;
-  text-transform: none;
+.wp-plugin-scan-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.55rem;
+  border: 2px solid currentColor;
+  border-radius: 0;
+  background-color: #080b14;
+  background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+  transition:
+    transform 80ms steps(2, end),
+    box-shadow 80ms steps(2, end);
+}
+
+.wp-plugin-scan-button--ok {
+  color: #74f7a5;
+  border-color: #74f7a5;
+  background-color: #07130c;
+  text-shadow: 0 0 8px rgba(116, 247, 165, 0.65);
+}
+
+.wp-plugin-scan-button--failed {
+  color: #ff6b81;
+  border-color: #ff6b81;
+  background-color: #16070b;
+  text-shadow: 0 0 8px rgba(255, 107, 129, 0.65);
+}
+
+.wp-plugin-scan-button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55);
+}
+
+.wp-pixel-invader {
+  flex: none;
+  filter: drop-shadow(0 0 4px currentColor);
+  animation: wp-invader-bob 1.2s steps(2, end) infinite;
+}
+
+.wp-plugin-scan-button--failed .wp-pixel-invader {
+  animation: wp-invader-shake 0.5s steps(2, end) infinite;
+}
+
+@keyframes wp-invader-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes wp-invader-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-pixel-invader,
+  .wp-plugin-scan-button {
+    animation: none;
+    transition: none;
+  }
 }
 
 .wp-plugin-scan-details {
@@ -98,6 +174,13 @@
   border-left-color: var(--ifm-color-danger);
 }
 
+.wp-plugin-scan-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
 .wp-plugin-scan-image {
   font-size: 0.8rem;
   overflow-wrap: anywhere;
@@ -114,6 +197,34 @@
 .wp-plugin-scan-findings summary {
   cursor: pointer;
   font-weight: 600;
+}
+
+.wp-plugin-scan-findings summary.wp-plugin-scan-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.6rem;
+  border: 2px solid var(--ifm-color-emphasis-500);
+  background: var(--ifm-background-surface-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  list-style: none;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.wp-plugin-scan-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.wp-plugin-scan-toggle::after {
+  content: '▶';
+  font-size: 0.6rem;
+}
+
+.wp-plugin-scan-findings[open] .wp-plugin-scan-toggle::after {
+  content: '▼';
 }
 
 .wp-plugin-scan-table {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { WoodpeckerPlugin } from '../types';
+import { InvaderState, PixelInvader } from './PixelInvader';
 
 type ScanFindings = {
   critical: number;
@@ -182,8 +183,9 @@ export function PluginScanBadge({ plugin }: { plugin: WoodpeckerPlugin }) {
 
   const ok = data.result.status === 'ok';
   return (
-    <span className={`badge ${ok ? 'badge--success' : 'badge--danger'} wp-plugin-scan-badge`} title={scanTitle(data)}>
-      {ok ? '✓ scanned' : '✗ scan failed'}
+    <span className={`wp-plugin-scan-button wp-plugin-scan-button--${ok ? 'ok' : 'failed'}`} title={scanTitle(data)}>
+      <PixelInvader state={ok ? 'ok' : 'failed'} />
+      <span>{ok ? 'Scanned' : 'Scan failed'}</span>
     </span>
   );
 }
@@ -309,7 +311,7 @@ function MisconfigurationsTable({ misconfigurations }: { misconfigurations: Scan
   );
 }
 
-function DetailedFindings({ url, total }: { url: string; total: number }) {
+function DetailedFindings({ url, total, state }: { url: string; total: number; state: InvaderState }) {
   const [details, setDetails] = useState<ScanDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -341,7 +343,10 @@ function DetailedFindings({ url, total }: { url: string; total: number }) {
         }
       }}
     >
-      <summary>Show detailed Trivy findings ({total})</summary>
+      <summary className="wp-plugin-scan-toggle">
+        <PixelInvader state={state} size={18} />
+        <span>Show detailed Trivy findings ({total})</span>
+      </summary>
       {loading && <p>Loading detailed results…</p>}
       {error && <p className="wp-plugin-scan-error">{error}</p>}
       {details && (
@@ -367,7 +372,10 @@ export function PluginScanDetails({ plugin }: { plugin: WoodpeckerPlugin }) {
 
   return (
     <div className={`wp-plugin-scan-details ${ok ? 'wp-plugin-scan-ok' : 'wp-plugin-scan-failed'}`}>
-      <strong>{ok ? '✓ Security scan completed' : '✗ Security scan failed'}</strong>
+      <div className="wp-plugin-scan-heading">
+        <PixelInvader state={ok ? 'ok' : 'failed'} size={26} />
+        <strong>{ok ? 'Security scan completed' : 'Security scan failed'}</strong>
+      </div>
       <div>
         Scanned {new Date(result.scanned_at).toLocaleString()} with Trivy {report.scanner.version ?? 'unknown'}
       </div>
@@ -382,7 +390,9 @@ export function PluginScanDetails({ plugin }: { plugin: WoodpeckerPlugin }) {
         </div>
       )}
       {result.error && <div className="wp-plugin-scan-error">{result.error}</div>}
-      {result.details_url && <DetailedFindings url={result.details_url} total={result.findings.total} />}
+      {result.details_url && (
+        <DetailedFindings url={result.details_url} total={result.findings.total} state={ok ? 'ok' : 'failed'} />
+      )}
       {report.pipeline_url && (
         <a href={report.pipeline_url} target="_blank" rel="noopener noreferrer">
           View scan pipeline
