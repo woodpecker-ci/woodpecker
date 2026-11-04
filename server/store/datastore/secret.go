@@ -55,6 +55,17 @@ func (s storage) SecretUpdate(secret *model.Secret) error {
 	})
 }
 
+func (s storage) SecretSwapValue(secret *model.Secret, oldValue, oldKeyID string) (bool, error) {
+	var swapped int64
+	err := retryWrite(func() error {
+		n, err := s.engine.Where("id = ? AND value = ? AND encryption_key_id = ?", secret.ID, oldValue, oldKeyID).
+			Cols("value", "encryption_key_id").Update(secret)
+		swapped = n
+		return wrapUpdate(n, err)
+	})
+	return swapped == 1, err
+}
+
 func (s storage) SecretDelete(secret *model.Secret) error {
 	return retryWrite(func() error {
 		return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))

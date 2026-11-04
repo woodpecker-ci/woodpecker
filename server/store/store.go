@@ -38,6 +38,9 @@ type Store interface {
 	CreateUser(*model.User) error
 	// UpdateUser updates a user account.
 	UpdateUser(*model.User) error
+	// UserSwapTokens writes the tokens and their encryption key id of the user
+	// if the stored ones still are the old ones, and reports whether it did.
+	UserSwapTokens(user *model.User, oldAccessToken, oldRefreshToken, oldKeyID string) (bool, error)
 	// DeleteUser deletes a user account.
 	DeleteUser(*model.User) error
 
@@ -118,6 +121,9 @@ type Store interface {
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
+	// SecretSwapValue writes the value and its encryption key id of the secret
+	// if the stored ones still are the old ones, and reports whether it did.
+	SecretSwapValue(secret *model.Secret, oldValue, oldKeyID string) (bool, error)
 	OrgSecretFind(int64, string) (*model.Secret, error)
 	OrgSecretList(int64, *model.ListOptionsWithAll) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
@@ -130,6 +136,10 @@ type Store interface {
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
 	RegistryDelete(*model.Registry) error
+	// RegistrySwapPassword writes the password and its encryption key id of
+	// the registry if the stored ones still are the old ones, and reports
+	// whether it did.
+	RegistrySwapPassword(registry *model.Registry, oldPassword, oldKeyID string) (bool, error)
 	OrgRegistryFind(int64, string) (*model.Registry, error)
 	OrgRegistryList(int64, *model.ListOptionsWithAll) ([]*model.Registry, error)
 	GlobalRegistryFind(string) (*model.Registry, error)

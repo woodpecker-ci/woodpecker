@@ -39,6 +39,9 @@ type Secret struct {
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
 	Note   string         `json:"note"            xorm:"note"`
+	// EncryptionKeyID is the id of the key the stored value is encrypted
+	// with, empty for plaintext.
+	EncryptionKeyID string `json:"-" xorm:"NOT NULL DEFAULT '' varchar(255) 'encryption_key_id'"`
 } //	@name	Secret
 
 // TableName return database table name for xorm.

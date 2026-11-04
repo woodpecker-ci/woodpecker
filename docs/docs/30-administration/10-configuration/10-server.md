@@ -83,6 +83,28 @@ WOODPECKER_DATABASE_DRIVER=postgres
 WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
 ```
 
+## Encryption
+
+Woodpecker can encrypt secret values, registry passwords and the forge tokens of users in the database.
+Encryption is off by default and gets enabled by configuring a key.
+Generate a raw key with `openssl rand -hex 32` and provide it through `WOODPECKER_ENCRYPTION_KEY` or `WOODPECKER_ENCRYPTION_KEY_FILE`:
+
+```ini
+WOODPECKER_ENCRYPTION_KEY_FILE=/etc/woodpecker/encryption.key
+```
+
+Alternatively use a [Tink](https://developers.google.com/tink) AEAD keyset in JSON format with `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`.
+Use only one of them.
+
+- **Enable:** configure a key and restart the server. Existing data is encrypted on startup.
+- **Rotate:** only for Tink keysets. Add a new key, make it the primary key, keep the old keys in the keyset and restart the server. Data is re-encrypted with the primary key on startup.
+- **Disable:** keep the key, set `WOODPECKER_ENCRYPTION_DISABLE=true` and restart the server. Data is decrypted on startup, afterwards the key and the flag can be removed. Do the same to change a raw key, then enable encryption with the new key.
+
+:::danger
+Without the key the encrypted data cannot be recovered and the server refuses to start.
+Back up the key separately from the database.
+:::
+
 ## TLS
 
 Woodpecker supports SSL configuration by mounting certificates into your container.
@@ -1038,6 +1060,44 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 - Default: none
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
+
+---
+
+### ENCRYPTION_KEY
+
+- Name: `WOODPECKER_ENCRYPTION_KEY`
+- Default: none
+
+Raw key to encrypt secrets, registry passwords and user tokens in the database.
+See [Encryption](#encryption).
+
+---
+
+### ENCRYPTION_KEY_FILE
+
+- Name: `WOODPECKER_ENCRYPTION_KEY_FILE`
+- Default: none
+
+Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath.
+
+---
+
+### ENCRYPTION_TINK_KEYSET_FILE
+
+- Name: `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
+- Default: none
+
+Path to a Tink AEAD keyset in JSON format, used instead of a raw key.
+The keyset is read in cleartext, so only the Woodpecker server should be able to read the file.
+
+---
+
+### ENCRYPTION_DISABLE
+
+- Name: `WOODPECKER_ENCRYPTION_DISABLE`
+- Default: `false`
+
+Decrypt all encrypted data on startup and disable encryption. Requires the key the data is encrypted with.
 
 ---
 

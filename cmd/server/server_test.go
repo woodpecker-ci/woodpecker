@@ -16,6 +16,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -63,4 +64,16 @@ func TestSetUnixSocketPermission(t *testing.T) {
 			assert.Equal(t, tt.want, info.Mode().Perm())
 		})
 	}
+}
+
+func TestRunFailsCleanlyOnEncryptionSetupError(t *testing.T) {
+	dir := t.TempDir()
+	err := genApp().Run(t.Context(), []string{
+		"woodpecker-server",
+		"--server-host", "https://ci.example.com",
+		"--db-driver", "sqlite3",
+		"--db-datasource", filepath.Join(dir, "woodpecker.sqlite"),
+		"--encryption-tink-keyset", filepath.Join(dir, "missing.json"),
+	})
+	assert.ErrorContains(t, err, "could not set up encryption")
 }
