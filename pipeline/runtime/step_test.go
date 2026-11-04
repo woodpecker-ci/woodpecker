@@ -104,6 +104,18 @@ func TestShouldSkipStep(t *testing.T) {
 
 		assert.True(t, r.shouldSkipStep(step))
 	})
+
+	t.Run("SkipSignalSkipsEveryStep", func(t *testing.T) {
+		t.Parallel()
+		r := newDummyRuntime(t, newTestTracer(t))
+		r.skipRemaining.Store(true)
+
+		// skip takes precedence over status conditions, including
+		// steps that run on success and failure (e.g. cleanup/notify).
+		assert.True(t, r.shouldSkipStep(&backend_types.Step{Name: "s", OnSuccess: true}))
+		assert.True(t, r.shouldSkipStep(&backend_types.Step{Name: "s", OnSuccess: true, OnFailure: true}))
+		assert.True(t, r.shouldSkipStep(&backend_types.Step{Name: "s", OnFailure: true}))
+	})
 }
 
 func TestTraceStep(t *testing.T) {
@@ -317,6 +329,73 @@ func TestCompleteStep(t *testing.T) {
 		assert.True(t, errors.As(err, &exitErr))
 		assert.Equal(t, 1, exitErr.Code)
 		assert.Equal(t, 1, ws.ExitCode)
+	})
+
+	t.Run("SkipSignal", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, ExitCode: 78}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		step := dummyStep("s1")
+		step.ExitCodeSignals = map[int]backend_types.StepSignal{78: backend_types.StepSignalSkip}
+
+		ws, err := r.completeStep(t.Context(), step, func() {}, time.Now().Unix())
+
+		assert.NoError(t, err)
+		assert.Equal(t, 0, ws.ExitCode)
+		assert.True(t, r.skipRequested.Load())
+	})
+
+	t.Run("UnmappedExitCode78Fails", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, ExitCode: 78}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+
+		ws, err := r.completeStep(t.Context(), dummyStep("s1"), func() {}, time.Now().Unix())
+
+		var exitErr *pipeline_errors.ExitError
+		assert.True(t, errors.As(err, &exitErr))
+		assert.Equal(t, 78, ws.ExitCode)
+		assert.False(t, r.skipRequested.Load())
+	})
+
+	t.Run("OtherExitCodeWithSignalsFails", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, ExitCode: 1}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		step := dummyStep("s1")
+		step.ExitCodeSignals = map[int]backend_types.StepSignal{78: backend_types.StepSignalSkip}
+
+		_, err := r.completeStep(t.Context(), step, func() {}, time.Now().Unix())
+
+		var exitErr *pipeline_errors.ExitError
+		assert.True(t, errors.As(err, &exitErr))
+		assert.False(t, r.skipRequested.Load())
+	})
+
+	t.Run("OOMKilledNotTreatedAsSignal", func(t *testing.T) {
+		t.Parallel()
+		engine := mocks.NewMockBackend(t)
+		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
+			Return(&backend_types.State{Exited: true, OOMKilled: true, ExitCode: 137}, nil)
+		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		r := New(&backend_types.Config{}, engine, WithTracer(newTestTracer(t)), WithLogger(newTestLogger(t)))
+		step := dummyStep("s1")
+		step.ExitCodeSignals = map[int]backend_types.StepSignal{137: backend_types.StepSignalSkip}
+
+		_, err := r.completeStep(t.Context(), step, func() {}, time.Now().Unix())
+
+		var oomErr *pipeline_errors.OomError
+		assert.True(t, errors.As(err, &oomErr))
+		assert.False(t, r.skipRequested.Load())
 	})
 
 	t.Run("OOMKilled", func(t *testing.T) {

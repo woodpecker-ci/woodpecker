@@ -1,0 +1,42 @@
+steps:
+  check-single:
+    image: alpine
+    commands:
+      - exit 78
+    signals:
+      skip: 78
+
+  check-list:
+    image: alpine
+    commands:
+      - exit 79
+    signals:
+      skip: [78, 79]
+
+  plugin:
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      repo: foo/bar
+    signals:
+      skip: 78
+
+  all-signals:
+    image: alpine
+    commands:
+      - exit 75
+    signals:
+      skip: 78
+      success: [1, 2]
+      restart: 75
+      cancel: 70
+
+  restart-long-form:
+    image: alpine
+    commands:
+      - exit 75
+    signals:
+      restart:
+        exit_codes: [75, 76]
+        max_restarts: 5
+      skip:
+        exit_codes: 78

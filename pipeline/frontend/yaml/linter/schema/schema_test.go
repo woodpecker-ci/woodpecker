@@ -89,6 +89,20 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-backend-options.yaml",
 		},
 		{
+			name:     "Signals",
+			testFile: ".woodpecker/test-signals.yaml",
+		},
+		{
+			name:     "Signals invalid max_restarts",
+			testFile: ".woodpecker/test-signals-invalid-max-restarts.yaml",
+			fail:     true,
+		},
+		{
+			name:     "Signals invalid",
+			testFile: ".woodpecker/test-signals-invalid.yaml",
+			fail:     true,
+		},
+		{
 			name:     "Broken Config",
 			testFile: ".woodpecker/test-broken.yaml",
 			fail:     true,

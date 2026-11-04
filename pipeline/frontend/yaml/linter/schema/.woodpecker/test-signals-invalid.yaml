@@ -1,0 +1,8 @@
+steps:
+  check:
+    image: alpine
+    commands:
+      - exit 78
+    signals:
+      pause_forever: 78
+      skip: 256
