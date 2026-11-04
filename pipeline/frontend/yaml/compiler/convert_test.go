@@ -93,7 +93,7 @@ func TestWorkspaceVolumeAlwaysAdded(t *testing.T) {
 func codes(c ...int) yaml_types.SignalConfig { return yaml_types.SignalConfig{ExitCodes: c} }
 
 func TestConvertSignals(t *testing.T) {
-	sig := func(m map[string]yaml_types.SignalConfig) (*signalConfig, error) { return convertSignals(m) }
+	sig := convertSignals
 
 	t.Run("empty", func(t *testing.T) {
 		got, err := sig(nil)

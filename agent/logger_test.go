@@ -39,8 +39,10 @@ func TestLoggerContinuesLineNumbersAcrossCalls(t *testing.T) {
 		entries []*rpc.LogEntry
 	)
 	peer.On("EnqueueLog", mock.Anything).Run(func(args mock.Arguments) {
+		entry, ok := args.Get(0).(*rpc.LogEntry)
+		assert.True(t, ok)
 		mu.Lock()
-		entries = append(entries, args.Get(0).(*rpc.LogEntry))
+		entries = append(entries, entry)
 		mu.Unlock()
 	}).Return()
 

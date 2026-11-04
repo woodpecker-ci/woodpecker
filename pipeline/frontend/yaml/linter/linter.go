@@ -235,11 +235,13 @@ func (l *Linter) lintSignals(config *WorkflowConfig, c *types.Container, area st
 			switch {
 			case backend_types.StepSignal(action) != backend_types.StepSignalRestart:
 				linterErr = multierr.Append(linterErr, newLinterError(
-					"`max_restarts` is only allowed for the `restart` signal", config.File, field+".max_restarts", false))
+					"`max_restarts` is only allowed for the `restart` signal", config.File, field+".max_restarts", false,
+				))
 			case *cfg.MaxRestarts < 1 || *cfg.MaxRestarts > backend_types.StepSignalRestartLimit:
 				linterErr = multierr.Append(linterErr, newLinterError(
 					fmt.Sprintf("`max_restarts` must be between 1 and %d", backend_types.StepSignalRestartLimit),
-					config.File, field+".max_restarts", false))
+					config.File, field+".max_restarts", false,
+				))
 			}
 		}
 		if len(cfg.ExitCodes) == 0 {
@@ -251,20 +253,23 @@ func (l *Linter) lintSignals(config *WorkflowConfig, c *types.Container, area st
 			if code < backend_types.MinSignalExitCode || code > backend_types.MaxSignalExitCode {
 				linterErr = multierr.Append(linterErr, newLinterError(
 					fmt.Sprintf("Exit code %d is out of range %d-%d", code, backend_types.MinSignalExitCode, backend_types.MaxSignalExitCode),
-					config.File, field, false))
+					config.File, field, false,
+				))
 				continue
 			}
 			if other, ok := seen[code]; ok {
 				linterErr = multierr.Append(linterErr, newLinterError(
 					fmt.Sprintf("Exit code %d is mapped to both signal `%s` and `%s`", code, other, action),
-					config.File, field, false))
+					config.File, field, false,
+				))
 				continue
 			}
 			seen[code] = action
 			if code == 126 || code == 127 || code >= 128 {
 				linterErr = multierr.Append(linterErr, newLinterError(
 					fmt.Sprintf("Exit code %d is used by shells or for processes killed by a signal (e.g. 137 = OOM/SIGKILL), consider a code between 64 and 113", code),
-					config.File, field, true))
+					config.File, field, true,
+				))
 			}
 		}
 	}

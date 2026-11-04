@@ -35,7 +35,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) lo
 	// line numbers and timestamps continue instead of starting over.
 	var (
 		writersMu sync.Mutex
-		writers   = map[string]io.Writer{}
+		writers   = make(map[string]io.Writer)
 	)
 
 	return func(step *backend_types.Step, rc io.ReadCloser) error {

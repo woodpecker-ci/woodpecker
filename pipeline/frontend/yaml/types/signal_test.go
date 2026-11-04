@@ -46,14 +46,14 @@ func TestSignalConfigUnmarshal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := map[string]SignalConfig{}
+			got := make(map[string]SignalConfig)
 			require.NoError(t, yaml.Unmarshal([]byte(tt.in), &got))
 			assert.Equal(t, tt.want, got)
 		})
 	}
 
 	t.Run("invalid", func(t *testing.T) {
-		got := map[string]SignalConfig{}
+		got := make(map[string]SignalConfig)
 		assert.Error(t, yaml.Unmarshal([]byte(`skip: abc`), &got))
 	})
 }

@@ -41,7 +41,7 @@ var skipOn78 = map[int]backend_types.StepSignal{78: backend_types.StepSignalSkip
 
 func signalTestStep(name string, env map[string]string) *backend_types.Step {
 	if env == nil {
-		env = map[string]string{}
+		env = make(map[string]string)
 	}
 	return &backend_types.Step{
 		Name: name, UUID: name + "-uuid",
@@ -391,7 +391,7 @@ func TestCancelSignalCancelsWorkflow(t *testing.T) {
 
 	states := finalStepStates(tracer)
 	assert.Equal(t, 0, states["check"].ExitCode)
-	assert.NoError(t, states["check"].Error, "the cancelling step itself is successful")
+	assert.NoError(t, states["check"].Error, "the canceling step itself is successful")
 	assert.ErrorIs(t, states["sibling"].Error, pipeline_errors.ErrCancel, "running sibling is stopped")
 	_, nextTraced := states["next"]
 	assert.False(t, nextTraced, "steps of later stages never start")

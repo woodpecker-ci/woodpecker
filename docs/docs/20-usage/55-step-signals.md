@@ -30,12 +30,12 @@ Signals are opt-in. A step without `signals` behaves as before: every exit code 
 
 ## Signals
 
-| Signal    | The step is shown as | Effect                                                                                                                         |
-| --------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `skip`    | successful           | The steps that would run after it are skipped. The workflow stays successful.                                                  |
-| `success` | successful           | Nothing else, the workflow continues as usual.                                                                                 |
-| `restart` | (runs again)         | The step runs again, up to `max_restarts` times. If the last attempt still exits with a `restart` code, the step fails.        |
-| `cancel`  | successful           | The workflow is canceled: running steps are stopped, the remaining steps do not run and the workflow is shown as killed.       |
+| Signal    | The step is shown as | Effect                                                                                                                   |
+| --------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `skip`    | successful           | The steps that would run after it are skipped. The workflow stays successful.                                            |
+| `success` | successful           | Nothing else, the workflow continues as usual.                                                                           |
+| `restart` | (runs again)         | The step runs again, up to `max_restarts` times. If the last attempt still exits with a `restart` code, the step fails.  |
+| `cancel`  | successful           | The workflow is canceled: running steps are stopped, the remaining steps do not run and the workflow is shown as killed. |
 
 ## Syntax
 

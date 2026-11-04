@@ -333,7 +333,7 @@ func newLogger(config *backend_types.Config) logging.Logger {
 	}
 	var (
 		writersMu sync.Mutex
-		writers   = map[string]io.Writer{}
+		writers   = make(map[string]io.Writer)
 	)
 	return func(step *backend_types.Step, rc io.ReadCloser) error {
 		writersMu.Lock()
