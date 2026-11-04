@@ -295,7 +295,7 @@ func (e *docker) trackStep(containerName string) {
 	e.stepStatesMu.Lock()
 	defer e.stepStatesMu.Unlock()
 	if e.stepStates == nil {
-		e.stepStates = map[string]*backend_types.State{}
+		e.stepStates = make(map[string]*backend_types.State)
 	}
 	e.stepStates[containerName] = nil
 }
