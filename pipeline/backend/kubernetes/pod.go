@@ -444,6 +444,7 @@ func volumeMounts(volumes []string) ([]kube_core_v1.VolumeMount, error) {
 		}
 
 		mount := volumeMount(volumeName, volumeMountPath(v))
+		mount.ReadOnly = volumeReadOnly(v)
 		mounts = append(mounts, mount)
 	}
 	return mounts, nil
@@ -774,6 +775,16 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	pod, err := mkPod(step, engineConfig, podName, engine.goos, options, taskUUID)
 	if err != nil {
 		return nil, err
+	}
+
+	if step.WorkspaceMode == types.WorkspaceModeOverlay {
+		if _, claim, found := workspaceClaim(pod, step); found {
+			overlay, err := engine.workspaceOverlayMode(ctx, engineConfig.GetNamespace(step.OrgID), claim)
+			if err != nil {
+				return nil, err
+			}
+			applyWorkspaceOverlay(pod, step, engineConfig, overlay)
+		}
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)

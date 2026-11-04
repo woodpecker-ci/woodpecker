@@ -45,6 +45,22 @@ func TestPvcMount(t *testing.T) {
 	assert.Equal(t, "/woodpecker/src/cache", mount)
 }
 
+func TestPvcMountReadOnly(t *testing.T) {
+	mounts, err := volumeMounts([]string{
+		"workspace:/woodpecker:ro",
+		"cache:/cache:rw",
+		"data:/data",
+	})
+	assert.NoError(t, err)
+	assert.Len(t, mounts, 3)
+	assert.Equal(t, "/woodpecker", mounts[0].MountPath)
+	assert.True(t, mounts[0].ReadOnly)
+	assert.Equal(t, "/cache", mounts[1].MountPath)
+	assert.False(t, mounts[1].ReadOnly)
+	assert.Equal(t, "/data", mounts[2].MountPath)
+	assert.False(t, mounts[2].ReadOnly)
+}
+
 func TestPersistentVolumeClaim(t *testing.T) {
 	namespace := "someNamespace"
 	expectedRwx := `
