@@ -21,6 +21,7 @@ export type WoodpeckerPlugin = WoodpeckerPluginHeader & {
   docs: string; // body of the docs .md file
   verified: boolean; // we set verified to false when not explicitly set
   iconDataUrl?: string;
+  latestRelease?: string; // tag of the latest release of the plugin repository
 };
 
 export type Content = {

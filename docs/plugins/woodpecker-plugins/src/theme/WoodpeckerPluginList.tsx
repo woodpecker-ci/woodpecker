@@ -6,7 +6,7 @@ import React, { useRef, useState } from 'react';
 import './style.css';
 
 import { WoodpeckerPlugin } from '../types';
-import { IconPlugin, IconVerified } from './Icons';
+import { IconPlugin, IconRelease, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   const pluginUrl = `/plugins/${plugin.slug}`;
@@ -20,9 +20,15 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
         <div className="col col--10">
           <h3>{plugin.name}</h3>
           <p>{plugin.description}</p>
-          {plugin.tags && (
+          {(plugin.latestRelease || plugin.tags) && (
             <div className="wp-plugin-tags">
-              {plugin.tags.map((tag, idx) => (
+              {plugin.latestRelease && (
+                <span className="badge badge--secondary wp-plugin-release">
+                  {IconRelease(14)}
+                  {plugin.latestRelease}
+                </span>
+              )}
+              {plugin.tags?.map((tag, idx) => (
                 <span className="badge badge--success" key={idx}>
                   {tag}
                 </span>

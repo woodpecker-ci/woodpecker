@@ -5,6 +5,7 @@ import axios, { AxiosError } from 'axios';
 import slugify from 'slugify';
 
 import * as markdown from './markdown';
+import { getLatestReleaseTag } from './release';
 import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 
 async function loadContent(): Promise<Content> {
@@ -63,6 +64,8 @@ async function loadContent(): Promise<Content> {
           }
         }
 
+        const latestRelease = await getLatestReleaseTag(i.docs);
+
         return {
           name: docsHeader.name,
           slug: slugify(docsHeader.name, { lower: true, strict: true }),
@@ -76,6 +79,7 @@ async function loadContent(): Promise<Content> {
           containerImageUrl: docsHeader.containerImageUrl,
           verified: i.verified || false,
           iconDataUrl: pluginIconDataUrl,
+          latestRelease,
         } satisfies WoodpeckerPlugin;
       }),
     )
