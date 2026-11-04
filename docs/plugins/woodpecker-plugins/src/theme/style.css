@@ -71,3 +71,70 @@
 .wp-plugin-breadcrumbs {
   margin-bottom: 2rem;
 }
+
+.wp-plugin-scan {
+  margin-top: 0.5rem;
+}
+
+.wp-plugin-scan-badge {
+  font-size: 0.72rem;
+  text-transform: none;
+}
+
+.wp-plugin-scan-details {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ifm-color-emphasis-400);
+  background: var(--ifm-background-surface-color);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.wp-plugin-scan-details.wp-plugin-scan-ok {
+  border-left-color: var(--ifm-color-success);
+}
+
+.wp-plugin-scan-details.wp-plugin-scan-failed {
+  border-left-color: var(--ifm-color-danger);
+}
+
+.wp-plugin-scan-image {
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.wp-plugin-scan-error {
+  color: var(--ifm-color-danger);
+}
+
+.wp-plugin-scan-findings {
+  margin-top: 0.75rem;
+}
+
+.wp-plugin-scan-findings summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.wp-plugin-scan-table {
+  max-height: 40rem;
+  overflow: auto;
+  margin: 0.75rem 0 1rem;
+}
+
+.wp-plugin-scan-table table {
+  display: table;
+  width: 100%;
+  font-size: 0.8rem;
+}
+
+.wp-plugin-scan-table th {
+  position: sticky;
+  top: 0;
+  background: var(--ifm-background-surface-color);
+  z-index: 1;
+}
+
+.wp-plugin-scan-table td {
+  vertical-align: top;
+}

@@ -19,6 +19,7 @@ export type WoodpeckerPlugin = WoodpeckerPluginHeader & {
   name: string;
   slug: string;
   docs: string; // body of the docs .md file
+  docsSource: string; // http url to the docs.md file, used to correlate scan results
   verified: boolean; // we set verified to false when not explicitly set
   iconDataUrl?: string;
 };

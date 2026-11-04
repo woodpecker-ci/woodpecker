@@ -7,6 +7,7 @@ import './style.css';
 
 import { WoodpeckerPlugin } from '../types';
 import { IconPlugin, IconVerified } from './Icons';
+import { PluginScanBadge } from './PluginScanBadge';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   const pluginUrl = `/plugins/${plugin.slug}`;
@@ -29,6 +30,9 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
               ))}
             </div>
           )}
+          <div className="wp-plugin-scan">
+            <PluginScanBadge plugin={plugin} />
+          </div>
         </div>
       </div>
       {plugin.verified && <div className="wp-plugin-verified">{IconVerified()}</div>}
