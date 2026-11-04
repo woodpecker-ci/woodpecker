@@ -192,6 +192,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	if err != nil {
 		return err
 	}
+	if step.WorkspaceMode == backend_types.WorkspaceModeOverlay {
+		if err := e.setupWorkspaceOverlay(ctx, step, hostConfig); err != nil {
+			return err
+		}
+	}
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
@@ -365,6 +370,10 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend_types.Step, task
 	// now we clean up files left
 	if _, err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return fmt.Errorf("could not remove container '%s': %w", step.Name, err)
+	}
+
+	if step.WorkspaceMode == backend_types.WorkspaceModeOverlay {
+		return e.removeWorkspaceOverlay(ctx, step)
 	}
 
 	return nil
