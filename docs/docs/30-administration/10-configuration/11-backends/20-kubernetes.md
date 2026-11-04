@@ -446,6 +446,17 @@ backend_options:
 In order to enable this configuration you need to set the appropriate environment variables to `true` on the woodpecker agent:
 [WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](#backend_k8s_pod_labels_allow_from_step).
 
+## Workspace modes
+
+A step with [`workspace: readonly`](../../../20-usage/20-workflow-syntax.md#workspace-mode) mounts the workspace volume read-only.
+
+For `workspace: overlay` the step gets its own copy of the workspace, which is deleted with the step pod:
+
+- If the CSI driver of the storage class can clone volumes, the copy is a volume cloned from the workspace volume.
+- Otherwise an init container copies the workspace into an `emptyDir` volume, using the [permission init image](#backend_k8s_permission_init_image).
+
+The first workflow that needs an overlay checks once per storage class whether cloning works, with a short-lived `wp-clone-probe-*` volume and pod. The agent keeps the result until it restarts.
+
 ## Tips and tricks
 
 ### CRI-O
