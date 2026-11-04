@@ -23,7 +23,7 @@ import (
 )
 
 // execPlugin use step.Image as exec binary.
-func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflowState, workspaceDir string, env []string) error {
 	binary, err := exec.LookPath(step.Image)
 	if err != nil {
 		return fmt.Errorf("lookup plugin binary: %w", err)
@@ -31,7 +31,7 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 
 	cmd := newCmd(ctx, binary)
 	cmd.Env = env
-	cmd.Dir = state.workspaceDir
+	cmd.Dir = workspaceDir
 
 	reader, err := cmd.StdoutPipe()
 	if err != nil {
