@@ -39,7 +39,8 @@ type fakeContainerAPI struct {
 }
 
 func (f *fakeContainerAPI) notFound() error {
-	return errdefs.ErrNotFound.WithMessage("Error response from daemon: no such container")
+	// Podman's lowercase wording, which the string checks do not match.
+	return errdefs.ErrNotFound.WithMessage(`no container with name or ID "postgres" found: no such container`)
 }
 
 func (f *fakeContainerAPI) ContainerCreate(context.Context, client.ContainerCreateOptions) (client.ContainerCreateResult, error) {
@@ -51,14 +52,23 @@ func (f *fakeContainerAPI) ContainerStart(context.Context, string, client.Contai
 }
 
 func (f *fakeContainerAPI) ContainerStop(context.Context, string, client.ContainerStopOptions) (client.ContainerStopResult, error) {
+	if f.removed {
+		return client.ContainerStopResult{}, f.notFound()
+	}
 	return client.ContainerStopResult{}, nil
 }
 
 func (f *fakeContainerAPI) ContainerKill(context.Context, string, client.ContainerKillOptions) (client.ContainerKillResult, error) {
+	if f.removed {
+		return client.ContainerKillResult{}, f.notFound()
+	}
 	return client.ContainerKillResult{}, errors.New("is not running")
 }
 
 func (f *fakeContainerAPI) ContainerRemove(context.Context, string, client.ContainerRemoveOptions) (client.ContainerRemoveResult, error) {
+	if f.removed {
+		return client.ContainerRemoveResult{}, f.notFound()
+	}
 	f.removed = true
 	return client.ContainerRemoveResult{}, nil
 }
@@ -107,6 +117,25 @@ func TestWaitStepAfterDestroyStep(t *testing.T) {
 
 	// nothing is kept once WaitStep has returned
 	assert.Empty(t, e.stepStates)
+}
+
+// completeStep destroys a step again after WaitStep returned. The container is
+// already gone, and the engine answers with a not-found error, which must be
+// ignored.
+func TestDestroyStepTwiceAroundWaitStep(t *testing.T) {
+	ctx := t.Context()
+	step := newWaitTestStep()
+	api := &fakeContainerAPI{}
+	e := &docker{client: api}
+
+	require.NoError(t, e.StartStep(ctx, step, "task"))
+	require.NoError(t, e.DestroyStep(ctx, step, "task"))
+
+	state, err := e.WaitStep(ctx, step, "task")
+	require.NoError(t, err)
+	assert.True(t, state.Exited)
+
+	require.NoError(t, e.DestroyStep(ctx, step, "task"))
 }
 
 func TestWaitStepAfterDestroyStepKeepsExitCode(t *testing.T) {
