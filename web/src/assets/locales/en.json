@@ -245,6 +245,7 @@
         "restart": "Restart",
         "restart_failed": "Restart failed",
         "restart_failed_desc": "Restart only the failed workflows and the workflows depending on them",
+        "restart_options": "More restart options",
         "canceled": "This step has been canceled.",
         "skipped": "This step has been skipped.",
         "cancel_success": "Pipeline canceled",

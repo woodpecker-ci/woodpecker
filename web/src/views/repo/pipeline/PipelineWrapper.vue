@@ -41,19 +41,12 @@
               :is-loading="isCancelingPipeline"
               @click="cancelPipeline"
             />
-            <Button
-              class="shrink-0"
-              :text="$t('repo.pipeline.actions.restart')"
-              :is-loading="isRestartingPipeline"
-              @click="restartPipeline"
-            />
-            <Button
-              v-if="pipelineCanRestartFailed(pipeline)"
-              class="shrink-0"
-              :text="$t('repo.pipeline.actions.restart_failed')"
-              :title="$t('repo.pipeline.actions.restart_failed_desc')"
-              :is-loading="isRestartingFailedWorkflows"
-              @click="restartFailedWorkflows"
+            <PipelineRestartButton
+              :can-restart-failed="pipelineCanRestartFailed(pipeline)"
+              :is-restarting="isRestartingPipeline"
+              :is-restarting-failed="isRestartingFailedWorkflows"
+              @restart="restartPipeline"
+              @restart-failed="restartFailedWorkflows"
             />
             <Button
               v-if="pipeline.status === 'success' && repo.allow_deploy"
@@ -160,6 +153,7 @@ import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import PipelineRestartButton from '~/components/repo/pipeline/PipelineRestartButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';

@@ -50,6 +50,7 @@
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'chevron-down'" :path="mdiChevronDown" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiClose" size="1.3rem" />
   <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilOutline" size="1.3rem" />
@@ -119,6 +120,7 @@ import {
   mdiBugOutline,
   mdiCalendarClockOutline,
   mdiCheckCircle,
+  mdiChevronDown,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiClose,
@@ -222,6 +224,7 @@ export type IconNames =
   | 'refresh'
   | 'blank'
   | 'heal'
+  | 'chevron-down'
   | 'chevron-right'
   | 'turn-off'
   | 'close'

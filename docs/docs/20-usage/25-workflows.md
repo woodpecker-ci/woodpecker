@@ -149,7 +149,7 @@ Read more about `skip_clone` at [pipeline syntax](./20-workflow-syntax.md#skip_c
 
 ## Restarting failed workflows
 
-When one workflow out of many fails, for example because of a flaky test or a network hiccup, you usually don't want to wait for all the others again. **Restart failed** on the pipeline page (or `woodpecker-cli pipeline start --failed`) creates a new pipeline that only runs:
+When one workflow out of many fails, for example because of a flaky test or a network hiccup, you usually don't want to wait for all the others again. **Restart failed** in the menu next to **Restart** on the pipeline page (or `woodpecker-cli pipeline start --failed`) creates a new pipeline that only runs:
 
 - the workflows that did not pass: the ones that failed or errored, and the ones that were canceled or skipped. Canceling a pipeline skips every workflow that had not started yet, so restarting a canceled pipeline picks up everything that did not finish. For a [matrix workflow](./30-matrix-workflows.md) only the variants that did not pass run again.
 - every workflow that depends on one of them, directly or through other workflows. `depends_on` is never skipped: a deploy that waits for the tests runs again together with them.
