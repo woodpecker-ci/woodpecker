@@ -79,7 +79,7 @@
         <div v-for="group in groupedLogs" :key="group.id" class="contents">
           <div
             v-if="group.isActualCommand && group.command"
-            class="sticky -top-4 z-10 col-span-3 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs mb-1"
+            class="sticky -top-4 z-10 col-span-3 mb-1 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs"
             :class="[isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
             @click="toggleGroup(group.id)"
           >
