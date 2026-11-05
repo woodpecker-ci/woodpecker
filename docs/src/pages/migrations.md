@@ -12,6 +12,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- (Kubernetes) Steps can no longer set `tolerations` in their backend options by default. Set `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP=true` on the agent to allow it again.
 
 ### API changes
 
