@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -184,6 +184,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
 		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		PullRequestDraft:     hook.PullRequest.Draft,
 		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 

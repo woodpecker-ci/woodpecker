@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
