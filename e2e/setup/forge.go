@@ -28,8 +28,8 @@ import (
 )
 
 // newMockForge builds a MockForge that serves the given files for any
-// config-fetch call, no-ops status reporting, and stubs all other methods safely.
-func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.MockForge {
+// config-fetch call, records status reporting, and stubs all other methods safely.
+func newMockForge(t *testing.T, files []*forge_types.FileMeta, statuses *Statuses) *forge_mocks.MockForge {
 	t.Helper()
 	m := forge_mocks.NewMockForge(t)
 
@@ -51,11 +51,11 @@ func newMockForge(t *testing.T, files []*forge_types.FileMeta) *forge_mocks.Mock
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, ".woodpecker",
 	).Return(files, nil).Maybe()
 
-	// Status reporting back to forge — no-op.
+	// Status reporting back to forge, recorded.
 	m.On(
 		"Status",
 		mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-	).Return(nil).Maybe()
+	).Return(statuses.status).Maybe()
 
 	// Netrc for clone steps.
 	m.On(

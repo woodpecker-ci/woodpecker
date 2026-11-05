@@ -30,7 +30,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -293,9 +292,8 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
-
 	defer func() {
+		server.Config.Services.Statuses.Workflow(workflow.PipelineID, workflow.ID)
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 
 		if err := s.scheduler.PublishPipelineEvent(c, repo, currentPipeline); err != nil {
@@ -307,7 +305,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	return s.updateAgentLastWork(agent)
 }
@@ -416,7 +413,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
+	server.Config.Services.Statuses.Workflow(workflow.PipelineID, workflow.ID)
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
@@ -588,30 +585,6 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 				c.State = updated.State
 				c.Finished = updated.Finished
 			}
-		}
-	}
-}
-
-func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
-	user, err := s.store.GetUser(repo.UserID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
-		return
-	}
-
-	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
-	if err != nil {
-		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
-		return
-	}
-
-	forge.Refresh(ctx, _forge, s.store, user)
-
-	// only do status updates for parent steps
-	if workflow != nil {
-		err = _forge.Status(ctx, user, repo, pipeline, workflow)
-		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
 	}
 }
