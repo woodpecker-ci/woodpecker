@@ -16,9 +16,7 @@
 package gitea
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"slices"
 	"strings"
 
@@ -74,16 +72,15 @@ func supportedAction(action string) bool {
 // parseHook parses a Gitea hook payload of the given type and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(hookType string, payload []byte) (*model.Repo, *model.Pipeline, error) {
-	body := bytes.NewReader(payload)
 	switch hookType {
 	case hookPush:
-		return parsePushHook(body)
+		return parsePushHook(payload)
 	case hookCreated:
-		return parseCreatedHook(body)
+		return parseCreatedHook(payload)
 	case hookPullRequest:
-		return parsePullRequestHook(body)
+		return parsePullRequestHook(payload)
 	case hookRelease:
-		return parseReleaseHook(body)
+		return parseReleaseHook(payload)
 	}
 	log.Debug().Msgf("unsupported hook type: '%s'", hookType)
 	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
@@ -91,7 +88,7 @@ func parseHook(hookType string, payload []byte) (*model.Repo, *model.Pipeline, e
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
+func parsePushHook(payload []byte) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -117,7 +114,7 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipelin
 
 // parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
+func parseCreatedHook(payload []byte) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -136,7 +133,7 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipe
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
-func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
+func parsePullRequestHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline
@@ -180,7 +177,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 }
 
 // parseReleaseHook parses a release hook and returns the Repo and Pipeline details.
-func parseReleaseHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
+func parseReleaseHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline

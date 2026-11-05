@@ -17,7 +17,6 @@ package gitea
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,7 +47,7 @@ func TestGiteaParser(t *testing.T) {
 
 	tests := []struct {
 		name  string
-		data  string
+		data  []byte
 		event string
 		err   error
 		repo  *model.Repo
@@ -670,7 +669,7 @@ func TestGiteaParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, p, err := parseHook(tt.event, []byte(tt.data))
+			r, p, err := parseHook(tt.event, tt.data)
 			if tt.err != nil {
 				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
@@ -683,13 +682,14 @@ func TestGiteaParser(t *testing.T) {
 }
 
 func TestParsePullRequestDraft(t *testing.T) {
-	payload := strings.Replace(
+	payload := bytes.Replace(
 		fixtures.HookPullRequest,
-		`"state": "open",`,
-		`"state": "open",`+"\n    "+`"draft": true,`,
+		[]byte(`"state": "open",`),
+		[]byte(`"state": "open",`+"\n    "+`"draft": true,`),
 		1,
 	)
-	_, p, err := parseHook(hookPullRequest, []byte(payload))
+
+	_, p, err := parseHook(hookPullRequest, payload)
 	assert.NoError(t, err)
 	if assert.NotNil(t, p) {
 		assert.True(t, p.PullRequestDraft)
@@ -697,36 +697,36 @@ func TestParsePullRequestDraft(t *testing.T) {
 }
 
 func TestParseIncompleteHookPayloads(t *testing.T) {
-	incomplete := []string{
-		`{}`,
-		`{"repository": {}}`,
-		`{"repository": {"full_name": "noslash"}, "sender": {}}`,
+	incomplete := [][]byte{
+		[]byte(`{}`),
+		[]byte(`{"repository": {}}`),
+		[]byte(`{"repository": {"full_name": "noslash"}, "sender": {}}`),
 	}
 	for _, payload := range incomplete {
-		t.Run(payload, func(t *testing.T) {
+		t.Run(string(payload), func(t *testing.T) {
 			assert.NotPanics(t, func() {
-				_, _, err := parsePushHook(bytes.NewBufferString(payload))
+				_, _, err := parsePushHook(payload)
 				assert.Error(t, err)
-				_, _, err = parseCreatedHook(bytes.NewBufferString(payload))
+				_, _, err = parseCreatedHook(payload)
 				assert.Error(t, err)
-				_, _, err = parsePullRequestHook(bytes.NewBufferString(payload))
+				_, _, err = parsePullRequestHook(payload)
 				assert.Error(t, err)
-				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				_, _, err = parseReleaseHook(payload)
 				assert.Error(t, err)
 			})
 		})
 	}
 
-	incompletePullRequest := []string{
-		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {}}`,
-		`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {"user": {}}}`,
+	incompletePullRequest := [][]byte{
+		[]byte(`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {}}`),
+		[]byte(`{"repository": {"full_name": "a/b", "owner": {}}, "sender": {}, "action": "opened", "pull_request": {"user": {}}}`),
 	}
 	for _, payload := range incompletePullRequest {
-		t.Run(payload, func(t *testing.T) {
+		t.Run(string(payload), func(t *testing.T) {
 			assert.NotPanics(t, func() {
-				_, _, err := parsePullRequestHook(bytes.NewBufferString(payload))
+				_, _, err := parsePullRequestHook(payload)
 				assert.Error(t, err)
-				_, _, err = parseReleaseHook(bytes.NewBufferString(payload))
+				_, _, err = parseReleaseHook(payload)
 				assert.Error(t, err)
 			})
 		})

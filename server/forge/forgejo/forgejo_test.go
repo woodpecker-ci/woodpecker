@@ -144,7 +144,7 @@ func TestForgejo(t *testing.T) {
 	})
 
 	t.Run("PR hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		buf := bytes.NewBuffer(fixtures.HookPullRequest)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullRequest)
@@ -311,12 +311,12 @@ func TestHookVerifiesSignature(t *testing.T) {
 
 func TestHookLoadsTagCommit(t *testing.T) {
 	newRequest := func() *http.Request {
-		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookRelease))
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookRelease))
 		req.Header.Set(hookEvent, hookRelease)
 		return signHookRequest(t, req)
 	}
 	newTagRequest := func() *http.Request {
-		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookTag))
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookTag))
 		req.Header.Set(hookEvent, hookCreated)
 		return signHookRequest(t, req)
 	}
