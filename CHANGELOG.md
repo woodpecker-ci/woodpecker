@@ -19,6 +19,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add small margin between log groups [[#7485](https://github.com/woodpecker-ci/woodpecker/pull/7485)]
 - Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
 - Use OrgID to match Orgs belong to users [[#7441](https://github.com/woodpecker-ci/woodpecker/pull/7441)]
 - CreateUser in one SQL session and report back constrain name on insert error [[#7439](https://github.com/woodpecker-ci/woodpecker/pull/7439)]
