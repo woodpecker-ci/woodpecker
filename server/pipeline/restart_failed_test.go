@@ -241,7 +241,7 @@ func TestPipelineTasksDepStatus(t *testing.T) {
 		DependsOn: constraint.DependsOn{{Name: "test"}},
 		Config:    nil,
 	}
-	tasks, err := pipelineTasks(repo, &model.Pipeline{ID: 3}, []*builder.Item{item},
+	tasks, err := pipelineTasks(repo, nil, &model.Pipeline{ID: 3}, []*builder.Item{item},
 		map[string]map[string]model.StatusValue{"deploy": {"10": model.StatusSkipped}})
 	require.NoError(t, err)
 	require.Len(t, tasks, 1)

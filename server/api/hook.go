@@ -90,7 +90,7 @@ func PostHook(c *gin.Context) {
 			return "", err
 		}
 
-		return repo.Hash, nil
+		return repo.WebhookSecret, nil
 	})
 	if err != nil {
 		msg := "failure to parse token from hook"

@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	mock "github.com/stretchr/testify/mock"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -274,6 +275,50 @@ func (_c *MockForge_Branches_Call) Return(strings []string, err error) *MockForg
 }
 
 func (_c *MockForge_Branches_Call) RunAndReturn(run func(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)) *MockForge_Branches_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Config provides a mock function for the type MockForge
+func (_mock *MockForge) Config() metadata.Forge {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Config")
+	}
+
+	var r0 metadata.Forge
+	if returnFunc, ok := ret.Get(0).(func() metadata.Forge); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(metadata.Forge)
+	}
+	return r0
+}
+
+// MockForge_Config_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Config'
+type MockForge_Config_Call struct {
+	*mock.Call
+}
+
+// Config is a helper method to define mock.On call
+func (_e *MockForge_Expecter) Config() *MockForge_Config_Call {
+	return &MockForge_Config_Call{Call: _e.mock.On("Config")}
+}
+
+func (_c *MockForge_Config_Call) Run(run func()) *MockForge_Config_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockForge_Config_Call) Return(forge metadata.Forge) *MockForge_Config_Call {
+	_c.Call.Return(forge)
+	return _c
+}
+
+func (_c *MockForge_Config_Call) RunAndReturn(run func() metadata.Forge) *MockForge_Config_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1314,50 +1359,6 @@ func (_c *MockForge_Teams_Call) Return(teams []*model.Team, err error) *MockForg
 }
 
 func (_c *MockForge_Teams_Call) RunAndReturn(run func(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error)) *MockForge_Teams_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// URL provides a mock function for the type MockForge
-func (_mock *MockForge) URL() string {
-	ret := _mock.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for URL")
-	}
-
-	var r0 string
-	if returnFunc, ok := ret.Get(0).(func() string); ok {
-		r0 = returnFunc()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	return r0
-}
-
-// MockForge_URL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'URL'
-type MockForge_URL_Call struct {
-	*mock.Call
-}
-
-// URL is a helper method to define mock.On call
-func (_e *MockForge_Expecter) URL() *MockForge_URL_Call {
-	return &MockForge_URL_Call{Call: _e.mock.On("URL")}
-}
-
-func (_c *MockForge_URL_Call) Run(run func()) *MockForge_URL_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockForge_URL_Call) Return(s string) *MockForge_URL_Call {
-	_c.Call.Return(s)
-	return _c
-}
-
-func (_c *MockForge_URL_Call) RunAndReturn(run func() string) *MockForge_URL_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -37,12 +37,41 @@ const serverConfigQueuePaused = "queue-paused"
 // starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
+	for _, task := range tasks {
+		restoreDepStatus(s, task)
+	}
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	pq := &persistentQueue{q, s}
 	pq.restorePausedState()
 	return pq
+}
+
+// restoreDepStatus sets the status of every finished dependency of a reloaded
+// task from its workflow. The queue keeps that status only in memory, so the
+// stored task still has the empty DepStatus it was inserted with and
+// Task.ShouldRun() would vacuously let it run.
+func restoreDepStatus(s store.Store, task *model.Task) {
+	for _, dep := range task.Dependencies {
+		workflowID, err := strconv.ParseInt(dep, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: invalid dependency id %s", task.ID, dep)
+			continue
+		}
+		workflow, err := s.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: cannot load dependency %s", task.ID, dep)
+			continue
+		}
+		if !isTerminalWorkflowState(workflow.State) {
+			continue
+		}
+		if task.DepStatus == nil {
+			task.DepStatus = make(map[string]model.StatusValue)
+		}
+		task.DepStatus[dep] = workflow.State
+	}
 }
 
 type persistentQueue struct {

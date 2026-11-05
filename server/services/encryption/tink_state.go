@@ -49,12 +49,11 @@ func (svc *tinkEncryptionService) disable() error {
 
 func (svc *tinkEncryptionService) rotate() error {
 	newSvc := &tinkEncryptionService{
-		keysetFilePath:    svc.keysetFilePath,
-		primaryKeyID:      "",
-		encryption:        nil,
-		store:             svc.store,
-		keysetFileWatcher: nil,
-		clients:           svc.clients,
+		keysetFilePath: svc.keysetFilePath,
+		primaryKeyID:   "",
+		encryption:     nil,
+		store:          svc.store,
+		clients:        svc.clients,
 	}
 
 	if err := newSvc.loadKeyset(); err != nil {
@@ -70,10 +69,6 @@ func (svc *tinkEncryptionService) rotate() error {
 	}
 
 	if err := newSvc.callbackOnRotation(); err != nil {
-		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
-	}
-
-	if err := newSvc.initFileWatcher(); err != nil {
 		return fmt.Errorf(errTemplateFailedRotatingEncryption, err)
 	}
 	return nil

@@ -15,6 +15,7 @@
 package datastore
 
 import (
+	"context"
 	"errors"
 
 	"github.com/rs/zerolog/log"
@@ -29,12 +30,12 @@ const pgBatchSize = 1000
 
 // LogFind returns the log entries of a step in the order the agent produced
 // them, which is the order their line numbers carry.
-func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+func (s storage) LogFind(ctx context.Context, step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
-	return logEntries, s.engine.Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
+	return logEntries, s.engine.Context(ctx).Asc("line").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
-func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
+func (s storage) LogAppend(ctx context.Context, _ *model.Step, logEntries []*model.LogEntry) error {
 	var errs error
 
 	// TODO: adapted from slices.Chunk(); switch to it in Go 1.23+
@@ -42,7 +43,7 @@ func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 		end := min(pgBatchSize, len(logEntries[i:]))
 		chunk := logEntries[i : i+end]
 
-		if err := wrapInsert(s.engine.Insert(chunk)); err != nil {
+		if err := wrapInsert(s.engine.Context(ctx).Insert(chunk)); err != nil {
 			log.Error().Err(err).Msg("could not store log entries to db")
 			errs = errors.Join(errs, err)
 		}
@@ -51,9 +52,9 @@ func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 	return errs
 }
 
-func (s storage) LogDelete(step *model.Step) error {
-	return retryWrite(func() error {
-		sess := s.engine.NewSession()
+func (s storage) LogDelete(ctx context.Context, step *model.Step) error {
+	return retryWriteCtx(ctx, func() error {
+		sess := s.engine.NewSession().Context(ctx)
 		defer sess.Close()
 		return logDelete(sess, step.ID)
 	})
@@ -63,4 +64,4 @@ func logDelete(sess *xorm.Session, stepID int64) error {
 	return wrapUpdate(sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)))
 }
 
-func (s storage) StepFinished(_ *model.Step) error { return nil }
+func (s storage) StepFinished(_ context.Context, _ *model.Step) error { return nil }

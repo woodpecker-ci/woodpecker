@@ -61,8 +61,8 @@ const processTimeInterval = 100 * time.Millisecond
 func NewMemoryQueue(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
-		workers:       map[*worker]struct{}{},
-		running:       map[string]*entry{},
+		workers:       make(map[*worker]struct{}),
+		running:       make(map[string]*entry),
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
 		extension:     constant.TaskTimeout,

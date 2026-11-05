@@ -118,22 +118,22 @@ func TestConstraintMap(t *testing.T) {
 		},
 		{
 			conf: "GOLANG: 1.7",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "{ GOLANG: 1.7, REDIS: 3.0 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "include: { GOLANG: 1.7, REDIS: 3.1 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "exclude: { GOLANG: 1.7, REDIS: 3.1 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: true,
 		},
 	}
@@ -150,15 +150,15 @@ func TestConstraintMapUnmarshalNull(t *testing.T) {
 	}{
 		{
 			conf:    "include: ~",
-			include: map[string]string{},
+			include: make(map[string]string),
 		},
 		{
 			conf:    "exclude: ~",
-			include: map[string]string{},
+			include: make(map[string]string),
 		},
 		{
 			conf:    "include: ~\nexclude: ~",
-			include: map[string]string{},
+			include: make(map[string]string),
 		},
 		{
 			conf:    "exclude: ~\nGOLANG: 1.7",

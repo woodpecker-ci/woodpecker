@@ -33,6 +33,8 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
+Also see [security boundaries](./17-security-boundaries.md#approval-of-pipelines).
+
 ## Trusted
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
@@ -42,6 +44,8 @@ If you set your project to trusted, a pipeline step and by this the underlying c
 Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
+
+Also see [security boundaries](./17-security-boundaries.md#trusted-repositories).
 
 ## Custom trusted clone plugins
 
@@ -58,6 +62,8 @@ Without an explicit allowlist, a malicious contributor could exploit a custom cl
 This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
 To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/git-push).
 :::
+
+Also see [security boundaries](./17-security-boundaries.md#git-credentials).
 
 ## Project visibility
 

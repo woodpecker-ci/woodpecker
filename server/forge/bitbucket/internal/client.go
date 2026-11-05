@@ -224,9 +224,11 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
-	out := new(WorkspaceMembershipResp)
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
+		// decode each page into a new value, the last page has no next link
+		// and must not keep the one of the page before
+		out := new(WorkspaceMembershipResp)
 		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
 		_, err := c.do(uri, http.MethodGet, nil, out)
 		if err != nil {

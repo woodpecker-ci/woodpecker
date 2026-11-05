@@ -38,7 +38,21 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return &ErrNotFound{Msg: err.Error()}
 	}
 
-	// First cancel/evict the running and pending workflows from the queue
+	// Mark pending steps canceled before evicting their workflows: eviction
+	// signals the agents, and an agent reporting its workflow done kills every
+	// step still pending. Writing them afterwards from this stale tree races
+	// with that and can leave them killed.
+	for _, workflow := range workflows {
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
+				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
+					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+				}
+			}
+		}
+	}
+
+	// Then cancel/evict the running and pending workflows from the queue
 	var workflowsToCancel []string
 	for _, w := range workflows {
 		if w.State == model.StatusRunning || w.State == model.StatusPending {
@@ -61,13 +75,6 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 			}
 		} else {
 			hasPendingOnly = false
-		}
-		for _, step := range workflow.Children {
-			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
-					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-				}
-			}
 		}
 	}
 

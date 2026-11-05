@@ -23,10 +23,11 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -85,9 +86,9 @@ func (c *Forgejo) Name() string {
 	return "forgejo"
 }
 
-// URL returns the root url of a configured forge.
-func (c *Forgejo) URL() string {
-	return c.url
+// Config returns the metadata of the configured forge.
+func (c *Forgejo) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *Forgejo) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
@@ -361,7 +362,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
-		"secret":       r.Hash,
+		"secret":       r.WebhookSecret,
 		"content_type": "json",
 	}
 	hook := forgejo.CreateHookOption{
@@ -506,13 +507,13 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
-				if err != nil {
-					return nil, nil, err
-				}
-				pipeline.Commit = sha
+			// the create hook of a pushed annotated tag holds the SHA of the
+			// tag object, not of the tagged commit
+			sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			if err != nil {
+				return nil, nil, err
 			}
+			pipeline.Commit = sha
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			if len(pipeline.ChangedFiles) == 0 {

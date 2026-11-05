@@ -49,11 +49,15 @@ func (m *Metadata) Environ() map[string]string {
 	forge := m.Forge
 	setNonEmptyEnvVar(params, "CI_FORGE_TYPE", forge.Type)
 	setNonEmptyEnvVar(params, "CI_FORGE_URL", forge.URL)
+	setNonEmptyEnvVar(params, "CI_FORGE_HOST", forge.Host)
 
 	repo := m.Repo
 	setNonEmptyEnvVar(params, "CI_REPO", path.Join(repo.Owner, repo.Name))
 	setNonEmptyEnvVar(params, "CI_REPO_NAME", repo.Name)
 	setNonEmptyEnvVar(params, "CI_REPO_OWNER", repo.Owner)
+	if repo.ID > 0 {
+		setNonEmptyEnvVar(params, "CI_REPO_ID", strconv.FormatInt(repo.ID, 10))
+	}
 	setNonEmptyEnvVar(params, "CI_REPO_REMOTE_ID", repo.RemoteID)
 	setNonEmptyEnvVar(params, "CI_REPO_URL", repo.ForgeURL)
 	setNonEmptyEnvVar(params, "CI_REPO_CLONE_URL", repo.CloneURL)

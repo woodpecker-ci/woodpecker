@@ -154,6 +154,12 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY"),
+		Name:    "admin-primary-forge-only",
+		Usage:   "only accept users of the primary forge as admins",
+		Value:   false,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ORGS"),
 		Name:    "orgs",
@@ -464,7 +470,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 5,
+		Value:   time.Second * 30,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),

@@ -19,9 +19,12 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -97,6 +100,70 @@ func TestGithub(t *testing.T) {
 	t.Run("repo not found error", func(t *testing.T) {
 		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 		assert.Error(t, err)
+	})
+
+	t.Run("dir is fetched with a single graphql request", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "somedir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "somedir/a.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir returns config-not-found for missing directories", func(t *testing.T) {
+		_, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "no-such-dir")
+		assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+	})
+
+	t.Run("dir skips symlinks", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+		}, files)
+	})
+
+	t.Run("dir loads symlinks over rest when following them", func(t *testing.T) {
+		followSymlinks = true
+		t.Cleanup(func() { followSymlinks = false })
+
+		// the graphql entry carries the link target as its text, which must
+		// never be used as the file content
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "symlink-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "symlink-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "symlink-dir/link.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir loads large and binary files over rest", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "large-dir")
+		require.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{
+			{Name: "large-dir/a.yaml", Data: []byte("steps: a")},
+			{Name: "large-dir/large.yaml", Data: []byte("pipeline:")},
+			{Name: "large-dir/binary.yaml", Data: []byte("pipeline:")},
+		}, files)
+	})
+
+	t.Run("dir falls back to per-file fetching when graphql fails", func(t *testing.T) {
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "rest-fallback-dir")
+		assert.NoError(t, err)
+		require.Len(t, files, 1)
+		assert.Equal(t, "rest-fallback-dir/b.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
+	})
+
+	t.Run("dir falls back instead of reporting config-not-found for an unexpected graphql response", func(t *testing.T) {
+		// a 200 without a repository object must not be mistaken for a missing
+		// path: config-not-found makes the caller drop the pipeline silently
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "null-repo-dir")
+		require.NoError(t, err)
+		assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+		require.Len(t, files, 1)
+		assert.Equal(t, "null-repo-dir/c.yaml", files[0].Name)
+		assert.Equal(t, "pipeline:", string(files[0].Data))
 	})
 }
 
@@ -432,7 +499,8 @@ func TestActivate(t *testing.T) {
 	var deleted []string
 	var created *github.Hook
 
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
 			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
 		}),
@@ -465,7 +533,8 @@ func TestActivate(t *testing.T) {
 }
 
 func TestDeactivateWithoutMatchingHook(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatch(github_mock.GetReposByOwnerByRepo, github.Repository{
 			ID: new(int64(1)), Name: new("hello-world"), FullName: new("octocat/hello-world"), Owner: &github.User{Login: new("octocat")},
 		}),
@@ -505,8 +574,10 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 	})
 
 	t.Run("new branch lists the files of the current commit on all pages", func(t *testing.T) {
-		ctx := store.InjectToContext(mockedContext(t, t.Context(),
-			github_mock.WithRequestMatchPages(github_mock.GetReposCommitsByOwnerByRepoByRef,
+		ctx := store.InjectToContext(mockedContext(
+			t, t.Context(),
+			github_mock.WithRequestMatchPages(
+				github_mock.GetReposCommitsByOwnerByRepoByRef,
 				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("a.go")}}},
 				github.RepositoryCommit{Files: []*github.CommitFile{{Filename: new("b.go")}}},
 			),
@@ -517,7 +588,8 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 	})
 
 	t.Run("push compares both commits and keeps renamed paths once", func(t *testing.T) {
-		ctx := store.InjectToContext(mockedContext(t, t.Context(),
+		ctx := store.InjectToContext(mockedContext(
+			t, t.Context(),
 			github_mock.WithRequestMatchHandler(github_mock.GetReposCompareByOwnerByRepoByBasehead, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, "/repos/octocat/hello-world/compare/"+prev+"..."+curr, r.URL.Path)
 				writeJSON(t, w, github.CommitsComparison{Files: []*github.CommitFile{
@@ -540,8 +612,10 @@ func TestLoadChangedFilesFromCommits(t *testing.T) {
 }
 
 func TestRepos(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
-		github_mock.WithRequestMatchPages(github_mock.GetUserRepos,
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatchPages(
+			github_mock.GetUserRepos,
 			[]github.Repository{
 				{ID: new(int64(1)), FullName: new("octocat/active"), Name: new("active"), Owner: &github.User{Login: new("octocat")}},
 				{ID: new(int64(2)), FullName: new("octocat/archived"), Name: new("archived"), Owner: &github.User{Login: new("octocat")}, Archived: new(true)},
@@ -569,7 +643,8 @@ func TestRepos(t *testing.T) {
 func TestFileAndDir(t *testing.T) {
 	encoded := func(s string) *string { return new(base64.StdEncoding.EncodeToString([]byte(s))) }
 
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, "abc", r.URL.Query().Get("ref"))
 			switch r.URL.Path {
@@ -580,8 +655,18 @@ func TestFileAndDir(t *testing.T) {
 			case "/repos/octocat/hello-world/contents/.woodpecker":
 				writeJSON(t, w, []github.RepositoryContent{
 					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("dir"), Name: new("sub")},
+					{Type: new("symlink"), Name: new("link.yaml")},
 					{Type: new("file"), Name: new("b.yaml")},
 				})
+			case "/repos/octocat/hello-world/contents/.broken":
+				writeJSON(t, w, []github.RepositoryContent{
+					{Type: new("file"), Name: new("a.yaml")},
+					{Type: new("file"), Name: new("b.yaml")},
+				})
+			case "/repos/octocat/hello-world/contents/.broken/a.yaml", "/repos/octocat/hello-world/contents/.broken/b.yaml":
+				w.WriteHeader(http.StatusInternalServerError)
+				writeJSON(t, w, map[string]string{"message": "Server Error"})
 			default:
 				w.WriteHeader(http.StatusNotFound)
 				writeJSON(t, w, map[string]string{"message": "Not Found"})
@@ -604,20 +689,84 @@ func TestFileAndDir(t *testing.T) {
 	_, err = c.File(ctx, user, repo, pipeline, ".woodpecker")
 	assert.ErrorContains(t, err, "is a folder not a file")
 
-	metas, err := c.Dir(ctx, user, repo, pipeline, ".woodpecker")
+	// dir fails the test instead of hanging when Dir does not return
+	dir := func(path string) ([]*forge_types.FileMeta, error) {
+		type result struct {
+			metas []*forge_types.FileMeta
+			err   error
+		}
+		done := make(chan result, 1)
+		go func() {
+			metas, err := c.Dir(ctx, user, repo, pipeline, path)
+			done <- result{metas, err}
+		}()
+		select {
+		case r := <-done:
+			return r.metas, r.err
+		case <-time.After(5 * time.Second):
+			require.FailNow(t, "Dir did not return", path)
+			return nil, nil
+		}
+	}
+
+	// sub folders and symlinks are skipped, files are loaded with their content
+	metas, err := dir(".woodpecker")
 	require.NoError(t, err)
 	assert.ElementsMatch(t, []*forge_types.FileMeta{
 		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
 		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
 	}, metas)
 
-	_, err = c.Dir(ctx, user, repo, pipeline, ".missing")
+	// a file that can not be loaded fails the folder
+	_, err = dir(".broken")
+	assert.ErrorContains(t, err, "500")
+
+	_, err = dir(".missing")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
 }
 
-func TestOrgMembership(t *testing.T) {
+func TestDirLimitsParallelFileFetches(t *testing.T) {
+	// more files than workers, each fetch stays open for a moment so
+	// unbounded fetching would have all of them in flight at once
+	const files = 3 * maxParallelFileFetches
+	var inFlight, maxInFlight atomic.Int32
 	ctx := mockedContext(t, t.Context(),
-		github_mock.WithRequestMatch(github_mock.GetOrgsMembershipsByOrgByUsername,
+		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/repos/octocat/hello-world/contents/.woodpecker" {
+				list := make([]github.RepositoryContent, 0, files)
+				for i := range files {
+					list = append(list, github.RepositoryContent{Type: new("file"), Name: new(strconv.Itoa(i) + ".yaml")})
+				}
+				writeJSON(t, w, list)
+				return
+			}
+			n := inFlight.Add(1)
+			defer inFlight.Add(-1)
+			for m := maxInFlight.Load(); n > m && !maxInFlight.CompareAndSwap(m, n); m = maxInFlight.Load() {
+			}
+			time.Sleep(20 * time.Millisecond)
+			name := strings.TrimPrefix(r.URL.Path, "/repos/octocat/hello-world/contents/")
+			writeJSON(t, w, github.RepositoryContent{Type: new("file"), Encoding: new("base64"), Content: new(base64.StdEncoding.EncodeToString([]byte("steps: " + name)))})
+		})),
+	)
+	c := &client{API: defaultAPI, url: defaultURL}
+
+	metas, err := c.Dir(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "octocat", Name: "hello-world"}, &model.Pipeline{Commit: "abc"}, ".woodpecker")
+	require.NoError(t, err)
+	assert.LessOrEqual(t, maxInFlight.Load(), int32(maxParallelFileFetches))
+	// files keep the order of the folder listing
+	require.Len(t, metas, files)
+	for i, meta := range metas {
+		name := ".woodpecker/" + strconv.Itoa(i) + ".yaml"
+		assert.Equal(t, &forge_types.FileMeta{Name: name, Data: []byte("steps: " + name)}, meta)
+	}
+}
+
+func TestOrgMembership(t *testing.T) {
+	ctx := mockedContext(
+		t, t.Context(),
+		github_mock.WithRequestMatch(
+			github_mock.GetOrgsMembershipsByOrgByUsername,
 			github.Membership{State: new("active"), Role: new("admin")},
 			github.Membership{State: new("pending"), Role: new("member")},
 		),
@@ -636,7 +785,8 @@ func TestOrgMembership(t *testing.T) {
 }
 
 func TestOrg(t *testing.T) {
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetOrgsByOrg, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/orgs/org" {
 				writeJSON(t, w, github.Organization{Login: new("org")})
@@ -677,4 +827,39 @@ func TestRefreshWithoutRefreshToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, refreshed)
 	assert.Equal(t, "token", user.AccessToken)
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*client)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }

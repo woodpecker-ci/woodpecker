@@ -23,6 +23,9 @@ import (
 func TestEnviron(t *testing.T) {
 	m := Metadata{
 		Sys: System{Name: "wp"},
+		Repo: Repo{
+			ID: 42,
+		},
 		Curr: Pipeline{
 			Event: EventRelease,
 			Release: Release{
@@ -45,6 +48,7 @@ func TestEnviron(t *testing.T) {
 
 	envs := m.Environ()
 	assert.Equal(t, "wp", envs["CI"])
+	assert.Equal(t, "42", envs["CI_REPO_ID"])
 	assert.Equal(t, "release", envs["CI_PIPELINE_EVENT"])
 	assert.Equal(t, "pull_request_metadata", envs["CI_PREV_PIPELINE_EVENT"])
 	assert.Equal(t, "v1.2.3", envs["CI_PIPELINE_RELEASE_TITLE"])
@@ -104,4 +108,27 @@ func TestEnvironReusedWorkflows(t *testing.T) {
 
 	m = &Metadata{Curr: Pipeline{ReusedWorkflows: map[string]int64{"lint": 5, "build": 3}}}
 	assert.Equal(t, "build=3,lint=5", m.Environ()["CI_PIPELINE_REUSED_WORKFLOWS"])
+}
+
+func TestEnvironForgeHost(t *testing.T) {
+	tests := []struct {
+		name  string
+		forge Forge
+		want  string
+	}{
+		{name: "host of the forge", forge: Forge{Type: "gitea", URL: "https://git.example.com", Host: "git.example.com"}, want: "git.example.com"},
+		{name: "port is kept", forge: Forge{Type: "forgejo", URL: "http://forgejo.internal:3000", Host: "forgejo.internal:3000"}, want: "forgejo.internal:3000"},
+		{name: "no forge configured", forge: Forge{}, want: ""},
+		{name: "an url on its own adds no host", forge: Forge{Type: "gitea", URL: "https://git.example.com"}, want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := Metadata{Forge: tt.forge}
+			envs := m.Environ()
+			assert.Equal(t, tt.want, envs["CI_FORGE_HOST"])
+			_, ok := envs["CI_FORGE_HOST"]
+			assert.Equal(t, tt.want != "", ok)
+		})
+	}
 }

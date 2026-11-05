@@ -3305,16 +3305,16 @@ func (_c *MockStore_HasRedirectionForRepo_Call) RunAndReturn(run func(n int64, s
 }
 
 // LogAppend provides a mock function for the type MockStore
-func (_mock *MockStore) LogAppend(step *model.Step, logEntrys []*model.LogEntry) error {
-	ret := _mock.Called(step, logEntrys)
+func (_mock *MockStore) LogAppend(context1 context.Context, step *model.Step, logEntrys []*model.LogEntry) error {
+	ret := _mock.Called(context1, step, logEntrys)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogAppend")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Step, []*model.LogEntry) error); ok {
-		r0 = returnFunc(step, logEntrys)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Step, []*model.LogEntry) error); ok {
+		r0 = returnFunc(context1, step, logEntrys)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -3327,25 +3327,31 @@ type MockStore_LogAppend_Call struct {
 }
 
 // LogAppend is a helper method to define mock.On call
+//   - context1 context.Context
 //   - step *model.Step
 //   - logEntrys []*model.LogEntry
-func (_e *MockStore_Expecter) LogAppend(step any, logEntrys any) *MockStore_LogAppend_Call {
-	return &MockStore_LogAppend_Call{Call: _e.mock.On("LogAppend", step, logEntrys)}
+func (_e *MockStore_Expecter) LogAppend(context1 any, step any, logEntrys any) *MockStore_LogAppend_Call {
+	return &MockStore_LogAppend_Call{Call: _e.mock.On("LogAppend", context1, step, logEntrys)}
 }
 
-func (_c *MockStore_LogAppend_Call) Run(run func(step *model.Step, logEntrys []*model.LogEntry)) *MockStore_LogAppend_Call {
+func (_c *MockStore_LogAppend_Call) Run(run func(context1 context.Context, step *model.Step, logEntrys []*model.LogEntry)) *MockStore_LogAppend_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Step
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Step)
+			arg0 = args[0].(context.Context)
 		}
-		var arg1 []*model.LogEntry
+		var arg1 *model.Step
 		if args[1] != nil {
-			arg1 = args[1].([]*model.LogEntry)
+			arg1 = args[1].(*model.Step)
+		}
+		var arg2 []*model.LogEntry
+		if args[2] != nil {
+			arg2 = args[2].([]*model.LogEntry)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -3356,22 +3362,22 @@ func (_c *MockStore_LogAppend_Call) Return(err error) *MockStore_LogAppend_Call 
 	return _c
 }
 
-func (_c *MockStore_LogAppend_Call) RunAndReturn(run func(step *model.Step, logEntrys []*model.LogEntry) error) *MockStore_LogAppend_Call {
+func (_c *MockStore_LogAppend_Call) RunAndReturn(run func(context1 context.Context, step *model.Step, logEntrys []*model.LogEntry) error) *MockStore_LogAppend_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LogDelete provides a mock function for the type MockStore
-func (_mock *MockStore) LogDelete(step *model.Step) error {
-	ret := _mock.Called(step)
+func (_mock *MockStore) LogDelete(context1 context.Context, step *model.Step) error {
+	ret := _mock.Called(context1, step)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogDelete")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Step) error); ok {
-		r0 = returnFunc(step)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Step) error); ok {
+		r0 = returnFunc(context1, step)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -3384,19 +3390,25 @@ type MockStore_LogDelete_Call struct {
 }
 
 // LogDelete is a helper method to define mock.On call
+//   - context1 context.Context
 //   - step *model.Step
-func (_e *MockStore_Expecter) LogDelete(step any) *MockStore_LogDelete_Call {
-	return &MockStore_LogDelete_Call{Call: _e.mock.On("LogDelete", step)}
+func (_e *MockStore_Expecter) LogDelete(context1 any, step any) *MockStore_LogDelete_Call {
+	return &MockStore_LogDelete_Call{Call: _e.mock.On("LogDelete", context1, step)}
 }
 
-func (_c *MockStore_LogDelete_Call) Run(run func(step *model.Step)) *MockStore_LogDelete_Call {
+func (_c *MockStore_LogDelete_Call) Run(run func(context1 context.Context, step *model.Step)) *MockStore_LogDelete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Step
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Step)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Step
+		if args[1] != nil {
+			arg1 = args[1].(*model.Step)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3407,14 +3419,14 @@ func (_c *MockStore_LogDelete_Call) Return(err error) *MockStore_LogDelete_Call 
 	return _c
 }
 
-func (_c *MockStore_LogDelete_Call) RunAndReturn(run func(step *model.Step) error) *MockStore_LogDelete_Call {
+func (_c *MockStore_LogDelete_Call) RunAndReturn(run func(context1 context.Context, step *model.Step) error) *MockStore_LogDelete_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // LogFind provides a mock function for the type MockStore
-func (_mock *MockStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
-	ret := _mock.Called(step)
+func (_mock *MockStore) LogFind(context1 context.Context, step *model.Step) ([]*model.LogEntry, error) {
+	ret := _mock.Called(context1, step)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogFind")
@@ -3422,18 +3434,18 @@ func (_mock *MockStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 
 	var r0 []*model.LogEntry
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Step) ([]*model.LogEntry, error)); ok {
-		return returnFunc(step)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Step) ([]*model.LogEntry, error)); ok {
+		return returnFunc(context1, step)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*model.Step) []*model.LogEntry); ok {
-		r0 = returnFunc(step)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Step) []*model.LogEntry); ok {
+		r0 = returnFunc(context1, step)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.LogEntry)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*model.Step) error); ok {
-		r1 = returnFunc(step)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *model.Step) error); ok {
+		r1 = returnFunc(context1, step)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3446,19 +3458,25 @@ type MockStore_LogFind_Call struct {
 }
 
 // LogFind is a helper method to define mock.On call
+//   - context1 context.Context
 //   - step *model.Step
-func (_e *MockStore_Expecter) LogFind(step any) *MockStore_LogFind_Call {
-	return &MockStore_LogFind_Call{Call: _e.mock.On("LogFind", step)}
+func (_e *MockStore_Expecter) LogFind(context1 any, step any) *MockStore_LogFind_Call {
+	return &MockStore_LogFind_Call{Call: _e.mock.On("LogFind", context1, step)}
 }
 
-func (_c *MockStore_LogFind_Call) Run(run func(step *model.Step)) *MockStore_LogFind_Call {
+func (_c *MockStore_LogFind_Call) Run(run func(context1 context.Context, step *model.Step)) *MockStore_LogFind_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Step
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Step)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Step
+		if args[1] != nil {
+			arg1 = args[1].(*model.Step)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -3469,7 +3487,7 @@ func (_c *MockStore_LogFind_Call) Return(logEntrys []*model.LogEntry, err error)
 	return _c
 }
 
-func (_c *MockStore_LogFind_Call) RunAndReturn(run func(step *model.Step) ([]*model.LogEntry, error)) *MockStore_LogFind_Call {
+func (_c *MockStore_LogFind_Call) RunAndReturn(run func(context1 context.Context, step *model.Step) ([]*model.LogEntry, error)) *MockStore_LogFind_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5690,16 +5708,16 @@ func (_c *MockStore_StepByUUID_Call) RunAndReturn(run func(uuid string) (*model.
 }
 
 // StepFinished provides a mock function for the type MockStore
-func (_mock *MockStore) StepFinished(step *model.Step) error {
-	ret := _mock.Called(step)
+func (_mock *MockStore) StepFinished(context1 context.Context, step *model.Step) error {
+	ret := _mock.Called(context1, step)
 
 	if len(ret) == 0 {
 		panic("no return value specified for StepFinished")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*model.Step) error); ok {
-		r0 = returnFunc(step)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *model.Step) error); ok {
+		r0 = returnFunc(context1, step)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -5712,19 +5730,25 @@ type MockStore_StepFinished_Call struct {
 }
 
 // StepFinished is a helper method to define mock.On call
+//   - context1 context.Context
 //   - step *model.Step
-func (_e *MockStore_Expecter) StepFinished(step any) *MockStore_StepFinished_Call {
-	return &MockStore_StepFinished_Call{Call: _e.mock.On("StepFinished", step)}
+func (_e *MockStore_Expecter) StepFinished(context1 any, step any) *MockStore_StepFinished_Call {
+	return &MockStore_StepFinished_Call{Call: _e.mock.On("StepFinished", context1, step)}
 }
 
-func (_c *MockStore_StepFinished_Call) Run(run func(step *model.Step)) *MockStore_StepFinished_Call {
+func (_c *MockStore_StepFinished_Call) Run(run func(context1 context.Context, step *model.Step)) *MockStore_StepFinished_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *model.Step
+		var arg0 context.Context
 		if args[0] != nil {
-			arg0 = args[0].(*model.Step)
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *model.Step
+		if args[1] != nil {
+			arg1 = args[1].(*model.Step)
 		}
 		run(
 			arg0,
+			arg1,
 		)
 	})
 	return _c
@@ -5735,7 +5759,7 @@ func (_c *MockStore_StepFinished_Call) Return(err error) *MockStore_StepFinished
 	return _c
 }
 
-func (_c *MockStore_StepFinished_Call) RunAndReturn(run func(step *model.Step) error) *MockStore_StepFinished_Call {
+func (_c *MockStore_StepFinished_Call) RunAndReturn(run func(context1 context.Context, step *model.Step) error) *MockStore_StepFinished_Call {
 	_c.Call.Return(run)
 	return _c
 }

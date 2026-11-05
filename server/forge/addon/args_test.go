@@ -80,11 +80,11 @@ func TestModelRepoRoundTrip(t *testing.T) {
 		t.Parallel()
 		perm := &model.Perm{Pull: true, Push: true, Admin: true}
 		orig := &model.Repo{
-			ID:       9,
-			FullName: "octocat/hello",
-			UserID:   42,
-			Hash:     "repo-hash",
-			Perm:     perm,
+			ID:            9,
+			FullName:      "octocat/hello",
+			UserID:        42,
+			WebhookSecret: "repo-hash",
+			Perm:          perm,
 		}
 
 		wrapped := modelRepoFromModel(orig)
@@ -97,7 +97,7 @@ func TestModelRepoRoundTrip(t *testing.T) {
 		got := decoded.asModel()
 		require.NotNil(t, got)
 		assert.Equal(t, int64(42), got.UserID)
-		assert.Equal(t, "repo-hash", got.Hash)
+		assert.Equal(t, "repo-hash", got.WebhookSecret)
 		require.NotNil(t, got.Perm)
 		assert.True(t, got.Perm.Admin)
 		assert.Equal(t, "octocat/hello", got.FullName)

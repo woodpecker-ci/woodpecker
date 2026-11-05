@@ -142,10 +142,10 @@ func modelUserFromModel(u *model.User) *modelUser {
 
 // modelRepo is an extension of model.Repo to marshal all fields to JSON.
 type modelRepo struct {
-	Repo   *model.Repo `json:"repo"`
-	UserID int64       `json:"user_id"`
-	Hash   string      `json:"hash"`
-	Perm   *model.Perm `json:"perm"`
+	Repo          *model.Repo `json:"repo"`
+	UserID        int64       `json:"user_id"`
+	WebhookSecret string      `json:"hash"`
+	Perm          *model.Perm `json:"perm"`
 }
 
 func (m *modelRepo) asModel() *model.Repo {
@@ -153,7 +153,7 @@ func (m *modelRepo) asModel() *model.Repo {
 		return nil
 	}
 	m.Repo.UserID = m.UserID
-	m.Repo.Hash = m.Hash
+	m.Repo.WebhookSecret = m.WebhookSecret
 	m.Repo.Perm = m.Perm
 	return m.Repo
 }
@@ -163,9 +163,9 @@ func modelRepoFromModel(r *model.Repo) *modelRepo {
 		return nil
 	}
 	return &modelRepo{
-		Repo:   r,
-		UserID: r.UserID,
-		Hash:   r.Hash,
-		Perm:   r.Perm,
+		Repo:          r,
+		UserID:        r.UserID,
+		WebhookSecret: r.WebhookSecret,
+		Perm:          r.Perm,
 	}
 }

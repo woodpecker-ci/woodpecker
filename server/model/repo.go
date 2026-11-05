@@ -68,7 +68,7 @@ type Repo struct {
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
 	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
-	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	WebhookSecret                string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`

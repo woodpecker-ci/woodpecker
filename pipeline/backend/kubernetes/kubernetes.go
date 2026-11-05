@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/cenkalti/backoff/v7"
@@ -307,6 +308,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan struct{})
 	var finishedOnce sync.Once
+	// Keep a termination observed by the informer if the API pod later disappears.
+	var observedPod atomic.Pointer[kube_core_v1.Pod]
+	rememberTermination := func(pod *kube_core_v1.Pod) {
+		if len(pod.Status.ContainerStatuses) > 0 && pod.Status.ContainerStatuses[0].State.Terminated != nil {
+			observedPod.CompareAndSwap(nil, pod.DeepCopy())
+		}
+	}
 
 	podChanged := func(obj any) {
 		pod, ok := obj.(*kube_core_v1.Pod)
@@ -316,6 +324,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
+			rememberTermination(pod)
 			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finishedOnce.Do(func() { close(finished) })
 			}
@@ -340,20 +349,22 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 			}
 		}
 		if pod.Name == podName {
+			rememberTermination(pod)
 			finishedOnce.Do(func() { close(finished) })
 		}
 	}
 
 	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
 	podInformer := si.Core().V1().Pods().Informer()
-	if _, err := podInformer.AddEventHandler(
+	handler, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			// A pod already terminal at the initial List only produces an Add event.
 			AddFunc:    podChanged,
 			UpdateFunc: func(_, newPod any) { podChanged(newPod) },
 			DeleteFunc: podDeleted,
 		},
-	); err != nil {
+	)
+	if err != nil {
 		return nil, err
 	}
 
@@ -361,16 +372,19 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// Wait for the informer's initial list before the check below. A pod deleted
-	// before that list never enters the cache, so its deletion is never delivered.
-	if !cache.WaitForCacheSync(ctx.Done(), podInformer.HasSynced) {
+	// Wait for initial Add handlers too, so an observed termination is retained
+	// before the guard Get can report that the pod has disappeared.
+	if !cache.WaitForCacheSync(ctx.Done(), handler.HasSynced) {
 		return nil, ctx.Err()
 	}
 
 	// If the pod was deleted before the informer synced, no events will
 	// ever arrive. Check explicitly so we don't hang forever.
-	if _, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{}); kube_errors.IsNotFound(err) {
-		return &types.State{ExitCode: 0, Exited: true}, nil
+	pod, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
+	if err == nil {
+		rememberTermination(pod)
+	} else if kube_errors.IsNotFound(err) && observedPod.Load() == nil {
+		return nil, err
 	}
 
 	select {
@@ -382,12 +396,15 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// After the informer signals completion, kubelet may not have finalized
 	// containerStatuses yet (phase=Succeeded before state.terminated is set).
 	// Retry with backoff to allow kubelet to catch up.
-	pod, err := backoff.Retry(
+	pod, err = backoff.Retry(
 		ctx,
 		func() (*kube_core_v1.Pod, error) {
 			p, err := e.client.CoreV1().Pods(e.config.GetNamespace(step.OrgID)).Get(ctx, podName, kube_meta_v1.GetOptions{})
 			if err != nil {
 				if kube_errors.IsNotFound(err) {
+					if observed := observedPod.Load(); observed != nil {
+						return observed, nil
+					}
 					return nil, backoff.Permanent(err)
 				}
 				return nil, err
@@ -407,9 +424,6 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}),
 	)
 	if err != nil {
-		if kube_errors.IsNotFound(backoff.AsRetryError(err).LastErr) {
-			return &types.State{ExitCode: 0, Exited: true}, nil
-		}
 		return nil, err
 	}
 

@@ -93,7 +93,7 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -156,7 +156,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name: "Agent without labels",
 			agentFilter: rpc.Filter{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			task: &model.Task{
 				Labels: map[string]string{"docker": "true"},
@@ -170,7 +170,7 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"docker": "true"},
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -178,10 +178,10 @@ func TestCreateFilterFunc(t *testing.T) {
 		{
 			name: "Agent and task without labels",
 			agentFilter: rpc.Filter{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			task: &model.Task{
-				Labels: map[string]string{},
+				Labels: make(map[string]string),
 			},
 			wantMatched: true,
 			wantScore:   0,
@@ -246,6 +246,50 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantMatched: true,
 			wantScore:   10,
 		},
+		{
+			name: "Org agents only matches agent of the same org",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: true,
+			wantScore:   20,
+		},
+		{
+			name: "Org agents only rejects system agent",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "*", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
+			name: "Org agents only rejects agent of other org",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"org-id": "456", "platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
+			name: "Org agents only rejects agent without org label",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux", pipeline.LabelOrgAgentsOnly: "true"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
 	}
 
 	for _, tt := range tests {
@@ -288,7 +332,7 @@ func TestMissingRequiredLabels(t *testing.T) {
 		// No agent labels
 		{
 			taskLabels:     map[string]string{"os": "linux"},
-			requiredLabels: map[string]string{},
+			requiredLabels: make(map[string]string),
 			want:           false,
 		},
 	}

@@ -26,6 +26,7 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -75,9 +76,9 @@ func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// URL returns the root url of a configured forge.
-func (c *config) URL() string {
-	return c.url
+// Config returns the metadata of the configured forge.
+func (c *config) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -271,18 +272,20 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
+			// sub directories are no pipeline files
+			if file.Type != "commit_file" {
+				continue
+			}
 			_, filename := filepath.Split(file.Path)
 			repoFile := forge_types.FileMeta{
 				Name: filename,
 			}
-			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
-				if err != nil {
-					return nil, err
-				}
-				if fileData != nil {
-					repoFile.Data = []byte(*fileData)
-				}
+			fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+			if err != nil {
+				return nil, err
+			}
+			if fileData != nil {
+				repoFile.Data = []byte(*fileData)
 			}
 			repoPathFiles = append(repoPathFiles, &repoFile)
 		}

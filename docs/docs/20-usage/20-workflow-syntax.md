@@ -806,6 +806,10 @@ depends_on:
     optional: true
 ```
 
+## `concurrency`
+
+By default, workflows run in parallel. See the [Concurrency section](./25-workflows.md#concurrency) for instructions on how to limit parallel execution of workflows.
+
 ## Advanced network options for steps
 
 :::warning
@@ -830,7 +834,7 @@ steps:
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode. Also see [security boundaries](./17-security-boundaries.md#trusted-repositories).
 :::
 
 ```diff

@@ -24,6 +24,7 @@ import (
 	"context"
 	"net/http"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -59,9 +60,8 @@ type Forge interface {
 	// Must be unique and constant across all implementations.
 	Name() string
 
-	// URL returns the root URL of the forge instance.
-	// Examples: "https://github.com", "https://gitlab.example.com"
-	URL() string
+	// Config returns the metadata of the forge instance.
+	Config() metadata.Forge
 
 	// Login authenticates a user via OAuth2.
 	//
@@ -121,7 +121,7 @@ type Forge interface {
 
 	// Activate creates a webhook pointing to Woodpecker.
 	// Called when user activates a repository.
-	// Must verify user has admin access. Should set webhook secret from r.Hash.
+	// Must verify user has admin access. Should set webhook secret from r.WebhookSecret.
 	// Configure webhook for all events Hook() can parse.
 	Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error
 
@@ -151,7 +151,7 @@ type Forge interface {
 	//
 	// Webhook Processing Flow:
 	//  1. HTTP request arrives at /api/hook with forge-specific format
-	//  2. Webhook token verified against repo.Hash
+	//  2. Webhook token verified against repo.WebhookSecret
 	//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
 	//
 	// Return Semantics:
