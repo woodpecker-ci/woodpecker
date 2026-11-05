@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-04
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
 - Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
 - Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
