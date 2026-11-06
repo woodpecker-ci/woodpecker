@@ -155,6 +155,7 @@ Most variables are available in both scopes. Variables scoped only to `runtime` 
 |                                    |                   | **Forge**                                                                                                                                        |                                                                                                                                 |
 | `CI_FORGE_TYPE`                    | `config, runtime` | name of forge                                                                                                                                    | `bitbucket`<br/>`bitbucket_dc`<br/>`forgejo`<br/>`gitea`<br/>`github`<br/>`gitlab`                                              |
 | `CI_FORGE_URL`                     | `config, runtime` | root URL of configured forge                                                                                                                     | `https://git.example.com`                                                                                                       |
+| `CI_FORGE_HOST`                    | `config, runtime` | hostname of configured forge                                                                                                                     | `git.example.com`                                                                                                               |
 |                                    |                   | **Internal** - Please don't use!                                                                                                                 |                                                                                                                                 |
 | `CI_SCRIPT`                        | `runtime`         | Internal script path. Used to call pipeline step commands.                                                                                       |                                                                                                                                 |
 | `CI_NETRC_USERNAME`                | `runtime`         | Credentials for private repos to be able to clone data. (Only available for specific images)                                                     |                                                                                                                                 |
@@ -255,7 +256,7 @@ For pull request events, `CI_COMMIT_PULL_REQUEST_DRAFT` is set to `true` or `fal
 | GitHub               | :white_check_mark: |                                                                   |
 | Gitea                | :white_check_mark: |                                                                   |
 | GitLab               | :white_check_mark: | Uses `draft`; falls back to legacy `work_in_progress` when needed |
-| Forgejo              | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
+| Forgejo              | :white_check_mark: |                                                                   |
 | Bitbucket            | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
 | Bitbucket Datacenter | :x:                | Webhook payloads include draft status, but it is not exposed yet  |
 

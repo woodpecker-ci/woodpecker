@@ -24,10 +24,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/api"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
@@ -87,7 +89,7 @@ func TestHook(t *testing.T) {
 	}
 
 	_manager.On("ForgeFromRepo", repo).Return(_forge, nil)
-	_forge.On("Hook", mock.Anything, mock.Anything).Return(repo, pipeline, nil)
+	_forge.On("Hook", mock.Anything, mock.Anything, repo.WebhookSecret).Return(repo, pipeline, nil)
 	_store.On("GetRepo", repo.ID).Return(repo, nil)
 	_store.On("GetUser", user.ID).Return(user, nil)
 	_store.On("UpdateRepo", repo).Return(nil)
@@ -107,4 +109,35 @@ func TestHook(t *testing.T) {
 
 	assert.Equal(t, http.StatusNoContent, c.Writer.Status())
 	assert.Equal(t, "true", w.Header().Get("Pipeline-Filtered"))
+}
+
+func TestHookRejectsInvalidSignature(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	oldManager := server.Config.Services.Manager
+	t.Cleanup(func() { server.Config.Services.Manager = oldManager })
+
+	_manager := manager_mocks.NewMockManager(t)
+	_forge := forge_mocks.NewMockForge(t)
+	_store := store_mocks.NewMockStore(t)
+	server.Config.Services.Manager = _manager
+	repo := &model.Repo{ID: 1, ForgeID: 1, ForgeRemoteID: "123", WebhookSecret: "repo-secret"}
+	_store.On("GetRepoForgeID", int64(1), model.ForgeRemoteID("123")).Return(repo, nil)
+	_manager.On("ForgeFromRepo", repo).Return(_forge, nil)
+	_forge.On("Hook", mock.Anything, mock.Anything, "repo-secret").Return(nil, nil, types.ErrInvalidWebhookSignature)
+
+	hookToken := token.New(token.HookToken)
+	hookToken.Set("repo-forge-remote-id", "123")
+	hookToken.Set("forge-id", "1")
+	signedToken, err := hookToken.Sign("repo-secret")
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", _store)
+	c.Request = httptest.NewRequest(http.MethodPost, "/api/hook", nil)
+	c.Request.Header.Set("Authorization", "Bearer "+signedToken)
+
+	api.PostHook(c)
+
+	assert.Equal(t, http.StatusForbidden, c.Writer.Status())
 }

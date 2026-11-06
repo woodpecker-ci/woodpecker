@@ -210,7 +210,7 @@ func TestBitbucket(t *testing.T) {
 	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 	mockStore.On("GetRepoForgeID", mock.Anything, mock.Anything).Return(fakeRepoFromHook, nil)
 
-	r, b, err := c.Hook(ctx, req)
+	r, b, err := c.Hook(ctx, req, "")
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)

@@ -825,5 +825,7 @@
     "delete": "删除",
     "allowed_orgs": "允许的组织",
     "allowed_orgs_desc": "指定允许其成员通过此代码托管平台登录的组织，作为全局 WOODPECKER_ORGS 设置的补充。",
-    "allowed_orgs_placeholder": "组织名称"
+    "allowed_orgs_placeholder": "组织名称",
+    "forge_name_placeholder": "在登录页面上显示的名称 (可选)",
+    "forge_name": "显示名称"
 }
