@@ -1,0 +1,91 @@
+# Nightly/manual security scan of all verified Woodpecker plugin images.
+#
+# The plugin list is read from docs/plugins/woodpecker-plugins/plugins.json and
+# each plugin image is taken from the `containerImage` field of the plugin's
+# docs.md. The scan loops over all plugins and continues on individual failures.
+#
+# Manual runs: start a pipeline with TASK=plugin-scan.
+# Scheduled runs: create a cron job named "plugin-scan" in the repository
+# settings (for example "0 3 * * *" for a nightly scan at 03:00).
+when:
+  - event: manual
+    evaluate: 'TASK == "plugin-scan"'
+  - event: cron
+    cron: plugin-scan
+
+variables:
+  - &trivy_image 'docker.io/aquasec/trivy:0.76.1'
+
+steps:
+  scan:
+    image: *trivy_image
+    pull: true
+    commands:
+      - apk add --no-cache curl jq
+      - sh ./.woodpecker/plugin-scan.sh
+    environment:
+      TRIVY_IMAGE: *trivy_image
+      PLUGINS_JSON: docs/plugins/woodpecker-plugins/plugins.json
+      REPORT_DIR: plugin-scan-report
+      # Set to "true" if a plugin whose scan could not be performed should make
+      # the workflow fail. Vulnerabilities themselves never fail the workflow.
+      FAIL_ON_SCAN_ERROR: 'false'
+
+  # Publish the compact scan status to the website deployment repository. Only
+  # the badge data and counts are published here; the detailed findings go to
+  # the force-updated plugin-scan-results branch below.
+  publish:
+    image: docker.io/alpine:3.24
+    depends_on:
+      - scan
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
+    when:
+      - event: cron
+      - event: manual
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+    commands:
+      - apk add --no-cache git openssh-client rsync
+      - mkdir -p $HOME/.ssh
+      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+      - chmod 0600 $HOME/.ssh/id_rsa
+      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git ./site_repo
+      - rsync -a plugin-scan-report/website/plugin-scan.json ./site_repo/plugin-scan.json
+      - cd ./site_repo
+      - git add plugin-scan.json
+      - test -n "$(git status --porcelain)" || exit 0
+      - git -c user.email="woodpecker-bot@obermui.de" -c user.name="woodpecker-bot" commit -m "Update plugin scan results"
+      - git push || (git pull --rebase && git push)
+
+  # Publish the trimmed per-plugin Trivy findings to a dedicated branch. The
+  # branch is force-pushed on every scan so the repository history does not grow
+  # with nightly report snapshots. The plugin detail page loads these files on
+  # demand from raw.githubusercontent.com.
+  publish-details:
+    image: docker.io/alpine:3.24
+    depends_on:
+      - scan
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
+    when:
+      - event: cron
+      - event: manual
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+    commands:
+      - apk add --no-cache git openssh-client
+      - mkdir -p $HOME/.ssh
+      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+      - chmod 0600 $HOME/.ssh/id_rsa
+      - mkdir -p ./scan-results-branch
+      - cd ./scan-results-branch
+      - git init
+      - git checkout -b plugin-scan-results
+      - cp -R ../plugin-scan-report/website/details/. .
+      - git add .
+      - git -c user.email="woodpecker-bot@obermui.de" -c user.name="woodpecker-bot" commit -m "Update plugin scan details - ${CI_COMMIT_SHA}"
+      - git remote add origin git@github.com:woodpecker-ci/woodpecker-ci.github.io.git
+      - git push --force origin plugin-scan-results

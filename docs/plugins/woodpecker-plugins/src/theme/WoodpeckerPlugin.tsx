@@ -3,6 +3,7 @@ import React from 'react';
 
 import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
 import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
+import { PluginScanDetails } from './PluginScanBadge';
 
 export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
   return (
@@ -57,6 +58,8 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
                       ))}
                     </div>
                   )}
+
+                  <PluginScanDetails plugin={plugin} />
                 </div>
 
                 <p style={{ marginTop: '2rem', marginBottom: '1rem' }}>{plugin.description}</p>

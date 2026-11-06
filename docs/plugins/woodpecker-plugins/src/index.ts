@@ -70,6 +70,7 @@ async function loadContent(): Promise<Content> {
           icon: docsHeader.icon,
           description: docsHeader.description,
           docs: docsBody,
+          docsSource: i.docs,
           tags: docsHeader.tags || [],
           author: docsHeader.author,
           containerImage: docsHeader.containerImage,
