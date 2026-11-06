@@ -79,13 +79,13 @@ type Repo struct {
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
 
+	// HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore
+	HasNoForgeRepo bool `json:"has_no_forge_repo,omitempty" xorm:"DEFAULT FALSE 'has_no_forge_repo'"`
+
 	// Rest API Only
 
 	// HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id
 	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty" xorm:"-"`
-
-	// HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore
-	HasNoForgeRepo bool `json:"has_no_forge_repo,omitempty" xorm:"-"`
 
 	// internal usage
 
@@ -138,6 +138,8 @@ func (r *Repo) Update(from *Repo) {
 		r.CloneSSH = from.CloneSSH
 	}
 	r.Branch = from.Branch
+	// the forge just returned this repo, so it is not orphaned
+	r.HasNoForgeRepo = false
 	// Only propagate visibility when the source supplies it. Some webhook
 	// payloads (notably GitLab push/tag/merge events) do not include project
 	// visibility, leaving from.Visibility empty and from.IsSCMPrivate at the

@@ -5127,6 +5127,61 @@ func (_c *MockStore_RepoListLatest_Call) RunAndReturn(run func(user *model.User)
 	return _c
 }
 
+// RepoListOrphaned provides a mock function for the type MockStore
+func (_mock *MockStore) RepoListOrphaned() ([]*model.Repo, error) {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for RepoListOrphaned")
+	}
+
+	var r0 []*model.Repo
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func() ([]*model.Repo, error)); ok {
+		return returnFunc()
+	}
+	if returnFunc, ok := ret.Get(0).(func() []*model.Repo); ok {
+		r0 = returnFunc()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Repo)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func() error); ok {
+		r1 = returnFunc()
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_RepoListOrphaned_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RepoListOrphaned'
+type MockStore_RepoListOrphaned_Call struct {
+	*mock.Call
+}
+
+// RepoListOrphaned is a helper method to define mock.On call
+func (_e *MockStore_Expecter) RepoListOrphaned() *MockStore_RepoListOrphaned_Call {
+	return &MockStore_RepoListOrphaned_Call{Call: _e.mock.On("RepoListOrphaned")}
+}
+
+func (_c *MockStore_RepoListOrphaned_Call) Run(run func()) *MockStore_RepoListOrphaned_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockStore_RepoListOrphaned_Call) Return(repos []*model.Repo, err error) *MockStore_RepoListOrphaned_Call {
+	_c.Call.Return(repos, err)
+	return _c
+}
+
+func (_c *MockStore_RepoListOrphaned_Call) RunAndReturn(run func() ([]*model.Repo, error)) *MockStore_RepoListOrphaned_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SecretCreate provides a mock function for the type MockStore
 func (_mock *MockStore) SecretCreate(secret *model.Secret) error {
 	ret := _mock.Called(secret)

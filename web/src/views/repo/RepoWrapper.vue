@@ -49,6 +49,7 @@
     />
 
     <Warning v-if="permSyncFailed" class="mb-4 text-sm" :text="$t('repo.perm_sync_failed')" />
+    <Warning v-if="repo.has_no_forge_repo" class="mb-4 text-sm" :text="$t('repo.orphaned')" />
     <router-view />
   </Scaffold>
   <router-view v-else-if="repo && repoPermissions" />
