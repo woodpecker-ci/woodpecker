@@ -196,7 +196,12 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	repo.Update(repoFromForge)
+	err = updateRepo(c, _store, _forge, user, repo, repoFromForge)
+	if err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msg("could not update repo from hook")
+		c.String(http.StatusInternalServerError, "failure to update repo")
+		return
+	}
 	err = _store.UpdateRepo(repo)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
