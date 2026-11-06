@@ -392,6 +392,9 @@ func TestCreatePipeline(t *testing.T) {
 			Password: "testpass",
 		}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		// a status post reads the persisted states it posts
+		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil).Maybe()
+		mockStore.On("GetPipeline", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
 
 		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
 		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
@@ -465,6 +468,9 @@ func TestCreatePipeline(t *testing.T) {
 		}, nil).Maybe()
 
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		// a status post reads the persisted states it posts
+		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil).Maybe()
+		mockStore.On("GetPipeline", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
 		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
 		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
 
@@ -527,6 +533,9 @@ func TestCreatePipeline(t *testing.T) {
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(nil, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		// a status post reads the persisted states it posts
+		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil).Maybe()
+		mockStore.On("GetPipeline", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
 
 		mockManager := manager_mocks.NewMockManager(t)
 		mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -594,6 +603,9 @@ func TestPostPipeline(t *testing.T) {
 		mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://example.com", Host: "example.com"}).Maybe()
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
+		// a status post reads the persisted states it posts
+		mockStore.On("WorkflowLoad", mock.Anything).Return(&model.Workflow{}, nil).Maybe()
+		mockStore.On("GetPipeline", mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
 
 		mockSecretService.On("SecretListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
 		mockRegistryService.On("RegistryListPipeline", mock.Anything, fakeRepo, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()

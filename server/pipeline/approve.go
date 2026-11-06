@@ -75,14 +75,18 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	publishPipeline(ctx, forge, currentPipeline, repo, user)
+	// the forge statuses are posted by start() right after
+	publishPipelineEvent(ctx, currentPipeline, repo)
 
-	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
+	startedPipeline, err := start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
+		if uErr := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, err); uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		}
 		return nil, errors.New(msg)
 	}
 
-	return currentPipeline, nil
+	return startedPipeline, nil
 }

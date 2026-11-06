@@ -62,7 +62,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		}
 	}
 
-	updatePipelineStatus(ctx, forge, pipeline, repo, user)
+	updatePipelineStatus(ctx, store, forge, pipeline, repo, user)
 
 	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, pipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
