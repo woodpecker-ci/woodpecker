@@ -310,7 +310,10 @@ func (r *Runtime) traceStep(processState *backend_types.State, err error, step *
 		}
 	case processState != nil:
 		s.CurrStepState = *processState
-		// processState == nil && err == nil: step just started, leave s.CurrStepState zero-valued.
+	default:
+		// Step just started. Report the agent's start time so the server does not
+		// mix its own clock (start) with the agent's clock (finish).
+		s.CurrStepState = backend_types.State{Started: time.Now().Unix()}
 	}
 
 	if traceErr := r.tracer.Trace(s); traceErr != nil {
