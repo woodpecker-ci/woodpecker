@@ -15,6 +15,7 @@
 package queue
 
 import (
+	"cmp"
 	"container/list"
 	"context"
 	"errors"
@@ -269,8 +270,10 @@ func (q *fifo) process() {
 
 		q.resubmitExpiredPipelines()
 		q.filterWaiting()
-		for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
+		concurrency := q.newConcurrencyIndex()
+		for pending, worker := q.assignToWorker(concurrency); pending != nil && worker != nil; pending, worker = q.assignToWorker(concurrency) {
 			task, _ := pending.Value.(*model.Task)
+			concurrency.start(task)
 			task.AgentID = worker.agentID
 			delete(q.workers, worker)
 			q.pending.Remove(pending)
@@ -323,7 +326,10 @@ func (q *fifo) filterWaiting() {
 	}
 }
 
-func (q *fifo) assignToWorker() (*list.Element, *worker) {
+func (q *fifo) assignToWorker(concurrency *concurrencyIndex) (*list.Element, *worker) {
+	if len(q.workers) == 0 {
+		return nil, nil
+	}
 	var bestWorker *worker
 	var bestScore int
 
@@ -332,7 +338,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 
 		// skip tasks that would exceed their workflow concurrency limit, they
 		// stay pending and are retried on the next process tick.
-		if !q.canRunConcurrent(task) {
+		if !concurrency.canRun(task) {
 			continue
 		}
 
@@ -356,80 +362,16 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	return nil, nil
 }
 
-// canRunConcurrent reports whether the given task may currently start without
-// violating its workflow concurrency limit. Tasks without a limit always pass,
-// keeping the default scheduling behavior unchanged.
-//
-// Slots within a concurrency group are granted in creation order (earliest
-// pipeline first, by the task's Created timestamp, with the workflow name as a
-// deterministic tiebreaker) rather than in the order tasks become ready. This
-// guarantees that a later pipeline whose dependencies happen to finish faster
-// cannot overtake an earlier one that is still waiting.
-//
-// The ordering reservation only applies across pipelines. Within a single
-// pipeline, execution order is already defined by depends_on, and reserving a
-// slot for an earlier workflow could deadlock when it depends on a later
-// workflow that shares the same group (e.g. deploy.yaml depending on
-// test.yaml). Because dependencies never cross pipelines, restricting the
-// reservation to other pipelines keeps the ordering guarantee while making
-// such deadlocks impossible.
-//
-// Expects the queue to be locked by the caller.
-func (q *fifo) canRunConcurrent(task *model.Task) bool {
-	if task.ConcurrencyLimit <= 0 || task.ConcurrencyGroup == "" {
-		return true
-	}
-
-	group := task.ConcurrencyGroup
-
-	// count tasks of the same group that already occupy a running slot.
-	running := 0
-	for _, e := range q.running {
-		if e.item.ConcurrencyGroup == group {
-			running++
-		}
-	}
-	if running >= task.ConcurrencyLimit {
-		return false
-	}
-
-	// count not-yet-running members of the group from earlier pipelines. They
-	// have priority for the remaining slots, even if they are still waiting on
-	// their dependencies, so cross-pipeline ordering is preserved.
-	ahead := 0
-	countAhead := func(other *model.Task) {
-		if other.ConcurrencyGroup != group || other.ID == task.ID {
-			return
-		}
-		// only reserve order across pipelines; see the function doc above.
-		if other.PipelineID == task.PipelineID {
-			return
-		}
-		if taskOrderLess(other, task) {
-			ahead++
-		}
-	}
-	for element := q.pending.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
-	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
-
-	return running+ahead < task.ConcurrencyLimit
-}
-
 // taskOrderLess reports whether task a was instantiated before task b. Ordering
 // is by the Created timestamp (the pipeline creation time), with the workflow
 // name as a deterministic tiebreaker for tasks created within the same second.
 // The task ID is intentionally not used for ordering.
 func taskOrderLess(a, b *model.Task) bool {
-	if a.Created != b.Created {
-		return a.Created < b.Created
-	}
-	return a.Name < b.Name
+	return taskOrderCompare(a, b) < 0
+}
+
+func taskOrderCompare(a, b *model.Task) int {
+	return cmp.Or(cmp.Compare(a.Created, b.Created), cmp.Compare(a.Name, b.Name))
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
