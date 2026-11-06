@@ -35,25 +35,25 @@ func TestEnvVarSubst(t *testing.T) {
 }
 
 // TestEnvVarSubstEscapes pins the escape rules of the config pre-processor.
-// Outside of ${...}, "\\" and "\/" are unescaped like "$$", so configs that
-// double backslashes (evaluate regexes, branch patterns) keep working.
+// Outside of ${...} only "$$" is an escape; "\\" and "\/" are kept as is, so
+// backslashes in evaluate regexes and branch patterns must not be doubled.
 func TestEnvVarSubstEscapes(t *testing.T) {
 	environ := map[string]string{"X": "x", "A": "a/b", "B": `a\b`}
 	tests := []struct {
 		in   string
 		want string
 	}{
-		// backslash escapes outside of ${...}
-		{in: `\\`, want: `\`},
-		{in: `\/`, want: `/`},
-		{in: `a\\b`, want: `a\b`},
-		{in: `a\/b`, want: `a/b`},
-		{in: `a\\\\b`, want: `a\\b`},
-		{in: `a\\/b`, want: `a\/b`},
-		{in: `$$\\`, want: `$\`},
-		{in: `\\${X}\\`, want: `\x\`},
-		{in: `${X}\\`, want: `x\`},
-		{in: `${X}\/`, want: `x/`},
+		// "\\" and "\/" outside of ${...} are no escapes
+		{in: `\\`, want: `\\`},
+		{in: `\/`, want: `\/`},
+		{in: `a\\b`, want: `a\\b`},
+		{in: `a\/b`, want: `a\/b`},
+		{in: `a\\\\b`, want: `a\\\\b`},
+		{in: `a\\/b`, want: `a\\/b`},
+		{in: `$$\\`, want: `$\\`},
+		{in: `\\${X}\\`, want: `\\x\\`},
+		{in: `${X}\\`, want: `x\\`},
+		{in: `${X}\/`, want: `x\/`},
 		// other backslashes are kept
 		{in: `a\.b`, want: `a\.b`},
 		{in: `a\nb`, want: `a\nb`},

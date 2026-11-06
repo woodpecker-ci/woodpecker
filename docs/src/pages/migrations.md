@@ -13,6 +13,28 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
 
+#### Backslashes in pipeline configs
+
+Backslashes outside of `${...}` are no longer unescaped when the pipeline config is pre-processed ([#7429](https://github.com/woodpecker-ci/woodpecker/pull/7429)).
+Before, `\\` became `\` and `\/` became `/`, so they had to be doubled. Now each backslash is kept as written:
+remove the extra one, e.g. in `evaluate` regexes, `branch` patterns and `commands`.
+
+3.x:
+
+```yaml
+when:
+  - event: push
+    branch: '*\\/*'
+```
+
+4.x:
+
+```yaml
+when:
+  - event: push
+    branch: '*\/*'
+```
+
 ### API changes
 
 - The pipeline model is currently being changed to use nested objects grouped based on the event.
