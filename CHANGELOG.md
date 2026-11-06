@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-05
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,7 @@
 
 ### 📦️ Dependency
 
+- Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
 - Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
 - Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
