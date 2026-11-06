@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Make builtin env var scopes more descriptive [[#7486](https://github.com/woodpecker-ci/woodpecker/pull/7486)]
 - Add support for forgejo to pull draft metadata [[#7470](https://github.com/woodpecker-ci/woodpecker/pull/7470)]
 - Add CI_FORGE_HOST as a built-in environment variable [[#7391](https://github.com/woodpecker-ci/woodpecker/pull/7391)]
 - Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
