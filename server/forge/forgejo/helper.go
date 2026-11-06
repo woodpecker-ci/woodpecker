@@ -17,7 +17,6 @@ package forgejo
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -226,22 +225,19 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 }
 
 // helper function that parses a push hook from a read closer.
-func parsePush(r io.Reader) (*pushHook, error) {
+func parsePush(b []byte) (*pushHook, error) {
 	push := new(pushHook)
-	err := json.NewDecoder(r).Decode(push)
-	return push, err
+	return push, json.Unmarshal(b, push)
 }
 
-func parsePullRequest(r io.Reader) (*pullRequestHook, error) {
+func parsePullRequest(b []byte) (*pullRequestHook, error) {
 	pr := new(pullRequestHook)
-	err := json.NewDecoder(r).Decode(pr)
-	return pr, err
+	return pr, json.Unmarshal(b, pr)
 }
 
-func parseRelease(r io.Reader) (*releaseHook, error) {
+func parseRelease(b []byte) (*releaseHook, error) {
 	pr := new(releaseHook)
-	err := json.NewDecoder(r).Decode(pr)
-	return pr, err
+	return pr, json.Unmarshal(b, pr)
 }
 
 // fixMalformedAvatar is a helper function that fixes an avatar url if malformed

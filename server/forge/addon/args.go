@@ -15,6 +15,10 @@
 package addon
 
 import (
+	"errors"
+	"fmt"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
@@ -77,7 +81,49 @@ type argumentsRepos struct {
 	P *model.ListOptions `json:"p"`
 }
 
+// errorKind names an error of the forge that the server checks for with
+// errors.Is. The RPC layer only sends the message of an error, so the kind is
+// sent next to the message. The values are part of the protocol, never rename them.
+type errorKind string
+
+const (
+	errorKindIgnoreEvent      errorKind = "ignore_event"
+	errorKindInvalidSignature errorKind = "invalid_signature"
+)
+
+// errorKindMap maps the kind to the error the server checks for.
+var errorKindMap = map[errorKind]error{
+	errorKindIgnoreEvent:      &types.ErrIgnoreEvent{},
+	errorKindInvalidSignature: types.ErrInvalidWebhookSignature,
+}
+
+// encodeErrorKinds returns the kind and the message of an error the server
+// checks for. For every other error the result is not found.
+func encodeErrorKinds(err error) (found bool, kind errorKind, msg string) {
+	for k, target := range errorKindMap {
+		if errors.Is(err, target) {
+			return true, k, err.Error()
+		}
+	}
+	return false, "", ""
+}
+
+// decodeErrorKinds returns the error an addon sent as kind and message.
+// A kind this server does not know is returned as ErrAddon with the message only.
+func decodeErrorKinds(kind errorKind, msg string) error {
+	if target, found := errorKindMap[kind]; found {
+		return &ErrAddon{Message: msg, Err: target}
+	}
+	return &ErrAddon{Message: msg, Err: fmt.Errorf("addon sent unknown error kind %q", kind)}
+}
+
+type baseErrorResponse struct {
+	ErrorKind    errorKind `json:"error_kind,omitempty"`
+	ErrorMessage string    `json:"error_message,omitempty"`
+}
+
 type responseHook struct {
+	baseErrorResponse
 	Repo     *modelRepo      `json:"repo"`
 	Pipeline *model.Pipeline `json:"pipeline"`
 }
@@ -93,6 +139,7 @@ type httpRequest struct {
 	Header map[string][]string `json:"header"`
 	Form   map[string][]string `json:"form"`
 	Body   []byte              `json:"body"`
+	Secret string              `json:"secret"`
 }
 
 // modelUser is an extension of model.User to marshal all fields to JSON.
