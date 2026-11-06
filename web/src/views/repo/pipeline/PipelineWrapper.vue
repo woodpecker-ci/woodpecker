@@ -41,11 +41,12 @@
               :is-loading="isCancelingPipeline"
               @click="cancelPipeline"
             />
-            <Button
-              class="shrink-0"
-              :text="$t('repo.pipeline.actions.restart')"
-              :is-loading="isRestartingPipeline"
-              @click="restartPipeline"
+            <PipelineRestartButton
+              :can-restart-failed="pipelineCanRestartFailed(pipeline)"
+              :is-restarting="isRestartingPipeline"
+              :is-restarting-failed="isRestartingFailedWorkflows"
+              @restart="restartPipeline"
+              @restart-failed="restartFailedWorkflows"
             />
             <Button
               v-if="pipeline.status === 'success' && repo.allow_deploy"
@@ -78,6 +79,19 @@
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
+        <router-link
+          v-if="pipeline.parent"
+          :to="{ name: 'repo-pipeline', params: { pipelineId: pipeline.parent } }"
+          class="text-wp-link-100 hover:text-wp-link-200 flex shrink-0 items-center gap-2"
+          data-test="pipeline-parent"
+        >
+          <Icon name="refresh" />
+          <span>{{
+            pipeline.partial_restart
+              ? $t('repo.pipeline.restart_failed_of', { pipelineId: pipeline.parent })
+              : $t('repo.pipeline.restart_of', { pipelineId: pipeline.parent })
+          }}</span>
+        </router-link>
         <div v-if="pipeline.status === 'killed' && pipeline.cancel_info" class="flex shrink-0 items-center gap-2">
           <Icon name="status-killed" />
           <span class="truncate">
@@ -139,6 +153,7 @@ import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import PipelineRestartButton from '~/components/repo/pipeline/PipelineRestartButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
@@ -149,7 +164,7 @@ import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Pipeline, PipelineConfig } from '~/lib/api/types';
-import { pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
+import { pipelineCanRestartFailed, pipelineHasErrorsToShow, workflowsWithErrors } from '~/lib/pipeline';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
@@ -214,6 +229,17 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
 
 const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncAction(async () => {
   const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
+    fork: true,
+  });
+  notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });
+  await router.push({
+    name: 'repo-pipeline',
+    params: { pipelineId: newPipeline.number },
+  });
+});
+
+const { doSubmit: restartFailedWorkflows, isLoading: isRestartingFailedWorkflows } = useAsyncAction(async () => {
+  const newPipeline = await apiClient.restartFailedWorkflows(repo.value.id, pipelineId.value, {
     fork: true,
   });
   notifications.notify({ title: i18n.t('repo.pipeline.actions.restart_success'), type: 'success' });

@@ -95,6 +95,10 @@ type Client interface {
 	// PipelineStart re-starts a stopped pipeline.
 	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
 
+	// PipelineRestartFailed re-starts the failed workflows of a pipeline and
+	// the workflows depending on them.
+	PipelineRestartFailed(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
+
 	// PipelineStop stops the given pipeline.
 	PipelineStop(repoID, pipeline int64) error
 

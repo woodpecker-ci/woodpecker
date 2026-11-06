@@ -5,6 +5,7 @@
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
         :pipeline="pipeline!"
+        :reused-workflows="reusedWorkflows"
       />
 
       <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
@@ -71,6 +72,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import useReusedWorkflows from '~/compositions/useReusedWorkflows';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineStep } from '~/lib/api/types';
 import { anyStepStarted, pipelineHasErrorsToShow, pipelineHasNonWarningErrors } from '~/lib/pipeline';
@@ -90,6 +92,11 @@ const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
 
 const stepId = toRef(props, 'stepId');
+
+const reusedWorkflows = useReusedWorkflows(
+  computed(() => repo.value.id),
+  pipeline,
+);
 
 const defaultStepId = computed(() => pipeline.value?.workflows?.[0]?.children?.[0]?.pid ?? null);
 

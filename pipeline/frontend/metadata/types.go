@@ -61,6 +61,10 @@ type (
 		Release     Release  `json:"release"`
 		Author      string   `json:"author,omitempty"`
 		Avatar      string   `json:"avatar,omitempty"`
+
+		// ReusedWorkflows lists the workflows a partial restart did not rerun,
+		// with the number of the pipeline they ran in.
+		ReusedWorkflows map[string]int64 `json:"reused_workflows,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.

@@ -40,6 +40,10 @@ var pipelineStartCmd = &cli.Command{
 				TrimSpace: true,
 			},
 		},
+		&cli.BoolFlag{
+			Name:  "failed",
+			Usage: "only restart the failed workflows and the workflows depending on them",
+		},
 	},
 }
 
@@ -77,7 +81,12 @@ func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 		Params: internal.ParseKeyPair(c.StringSlice("param")),
 	}
 
-	pipeline, err := client.PipelineStart(repoID, number, opt)
+	start := client.PipelineStart
+	if c.Bool("failed") {
+		start = client.PipelineRestartFailed
+	}
+
+	pipeline, err := start(repoID, number, opt)
 	if err != nil {
 		return err
 	}

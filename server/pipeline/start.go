@@ -28,7 +28,8 @@ import (
 )
 
 // start a pipeline, make sure it was stored persistent in the store before.
-func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item) (*model.Pipeline, error) {
+// The depStatus argument is only set for a partial restart, see pipelineTasks.
+func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*builder.Item, depStatus map[string]map[string]model.StatusValue) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {
 		// should be not breaking
@@ -40,7 +41,7 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		return nil, fmt.Errorf("failed to load org %d of repo %s: %w", repo.OrgID, repo.FullName, err)
 	}
 
-	tasks, err := pipelineTasks(repo, org, activePipeline, pipelineItems)
+	tasks, err := pipelineTasks(repo, org, activePipeline, pipelineItems, depStatus)
 	if err != nil {
 		return nil, err
 	}

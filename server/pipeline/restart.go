@@ -21,6 +21,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -30,6 +31,18 @@ import (
 
 // Restart a pipeline by creating a new one out of the old and start it.
 func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+	return restart(ctx, store, lastPipeline, user, repo, envs, false)
+}
+
+// RestartFailed creates a new pipeline out of the old one that only runs the
+// workflows which failed, plus every workflow depending on them. The workflows
+// that are not rerun are left out of the new pipeline, and dependencies on
+// them count as finished with the state they had in the old pipeline.
+func RestartFailed(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string) (*model.Pipeline, error) {
+	return restart(ctx, store, lastPipeline, user, repo, envs, true)
+}
+
+func restart(ctx context.Context, store store.Store, lastPipeline *model.Pipeline, user *model.User, repo *model.Repo, envs map[string]string, failedOnly bool) (*model.Pipeline, error) {
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
@@ -39,6 +52,25 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 
 	if lastPipeline.Status == model.StatusBlocked {
 		return nil, &ErrBadRequest{Msg: "cannot restart a pipeline with status blocked"}
+	}
+
+	var selection *workflowSelection
+	if failedOnly {
+		oldWorkflows, err := effectiveWorkflows(store, repo, lastPipeline)
+		if err != nil {
+			msg := fmt.Sprintf("failure to get workflows of pipeline %s#%d", repo.FullName, lastPipeline.Number)
+			log.Error().Err(err).Msg(msg)
+			return nil, errors.New(msg)
+		}
+		for _, wf := range oldWorkflows {
+			if wf.Running() {
+				return nil, &ErrBadRequest{Msg: "cannot restart failed workflows of a pipeline that is still running"}
+			}
+		}
+		selection = selectFailedWorkflows(oldWorkflows, lastPipeline.Status)
+		if selection == nil {
+			return nil, &ErrBadRequest{Msg: "pipeline has no failed workflows to restart"}
+		}
 	}
 
 	// The forge fetcher reuses this as-is; a config extension may replace it.
@@ -65,6 +97,10 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	newPipeline := createNewOutOfOld(lastPipeline)
 	newPipeline.Parent = lastPipeline.Number
 	newPipeline.RerunCount++
+	newPipeline.PartialRestart = failedOnly
+	if selection != nil {
+		newPipeline.ReusedWorkflows = selection.reused()
+	}
 	newPipeline.Version = version.String()
 
 	err = store.CreatePipeline(newPipeline)
@@ -102,7 +138,12 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false)
+	var itemFilter func([]*builder.Item) []*builder.Item
+	if selection != nil {
+		itemFilter = selection.filterItems
+	}
+
+	newPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs, false, itemFilter)
 	if handleParseErrors(newPipeline, parseErr) {
 		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, parseErr); uErr != nil {
 			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
@@ -119,9 +160,24 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
+	if selection != nil && len(pipelineItems) == 0 {
+		newPipeline, uErr := UpdateToStatusError(store, *newPipeline, errors.New("none of the failed workflows is part of the pipeline config anymore"))
+		if uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
+			return nil, uErr
+		}
+		updatePipelineStatus(ctx, forge, newPipeline, repo, user)
+		return newPipeline, nil
+	}
+
 	publishPipeline(ctx, forge, newPipeline, repo, user)
 
-	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems)
+	var depStatus map[string]map[string]model.StatusValue
+	if selection != nil {
+		depStatus = selection.depStatus
+	}
+
+	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems, depStatus)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)

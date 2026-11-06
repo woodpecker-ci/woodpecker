@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n';
 
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { ReusedWorkflow } from '~/lib/pipeline';
 
 // usePipeline() calls useI18n(), which must resolve during setup.
 const i18n = createI18n({
@@ -15,9 +16,9 @@ const i18n = createI18n({
   messages: { en: {} },
 });
 
-function mountStepList(pipeline: Pipeline) {
+function mountStepList(pipeline: Pipeline, reusedWorkflows?: ReusedWorkflow[]) {
   return shallowMount(PipelineStepList, {
-    props: { pipeline },
+    props: { pipeline, reusedWorkflows },
     global: {
       plugins: [i18n],
       // router-link resolves globally, so shallowMount does not stub it.
@@ -134,6 +135,22 @@ describe('pipelineStepList', () => {
     const pipeline = makePipeline([makeWorkflow(1, [], 'skipped'), makeWorkflow(2, [makeStep(1)], 'success')]);
 
     expect(() => mountStepList(pipeline)).not.toThrow();
+  });
+
+  it('lists the workflows reused from the parent pipelines, grouped by pipeline', () => {
+    const pipeline = makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]);
+    const reused: ReusedWorkflow[] = [
+      { workflow: makeWorkflow(10, [makeStep(11)], 'success') as PipelineWorkflow, pipelineNumber: 3 },
+      { workflow: makeWorkflow(20, [makeStep(21)], 'success') as PipelineWorkflow, pipelineNumber: 3 },
+      { workflow: makeWorkflow(30, [makeStep(31)], 'success') as PipelineWorkflow, pipelineNumber: 2 },
+    ];
+
+    const wrapper = mountStepList(pipeline, reused);
+    expect(wrapper.findAll('[data-test="reused-workflow"]')).toHaveLength(3);
+    // One header link per pipeline the workflows passed in.
+    expect(wrapper.findAll('[data-test="reused-workflows-header"]')).toHaveLength(2);
+    // Only the steps of the current pipeline are selectable here.
+    expect(wrapper.findAll('[data-step-id]')).toHaveLength(1);
   });
 
   it('renders a workflow whose children key is absent', () => {

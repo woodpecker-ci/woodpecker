@@ -255,6 +255,59 @@ func TestClientPipelineStart(t *testing.T) {
 	}
 }
 
+func TestClientPipelineRestartFailed(t *testing.T) {
+	tests := []struct {
+		name             string
+		handler          http.HandlerFunc
+		opts             PipelineStartOptions
+		wantErr          bool
+		expectedPipeline *Pipeline
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/api/repos/123/pipelines/456/restart-failed?foo=bar", r.URL.RequestURI())
+
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `{"id":789}`)
+				assert.NoError(t, err)
+			},
+			opts: PipelineStartOptions{
+				Params: map[string]string{"foo": "bar"},
+			},
+			expectedPipeline: &Pipeline{
+				ID: 789,
+			},
+		},
+		{
+			name: "nothing failed",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+
+			pipeline, err := client.PipelineRestartFailed(123, 456, tt.opts)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expectedPipeline, pipeline)
+		})
+	}
+}
+
 func TestClient_PipelineLast(t *testing.T) {
 	tests := []struct {
 		name     string

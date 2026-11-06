@@ -156,7 +156,7 @@ func TestCreatePipelineItemsKeepsPipelineOnSaveError(t *testing.T) {
 	mockManager.On("RegistryServiceFromRepo", mock.Anything).Return(registryService, nil)
 	mockManager.On("EnvironmentService").Return(nil, nil)
 
-	got, items, parseErr, err := createPipelineItems(t.Context(), forge, store, pipeline, &model.User{ID: 1}, repo, yamls, nil, false)
+	got, items, parseErr, err := createPipelineItems(t.Context(), forge, store, pipeline, &model.User{ID: 1}, repo, yamls, nil, false, nil)
 	assert.ErrorContains(t, err, "database is locked")
 	assert.False(t, pipeline_errors.HasBlockingErrors(parseErr))
 	assert.Nil(t, items)
