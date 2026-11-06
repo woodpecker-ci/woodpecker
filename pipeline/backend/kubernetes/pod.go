@@ -614,11 +614,15 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		// only allow to set user if its not root or step is privileged or using user namespaces
 		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || allowRoot) {
 			user = sc.RunAsUser
+		} else if sc.RunAsUser != nil {
+			log.Warn().Msg("ignoring securityContext.runAsUser: 0, root is only allowed for privileged steps or with user namespaces")
 		}
 
 		// only allow to set group if its not root or step is privileged or using user namespaces
 		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || allowRoot) {
 			group = sc.RunAsGroup
+		} else if sc.RunAsGroup != nil {
+			log.Warn().Msg("ignoring securityContext.runAsGroup: 0, root is only allowed for privileged steps or with user namespaces")
 		}
 
 		// only allow to set fsGroup if its not root or step is privileged or using user namespaces

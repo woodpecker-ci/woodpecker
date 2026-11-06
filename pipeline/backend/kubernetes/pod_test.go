@@ -15,11 +15,14 @@
 package kubernetes
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	kube_core_v1 "k8s.io/api/core/v1"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -1685,4 +1688,20 @@ func TestNodeSelectorAllowFromStep(t *testing.T) {
 	}, taskUUID)
 	assert.NoError(t, err)
 	assert.Equal(t, "sensitive-node", pod.Spec.NodeSelector["attacker-target"])
+}
+
+func TestPodSecurityContextWarnsOnDroppedRoot(t *testing.T) {
+	var buf bytes.Buffer
+	defer func(l zerolog.Logger) { log.Logger = l }(log.Logger)
+	log.Logger = zerolog.New(&buf)
+
+	sc := podSecurityContext(&SecurityContext{RunAsUser: newInt64(0), RunAsGroup: newInt64(0)}, SecurityContextConfig{}, false, nil)
+	assert.Nil(t, sc)
+	assert.Contains(t, buf.String(), `"level":"warn"`)
+	assert.Contains(t, buf.String(), "runAsUser")
+	assert.Contains(t, buf.String(), "runAsGroup")
+
+	buf.Reset()
+	podSecurityContext(&SecurityContext{RunAsUser: newInt64(0), RunAsGroup: newInt64(0)}, SecurityContextConfig{}, true, nil)
+	assert.NotContains(t, buf.String(), `"level":"warn"`)
 }
