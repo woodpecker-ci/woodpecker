@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Check webhooks body signature where already setup [[#7407](https://github.com/woodpecker-ci/woodpecker/pull/7407)]
 - Add flag to restrict admins to the primary forge [[#7430](https://github.com/woodpecker-ci/woodpecker/pull/7430)]
 
 ### 📈 Enhancement
