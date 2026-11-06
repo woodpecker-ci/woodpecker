@@ -670,6 +670,9 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		var files []string
 		for _, file := range forgejoFiles {
 			files = append(files, file.Filename)
+			if file.PreviousFilename != "" {
+				files = append(files, file.PreviousFilename)
+			}
 		}
 		return files, nil
 	}, -1)
