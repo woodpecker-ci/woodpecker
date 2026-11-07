@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-06
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain
+@6543, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @zeevogels
 
 ### 🔒 Security
 
@@ -34,6 +34,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7493](https://github.com/woodpecker-ci/woodpecker/pull/7493)]
 - Update dependency tslib to v2.9.1 [[#7461](https://github.com/woodpecker-ci/woodpecker/pull/7461)]
 - Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
 - Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
@@ -42,11 +43,16 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
 - Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
 - Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
+
+### Misc
+
+- For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
