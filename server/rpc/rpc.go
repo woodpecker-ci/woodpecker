@@ -513,7 +513,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	// Entries the agent resends after a retry are already stored and rejected
+	// Entries the agent sends again after a retry are already stored and rejected
 	// by the unique index; that is the only error that is safe to drop.
 	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil && !errors.Is(err, types.ErrInsertDuplicateDetected) {
 		log.Error().Err(err).Msg("could not store log entries")
