@@ -36,6 +36,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -660,22 +661,24 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]string, error) {
+	forgejoFiles, err := shared_utils.Paginate(func(page int) ([]*forgejo.ChangedFile, error) {
 		forgejoFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			forgejo.ListPullRequestFilesOptions{Page: page})
-		if err != nil {
-			return nil, err
-		}
-
-		var files []string
-		for _, file := range forgejoFiles {
-			files = append(files, file.Filename)
-			if file.PreviousFilename != "" {
-				files = append(files, file.PreviousFilename)
-			}
-		}
-		return files, nil
+		return forgejoFiles, err
 	}, -1)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, file := range forgejoFiles {
+		files = append(files, file.Filename)
+		if file.PreviousFilename != "" {
+			files = append(files, file.PreviousFilename)
+		}
+	}
+
+	return utils.DeduplicateStrings(files), nil
 }
 
 func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {

@@ -730,7 +730,8 @@ func TestDirLimitsParallelFileFetches(t *testing.T) {
 	// unbounded fetching would have all of them in flight at once
 	const files = 3 * maxParallelFileFetches
 	var inFlight, maxInFlight atomic.Int32
-	ctx := mockedContext(t, t.Context(),
+	ctx := mockedContext(
+		t, t.Context(),
 		github_mock.WithRequestMatchHandler(github_mock.GetReposContentsByOwnerByRepoByPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/repos/octocat/hello-world/contents/.woodpecker" {
 				list := make([]github.RepositoryContent, 0, files)

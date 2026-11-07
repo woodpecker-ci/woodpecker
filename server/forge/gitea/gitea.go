@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -662,22 +663,23 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]string, error) {
+	giteaFiles, err := shared_utils.Paginate(func(page int) ([]*gitea.ChangedFile, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{Page: page})
-		if err != nil {
-			return nil, err
-		}
-
-		var files []string
-		for _, file := range giteaFiles {
-			files = append(files, file.Filename)
-			if file.PreviousFilename != "" {
-				files = append(files, file.PreviousFilename)
-			}
-		}
-		return files, nil
+		return giteaFiles, err
 	}, -1)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, file := range giteaFiles {
+		files = append(files, file.Filename)
+		if file.PreviousFilename != "" {
+			files = append(files, file.PreviousFilename)
+		}
+	}
+	return utils.DeduplicateStrings(files), nil
 }
 
 func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
