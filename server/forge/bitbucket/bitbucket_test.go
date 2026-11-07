@@ -102,6 +102,14 @@ func TestBitbucket(t *testing.T) {
 	_, err = c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
 	assert.Error(t, err)
 
+	// without owner the repository is looked up in the workspaces of the user
+	repo, err = c.Repo(ctx, fakeUser, "", "", fakeRepo.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, fakeRepo.FullName, repo.FullName)
+
+	_, err = c.Repo(ctx, fakeUser, "", "", fakeRepoNotFound.Name)
+	assert.ErrorIs(t, err, types.ErrRepoNotFound)
+
 	repos, err := c.Repos(ctx, fakeUser, &model.ListOptions{Page: 1, PerPage: 10})
 	assert.NoError(t, err)
 	assert.Len(t, repos, 1)
