@@ -1,5 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
+import { WoodpeckerPluginRelease } from './types';
+
 // releaseApiUrl returns the API url of the latest release of the repository a docs file belongs to,
 // or undefined if the forge is not known.
 export function releaseApiUrl(docsUrl: string): string | undefined {
@@ -28,17 +30,18 @@ export function releaseApiUrl(docsUrl: string): string | undefined {
   return undefined;
 }
 
-// getLatestReleaseTag returns the tag of the latest release of the repository a docs file belongs to,
+// getLatestRelease returns the latest release of the repository a docs file belongs to, with the tag
 // without a leading "v" (v1.2.3 becomes 1.2.3), or undefined if there is none or it can't be fetched.
-export async function getLatestReleaseTag(docsUrl: string): Promise<string | undefined> {
+export async function getLatestRelease(docsUrl: string): Promise<WoodpeckerPluginRelease | undefined> {
   const apiUrl = releaseApiUrl(docsUrl);
   if (!apiUrl) {
     return undefined;
   }
 
   try {
-    const response = await axios<{ tag_name?: string }>(apiUrl);
-    return response.data.tag_name?.replace(/^v(?=\d)/, '') || undefined;
+    const response = await axios<{ tag_name?: string; html_url?: string }>(apiUrl);
+    const tag = response.data.tag_name?.replace(/^v(?=\d)/, '');
+    return tag ? { tag, url: response.data.html_url } : undefined;
   } catch (e) {
     const axiosError = e as AxiosError;
     // no release published

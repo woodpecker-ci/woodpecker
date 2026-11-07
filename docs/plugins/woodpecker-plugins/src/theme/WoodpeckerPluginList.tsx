@@ -25,7 +25,7 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
               {plugin.latestRelease && (
                 <span className="badge badge--secondary wp-plugin-release">
                   {IconRelease(14)}
-                  {plugin.latestRelease}
+                  {plugin.latestRelease.tag}
                 </span>
               )}
               {plugin.tags?.map((tag, idx) => (

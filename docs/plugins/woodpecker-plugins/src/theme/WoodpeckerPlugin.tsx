@@ -40,7 +40,13 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
                   {plugin.latestRelease && (
                     <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
                       {IconRelease(20)}
-                      <span>Latest release: {plugin.latestRelease}</span>
+                      {plugin.latestRelease.url ? (
+                        <a href={plugin.latestRelease.url} target="_blank" rel="noopener noreferrer">
+                          Latest release: {plugin.latestRelease.tag}
+                        </a>
+                      ) : (
+                        <span>Latest release: {plugin.latestRelease.tag}</span>
+                      )}
                     </div>
                   )}
 
