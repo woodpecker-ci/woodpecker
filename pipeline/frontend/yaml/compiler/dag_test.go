@@ -40,7 +40,7 @@ func TestConvertDAGToStages(t *testing.T) {
 	}
 	_, err := convertDAGToStages(steps)
 	assert.ErrorIs(t, err, &ErrStepDependencyCycle{})
-	assert.EqualError(t, err, "cycle detected: [step1 step3 step2]")
+	assert.EqualError(t, err, "step dependency cycle: step1 -> step3 -> step2 -> step1")
 
 	steps = map[string]*dagCompilerStep{
 		"step1": {
