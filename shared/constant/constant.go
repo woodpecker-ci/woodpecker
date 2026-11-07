@@ -31,10 +31,9 @@ const (
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
+// It only trusts the exact default clone plugin, as older versions may not be safe.
 var TrustedClonePlugins = []string{
 	DefaultClonePlugin,
-	"docker.io/woodpeckerci/plugin-git",
-	"quay.io/woodpeckerci/plugin-git",
 }
 
 // TaskTimeout is the time till a running task is counted as dead.
