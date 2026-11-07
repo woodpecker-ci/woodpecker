@@ -16,6 +16,7 @@ package agent
 
 import (
 	"io"
+	"sync"
 
 	"github.com/rs/zerolog"
 
@@ -29,6 +30,14 @@ import (
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) logging.Logger {
+	// One log writer per step, reused when the logger is called again for the
+	// same step (e.g. when a step is restarted by the restart signal), so the
+	// line numbers and timestamps continue instead of starting over.
+	var (
+		writersMu sync.Mutex
+		writers   = make(map[string]io.Writer)
+	)
+
 	return func(step *backend_types.Step, rc io.ReadCloser) error {
 		defer rc.Close()
 
@@ -43,7 +52,13 @@ func (r *Runner) createLogger(_logger zerolog.Logger, workflow *rpc.Workflow) lo
 
 		logger.Debug().Msg("log stream opened")
 
-		logStream := shared.NewSecretsReplaceWriter(log.NewLineWriter(r.client, step.UUID), secrets)
+		writersMu.Lock()
+		logStream, ok := writers[step.UUID]
+		if !ok {
+			logStream = shared.NewSecretsReplaceWriter(log.NewLineWriter(r.client, step.UUID), secrets)
+			writers[step.UUID] = logStream
+		}
+		writersMu.Unlock()
 		if err := pipeline_utils.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
