@@ -83,7 +83,12 @@ func (s *RPC) lockAgentToWorkflow(_ context.Context, agent *model.Agent, strWork
 	}
 
 	workflow.AgentID = agent.ID
-	return s.store.WorkflowUpdate(workflow)
+	if err := s.store.WorkflowUpdateWithSnapshot(workflow, model.NewAgentSnapshot(agent)); err != nil {
+		workflow.AgentSnapshotID = 0
+		log.Error().Err(err).Int64("agentID", agent.ID).Msgf("cannot store agent snapshot for workflow %d", workflowID)
+		return s.store.WorkflowUpdate(workflow)
+	}
+	return nil
 }
 
 // isActiveState returns true for states where work is in progress or not yet started.
