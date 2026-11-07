@@ -76,6 +76,7 @@ func findDependencyCycle(items []*Item) []string {
 	dependencies := make(map[string]constraint.DependsOn, len(items))
 	for _, item := range items {
 		// every matrix axis is an item under the same workflow name
+		// TODO(2886): https://github.com/woodpecker-ci/woodpecker/issues/2886#issuecomment-1862007473
 		name := item.Workflow.Name
 		dependencies[name] = append(dependencies[name], item.DependsOn...)
 	}
