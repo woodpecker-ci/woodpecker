@@ -36,7 +36,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -678,7 +677,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		}
 	}
 
-	return utils.DeduplicateStrings(files), nil
+	return shared_utils.DeduplicateStrings(files), nil
 }
 
 func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {

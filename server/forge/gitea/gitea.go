@@ -38,7 +38,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -679,7 +678,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 			files = append(files, file.PreviousFilename)
 		}
 	}
-	return utils.DeduplicateStrings(files), nil
+	return shared_utils.DeduplicateStrings(files), nil
 }
 
 func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
