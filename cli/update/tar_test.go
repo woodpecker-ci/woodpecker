@@ -44,8 +44,7 @@ func tarGz(t *testing.T, headers ...*tar.Header) *bytes.Buffer {
 func TestUnTar(t *testing.T) {
 	t.Run("extracts files and dirs", func(t *testing.T) {
 		dst := t.TempDir()
-		err := UnTar(dst, tarGz(
-			t,
+		err := UnTar(dst, tarGz(t,
 			&tar.Header{Name: "bin/", Typeflag: tar.TypeDir, Mode: 0o755},
 			&tar.Header{Name: "bin/woodpecker-cli", Typeflag: tar.TypeReg, Mode: 0o755, Size: 4},
 		))
