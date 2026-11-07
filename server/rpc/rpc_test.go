@@ -17,6 +17,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -40,6 +41,7 @@ import (
 	scheduler_mocks "go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestRegisterAgent(t *testing.T) {
@@ -1100,6 +1102,52 @@ func TestRPCLog(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "could not find step")
 	})
+}
+
+func TestRPCLogAppendError(t *testing.T) {
+	errCantOpen := errors.New("unable to open database file")
+	duplicate := fmt.Errorf("%w: %w", types.ErrInsertDuplicateDetected, errors.New("UNIQUE constraint failed"))
+
+	tests := []struct {
+		name      string
+		appendErr error
+		wantErr   error
+	}{
+		{name: "store error is returned", appendErr: errCantOpen, wantErr: errCantOpen},
+		{name: "duplicate entries are ignored", appendErr: duplicate},
+		{name: "joined duplicate chunks are ignored", appendErr: errors.Join(duplicate, duplicate)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStore := store_mocks.NewMockStore(t)
+			mockLogStore := log_mocks.NewMockService(t)
+			origLogStore := server.Config.Services.LogStore
+			server.Config.Services.LogStore = mockLogStore
+			t.Cleanup(func() { server.Config.Services.LogStore = origLogStore })
+
+			mockStore.On("StepByUUID", "step-uuid-123").Return(defaultStep(model.StatusRunning), nil)
+			mockStore.On("WorkflowByStep", mock.Anything).Return(defaultWorkflow(model.StatusRunning), nil)
+			mockStore.On("WorkflowLoad", int64(30)).Return(defaultWorkflow(model.StatusRunning), nil)
+			mockStore.On("AgentFind", int64(1)).Return(defaultAgent(), nil)
+			mockStore.On("GetPipeline", int64(20)).Return(defaultPipeline(model.StatusRunning), nil)
+			mockStore.On("GetRepo", int64(10)).Return(defaultRepo(), nil)
+			mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+			mockLogStore.On("LogAppend", mock.Anything, mock.Anything, mock.Anything).Return(tt.appendErr)
+
+			rpcInst := newTestRPC(t, mockStore, nil)
+			ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+			err := rpcInst.Log(ctx, "step-uuid-123", []*rpc.LogEntry{
+				{StepUUID: "step-uuid-123", Line: 0, Data: []byte("hello")},
+			})
+			if tt.wantErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorIs(t, err, tt.wantErr)
+			}
+		})
+	}
 }
 
 func TestRPCExtend(t *testing.T) {
