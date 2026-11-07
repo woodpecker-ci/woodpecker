@@ -164,20 +164,16 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	if owner == "" {
-		repos, err := c.Repos(ctx, u, &model.ListOptions{Page: 1})
-		if err != nil {
-			return nil, err
-		}
-		for _, repo := range repos {
-			if string(repo.ForgeRemoteID) == name {
-				owner = repo.Owner
-				break
-			}
-		}
-	}
 	client := c.newClient(ctx, u)
-	repo, err := client.FindRepo(owner, name)
+	var (
+		repo *internal.Repo
+		err  error
+	)
+	if owner == "" {
+		owner, repo, err = findRepoInWorkspaces(client, name)
+	} else {
+		repo, err = client.FindRepo(owner, name)
+	}
 	if err != nil {
 		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
@@ -186,6 +182,30 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 		return nil, err
 	}
 	return convertRepo(repo, perm), nil
+}
+
+// findRepoInWorkspaces looks the repository (slug or UUID) up in each workspace of the
+// user and returns the first workspace that has it. Listing all repositories of all
+// workspaces (Repos) takes minutes for workspaces with thousands of repositories.
+func findRepoInWorkspaces(client *internal.Client, name string) (string, *internal.Repo, error) {
+	workspaces, err := client.ListWorkspacesAll()
+	if err != nil {
+		return "", nil, err
+	}
+	for _, access := range workspaces {
+		if access.Workspace == nil {
+			continue
+		}
+		repo, err := client.FindRepo(access.Workspace.Slug, name)
+		if err == nil {
+			return access.Workspace.Slug, repo, nil
+		}
+		var rspErr internal.Error
+		if !errors.As(err, &rspErr) || rspErr.Status != http.StatusNotFound {
+			return "", nil, err
+		}
+	}
+	return "", nil, fmt.Errorf("repository %s not found in the workspaces of the user", name)
 }
 
 // Repos returns a list of all repositories for Bitbucket account, including
