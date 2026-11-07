@@ -16,7 +16,6 @@ package builder
 
 import (
 	"path/filepath"
-	"slices"
 	"strings"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
@@ -74,39 +73,18 @@ func filterMissingDependencies(items []*Item) []*Item {
 // findDependencyCycle returns the names of workflows that depend on each other
 // in a loop, starting and ending with the same name, or nil if there is none.
 func findDependencyCycle(items []*Item) []string {
-	dependencies := make(map[string][]string, len(items))
+	dependencies := make(map[string]constraint.DependsOn, len(items))
 	for _, item := range items {
+		// every matrix axis is an item under the same workflow name
 		name := item.Workflow.Name
-		dependencies[name] = append(dependencies[name], item.DependsOn.Names()...)
+		dependencies[name] = append(dependencies[name], item.DependsOn...)
 	}
 
-	checked := make(map[string]bool, len(dependencies))
-	var path []string
-	var visit func(name string) []string
-	visit = func(name string) []string {
-		if i := slices.Index(path, name); i >= 0 {
-			return append(path[i:], name)
-		}
-		if checked[name] {
-			return nil
-		}
-		path = append(path, name)
-		for _, dep := range dependencies[name] {
-			if cycle := visit(dep); cycle != nil {
-				return cycle
-			}
-		}
-		path = path[:len(path)-1]
-		checked[name] = true
+	cycle := constraint.FindDependencyCycle(dependencies)
+	if cycle == nil {
 		return nil
 	}
-
-	for _, item := range items {
-		if cycle := visit(item.Workflow.Name); cycle != nil {
-			return cycle
-		}
-	}
-	return nil
+	return append(cycle, cycle[0])
 }
 
 // selectYamls returns the file of the named workflow and, transitively, the

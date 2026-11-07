@@ -17,6 +17,8 @@ package constraint
 import (
 	"errors"
 	"fmt"
+	"maps"
+	"slices"
 )
 
 // Dependency represents a single dependency with an optional flag.
@@ -167,4 +169,39 @@ func (d DependsOn) OptionalNames() []string {
 		}
 	}
 	return names
+}
+
+// FindDependencyCycle returns names that depend on each other in a loop, each
+// one depending on the next and the last on the first, or nil if there is none.
+// The map holds the depends_on of each step or workflow by name. Names are
+// visited in sorted order to report the same cycle on every run, and
+// dependencies on names without an entry are ignored.
+func FindDependencyCycle(dependencies map[string]DependsOn) []string {
+	checked := make(map[string]bool, len(dependencies))
+	var path []string
+	var visit func(name string) []string
+	visit = func(name string) []string {
+		if i := slices.Index(path, name); i >= 0 {
+			return slices.Clone(path[i:])
+		}
+		if checked[name] {
+			return nil
+		}
+		path = append(path, name)
+		for _, dep := range dependencies[name] {
+			if cycle := visit(dep.Name); cycle != nil {
+				return cycle
+			}
+		}
+		path = path[:len(path)-1]
+		checked[name] = true
+		return nil
+	}
+
+	for _, name := range slices.Sorted(maps.Keys(dependencies)) {
+		if cycle := visit(name); cycle != nil {
+			return cycle
+		}
+	}
+	return nil
 }

@@ -40,6 +40,7 @@ func TestConvertDAGToStages(t *testing.T) {
 	}
 	_, err := convertDAGToStages(steps)
 	assert.ErrorIs(t, err, &ErrStepDependencyCycle{})
+	assert.EqualError(t, err, "cycle detected: [step1 step3 step2]")
 
 	steps = map[string]*dagCompilerStep{
 		"step1": {
@@ -164,9 +165,8 @@ func TestOptionalStepDependency(t *testing.T) {
 	})
 
 	t.Run("missing optional step dep on a step that has dependents", func(t *testing.T) {
-		// convertDAGToStages resolves one step at a time and runs the cycle check in the
-		// same loop, so if it reaches `notify` before `deploy`, the walk follows deploy's
-		// still-unresolved edge to the absent `lint`. Map iteration order decides, so run
+		// the cycle check must not trip over deploy's edge to the absent `lint`, whichever
+		// of `notify` and `deploy` is resolved first. Map iteration order decides, so run
 		// this enough times to cover both orders.
 		for range 100 {
 			steps := map[string]*dagCompilerStep{
