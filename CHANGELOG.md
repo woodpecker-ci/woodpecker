@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency jsdom to v31 [[#7496](https://github.com/woodpecker-ci/woodpecker/pull/7496)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
 - Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
