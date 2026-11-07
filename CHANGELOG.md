@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
 - Make builtin env var scopes more descriptive [[#7486](https://github.com/woodpecker-ci/woodpecker/pull/7486)]
 - Add support for forgejo to pull draft metadata [[#7470](https://github.com/woodpecker-ci/woodpecker/pull/7470)]
 - Add CI_FORGE_HOST as a built-in environment variable [[#7391](https://github.com/woodpecker-ci/woodpecker/pull/7391)]
@@ -43,16 +44,13 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
 - Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
 - Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
 - Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
-
-### Misc
-
-- For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
