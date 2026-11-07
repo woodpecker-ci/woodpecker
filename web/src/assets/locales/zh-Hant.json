@@ -33,6 +33,10 @@
             },
             "message": {
                 "title": "訊息"
+            },
+            "workflow": {
+                "title": "工作流程",
+                "all": "所有工作流程"
             }
         },
         "pipeline": {
@@ -329,7 +333,10 @@
                     "last_contact": "上次聯繫",
                     "badge": "上次聯繫"
                 },
-                "none": "還沒有任何執行器。"
+                "none": "還沒有任何執行器。",
+                "filters": {
+                    "key": "標籤名稱"
+                }
             },
             "repos": {
                 "disabled": "已停用",
@@ -448,6 +455,11 @@
                 "cli_usage": "CLI 使用範例",
                 "token": "個人存取權杖",
                 "cli_and_api": "CLI & API"
+            },
+            "agents": {
+                "require_user_agents": {
+                    "saved": "使用者設定已儲存"
+                }
             }
         }
     },
@@ -517,7 +529,12 @@
     "help_translating": "您可以在 {0} 上幫助將 Woodpecker 翻譯成您的語言。",
     "org": {
         "settings": {
-            "not_allowed": "您不被允許存取此組織的設定"
+            "not_allowed": "您不被允許存取此組織的設定",
+            "agents": {
+                "require_org_agents": {
+                    "saved": "組織設定已儲存"
+                }
+            }
         }
     },
     "access_denied": "您不被允許存取此實例",
@@ -529,5 +546,6 @@
     "invalid_state": "OAuth 狀態不可用",
     "allowed_orgs_placeholder": "組織名稱",
     "git_password_desc": "Git 使用者的密碼或個人存取權杖。",
-    "no_forges": "還沒有任何 forge。"
+    "no_forges": "還沒有任何 forge。",
+    "forge_name": "顯示名稱"
 }
