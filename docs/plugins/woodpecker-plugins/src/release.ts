@@ -1,19 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
+import { authHeaders } from './auth';
 import { WoodpeckerPluginRelease } from './types';
-
-// apiTokens lists the optional read tokens per API host, to avoid rate limits of anonymous requests.
-const apiTokens: Record<string, { env: string; scheme: string }> = {
-  'api.github.com': { env: 'GITHUB_TOKEN', scheme: 'Bearer' },
-  'codeberg.org': { env: 'CODEBERG_TOKEN', scheme: 'token' },
-};
-
-// authHeaders returns the authorization header for an API url, if a token for its host is set.
-function authHeaders(apiUrl: string): Record<string, string> {
-  const token = apiTokens[new URL(apiUrl).hostname];
-  const value = token && process.env[token.env];
-  return value ? { Authorization: `${token.scheme} ${value}` } : {};
-}
 
 // releaseApiUrl returns the API url of the latest release of the repository a docs file belongs to,
 // or undefined if the forge is not known.

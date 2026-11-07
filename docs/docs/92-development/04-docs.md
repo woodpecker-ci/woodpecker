@@ -19,7 +19,7 @@ pnpm start
 pnpm build
 ```
 
-The plugin index looks up the latest release of each plugin with the API of its forge.
+The plugin index fetches the docs and the latest release of each plugin from its forge.
 Anonymous requests hit the rate limits fast,
 so you can set read only tokens in `GITHUB_TOKEN` and `CODEBERG_TOKEN`.
 

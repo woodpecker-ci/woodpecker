@@ -4,6 +4,7 @@ import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/typ
 import axios, { AxiosError } from 'axios';
 import slugify from 'slugify';
 
+import { authHeaders } from './auth';
 import * as markdown from './markdown';
 import { getLatestRelease } from './release';
 import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
@@ -18,7 +19,7 @@ async function loadContent(): Promise<Content> {
       pluginsIndex.plugins.map(async (i): Promise<WoodpeckerPlugin | undefined> => {
         let docsContent: string;
         try {
-          const response = await axios(i.docs);
+          const response = await axios(i.docs, { headers: authHeaders(i.docs) });
           docsContent = response.data;
         } catch (e) {
           const axiosError = e as AxiosError;
