@@ -155,7 +155,7 @@ func TestForgejo(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.NoError(t, err)
 		assert.Equal(t, model.EventPull, b.Event)
-		assert.Equal(t, []string{"README.md"}, b.ChangedFiles)
+		assert.Equal(t, []string{"README.md", "src/old.go", "CHANGELOG.md"}, b.ChangedFiles)
 	})
 }
 

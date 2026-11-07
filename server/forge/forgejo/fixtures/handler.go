@@ -219,13 +219,18 @@ const prFilesPayload = `
 [
 	{
 		"filename": "README.md",
-		"status": "changed",
+		"previous_filename": "src/old.go",
+		"status": "renamed",
 		"additions": 2,
 		"deletions": 0,
 		"changes": 2,
 		"html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
 		"contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
 		"raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
+	},
+	{
+		"filename": "CHANGELOG.md",
+		"status": "changed"
 	}
 ]
 `
