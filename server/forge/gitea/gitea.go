@@ -672,6 +672,9 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		var files []string
 		for _, file := range giteaFiles {
 			files = append(files, file.Filename)
+			if file.PreviousFilename != "" {
+				files = append(files, file.PreviousFilename)
+			}
 		}
 		return files, nil
 	}, -1)
