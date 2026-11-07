@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestLogCreateFindDelete(t *testing.T) {
@@ -146,10 +147,10 @@ func TestLogAppendRejectsResentEntries(t *testing.T) {
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
 	}))
 	// the agent retries with the batch it already sent
-	assert.Error(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
+	assert.ErrorIs(t, store.LogAppend(t.Context(), &step, []*model.LogEntry{
 		{StepID: step.ID, Data: []byte("hello"), Line: 0, Time: 0},
 		{StepID: step.ID, Data: []byte("world"), Line: 1, Time: 10},
-	}))
+	}), types.ErrInsertDuplicateDetected)
 
 	logEntries, err := store.LogFind(t.Context(), &step)
 	assert.NoError(t, err)
