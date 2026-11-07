@@ -14,7 +14,10 @@
 
 package compiler
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ErrExtraHostFormat struct {
 	host string
@@ -75,7 +78,7 @@ type ErrStepDependencyCycle struct {
 }
 
 func (err *ErrStepDependencyCycle) Error() string {
-	return fmt.Sprintf("cycle detected: %v", err.path)
+	return fmt.Sprintf("step dependency cycle: %s -> %s", strings.Join(err.path, " -> "), err.path[0])
 }
 
 func (*ErrStepDependencyCycle) Is(target error) bool {
