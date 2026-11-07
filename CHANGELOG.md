@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- Return log store errors to the agent, except for duplicate entries [[#7501](https://github.com/woodpecker-ci/woodpecker/pull/7501)]
 - Preserve previous pull request file paths for gitea & forgejo [[#7492](https://github.com/woodpecker-ci/woodpecker/pull/7492)]
 - Add small margin between log groups [[#7485](https://github.com/woodpecker-ci/woodpecker/pull/7485)]
 - Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
