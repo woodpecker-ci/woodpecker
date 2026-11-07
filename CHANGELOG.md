@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @zeevogels
+@6543, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @zeevogels
 
 ### 🔒 Security
 
@@ -22,6 +22,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(forge): preserve previous pull request file paths [[#7492](https://github.com/woodpecker-ci/woodpecker/pull/7492)]
 - Add small margin between log groups [[#7485](https://github.com/woodpecker-ci/woodpecker/pull/7485)]
 - Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
 - Use OrgID to match Orgs belong to users [[#7441](https://github.com/woodpecker-ci/woodpecker/pull/7441)]
@@ -44,6 +45,7 @@
 
 ### 📦️ Dependency
 
+- Update woodpeckerci/plugin-release Docker tag to v1 [[#7499](https://github.com/woodpecker-ci/woodpecker/pull/7499)]
 - Update dependency jsdom to v31 [[#7496](https://github.com/woodpecker-ci/woodpecker/pull/7496)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
 - Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
