@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -28,18 +27,11 @@ import (
 
 // Decline updates the status to declined for blocked pipelines.
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
-	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
-	if err != nil {
-		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
-		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, errors.New(msg)
-	}
-
 	if pipeline.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	pipeline, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
+	pipeline, err := UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
@@ -62,7 +54,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 		}
 	}
 
-	updatePipelineStatus(ctx, forge, pipeline, repo, user)
+	updatePipelineStatus(pipeline)
 
 	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, pipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")

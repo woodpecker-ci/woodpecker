@@ -59,7 +59,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 
 	currentPipeline, pipelineItems, parseErr, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil, true)
 	if handleParseErrors(currentPipeline, parseErr) {
-		if err := updatePipelineWithErr(ctx, forge, store, currentPipeline, repo, user, parseErr); err != nil {
+		if err := updatePipelineWithErr(ctx, store, currentPipeline, repo, parseErr); err != nil {
 			log.Error().Err(err).Msgf("error setting error status of pipeline for %s#%d after approval", repo.FullName, currentPipeline.Number)
 		}
 		msg := fmt.Sprintf("failure to parse pipeline config for %s", repo.FullName)
@@ -75,7 +75,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
-	publishPipeline(ctx, forge, currentPipeline, repo, user)
+	publishPipeline(ctx, currentPipeline, repo)
 
 	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
 	if err != nil {

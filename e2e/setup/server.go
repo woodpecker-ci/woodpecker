@@ -31,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forgestatus"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
@@ -64,6 +65,8 @@ type ServerEnv struct {
 	Queue    queue.Queue
 	Fixtures *Fixtures
 	Forge    *forge_mocks.MockForge
+	// Statuses are the commit statuses the forge took.
+	Statuses *Statuses
 	Manager  services.Manager
 }
 
@@ -96,7 +99,8 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 
 	memStore := newStore(ctx, t)
 	fixtures := seedFixtures(t, memStore)
-	mockForge := newMockForge(t, files)
+	statuses := newStatuses()
+	mockForge := newMockForge(t, files, statuses)
 
 	mgr, err := newTestManager(memStore, mockForge)
 	require.NoError(t, err, "create services manager")
@@ -120,6 +124,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 	server.Config.Services.Membership = cache.NewMembershipService(memStore)
 	server.Config.Services.Manager = mgr
 	server.Config.Services.LogStore = memStore
+	server.Config.Services.Statuses = forgestatus.New(ctx, memStore, mgr.ForgeFromRepo, statusPolicy)
 
 	server.Config.Server.AgentToken = TestAgentToken
 	server.Config.Server.Host = "http://localhost"
@@ -144,6 +149,7 @@ func StartServer(ctx context.Context, t *testing.T, files []*forge_types.FileMet
 		Queue:    memQueue,
 		Fixtures: fixtures,
 		Forge:    mockForge,
+		Statuses: statuses,
 		Manager:  mgr,
 	}
 }

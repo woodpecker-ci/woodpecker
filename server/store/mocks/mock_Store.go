@@ -6503,6 +6503,68 @@ func (_c *MockStore_WorkflowGetTree_Call) RunAndReturn(run func(pipeline *model.
 	return _c
 }
 
+// WorkflowList provides a mock function for the type MockStore
+func (_mock *MockStore) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {
+	ret := _mock.Called(pipeline)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WorkflowList")
+	}
+
+	var r0 []*model.Workflow
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline) ([]*model.Workflow, error)); ok {
+		return returnFunc(pipeline)
+	}
+	if returnFunc, ok := ret.Get(0).(func(*model.Pipeline) []*model.Workflow); ok {
+		r0 = returnFunc(pipeline)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Workflow)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(*model.Pipeline) error); ok {
+		r1 = returnFunc(pipeline)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockStore_WorkflowList_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WorkflowList'
+type MockStore_WorkflowList_Call struct {
+	*mock.Call
+}
+
+// WorkflowList is a helper method to define mock.On call
+//   - pipeline *model.Pipeline
+func (_e *MockStore_Expecter) WorkflowList(pipeline any) *MockStore_WorkflowList_Call {
+	return &MockStore_WorkflowList_Call{Call: _e.mock.On("WorkflowList", pipeline)}
+}
+
+func (_c *MockStore_WorkflowList_Call) Run(run func(pipeline *model.Pipeline)) *MockStore_WorkflowList_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 *model.Pipeline
+		if args[0] != nil {
+			arg0 = args[0].(*model.Pipeline)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockStore_WorkflowList_Call) Return(workflows []*model.Workflow, err error) *MockStore_WorkflowList_Call {
+	_c.Call.Return(workflows, err)
+	return _c
+}
+
+func (_c *MockStore_WorkflowList_Call) RunAndReturn(run func(pipeline *model.Pipeline) ([]*model.Workflow, error)) *MockStore_WorkflowList_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // WorkflowLoad provides a mock function for the type MockStore
 func (_mock *MockStore) WorkflowLoad(n int64) (*model.Workflow, error) {
 	ret := _mock.Called(n)

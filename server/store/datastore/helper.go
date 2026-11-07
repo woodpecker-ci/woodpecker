@@ -61,14 +61,16 @@ func isErrDatabaseLocked(err error) bool {
 }
 
 // wrapGet return error if err not nil or if requested entry do not exist.
+// A failed query reports exist as false too; it is an error, not a missing
+// entry.
 func wrapGet(exist bool, err error) error {
-	if !exist {
-		return types.ErrRecordNotExist
-	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
+	}
+	if !exist {
+		return types.ErrRecordNotExist
 	}
 	return nil
 }

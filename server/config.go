@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forgestatus"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
@@ -34,6 +35,7 @@ var Config = struct {
 		Membership cache.MembershipService
 		Manager    services.Manager
 		LogStore   log.Service
+		Statuses   *forgestatus.Sender
 	}
 	Server struct {
 		JWTSecret             string

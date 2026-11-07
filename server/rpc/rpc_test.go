@@ -536,8 +536,6 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
 		// pipeline.UpdateToStatusRunning -> UpdatePipeline
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
-		// updateForgeStatus -> GetUser returns error so forge interaction is skipped
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
 		// pipeline.UpdateWorkflowStatusToRunning -> WorkflowUpdate
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		// pubsub deferred -> WorkflowGetTree
@@ -563,8 +561,6 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
-		// updateForgeStatus -> GetUser returns error so forge interaction is skipped
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
@@ -664,7 +660,6 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
@@ -697,7 +692,6 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{failedWorkflow, storedWorkflow}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
-		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 

@@ -32,6 +32,11 @@ func TestWrapGet(t *testing.T) {
 
 	err = wrapGet(true, errors.New("test err"))
 	assert.Equal(t, "TestWrapGet: test err", err.Error())
+
+	// a failed query reports nothing found as well: it is not a missing entry
+	err = wrapGet(false, errors.New("connection reset"))
+	assert.NotErrorIs(t, err, types.ErrRecordNotExist)
+	assert.Equal(t, "TestWrapGet: connection reset", err.Error())
 }
 
 func TestWrapDelete(t *testing.T) {
