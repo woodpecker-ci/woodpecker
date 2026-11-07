@@ -56,7 +56,7 @@ export async function getLatestRelease(docsUrl: string): Promise<WoodpeckerPlugi
     const tag = response.data.tag_name?.replace(/^v(?=\d)/, '');
     return tag ? { tag, url: response.data.html_url } : undefined;
   } catch (e) {
-    const axiosError = e as AxiosError;
+    const axiosError = e as AxiosError<{ message?: string }>;
     // no release published
     if (axiosError.response?.status === 404) {
       return undefined;
@@ -67,6 +67,7 @@ export async function getLatestRelease(docsUrl: string): Promise<WoodpeckerPlugi
       axiosError.message,
       axiosError.response?.status,
       axiosError.response?.statusText,
+      axiosError.response?.data?.message,
     );
     return undefined;
   }
