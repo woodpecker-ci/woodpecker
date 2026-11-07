@@ -47,6 +47,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
 - Update woodpeckerci/plugin-release Docker tag to v1 [[#7499](https://github.com/woodpecker-ci/woodpecker/pull/7499)]
 - Update dependency jsdom to v31 [[#7496](https://github.com/woodpecker-ci/woodpecker/pull/7496)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
