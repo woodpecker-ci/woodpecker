@@ -5,3 +5,9 @@ packages:
 allowBuilds:
   '@swc/core': false
   core-js: false
+
+overrides:
+  serialize-javascript: '^7.0.5'
+  uuid: '^14.0.0'
+  # CVE-2026-104848, CVE-2026-104849
+  tinypool: '^2.1.2'
