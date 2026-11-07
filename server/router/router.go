@@ -20,7 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	swaggo_files "github.com/swaggo/files"
+	swaggo_files "github.com/swaggo/files/v2"
 	swaggo_gin_swagger "github.com/swaggo/gin-swagger"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
