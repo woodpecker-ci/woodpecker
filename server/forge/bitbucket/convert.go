@@ -53,12 +53,13 @@ func convertStatus(status model.StatusValue) string {
 // convertRepo is a helper function used to convert a Bitbucket repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
+	owner, name, _ := strings.Cut(from.FullName, "/")
 	repo := model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
 		Clone:         cloneLink(from),
 		CloneSSH:      sshCloneLink(from),
-		Owner:         strings.Split(from.FullName, "/")[0],
-		Name:          strings.Split(from.FullName, "/")[1],
+		Owner:         owner,
+		Name:          name,
 		FullName:      from.FullName,
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
