@@ -40,6 +40,7 @@
 
 ### 📚 Documentation
 
+- Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
 - Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
 - Remove overrides from docs dependencies [[#7497](https://github.com/woodpecker-ci/woodpecker/pull/7497)]
 - Update docs npm deps non-major [[#7493](https://github.com/woodpecker-ci/woodpecker/pull/7493)]
