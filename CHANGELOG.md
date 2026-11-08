@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @arpitjain099, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @zeevogels
+@6543, @arpitjain099, @chaitanya-y20, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -40,6 +40,7 @@
 
 ### 📚 Documentation
 
+- docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
 - Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
 - Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
 - Remove overrides from docs dependencies [[#7497](https://github.com/woodpecker-ci/woodpecker/pull/7497)]
