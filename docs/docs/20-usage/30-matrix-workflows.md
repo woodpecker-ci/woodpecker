@@ -120,6 +120,9 @@ steps:
 
 ### Example matrix pipeline using multiple platforms
 
+Use `${platform}` in `labels` to substitute the matrix value before scheduling. The shell spelling `$platform` stays
+literal here and can leave a workflow pending when agents advertise `linux/amd64` or `linux/arm64`.
+
 ```yaml
 matrix:
   platform:
