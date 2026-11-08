@@ -100,6 +100,35 @@ func quoteNushell(value string) string {
 	}
 }
 
+func isCSharpHeader(cmd string) bool {
+	cmd = strings.TrimSpace(cmd)
+
+	if cmd == "" {
+		return true
+	}
+
+	if strings.HasPrefix(cmd, "#") ||
+		strings.HasPrefix(cmd, "//") ||
+		strings.HasPrefix(cmd, "/*") {
+		return true
+	}
+
+	fields := strings.Fields(cmd)
+	if len(fields) < 2 { //nolint:mnd // Command requires at least two fields.
+		return false
+	}
+
+	if fields[0] == "global" && fields[1] == "using" {
+		return true
+	}
+
+	if fields[0] != "using" {
+		return false
+	}
+
+	return fields[1] != "var" && !strings.HasPrefix(fields[1], "(")
+}
+
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
@@ -171,15 +200,42 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
 	case "csi", "dotnet-script", "csharp":
+		var source strings.Builder
+		var deferredMarkers strings.Builder
+		header := true
+
+		writeMarker := func(target *strings.Builder, cmd string) {
+			fmt.Fprintf(target, "System.Console.WriteLine(@\"%s\");\n",
+				strings.ReplaceAll(common.CommandMarker+cmd, `"`, `""`))
+		}
+
+		for _, cmd := range cmdList {
+			if header && isCSharpHeader(cmd) {
+				source.WriteString(cmd + "\n")
+				writeMarker(&deferredMarkers, cmd)
+				continue
+			}
+
+			if header {
+				source.WriteString(deferredMarkers.String())
+				header = false
+			}
+
+			writeMarker(&source, cmd)
+			source.WriteString(cmd + "\n")
+		}
+
+		if header {
+			source.WriteString(deferredMarkers.String())
+		}
+
 		script, err := os.CreateTemp(baseDir, "*.csx")
 		if err != nil {
 			return nil, err
 		}
-
 		defer script.Close()
 
-		// Keep the commands unchanged so directives such as #r and #load remain valid.
-		if _, err := script.WriteString(strings.Join(cmdList, "\n")); err != nil {
+		if _, err := script.WriteString(source.String()); err != nil {
 			return nil, err
 		}
 
