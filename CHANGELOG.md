@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-07
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -48,6 +48,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7508](https://github.com/woodpecker-ci/woodpecker/pull/7508)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
 - Update woodpeckerci/plugin-release Docker tag to v1 [[#7499](https://github.com/woodpecker-ci/woodpecker/pull/7499)]
