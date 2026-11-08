@@ -131,7 +131,11 @@
                 "admin": {
                     "admin": "Admin",
                     "placeholder": "Benutzer ist ein Admin",
-                    "admin_warning": "Dieser Benutzer ist ein Admin aufgrund deiner Umgebungs-Konfiguration. Wenn du die Berechtigung hier entziehst, wird sie bei der nächsten Anmeldung wiederhergestellt."
+                    "admin_warning": "Dieser Benutzer ist in der Umgebungskonfiguration WOODPECKER_ADMIN gelistet. Um die Berechtigung endgültig zu entziehen, musst du den Benutzer auch aus der Umgebungsvariable entfernen.",
+                    "admin_env": "Admin (Umgebung)",
+                    "admin_env_desc": "Admin, da der Nutzer in WOODPECKER_ADMIN gelistet ist.",
+                    "admin_revoked": "Admin-Berechtigung temporär entzogen",
+                    "admin_revoked_desc": "Der Benutzer ist in der Umgebungskonfiguration WOODPECKER_ADMIN gelistet, aber die Admin-Berechtigung wurde hier entzogen. Bei der ersten Anmeldung nach dem nächsten Serverneustart wird der Nutzer wieder Admin, wenn er nicht aus WOODPECKER_ADMIN entfernt wird."
                 },
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
@@ -204,7 +208,12 @@
                 "desc": "Zugangsdaten zum Register der Organisation können für private Images aller Pipelines der Organisation verwendet werden."
             },
             "agents": {
-                "desc": "Agenten registriert für diese Organisation."
+                "desc": "Agenten registriert für diese Organisation.",
+                "require_org_agents": {
+                    "require": "Pipelines nur auf Organisations-Agenten ausführen",
+                    "desc": "Workflows von Repositorys dieser Organisation werden nur von Agenten ausgeführt, die bei der Organisation registriert sind, nicht von Server-weiten Agenten.",
+                    "saved": "Organisationseinstellungen gespeichert"
+                }
             }
         }
     },
@@ -259,6 +268,12 @@
             "message": {
                 "title": "Nachricht",
                 "desc": "Diese Nachricht wird in der Bezeichnung der Pipeline als zusätzlich Information angezeigt."
+            },
+            "workflow": {
+                "title": "Workflow",
+                "desc": "Nur den ausgewählten Workflow sowie die harten Abhängigkeiten ausführen.",
+                "all": "Alle Workflows",
+                "load_error": "Workflows auf dieser Branch konnten nicht geladen werden. Stelle sicher, dass der Branch existiert und die Pipeline-Konfiguration gültig ist."
             }
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
@@ -655,7 +670,12 @@
                 "desc": "Register-Zugangsdaten des Benutzers können für private Images aller persönlichen Pipelines verwendet werden."
             },
             "agents": {
-                "desc": "Agenten, die für die Repositorys deines Benutzers registriert sind."
+                "desc": "Agenten, die für die Repositorys deines Benutzers registriert sind.",
+                "require_user_agents": {
+                    "require": "Pipelines nur auf deinen Agenten ausführen",
+                    "desc": "Workflows von deinen Repositorys werden nur von Agenten ausgeführt, die bei dir registriert sind, nicht von Server-weiten Agenten.",
+                    "saved": "Benutzereinstellungen gespeichert"
+                }
             }
         }
     },
@@ -824,5 +844,7 @@
     "delete": "Entfernen",
     "allowed_orgs": "Erlaubte Organisationen",
     "allowed_orgs_desc": "Die Mitglieder dieser Organisationen dürfen sich mit dieser Plattform anmelden, zusätzlich zu den in WOODPECKER_ORGS global konfigurierten.",
-    "allowed_orgs_placeholder": "Organisationsname"
+    "allowed_orgs_placeholder": "Organisationsname",
+    "forge_name": "Anzeigename",
+    "forge_name_placeholder": "Optionaler Name, angezeigt auf der Anmelde-Seite"
 }
