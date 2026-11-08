@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.gitea.io/sdk/gitea"
+	"gitea.dev/sdk"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
