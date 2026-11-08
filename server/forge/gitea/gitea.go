@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"gitea.dev/sdk"
 	"github.com/rs/zerolog/log"
@@ -45,7 +46,7 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	defaultPageSize   = 50
-	giteaDevVersion   = "v1.21.0"
+	giteaDevVersion   = "v29.0.0"
 )
 
 type Gitea struct {
@@ -56,6 +57,10 @@ type Gitea struct {
 	oAuthHost         string
 	skipVerify        bool
 	pageSize          int
+
+	// canSkip tells if the server knows the skipped state, checked once per forge.
+	canSkipOnce sync.Once
+	canSkip     bool
 }
 
 // Opts defines configuration options.
@@ -321,12 +326,15 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		return err
 	}
 
+	c.canSkipOnce.Do(func() {
+		c.canSkip = client.CheckServerVersionConstraint(">= 1.25.0") == nil
+	})
 	_, _, err = client.CreateStatus(
 		repo.Owner,
 		repo.Name,
 		pipeline.Commit,
 		gitea.CreateStatusOption{
-			State:       getStatus(workflow.State),
+			State:       getStatus(workflow.State, c.canSkip),
 			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
@@ -618,7 +626,7 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 
 // getStatus is a helper function that converts a Woodpecker
 // status to a Gitea status.
-func getStatus(status model.StatusValue) gitea.StatusState {
+func getStatus(status model.StatusValue, canSkip bool) gitea.StatusState {
 	switch status {
 	case model.StatusPending, model.StatusBlocked, model.StatusCreated:
 		return gitea.StatusPending
@@ -626,7 +634,12 @@ func getStatus(status model.StatusValue) gitea.StatusState {
 		return gitea.StatusPending
 	case model.StatusSuccess:
 		return gitea.StatusSuccess
-	case model.StatusFailure, model.StatusKilled, model.StatusSkipped, model.StatusCanceled:
+	case model.StatusFailure, model.StatusKilled, model.StatusCanceled:
+		return gitea.StatusFailure
+	case model.StatusSkipped:
+		if canSkip {
+			return gitea.StatusSkipped
+		}
 		return gitea.StatusFailure
 	case model.StatusDeclined:
 		return gitea.StatusWarning
