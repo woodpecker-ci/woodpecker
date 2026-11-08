@@ -30,6 +30,15 @@ func TestWrapGet(t *testing.T) {
 	err := wrapGet(false, nil)
 	assert.ErrorIs(t, err, types.ErrRecordNotExist)
 
+	// Database locked errors must surface as ErrDatabaseLocked instead of ErrRecordNotExist.
+	for _, driverErr := range []string{
+		// sqlite common errors
+		"database is locked",
+		"database table is locked",
+	} {
+		assert.ErrorIs(t, wrapGet(false, errors.New(driverErr)), types.ErrDatabaseLocked, driverErr)
+	}
+
 	err = wrapGet(true, errors.New("test err"))
 	assert.Equal(t, "TestWrapGet: test err", err.Error())
 }
