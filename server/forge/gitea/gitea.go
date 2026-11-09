@@ -21,15 +21,16 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -84,9 +85,9 @@ func (c *Gitea) Name() string {
 	return "gitea"
 }
 
-// URL returns the root url of a configured forge.
-func (c *Gitea) URL() string {
-	return c.url
+// Config returns the metadata of the configured forge.
+func (c *Gitea) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
@@ -152,10 +153,9 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
 	config.RedirectURL = ""
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -365,7 +365,7 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
-		"secret":       r.Hash,
+		"secret":       r.WebhookSecret,
 		"content_type": "json",
 	}
 	hook := gitea.CreateHookOption{
@@ -498,8 +498,17 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 
 // Hook parses the incoming Gitea hook and returns the Repository and Pipeline
 // details. If the hook is unsupported nil values are returned.
-func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pipeline, err := parseHook(r)
+func (c *Gitea) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
+	valid, err := gitea.VerifyWebhookSignature(secret, r.Header.Get(hookSignature), body)
+	if err != nil || !valid {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+
+	repo, pipeline, err := parseHook(r.Header.Get(hookEvent), body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -510,13 +519,13 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
-				if err != nil {
-					return nil, nil, err
-				}
-				pipeline.Commit = sha
+			// the create hook of a pushed annotated tag holds the SHA of the
+			// tag object, not of the tagged commit
+			sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			if err != nil {
+				return nil, nil, err
 			}
+			pipeline.Commit = sha
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
 			if len(pipeline.ChangedFiles) == 0 {
@@ -653,19 +662,23 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]string, error) {
+	giteaFiles, err := shared_utils.Paginate(func(page int) ([]*gitea.ChangedFile, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{Page: page})
-		if err != nil {
-			return nil, err
-		}
-
-		var files []string
-		for _, file := range giteaFiles {
-			files = append(files, file.Filename)
-		}
-		return files, nil
+		return giteaFiles, err
 	}, -1)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, file := range giteaFiles {
+		files = append(files, file.Filename)
+		if file.PreviousFilename != "" {
+			files = append(files, file.PreviousFilename)
+		}
+	}
+	return shared_utils.DeduplicateStrings(files), nil
 }
 
 func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {

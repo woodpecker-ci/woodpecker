@@ -11,12 +11,13 @@ RUN apt update && \
 
 FROM scratch AS stage
 
-# collect certs, timezone data, user and data directory from build image
+# collect certs, timezone data, user, data and temp directory from build image
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 COPY --from=build --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
+COPY --from=build --chown=woodpecker:woodpecker /tmp /tmp
 
 FROM scratch
 ARG TARGETOS TARGETARCH

@@ -17,6 +17,7 @@
 package session
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -98,5 +99,40 @@ func TestSetPerm(t *testing.T) {
 		assert.EqualValues(t, repo.ID, perm.RepoID)
 		assert.EqualValues(t, user.ID, perm.UserID)
 		assert.InDelta(t, time.Now().Unix(), perm.Synced, 5)
+	})
+
+	t.Run("stale perm falls back to read only if the forge sync fails", func(t *testing.T) {
+		mgr := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromRepo", mock.Anything).Return(_forge, nil)
+		server.Config.Services.Manager = mgr
+
+		user := &model.User{ID: 12, Login: "carol", ForgeID: 2}
+		repo := &model.Repo{ID: 22, FullName: "acme/spanner", ForgeID: 2, ForgeRemoteID: "7"}
+		synced := time.Now().Add(-2 * time.Hour).Unix()
+		require.NoError(t, s.PermUpsert(&model.Perm{
+			UserID: user.ID, RepoID: repo.ID, Pull: true, Push: true, Admin: true, Synced: synced,
+		}))
+
+		_forge.On("Repo", mock.Anything, user, repo.ForgeRemoteID, repo.Owner, repo.Name).
+			Return(nil, errors.New("forge not reachable")).Once()
+
+		c, _ := newCtx(user, repo)
+
+		SetPerm()(c)
+
+		perm := Perm(c)
+		require.NotNil(t, perm)
+		assert.True(t, perm.Pull)
+		assert.False(t, perm.Push)
+		assert.False(t, perm.Admin)
+
+		stored, err := s.PermFind(user, repo)
+		require.NoError(t, err)
+		assert.True(t, stored.Pull)
+		assert.False(t, stored.Push)
+		assert.False(t, stored.Admin)
+		// not marked as synced, so the next request asks the forge again
+		assert.Equal(t, synced, stored.Synced)
 	})
 }

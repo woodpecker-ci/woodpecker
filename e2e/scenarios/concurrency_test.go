@@ -100,7 +100,7 @@ func TestWorkflowConcurrencyLimit(t *testing.T) {
 	}
 
 	// Wait for every round to finish, collecting workflow timings by name.
-	byWorkflow := map[string][]wfInterval{}
+	byWorkflow := make(map[string][]wfInterval)
 
 	for i, p := range created {
 		finished := setup.WaitForPipeline(t, env.Store, p.ID)

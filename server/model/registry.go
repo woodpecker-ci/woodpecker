@@ -18,6 +18,7 @@ package model
 import (
 	"errors"
 	"net/url"
+	"strings"
 )
 
 var (
@@ -67,7 +68,13 @@ func (r *Registry) Validate() error {
 		return errRegistryPasswordInvalid
 	}
 
-	_, err := url.Parse(r.Address)
+	// Registry addresses are usually bare hosts as they appear in image references
+	// (e.g. "10.0.1.32:5000"), which url.Parse rejects or misreads without a scheme.
+	address := r.Address
+	if !strings.Contains(address, "://") {
+		address = "//" + address
+	}
+	_, err := url.Parse(address)
 	return err
 }
 

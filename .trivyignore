@@ -3,3 +3,9 @@
 # reports "main module does not need package"): the module dependency itself
 # is only used for ssh/acme/bcrypt, and the advisory has no fixed version.
 GO-2026-5932
+
+# braces 3.0.3 (via micromatch and chokidar in docs/) has a stack-overflow DoS
+# on deeply nested patterns and no fixed release yet. It only runs on
+# build-time globs we control, never on user input.
+# Remove once upstream ships a fix: https://github.com/micromatch/braces/issues/70
+CVE-2026-93687

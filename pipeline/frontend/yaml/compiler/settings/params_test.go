@@ -58,7 +58,7 @@ func TestParamsToEnv(t *testing.T) {
 	secrets := map[string]string{
 		"secret_token": "FooBar",
 	}
-	got := map[string]string{}
+	got := make(map[string]string)
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
 		secret, ok := secrets[name]
@@ -68,12 +68,12 @@ func TestParamsToEnv(t *testing.T) {
 
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
-	secretMapping := map[string]string{}
+	secretMapping := make(map[string]string)
 	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 
 	// handle edge cases (#1609)
-	got = map[string]string{}
+	got = make(map[string]string)
 	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil, nil))
 	assert.EqualValues(t, map[string]string{"PLUGIN_A": "a,"}, got)
 }
@@ -87,7 +87,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 		"PLUGIN_STRING": "stringz",
 		"PLUGIN_INT":    "1",
 	}
-	got := map[string]string{}
+	got := make(map[string]string)
 	getSecretValue := func(name string) (string, error) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
@@ -101,7 +101,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 	}
 
 	// handle edge cases (#1609)
-	got = map[string]string{}
+	got = make(map[string]string)
 	assert.NoError(t, ParamsToEnv(from, got, "", true, getSecretValue, nil))
 	assert.EqualValues(t, wantNoPrefix, got, "Problem converting plugin parameters to environment variables")
 }
@@ -156,7 +156,7 @@ list.map:
 		"secret_token": "FooBar",
 		"cb_password":  "geheim",
 	}
-	got := map[string]string{}
+	got := make(map[string]string)
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
 		secret, ok := secrets[name]
@@ -166,7 +166,7 @@ list.map:
 
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
-	gotSecretMapping := map[string]string{}
+	gotSecretMapping := make(map[string]string)
 	wantSecretMapping := map[string]string{
 		"PLUGIN_MY_SECRET": "FooBar",
 		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value","secret":"FooBar"}`,
@@ -197,7 +197,7 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	secretMapping := map[string]string{}
+	secretMapping := make(map[string]string)
 	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, getSecretValue, secretMapping))
 }
 
@@ -226,8 +226,8 @@ func TestSecretNotFound(t *testing.T) {
 
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
-	got := map[string]string{}
-	secretMapping := map[string]string{}
+	got := make(map[string]string)
+	secretMapping := make(map[string]string)
 	assert.ErrorContains(t,
 		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping),
 		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
@@ -252,8 +252,8 @@ func TestSecretMappingSimpleSecret(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found", name)
 	}
 
-	got := map[string]string{}
-	secretMapping := map[string]string{}
+	got := make(map[string]string)
+	secretMapping := make(map[string]string)
 
 	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
 
@@ -292,8 +292,8 @@ func TestSecretMappingComplexMapWithSecrets(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found", name)
 	}
 
-	got := map[string]string{}
-	secretMapping := map[string]string{}
+	got := make(map[string]string)
+	secretMapping := make(map[string]string)
 
 	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
 
@@ -315,7 +315,7 @@ func TestComplexTypesWithNilValuesWontPanic(t *testing.T) {
 		},
 	}
 
-	got := map[string]string{}
+	got := make(map[string]string)
 	expectedJSON := `["copy a b",{"foo":null}]`
 
 	err := ParamsToEnv(from, got, "PLUGIN_", true, nil, nil)

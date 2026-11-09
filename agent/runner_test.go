@@ -87,7 +87,7 @@ func TestRunReportsCancelWithoutError(t *testing.T) {
 		}).
 		Return(nil)
 
-	counter := &State{Metadata: map[string]Info{}}
+	counter := &State{Metadata: make(map[string]Info)}
 	runner := NewRunner(peer, rpc.Filter{}, "test-agent", 1, counter, engine)
 
 	assert.NoError(t, runner.Run(t.Context()))
@@ -99,7 +99,7 @@ func TestRunReportsCancelWithoutError(t *testing.T) {
 func TestFormatAgentLabels(t *testing.T) {
 	// Empty label set renders as an empty string, not "map[]" or similar.
 	assert.Empty(t, formatAgentLabels(nil))
-	assert.Empty(t, formatAgentLabels(map[string]string{}))
+	assert.Empty(t, formatAgentLabels(make(map[string]string)))
 
 	// Labels render as a JSON object with keys sorted, so the value is stable
 	// across runs regardless of map iteration order.

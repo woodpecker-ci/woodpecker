@@ -193,7 +193,7 @@ func allowAppendingLogs(currPipeline *model.Pipeline, currStep *model.Step) erro
 		return nil
 	}
 	// else give some delay where log caches can drain and be send ... because of network outage / server restart / ...
-	if time.Unix(currPipeline.Finished, 0).Add(logStreamDelayAllowed).After(time.Now()) {
+	if time.Unix(max(currPipeline.Finished, currStep.Finished), 0).Add(logStreamDelayAllowed).After(time.Now()) {
 		return nil
 	}
 

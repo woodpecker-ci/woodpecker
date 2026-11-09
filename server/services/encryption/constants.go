@@ -57,7 +57,6 @@ const (
 	errMessageTemplateUnsupportedKeyType = "unsupported encryption key type: %s"
 	errMessageCantUseBothServices        = "cannot use raw encryption key and tink keyset at the same time"
 	errMessageNoKeysProvided             = "encryption enabled but no keys provided"
-	errMessageFailedRotatingEncryption   = "failed rotating encryption"
 
 	// Log messages.
 	logMessageEncryptionEnabled       = "encryption enabled"
@@ -72,19 +71,13 @@ const (
 // Tink.
 const (
 	// Error wrapping templates.
-	errTemplateTinkFailedLoadingKeyset              = "failed loading encryption keyset: %w"
-	errTemplateTinkFailedValidatingKeyset           = "failed validating encryption keyset: %w"
-	errTemplateTinkFailedInitializeFileWatcher      = "failed initializing keyset file watcher: %w"
-	errTemplateTinkFailedSubscribeKeysetFileChanges = "failed subscribing on encryption keyset file changes: %w"
-	errTemplateTinkFailedOpeningKeyset              = "failed opening encryption keyset file: %w"
-	errTemplateTinkFailedReadingKeyset              = "failed reading encryption keyset from file: %w"
-	errTemplateTinkFailedInitializingAEAD           = "failed initializing AEAD instance: %w"
-
-	// Error messages.
-	errMessageTinkKeysetFileWatchFailed = "failed watching encryption keyset file changes"
+	errTemplateTinkFailedLoadingKeyset    = "failed loading encryption keyset: %w"
+	errTemplateTinkFailedValidatingKeyset = "failed validating encryption keyset: %w"
+	errTemplateTinkFailedOpeningKeyset    = "failed opening encryption keyset file: %w"
+	errTemplateTinkFailedReadingKeyset    = "failed reading encryption keyset from file: %w"
+	errTemplateTinkFailedInitializingAEAD = "failed initializing AEAD instance: %w"
 
 	// Log message templates.
-	logTemplateTinkKeysetFileChanged       = "changes detected in encryption keyset file: '%s'. Encryption service will be reloaded"
 	logTemplateTinkLoadingKeyset           = "loading encryption keyset from file: %s"
 	logTemplateTinkFailedClosingKeysetFile = "could not close keyset file: %s"
 )

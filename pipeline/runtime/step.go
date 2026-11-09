@@ -199,10 +199,14 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 	}
 
 	if waitState.OOMKilled {
-		return waitState, &pipeline_errors.OomError{
+		err := &pipeline_errors.OomError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
+
+		waitState.Error = errors.Join(waitState.Error, err)
+
+		return waitState, err
 	}
 	if waitState.ExitCode != 0 {
 		return waitState, &pipeline_errors.ExitError{
@@ -210,8 +214,11 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 			Code: waitState.ExitCode,
 		}
 	}
+	if errors.Is(waitState.Error, pipeline_errors.ErrCancel) {
+		return waitState, nil
+	}
 
-	return waitState, nil
+	return waitState, waitState.Error
 }
 
 // runBlockingStep starts the step and blocks until it fully completes.

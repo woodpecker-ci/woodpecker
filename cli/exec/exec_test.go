@@ -44,6 +44,7 @@ steps:
     image: alpine
     commands:
       - echo hello
+      - echo supersecret
 `), 0o600))
 
 	// LineWriter writes to os.Stderr directly, so redirect the fd
@@ -64,6 +65,7 @@ steps:
 		"woodpecker-cli",
 		"--backend-engine", "dummy",
 		"--repo-path", repoDir,
+		"--secrets", "password=supersecret",
 		workflowPath,
 	})
 	require.NoError(t, err)
@@ -87,8 +89,10 @@ steps:
 		`[build:L3:0s] StepCommands:
 [build:L4:0s] ------------------
 [build:L5:0s] echo hello
-[build:L6:0s] ------------------`,
+[build:L6:0s] echo ********
+[build:L7:0s] ------------------`,
 	)
+	assert.NotContains(t, stdout, "supersecret")
 
 	require.NoError(t, err)
 }

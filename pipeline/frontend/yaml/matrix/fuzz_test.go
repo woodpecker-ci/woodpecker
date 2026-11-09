@@ -25,6 +25,8 @@ func FuzzParse(f *testing.F) {
 	f.Add([]byte("matrix:\n  include:\n    - GO: 1\n      OS: linux"))
 	f.Add([]byte("matrix: {}"))
 	f.Add([]byte("matrix:\n  A: [x]"))
+	f.Add([]byte(largeMatrix(10, 128)))
+	f.Add([]byte(largeMatrix(64, 2)))
 
 	f.Fuzz(func(_ *testing.T, data []byte) {
 		_, _ = Parse(data)

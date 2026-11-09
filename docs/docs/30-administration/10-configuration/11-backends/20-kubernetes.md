@@ -702,3 +702,21 @@ Determines if the Pod `serviceAccountName` can be defined from a step's backend 
 - Default: `false`
 
 Determines if the Pod `runtimeClassName` can be defined from a step's backend options. Disabled by default, as it would otherwise allow any user with push access to run pods under an arbitrary runtime class.
+
+---
+
+### BACKEND_K8S_ALLOW_NATIVE_SECRETS
+
+- Name: `WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS`
+- Default: `false`
+
+Determines if steps can reference existing Kubernetes secrets with the `secrets` field of their backend options. Disabled by default, as it would otherwise let any pipeline use any secret in the namespace the pods run in.
+
+---
+
+### BACKEND_K8S_STOP_TIMEOUT
+
+- Name: `WOODPECKER_BACKEND_K8S_STOP_TIMEOUT`
+- Default: `20`
+
+Seconds Woodpecker waits for pods to stop gracefully before it kills them.

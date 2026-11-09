@@ -1,0 +1,11 @@
+{
+  "name": "step state carrying an error with exit code 0 fails pipeline",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [{ "name": "woodpecker", "status": "failure", "error": "expected step state error" }],
+  "expected_steps": [
+    { "name": "build", "status": "failure", "exit_code": 0, "error": "expected step state error" },
+    { "name": "deploy", "status": "skipped", "exit_code": 0 },
+    { "name": "notify", "status": "success", "exit_code": 0 }
+  ]
+}

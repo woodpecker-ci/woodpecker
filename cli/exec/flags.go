@@ -166,6 +166,11 @@ var flags = []cli.Flag{
 		Name:    "repo",
 		Usage:   "Set the full name to derive metadata environment variables \"CI_REPO\", \"CI_REPO_NAME\" and \"CI_REPO_OWNER\".",
 	},
+	&cli.Int64Flag{
+		Sources: cli.EnvVars("CI_REPO_ID"),
+		Name:    "repo-id",
+		Usage:   "Set the metadata environment variable \"CI_REPO_ID\".",
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_REPO_REMOTE_ID"),
 		Name:    "repo-remote-id",

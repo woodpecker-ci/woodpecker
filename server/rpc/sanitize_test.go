@@ -286,6 +286,27 @@ func TestAllowAppendingLogs(t *testing.T) {
 	})
 }
 
+// TestAllowAppendingLogsStepFinished ensures the drain window also starts at
+// the step's own finish time, so a pipeline without a recorded finish time
+// does not reject logs of a step that just finished.
+func TestAllowAppendingLogsStepFinished(t *testing.T) {
+	t.Parallel()
+
+	p := &model.Pipeline{Status: model.StatusFailure, Finished: 0}
+
+	t.Run("recent step finish allowed", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-time.Second).Unix()}
+		assert.NoError(t, allowAppendingLogs(p, step))
+	})
+
+	t.Run("stale step finish rejected", func(t *testing.T) {
+		t.Parallel()
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix()}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+}
+
 // TestAllowAppendingLogsDrainBoundary guards the exact edge of the 5-minute
 // drain window against off-by-one errors.
 func TestAllowAppendingLogsDrainBoundary(t *testing.T) {

@@ -71,7 +71,7 @@ func ParseRequest(allowedTypes []Type, r *http.Request, fn SecretFunc) (*Token, 
 	// authorization header.
 	token := r.Header.Get("Authorization")
 	if len(token) != 0 {
-		log.Trace().Msgf("token.ParseRequest: found token in header: %s", token)
+		log.Trace().Msg("token.ParseRequest: found token in header")
 		bearer := token
 		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
 			return nil, err

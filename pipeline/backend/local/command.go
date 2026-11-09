@@ -89,16 +89,21 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
+// Use a delimiter not present in the value to preserve its contents.
+// https://www.nushell.sh/lang-guide/chapters/strings_and_text.html#string-literals
+func quoteNushell(value string) string {
+	for n := 1; ; n++ {
+		hashes := strings.Repeat("#", n)
+		if !strings.Contains(value, "'"+hashes) {
+			return "r" + hashes + "'" + value + "'" + hashes
+		}
+	}
+}
+
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
 	if len(cmdList) == 0 {
 		return nil, ErrNoCmdSet
 	}
-
-	script := ""
-	for _, cmd := range cmdList {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
-	}
-	script = strings.TrimSpace(script)
 
 	switch shellName {
 	default:
@@ -109,7 +114,12 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		fallthrough
 		// normal posix shells
 	case "sh", "bash", "zsh":
-		return []string{"-e", "-c", script}, nil
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-e", "-c", script.String()}, nil
 	case "":
 		return nil, ErrNoShellSet
 	case "cmd":
@@ -141,14 +151,25 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 	case "fish":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			fmt.Fprintf(&script, "echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote(common.CommandMarker+cmd)), cmd)
+			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + " || exit $status\n")
 		}
 		return []string{"-c", script.String()}, nil
-	case "nu":
-		return []string{"--commands", script}, nil
+	case "nu", "nushell":
+		var script strings.Builder
+		for _, cmd := range cmdList {
+			script.WriteString("print " + quoteNushell(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"--commands", script.String()}, nil
 	case "powershell", "pwsh":
-		// cspell:disable-next-line
-		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
+		var script strings.Builder
+		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
+		for _, cmd := range cmdList {
+			script.WriteString("Write-Host " + common.QuotePowerShell(common.CommandMarker+cmd) + "\n")
+			script.WriteString(cmd + "\n")
+		}
+		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
 	}
 }
 

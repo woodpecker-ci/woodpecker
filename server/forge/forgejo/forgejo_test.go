@@ -16,16 +16,26 @@ package forgejo
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
@@ -134,18 +144,18 @@ func TestForgejo(t *testing.T) {
 	})
 
 	t.Run("PR hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		buf := bytes.NewBuffer(fixtures.HookPullRequest)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullRequest)
 		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(fakeRepo, nil)
 		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
-		r, b, err := c.Hook(ctx, req)
+		r, b, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.NoError(t, err)
 		assert.Equal(t, model.EventPull, b.Event)
-		assert.Equal(t, []string{"README.md"}, b.ChangedFiles)
+		assert.Equal(t, []string{"README.md", "src/old.go", "CHANGELOG.md", "a.go", "b.go", "c.go"}, b.ChangedFiles)
 	})
 }
 
@@ -214,4 +224,368 @@ func TestGetStatus(t *testing.T) {
 	for _, tt := range tests {
 		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
 	}
+}
+
+// newTestForge returns a forge talking to a fake Forgejo API with the given routes.
+func newTestForge(t *testing.T, routes map[string]http.HandlerFunc) *Forgejo {
+	t.Helper()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/v1/version", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"version":"7.0.2"}`))
+	})
+	for route, handler := range routes {
+		mux.HandleFunc(route, handler)
+	}
+	server := httptest.NewServer(mux)
+	t.Cleanup(server.Close)
+
+	f, err := New(1, Opts{URL: server.URL})
+	require.NoError(t, err)
+	g, ok := f.(*Forgejo)
+	require.True(t, ok)
+	return g
+}
+
+func respond(status int, body string) http.HandlerFunc {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_, _ = w.Write([]byte(body))
+	}
+}
+
+// testHookSecret is the webhook secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs the body of req with testHookSecret like Forgejo does.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	mac := hmac.New(sha256.New, []byte(testHookSecret))
+	_, _ = mac.Write(body)
+	req.Header.Set("X-Forgejo-Signature", hex.EncodeToString(mac.Sum(nil)))
+	return req
+}
+
+func TestHookVerifiesSignature(t *testing.T) {
+	// test vector of https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries,
+	// Forgejo signs the body the same way, only without the sha256= prefix
+	const (
+		secret    = "It's a Secret to Everybody"
+		body      = "Hello, World!"
+		signature = "757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"
+	)
+	g := newTestForge(t, nil)
+
+	for _, tc := range []struct {
+		name      string
+		secret    string
+		body      string
+		signature []string
+		valid     bool
+	}{
+		{name: "valid", secret: secret, body: body, signature: []string{signature}, valid: true},
+		{name: "wrong secret", secret: "other secret", body: body, signature: []string{signature}},
+		{name: "changed body", secret: secret, body: body + "!", signature: []string{signature}},
+		{name: "missing signature", secret: secret, body: body},
+		{name: "no secret on both sides", body: body, signature: []string{""}},
+		{name: "malformed signature", secret: secret, body: body, signature: []string{"not hex"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/hook", strings.NewReader(tc.body))
+			req.Header.Set(hookEvent, "ping")
+			req.Header["X-Forgejo-Signature"] = tc.signature
+
+			_, _, err := g.Hook(t.Context(), req, tc.secret)
+			if tc.valid {
+				// ping is no pipeline event, so a valid hook ends here
+				assert.ErrorIs(t, err, &forge_types.ErrIgnoreEvent{})
+			} else {
+				assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
+			}
+		})
+	}
+}
+
+func TestHookLoadsTagCommit(t *testing.T) {
+	newRequest := func() *http.Request {
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookRelease))
+		req.Header.Set(hookEvent, hookRelease)
+		return signHookRequest(t, req)
+	}
+	newTagRequest := func() *http.Request {
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookTag))
+		req.Header.Set(hookEvent, hookCreated)
+		return signHookRequest(t, req)
+	}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(&model.Repo{
+		ID: 1, UserID: 1, ForgeRemoteID: "77", Owner: "anbraten", Name: "demo",
+	}, nil)
+	s.On("GetUser", int64(1)).Return(&model.User{ID: 1, AccessToken: "token", Expiry: time.Now().Add(time.Hour).Unix()}, nil)
+	ctx := store.InjectToContext(t.Context(), s)
+
+	t.Run("release events get the commit of their tag", func(t *testing.T) {
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/repos/anbraten/demo/tags/0.0.5": respond(http.StatusOK, `{"name":"0.0.5","commit":{"sha":"abc123"}}`),
+		})
+
+		_, pipeline, err := g.Hook(ctx, newRequest(), testHookSecret)
+		require.NoError(t, err)
+		assert.Equal(t, model.EventRelease, pipeline.Event)
+		assert.Equal(t, "0.0.5", pipeline.TagTitle)
+		assert.Equal(t, "abc123", pipeline.Commit)
+	})
+
+	t.Run("tag events get the commit of their tag, not the annotated tag object", func(t *testing.T) {
+		// the create hook of a pushed annotated tag holds the SHA of the tag object
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
+		})
+
+		_, pipeline, err := g.Hook(ctx, newTagRequest(), testHookSecret)
+		require.NoError(t, err)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
+		assert.Equal(t, "abc123", pipeline.Commit)
+	})
+
+	t.Run("missing tag fails the hook", func(t *testing.T) {
+		g := newTestForge(t, nil)
+
+		_, _, err := g.Hook(ctx, newRequest(), testHookSecret)
+		assert.Error(t, err)
+	})
+}
+
+func TestOrgMembership(t *testing.T) {
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/orgs/org/members/owner":            respond(http.StatusNoContent, ""),
+		"/api/v1/users/owner/orgs/org/permissions":  respond(http.StatusOK, `{"is_owner":true}`),
+		"/api/v1/orgs/org/members/admin":            respond(http.StatusNoContent, ""),
+		"/api/v1/users/admin/orgs/org/permissions":  respond(http.StatusOK, `{"is_admin":true}`),
+		"/api/v1/orgs/org/members/member":           respond(http.StatusNoContent, ""),
+		"/api/v1/users/member/orgs/org/permissions": respond(http.StatusOK, `{"can_read":true}`),
+		"/api/v1/orgs/org/members/stranger":         respond(http.StatusNotFound, ""),
+		"/api/v1/orgs/org/members/broken":           respond(http.StatusNoContent, ""),
+		"/api/v1/users/broken/orgs/org/permissions": respond(http.StatusInternalServerError, `{"message":"boom"}`),
+		"/api/v1/orgs/unreachable/members/owner":    respond(http.StatusInternalServerError, ""),
+	})
+
+	for _, tc := range []struct {
+		login string
+		want  *model.OrgPerm
+	}{
+		{login: "owner", want: &model.OrgPerm{Member: true, Admin: true}},
+		{login: "admin", want: &model.OrgPerm{Member: true, Admin: true}},
+		{login: "member", want: &model.OrgPerm{Member: true}},
+		{login: "stranger", want: &model.OrgPerm{}},
+	} {
+		t.Run(tc.login, func(t *testing.T) {
+			perm, err := g.OrgMembership(t.Context(), &model.User{Login: tc.login, AccessToken: "token"}, "org")
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, perm)
+		})
+	}
+
+	t.Run("membership is kept when permissions fail", func(t *testing.T) {
+		perm, err := g.OrgMembership(t.Context(), &model.User{Login: "broken", AccessToken: "token"}, "org")
+		assert.Error(t, err)
+		assert.Equal(t, &model.OrgPerm{Member: true}, perm)
+	})
+
+	t.Run("membership check error", func(t *testing.T) {
+		_, err := g.OrgMembership(t.Context(), &model.User{Login: "owner", AccessToken: "token"}, "unreachable")
+		assert.Error(t, err)
+	})
+}
+
+func TestOrg(t *testing.T) {
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/orgs/public-org":    respond(http.StatusOK, `{"username":"public-org","visibility":"public"}`),
+		"/api/v1/orgs/private-org":   respond(http.StatusOK, `{"username":"private-org","visibility":"private"}`),
+		"/api/v1/orgs/":              respond(http.StatusNotFound, `{"message":"not found"}`),
+		"/api/v1/users/public-user":  respond(http.StatusOK, `{"login":"public-user","visibility":"public"}`),
+		"/api/v1/users/limited-user": respond(http.StatusOK, `{"login":"limited-user","visibility":"limited"}`),
+		"/api/v1/users/":             respond(http.StatusNotFound, `{"message":"not found"}`),
+	})
+	user := &model.User{AccessToken: "token"}
+
+	for _, tc := range []struct {
+		name string
+		want *model.Org
+	}{
+		{name: "public-org", want: &model.Org{Name: "public-org"}},
+		{name: "private-org", want: &model.Org{Name: "private-org", Private: true}},
+		{name: "public-user", want: &model.Org{Name: "public-user", IsUser: true}},
+		{name: "limited-user", want: &model.Org{Name: "limited-user", IsUser: true, Private: true}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			org, err := g.Org(t.Context(), user, tc.name)
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, org)
+		})
+	}
+
+	t.Run("neither org nor user", func(t *testing.T) {
+		_, err := g.Org(t.Context(), user, "missing")
+		assert.Error(t, err)
+	})
+}
+
+func TestTeams(t *testing.T) {
+	// a page size of two makes the second, shorter page the last one
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/settings/api": respond(http.StatusOK, `{"max_response_items":2}`),
+		"/api/v1/user/orgs": func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "2", r.URL.Query().Get("limit"))
+			switch r.URL.Query().Get("page") {
+			case "1":
+				_, _ = w.Write([]byte(`[{"username":"one","avatar_url":"/avatars/one"},{"username":"two","avatar_url":"https://avatars.example.com/two"}]`))
+			default:
+				_, _ = w.Write([]byte(`[{"username":"three"}]`))
+			}
+		},
+	})
+	user := &model.User{AccessToken: "token"}
+
+	teams, err := g.Teams(t.Context(), user, &model.ListOptions{Page: 1})
+	require.NoError(t, err)
+	require.Len(t, teams, 3)
+	assert.Equal(t, "one", teams[0].Login)
+	assert.Equal(t, g.url+"/avatars/one", teams[0].Avatar)
+	assert.Equal(t, "https://avatars.example.com/two", teams[1].Avatar)
+	assert.Equal(t, "three", teams[2].Login)
+
+	// all teams come with the first page
+	teams, err = g.Teams(t.Context(), user, &model.ListOptions{Page: 2})
+	require.NoError(t, err)
+	assert.Empty(t, teams)
+}
+
+func TestFileAndDir(t *testing.T) {
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/repos/owner/repo/contents/.woodpecker": func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "abc", r.URL.Query().Get("ref"))
+			_, _ = w.Write([]byte(`[` +
+				`{"type":"file","path":".woodpecker/a.yaml"},` +
+				`{"type":"dir","path":".woodpecker/sub"},` +
+				`{"type":"file","path":".woodpecker/b.yaml"}]`))
+		},
+		"/api/v1/repos/owner/repo/contents/": respond(http.StatusNotFound, `{"message":"not found"}`),
+		"/api/v1/repos/owner/repo/raw/": func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "abc", r.URL.Query().Get("ref"))
+			switch strings.TrimPrefix(r.URL.Path, "/api/v1/repos/owner/repo/raw/") {
+			case ".woodpecker/a.yaml":
+				_, _ = w.Write([]byte("steps: a"))
+			case ".woodpecker/b.yaml":
+				_, _ = w.Write([]byte("steps: b"))
+			default:
+				http.NotFound(w, r)
+			}
+		},
+	})
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{Owner: "owner", Name: "repo"}
+	pipeline := &model.Pipeline{Commit: "abc"}
+
+	_, err := g.File(t.Context(), user, repo, pipeline, ".woodpecker.yaml")
+	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+
+	// sub directories are skipped, files are loaded with their content
+	metas, err := g.Dir(t.Context(), user, repo, pipeline, ".woodpecker")
+	require.NoError(t, err)
+	assert.Equal(t, []*forge_types.FileMeta{
+		{Name: ".woodpecker/a.yaml", Data: []byte("steps: a")},
+		{Name: ".woodpecker/b.yaml", Data: []byte("steps: b")},
+	}, metas)
+
+	_, err = g.Dir(t.Context(), user, repo, pipeline, ".missing")
+	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+}
+
+func TestBranchHead(t *testing.T) {
+	g := newTestForge(t, map[string]http.HandlerFunc{
+		"/api/v1/repos/owner/repo/branches/main": respond(http.StatusOK, `{"name":"main","commit":{"id":"abc","url":"https://forgejo.example.com/owner/repo/commit/abc"}}`),
+	})
+
+	commit, err := g.BranchHead(t.Context(), &model.User{AccessToken: "token"}, &model.Repo{Owner: "owner", Name: "repo"}, "main")
+	require.NoError(t, err)
+	assert.Equal(t, &model.Commit{SHA: "abc", ForgeURL: "https://forgejo.example.com/owner/repo/commit/abc"}, commit)
+}
+
+func TestToPermWithoutPermissions(t *testing.T) {
+	// repos of other users come without permissions
+	assert.Equal(t, &model.Perm{}, toPerm(nil))
+}
+
+func TestMatchingHooks(t *testing.T) {
+	hooks := []*forgejo.Hook{
+		{ID: 1, Config: make(map[string]string)},
+		{ID: 2, Config: map[string]string{"url": "https://other.example.com/hook"}},
+		{ID: 3, Config: map[string]string{"url": "https://ci.example.com/api/hook?access_token=old"}},
+	}
+
+	assert.Equal(t, hooks[2], matchingHooks(hooks, "https://ci.example.com/api/hook?access_token=new"))
+	assert.Nil(t, matchingHooks(hooks[:2], "https://ci.example.com/api/hook"))
+	assert.Nil(t, matchingHooks(hooks, "://invalid"))
+}
+
+func TestPerPage(t *testing.T) {
+	t.Run("uses the server limit", func(t *testing.T) {
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/settings/api": respond(http.StatusOK, `{"max_response_items":42}`),
+		})
+		assert.Equal(t, 42, g.perPage(t.Context()))
+	})
+
+	t.Run("falls back to the default", func(t *testing.T) {
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/settings/api": respond(http.StatusInternalServerError, ""),
+		})
+		assert.Equal(t, defaultPageSize, g.perPage(t.Context()))
+	})
+
+	t.Run("keeps a configured size", func(t *testing.T) {
+		g := &Forgejo{pageSize: 7}
+		assert.Equal(t, 7, g.perPage(t.Context()))
+	})
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*Forgejo)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }

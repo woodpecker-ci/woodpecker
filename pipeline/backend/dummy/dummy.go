@@ -44,6 +44,15 @@ const (
 	EnvKeyStepExitCode    = "STEP_EXIT_CODE"
 	EnvKeyStepTailFail    = "STEP_TAIL_FAIL"
 	EnvKeyStepOOMKilled   = "STEP_OOM_KILLED"
+	// EnvKeyStepWaitFail makes WaitStep return an error instead of a state,
+	// like the kubernetes backend on an image pull failure or the docker
+	// backend when ContainerWait/ContainerInspect fail.
+	EnvKeyStepWaitFail = "STEP_WAIT_FAIL"
+	// EnvKeyStepStateError makes WaitStep return a state carrying an error
+	// while the exit code stays as configured, like the local backend does.
+	EnvKeyStepStateError = "STEP_STATE_ERROR"
+	// EnvKeyStepDestroyFail makes DestroyStep fail after the step finished.
+	EnvKeyStepDestroyFail = "STEP_DESTROY_FAIL"
 
 	// Internal const.
 	stepStateStarted   = "started"
@@ -201,6 +210,10 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 
 	e.kv.Store(key, stepStateDone)
 
+	if waitFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepWaitFail]); waitFail {
+		return nil, fmt.Errorf("expected fail to wait for step")
+	}
+
 	oomKilled, _ := strconv.ParseBool(step.Environment[EnvKeyStepOOMKilled])
 	exitCode := 0
 
@@ -208,10 +221,16 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID
 		exitCode, _ = strconv.Atoi(strings.TrimSpace(code))
 	}
 
+	var stateErr error
+	if withErr, _ := strconv.ParseBool(step.Environment[EnvKeyStepStateError]); withErr {
+		stateErr = fmt.Errorf("expected step state error")
+	}
+
 	return &backend_types.State{
 		ExitCode:  exitCode,
 		Exited:    true,
 		OOMKilled: oomKilled,
+		Error:     stateErr,
 	}, nil
 }
 
@@ -263,6 +282,10 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend_types.Step, taskUUI
 	}
 
 	e.kv.Delete(key)
+
+	if destroyFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepDestroyFail]); destroyFail {
+		return fmt.Errorf("expected fail to destroy step")
+	}
 	return nil
 }
 

@@ -49,6 +49,30 @@ func TestParseHook(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+	t.Run("pull-request hook without a repository", func(t *testing.T) {
+		buf := bytes.NewBufferString("{}")
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullCreated)
+
+		_, r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.ErrorIs(t, err, errIncompleteHook)
+	})
+
+	t.Run("push hook with a full name that has no owner", func(t *testing.T) {
+		buf := bytes.NewBufferString(`{"repository":{"full_name":"nameonly"},"push":{"changes":[{"new":{"name":"main","type":"branch","target":{"hash":"abc"}}}]}}`)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPush)
+
+		_, r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.ErrorIs(t, err, errIncompleteHook)
+	})
+
 	t.Run("pull-request", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPull)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)

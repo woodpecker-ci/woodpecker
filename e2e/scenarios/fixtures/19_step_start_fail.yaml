@@ -1,0 +1,21 @@
+skip_clone: true
+
+steps:
+  - name: build
+    image: dummy
+    commands:
+      - echo building
+    environment:
+      STEP_START_FAIL: 'true'
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+
+  - name: notify
+    image: dummy
+    commands:
+      - echo notifying
+    when:
+      - status: [failure]

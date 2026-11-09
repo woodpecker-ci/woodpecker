@@ -23,11 +23,11 @@ var removePluginOnlyOptionFromSecretsTable = xormigrate.Migration{
 	ID: "remove-plugin-only-option-from-secrets-table",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type secrets struct {
-			ID          int64    `json:"id"              xorm:"pk autoincr 'secret_id'"`
-			PluginsOnly bool     `json:"plugins_only"    xorm:"secret_plugins_only"`
-			SkipVerify  bool     `json:"-"               xorm:"secret_skip_verify"`
-			Conceal     bool     `json:"-"               xorm:"secret_conceal"`
-			Images      []string `json:"images"          xorm:"json 'secret_images'"`
+			ID          int64    `json:"id"           xorm:"pk autoincr 'secret_id'"`
+			PluginsOnly bool     `json:"plugins_only" xorm:"secret_plugins_only"`
+			SkipVerify  bool     `json:"-"            xorm:"secret_skip_verify"`
+			Conceal     bool     `json:"-"            xorm:"secret_conceal"`
+			Images      []string `json:"images"       xorm:"json 'secret_images'"`
 		}
 
 		// make sure plugin_only column exists

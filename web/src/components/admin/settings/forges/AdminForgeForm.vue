@@ -6,6 +6,10 @@
       <SelectField :id="id" v-model="forgeType" :options="forgeTypeOptions" required />
     </InputField>
 
+    <InputField v-slot="{ id }" :label="$t('forge_name')">
+      <TextField :id="id" v-model="forge.name" :placeholder="$t('forge_name_placeholder')" />
+    </InputField>
+
     <InputField v-if="forge.type !== 'bitbucket'" v-slot="{ id }" :label="$t('url')">
       <TextField :id="id" v-model="forge.url" :placeholder="$t('url')" required />
     </InputField>

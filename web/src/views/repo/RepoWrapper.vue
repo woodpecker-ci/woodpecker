@@ -48,6 +48,7 @@
       :title="$t('repo.pull_requests')"
     />
 
+    <Warning v-if="permSyncFailed" class="mb-4 text-sm" :text="$t('repo.perm_sync_failed')" />
     <router-view />
   </Scaffold>
   <router-view v-else-if="repo && repoPermissions" />
@@ -62,6 +63,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -85,7 +87,7 @@ const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
 const notifications = useNotifications();
-const { isAuthenticated } = useAuthentication();
+const { isAuthenticated, user } = useAuthentication();
 const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
@@ -135,6 +137,15 @@ onMounted(() => {
 
 watch([repositoryId], () => {
   loadRepo();
+});
+
+// the server re-syncs permissions older than the interval with the forge on every request,
+// so a still-outdated timestamp means the sync failed
+const permSyncFailed = computed(() => {
+  if (!user || user.admin || !repo.value || !repoPermissions.value || user.forge_id !== repo.value.forge_id) {
+    return false;
+  }
+  return repoPermissions.value.synced + config.permSyncInterval < Date.now() / 1000;
 });
 
 const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);

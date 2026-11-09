@@ -1,0 +1,11 @@
+{
+  "name": "OOM killed step with exit code 0 fails pipeline",
+  "event": "push",
+  "expected_status": "failure",
+  "expected_workflows": [{ "name": "woodpecker", "status": "failure", "error": "" }],
+  "expected_steps": [
+    { "name": "hungry", "status": "failure", "exit_code": 0, "error": "received oom kill" },
+    { "name": "deploy", "status": "skipped", "exit_code": 0 },
+    { "name": "notify", "status": "success", "exit_code": 0 }
+  ]
+}
