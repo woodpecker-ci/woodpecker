@@ -94,6 +94,16 @@ func (c *Client) ListWorkspaces(opts *ListOpts) (*WorkspacesResp, error) {
 	return out, err
 }
 
+func (c *Client) ListWorkspacesAll() ([]*WorkspaceAccess, error) {
+	return shared_utils.Paginate(func(page int) ([]*WorkspaceAccess, error) {
+		resp, err := c.ListWorkspaces(&ListOpts{Page: page, PageLen: pageSize})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
+	}, -1)
+}
+
 func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.base, owner, name)
