@@ -148,8 +148,8 @@ type Change struct {
 			} `json:"author"`
 		} `json:"target"`
 	} `json:"new"`
-	// Old is the ref before the push, nil when the push created it.
-	Old *struct {
+	// Old is the ref before the push. Its hash is empty when the push created the ref.
+	Old struct {
 		Target struct {
 			Hash string `json:"hash"`
 		} `json:"target"`

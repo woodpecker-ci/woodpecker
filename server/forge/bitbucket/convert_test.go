@@ -172,19 +172,22 @@ func TestConvertPushHook(t *testing.T) {
 }
 
 func TestConvertPushPrevCommit(t *testing.T) {
-	for name, tc := range map[string]struct {
+	tests := []struct {
+		name   string
 		change string
 		want   string
 	}{
-		"fast-forward push": {`{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}}`, "aaa"},
-		"new ref":           {`{"new": {"target": {"hash": "bbb"}}, "old": null}`, ""},
-		"force push":        {`{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}, "forced": true}`, ""},
-		"ref not moved":     {`{"new": {"target": {"hash": "aaa"}}, "old": {"target": {"hash": "aaa"}}}`, ""},
-	} {
-		t.Run(name, func(t *testing.T) {
+		{name: "fast-forward push", change: `{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}}`, want: "aaa"},
+		{name: "new ref", change: `{"new": {"target": {"hash": "bbb"}}, "old": null}`, want: ""},
+		{name: "force push", change: `{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}, "forced": true}`, want: ""},
+		{name: "ref not moved", change: `{"new": {"target": {"hash": "aaa"}}, "old": {"target": {"hash": "aaa"}}}`, want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			var change internal.Change
-			require.NoError(t, json.Unmarshal([]byte(tc.change), &change))
-			assert.Equal(t, tc.want, convertPushPrevCommit(&change))
+			require.NoError(t, json.Unmarshal([]byte(tt.change), &change))
+			assert.Equal(t, tt.want, convertPushPrevCommit(&change))
 		})
 	}
 }

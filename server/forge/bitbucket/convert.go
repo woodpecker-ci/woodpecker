@@ -231,7 +231,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 // range is not meaningful: the push created the ref, was forced, or did not
 // move it. Then only the head commit is used, as the GitHub forge does.
 func convertPushPrevCommit(change *internal.Change) string {
-	if change.Old == nil || change.Forced || change.Old.Target.Hash == change.New.Target.Hash {
+	if change.Forced || change.Old.Target.Hash == change.New.Target.Hash {
 		return ""
 	}
 	return change.Old.Target.Hash
