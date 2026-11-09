@@ -98,9 +98,12 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return err
 	}
 
-	// The workflows that did not start are final now; running ones get their
-	// status once their agent reports them done. Sending those here could
-	// land after the agent's final status.
+	// Only send the statuses of the workflows this cancel finished itself.
+	// Running workflows are left out on purpose: their agent stops on the
+	// cancel signal and sends their final status from RPC.Done. Their state
+	// in the store is still running here, and sending that could reach the
+	// forge after the final status and stay. The full tree is loaded again
+	// below for the pipeline event.
 	killedPipeline.Workflows = notStarted
 	updatePipelineStatusOnForge(ctx, _forge, killedPipeline, repo, user)
 
