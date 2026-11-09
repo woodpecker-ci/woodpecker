@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type ctxKey struct{}
@@ -511,8 +512,11 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(ctx, step, logEntries); err != nil {
+	// Entries the agent sends again after a retry are already stored and rejected
+	// by the unique index; that is the only error that is safe to drop.
+	if err = server.Config.Services.LogStore.LogAppend(ctx, step, logEntries); err != nil && !errors.Is(err, types.ErrInsertDuplicateDetected) {
 		log.Error().Err(err).Msg("could not store log entries")
+		return err
 	}
 
 	return nil

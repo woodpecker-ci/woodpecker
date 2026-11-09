@@ -313,8 +313,7 @@ func TestGetPipelineMetadata(t *testing.T) {
 	fakeRepo := &model.Repo{ID: 1}
 
 	mockForge := forge_mocks.NewMockForge(t)
-	mockForge.On("Name").Return("mock")
-	mockForge.On("URL").Return("https://codeberg.org")
+	mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://codeberg.org", Host: "codeberg.org"})
 
 	mockManager := manager_mocks.NewMockManager(t)
 	mockManager.On("ForgeFromRepo", fakeRepo).Return(mockForge, nil)
@@ -398,8 +397,7 @@ func TestCreatePipeline(t *testing.T) {
 		fakeCommit := &model.Commit{SHA: "abc123", ForgeURL: "https://example.com/commit/abc123"}
 
 		mockForge := forge_mocks.NewMockForge(t)
-		mockForge.On("Name").Return("mock").Maybe()
-		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://example.com", Host: "example.com"}).Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{
 			Machine:  "example.com",
@@ -470,8 +468,7 @@ func TestCreatePipeline(t *testing.T) {
 		fakeCommit := &model.Commit{SHA: "abc123", ForgeURL: "https://example.com/commit/abc123"}
 
 		mockForge := forge_mocks.NewMockForge(t)
-		mockForge.On("Name").Return("mock").Maybe()
-		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://example.com", Host: "example.com"}).Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, "main").Return(fakeCommit, nil)
 		// mock the netrc for parse config
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{
@@ -607,8 +604,7 @@ func TestPostPipeline(t *testing.T) {
 		mockRegistryService := registry_service_mocks.NewMockService(t)
 
 		mockForge := forge_mocks.NewMockForge(t)
-		mockForge.On("Name").Return("mock").Maybe()
-		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://example.com", Host: "example.com"}).Maybe()
 		mockForge.On("Netrc", fakeUser, fakeRepo).Return(&model.Netrc{}, nil).Maybe()
 		mockForge.On("Status", mock.Anything, fakeUser, fakeRepo, mock.Anything, mock.Anything).Return(nil).Maybe()
 
@@ -933,8 +929,7 @@ func TestGetRepoWorkflows(t *testing.T) {
 		t.Helper()
 
 		mockForge := forge_mocks.NewMockForge(t)
-		mockForge.On("Name").Return("mock").Maybe()
-		mockForge.On("URL").Return("https://example.com").Maybe()
+		mockForge.On("Config").Return(metadata.Forge{Type: "mock", URL: "https://example.com", Host: "example.com"}).Maybe()
 		mockForge.On("BranchHead", mock.Anything, fakeUser, fakeRepo, mock.Anything).Return(fakeCommit, nil)
 
 		mockConfigService := config_service_mocks.NewMockService(t)

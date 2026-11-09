@@ -81,7 +81,7 @@ func TestPatchUser(t *testing.T) {
 	}
 
 	t.Run("revoking a listed admin stops admin at sign in but keeps them listed", func(t *testing.T) {
-		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"Erin"})
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"Erin"}, false)
 		require.NoError(t, s.CreateUser(&model.User{Login: "erin", ForgeID: model.PrimaryForgeID, ForgeRemoteID: "5", Hash: "erin", Admin: true}))
 
 		patch(t, "erin", &model.User{Login: "erin", ForgeID: model.PrimaryForgeID, ForgeRemoteID: "5", Admin: false})
@@ -109,7 +109,7 @@ func TestPatchUser(t *testing.T) {
 	})
 
 	t.Run("a listed user who never signed in is not shown as revoked", func(t *testing.T) {
-		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"grace"})
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"grace"}, false)
 		require.NoError(t, s.CreateUser(&model.User{Login: "grace", ForgeID: model.PrimaryForgeID, ForgeRemoteID: "7", Hash: "grace"}))
 
 		tc := newTestContext(t, s)
@@ -130,7 +130,7 @@ func TestPatchUser(t *testing.T) {
 	})
 
 	t.Run("keeping admin leaves the admin list alone", func(t *testing.T) {
-		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"frank"})
+		server.Config.Permissions.Admins = permissions.NewAdmins([]string{"frank"}, false)
 		require.NoError(t, s.CreateUser(&model.User{Login: "frank", ForgeID: model.PrimaryForgeID, ForgeRemoteID: "6", Hash: "frank", Admin: true}))
 
 		patch(t, "frank", &model.User{Login: "frank", ForgeID: model.PrimaryForgeID, ForgeRemoteID: "6", Admin: true})
