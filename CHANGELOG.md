@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @slayerjain, @xunguangzlj-cloud, @zeevogels
+@6543, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -23,6 +23,7 @@
 
 ### 🐛 Bug Fixes
 
+- Only auto-cancel older pipelines [[#7345](https://github.com/woodpecker-ci/woodpecker/pull/7345)]
 - Report SQLite database lock on reads instead of "record not found" [[#7503](https://github.com/woodpecker-ci/woodpecker/pull/7503)]
 - Reject Bitbucket webhooks whose repository full name has no owner [[#7507](https://github.com/woodpecker-ci/woodpecker/pull/7507)]
 - Fail pipelines whose workflows depend on each other in a cycle [[#7471](https://github.com/woodpecker-ci/woodpecker/pull/7471)]
