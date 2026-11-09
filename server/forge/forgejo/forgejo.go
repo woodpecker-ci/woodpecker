@@ -87,6 +87,8 @@ func (c *Forgejo) Name() string {
 	return "forgejo"
 }
 
+func (c *Forgejo) Close() error { return nil }
+
 // Config returns the metadata of the configured forge.
 func (c *Forgejo) Config() metadata.Forge {
 	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}

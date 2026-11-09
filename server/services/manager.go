@@ -17,9 +17,11 @@ package services
 import (
 	"crypto"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -47,6 +49,7 @@ type Manager interface {
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
 	ForgeByID(forgeID int64) (forge.Forge, error)
+	RemoveForge(forgeID int64)
 }
 
 type manager struct {
@@ -60,6 +63,54 @@ type manager struct {
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
 	client              *utils.Client
+	forgeMu             sync.Mutex
+	forgeLocks          map[int64]*forgeLock
+	forges              sync.Map
+}
+
+type forgeLock struct {
+	mu   sync.Mutex
+	refs int
+}
+
+func (m *manager) lockForge(id int64) func() {
+	m.forgeMu.Lock()
+	if m.forgeLocks == nil {
+		m.forgeLocks = make(map[int64]*forgeLock)
+	}
+	lock := m.forgeLocks[id]
+	if lock == nil {
+		lock = &forgeLock{}
+		m.forgeLocks[id] = lock
+	}
+	lock.refs++
+	m.forgeMu.Unlock()
+
+	lock.mu.Lock()
+	return func() {
+		lock.mu.Unlock()
+		m.forgeMu.Lock()
+		lock.refs--
+		if lock.refs == 0 {
+			delete(m.forgeLocks, id)
+		}
+		m.forgeMu.Unlock()
+	}
+}
+
+func closeForge(f forge.Forge) {
+	if err := f.Close(); err != nil {
+		log.Error().Err(err).Msg("failed to close forge")
+	}
+}
+
+func closeStoredForge(value any) {
+	f, ok := value.(forge.Forge)
+	if !ok {
+		log.Error().Msg("failed to close forge with unexpected type")
+		return
+	}
+	closeForge(f)
 }
 
 func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -148,9 +199,21 @@ func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 }
 
 func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
+	unlock := m.lockForge(id)
+	defer unlock()
+
 	item := m.forgeCache.Get(id)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
+	}
+	if old, ok := m.forges.Load(id); ok {
+		closeStoredForge(old)
+		m.forges.Delete(id)
+	} else if item != nil {
+		closeForge(item.Value())
+	}
+	if item != nil {
+		m.forgeCache.Delete(id)
 	}
 
 	forgeModel, err := m.store.ForgeGet(id)
@@ -163,7 +226,21 @@ func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
 		return nil, err
 	}
 
+	m.forges.Store(id, forge)
 	m.forgeCache.Set(id, forge, forgeCacheTTL)
 
 	return forge, nil
+}
+
+func (m *manager) RemoveForge(id int64) {
+	unlock := m.lockForge(id)
+	defer unlock()
+
+	if old, ok := m.forges.Load(id); ok {
+		closeStoredForge(old)
+		m.forges.Delete(id)
+	} else if item := m.forgeCache.Get(id); item != nil {
+		closeForge(item.Value())
+	}
+	m.forgeCache.Delete(id)
 }

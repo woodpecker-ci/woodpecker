@@ -19,7 +19,9 @@ import (
 	"crypto/rand"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/stretchr/testify/assert"
@@ -209,4 +211,53 @@ func TestForgeByID(t *testing.T) {
 		_, err := m.ForgeByID(2)
 		assert.ErrorIs(t, err, assert.AnError)
 	})
+}
+
+type closeTrackingForge struct {
+	forge.Forge
+	closed atomic.Bool
+}
+
+func (f *closeTrackingForge) Close() error {
+	f.closed.Store(true)
+	return nil
+}
+
+func TestForgeByIDClosesExpiredForgeBeforeSetup(t *testing.T) {
+	s := store_mocks.NewMockStore(t)
+	s.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil).Twice()
+	first := &closeTrackingForge{}
+	second := &closeTrackingForge{}
+	setups := 0
+	m := &manager{
+		store:      s,
+		forgeCache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+		setupForge: func(*model.Forge) (forge.Forge, error) {
+			setups++
+			if setups == 2 {
+				require.True(t, first.closed.Load())
+				return second, nil
+			}
+			return first, nil
+		},
+	}
+
+	_, err := m.ForgeByID(1)
+	require.NoError(t, err)
+	m.forgeCache.Set(1, first, time.Nanosecond)
+	time.Sleep(time.Millisecond)
+	got, err := m.ForgeByID(1)
+	require.NoError(t, err)
+	assert.Same(t, second, got)
+}
+
+func TestRemoveForgeClosesCachedForge(t *testing.T) {
+	f := &closeTrackingForge{}
+	m := &manager{forgeCache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]())}
+	m.forgeCache.Set(1, f, time.Hour)
+
+	m.RemoveForge(1)
+
+	assert.True(t, f.closed.Load())
+	assert.Nil(t, m.forgeCache.Get(1))
 }
