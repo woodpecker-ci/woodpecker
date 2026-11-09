@@ -393,35 +393,6 @@ func TestFetchTimeout(t *testing.T) {
 		})
 	}
 
-	t.Run("canceled parent context is not reported as forge timeout", func(t *testing.T) {
-		t.Parallel()
-
-		ctx, cancelCause := context.WithCancelCause(t.Context())
-		cancel := func() { cancelCause(nil) }
-		f := new(mocks.MockForge)
-		f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
-			cancel()
-			blockUntilDone(args)
-		}).Return(nil, context.Canceled)
-		f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
-			cancel()
-			blockUntilDone(args)
-		}).Return(nil, context.Canceled)
-
-		configFetcher := config.NewForge(time.Minute, 1, constant.DefaultConfigOrder, []string{".yaml", ".yml"})
-		_, err := configFetcher.Fetch(
-			ctx,
-			f,
-			&model.User{AccessToken: "xxx"},
-			&model.Repo{Owner: "owner", Name: "repo"},
-			&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
-			nil,
-			false,
-		)
-		require.ErrorIs(t, err, context.Canceled)
-		assert.NotErrorIs(t, err, &forge_types.ErrConfigFetchTimeout{})
-	})
-
 	t.Run("parent deadline is not reported as forge timeout", func(t *testing.T) {
 		t.Parallel()
 

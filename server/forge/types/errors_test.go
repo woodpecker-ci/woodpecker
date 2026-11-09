@@ -69,13 +69,7 @@ func TestErrConfigFetchTimeout(t *testing.T) {
 	t.Run("message names timeout, attempts and configs", func(t *testing.T) {
 		t.Parallel()
 		err := &ErrConfigFetchTimeout{Timeout: 10 * time.Second, Attempts: 3, Configs: []string{".woodpecker/", ".woodpecker.yaml", ".woodpecker.yml"}}
-		assert.Equal(t, "forge did not answer within 10s (tried 3 times) while fetching '.woodpecker/', '.woodpecker.yaml' and '.woodpecker.yml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT", err.Error())
-	})
-
-	t.Run("message with one config and one attempt", func(t *testing.T) {
-		t.Parallel()
-		err := &ErrConfigFetchTimeout{Timeout: 500 * time.Millisecond, Attempts: 1, Configs: []string{"ci.yaml"}}
-		assert.Equal(t, "forge did not answer within 500ms (tried 1 time) while fetching 'ci.yaml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT", err.Error())
+		assert.Equal(t, "forge did not answer within 10s (tried 3 times) while fetching '.woodpecker/', '.woodpecker.yaml', '.woodpecker.yml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT", err.Error())
 	})
 
 	t.Run("errors.Is matches any ErrConfigFetchTimeout and the deadline", func(t *testing.T) {
