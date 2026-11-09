@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-08
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7519](https://github.com/woodpecker-ci/woodpecker/pull/7519)]
 - docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
 - Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
 - Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
@@ -54,6 +55,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.45.0 [[#7518](https://github.com/woodpecker-ci/woodpecker/pull/7518)]
 - Update golang-packages [[#7508](https://github.com/woodpecker-ci/woodpecker/pull/7508)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
