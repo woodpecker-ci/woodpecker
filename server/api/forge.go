@@ -119,6 +119,7 @@ func PatchForge(c *gin.Context) {
 	}
 	forge.URL = in.URL
 	forge.Type = in.Type
+	forge.Name = in.Name
 	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
@@ -158,6 +159,7 @@ func PostForge(c *gin.Context) {
 	forge := &model.Forge{
 		URL:               in.URL,
 		Type:              in.Type,
+		Name:              in.Name,
 		OAuthClientID:     in.OAuthClientID,
 		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,

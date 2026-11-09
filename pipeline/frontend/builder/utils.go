@@ -70,6 +70,24 @@ func filterMissingDependencies(items []*Item) []*Item {
 	return items
 }
 
+// findDependencyCycle returns the names of workflows that depend on each other
+// in a loop, starting and ending with the same name, or nil if there is none.
+func findDependencyCycle(items []*Item) []string {
+	dependencies := make(map[string]constraint.DependsOn, len(items))
+	for _, item := range items {
+		// every matrix axis is an item under the same workflow name
+		// TODO(2886): https://github.com/woodpecker-ci/woodpecker/issues/2886#issuecomment-1862007473
+		name := item.Workflow.Name
+		dependencies[name] = append(dependencies[name], item.DependsOn...)
+	}
+
+	cycle := constraint.FindDependencyCycle(dependencies)
+	if cycle == nil {
+		return nil
+	}
+	return append(cycle, cycle[0])
+}
+
 // selectYamls returns the file of the named workflow and, transitively, the
 // files of the workflows it hard depends on.
 func (b *PipelineBuilder) selectYamls(name string) ([]*YamlFile, error) {

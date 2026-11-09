@@ -78,6 +78,12 @@ steps:
       - bash -c 'shopt -s globstar; addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
 
+  check-test-file-map-source-file:
+    image: docker.io/alpine:3.24
+    commands:
+      - apk add --no-cache -q bash && bash .woodpecker/check-test-file-map-source-file.sh
+    when: *when
+
   test:
     depends_on:
       - vendor
