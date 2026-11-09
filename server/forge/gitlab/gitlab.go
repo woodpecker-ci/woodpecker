@@ -85,6 +85,8 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
+func (g *GitLab) Close() error { return nil }
+
 // Config returns the metadata of the configured forge.
 func (g *GitLab) Config() metadata.Forge {
 	return metadata.Forge{Type: g.Name(), URL: g.url, Host: common.HostFromURL(g.url)}

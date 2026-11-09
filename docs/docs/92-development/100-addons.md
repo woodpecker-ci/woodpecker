@@ -56,6 +56,9 @@ type config struct {
 // `config` must implement `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`. You must directly use Woodpecker's packages - see imports above.
 ```
 
+Forge addons must implement `Close() error`. Woodpecker calls it before unloading an addon,
+so addons should stop any background services they started there.
+
 ### Addon types
 
 | Type      | Addon package                                                  | Service interface                                                  |
