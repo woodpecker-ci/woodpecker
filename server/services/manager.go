@@ -72,8 +72,10 @@ type manager struct {
 // newForgeCache returns a forge cache that closes every forge it evicts.
 // Eviction callbacks run in their own goroutine, so a slow Close (an addon
 // waiting for in-flight calls) does not block the caller.
+// Hits restart the TTL, so a forge in use is not set up again every
+// forgeCacheTTL; config changes are applied through RemoveForge.
 func newForgeCache() *ttlcache.Cache[int64, forge.Forge] {
-	c := ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]())
+	c := ttlcache.New[int64, forge.Forge]()
 	c.OnEviction(func(_ context.Context, _ ttlcache.EvictionReason, item *ttlcache.Item[int64, forge.Forge]) {
 		if err := item.Value().Close(); err != nil {
 			log.Error().Err(err).Int64("forge-id", item.Key()).Msg("failed to close forge")
