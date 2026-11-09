@@ -66,7 +66,7 @@ type manager struct {
 	client              *utils.Client
 	// forgeMu serializes creating and removing forge instances, so that
 	// no instance gets replaced in the cache without being closed.
-	forgeMu sync.RWMutex
+	forgeMu sync.Mutex
 }
 
 // newForgeCache returns a forge cache that closes every forge it evicts.
@@ -168,15 +168,12 @@ func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 }
 
 func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
-	// First do easy path where forge is loaded and usable
-	m.forgeMu.RLock()
+	// ttlcache is safe for concurrent use, so cache hits need no lock of ours
+	// and do not wait for a slow setup of another forge.
 	if item := m.forgeCache.Get(id); item != nil {
-		defer m.forgeMu.RUnlock()
 		return item.Value(), nil
 	}
-	m.forgeMu.RUnlock()
 
-	// Now we need write lock to clean and load forge
 	m.forgeMu.Lock()
 	defer m.forgeMu.Unlock()
 
