@@ -447,7 +447,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
-	pr, repo, pl, err := parseHook(req)
+	pr, repo, pl, prevCommit, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -467,8 +467,14 @@ func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 
 	switch pl.Event {
 	case model.EventPush:
-		// List only the latest push changes
-		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		// List the changes of all pushed commits. Without the commit before the
+		// push (new ref or force push) only the head commit is listed.
+		spec := pl.Commit
+		if prevCommit != "" {
+			// The commit with the changes comes first, the one to compare to second.
+			spec = fmt.Sprintf("%s..%s", pl.Commit, prevCommit)
+		}
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, spec)
 		if err != nil {
 			return nil, nil, err
 		}

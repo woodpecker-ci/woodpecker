@@ -148,6 +148,13 @@ type Change struct {
 			} `json:"author"`
 		} `json:"target"`
 	} `json:"new"`
+	// Old is the ref before the push, nil when the push created it.
+	Old *struct {
+		Target struct {
+			Hash string `json:"hash"`
+		} `json:"target"`
+	} `json:"old"`
+	Forced bool `json:"forced"`
 }
 
 type PushHook struct {

@@ -226,6 +226,17 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
+// convertPushPrevCommit returns the commit the ref pointed to before the push,
+// so the changed files can cover every pushed commit. It is empty when that
+// range is not meaningful: the push created the ref, was forced, or did not
+// move it. Then only the head commit is used, as the GitHub forge does.
+func convertPushPrevCommit(change *internal.Change) string {
+	if change.Old == nil || change.Forced || change.Old.Target.Hash == change.New.Target.Hash {
+		return ""
+	}
+	return change.Old.Target.Hash
+}
+
 // regex for git author fields (r.g. "name <name@mail.tld>").
 var reGitMail = regexp.MustCompile("<(.*)>")
 
