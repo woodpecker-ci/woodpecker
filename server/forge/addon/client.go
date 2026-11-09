@@ -38,6 +38,8 @@ import (
 // make sure RPC implements forge.Forge.
 var _ forge.Forge = new(RPC)
 
+var ErrAddonClosed = errors.New("forge addon is closed")
+
 // ErrAddon is an error returned by the addon itself, not by the addon system.
 // Only the message of the error crosses the RPC boundary. Err is set to the
 // error the server checks for, if the addon sent its kind.
@@ -105,8 +107,6 @@ func Load(file string) (forge.Forge, error) {
 	return extension, nil
 }
 
-var errAddonClosed = errors.New("forge addon is closed")
-
 // rpcClient wraps the RPC connection of one addon process.
 type rpcClient struct {
 	mu     sync.RWMutex
@@ -119,7 +119,7 @@ func (c *rpcClient) Call(method string, args, reply any) error {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.closed {
-		return errAddonClosed
+		return ErrAddonClosed
 	}
 	return c.rpc.Call(method, args, reply)
 }

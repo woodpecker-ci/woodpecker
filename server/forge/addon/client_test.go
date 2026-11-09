@@ -111,5 +111,5 @@ func TestCallAfterCloseFails(t *testing.T) {
 	require.NoError(t, f.Close())
 	require.NoError(t, f.Close())
 	_, err = f.Teams(t.Context(), &model.User{Login: filepath.Join(t.TempDir(), "x")}, nil)
-	require.ErrorIs(t, err, errAddonClosed)
+	require.ErrorIs(t, err, ErrAddonClosed)
 }
