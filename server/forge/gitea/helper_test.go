@@ -18,7 +18,7 @@ package gitea
 import (
 	"testing"
 
-	"gitea.dev/sdk"
+	gitea "gitea.dev/sdk"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea/fixtures"

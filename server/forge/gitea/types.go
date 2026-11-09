@@ -19,7 +19,7 @@ import (
 	"errors"
 	"strings"
 
-	"gitea.dev/sdk"
+	gitea "gitea.dev/sdk"
 )
 
 type pushHook struct {
