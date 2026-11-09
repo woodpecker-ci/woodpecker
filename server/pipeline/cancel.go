@@ -102,7 +102,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	// status once their agent reports them done. Sending those here could
 	// land after the agent's final status.
 	killedPipeline.Workflows = notStarted
-	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
+	updatePipelineStatusOnForge(ctx, _forge, killedPipeline, repo, user)
 
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
