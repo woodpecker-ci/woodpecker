@@ -31,6 +31,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -100,9 +101,9 @@ func (c *client) Name() string {
 	return "github"
 }
 
-// URL returns the root url of a configured forge.
-func (c *client) URL() string {
-	return c.url
+// Config returns the metadata of the configured forge.
+func (c *client) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates the session and returns the forge user details.
@@ -695,7 +696,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err

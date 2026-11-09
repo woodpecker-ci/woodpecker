@@ -15,6 +15,7 @@
 package constraint
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -175,4 +176,87 @@ func TestDependsOnHelpers(t *testing.T) {
 	assert.Nil(t, nilDeps.Names())
 	assert.Nil(t, nilDeps.RequiredNames())
 	assert.Nil(t, nilDeps.OptionalNames())
+}
+
+func TestFindDependencyCycle(t *testing.T) {
+	tests := []struct {
+		name         string
+		dependencies map[string]DependsOn
+		cycle        []string
+	}{
+		{
+			name:         "no dependencies",
+			dependencies: map[string]DependsOn{"a": nil, "b": {}},
+		},
+		{
+			name: "chain",
+			dependencies: map[string]DependsOn{
+				"a": {{Name: "b"}},
+				"b": {{Name: "c"}},
+				"c": nil,
+			},
+		},
+		{
+			name: "shared dependency",
+			dependencies: map[string]DependsOn{
+				"a": nil,
+				"b": {{Name: "a"}},
+				"c": {{Name: "a"}},
+				"d": {{Name: "b"}, {Name: "c"}},
+			},
+		},
+		{
+			name:         "dependency without an entry",
+			dependencies: map[string]DependsOn{"a": {{Name: "missing"}}},
+		},
+		{
+			name:         "depends on itself",
+			dependencies: map[string]DependsOn{"a": {{Name: "a"}}},
+			cycle:        []string{"a"},
+		},
+		{
+			name: "depend on each other",
+			dependencies: map[string]DependsOn{
+				"a": {{Name: "c"}},
+				"b": {{Name: "a"}},
+				"c": {{Name: "b"}},
+			},
+			cycle: []string{"a", "c", "b"},
+		},
+		{
+			name: "cycle behind a dependency",
+			dependencies: map[string]DependsOn{
+				"a": {{Name: "b"}},
+				"b": {{Name: "c"}},
+				"c": {{Name: "b"}},
+			},
+			cycle: []string{"b", "c"},
+		},
+		{
+			name: "optional dependency",
+			dependencies: map[string]DependsOn{
+				"a": {{Name: "b", Optional: true}},
+				"b": {{Name: "a"}},
+			},
+			cycle: []string{"a", "b"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.cycle, FindDependencyCycle(tt.dependencies))
+		})
+	}
+
+	t.Run("every entry depends on all before it", func(t *testing.T) {
+		// each entry is checked once, so this does not walk every path
+		dependencies := make(map[string]DependsOn)
+		var previous DependsOn
+		for i := range 50 {
+			name := fmt.Sprintf("step-%02d", i)
+			dependencies[name] = previous
+			previous = append(previous, Dependency{Name: name})
+		}
+		assert.Nil(t, FindDependencyCycle(dependencies))
+	})
 }
