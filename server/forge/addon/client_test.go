@@ -101,3 +101,15 @@ func TestCloseWaitsForInflightAddonRPC(t *testing.T) {
 	require.NoError(t, <-result)
 	require.NoError(t, <-closed)
 }
+
+func TestCallAfterCloseFails(t *testing.T) {
+	executable, err := os.Executable()
+	require.NoError(t, err)
+	f, err := Load(executable)
+	require.NoError(t, err)
+
+	require.NoError(t, f.Close())
+	require.NoError(t, f.Close())
+	_, err = f.Teams(t.Context(), &model.User{Login: filepath.Join(t.TempDir(), "x")}, nil)
+	require.ErrorIs(t, err, errAddonClosed)
+}

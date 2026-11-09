@@ -19,6 +19,7 @@ import (
 	"crypto/rand"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -223,7 +224,7 @@ func (f *closeTrackingForge) Close() error {
 	return nil
 }
 
-func TestForgeByIDClosesExpiredForgeBeforeSetup(t *testing.T) {
+func TestForgeByIDClosesExpiredForge(t *testing.T) {
 	s := store_mocks.NewMockStore(t)
 	s.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil).Twice()
 	first := &closeTrackingForge{}
@@ -231,11 +232,10 @@ func TestForgeByIDClosesExpiredForgeBeforeSetup(t *testing.T) {
 	setups := 0
 	m := &manager{
 		store:      s,
-		forgeCache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+		forgeCache: newForgeCache(),
 		setupForge: func(*model.Forge) (forge.Forge, error) {
 			setups++
 			if setups == 2 {
-				require.True(t, first.closed.Load())
 				return second, nil
 			}
 			return first, nil
@@ -249,15 +249,47 @@ func TestForgeByIDClosesExpiredForgeBeforeSetup(t *testing.T) {
 	got, err := m.ForgeByID(1)
 	require.NoError(t, err)
 	assert.Same(t, second, got)
+	require.Eventually(t, first.closed.Load, time.Second, time.Millisecond)
+	assert.False(t, second.closed.Load())
 }
 
 func TestRemoveForgeClosesCachedForge(t *testing.T) {
 	f := &closeTrackingForge{}
-	m := &manager{forgeCache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]())}
+	m := &manager{forgeCache: newForgeCache()}
 	m.forgeCache.Set(1, f, time.Hour)
 
 	m.RemoveForge(1)
 
-	assert.True(t, f.closed.Load())
+	require.Eventually(t, f.closed.Load, time.Second, time.Millisecond)
 	assert.Nil(t, m.forgeCache.Get(1))
+}
+
+func TestForgeByIDConcurrentMissSetsUpOnce(t *testing.T) {
+	s := store_mocks.NewMockStore(t)
+	s.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1}, nil)
+	var setups atomic.Int32
+	m := &manager{
+		store:      s,
+		forgeCache: newForgeCache(),
+		setupForge: func(*model.Forge) (forge.Forge, error) {
+			setups.Add(1)
+			time.Sleep(10 * time.Millisecond)
+			return &closeTrackingForge{}, nil
+		},
+	}
+
+	const n = 20
+	got := make([]forge.Forge, n)
+	var wg sync.WaitGroup
+	for i := range n {
+		wg.Go(func() {
+			got[i], _ = m.ForgeByID(1)
+		})
+	}
+	wg.Wait()
+
+	assert.EqualValues(t, 1, setups.Load())
+	for _, f := range got {
+		assert.Same(t, got[0], f)
+	}
 }

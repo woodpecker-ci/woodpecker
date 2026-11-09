@@ -15,6 +15,7 @@
 package services
 
 import (
+	"context"
 	"crypto"
 	"strings"
 	"sync"
@@ -63,54 +64,22 @@ type manager struct {
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
 	client              *utils.Client
-	forgeMu             sync.Mutex
-	forgeLocks          map[int64]*forgeLock
-	forges              sync.Map
+	// forgeMu serializes creating and removing forge instances, so that
+	// no instance gets replaced in the cache without being closed.
+	forgeMu sync.Mutex
 }
 
-type forgeLock struct {
-	mu   sync.Mutex
-	refs int
-}
-
-func (m *manager) lockForge(id int64) func() {
-	m.forgeMu.Lock()
-	if m.forgeLocks == nil {
-		m.forgeLocks = make(map[int64]*forgeLock)
-	}
-	lock := m.forgeLocks[id]
-	if lock == nil {
-		lock = &forgeLock{}
-		m.forgeLocks[id] = lock
-	}
-	lock.refs++
-	m.forgeMu.Unlock()
-
-	lock.mu.Lock()
-	return func() {
-		lock.mu.Unlock()
-		m.forgeMu.Lock()
-		lock.refs--
-		if lock.refs == 0 {
-			delete(m.forgeLocks, id)
+// newForgeCache returns a forge cache that closes every forge it evicts.
+// Eviction callbacks run in their own goroutine, so a slow Close (an addon
+// waiting for in-flight calls) does not block the caller.
+func newForgeCache() *ttlcache.Cache[int64, forge.Forge] {
+	c := ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]())
+	c.OnEviction(func(_ context.Context, _ ttlcache.EvictionReason, item *ttlcache.Item[int64, forge.Forge]) {
+		if err := item.Value().Close(); err != nil {
+			log.Error().Err(err).Int64("forge-id", item.Key()).Msg("failed to close forge")
 		}
-		m.forgeMu.Unlock()
-	}
-}
-
-func closeForge(f forge.Forge) {
-	if err := f.Close(); err != nil {
-		log.Error().Err(err).Msg("failed to close forge")
-	}
-}
-
-func closeStoredForge(value any) {
-	f, ok := value.(forge.Forge)
-	if !ok {
-		log.Error().Msg("failed to close forge with unexpected type")
-		return
-	}
-	closeForge(f)
+	})
+	return c
 }
 
 func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -142,7 +111,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
-		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+		forgeCache:          newForgeCache(),
 		setupForge:          setupForge,
 		client:              client,
 	}, nil
@@ -199,22 +168,21 @@ func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 }
 
 func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
-	unlock := m.lockForge(id)
-	defer unlock()
-
-	item := m.forgeCache.Get(id)
-	if item != nil && !item.IsExpired() {
+	if item := m.forgeCache.Get(id); item != nil {
 		return item.Value(), nil
 	}
-	if old, ok := m.forges.Load(id); ok {
-		closeStoredForge(old)
-		m.forges.Delete(id)
-	} else if item != nil {
-		closeForge(item.Value())
+
+	m.forgeMu.Lock()
+	defer m.forgeMu.Unlock()
+
+	// another call may have created the forge while we waited for the lock
+	if item := m.forgeCache.Get(id); item != nil {
+		return item.Value(), nil
 	}
-	if item != nil {
-		m.forgeCache.Delete(id)
-	}
+
+	// Get does not return expired items, but they stay in the cache and Set
+	// would overwrite them without an eviction. Delete evicts (and closes) them.
+	m.forgeCache.Delete(id)
 
 	forgeModel, err := m.store.ForgeGet(id)
 	if err != nil {
@@ -226,21 +194,14 @@ func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
 		return nil, err
 	}
 
-	m.forges.Store(id, forge)
 	m.forgeCache.Set(id, forge, forgeCacheTTL)
 
 	return forge, nil
 }
 
 func (m *manager) RemoveForge(id int64) {
-	unlock := m.lockForge(id)
-	defer unlock()
+	m.forgeMu.Lock()
+	defer m.forgeMu.Unlock()
 
-	if old, ok := m.forges.Load(id); ok {
-		closeStoredForge(old)
-		m.forges.Delete(id)
-	} else if item := m.forgeCache.Get(id); item != nil {
-		closeForge(item.Value())
-	}
 	m.forgeCache.Delete(id)
 }

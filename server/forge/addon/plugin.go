@@ -39,5 +39,5 @@ func (p *Plugin) Server(*plugin.MuxBroker) (any, error) {
 }
 
 func (*Plugin) Client(_ *plugin.MuxBroker, c *rpc.Client) (any, error) {
-	return &RPC{client: c}, nil
+	return &RPC{client: &rpcClient{rpc: c}}, nil
 }

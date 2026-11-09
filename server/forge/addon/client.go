@@ -100,91 +100,52 @@ func Load(file string) (forge.Forge, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid forge addon client %T", raw)
 	}
-	state := &processState{current: &process{rpc: extension.client, client: client, done: make(chan struct{})}}
-	extension.client = &processSlot{state: state}
-	extension.slot = state
+	extension.client.plugin = client
 	success = true
 	return extension, nil
 }
 
+var errAddonClosed = errors.New("forge addon is closed")
+
+// rpcClient wraps the RPC connection of one addon process.
+type rpcClient struct {
+	mu     sync.RWMutex
+	rpc    *rpc.Client
+	plugin *plugin.Client
+	closed bool
+}
+
+func (c *rpcClient) Call(method string, args, reply any) error {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.closed {
+		return errAddonClosed
+	}
+	return c.rpc.Call(method, args, reply)
+}
+
+func (c *rpcClient) Close() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.closed {
+		return nil
+	}
+	c.closed = true
+
+	var resp []byte
+	err := c.rpc.Call("Plugin.Close", []byte{}, &resp)
+	if c.plugin != nil {
+		c.plugin.Kill()
+	}
+	return addonError(err)
+}
+
 type RPC struct {
-	client interface{ Call(string, any, any) error }
-	slot   *processState
-}
-
-type process struct {
-	mu      sync.Mutex
-	rpc     interface{ Call(string, any, any) error }
-	client  *plugin.Client
-	done    chan struct{}
-	active  int
-	closing bool
-}
-
-type processState struct {
-	mu      sync.Mutex
-	current *process
-}
-
-type processSlot struct {
-	state *processState
-}
-
-func (s *processSlot) Call(method string, args, reply any) error {
-	state := s.state
-	state.mu.Lock()
-	p := state.current
-	if p == nil {
-		state.mu.Unlock()
-		return errors.New("forge addon is closed")
-	}
-	p.mu.Lock()
-	if p.closing {
-		p.mu.Unlock()
-		state.mu.Unlock()
-		return errors.New("forge addon is closing")
-	}
-	p.active++
-	p.mu.Unlock()
-	state.mu.Unlock()
-
-	defer func() {
-		p.mu.Lock()
-		p.active--
-		if p.closing && p.active == 0 {
-			close(p.done)
-		}
-		p.mu.Unlock()
-	}()
-	return p.rpc.Call(method, args, reply)
+	client *rpcClient
 }
 
 func (g *RPC) Close() error {
-	if g == nil || g.slot == nil {
-		return nil
-	}
-
-	state := g.slot
-	state.mu.Lock()
-	p := state.current
-	if p == nil {
-		state.mu.Unlock()
-		return nil
-	}
-	state.current = nil
-	p.mu.Lock()
-	p.closing = true
-	if p.active == 0 {
-		close(p.done)
-	}
-	p.mu.Unlock()
-	state.mu.Unlock()
-
-	<-p.done
-	var resp []byte
-	err := p.rpc.Call("Plugin.Close", []byte{}, &resp)
-	p.client.Kill()
-	return addonError(err)
+	return g.client.Close()
 }
 
 func (g *RPC) Name() string {
