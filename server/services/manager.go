@@ -105,6 +105,11 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
+	forgeCache := newForgeCache()
+	// evict (and so close) expired forges even if they are never asked for
+	// again, so an unused addon process does not keep running
+	go forgeCache.Start()
+
 	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
@@ -113,7 +118,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
-		forgeCache:          newForgeCache(),
+		forgeCache:          forgeCache,
 		setupForge:          setupForge,
 		client:              client,
 	}, nil
