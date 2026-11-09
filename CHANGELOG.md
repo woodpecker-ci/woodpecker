@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Raise matrix per-axis variable limit from 10 to 64 [[#7526](https://github.com/woodpecker-ci/woodpecker/pull/7526)]
 - Show the latest release of plugins in the plugin index if exist [[#7480](https://github.com/woodpecker-ci/woodpecker/pull/7480)]
 - For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
 - Make builtin env var scopes more descriptive [[#7486](https://github.com/woodpecker-ci/woodpecker/pull/7486)]
