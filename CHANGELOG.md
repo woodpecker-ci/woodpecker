@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
+@6543, @Bynlk, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -24,6 +24,7 @@
 
 ### 🐛 Bug Fixes
 
+- Close forge instances before cache replacement [[#7525](https://github.com/woodpecker-ci/woodpecker/pull/7525)]
 - Only auto-cancel older pipelines [[#7345](https://github.com/woodpecker-ci/woodpecker/pull/7345)]
 - Report SQLite database lock on reads instead of "record not found" [[#7503](https://github.com/woodpecker-ci/woodpecker/pull/7503)]
 - Reject Bitbucket webhooks whose repository full name has no owner [[#7507](https://github.com/woodpecker-ci/woodpecker/pull/7507)]
@@ -43,7 +44,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7519](https://github.com/woodpecker-ci/woodpecker/pull/7519)]
 - docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
 - Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
 - Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
@@ -58,6 +58,7 @@
 ### 📦️ Dependency
 
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.45.0 [[#7518](https://github.com/woodpecker-ci/woodpecker/pull/7518)]
+- Lock file maintenance [[#7519](https://github.com/woodpecker-ci/woodpecker/pull/7519)]
 - Update golang-packages [[#7508](https://github.com/woodpecker-ci/woodpecker/pull/7508)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
