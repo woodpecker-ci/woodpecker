@@ -73,13 +73,16 @@ func isErrDatabaseLocked(err error) bool {
 
 // wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
-	if !exist {
-		return types.ErrRecordNotExist
+	if isErrDatabaseLocked(err) {
+		return types.ErrDatabaseLocked
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
+	}
+	if !exist {
+		return types.ErrRecordNotExist
 	}
 	return nil
 }
@@ -117,7 +120,7 @@ func wrapInsert(c int64, err error) error {
 			strings.Contains(errMsg, "duplicate key") ||
 			strings.Contains(errMsg, "unique constraint") ||
 			strings.Contains(errMsg, "Duplicate entry") {
-			return types.ErrInsertDuplicateDetected
+			return fmt.Errorf("%w: %w", types.ErrInsertDuplicateDetected, err)
 		}
 		if isErrDatabaseLocked(err) {
 			return types.ErrDatabaseLocked

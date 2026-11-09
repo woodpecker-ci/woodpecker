@@ -720,6 +720,78 @@ depends_on:
 	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
 }
 
+func TestWorkflowDependencyCycle(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "push"}
+
+	workflow := func(name, dependsOn string) *YamlFile {
+		data := "when:\n  event: push\nsteps:\n  - name: build\n    image: scratch\n"
+		if dependsOn != "" {
+			data += "depends_on: " + dependsOn + "\n"
+		}
+		return &YamlFile{Name: name, Data: []byte(data)}
+	}
+
+	tests := []struct {
+		name  string
+		yamls []*YamlFile
+		cycle string
+	}{
+		{
+			name:  "workflows depend on each other",
+			yamls: []*YamlFile{workflow("build", "[deploy]"), workflow("deploy", "[build]")},
+			cycle: "build -> deploy -> build",
+		},
+		{
+			name:  "workflow depends on itself",
+			yamls: []*YamlFile{workflow("build", "[build]")},
+			cycle: "build -> build",
+		},
+		{
+			name:  "cycle behind a dependency",
+			yamls: []*YamlFile{workflow("a", "[b]"), workflow("b", "[c]"), workflow("c", "[b]")},
+			cycle: "b -> c -> b",
+		},
+		{
+			name:  "optional dependency that exists",
+			yamls: []*YamlFile{workflow("build", "[{name: deploy, optional: true}]"), workflow("deploy", "[build]")},
+			cycle: "build -> deploy -> build",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				Yamls:               tt.yamls,
+			}
+
+			items, err := b.Build()
+			assert.Nil(t, items)
+			assert.True(t, errors.HasBlockingErrors(err))
+			assert.ErrorContains(t, err, "workflow dependency cycle: "+tt.cycle)
+		})
+	}
+
+	t.Run("shared dependency is no cycle", func(t *testing.T) {
+		b := PipelineBuilder{
+			GetWorkflowMetadata: m.GetWorkflowMetadata,
+			RepoTrusted:         &metadata.TrustedConfiguration{},
+			Yamls: []*YamlFile{
+				workflow("build", ""),
+				workflow("deploy", "[build, test]"),
+				workflow("test", "[build]"),
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 3)
+	})
+}
+
 func TestDependsOnOptionalFlag(t *testing.T) {
 	t.Parallel()
 

@@ -27,6 +27,9 @@ This will take care of connecting the addon forge to the server.
 It is not possible to access global variables from Woodpecker, for example the server configuration. You must therefore parse the environment variables in your addon. The reason for this is that the addon runs in a completely separate process.
 :::
 
+A forge addon gets the webhook secret of the repository as third argument of `Hook`.
+If your forge signs webhooks, verify the signature of the request body with it before you parse the body.
+
 ### Example structure
 
 This is an example for a forge addon.
@@ -52,6 +55,9 @@ type config struct {
 
 // `config` must implement `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`. You must directly use Woodpecker's packages - see imports above.
 ```
+
+Forge addons must implement `Close() error`. Woodpecker calls it before unloading an addon,
+so addons should stop any background services they started there.
 
 ### Addon types
 

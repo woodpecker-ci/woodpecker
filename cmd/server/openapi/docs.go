@@ -3116,7 +3116,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "the options for the pipeline to run",
-                        "name": "options",
+                        "name": "pipelineOptions",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -6295,6 +6295,9 @@ const docTemplate = `{
         "metadata.Forge": {
             "type": "object",
             "properties": {
+                "host": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 },

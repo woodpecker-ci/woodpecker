@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	mock "github.com/stretchr/testify/mock"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -278,6 +279,82 @@ func (_c *MockForge_Branches_Call) RunAndReturn(run func(ctx context.Context, u 
 	return _c
 }
 
+// Config provides a mock function for the type MockForge
+func (_mock *MockForge) Config() metadata.Forge {
+	ret := _mock.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Config")
+	}
+
+	var r0 metadata.Forge
+	if returnFunc, ok := ret.Get(0).(func() metadata.Forge); ok {
+		r0 = returnFunc()
+	} else {
+		r0 = ret.Get(0).(metadata.Forge)
+	}
+	return r0
+}
+
+// MockForge_Config_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Config'
+type MockForge_Config_Call struct {
+	*mock.Call
+}
+
+// Config is a helper method to define mock.On call
+func (_e *MockForge_Expecter) Config() *MockForge_Config_Call {
+	return &MockForge_Config_Call{Call: _e.mock.On("Config")}
+}
+
+// Close provides a mock function for the type MockForge
+func (_mock *MockForge) Close() error {
+	ret := _mock.Called()
+	if len(ret) == 0 {
+		panic("no return value specified for Close")
+	}
+	if returnFunc, ok := ret.Get(0).(func() error); ok {
+		return returnFunc()
+	}
+	return ret.Error(0)
+}
+
+// MockForge_Close_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Close'
+type MockForge_Close_Call struct {
+	*mock.Call
+}
+
+// Close is a helper method to define mock.On call
+func (_e *MockForge_Expecter) Close() *MockForge_Close_Call {
+	return &MockForge_Close_Call{Call: _e.mock.On("Close")}
+}
+
+func (_c *MockForge_Close_Call) Return(err error) *MockForge_Close_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockForge_Close_Call) RunAndReturn(run func() error) *MockForge_Close_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+func (_c *MockForge_Config_Call) Run(run func()) *MockForge_Config_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockForge_Config_Call) Return(forge metadata.Forge) *MockForge_Config_Call {
+	_c.Call.Return(forge)
+	return _c
+}
+
+func (_c *MockForge_Config_Call) RunAndReturn(run func() metadata.Forge) *MockForge_Config_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Deactivate provides a mock function for the type MockForge
 func (_mock *MockForge) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	ret := _mock.Called(ctx, u, r, link)
@@ -520,8 +597,8 @@ func (_c *MockForge_File_Call) RunAndReturn(run func(ctx context.Context, u *mod
 }
 
 // Hook provides a mock function for the type MockForge
-func (_mock *MockForge) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	ret := _mock.Called(ctx, r)
+func (_mock *MockForge) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	ret := _mock.Called(ctx, r, secret)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Hook")
@@ -530,25 +607,25 @@ func (_mock *MockForge) Hook(ctx context.Context, r *http.Request) (*model.Repo,
 	var r0 *model.Repo
 	var r1 *model.Pipeline
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *http.Request) (*model.Repo, *model.Pipeline, error)); ok {
-		return returnFunc(ctx, r)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *http.Request, string) (*model.Repo, *model.Pipeline, error)); ok {
+		return returnFunc(ctx, r, secret)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, *http.Request) *model.Repo); ok {
-		r0 = returnFunc(ctx, r)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *http.Request, string) *model.Repo); ok {
+		r0 = returnFunc(ctx, r, secret)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Repo)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, *http.Request) *model.Pipeline); ok {
-		r1 = returnFunc(ctx, r)
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *http.Request, string) *model.Pipeline); ok {
+		r1 = returnFunc(ctx, r, secret)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*model.Pipeline)
 		}
 	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, *http.Request) error); ok {
-		r2 = returnFunc(ctx, r)
+	if returnFunc, ok := ret.Get(2).(func(context.Context, *http.Request, string) error); ok {
+		r2 = returnFunc(ctx, r, secret)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -563,11 +640,12 @@ type MockForge_Hook_Call struct {
 // Hook is a helper method to define mock.On call
 //   - ctx context.Context
 //   - r *http.Request
-func (_e *MockForge_Expecter) Hook(ctx any, r any) *MockForge_Hook_Call {
-	return &MockForge_Hook_Call{Call: _e.mock.On("Hook", ctx, r)}
+//   - secret string
+func (_e *MockForge_Expecter) Hook(ctx any, r any, secret any) *MockForge_Hook_Call {
+	return &MockForge_Hook_Call{Call: _e.mock.On("Hook", ctx, r, secret)}
 }
 
-func (_c *MockForge_Hook_Call) Run(run func(ctx context.Context, r *http.Request)) *MockForge_Hook_Call {
+func (_c *MockForge_Hook_Call) Run(run func(ctx context.Context, r *http.Request, secret string)) *MockForge_Hook_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -577,9 +655,14 @@ func (_c *MockForge_Hook_Call) Run(run func(ctx context.Context, r *http.Request
 		if args[1] != nil {
 			arg1 = args[1].(*http.Request)
 		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -590,7 +673,7 @@ func (_c *MockForge_Hook_Call) Return(repo *model.Repo, pipeline *model.Pipeline
 	return _c
 }
 
-func (_c *MockForge_Hook_Call) RunAndReturn(run func(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)) *MockForge_Hook_Call {
+func (_c *MockForge_Hook_Call) RunAndReturn(run func(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error)) *MockForge_Hook_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1314,50 +1397,6 @@ func (_c *MockForge_Teams_Call) Return(teams []*model.Team, err error) *MockForg
 }
 
 func (_c *MockForge_Teams_Call) RunAndReturn(run func(ctx context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error)) *MockForge_Teams_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// URL provides a mock function for the type MockForge
-func (_mock *MockForge) URL() string {
-	ret := _mock.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for URL")
-	}
-
-	var r0 string
-	if returnFunc, ok := ret.Get(0).(func() string); ok {
-		r0 = returnFunc()
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-	return r0
-}
-
-// MockForge_URL_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'URL'
-type MockForge_URL_Call struct {
-	*mock.Call
-}
-
-// URL is a helper method to define mock.On call
-func (_e *MockForge_Expecter) URL() *MockForge_URL_Call {
-	return &MockForge_URL_Call{Call: _e.mock.On("URL")}
-}
-
-func (_c *MockForge_URL_Call) Run(run func()) *MockForge_URL_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run()
-	})
-	return _c
-}
-
-func (_c *MockForge_URL_Call) Return(s string) *MockForge_URL_Call {
-	_c.Call.Return(s)
-	return _c
-}
-
-func (_c *MockForge_URL_Call) RunAndReturn(run func() string) *MockForge_URL_Call {
 	_c.Call.Return(run)
 	return _c
 }

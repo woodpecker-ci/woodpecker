@@ -17,9 +17,15 @@ package gitea
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -29,6 +35,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea/fixtures"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -126,18 +133,18 @@ func TestGitea(t *testing.T) {
 	})
 
 	t.Run("PR hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		buf := bytes.NewBuffer(fixtures.HookPullRequest)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullRequest)
 		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything, mock.Anything).Return(fakeRepo, nil)
 		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
-		r, b, err := c.Hook(ctx, req)
+		r, b, err := c.Hook(ctx, signHookRequest(t, req), testHookSecret)
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.NoError(t, err)
 		assert.Equal(t, model.EventPull, b.Event)
-		assert.Equal(t, []string{"README.md"}, b.ChangedFiles)
+		assert.Equal(t, []string{"README.md", "src/old.go", "CHANGELOG.md", "a.go", "b.go", "c.go"}, b.ChangedFiles)
 	})
 }
 
@@ -230,16 +237,71 @@ func respond(status int, body string) http.HandlerFunc {
 	}
 }
 
+// testHookSecret is the webhook secret signHookRequest signs with.
+const testHookSecret = "test-secret"
+
+// signHookRequest signs the body of req with testHookSecret like Gitea does.
+func signHookRequest(t *testing.T, req *http.Request) *http.Request {
+	t.Helper()
+	body, err := io.ReadAll(req.Body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	mac := hmac.New(sha256.New, []byte(testHookSecret))
+	_, _ = mac.Write(body)
+	req.Header.Set("X-Gitea-Signature", hex.EncodeToString(mac.Sum(nil)))
+	return req
+}
+
+func TestHookVerifiesSignature(t *testing.T) {
+	// test vector of https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries,
+	// Gitea signs the body the same way, only without the sha256= prefix
+	const (
+		secret    = "It's a Secret to Everybody"
+		body      = "Hello, World!"
+		signature = "757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17"
+	)
+	g := newTestForge(t, nil)
+
+	for _, tc := range []struct {
+		name      string
+		secret    string
+		body      string
+		signature []string
+		valid     bool
+	}{
+		{name: "valid", secret: secret, body: body, signature: []string{signature}, valid: true},
+		{name: "wrong secret", secret: "other secret", body: body, signature: []string{signature}},
+		{name: "changed body", secret: secret, body: body + "!", signature: []string{signature}},
+		{name: "missing signature", secret: secret, body: body},
+		{name: "no secret on both sides", body: body, signature: []string{""}},
+		{name: "malformed signature", secret: secret, body: body, signature: []string{"not hex"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/hook", strings.NewReader(tc.body))
+			req.Header.Set(hookEvent, "ping")
+			req.Header["X-Gitea-Signature"] = tc.signature
+
+			_, _, err := g.Hook(t.Context(), req, tc.secret)
+			if tc.valid {
+				// ping is no pipeline event, so a valid hook ends here
+				assert.ErrorIs(t, err, &forge_types.ErrIgnoreEvent{})
+			} else {
+				assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
+			}
+		})
+	}
+}
+
 func TestHookLoadsTagCommit(t *testing.T) {
 	newRequest := func() *http.Request {
-		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookRelease))
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookRelease))
 		req.Header.Set(hookEvent, hookRelease)
-		return req
+		return signHookRequest(t, req)
 	}
 	newTagRequest := func() *http.Request {
-		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(fixtures.HookTag))
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookTag))
 		req.Header.Set(hookEvent, hookCreated)
-		return req
+		return signHookRequest(t, req)
 	}
 
 	s := store_mocks.NewMockStore(t)
@@ -254,7 +316,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 			"/api/v1/repos/anbraten/demo/tags/0.0.5": respond(http.StatusOK, `{"name":"0.0.5","commit":{"sha":"abc123"}}`),
 		})
 
-		_, pipeline, err := g.Hook(ctx, newRequest())
+		_, pipeline, err := g.Hook(ctx, newRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
@@ -267,7 +329,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
 		})
 
-		_, pipeline, err := g.Hook(ctx, newTagRequest())
+		_, pipeline, err := g.Hook(ctx, newTagRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
@@ -277,7 +339,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 	t.Run("missing tag fails the hook", func(t *testing.T) {
 		g := newTestForge(t, nil)
 
-		_, _, err := g.Hook(ctx, newRequest())
+		_, _, err := g.Hook(ctx, newRequest(), testHookSecret)
 		assert.Error(t, err)
 	})
 }
@@ -474,4 +536,49 @@ func TestPerPage(t *testing.T) {
 		g := &Gitea{pageSize: 7}
 		assert.Equal(t, 7, g.perPage(t.Context()))
 	})
+}
+
+func TestConfig(t *testing.T) {
+	f, err := New(1, Opts{URL: "https://example.com/gitea"})
+	require.NoError(t, err)
+
+	serverForge, ok := f.(metadata.ServerForge)
+	require.True(t, ok, "gitea must implement the metadata forge interface")
+
+	assert.Equal(t, metadata.Forge{Type: "gitea", URL: "https://example.com/gitea", Host: "example.com"}, serverForge.Config())
+}
+
+func TestRefreshExchangesStillValidToken(t *testing.T) {
+	var tokenRequests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login/oauth/access_token" {
+			http.NotFound(w, r)
+			return
+		}
+		tokenRequests.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"access_token":"new-access","token_type":"bearer","expires_in":3600,"refresh_token":"new-refresh"}`)
+	}))
+	defer server.Close()
+
+	forge, err := New(1, Opts{URL: server.URL, OAuthClientID: "id", OAuthClientSecret: "secret"})
+	assert.NoError(t, err)
+
+	user := &model.User{
+		AccessToken:  "old-access",
+		RefreshToken: "old-refresh",
+		Expiry:       time.Now().Add(5 * time.Minute).UTC().Unix(),
+	}
+
+	f, ok := forge.(*Gitea)
+	require.True(t, ok)
+
+	updated, err := f.Refresh(t.Context(), user)
+	assert.NoError(t, err)
+	assert.True(t, updated)
+
+	assert.Equal(t, int32(1), tokenRequests.Load(), "token endpoint must be called exactly once")
+	assert.Equal(t, "new-access", user.AccessToken)
+	assert.Equal(t, "new-refresh", user.RefreshToken)
+	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
 }
