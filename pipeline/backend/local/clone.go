@@ -16,10 +16,12 @@ package local
 
 import (
 	"context"
-	"encoding/json"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -58,7 +60,7 @@ func (e *local) setupClone(ctx context.Context, state *workflowState) error {
 	if e.os == "windows" {
 		state.pluginGitBinary += ".exe"
 	}
-	return e.downloadLatestGitPluginBinary(ctx, state.pluginGitBinary)
+	return e.downloadGitPluginBinary(ctx, state.pluginGitBinary)
 }
 
 // execClone executes a clone-step locally.
@@ -140,63 +142,66 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
-// downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
-// and saves it to dest.
-func (e *local) downloadLatestGitPluginBinary(ctx context.Context, dest string) error {
-	type asset struct {
-		Name               string
-		BrowserDownloadURL string `json:"browser_download_url"`
+// pluginGitReleaseURL is the base URL of the plugin-git releases (overridden in tests).
+var pluginGitReleaseURL = "https://github.com/woodpecker-ci/plugin-git/releases"
+
+// downloadGitPluginBinary downloads the plugin-git binary of the configured version for the
+// runtime OS and Arch, verifies it against the release's checksums.txt and saves it to dest.
+func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error {
+	asset := fmt.Sprintf("%s-%s_plugin-git", e.os, e.arch)
+	if e.os == "windows" {
+		asset += ".exe"
 	}
 
-	type release struct {
-		Assets []asset
+	baseURL := pluginGitReleaseURL + "/latest/download"
+	if e.pluginGitVersion != "" && e.pluginGitVersion != "latest" {
+		baseURL = pluginGitReleaseURL + "/download/" + url.PathEscape(e.pluginGitVersion)
 	}
 
-	// get latest release
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/repos/woodpecker-ci/plugin-git/releases/latest", nil)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	resp, err := http.DefaultClient.Do(req)
+	checksums, err := httpGet(ctx, baseURL+"/checksums.txt")
 	if err != nil {
-		return fmt.Errorf("could not get latest release: %w", err)
+		return fmt.Errorf("could not download plugin-git checksums: %w", err)
 	}
-	raw, _ := io.ReadAll(resp.Body)
-	_ = resp.Body.Close()
-	var rel release
-	if err := json.Unmarshal(raw, &rel); err != nil {
-		return fmt.Errorf("could not unmarshal github response: %w", err)
-	}
-
-	for _, at := range rel.Assets {
-		if strings.Contains(at.Name, e.os) && strings.Contains(at.Name, e.arch) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, at.BrowserDownloadURL, nil)
-			if err != nil {
-				return err
-			}
-			assetResp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return fmt.Errorf("could not download plugin-git: %w", err)
-			}
-			defer assetResp.Body.Close()
-
-			file, err := os.Create(dest)
-			if err != nil {
-				return fmt.Errorf("could not create plugin-git: %w", err)
-			}
-			defer file.Close()
-
-			if _, err := io.Copy(file, assetResp.Body); err != nil {
-				return fmt.Errorf("could not download plugin-git: %w", err)
-			}
-			if err := os.Chmod(dest, 0o755); err != nil {
-				return err
-			}
-
-			// download successful
-			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
-			return nil
+	var wantSum string
+	for _, line := range strings.Split(string(checksums), "\n") {
+		if fields := strings.Fields(line); len(fields) == 2 && fields[1] == asset {
+			wantSum = fields[0]
+			break
 		}
 	}
+	if wantSum == "" {
+		return fmt.Errorf("could not download plugin-git: no release asset '%s' for this os/arch", asset)
+	}
 
-	return fmt.Errorf("could not download plugin-git, binary for this os/arch not found")
+	binary, err := httpGet(ctx, baseURL+"/"+asset)
+	if err != nil {
+		return fmt.Errorf("could not download plugin-git: %w", err)
+	}
+	if sum := sha256.Sum256(binary); hex.EncodeToString(sum[:]) != wantSum {
+		return fmt.Errorf("could not download plugin-git: checksum mismatch for '%s'", asset)
+	}
+
+	if err := os.WriteFile(dest, binary, 0o755); err != nil {
+		return fmt.Errorf("could not write plugin-git: %w", err)
+	}
+
+	log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
+	return nil
+}
+
+// httpGet returns the body of a GET request and fails on non-200 responses.
+func httpGet(ctx context.Context, url string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GET %s: unexpected status %s", url, resp.Status)
+	}
+	return io.ReadAll(resp.Body)
 }
