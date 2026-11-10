@@ -60,12 +60,14 @@ function timeAgo(date: number) {
 function prettyDuration(durationMs: number) {
   const t = splitDuration(durationMs);
 
-  if (t.totalHours > 1) {
+  // Also move up a unit when the rounded count reaches it, so 59.6 minutes
+  // reads "1 hour" rather than "60 minutes".
+  if (t.totalHours > 1 || Math.round(t.totalMinutes) >= 60) {
     return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(
       Math.round(t.totalHours),
     );
   }
-  if (t.totalMinutes > 1) {
+  if (t.totalMinutes > 1 || Math.round(t.totalSeconds) >= 60) {
     return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(
       Math.round(t.totalMinutes),
     );
