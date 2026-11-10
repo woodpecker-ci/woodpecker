@@ -120,35 +120,35 @@ New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker" `
 ## Backend options
 
 ```yaml
-    backend_options:
-      libvirt:
-        # Setting this to 'true' will make the changes to the VM
-        # visible to other steps/workflows and break isolation.
-        # This can be useful however if VM creation is automated
-        # in some other way.
-        persistent: false
-        # This is optional and should only be used if the backend
-        # can't figure out how to create and format a disk as the
-        # shared volume.
-        shared_disk:
-          # The UUID is needed for mounting on linux.
-          # On windows we create a serial number on the fly and use
-          # that for mounting.
-          uuid: bd5ea041-e765-4d3a-9cda-083e4e52b187
-          # The disk image to use. Must be a filename. Paths
-          # are ignored. Both qcow2 and raw img are fine.
-          disk_image: shared.qcow2
-        # The SSH configuration. This is required.
-        ssh_config:
-          # required
-          username: root
-          # Optional. Timeout before giving up on connecting via ssh. If
-          # your VM needs a long time to start up, you may want to increase this.
-          # Takes a duration string, such as "2m" for two minutes.
-          timeout: 1m
-          # Optional. Only use this if libvirt NSS doesn't work. This
-          # must be the interface inside the guest on which we can connect to sshd.
-          interface: eth0
+backend_options:
+  libvirt:
+    # Setting this to 'true' will make the changes to the VM
+    # visible to other steps/workflows and break isolation.
+    # This can be useful however if VM creation is automated
+    # in some other way.
+    persistent: false
+    # This is optional and should only be used if the backend
+    # can't figure out how to create and format a disk as the
+    # shared volume.
+    shared_disk:
+      # The UUID is needed for mounting on linux.
+      # On windows we create a serial number on the fly and use
+      # that for mounting.
+      uuid: bd5ea041-e765-4d3a-9cda-083e4e52b187
+      # The disk image to use. Must be a filename. Paths
+      # are ignored. Both qcow2 and raw img are fine.
+      disk_image: shared.qcow2
+    # The SSH configuration. This is required.
+    ssh_config:
+      # required
+      username: root
+      # Optional. Timeout before giving up on connecting via ssh. If
+      # your VM needs a long time to start up, you may want to increase this.
+      # Takes a duration string, such as "2m" for two minutes.
+      timeout: 1m
+      # Optional. Only use this if libvirt NSS doesn't work. This
+      # must be the interface inside the guest on which we can connect to sshd.
+      interface: eth0
 ```
 
 The SSH password has to be configured via the environment variable `LIBVIRT_SSH_PW`,
@@ -167,33 +167,32 @@ labels:
 skip_clone: true
 
 steps:
- - name: build
-   image: win11
-   commands:
-     # install ghcup and msys2
-     - Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; try { & ([ScriptBlock]::Create((Invoke-WebRequest https://raw.githubusercontent.com/haskell/ghcup-hs/refs/heads/no-pty/scripts/bootstrap/bootstrap-haskell.ps1 -UseBasicParsing))) -DisableCurl -Msys2Env CLANG64 -Minimal } catch { Write-Error $_ }
-     # clone the repository
-     - C:/ghcup/msys64/usr/bin/bash.exe --login -e -c "ls -lah && pwd && pacman --noconfirm -S --needed --overwrite '*' bash git && git clone ${CI_REPO_CLONE_URL} --branch ${CI_COMMIT_BRANCH} . && ghcup install ghc --set $env:GHC && ghcup install cabal --set $env:CABAL"
-     # build
-     - C:/ghcup/msys64/usr/bin/bash.exe --login -e .github/scripts/build.sh --ghc ghc-$env:GHC --verbose --os Windows --check-linking --strip
-   environment:
-     GHC: 9.10.3
-     CABAL: 3.18.1.0
-     CABAL_DIR: "C:/cabal"
-     MSYSTEM: CLANG64
-     CHERE_INVOKING: 1
-     GHCUP_MSYS2_ENV: CLANG64
-     GHCUP_INSTALL_BASE_PREFIX: "C:/"
-     LIBVIRT_SSH_PW:
-       from_secret: win11_ssh_pw
-   backend_options:
-     libvirt:
-       ssh_config:
-         username: maerwald
+  - name: build
+    image: win11
+    commands:
+      # install ghcup and msys2
+      - Set-ExecutionPolicy Bypass -Scope Process -Force;[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; try { & ([ScriptBlock]::Create((Invoke-WebRequest https://raw.githubusercontent.com/haskell/ghcup-hs/refs/heads/no-pty/scripts/bootstrap/bootstrap-haskell.ps1 -UseBasicParsing))) -DisableCurl -Msys2Env CLANG64 -Minimal } catch { Write-Error $_ }
+      # clone the repository
+      - C:/ghcup/msys64/usr/bin/bash.exe --login -e -c "ls -lah && pwd && pacman --noconfirm -S --needed --overwrite '*' bash git && git clone ${CI_REPO_CLONE_URL} --branch ${CI_COMMIT_BRANCH} . && ghcup install ghc --set $env:GHC && ghcup install cabal --set $env:CABAL"
+      # build
+      - C:/ghcup/msys64/usr/bin/bash.exe --login -e .github/scripts/build.sh --ghc ghc-$env:GHC --verbose --os Windows --check-linking --strip
+    environment:
+      GHC: 9.10.3
+      CABAL: 3.18.1.0
+      CABAL_DIR: 'C:/cabal'
+      MSYSTEM: CLANG64
+      CHERE_INVOKING: 1
+      GHCUP_MSYS2_ENV: CLANG64
+      GHCUP_INSTALL_BASE_PREFIX: 'C:/'
+      LIBVIRT_SSH_PW:
+        from_secret: win11_ssh_pw
+    backend_options:
+      libvirt:
+        ssh_config:
+          username: maerwald
 ```
 
 ## Caveats
 
 Plugins don't work. They are docker specific. That also means that automatic cloning
 doesn't work and we always need `skip_clone: true`.
-
