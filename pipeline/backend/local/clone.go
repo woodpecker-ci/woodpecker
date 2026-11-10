@@ -85,11 +85,12 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	if rmCmd != "" {
 		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
 		if e.os == "windows" {
-			pwsh, err := exec.LookPath("powershell.exe")
+			cmdExe, err := exec.LookPath("cmd.exe")
 			if err != nil {
 				return err
 			}
-			cmd = newCmd(ctx, pwsh, "-Command", fmt.Sprintf("%s ; $code=$? ; %s ; if (!$code) {[Environment]::Exit(1)}", state.pluginGitBinary, rmCmd))
+
+			cmd = newCmd(ctx, cmdExe, "/D", "/S", "/C", fmt.Sprintf(`""%s" && (%s & exit /b 0) || (%s & exit /b 1)"`, state.pluginGitBinary, rmCmd, rmCmd))
 		} else {
 			cmd = newCmd(ctx, "/bin/sh", "-c", fmt.Sprintf("%s ; export code=$? ; %s ; exit $code", state.pluginGitBinary, rmCmd))
 		}
