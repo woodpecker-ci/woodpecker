@@ -71,11 +71,11 @@ set +m
 
 b64decode() {
 	if echo "bG9sCg==" | base64 -d >/dev/null 2>&1 ; then
-	  base64 -d
+		base64 -d
 	elif echo "bG9sCg==" | base64 -D >/dev/null 2>&1 ; then
-	  base64 -D
+		base64 -D
 	else
-	  openssl base64 -d -A
+		openssl base64 -d -A
 	fi
 }
 

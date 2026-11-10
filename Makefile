@@ -48,7 +48,7 @@ endif
 # only forwarded on server and agent and cli compilation
 CGO_ENABLED ?= 1
 ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
-        CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
+	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
 
@@ -64,7 +64,7 @@ ifeq ($(LIBVIRT_ENABLED),true)
 	override TAGS += libvirt
 	ifneq ($(STATIC_BUILD),true)
 		# we have dynamic build so we can do dynamic so loading
-	        override TAGS += libvirt_dlopen
+		override TAGS += libvirt_dlopen
 	endif
 endif
 

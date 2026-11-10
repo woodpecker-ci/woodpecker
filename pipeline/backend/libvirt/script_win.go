@@ -64,8 +64,8 @@ func generateScriptWindows(commands []string, env map[string]string, workDir str
 		`
 		& {
 			%s
-    }
-    `, buf.String(),
+		}
+		`, buf.String(),
 	)
 	return wrapped
 }
@@ -96,8 +96,8 @@ Write-Output @'
 '@
 
 & {
-  %s ;
-  if ($LASTEXITCODE) { exit $LASTEXITCODE } ;
+	%s ;
+	if ($LASTEXITCODE) { exit $LASTEXITCODE } ;
 } ;
 
 `
