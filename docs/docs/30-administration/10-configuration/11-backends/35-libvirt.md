@@ -64,6 +64,11 @@ These are the requirements for the host that runs the woodpecker agent:
 - sufficient privileges for the user running the agent to interact with libvirtd and write to the images store (`/var/lib/libvirt/images` by default)
 - [libvirt nss](https://libvirt.org/nss.html) set up, so that we can connect to the machine by name
 
+:::note
+The official agent and cli container images are built without the libvirt backend.
+Run the agent binary directly on the libvirt host instead.
+:::
+
 ## VM creation
 
 Libvirt has an [ecosystem of tools](https://www.virt-tools.org/).
