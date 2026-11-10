@@ -91,7 +91,11 @@ export default class ApiClient {
     return this._request('DELETE', path);
   }
 
-  _subscribe<T>(path: string, callback: (data: T) => void, opts = { reconnect: true }) {
+  _subscribe<T>(
+    path: string,
+    callback: (data: T) => void,
+    opts: { reconnect: boolean; onReconnect?: () => void } = { reconnect: true },
+  ) {
     const query = encodeQueryString({
       access_token: this.token ?? undefined,
     });
@@ -99,6 +103,13 @@ export default class ApiClient {
     _path = this.token !== null ? `${_path}?${query}` : _path;
 
     const events = new EventSource(_path);
+    let connected = false;
+    events.onopen = () => {
+      if (connected) {
+        opts.onReconnect?.();
+      }
+      connected = true;
+    };
     events.onmessage = (event) => {
       const data = JSON.parse(event.data as string) as T;
       // eslint-disable-next-line promise/prefer-await-to-callbacks
