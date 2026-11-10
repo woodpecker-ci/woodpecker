@@ -59,6 +59,7 @@ These are the requirements for the host that runs the woodpecker agent:
 - hardware that supports virtualization
 - libvirt supported operating system
 - libvirt C libraries installed
+- agent built with cgo enabled (`CGO_ENABLED=1`)
 - libvirtd service started and operational (including networking)
 - sufficient privileges for the user running the agent to interact with libvirtd and write to the images store (`/var/lib/libvirt/images` by default)
 - [libvirt nss](https://libvirt.org/nss.html) set up, so that we can connect to the machine by name
