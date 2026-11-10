@@ -37,6 +37,7 @@ else
 endif
 
 TAGS ?=
+override TAGS += libvirt_dlopen
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)

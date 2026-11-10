@@ -101,8 +101,11 @@ func ConnectToLibvirt(ctx context.Context) (*virt.Connect, error) {
 	}
 	libvirtUri := c.String("backend-libvirt-uri")
 
-	return virt.NewConnect(libvirtUri)
-
+	conn, err := virt.NewConnect(libvirtUri)
+	if err != nil {
+		return nil, fmt.Errorf("libvirt backend is unavailable: %w", err)
+	}
+	return conn, nil
 }
 
 // it's hard to figure out just the socket, so we attempt

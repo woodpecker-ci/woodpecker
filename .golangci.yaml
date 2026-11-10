@@ -3,6 +3,7 @@ run:
   timeout: 15m
   build-tags:
     - test
+    - libvirt_dlopen
 linters:
   default: none
   enable:
