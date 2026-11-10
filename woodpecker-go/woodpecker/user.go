@@ -27,7 +27,8 @@ const (
 )
 
 type RepoListOptions struct {
-	All bool // query all repos, including inactive ones
+	All  bool   // query all repos, including inactive ones
+	Name string // filter repos by name
 }
 
 type UserListOptions struct {
@@ -39,6 +40,9 @@ func (opt *RepoListOptions) QueryEncode() string {
 	query := make(url.Values)
 	if opt.All {
 		query.Add("all", "true")
+	}
+	if opt.Name != "" {
+		query.Add("name", opt.Name)
 	}
 	return query.Encode()
 }
