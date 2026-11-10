@@ -42,7 +42,36 @@ steps:
     environment:
       PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;windows|amd64;freebsd|amd64'
       SQLITE_ENABLED: 'true'
+      STATIC_BUILD: 'true'
       TAGS: 'netgo'
+      ARCHIVE_IT: '1'
+
+  cross-compile-agent:
+    depends_on:
+      - vendor
+    image: *xgo_image
+    pull: true
+    commands:
+      - apt update
+      - apt install -y tree
+      - make cross-compile-agent
+    environment:
+      PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;linux|arm/v7'
+      STATIC_BUILD: 'false'
+      ARCHIVE_IT: '1'
+
+  cross-compile-cli:
+    depends_on:
+      - vendor
+    image: *xgo_image
+    pull: true
+    commands:
+      - apt update
+      - apt install -y tree
+      - make cross-compile-cli
+    environment:
+      PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;linux|arm/v7'
+      STATIC_BUILD: 'false'
       ARCHIVE_IT: '1'
 
   build-tarball:
@@ -74,6 +103,8 @@ steps:
   build-deb-rpm:
     depends_on:
       - cross-compile-server
+      - cross-compile-agent
+      - cross-compile-cli
       - build-agent
       - build-cli
     image: *golang_image
@@ -83,6 +114,8 @@ steps:
   checksums:
     depends_on:
       - cross-compile-server
+      - cross-compile-agent
+      - cross-compile-cli
       - build-agent
       - build-cli
       - build-deb-rpm

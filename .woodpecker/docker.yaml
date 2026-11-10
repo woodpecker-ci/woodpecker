@@ -98,6 +98,7 @@ steps:
     environment: &server_env
       PLATFORMS: 'linux|amd64'
       SQLITE_ENABLED: 'true'
+      STATIC_BUILD: 'true'
       TAGS: 'netgo'
     when:
       - event: [pull_request, pull_request_metadata]
