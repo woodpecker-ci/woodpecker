@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Report substitution errors in cli lint and server with custom error [[#7534](https://github.com/woodpecker-ci/woodpecker/pull/7534)]
 - Report skipped and canceled workflows as error to GitHub [[#7517](https://github.com/woodpecker-ci/woodpecker/pull/7517)]
 - Report skipped workflows as skipped to forgejo >= 16 [[#7515](https://github.com/woodpecker-ci/woodpecker/pull/7515)]
 - Raise matrix per-axis variable limit from 10 to 64 [[#7526](https://github.com/woodpecker-ci/woodpecker/pull/7526)]
