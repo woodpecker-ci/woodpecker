@@ -50,11 +50,12 @@ const (
 // GitHub commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusSkipped, model.StatusCanceled, model.StatusCreated:
+	case model.StatusPending, model.StatusRunning, model.StatusBlocked, model.StatusCreated:
 		return statusPending
 	case model.StatusFailure, model.StatusDeclined:
 		return statusFailure
-	case model.StatusKilled, model.StatusError:
+	case model.StatusKilled, model.StatusError, model.StatusSkipped, model.StatusCanceled:
+		// GitHub has no skipped or canceled state; they are neither success nor failure
 		return statusError
 	case model.StatusSuccess:
 		return statusSuccess
