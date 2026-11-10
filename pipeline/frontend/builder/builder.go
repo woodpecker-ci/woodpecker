@@ -138,7 +138,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
+		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 	}
 
 	// parse yaml pipeline
