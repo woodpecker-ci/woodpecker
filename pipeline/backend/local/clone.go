@@ -163,7 +163,7 @@ func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error 
 		return fmt.Errorf("could not download plugin-git checksums: %w", err)
 	}
 	var wantSum string
-	for _, line := range strings.Split(string(checksums), "\n") {
+	for line := range strings.SplitSeq(string(checksums), "\n") {
 		if fields := strings.Fields(line); len(fields) == 2 && fields[1] == asset {
 			wantSum = fields[0]
 			break
