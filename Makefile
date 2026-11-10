@@ -295,8 +295,11 @@ build: build-agent build-server build-cli ## Build all binaries
 .PHONY: release-frontend
 release-frontend: build-ui ## Build frontend
 
+.PHONY: cross-compile-server
 cross-compile-server: ## Cross compile the server
+.PHONY: cross-compile-agent
 cross-compile-agent: ## Cross compile the agent
+.PHONY: cross-compile-cli
 cross-compile-cli: ## Cross compile the cli
 cross-compile-server cross-compile-agent cross-compile-cli: cross-compile-%:
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
