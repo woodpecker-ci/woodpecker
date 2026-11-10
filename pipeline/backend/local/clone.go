@@ -16,6 +16,8 @@ package local
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -30,8 +33,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
-// pluginGitReleaseURL is the base URL of the plugin-git releases (overridden in tests).
-var pluginGitReleaseURL = "https://github.com/woodpecker-ci/plugin-git/releases"
+// pluginGitReleaseAPI is the GitHub API endpoint of the plugin-git releases (overridden in tests).
+var pluginGitReleaseAPI = "https://api.github.com/repos/woodpecker-ci/plugin-git/releases"
+
+// errNotFound is returned by httpGet on a 404 response.
+var errNotFound = errors.New("not found")
 
 // checkGitCloneCap check if we have the git binary on hand.
 func checkGitCloneCap() error {
@@ -143,30 +149,64 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
-// downloadGitPluginBinary downloads the plugin-git binary of the configured version for the
+// downloadGitPluginBinary downloads the plugin-git binary of the configured release for the
 // runtime OS and Arch and saves it to dest.
 func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error {
-	asset := fmt.Sprintf("%s-%s_plugin-git", e.os, e.arch)
-	if e.os == "windows" {
-		asset += ".exe"
+	version := e.pluginGitVersion
+	if version == "" {
+		version = "latest"
 	}
 
-	baseURL := pluginGitReleaseURL + "/latest/download"
-	if e.pluginGitVersion != "" && e.pluginGitVersion != "latest" {
-		baseURL = pluginGitReleaseURL + "/download/" + url.PathEscape(e.pluginGitVersion)
+	releaseURL := pluginGitReleaseAPI + "/latest"
+	if version != "latest" {
+		releaseURL = pluginGitReleaseAPI + "/tags/" + url.PathEscape(version)
 	}
 
-	binary, err := httpGet(ctx, baseURL+"/"+asset)
+	raw, err := httpGet(ctx, releaseURL)
+	if errors.Is(err, errNotFound) {
+		return fmt.Errorf("plugin-git release '%s' does not exist", version)
+	}
 	if err != nil {
-		return fmt.Errorf("could not download plugin-git: %w", err)
+		return fmt.Errorf("could not get plugin-git release '%s': %w", version, err)
 	}
 
-	if err := os.WriteFile(dest, binary, 0o755); err != nil {
-		return fmt.Errorf("could not write plugin-git: %w", err)
+	var release struct {
+		Assets []struct {
+			Name               string `json:"name"`
+			BrowserDownloadURL string `json:"browser_download_url"`
+		} `json:"assets"`
+	}
+	if err := json.Unmarshal(raw, &release); err != nil {
+		return fmt.Errorf("could not unmarshal github response: %w", err)
 	}
 
-	log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
-	return nil
+	for _, asset := range release.Assets {
+		if !matchesPlatform(asset.Name, e.os, e.arch) {
+			continue
+		}
+
+		binary, err := httpGet(ctx, asset.BrowserDownloadURL)
+		if err != nil {
+			return fmt.Errorf("could not download plugin-git: %w", err)
+		}
+		if err := os.WriteFile(dest, binary, 0o755); err != nil {
+			return fmt.Errorf("could not write plugin-git: %w", err)
+		}
+
+		log.Trace().Msgf("download of 'plugin-git' %s to '%s' successful", version, dest)
+		return nil
+	}
+
+	return fmt.Errorf("plugin-git release '%s' has no binary for %s/%s", version, e.os, e.arch)
+}
+
+// matchesPlatform reports whether an asset name contains os and arch as separate parts,
+// so "linux-arm_plugin-git" matches linux/arm but "linux-arm64_plugin-git" does not.
+func matchesPlatform(name, os, arch string) bool {
+	parts := strings.FieldsFunc(name, func(r rune) bool {
+		return r == '-' || r == '_' || r == '.'
+	})
+	return slices.Contains(parts, os) && slices.Contains(parts, arch)
 }
 
 // httpGet returns the body of a GET request and fails on non-200 responses.
@@ -180,6 +220,9 @@ func httpGet(ctx context.Context, url string) ([]byte, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("GET %s: %w", url, errNotFound)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GET %s: unexpected status %s", url, resp.Status)
 	}
