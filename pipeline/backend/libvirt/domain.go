@@ -36,7 +36,6 @@ import (
 func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, persistent bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (outDomain *virt.Domain, newName string, guestOS string, uuid string, err error) {
 	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 	domain, err := e.conn.LookupDomainByName(image)
-
 	if err != nil {
 		return nil, "", "", "", err
 	}
@@ -339,7 +338,6 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 			return nil, backoff.Permanent(fmt.Errorf("Unexpected state: %d", info.State))
 		}
 	}, backoff.WithMaxElapsedTime(maxBackOff))
-
 	if err != nil {
 		log.Debug().Msgf("Could not shut down domain gracefully... destroying cold. Error was: %s", err.Error())
 		err := domain.Destroy()
@@ -426,7 +424,6 @@ func getGuestOS(domain *virt.Domain) (string, error) {
 		}
 
 	} else {
-
 		// TODO: what does 'ID' return?
 		return guestInfo.OS.ID, nil
 	}

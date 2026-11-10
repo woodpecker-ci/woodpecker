@@ -65,7 +65,8 @@ func generateScriptWindows(commands []string, env map[string]string, workDir str
 		& {
 			%s
     }
-    `, buf.String())
+    `, buf.String(),
+	)
 	return wrapped
 }
 

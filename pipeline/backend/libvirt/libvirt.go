@@ -188,7 +188,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	e.guestOS.Store(step.UUID, guestOS)
 
 	scriptIn, entry, err := GenerateSSHConf(step, guestOS)
-
 	if err != nil {
 		return err
 	}
@@ -244,7 +243,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 			Callback: ssh.InsecureIgnoreHostKey(),
 		})
 	}, backoff.WithMaxElapsedTime(maxBackOff))
-
 	if err != nil {
 		return err
 	}
@@ -262,7 +260,6 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 		args := []string{"-noprofile", "-noninteractive", "-encodedcommand", base64.StdEncoding.EncodeToString(utf16leBytes)}
 		err = AdhocSSH(ctx, client, cmd, args, taskUUID, step.UUID)
-
 		if err != nil {
 			return err
 		}

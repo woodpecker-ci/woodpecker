@@ -87,7 +87,6 @@ func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args
 // We could also try to attach to stdin and send 'Ctrl+c', but that opens up other issues (closing channel
 // at the appropriate time etc.).
 func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
-
 	pid, err := GetWoodpeckerPid(client, guestOS, stepUUID)
 	if err != nil {
 		return err
@@ -253,7 +252,6 @@ func CheckSshPid(pid string, client *goph.Client, guestOS string, stepUUID strin
 			log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
 			return true, nil
 		}
-
 	}, backoff.WithMaxElapsedTime(maxBackOff))
 
 	return b, nil

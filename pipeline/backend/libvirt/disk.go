@@ -64,18 +64,18 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			{
 				var cmd *exec.Cmd
 				if fstype == "ntfs" {
-					cmd = exec.Command("guestfish", "-a", disk, "--", "run", ":",
+					cmd = exec.Command(
+						"guestfish", "-a", disk, "--", "run", ":",
 						"part-init", "/dev/sda", "mbr", ":", // initialize MBR
 						"part-add", "/dev/sda", "p", "2048", "-1", ":", // create primary partition
 						"part-set-mbr-id", "/dev/sda", "1", "0x07", ":", // sets NTFS type
 						"mkfs", "ntfs", "/dev/sda1", // format NTFS
 					)
-
 				} else {
-					cmd = exec.Command("guestfish", "-a", disk, "--", "run", ":",
+					cmd = exec.Command(
+						"guestfish", "-a", disk, "--", "run", ":",
 						"mkfs", fstype, "/dev/sda", // format
 					)
-
 				}
 				log.Debug().Msgf("Format disk: %s", cmd.Args)
 				_, err := cmd.Output()
