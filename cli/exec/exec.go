@@ -55,7 +55,7 @@ var Command = &cli.Command{
 	Usage:     "execute a local pipeline",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
-	Flags:     slices.Concat(flags, docker.Flags, kubernetes.Flags, local.Flags, libvirt.Flags),
+	Flags:     slices.Concat(flags, backendFlags(backends)),
 }
 
 var backends = []backend_types.Backend{
@@ -63,6 +63,14 @@ var backends = []backend_types.Backend{
 	docker.New(),
 	local.New(),
 	libvirt.New(),
+}
+
+func backendFlags(backends []backend_types.Backend) []cli.Flag {
+	var all []cli.Flag
+	for _, b := range backends {
+		all = append(all, b.Flags()...)
+	}
+	return all
 }
 
 func run(ctx context.Context, c *cli.Command) error {
