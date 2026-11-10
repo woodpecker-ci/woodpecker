@@ -52,8 +52,7 @@ func GetLinterData(e *PipelineError) *LinterErrorData {
 func GetPipelineErrors(err error) []*PipelineError {
 	var pipelineErrors []*PipelineError
 	for _, _err := range multierr.Errors(err) {
-		var err *PipelineError
-		if errors.As(_err, &err) {
+		if err, ok := errors.AsType[*PipelineError](_err); ok {
 			pipelineErrors = append(pipelineErrors, err)
 		} else {
 			pipelineErrors = append(pipelineErrors, &PipelineError{

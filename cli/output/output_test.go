@@ -48,9 +48,9 @@ func TestParseOutputOptions(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		out, opts := ParseOutputOptions(tc.in)
-		assert.Equal(t, tc.out, out)
-		assert.Equal(t, tc.opts, opts)
+	for _, tt := range testCases {
+		out, opts := ParseOutputOptions(tt.in)
+		assert.Equal(t, tt.out, out)
+		assert.Equal(t, tt.opts, opts)
 	}
 }

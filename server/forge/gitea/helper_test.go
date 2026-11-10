@@ -16,7 +16,6 @@
 package gitea
 
 import (
-	"bytes"
 	"testing"
 
 	"code.gitea.io/sdk/gitea"
@@ -26,10 +25,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_parsePush(t *testing.T) {
+func TestParsePush(t *testing.T) {
 	t.Run("Should parse push hook payload", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		hook, err := parsePush(buf)
+		hook, err := parsePush(fixtures.HookPush)
 		assert.NoError(t, err)
 		assert.Equal(t, "refs/heads/main", hook.Ref)
 		assert.Equal(t, "ef98532add3b2feb7a137426bba1248724367df5", hook.After)
@@ -47,8 +45,7 @@ func Test_parsePush(t *testing.T) {
 		assert.Equal(t, "http://gitea.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", hook.Sender.AvatarURL)
 	})
 	t.Run("Should parse tag hook payload", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookTag)
-		hook, err := parsePush(buf)
+		hook, err := parsePush(fixtures.HookTag)
 		assert.NoError(t, err)
 		assert.Equal(t, "v1.0.0", hook.Ref)
 		assert.Equal(t, "ef98532add3b2feb7a137426bba1248724367df5", hook.Sha)
@@ -63,8 +60,7 @@ func Test_parsePush(t *testing.T) {
 	})
 
 	t.Run("Should return a Pipeline struct from a push hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		hook, _ := parsePush(buf)
+		hook, _ := parsePush(fixtures.HookPush)
 		pipeline := pipelineFromPush(hook)
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, hook.After, pipeline.Commit)
@@ -78,8 +74,7 @@ func Test_parsePush(t *testing.T) {
 	})
 
 	t.Run("Should return a Repo struct from a push hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPush)
-		hook, _ := parsePush(buf)
+		hook, _ := parsePush(fixtures.HookPush)
 		repo := toRepo(hook.Repo)
 		assert.Equal(t, hook.Repo.Name, repo.Name)
 		assert.Equal(t, hook.Repo.Owner.UserName, repo.Owner)
@@ -88,8 +83,7 @@ func Test_parsePush(t *testing.T) {
 	})
 
 	t.Run("Should return a Pipeline struct from a tag hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookTag)
-		hook, _ := parsePush(buf)
+		hook, _ := parsePush(fixtures.HookTag)
 		pipeline := pipelineFromTag(hook)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, hook.Sha, pipeline.Commit)
@@ -100,10 +94,9 @@ func Test_parsePush(t *testing.T) {
 	})
 }
 
-func Test_parsePullRequest(t *testing.T) {
+func TestParsePullRequest(t *testing.T) {
 	t.Run("Should parse pull_request hook payload", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
-		hook, err := parsePullRequest(buf)
+		hook, err := parsePullRequest(fixtures.HookPullRequest)
 		assert.NoError(t, err)
 		assert.Equal(t, "opened", hook.Action)
 		assert.Equal(t, int64(1), hook.Number)
@@ -128,8 +121,7 @@ func Test_parsePullRequest(t *testing.T) {
 	})
 
 	t.Run("Should return a Pipeline struct from a pull_request hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
-		hook, _ := parsePullRequest(buf)
+		hook, _ := parsePullRequest(fixtures.HookPullRequest)
 		pipeline := pipelineFromPullRequest(hook)
 		assert.Equal(t, model.EventPull, pipeline.Event)
 		assert.Equal(t, hook.PullRequest.Head.Sha, pipeline.Commit)
@@ -143,8 +135,7 @@ func Test_parsePullRequest(t *testing.T) {
 	})
 
 	t.Run("Should return a Repo struct from a pull_request hook", func(t *testing.T) {
-		buf := bytes.NewBufferString(fixtures.HookPullRequest)
-		hook, _ := parsePullRequest(buf)
+		hook, _ := parsePullRequest(fixtures.HookPullRequest)
 		repo := toRepo(hook.Repo)
 		assert.Equal(t, hook.Repo.Name, repo.Name)
 		assert.Equal(t, hook.Repo.Owner.UserName, repo.Owner)
@@ -153,7 +144,7 @@ func Test_parsePullRequest(t *testing.T) {
 	})
 }
 
-func Test_toPerm(t *testing.T) {
+func TestToPerm(t *testing.T) {
 	perms := []gitea.Permission{
 		{
 			Admin: true,
@@ -179,7 +170,7 @@ func Test_toPerm(t *testing.T) {
 	}
 }
 
-func Test_toTeam(t *testing.T) {
+func TestToTeam(t *testing.T) {
 	from := &gitea.Organization{
 		Name:      "woodpecker",
 		AvatarURL: "/avatars/1",
@@ -190,7 +181,7 @@ func Test_toTeam(t *testing.T) {
 	assert.Equal(t, "http://localhost:80/avatars/1", to.Avatar)
 }
 
-func Test_toRepo(t *testing.T) {
+func TestToRepo(t *testing.T) {
 	from := gitea.Repository{
 		FullName: "gophers/hello-world",
 		Owner: &gitea.User{
@@ -215,7 +206,7 @@ func Test_toRepo(t *testing.T) {
 	assert.True(t, repo.Perm.Admin)
 }
 
-func Test_fixMalformedAvatar(t *testing.T) {
+func TestFixMalformedAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
 		After  string
@@ -244,7 +235,7 @@ func Test_fixMalformedAvatar(t *testing.T) {
 	}
 }
 
-func Test_expandAvatar(t *testing.T) {
+func TestExpandAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
 		After  string

@@ -21,14 +21,22 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
+type testForge struct {
+	name string
+	url  string
+	host string
+}
+
+func (f testForge) Name() string { return f.name }
+func (f testForge) Config() metadata.Forge {
+	return metadata.Forge{Type: f.name, URL: f.url, Host: f.host}
+}
+
 func TestGetWorkflowMetadata(t *testing.T) {
-	forge := mocks.NewMockForge(t)
-	forge.On("Name").Return("gitea")
-	forge.On("URL").Return("https://gitea.com")
+	forge := testForge{name: "gitea", url: "https://gitea.com", host: "gitea.com"}
 
 	testCases := []struct {
 		name             string
@@ -79,7 +87,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 			workflow: &builder.Workflow{Name: "hello"},
 			sysURL:   "https://example.com",
 			expectedMetadata: metadata.Metadata{
-				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com"},
+				Forge: metadata.Forge{Type: "gitea", URL: "https://gitea.com", Host: "gitea.com"},
 				Sys:   metadata.System{Name: "woodpecker", Host: "example.com", URL: "https://example.com"},
 				Repo:  metadata.Repo{Owner: "testUser", Name: "testRepo", ForgeURL: "https://gitea.com/testUser/testRepo", CloneURL: "https://gitea.com/testUser/testRepo.git", CloneSSHURL: "git@gitea.com:testUser/testRepo.git", Branch: "main", Private: true},
 				Curr: metadata.Pipeline{
@@ -93,6 +101,7 @@ func TestGetWorkflowMetadata(t *testing.T) {
 				"CI":                        "woodpecker",
 				"CI_FORGE_TYPE":             "gitea",
 				"CI_FORGE_URL":              "https://gitea.com",
+				"CI_FORGE_HOST":             "gitea.com",
 				"CI_COMMIT_TIMESTAMP":       "1722617519",
 				"CI_PIPELINE_CREATED":       "0",
 				"CI_PIPELINE_FILES":         `["test.go","markdown file.md"]`,
@@ -170,19 +179,60 @@ func TestGetWorkflowMetadata(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			result := NewServerMetadata(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL).GetWorkflowMetadata(testCase.workflow)
-			if testCase.expectedMetadata.Sys.Name != "" || testCase.expectedMetadata.Forge.Type != "" || testCase.expectedMetadata.Curr.Number != 0 {
-				assert.EqualValues(t, testCase.expectedMetadata, result)
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NewServerMetadata(tt.forge, tt.repo, tt.pipeline, tt.prev, tt.sysURL).GetWorkflowMetadata(tt.workflow)
+			if tt.expectedMetadata.Sys.Name != "" || tt.expectedMetadata.Forge.Type != "" || tt.expectedMetadata.Curr.Number != 0 {
+				assert.EqualValues(t, tt.expectedMetadata, result)
 			}
-			if testCase.expectedEnviron != nil {
-				assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
+			if tt.expectedEnviron != nil {
+				assert.EqualValues(t, tt.expectedEnviron, result.Environ())
 			}
-			if testCase.name == "Test with pull request draft" {
+			if tt.name == "Test with pull request draft" {
 				assert.True(t, result.Curr.Commit.PullRequestDraft)
 				assert.Equal(t, "true", result.Environ()["CI_COMMIT_PULL_REQUEST_DRAFT"])
 			}
+		})
+	}
+}
+
+func TestMetadataPipelineFromModelPipelineRelease(t *testing.T) {
+	tests := []struct {
+		name             string
+		pipeline         *model.Pipeline
+		wantRelease      string
+		wantIsPrerelease bool
+	}{
+		{
+			name:     "no release leaves release fields empty and does not panic",
+			pipeline: &model.Pipeline{Number: 1, Event: model.EventPush},
+		},
+		{
+			name: "release populates release title and prerelease flag",
+			pipeline: &model.Pipeline{
+				Number:  2,
+				Event:   model.EventRelease,
+				Release: &model.Release{Title: "v1.0.0", IsPrerelease: true},
+			},
+			wantRelease:      "v1.0.0",
+			wantIsPrerelease: true,
+		},
+		{
+			name: "stable release keeps prerelease false",
+			pipeline: &model.Pipeline{
+				Number:  3,
+				Event:   model.EventRelease,
+				Release: &model.Release{Title: "v2.0.0"},
+			},
+			wantRelease: "v2.0.0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := metadataPipelineFromModelPipeline(tt.pipeline, false)
+			assert.Equal(t, tt.wantRelease, result.Release.Title)
+			assert.Equal(t, tt.wantIsPrerelease, result.Release.IsPrerelease)
 		})
 	}
 }

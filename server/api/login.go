@@ -282,6 +282,7 @@ func HandleAuth(c *gin.Context) {
 	// update the user meta data and authorization data.
 	user.AccessToken = userFromForge.AccessToken
 	user.RefreshToken = userFromForge.RefreshToken
+	user.Expiry = userFromForge.Expiry
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
 	user.ForgeID = forgeID

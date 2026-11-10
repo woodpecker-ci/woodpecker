@@ -389,6 +389,10 @@ func (c *client) processLogs(ctx context.Context) {
 		bytes = 0
 	}
 
+	// Ensure periodic flush even during continuous log output
+	ticker := time.NewTicker(maxLogFlushPeriod)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -407,7 +411,7 @@ func (c *client) processLogs(ctx context.Context) {
 				send()
 			}
 
-		case <-time.After(maxLogFlushPeriod):
+		case <-ticker.C:
 			send()
 		}
 	}

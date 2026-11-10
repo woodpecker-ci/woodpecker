@@ -79,39 +79,11 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 	return convertDAGToStages(stepMap)
 }
 
-func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
-	step, exists := steps[name]
-	if !exists {
-		// `name` is an optional dependency on a step that was filtered out. convertDAGToStages
-		// drops those edges, but it resolves one step at a time and runs this walk in the same
-		// loop, so the walk can reach a step whose dependsOn is not resolved yet and follow an
-		// edge to a filtered-out step. There is nothing to traverse, and a missing *required*
-		// dependency is still reported by convertDAGToStages when it reaches that step.
-		return nil
-	}
-
-	if _, ok := visited[name]; ok {
-		return &ErrStepDependencyCycle{path: path}
-	}
-
-	visited[name] = struct{}{}
-	path = append(path, name)
-
-	for _, dep := range step.dependsOn {
-		if err := dfsVisit(steps, dep.Name, visited, path); err != nil {
-			return err
-		}
-	}
-
-	delete(visited, name)
-
-	return nil
-}
-
 func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
 	addedSteps := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
 
+	dependencies := make(map[string]constraint.DependsOn, len(steps))
 	for name, step := range steps {
 		var resolved constraint.DependsOn
 		for _, dep := range step.dependsOn {
@@ -124,12 +96,12 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 			resolved = append(resolved, dep)
 		}
 		step.dependsOn = resolved
+		step.step.DependsOn = resolved.Names()
+		dependencies[name] = resolved
+	}
 
-		// check if there are cycles
-		visited := make(map[string]struct{})
-		if err := dfsVisit(steps, name, visited, []string{}); err != nil {
-			return nil, err
-		}
+	if cycle := constraint.FindDependencyCycle(dependencies); cycle != nil {
+		return nil, &ErrStepDependencyCycle{path: cycle}
 	}
 
 	for len(steps) > 0 {

@@ -120,7 +120,7 @@ func restorePostgresDump(t *testing.T, config string) {
 		newLines = append(newLines, line)
 	}
 
-	for _, stmt := range strings.Split(strings.Join(newLines, "\n"), ";") {
+	for stmt := range strings.SplitSeq(strings.Join(newLines, "\n"), ";") {
 		if stmt == "" {
 			continue
 		}

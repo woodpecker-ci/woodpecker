@@ -27,6 +27,9 @@ import (
 func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
+		apiBase.GET("/version", api.Version)
+		apiBase.GET("/healthz", api.Health)
+
 		user := apiBase.Group("/user")
 		{
 			user.Use(session.MustUser())
@@ -65,6 +68,7 @@ func apiRoutes(e *gin.RouterGroup) {
 				org := orgBase.Group("")
 				{
 					org.Use(session.MustOrgMember(true))
+					org.PATCH("", api.PatchOrg)
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 
 					org.GET("/secrets", api.GetOrgSecretList)
@@ -113,6 +117,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					repo.GET("/pipelines", api.GetPipelines)
 					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+					repo.GET("/workflows", session.MustPush, api.GetRepoWorkflows)
 					repo.DELETE("/pipelines/:pipeline_number", session.MustRepoAdmin(), session.SetPipeline(), api.DeletePipeline)
 					repo.GET("/pipelines/:pipeline_number", api.GetPipeline)
 					repo.GET("/pipelines/:pipeline_number/config", session.SetPipeline(), api.GetPipelineConfig)

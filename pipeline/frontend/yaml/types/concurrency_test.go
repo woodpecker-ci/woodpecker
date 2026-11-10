@@ -49,14 +49,14 @@ func TestUnmarshalConcurrency(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			var parsed struct {
 				Concurrency Concurrency `yaml:"concurrency"`
 			}
-			err := yaml.Unmarshal([]byte(tc.yaml), &parsed)
+			err := yaml.Unmarshal([]byte(tt.yaml), &parsed)
 			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, parsed.Concurrency)
+			assert.Equal(t, tt.expected, parsed.Concurrency)
 		})
 	}
 }
@@ -84,9 +84,9 @@ func TestConcurrencyIsZero(t *testing.T) {
 		{name: "with group only", concurrency: Concurrency{Group: "deploy"}, expected: false},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, tc.concurrency.IsZero())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, tt.concurrency.IsZero())
 		})
 	}
 }
@@ -124,14 +124,14 @@ func TestMarshalConcurrency(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			wrapped := struct {
 				Concurrency Concurrency `yaml:"concurrency"`
-			}{tc.concurrency}
+			}{tt.concurrency}
 			out, err := yaml.Marshal(wrapped)
 			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, string(out))
+			assert.Equal(t, tt.expected, string(out))
 		})
 	}
 }
@@ -149,16 +149,16 @@ func TestConcurrencyRoundTrip(t *testing.T) {
 		{name: "group only", concurrency: Concurrency{Group: "deploy"}, wantShorthand: false},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			type wrapper struct {
 				Concurrency Concurrency `yaml:"concurrency"`
 			}
 
-			out, err := yaml.Marshal(wrapper{tc.concurrency})
+			out, err := yaml.Marshal(wrapper{tt.concurrency})
 			assert.NoError(t, err)
 
-			if tc.wantShorthand {
+			if tt.wantShorthand {
 				assert.NotContains(t, string(out), "limit:", "expected shorthand, got object form")
 				assert.NotContains(t, string(out), "group:")
 			} else {
@@ -168,7 +168,7 @@ func TestConcurrencyRoundTrip(t *testing.T) {
 			var back wrapper
 			err = yaml.Unmarshal(out, &back)
 			assert.NoError(t, err)
-			assert.Equal(t, tc.concurrency, back.Concurrency, "value changed across marshal/unmarshal")
+			assert.Equal(t, tt.concurrency, back.Concurrency, "value changed across marshal/unmarshal")
 		})
 	}
 }

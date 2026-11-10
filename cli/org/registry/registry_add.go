@@ -65,8 +65,8 @@ func registryCreate(ctx context.Context, c *cli.Command) error {
 		Username: username,
 		Password: password,
 	}
-	if strings.HasPrefix(registry.Password, "@") {
-		path := strings.TrimPrefix(registry.Password, "@")
+	if after, ok := strings.CutPrefix(registry.Password, "@"); ok {
+		path := after
 		out, err := os.ReadFile(path)
 		if err != nil {
 			return err

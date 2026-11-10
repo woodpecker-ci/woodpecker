@@ -16,10 +16,13 @@ Currently we do not support [services](../../../20-usage/60-services.md) for thi
 Since the commands run directly in the same context as the agent (same user, same
 filesystem), a malicious pipeline could be used to access the agent
 configuration especially the `WOODPECKER_AGENT_SECRET` variable.
+Steps do not inherit this variable from the agent, but they can still read the secret in other ways.
 
 It is recommended to use this backend only for private setup where the code and
 pipeline can be trusted. It should not be used in a public instance where
 anyone can submit code or add new repositories. The agent should not run as a privileged user (root).
+
+Also see [security boundaries](../../../20-usage/17-security-boundaries.md#agents-and-backends).
 
 The local backend will use a random directory in `$TMPDIR` to store the cloned
 code and execute commands.
@@ -43,6 +46,16 @@ steps:
     commands: [...]
 ```
 
+By default, the shell executable is resolved using its name from `PATH`.
+The executable path can be overridden with an environment variable named
+`WOODPECKER_SHELL_PATH_<shell>`.
+
+For example, to use Bash from a custom location:
+
+```bash
+WOODPECKER_SHELL_PATH_bash=/custom/path/bash
+```
+
 ### Plugins
 
 ```yaml
@@ -62,3 +75,12 @@ In the context of the local backend, plugins are simply executable binaries, whi
 - Default: default temp directory
 
 Directory to create folders for workflows.
+
+---
+
+### BACKEND_LOCAL_ISOLATED_HOME
+
+- Name: `WOODPECKER_BACKEND_LOCAL_ISOLATED_HOME`
+- Default: `true`
+
+Sets `HOME`, `USERPROFILE` and related variables to an isolated directory for each workflow. If set to `false`, the user's own home directory is used and no netrc file is written.

@@ -59,8 +59,8 @@ func TestUserValidate(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		err := test.user.Validate()
-		assert.ErrorIs(t, err, test.err)
+	for _, tt := range tests {
+		err := tt.user.Validate()
+		assert.ErrorIs(t, err, tt.err)
 	}
 }

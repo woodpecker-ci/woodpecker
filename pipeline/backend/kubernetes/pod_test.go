@@ -173,7 +173,7 @@ func TestStepNameAsLabelInPod(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}
 	meta, err := podMeta(step, &config{Namespace: "woodpecker"}, BackendOptions{}, "wp-01he8bebctabr3kgk0qj36d2me-1", taskUUID)
 	assert.NoError(t, err)
@@ -196,7 +196,7 @@ func TestPodHostnameSanitized(t *testing.T) {
 		Image:       "alpine:latest",
 		UUID:        "01he8bebctabr3kgk0qj36d2me-1",
 		WorkingDir:  "/woodpecker/src",
-		Environment: map[string]string{},
+		Environment: make(map[string]string),
 	}, &config{Namespace: "woodpecker"}, "wp-01he8bebctabr3kgk0qj36d2me-1", "linux/amd64", BackendOptions{}, taskUUID)
 	assert.NoError(t, err)
 	assert.Equal(t, "update-repos", pod.Spec.Hostname)
@@ -318,7 +318,7 @@ func TestServiceWorkspaceVolume(t *testing.T) {
 		Type:          types.StepTypeService,
 		WorkingDir:    "/woodpecker/src",
 		WorkspaceBase: "/woodpecker",
-		Environment:   map[string]string{},
+		Environment:   make(map[string]string),
 		Volumes:       []string{"workspace:/woodpecker", "cache:/cache"},
 	}
 
@@ -584,12 +584,16 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext, hostUsers ...*bool) (*kube_core_v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext, hostUsersAndOverrideNonRoot ...bool) (*kube_core_v1.Pod, error) {
 		opts := BackendOptions{
 			SecurityContext: &secCtx,
 		}
-		if len(hostUsers) > 0 {
-			opts.HostUsers = hostUsers[0]
+		secCtxCfg := SecurityContextConfig{RunAsNonRoot: globalRunAsRoot}
+		if len(hostUsersAndOverrideNonRoot) > 0 {
+			opts.HostUsers = newBool(hostUsersAndOverrideNonRoot[0])
+		}
+		if len(hostUsersAndOverrideNonRoot) > 1 {
+			secCtxCfg.OverrideNonRootInUserNamespaces = hostUsersAndOverrideNonRoot[1]
 		}
 		return mkPod(&types.Step{
 			Name:       "go-test",
@@ -598,7 +602,7 @@ func TestPodPrivilege(t *testing.T) {
 			Privileged: stepPrivileged,
 		}, &config{
 			Namespace:       "woodpecker",
-			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
+			SecurityContext: secCtxCfg,
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", opts, "11301")
 	}
 
@@ -644,7 +648,7 @@ func TestPodPrivilege(t *testing.T) {
 		RunAsGroup: newInt64(0),
 		FSGroup:    newInt64(0),
 	}
-	pod, err = createTestPod(false, false, secCtx, newBool(false))
+	pod, err = createTestPod(false, false, secCtx, false)
 	assert.NoError(t, err)
 	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsGroup)
@@ -657,7 +661,7 @@ func TestPodPrivilege(t *testing.T) {
 		RunAsGroup: newInt64(0),
 		FSGroup:    newInt64(0),
 	}
-	pod, err = createTestPod(false, false, secCtx, newBool(true))
+	pod, err = createTestPod(false, false, secCtx, true)
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.SecurityContext.RunAsUser)
 	assert.Nil(t, pod.Spec.SecurityContext.RunAsGroup)
@@ -690,6 +694,33 @@ func TestPodPrivilege(t *testing.T) {
 		RunAsNonRoot: newBool(false),
 	}
 	pod, err = createTestPod(false, true, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	// hostUsers=false and overrideNonRootInUserNamespaces=true: applied
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx, false, true)
+	assert.NoError(t, err)
+	assert.False(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	// and hostUsers=false: ignored
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx, false)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	// and hostUsers=true: ignored
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx, true)
 	assert.NoError(t, err)
 	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
 
@@ -1483,6 +1514,44 @@ func TestHostUsers(t *testing.T) {
 	assert.True(t, *pod.Spec.HostUsers)
 }
 
+func TestUserNamespaces(t *testing.T) {
+	createTestPod := func(enableUserNamespaces bool, hostUsers *bool) (*kube_core_v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:  "go-test",
+			Image: "golang:1.16",
+			UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		}, &config{
+			Namespace:            "woodpecker",
+			EnableUserNamespaces: enableUserNamespaces,
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			HostUsers: hostUsers,
+		}, "11301")
+	}
+
+	// default: option not enabled, hostUsers option not explicitly set: nil
+	pod, err := createTestPod(false, nil)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option not explicitly set: false
+	pod, err = createTestPod(true, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option explicitly set to false: false
+	pod, err = createTestPod(true, newBool(false))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.False(t, *pod.Spec.HostUsers)
+
+	// option enabled, hostUsers option explicitly set to true: true
+	pod, err = createTestPod(true, newBool(true))
+	assert.NoError(t, err)
+	assert.NotNil(t, pod.Spec.HostUsers)
+	assert.True(t, *pod.Spec.HostUsers)
+}
+
 func TestInitContainer(t *testing.T) {
 	const expected = `
 	{
@@ -1589,4 +1658,31 @@ func TestUnrequiredInitContainer(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.InitContainers)
+}
+
+func TestNodeSelectorAllowFromStep(t *testing.T) {
+	step := &types.Step{
+		Name:  "ns-test",
+		Image: "alpine",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+	}
+
+	// When disabled (default), a step-provided node selector must be ignored.
+	pod, err := mkPod(step, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector: map[string]string{"attacker-target": "sensitive-node"},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.NotContains(t, pod.Spec.NodeSelector, "attacker-target")
+
+	// When explicitly enabled by the admin, the step value is honored.
+	pod, err = mkPod(step, &config{
+		Namespace:                    "woodpecker",
+		PodNodeSelectorAllowFromStep: true,
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		NodeSelector: map[string]string{"attacker-target": "sensitive-node"},
+	}, taskUUID)
+	assert.NoError(t, err)
+	assert.Equal(t, "sensitive-node", pod.Spec.NodeSelector["attacker-target"])
 }

@@ -87,3 +87,39 @@ func TestTask_GetLabels(t *testing.T) {
 		}, task.Labels)
 	})
 }
+
+func TestTask_ApplyLabelsFromOrg(t *testing.T) {
+	t.Run("Nil Org", func(t *testing.T) {
+		task := &Task{}
+		task.ApplyLabelsFromOrg(nil)
+
+		assert.Empty(t, task.Labels)
+	})
+
+	t.Run("Org agents not required", func(t *testing.T) {
+		task := &Task{
+			Labels: map[string]string{
+				"existing": "label",
+			},
+		}
+		task.ApplyLabelsFromOrg(&Org{ID: 456})
+
+		assert.Equal(t, map[string]string{
+			"existing": "label",
+		}, task.Labels)
+	})
+
+	t.Run("Org agents required", func(t *testing.T) {
+		task := &Task{
+			Labels: map[string]string{
+				"existing": "label",
+			},
+		}
+		task.ApplyLabelsFromOrg(&Org{ID: 456, RequireOrgAgents: true})
+
+		assert.Equal(t, map[string]string{
+			"existing":                  "label",
+			pipeline.LabelOrgAgentsOnly: "true",
+		}, task.Labels)
+	})
+}

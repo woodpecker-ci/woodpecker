@@ -37,11 +37,11 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 	t.Parallel()
 
 	testTable := []struct {
-		name          string
-		repoName      string
-		dbRegs        []*model.Registry
-		expected      []*model.Registry
-		expectedError bool
+		name     string
+		repoName string
+		dbRegs   []*model.Registry
+		expected []*model.Registry
+		wantErr  bool
 	}{
 		{
 			name:     "Extension overrides base registry by name",
@@ -55,7 +55,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 				{Address: "docker.io", Username: "shared", Password: "external-value"},
 				{Address: "codeberg.org", Username: "ext-only", Password: "only-in-ext"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:     "Extension returns 204 no registries",
@@ -66,7 +66,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 			expected: []*model.Registry{
 				{ID: 1, RepoID: 1, Address: "quay.io", Username: "db-secret", Password: "db-value"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 		{
 			name:     "Extension error falls back to base registries",
@@ -77,7 +77,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 			expected: []*model.Registry{
 				{ID: 1, RepoID: 1, Address: "quay.io", Username: "db-secret", Password: "db-value"},
 			},
-			expectedError: false,
+			wantErr: false,
 		},
 	}
 
@@ -160,7 +160,7 @@ func TestWithExtensionRegistryListPipeline(t *testing.T) {
 				&model.Pipeline{},
 				nil,
 			)
-			if tt.expectedError {
+			if tt.wantErr {
 				require.Error(t, err, "expected an error")
 			} else {
 				require.NoError(t, err, "error fetching registries")

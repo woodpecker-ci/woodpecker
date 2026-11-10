@@ -94,12 +94,15 @@ func (s storage) CreateRepo(repo *model.Repo) error {
 }
 
 func (s storage) UpdateRepo(repo *model.Repo) error {
-	_, err := s.engine.ID(repo.ID).AllCols().Update(repo)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(repo.ID).AllCols().Update(repo))
+	})
 }
 
 func (s storage) DeleteRepo(repo *model.Repo) error {
-	return s.deleteRepo(s.engine.NewSession(), repo)
+	return retryWrite(func() error {
+		return s.deleteRepo(s.engine.NewSession(), repo)
+	})
 }
 
 func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {

@@ -114,36 +114,31 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		err := utils.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
-	}()
-
-	// wait for the goroutine to start
-	time.Sleep(time.Millisecond)
+	})
 
 	// write 4 bytes without newline
 	if _, err := w.Write([]byte("12345")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	writes := testWriter.GetWrites()
-	assert.Lenf(t, testWriter.GetWrites(), 1, "expected 1 writes, got: %v", writes)
+	assert.Eventually(t, func() bool {
+		return len(testWriter.GetWrites()) == 1
+	}, time.Second, 5*time.Millisecond, "expected 1 write, got: %v", testWriter.GetWrites())
 
 	// write more bytes
 	if _, err := w.Write([]byte("67\n89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// wait for writer to write
-	time.Sleep(time.Millisecond)
 
-	writes = testWriter.GetWrites()
-	assert.Lenf(t, testWriter.GetWrites(), 2, "expected 2 writes, got: %v", writes)
+	assert.Eventually(t, func() bool {
+		return len(testWriter.GetWrites()) == 2
+	}, time.Second, 5*time.Millisecond, "expected 2 writes, got: %v", testWriter.GetWrites())
 
-	writes = testWriter.GetWrites()
+	writes := testWriter.GetWrites()
 	writtenData := strings.Join(writes, "-")
 	assert.Equal(t, "1234-567\n", writtenData, "unexpected writtenData: %s", writtenData)
 

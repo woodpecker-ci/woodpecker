@@ -46,12 +46,15 @@ func (s storage) CronList(repo *model.Repo, p *model.ListOptionsWithAll) ([]*mod
 }
 
 func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {
-	_, err := s.engine.ID(cron.ID).AllCols().Update(cron)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(cron.ID).AllCols().Update(cron))
+	})
 }
 
 func (s storage) CronDelete(repo *model.Repo, id int64) error {
-	return wrapDelete(s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.Cron)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(id).Where("repo_id = ?", repo.ID).Delete(new(model.Cron)))
+	})
 }
 
 // CronListNextExecute returns limited number of jobs with NextExec being less or equal to the provided unix timestamp.
@@ -62,13 +65,15 @@ func (s storage) CronListNextExecute(nextExec, limit int64) ([]*model.Cron, erro
 
 // CronGetLock try to get a lock by updating NextExec.
 func (s storage) CronGetLock(cron *model.Cron, newNextExec int64) (bool, error) {
-	cols, err := s.engine.ID(cron.ID).Where(builder.Eq{"next_exec": cron.NextExec}).
-		Cols("next_exec").Update(&model.Cron{NextExec: newNextExec})
-	gotLock := cols != 0
-
+	var gotLock bool
+	err := retryWrite(func() error {
+		cols, e := s.engine.ID(cron.ID).Where(builder.Eq{"next_exec": cron.NextExec}).
+			Cols("next_exec").Update(&model.Cron{NextExec: newNextExec})
+		gotLock = cols != 0
+		return wrapUpdate(cols, e)
+	})
 	if err == nil && gotLock {
 		cron.NextExec = newNextExec
 	}
-
 	return gotLock, err
 }

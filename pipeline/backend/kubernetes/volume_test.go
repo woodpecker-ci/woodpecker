@@ -19,6 +19,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestPvcName(t *testing.T) {
@@ -117,4 +119,54 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	}, "some0..INVALID3name", namespace)
 	assert.NoError(t, err)
 	assert.Equal(t, "some0.invalid3name", pvc.Name)
+}
+
+func TestDropLocalPathsInsideWorkspace(t *testing.T) {
+	conf := &types.Config{
+		Stages: []*types.Stage{{
+			Steps: []*types.Step{
+				{
+					WorkspaceBase: "/woodpecker",
+					Volumes: []string{
+						"wp_workflow_0_default:/woodpecker",
+						"/home/user/repo:/woodpecker/src",
+						"woodpecker-cache:/cache",
+						"/host/data:/data",
+						"/host/woodpecker-not-below:/woodpecker-not-below",
+					},
+				},
+			},
+		}},
+	}
+
+	dropLocalPathsInsideWorkspace(conf)
+
+	assert.Equal(t, []string{
+		"wp_workflow_0_default:/woodpecker",
+		"woodpecker-cache:/cache",
+		"/host/data:/data",
+		"/host/woodpecker-not-below:/woodpecker-not-below",
+	}, conf.Stages[0].Steps[0].Volumes)
+}
+
+func TestDropLocalPathsInsideWorkspaceAtBase(t *testing.T) {
+	conf := &types.Config{
+		Stages: []*types.Stage{{
+			Steps: []*types.Step{
+				{
+					WorkspaceBase: "/woodpecker",
+					Volumes: []string{
+						"/home/user/repo:/woodpecker",
+						"wp_workflow_0_default:/woodpecker",
+					},
+				},
+			},
+		}},
+	}
+
+	dropLocalPathsInsideWorkspace(conf)
+
+	assert.Equal(t, []string{
+		"wp_workflow_0_default:/woodpecker",
+	}, conf.Stages[0].Steps[0].Volumes)
 }

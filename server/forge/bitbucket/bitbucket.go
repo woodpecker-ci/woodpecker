@@ -26,6 +26,7 @@ import (
 
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -34,7 +35,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
-	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -76,9 +76,11 @@ func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// URL returns the root url of a configured forge.
-func (c *config) URL() string {
-	return c.url
+func (c *config) Close() error { return nil }
+
+// Config returns the metadata of the configured forge.
+func (c *config) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
@@ -164,20 +166,16 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	if owner == "" {
-		repos, err := c.Repos(ctx, u, &model.ListOptions{Page: 1})
-		if err != nil {
-			return nil, err
-		}
-		for _, repo := range repos {
-			if string(repo.ForgeRemoteID) == name {
-				owner = repo.Owner
-				break
-			}
-		}
-	}
 	client := c.newClient(ctx, u)
-	repo, err := client.FindRepo(owner, name)
+	var (
+		repo *internal.Repo
+		err  error
+	)
+	if owner == "" {
+		owner, repo, err = findRepoInWorkspaces(client, name)
+	} else {
+		repo, err = client.FindRepo(owner, name)
+	}
 	if err != nil {
 		return nil, errors.Join(err, forge_types.ErrRepoNotFound)
 	}
@@ -186,6 +184,30 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 		return nil, err
 	}
 	return convertRepo(repo, perm), nil
+}
+
+// findRepoInWorkspaces looks the repository (slug or UUID) up in each workspace of the
+// user and returns the first workspace that has it. Listing all repositories of all
+// workspaces (Repos) takes minutes for workspaces with thousands of repositories.
+func findRepoInWorkspaces(client *internal.Client, name string) (string, *internal.Repo, error) {
+	workspaces, err := client.ListWorkspacesAll()
+	if err != nil {
+		return "", nil, err
+	}
+	for _, access := range workspaces {
+		if access.Workspace == nil {
+			continue
+		}
+		repo, err := client.FindRepo(access.Workspace.Slug, name)
+		if err == nil {
+			return access.Workspace.Slug, repo, nil
+		}
+		var rspErr internal.Error
+		if !errors.As(err, &rspErr) || rspErr.Status != http.StatusNotFound {
+			return "", nil, err
+		}
+	}
+	return "", nil, fmt.Errorf("repository %s not found in the workspaces of the user", name)
 }
 
 // Repos returns a list of all repositories for Bitbucket account, including
@@ -272,18 +294,20 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
+			// sub directories are no pipeline files
+			if file.Type != "commit_file" {
+				continue
+			}
 			_, filename := filepath.Split(file.Path)
 			repoFile := forge_types.FileMeta{
 				Name: filename,
 			}
-			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
-				if err != nil {
-					return nil, err
-				}
-				if fileData != nil {
-					repoFile.Data = []byte(*fileData)
-				}
+			fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+			if err != nil {
+				return nil, err
+			}
+			if fileData != nil {
+				repoFile.Data = []byte(*fileData)
 			}
 			repoPathFiles = append(repoPathFiles, &repoFile)
 		}
@@ -353,15 +377,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 		return fmt.Errorf("repo online check failed: %w", err)
 	}
 
-	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
-		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
-			Page: page,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return hooks.Values, nil
-	}, -1)
+	hooks, err := client.ListHooksAll(r.Owner, r.Name)
 	if err != nil {
 		return err
 	}
@@ -432,7 +448,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err

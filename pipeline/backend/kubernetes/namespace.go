@@ -43,7 +43,7 @@ func mkNamespace(ctx context.Context, client K8sNamespaceClient, namespace strin
 	log.Trace().Str("namespace", namespace).Msg("creating Kubernetes namespace")
 
 	_, err = client.Create(ctx, &kube_core_v1.Namespace{
-		ObjectMeta: kube_meta_v1.ObjectMeta{Name: namespace},
+		Name: namespace,
 	}, kube_meta_v1.CreateOptions{})
 	if err != nil {
 		log.Error().Err(err).Str("namespace", namespace).Msg("failed to create Kubernetes namespace")

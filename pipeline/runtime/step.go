@@ -199,10 +199,14 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 	}
 
 	if waitState.OOMKilled {
-		return waitState, &pipeline_errors.OomError{
+		err := &pipeline_errors.OomError{
 			UUID: step.UUID,
 			Code: waitState.ExitCode,
 		}
+
+		waitState.Error = errors.Join(waitState.Error, err)
+
+		return waitState, err
 	}
 	if waitState.ExitCode != 0 {
 		return waitState, &pipeline_errors.ExitError{
@@ -210,8 +214,11 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 			Code: waitState.ExitCode,
 		}
 	}
+	if errors.Is(waitState.Error, pipeline_errors.ErrCancel) {
+		return waitState, nil
+	}
 
-	return waitState, nil
+	return waitState, waitState.Error
 }
 
 // runBlockingStep starts the step and blocks until it fully completes.
@@ -260,10 +267,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 	}
 
 	// Container is up and logging is streaming — hand off to background.
-	r.uploadWait.Add(1)
-	go func() {
-		defer r.uploadWait.Done()
-
+	r.uploadWait.Go(func() {
 		logger := r.makeLogger()
 
 		processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
@@ -278,7 +282,7 @@ func (r *Runtime) runDetachedStep(runnerCtx context.Context, step *backend_types
 		if traceErr := r.traceStep(processState, err, step); traceErr != nil {
 			logger.Error().Err(traceErr).Str("step", step.Name).Msg("failed to trace detached step result")
 		}
-	}()
+	})
 
 	return nil
 }

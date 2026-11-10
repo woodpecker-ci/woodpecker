@@ -222,7 +222,7 @@ PULLREQUEST_DRONE_PULL_REQUEST=0`
 
 func convertListToEnvMap(t *testing.T, list string) map[string]string {
 	result := make(map[string]string)
-	for _, s := range strings.Split(list, "\n") {
+	for s := range strings.SplitSeq(list, "\n") {
 		before, after, _ := strings.Cut(strings.TrimSpace(s), "=")
 		if before == "" {
 			t.Fatal("helper function got invalid test data")

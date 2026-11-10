@@ -40,7 +40,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.Use(gin.Recovery())
 
 	e.Use(func(c *gin.Context) {
-		log.Trace().Msgf("[%s] %s", c.Request.Method, c.Request.URL.String())
+		log.Trace().Msgf("[%s] %s", c.Request.Method, c.Request.URL.Path)
 		c.Next()
 	})
 
@@ -65,6 +65,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 		}
 
 		base.GET("/metrics", metrics.PromHandler())
+		// TODO: remove in v4.0.0, use the ones in apiRoutes
 		base.GET("/version", api.Version)
 		base.GET("/healthz", api.Health)
 	}

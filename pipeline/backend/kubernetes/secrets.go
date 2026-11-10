@@ -236,12 +236,10 @@ func mkRegistrySecret(step *types.Step, config *config) (*kube_core_v1.Secret, e
 	}
 
 	return &kube_core_v1.Secret{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Namespace: config.GetNamespace(step.OrgID),
-			Name:      name,
-			Labels:    labels,
-		},
-		Type: kube_core_v1.SecretTypeDockerConfigJson,
+		Namespace: config.GetNamespace(step.OrgID),
+		Name:      name,
+		Labels:    labels,
+		Type:      kube_core_v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
 			kube_core_v1.DockerConfigJsonKey: configFileJSON,
 		},
@@ -333,10 +331,8 @@ func mkStepSecret(step *types.Step, config *config) (*kube_core_v1.Secret, error
 	}
 
 	return &kube_core_v1.Secret{
-		ObjectMeta: kube_meta_v1.ObjectMeta{
-			Namespace: config.GetNamespace(step.OrgID),
-			Name:      name,
-		},
+		Namespace:  config.GetNamespace(step.OrgID),
+		Name:       name,
 		Type:       kube_core_v1.SecretTypeOpaque,
 		StringData: step.SecretMapping,
 	}, nil

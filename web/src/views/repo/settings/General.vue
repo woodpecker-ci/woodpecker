@@ -1,10 +1,7 @@
 <template>
   <Settings :title="$t('repo.settings.general.project')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
-      <InputField
-        docs-url="docs/usage/project-settings#project-settings-1"
-        :label="$t('repo.settings.general.general')"
-      >
+      <InputField docs-url="docs/usage/project-settings" :label="$t('repo.settings.general.general')">
         <Checkbox
           v-model="repoSettings.allow_pr"
           :label="$t('repo.settings.general.allow_pr.allow')"
@@ -36,7 +33,7 @@
 
       <InputField
         v-if="user?.admin"
-        docs-url="docs/usage/project-settings#project-settings-1"
+        docs-url="docs/usage/project-settings"
         :label="$t('repo.settings.general.trusted.trusted')"
       >
         <Checkbox

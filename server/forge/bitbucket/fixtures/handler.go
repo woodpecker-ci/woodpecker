@@ -106,6 +106,12 @@ func getRepoHooks(c *gin.Context) {
 		c.String(http.StatusNotFound, "")
 	case "hook_empty":
 		c.String(http.StatusOK, "{}")
+	case "repo_hooks_no_next":
+		if page := c.Query("page"); page != "" && page != "1" && page != "2" {
+			c.String(http.StatusTooManyRequests, "Rate limit for this resource has been exceeded")
+			return
+		}
+		c.String(http.StatusOK, repoHookPayload)
 	default:
 		if c.Query("page") == "" || c.Query("page") == "1" {
 			c.String(http.StatusOK, repoHookPayload)

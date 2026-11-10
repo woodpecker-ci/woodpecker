@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 )
 
-func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testing.T) {
+func TestCustom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	filesToTest := []struct {
@@ -60,7 +60,7 @@ func Test_custom_file_returns_OK_and_empty_content_and_fitting_mimetype(t *testi
 	}
 }
 
-func Test_custom_file_return_actual_content(t *testing.T) {
+func TestCustom_file_return_actual_content(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	temp, err := os.CreateTemp(os.TempDir(), "data.txt")

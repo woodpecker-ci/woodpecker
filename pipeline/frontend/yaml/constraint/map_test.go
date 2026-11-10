@@ -118,28 +118,59 @@ func TestConstraintMap(t *testing.T) {
 		},
 		{
 			conf: "GOLANG: 1.7",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "{ GOLANG: 1.7, REDIS: 3.0 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "include: { GOLANG: 1.7, REDIS: 3.1 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: false,
 		},
 		{
 			conf: "exclude: { GOLANG: 1.7, REDIS: 3.1 }",
-			with: map[string]string{},
+			with: make(map[string]string),
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		c := parseConstraintMap(t, test.conf)
-		assert.Equal(t, test.want, c.Match(test.with), "config: '%s', with: '%s'", test.conf, test.with)
+	for _, tt := range testdata {
+		c := parseConstraintMap(t, tt.conf)
+		assert.Equal(t, tt.want, c.Match(tt.with), "config: '%s', with: '%s'", tt.conf, tt.with)
+	}
+}
+
+func TestConstraintMapUnmarshalNull(t *testing.T) {
+	testdata := []struct {
+		conf    string
+		include map[string]string
+	}{
+		{
+			conf:    "include: ~",
+			include: make(map[string]string),
+		},
+		{
+			conf:    "exclude: ~",
+			include: make(map[string]string),
+		},
+		{
+			conf:    "include: ~\nexclude: ~",
+			include: make(map[string]string),
+		},
+		{
+			conf:    "exclude: ~\nGOLANG: 1.7",
+			include: map[string]string{"GOLANG": "1.7"},
+		},
+	}
+	for _, tt := range testdata {
+		t.Run(tt.conf, func(t *testing.T) {
+			c := parseConstraintMap(t, tt.conf)
+			assert.Equal(t, tt.include, c.Include)
+			assert.Empty(t, c.Exclude)
+		})
 	}
 }
 

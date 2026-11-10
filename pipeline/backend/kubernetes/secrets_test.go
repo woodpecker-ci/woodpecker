@@ -81,7 +81,7 @@ func TestSimpleSecret(t *testing.T) {
 	assert.Equal(t, []kube_core_v1.EnvFromSource{
 		{
 			SecretRef: &kube_core_v1.SecretEnvSource{
-				LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
+				Name: "test-secret",
 			},
 		},
 	}, nsp.envFromSources)
@@ -107,8 +107,8 @@ func TestSecretWithKey(t *testing.T) {
 			Name: "ACCESS_KEY",
 			ValueFrom: &kube_core_v1.EnvVarSource{
 				SecretKeyRef: &kube_core_v1.SecretKeySelector{
-					LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
-					Key:                  "access_key",
+					Name: "test-secret",
+					Key:  "access_key",
 				},
 			},
 		},
@@ -138,8 +138,8 @@ func TestSecretWithKeyMapping(t *testing.T) {
 			Name: "AWS_SECRET_ACCESS_KEY",
 			ValueFrom: &kube_core_v1.EnvVarSource{
 				SecretKeyRef: &kube_core_v1.SecretKeySelector{
-					LocalObjectReference: kube_core_v1.LocalObjectReference{Name: "test-secret"},
-					Key:                  "aws-secret",
+					Name: "test-secret",
+					Key:  "aws-secret",
 				},
 			},
 		},
@@ -166,10 +166,8 @@ func TestFileSecret(t *testing.T) {
 	assert.Equal(t, []kube_core_v1.Volume{
 		{
 			Name: "reg-cred",
-			VolumeSource: kube_core_v1.VolumeSource{
-				Secret: &kube_core_v1.SecretVolumeSource{
-					SecretName: "reg-cred",
-				},
+			Secret: &kube_core_v1.SecretVolumeSource{
+				SecretName: "reg-cred",
 			},
 		},
 	}, nsp.volumes)

@@ -110,9 +110,7 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipel
 		return client.PipelineList(
 			repoID,
 			woodpecker.PipelineListOptions{
-				ListOptions: woodpecker.ListOptions{
-					Page: page,
-				},
+				Page:   page,
 				Before: opt.Before,
 				After:  opt.After,
 				Branch: branch,

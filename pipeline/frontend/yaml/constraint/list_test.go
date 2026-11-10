@@ -154,9 +154,9 @@ func TestConstraintList(t *testing.T) {
 			want: true,
 		},
 	}
-	for _, test := range testdata {
-		c := parseConstraintList(t, test.conf)
-		assert.Equal(t, test.want, c.Match(test.with))
+	for _, tt := range testdata {
+		c := parseConstraintList(t, tt.conf)
+		assert.Equal(t, tt.want, c.Match(tt.with))
 	}
 }
 

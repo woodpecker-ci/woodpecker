@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_parseHook(t *testing.T) {
+func TestParseHook(t *testing.T) {
 	t.Run("unsupported hook", func(t *testing.T) {
 		buf := bytes.NewBufferString(fixtures.HookPush)
 		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
@@ -47,6 +47,30 @@ func Test_parseHook(t *testing.T) {
 
 		_, _, _, err := parseHook(req)
 		assert.Error(t, err)
+	})
+
+	t.Run("pull-request hook without a repository", func(t *testing.T) {
+		buf := bytes.NewBufferString("{}")
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullCreated)
+
+		_, r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.ErrorIs(t, err, errIncompleteHook)
+	})
+
+	t.Run("push hook with a full name that has no owner", func(t *testing.T) {
+		buf := bytes.NewBufferString(`{"repository":{"full_name":"nameonly"},"push":{"changes":[{"new":{"name":"main","type":"branch","target":{"hash":"abc"}}}]}}`)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPush)
+
+		_, r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.ErrorIs(t, err, errIncompleteHook)
 	})
 
 	t.Run("pull-request", func(t *testing.T) {

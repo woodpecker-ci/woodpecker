@@ -423,8 +423,8 @@
             "desc": "Kódtárak az utolsó pipeline létrehozás sorrendjében"
         },
         "last": {
-            "title": "Utoljára megtekintett",
-            "desc": "Utoljára megtekintett kódtárak a hozzáférés ideje szerint rendezve"
+            "title": "Utoljára látott",
+            "desc": "Nemrég látott kódtárak, a hozzáférés sorrendjében"
         }
     },
     "documentation_for": "{topic} dokumentációja",

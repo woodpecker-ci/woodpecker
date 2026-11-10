@@ -29,7 +29,7 @@ The package installation will create a systemd service file for the Woodpecker s
 ```ini title="/usr/local/lib/systemd/system/woodpecker-server.service"
 [Unit]
 Description=WoodpeckerCI server
-Documentation=https://woodpecker-ci.org/docs/administration/server-config
+Documentation=https://woodpecker-ci.org/docs/administration/configuration/server
 Requires=network.target
 After=network.target
 ConditionFileNotEmpty=/etc/woodpecker/woodpecker-server.env

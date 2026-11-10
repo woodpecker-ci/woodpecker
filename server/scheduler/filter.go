@@ -34,6 +34,15 @@ func createFilterFunc(agentFilter rpc.Filter) FilterFn {
 			return false, 0
 		}
 
+		// tasks of orgs requiring org agents only match agents of that exact org,
+		// the agent org-id label is always enforced by the server
+		if labels[pipeline.LabelOrgAgentsOnly] == "true" {
+			taskOrgID := labels[pipeline.LabelFilterOrg]
+			if taskOrgID == "" || agentFilter.Labels[pipeline.LabelFilterOrg] != taskOrgID {
+				return false, 0
+			}
+		}
+
 		// ignore internal labels for filtering
 		for k := range labels {
 			if strings.HasPrefix(k, pipeline.InternalLabelPrefix) {

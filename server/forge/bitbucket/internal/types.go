@@ -15,6 +15,8 @@
 package internal
 
 import (
+	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 	"time"
@@ -235,6 +237,9 @@ type Error struct {
 }
 
 func (e Error) Error() string {
+	if e.Body.Message == "" {
+		return fmt.Sprintf("bitbucket responded with HTTP %d %s", e.Status, http.StatusText(e.Status))
+	}
 	return e.Body.Message
 }
 

@@ -88,4 +88,4 @@ woodpecker-cli exec \
 
 ## More options
 
-See the generated [CLI reference](../40-cli.md#exec) for the full list of `exec` flags.
+See the generated [CLI reference](../40-cli/90-reference.md#exec) for the full list of `exec` flags.

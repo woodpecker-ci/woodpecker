@@ -15,16 +15,18 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 ## Projects using Woodpecker
 
 - [Woodpecker CI](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) itself
-- [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
+- [All official plugins](https://codeberg.org/woodpecker-plugins)
 - [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
 - [Vieter](https://git.rustybever.be/vieter-v/vieter) - Archlinux/Pacman repository server & automated package build system
   - [Rieter](https://git.rustybever.be/Chewing_Bever/rieter) - Rewrite of the Vieter project in Rust
 - [Alex](https://git.rustybever.be/Chewing_Bever/alex) - Minecraft server wrapper designed to automate backups & complement Docker installations
+- [OpenCloud](https://github.com/opencloud-eu/opencloud) - An open source platform for secure file management, sharing and collaboration, with team spaces and flexible self-hosting
 
 ## Tools
 
 - [Convert Drone CI pipelines to Woodpecker CI](https://codeberg.org/lafriks/woodpecker-pipeline-transform)
 - [Ansible NAS](https://github.com/davestephens/ansible-nas/) - a homelab Ansible playbook that can set up Woodpecker CI and Gitea
+- [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook) - an Ansible playbook that can [set up Woodpecker CI](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/components/woodpecker_ci_server/README.md) alongside 250+ other self-hosted services, including Forgejo and Gitea
 - [picus](https://github.com/windsource/picus) - Picus connects to a Woodpecker CI server and creates an agent in the cloud when there are pending workflows.
 - [Hetzner cloud](https://www.hetzner.com/cloud) based [Woodpecker compatible autoscaler](https://git.ljoonal.xyz/ljoonal/hetzner-ci-autoscaler) - Creates and destroys VPS instances based on the count of pending & running jobs.
 - [woodpecker-lint](https://git.schmidl.dev/schtobia/woodpecker-lint) - A repository for linting a Woodpecker config file via pre-commit hook
@@ -33,9 +35,10 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another Woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
 - [Woodpecker MCP](https://github.com/j04n-f/woodpecker-mcp) - A Model Context Protocol (MCP) server that connects AI assistants to Woodpecker CI. Debug pipeline failures, analyze build logs, and troubleshoot CI/CD configurations with AI assistance.
 
-## Configuration Services
+## [Configuration Extensions](/docs/usage/extensions#configuration)
 
 - [Dynamic Pipelines for Nix Flakes](https://github.com/pinpox/woodpecker-flake-pipeliner) - Define pipelines as Nix Flake outputs
+- [Starlark Config Extension](https://github.com/opencloud-eu/woodpecker-ci-config-service) - Drone's starlark suport as service
 
 ## Pipelines
 
@@ -67,7 +70,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Improving Multi-Arch Image Build Performance by not Emulating](https://blog.mei-home.net/posts/improving-container-image-build-perf-with-buildah/)
 - [CI pipelines with Woodpecker](https://blog.reinhard.codes/2024/11/19/ci-pipelines-with-woodpecker/)
 - [Setting up Woodpecker CI at home](https://jamesbrechtel.com/posts/wasting-time-for-misery-and-loss/)
-- [Woodpecker CI with automatic runner creation](https://planet.kde.org/jonah-bruchert-2023-05-13-woodpecker-ci-with-automatic-runner-creation/)
+- [Woodpecker CI with automatic runner creation](https://jbb.ghsq.de/2023/05/14/self-hosted-ci-hetzner.html)
 - [Self-Hosted CI: Install and Run Woodpecker CI on Your VPS](https://mangohost.net/blog/self-hosted-ci-install-and-run-woodpecker-ci-on-your-vps/)
 - [Automating My Blog With Gitea and Woodpecker](https://bgenc.net/2022.11.19.automating-my-blog-with-gitea-and-woodpecker/)
 - [Testcontainers in Woodpecker CI](https://gaborpihaj.com/posts/testcontainers-in-woodpecker-ci/)
@@ -85,3 +88,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 ## Plugins
 
 We have a separate [index](/plugins) for plugins.
+
+## Useful images
+
+- [GodotCI](https://codeberg.org/Bigaston/GodotCI) - Images for Woodpecker to automate build of Godot games

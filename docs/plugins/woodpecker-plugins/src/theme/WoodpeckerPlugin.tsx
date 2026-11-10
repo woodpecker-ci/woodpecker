@@ -2,7 +2,7 @@ import Layout from '@theme/Layout';
 import React from 'react';
 
 import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
-import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
+import { IconContainer, IconPlugin, IconRelease, IconVerified, IconWebsite } from './Icons';
 
 export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
   return (
@@ -33,6 +33,19 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
                         </a>
                       ) : (
                         <span>{plugin.containerImage}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {plugin.latestRelease && (
+                    <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
+                      {IconRelease(20)}
+                      {plugin.latestRelease.url ? (
+                        <a href={plugin.latestRelease.url} target="_blank" rel="noopener noreferrer">
+                          Latest release: {plugin.latestRelease.tag}
+                        </a>
+                      ) : (
+                        <span>Latest release: {plugin.latestRelease.tag}</span>
                       )}
                     </div>
                   )}

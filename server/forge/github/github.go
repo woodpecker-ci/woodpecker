@@ -25,12 +25,13 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/google/go-github/v91/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -100,9 +101,11 @@ func (c *client) Name() string {
 	return "github"
 }
 
-// URL returns the root url of a configured forge.
-func (c *client) URL() string {
-	return c.url
+func (c *client) Close() error { return nil }
+
+// Config returns the metadata of the configured forge.
+func (c *client) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 // Login authenticates the session and returns the forge user details.
@@ -163,10 +166,9 @@ func (c *client) Refresh(ctx context.Context, user *model.User) (bool, error) {
 
 	config := c.newConfig()
 
+	// Refresh token only: a stored access token makes oauth2 skip the exchange.
 	source := config.TokenSource(ctx, &oauth2.Token{
-		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
-		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
 	token, err := source.Token()
@@ -286,7 +288,28 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	return []byte(data), err
 }
 
+// maxParallelFileFetches bounds how many files of a config folder Dir loads at once.
+const maxParallelFileFetches = 10
+
+// followSymlinks makes Dir load a symlink in a config folder as the linked file.
+// Off, symlinks are skipped like sub folders.
+// TODO: enable in v4.0.0, following symlinks is a breaking change
+var followSymlinks = false
+
 func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
+	files, err := c.dirFromGraphQL(ctx, u, r, b, f)
+	if err == nil || errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+		return files, err
+	}
+	// TODO: remove the REST fallback once the GraphQL fetch got real world usage without issue reports
+	log.Error().Err(err).Msgf("github: graphql fetch of directory %s failed, falling back to the deprecated per-file fetch", f)
+	return c.dirFromREST(ctx, u, r, b, f)
+}
+
+// dirFromREST loads a directory with one REST request per file.
+//
+// Deprecated: only a fallback while the GraphQL fetch rolls out, do not use or extend it.
+func (c *client) dirFromREST(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
@@ -302,43 +325,44 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	fc := make(chan *forge_types.FileMeta)
-	errChan := make(chan error)
-
+	// sub folders and submodules are no pipeline files
+	var paths []string
 	for _, file := range data {
-		if file.GetType() == "file" {
-			go func(path string) {
-				content, err := c.File(ctx, u, r, b, path)
-				if err != nil {
-					if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-						err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
-					}
-					errChan <- err
-				} else {
-					fc <- &forge_types.FileMeta{
-						Name: path,
-						Data: content,
-					}
-				}
-			}(f + "/" + file.GetName())
+		if t := file.GetType(); t == "file" || (followSymlinks && t == "symlink") {
+			paths = append(paths, f+"/"+file.GetName())
 		}
 	}
 
-	var files []*forge_types.FileMeta
-
-	for range data {
-		select {
-		case err := <-errChan:
-			return nil, err
-		case fileMeta := <-fc:
-			files = append(files, fileMeta)
-		}
+	// load the files in parallel with a bounded number of workers,
+	// the first error cancels the fetches still running
+	files := make([]*forge_types.FileMeta, len(paths))
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallelFileFetches)
+	for i, path := range paths {
+		g.Go(func() error {
+			file, err := c.dirFile(gCtx, u, r, b, path)
+			files[i] = file
+			return err
+		})
 	}
-
-	close(fc)
-	close(errChan)
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
 
 	return files, nil
+}
+
+// dirFile loads a file that a directory listing reported. Not found means the
+// listing and the file disagree, so it must not drop the pipeline as a missing config.
+func (c *client) dirFile(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, path string) (*forge_types.FileMeta, error) {
+	data, err := c.File(ctx, u, r, b, path)
+	if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+		return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &forge_types.FileMeta{Name: path, Data: data}, nil
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -349,11 +373,9 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 
 	pullRequests, _, err := client.PullRequests.List(ctx, r.Owner, r.Name, &github.PullRequestListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
-		State: "open",
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
+		State:   "open",
 	})
 	if err != nil {
 		return nil, err
@@ -643,10 +665,8 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	githubBranches, _, err := client.Repositories.ListBranches(ctx, r.Owner, r.Name, &github.BranchListOptions{
-		ListOptions: github.ListOptions{
-			Page:    p.Page,
-			PerPage: perPage(p.PerPage),
-		},
+		Page:    p.Page,
+		PerPage: perPage(p.PerPage),
 	})
 	if err != nil {
 		return nil, err
@@ -678,7 +698,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err

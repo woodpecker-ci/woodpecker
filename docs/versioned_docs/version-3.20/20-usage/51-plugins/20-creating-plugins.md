@@ -1,0 +1,180 @@
+# Creating plugins
+
+Creating a new plugin is simple: Build a Docker container which uses your plugin logic as the ENTRYPOINT.
+
+## Security
+
+A plugin is just a step that runs your image, it is not secure on its own. But it can get more trust than a normal step: secrets limited to it by the [plugins filter](../40-secrets.md#plugins-filter), [privileged mode](../../30-administration/10-configuration/10-server.md#plugins_privileged) or the Git credentials as a [trusted clone plugin](../75-project-settings.md#custom-trusted-clone-plugins).
+
+Everybody who can change the workflow, for example with a pull request, controls the settings and the workspace. A plugin that should get this trust has to treat both as untrusted input:
+
+- No settings that run commands or scripts.
+- No settings loaded from files in the workspace.
+- Never print secrets.
+- Placeholders in settings are fine, as long as they cannot reach a secret: remove your secret settings (e.g. `PLUGIN_TOKEN`) from the environment before you replace them, or only allow a fixed list of names.
+
+If your plugin is not designed for this, say so in its documentation.
+
+Also see [security boundaries](../17-security-boundaries.md#plugins).
+
+## Settings
+
+To allow users to configure the behavior of your plugin, you should use `settings:`.
+
+These are passed to your plugin as uppercase env vars with a `PLUGIN_` prefix.
+Using a setting like `url` results in an env var named `PLUGIN_URL`.
+
+Characters like `-` are converted to an underscore (`_`). `some_String` gets `PLUGIN_SOME_STRING`.
+CamelCase is not respected, `anInt` get `PLUGIN_ANINT`. <!-- cspell:ignore ANINT -->
+
+### Basic settings
+
+Using any basic YAML type (scalar) will be converted into a string:
+
+| Setting              | Environment value            |
+| -------------------- | ---------------------------- |
+| `some-bool: false`   | `PLUGIN_SOME_BOOL="false"`   |
+| `some_String: hello` | `PLUGIN_SOME_STRING="hello"` |
+| `anInt: 3`           | `PLUGIN_ANINT="3"`           |
+
+### Complex settings
+
+It's also possible to use complex settings like this:
+
+```yaml
+steps:
+  - name: plugin
+    image: foo/plugin
+    settings:
+      complex:
+        abc: 2
+        list:
+          - 2
+          - 3
+```
+
+Values like this are converted to JSON and then passed to your plugin. In the example above, the environment variable `PLUGIN_COMPLEX` would contain `{"abc": "2", "list": [ "2", "3" ]}`.
+
+### Secrets
+
+Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage). See [security](#security) for what your plugin has to take care of.
+
+## Plugin library
+
+We provide plugin libraries you can use to get easy access to internal env vars and your settings:
+
+- Go: [go-plugin](https://codeberg.org/woodpecker-plugins/go-plugin), import as `codeberg.org/woodpecker-plugins/go-plugin`
+- TypeScript / JavaScript: [ts-plugin](https://codeberg.org/woodpecker-plugins/ts-plugin), published as [`@woodpecker-ci/plugin`](https://www.npmjs.com/package/@woodpecker-ci/plugin)
+- Rust: [rust-plugin](https://codeberg.org/woodpecker-plugins/rust-plugin), published as [`woodpecker-plugin`](https://crates.io/crates/woodpecker-plugin)
+
+## Metadata
+
+In your documentation, you can use a Markdown header to define metadata for your plugin. This data is used by [our plugin index](/plugins).
+
+Supported metadata:
+
+- `name`: The plugin's full name
+- `icon`: URL to your plugin's icon
+- `description`: A short description of what it's doing
+- `author`: Your name
+- `tags`: List of keywords (e.g. `[git, clone]` for the clone plugin)
+- `containerImage`: name of the container image
+- `containerImageUrl`: link to the container image
+- `url`: homepage or repository of your plugin
+
+If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
+
+## Output groups
+
+Woodpecker's UI supports collapsible output groups for commands, plugin stages, test suites, or any other title. Titles do not need to match a command in the pipeline configuration, and groups work even when no pipeline configuration is available.
+
+<!-- markdownlint-disable no-space-in-code -->
+
+To start a group, print a line beginning with `▶  ` (`▶` followed by two ASCII spaces), then a nonempty title. Leading and trailing whitespace is ignored when detecting group headings. A single space, an embedded marker, or an empty or whitespace-only title does not start a group.
+
+<!-- markdownlint-enable no-space-in-code -->
+
+Groups are flat: each group includes its heading and all following output until the next group heading or the end of the log. There are no nested groups or explicit end markers. Output before the first group remains visible.
+
+For example, a plugin can group its build and test output:
+
+```bash
+echo "▶  Build assets"
+make build
+echo "▶  Test suite"
+make test
+```
+
+## Example plugin
+
+This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make HTTP requests during the build pipeline.
+
+### What end users will see
+
+The below example demonstrates how we might configure a webhook plugin in the YAML file:
+
+```yaml
+steps:
+  - name: webhook
+    image: foo/webhook
+    settings:
+      url: https://example.com
+      method: post
+      body: |
+        hello world
+```
+
+### Write the logic
+
+Create a simple shell script that invokes curl using the YAML configuration parameters, which are passed to the script as environment variables in uppercase and prefixed with `PLUGIN_`.
+
+```bash
+#!/bin/sh
+
+echo "▶  curl -X ${PLUGIN_METHOD} -d ${PLUGIN_BODY} ${PLUGIN_URL}"
+curl \
+  -X ${PLUGIN_METHOD} \
+  -d ${PLUGIN_BODY} \
+  ${PLUGIN_URL}
+```
+
+### Package it
+
+Create a Dockerfile that adds your shell script to the image, and configures the image to execute your shell script as the main entrypoint.
+
+```dockerfile
+# please pin the version, e.g. alpine:3.19
+FROM alpine
+ADD script.sh /bin/
+RUN chmod +x /bin/script.sh
+RUN apk -Uuv add curl ca-certificates
+ENTRYPOINT /bin/script.sh
+```
+
+Build and publish your plugin to the Docker registry. Once published, your plugin can be shared with the broader Woodpecker community.
+
+```shell
+docker build -t foo/webhook .
+docker push foo/webhook
+```
+
+Execute your plugin locally from the command line to verify it is working:
+
+```shell
+docker run --rm \
+  -e PLUGIN_METHOD=post \
+  -e PLUGIN_URL=https://example.com \
+  -e PLUGIN_BODY="hello world" \
+  foo/webhook
+```
+
+## Best practices
+
+- Build your plugin for different architectures to allow many users to use them.
+  At least, you should support `amd64` and `arm64`.
+- Provide binaries for users using the `local` backend.
+  These should also be built for different OS/architectures.
+- Use [built-in env vars](../50-environment.md#built-in-environment-variables) where possible.
+- Do not use any configuration except settings (and internal env vars). This means: Don't require using [`environment`](../50-environment.md) and don't require specific secret names.
+- Add a `docs.md` file, listing all your settings and plugin metadata ([example](https://github.com/woodpecker-ci/plugin-git/blob/main/docs.md)).
+- Add your plugin to the [plugin index](/plugins) using your `docs.md` ([the example above in the index](https://woodpecker-ci.org/plugins/git-clone)).

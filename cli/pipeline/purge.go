@@ -149,9 +149,7 @@ func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, branch string,
 		return client.PipelineList(
 			repoID,
 			woodpecker.PipelineListOptions{
-				ListOptions: woodpecker.ListOptions{
-					Page: page,
-				},
+				Page:   page,
 				Branch: branch,
 			},
 		)
@@ -163,9 +161,7 @@ func fetchPipelines(client woodpecker.Client, repoID int64, branch string, befor
 		return client.PipelineList(
 			repoID,
 			woodpecker.PipelineListOptions{
-				ListOptions: woodpecker.ListOptions{
-					Page: page,
-				},
+				Page:   page,
 				Before: before,
 				Branch: branch,
 			},

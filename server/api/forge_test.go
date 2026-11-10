@@ -47,11 +47,9 @@ func newForgeCtx(t *testing.T, method string, body any) (*gin.Context, *httptest
 func TestPostForge(t *testing.T) {
 	t.Run("should store the allowed orgs of the new forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPost, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-				Orgs: []string{"org1", "org2"},
-			},
+			Type:              model.ForgeTypeGithub,
+			URL:               "https://github.com",
+			Orgs:              []string{"org1", "org2"},
 			OAuthClientSecret: "client-secret",
 		})
 
@@ -66,16 +64,61 @@ func TestPostForge(t *testing.T) {
 		require.NotNil(t, created)
 		assert.Equal(t, []string{"org1", "org2"}, created.Orgs)
 	})
+
+	t.Run("should store the name of the new forge", func(t *testing.T) {
+		c, rec, _store := newForgeCtx(t, http.MethodPost, &model.ForgeWithOAuthClientSecret{
+			Type:              model.ForgeTypeGithub,
+			URL:               "https://github.com",
+			Name:              "My Org GitHub",
+			OAuthClientSecret: "client-secret",
+		})
+
+		var created *model.Forge
+		_store.On("ForgeCreate", mock.Anything).Run(func(args mock.Arguments) {
+			created, _ = args.Get(0).(*model.Forge)
+		}).Return(nil)
+
+		PostForge(c)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, created)
+		assert.Equal(t, "My Org GitHub", created.Name)
+	})
 }
 
 func TestPatchForge(t *testing.T) {
+	t.Run("should update the name of the forge", func(t *testing.T) {
+		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Name: "Renamed forge",
+		})
+		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
+
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Name: "Old name",
+		}, nil)
+
+		var updated *model.Forge
+		_store.On("ForgeUpdate", mock.Anything).Run(func(args mock.Arguments) {
+			updated, _ = args.Get(0).(*model.Forge)
+		}).Return(nil)
+
+		PatchForge(c)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, updated)
+		assert.Equal(t, "Renamed forge", updated.Name)
+	})
+
 	t.Run("should update the allowed orgs of the forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-				Orgs: []string{"org2"},
-			},
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Orgs: []string{"org2"},
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
 
@@ -103,10 +146,8 @@ func TestPatchForge(t *testing.T) {
 
 	t.Run("should clear the allowed orgs of the forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-			},
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
 
