@@ -16,8 +16,6 @@ package local
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,6 +29,9 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+// pluginGitReleaseURL is the base URL of the plugin-git releases (overridden in tests).
+var pluginGitReleaseURL = "https://github.com/woodpecker-ci/plugin-git/releases"
 
 // checkGitCloneCap check if we have the git binary on hand.
 func checkGitCloneCap() error {
@@ -142,11 +143,8 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
-// pluginGitReleaseURL is the base URL of the plugin-git releases (overridden in tests).
-var pluginGitReleaseURL = "https://github.com/woodpecker-ci/plugin-git/releases"
-
 // downloadGitPluginBinary downloads the plugin-git binary of the configured version for the
-// runtime OS and Arch, verifies it against the release's checksums.txt and saves it to dest.
+// runtime OS and Arch and saves it to dest.
 func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error {
 	asset := fmt.Sprintf("%s-%s_plugin-git", e.os, e.arch)
 	if e.os == "windows" {
@@ -158,27 +156,9 @@ func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error 
 		baseURL = pluginGitReleaseURL + "/download/" + url.PathEscape(e.pluginGitVersion)
 	}
 
-	checksums, err := httpGet(ctx, baseURL+"/checksums.txt")
-	if err != nil {
-		return fmt.Errorf("could not download plugin-git checksums: %w", err)
-	}
-	var wantSum string
-	for line := range strings.SplitSeq(string(checksums), "\n") {
-		if fields := strings.Fields(line); len(fields) == 2 && fields[1] == asset {
-			wantSum = fields[0]
-			break
-		}
-	}
-	if wantSum == "" {
-		return fmt.Errorf("could not download plugin-git: no release asset '%s' for this os/arch", asset)
-	}
-
 	binary, err := httpGet(ctx, baseURL+"/"+asset)
 	if err != nil {
 		return fmt.Errorf("could not download plugin-git: %w", err)
-	}
-	if sum := sha256.Sum256(binary); hex.EncodeToString(sum[:]) != wantSum {
-		return fmt.Errorf("could not download plugin-git: checksum mismatch for '%s'", asset)
 	}
 
 	if err := os.WriteFile(dest, binary, 0o755); err != nil {

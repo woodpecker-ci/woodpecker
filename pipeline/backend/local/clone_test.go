@@ -15,14 +15,10 @@
 package local
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,9 +27,6 @@ import (
 
 func TestDownloadGitPluginBinary(t *testing.T) {
 	binary := []byte("plugin-git binary")
-	sum := sha256.Sum256(binary)
-	checksums := fmt.Sprintf("%s  linux-arm64_plugin-git\n%s  linux-arm_plugin-git\n",
-		strings.Repeat("0", 64), hex.EncodeToString(sum[:]))
 
 	tests := []struct {
 		name      string
@@ -47,18 +40,13 @@ func TestDownloadGitPluginBinary(t *testing.T) {
 		{name: "latest", arch: "arm", assetCode: http.StatusOK, assetBody: binary, wantPath: "/latest/download/linux-arm_plugin-git"},
 		{name: "pinned version", arch: "arm", version: "2.12.1", assetCode: http.StatusOK, assetBody: binary, wantPath: "/download/2.12.1/linux-arm_plugin-git"},
 		{name: "http error", arch: "arm", assetCode: http.StatusBadGateway, assetBody: []byte("<html>502</html>"), wantErr: "unexpected status 502"},
-		{name: "checksum mismatch", arch: "arm64", assetCode: http.StatusOK, assetBody: binary, wantErr: "checksum mismatch"},
-		{name: "unsupported arch", arch: "386", wantErr: "no release asset 'linux-386_plugin-git'"},
+		{name: "unsupported arch", arch: "386", assetCode: http.StatusNotFound, wantErr: "linux-386_plugin-git: unexpected status 404"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var gotPath string
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if strings.HasSuffix(r.URL.Path, "/checksums.txt") {
-					fmt.Fprint(w, checksums)
-					return
-				}
 				gotPath = r.URL.Path
 				w.WriteHeader(tt.assetCode)
 				_, _ = w.Write(tt.assetBody)

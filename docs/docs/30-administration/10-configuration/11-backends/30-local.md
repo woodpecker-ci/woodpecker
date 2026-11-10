@@ -92,4 +92,4 @@ Sets `HOME`, `USERPROFILE` and related variables to an isolated directory for ea
 - Name: `WOODPECKER_BACKEND_LOCAL_PLUGIN_GIT_VERSION`
 - Default: `latest`
 
-The [plugin-git](https://github.com/woodpecker-ci/plugin-git/releases) release to download for the clone step if `plugin-git` is not in `$PATH`, for example `2.12.1`. The binary is verified against the `checksums.txt` of the release before it is used.
+The [plugin-git](https://github.com/woodpecker-ci/plugin-git/releases) release to download for the clone step if `plugin-git` is not in `$PATH`, for example `2.12.1`.

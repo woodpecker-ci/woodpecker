@@ -691,7 +691,7 @@ For more details and examples check the [Advanced usage docs](./90-advanced-usag
 
 Woodpecker automatically configures a default clone step if it is not explicitly defined.
 If you are using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary from your `$PATH` is used for the default clone step.
-If it is not in your `$PATH`, the agent downloads and verifies the release set by [`WOODPECKER_BACKEND_LOCAL_PLUGIN_GIT_VERSION`](../30-administration/10-configuration/11-backends/30-local.md#backend_local_plugin_git_version).
+If it is not in your `$PATH`, the agent downloads the release set by [`WOODPECKER_BACKEND_LOCAL_PLUGIN_GIT_VERSION`](../30-administration/10-configuration/11-backends/30-local.md#backend_local_plugin_git_version).
 You can also write a manual clone step.
 
 You can manually configure the clone step in your workflow to customize it:
