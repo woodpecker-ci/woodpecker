@@ -151,11 +151,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "new": {
@@ -230,11 +226,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "truncated": false,
@@ -388,11 +380,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "new": {
@@ -467,11 +455,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "truncated": false,
@@ -625,11 +609,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "new": null,
@@ -785,11 +765,7 @@
             }
           },
           "type": "branch",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "new": {
@@ -864,11 +840,7 @@
             }
           },
           "type": "tag",
-          "merge_strategies": [
-            "merge_commit",
-            "squash",
-            "fast_forward"
-          ],
+          "merge_strategies": ["merge_commit", "squash", "fast_forward"],
           "default_merge_strategy": "merge_commit"
         },
         "truncated": false,

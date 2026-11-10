@@ -223,11 +223,14 @@ func TestHookMultiplePipelines(t *testing.T) {
 	// Both pipelines are created, the second one too; neither has workflows, so both are filtered
 	// out and the response is that of the first.
 	_store.AssertNumberOfCalls(t, "CreatePipeline", 2)
-	created := map[string]bool{}
+	created := make(map[string]bool)
 	for _, call := range _store.Calls {
-		if call.Method == "CreatePipeline" {
-			created[call.Arguments.Get(0).(*model.Pipeline).Ref] = true
+		if call.Method != "CreatePipeline" {
+			continue
 		}
+		pl, ok := call.Arguments.Get(0).(*model.Pipeline)
+		require.True(t, ok)
+		created[pl.Ref] = true
 	}
 	assert.Equal(t, map[string]bool{"refs/heads/develop": true, "refs/heads/release/1.2": true}, created)
 	assert.Equal(t, http.StatusNoContent, c.Writer.Status())
