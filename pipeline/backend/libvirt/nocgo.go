@@ -48,5 +48,5 @@ func (*stub) IsAvailable(ctx context.Context) bool {
 func (*stub) Flags() []cli.Flag { return nil }
 
 func (*stub) Load(context.Context) (*backend_types.BackendInfo, error) {
-	return nil, errors.New("libvirt backend is not compiled in, build with LIBVIRT_ENABLED=true")
+	return nil, errors.New("libvirt backend is not compiled in, compile backend with LIBVIRT_ENABLED=true")
 }
