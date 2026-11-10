@@ -58,23 +58,24 @@ function timeAgo(date: number) {
 }
 
 function prettyDuration(durationMs: number) {
-  const t = splitDuration(durationMs);
+  const formatter = new Intl.DurationFormat(currentLocale, { style: 'long' });
 
-  // Also move up a unit when the rounded count reaches it, so 59.6 minutes
-  // reads "1 hour" rather than "60 minutes".
-  if (t.totalHours > 1 || Math.round(t.totalMinutes) >= 60) {
-    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(
-      Math.round(t.totalHours),
-    );
+  const totalSeconds = Math.round(durationMs / 1000);
+  if (totalSeconds < 60) {
+    // secondsDisplay keeps "0 seconds" instead of an empty string.
+    return new Intl.DurationFormat(currentLocale, { style: 'long', secondsDisplay: 'always' }).format({
+      seconds: totalSeconds,
+    });
   }
-  if (t.totalMinutes > 1 || Math.round(t.totalSeconds) >= 60) {
-    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(
-      Math.round(t.totalMinutes),
-    );
+
+  const totalMinutes = Math.round(durationMs / (60 * 1000));
+  if (totalMinutes < 60) {
+    return formatter.format({ minutes: totalMinutes });
   }
-  return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(
-    Math.round(t.totalSeconds),
-  );
+
+  // From one hour on, show hours and minutes, with minutes rounded to 5.
+  const roundedMinutes = Math.round(durationMs / (5 * 60 * 1000)) * 5;
+  return formatter.format({ hours: Math.floor(roundedMinutes / 60), minutes: roundedMinutes % 60 });
 }
 
 function durationAsNumber(durationMs: number): string {
