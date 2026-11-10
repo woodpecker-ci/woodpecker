@@ -13,6 +13,8 @@
 
 ### 📈 Enhancement
 
+- Report skipped and canceled workflows as error to GitHub [[#7517](https://github.com/woodpecker-ci/woodpecker/pull/7517)]
+- Report skipped workflows as skipped to forgejo >= 16 [[#7515](https://github.com/woodpecker-ci/woodpecker/pull/7515)]
 - Raise matrix per-axis variable limit from 10 to 64 [[#7526](https://github.com/woodpecker-ci/woodpecker/pull/7526)]
 - Show the latest release of plugins in the plugin index if exist [[#7480](https://github.com/woodpecker-ci/woodpecker/pull/7480)]
 - For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
