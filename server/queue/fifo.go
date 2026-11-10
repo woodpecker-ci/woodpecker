@@ -285,42 +285,72 @@ func (q *fifo) process() {
 	}
 }
 
+// filterWaiting moves pending tasks whose dependencies are still queued or
+// running to waitingOnDeps, and waiting tasks whose dependencies have cleared
+// back to the tail of pending. Tasks that keep their state stay where they are,
+// so a steady queue is checked without moving anything.
+//
+// The result is ordered as if all waiting tasks were appended to pending and
+// the combined list was filtered again: newly blocked tasks go in front of the
+// tasks that are still waiting, and released tasks keep their relative order.
 func (q *fifo) filterWaiting() {
-	// resubmits all waiting tasks to pending, deps may have cleared
-	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		task, _ := element.Value.(*model.Task)
-		q.pending.PushBack(task)
+	queuedIDs := q.queuedIDsIfNeeded()
+	if queuedIDs == nil {
+		// no queued task has dependencies, so nothing can be blocked
+		return
 	}
 
-	// rebuild waitingDeps
-	q.waitingOnDeps = list.New()
-	var filtered []*list.Element
-	var pendingIDs map[string]struct{}
-	for element := q.pending.Front(); element != nil; element = element.Next() {
+	// Insert newly blocked tasks before the first task that was already
+	// waiting. Inserted tasks are never revisited by the waiting loop below,
+	// as it starts at this element.
+	firstWaiting := q.waitingOnDeps.Front()
+	for element := q.pending.Front(); element != nil; {
+		next := element.Next()
 		task, _ := element.Value.(*model.Task)
-		if len(task.Dependencies) == 0 {
-			continue
-		}
-		if pendingIDs == nil {
-			// Snapshot all queued IDs before removing any blocked tasks. Waiting
-			// tasks have been requeued above and can themselves be dependencies.
-			// Build the index only when dependencies need checking.
-			pendingIDs = make(map[string]struct{}, q.pending.Len())
-			for pending := q.pending.Front(); pending != nil; pending = pending.Next() {
-				queued, _ := pending.Value.(*model.Task)
-				pendingIDs[queued.ID] = struct{}{}
+		if q.depsInQueue(task, queuedIDs) {
+			q.pending.Remove(element)
+			if firstWaiting != nil {
+				q.waitingOnDeps.InsertBefore(task, firstWaiting)
+			} else {
+				q.waitingOnDeps.PushBack(task)
 			}
 		}
-		if q.depsInQueue(task, pendingIDs) {
-			q.waitingOnDeps.PushBack(task)
-			filtered = append(filtered, element)
-		}
+		element = next
 	}
 
-	// filter waiting tasks
-	for _, f := range filtered {
-		q.pending.Remove(f)
+	for element := firstWaiting; element != nil; {
+		next := element.Next()
+		task, _ := element.Value.(*model.Task)
+		if !q.depsInQueue(task, queuedIDs) {
+			q.waitingOnDeps.Remove(element)
+			q.pending.PushBack(task)
+		}
+		element = next
 	}
+}
+
+// queuedIDsIfNeeded returns the IDs of all pending and waiting tasks, as
+// waiting tasks can themselves be dependencies. It returns nil if no queued
+// task has dependencies, so the index is only built when it is needed.
+func (q *fifo) queuedIDsIfNeeded() map[string]struct{} {
+	hasDeps := q.waitingOnDeps.Len() > 0
+	for element := q.pending.Front(); element != nil && !hasDeps; element = element.Next() {
+		if task, _ := element.Value.(*model.Task); len(task.Dependencies) > 0 {
+			hasDeps = true
+		}
+	}
+	if !hasDeps {
+		return nil
+	}
+
+	queuedIDs := make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
+	for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
+		for element := tasks.Front(); element != nil; element = element.Next() {
+			task, _ := element.Value.(*model.Task)
+			queuedIDs[task.ID] = struct{}{}
+		}
+	}
+	return queuedIDs
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
@@ -444,9 +474,9 @@ func (q *fifo) resubmitExpiredPipelines() {
 	}
 }
 
-func (q *fifo) depsInQueue(task *model.Task, pendingIDs map[string]struct{}) bool {
+func (q *fifo) depsInQueue(task *model.Task, queuedIDs map[string]struct{}) bool {
 	for _, dep := range task.Dependencies {
-		if _, ok := pendingIDs[dep]; ok {
+		if _, ok := queuedIDs[dep]; ok {
 			return true
 		}
 		if _, ok := q.running[dep]; ok {

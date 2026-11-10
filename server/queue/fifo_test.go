@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"sync"
 	"testing"
 	"time"
@@ -739,6 +740,54 @@ func TestFifoFilterWaiting(t *testing.T) {
 			},
 			blocked: []string{"first", "second"},
 		},
+		{
+			name: "newly blocked tasks go in front of all waiting tasks",
+			pending: []*model.Task{
+				{ID: "blocked-1", Dependencies: []string{"root"}},
+				{ID: "ready"},
+				{ID: "blocked-2", Dependencies: []string{"root"}},
+			},
+			waiting: []*model.Task{
+				{ID: "waiting-1", Dependencies: []string{"root"}},
+				{ID: "waiting-2", Dependencies: []string{"root"}},
+			},
+			running: []string{"root"},
+			ready:   []string{"ready"},
+			blocked: []string{"blocked-1", "blocked-2", "waiting-1", "waiting-2"},
+		},
+		{
+			name: "all waiting tasks released in order",
+			pending: []*model.Task{
+				{ID: "ready"},
+			},
+			waiting: []*model.Task{
+				{ID: "released-1", Dependencies: []string{"finished"}},
+				{ID: "released-2", Dependencies: []string{"finished"}},
+			},
+			ready: []string{"ready", "released-1", "released-2"},
+		},
+		{
+			name: "waiting tasks can depend on newly blocked tasks",
+			pending: []*model.Task{
+				{ID: "parent", Dependencies: []string{"root"}},
+			},
+			waiting: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+			},
+			running: []string{"root"},
+			blocked: []string{"parent", "child"},
+		},
+		{
+			name: "released tasks still block their queued dependents",
+			pending: []*model.Task{
+				{ID: "child", Dependencies: []string{"parent"}},
+			},
+			waiting: []*model.Task{
+				{ID: "parent", Dependencies: []string{"finished"}},
+			},
+			ready:   []string{"parent"},
+			blocked: []string{"child"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -770,6 +819,127 @@ func TestFifoFilterWaiting(t *testing.T) {
 				assert.Equal(t, tt.blocked, ids(q.waitingOnDeps))
 			}
 		})
+	}
+}
+
+// TestFifoFilterWaitingKeepsUnchangedTasksInPlace checks that tasks whose state
+// does not change are not moved between or within the lists.
+func TestFifoFilterWaitingKeepsUnchangedTasksInPlace(t *testing.T) {
+	q := &fifo{
+		pending:       list.New(),
+		waitingOnDeps: list.New(),
+		running:       map[string]*entry{"root": {item: &model.Task{ID: "root"}}},
+	}
+	q.pending.PushBack(&model.Task{ID: "ready"})
+	q.pending.PushBack(&model.Task{ID: "released-later"})
+	q.waitingOnDeps.PushBack(&model.Task{ID: "blocked", Dependencies: []string{"root"}})
+	q.waitingOnDeps.PushBack(&model.Task{ID: "released", Dependencies: []string{"finished"}})
+
+	elements := func(tasks *list.List) []*list.Element {
+		var result []*list.Element
+		for element := tasks.Front(); element != nil; element = element.Next() {
+			result = append(result, element)
+		}
+		return result
+	}
+	pendingBefore := elements(q.pending)
+	waitingBefore := elements(q.waitingOnDeps)
+
+	q.filterWaiting()
+
+	// the two ready tasks and the blocked task keep their list elements,
+	// only the released task got moved to the tail of pending.
+	pendingAfter := elements(q.pending)
+	require.Len(t, pendingAfter, 3)
+	assert.Same(t, pendingBefore[0], pendingAfter[0])
+	assert.Same(t, pendingBefore[1], pendingAfter[1])
+	assert.Equal(t, "released", pendingAfter[2].Value.(*model.Task).ID)
+	assert.Equal(t, []*list.Element{waitingBefore[0]}, elements(q.waitingOnDeps))
+
+	// a second run on the now steady queue moves nothing.
+	pendingBefore, waitingBefore = elements(q.pending), elements(q.waitingOnDeps)
+	q.filterWaiting()
+	assert.Equal(t, pendingBefore, elements(q.pending))
+	assert.Equal(t, waitingBefore, elements(q.waitingOnDeps))
+}
+
+// TestFifoFilterWaitingMatchesRequeueAll compares filterWaiting on random queues
+// with the previous implementation, which appended all waiting tasks to pending
+// and filtered the combined list again. Both must give the same order.
+func TestFifoFilterWaitingMatchesRequeueAll(t *testing.T) {
+	requeueAll := func(pending, waiting []*model.Task, running map[string]*entry) (ready, blocked []string) {
+		all := append(append([]*model.Task{}, pending...), waiting...)
+		queued := make(map[string]struct{}, len(all))
+		for _, task := range all {
+			queued[task.ID] = struct{}{}
+		}
+		for _, task := range all {
+			isBlocked := false
+			for _, dep := range task.Dependencies {
+				_, inQueue := queued[dep]
+				_, isRunning := running[dep]
+				isBlocked = isBlocked || inQueue || isRunning
+			}
+			if isBlocked {
+				blocked = append(blocked, task.ID)
+			} else {
+				ready = append(ready, task.ID)
+			}
+		}
+		return ready, blocked
+	}
+	ids := func(tasks *list.List) []string {
+		var result []string
+		for element := tasks.Front(); element != nil; element = element.Next() {
+			result = append(result, element.Value.(*model.Task).ID)
+		}
+		return result
+	}
+
+	rng := rand.New(rand.NewPCG(1, 2)) // fixed seed for reproducible failures
+	for run := range 500 {
+		size := 1 + rng.IntN(20)
+		// dependencies may point to queued, running or finished (unknown) tasks
+		depIDs := func() []string {
+			var deps []string
+			for range rng.IntN(3) {
+				switch rng.IntN(3) {
+				case 0:
+					deps = append(deps, fmt.Sprintf("task-%d", rng.IntN(size)))
+				case 1:
+					deps = append(deps, fmt.Sprintf("running-%d", rng.IntN(3)))
+				default:
+					deps = append(deps, "finished")
+				}
+			}
+			return deps
+		}
+
+		q := &fifo{
+			pending:       list.New(),
+			waitingOnDeps: list.New(),
+			running:       make(map[string]*entry),
+		}
+		for i := range rng.IntN(3) {
+			id := fmt.Sprintf("running-%d", i)
+			q.running[id] = &entry{item: &model.Task{ID: id}}
+		}
+		var pending, waiting []*model.Task
+		for i := range size {
+			task := &model.Task{ID: fmt.Sprintf("task-%d", i), Dependencies: depIDs()}
+			if rng.IntN(2) == 0 {
+				pending = append(pending, task)
+				q.pending.PushBack(task)
+			} else {
+				waiting = append(waiting, task)
+				q.waitingOnDeps.PushBack(task)
+			}
+		}
+
+		wantReady, wantBlocked := requeueAll(pending, waiting, q.running)
+		q.filterWaiting()
+		require.Equal(t, wantReady, ids(q.pending), "pending order differs in run %d", run)
+		require.Equal(t, wantBlocked, ids(q.waitingOnDeps), "waiting order differs in run %d", run)
 	}
 }
 
