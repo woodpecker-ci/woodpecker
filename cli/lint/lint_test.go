@@ -58,6 +58,21 @@ func TestLintWithFileConfig(t *testing.T) {
 	})
 }
 
+func TestLintReportsSubstitutionError(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker.yml"), `steps:
+  test:
+    image: bash
+    commands:
+      - echo "${ARGS[@]}"
+`)
+
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.Error(t, lint(t.Context(), c))
+	})
+}
+
 func TestLintWalksAllYAMLWhenNoConfig(t *testing.T) {
 	repoRoot := t.TempDir()
 
