@@ -21,10 +21,13 @@ describe('prettyDuration', () => {
     expect(prettyDuration(59.4 * 60 * 1000)).toBe('59 minutes');
   });
 
-  it('shows hours and minutes, with minutes rounded to 5', () => {
-    expect(prettyDuration(90 * 60 * 1000)).toBe('1 hour, 30 minutes');
-    expect(prettyDuration(92 * 60 * 1000)).toBe('1 hour, 30 minutes');
-    expect(prettyDuration(93 * 60 * 1000)).toBe('1 hour, 35 minutes');
-    expect(prettyDuration(118 * 60 * 1000)).toBe('2 hours');
+  it('shows the minutes over one hour only when there are more than 5', () => {
+    const minute = 60 * 1000;
+    expect(prettyDuration(62 * minute)).toBe('1 hour');
+    expect(prettyDuration(65 * minute)).toBe('1 hour');
+    expect(prettyDuration(66 * minute)).toBe('1 hour, 6 minutes');
+    expect(prettyDuration(92 * minute)).toBe('1 hour, 32 minutes');
+    expect(prettyDuration(119.6 * minute)).toBe('2 hours');
+    expect(prettyDuration(150 * minute)).toBe('2 hours, 30 minutes');
   });
 });

@@ -73,9 +73,10 @@ function prettyDuration(durationMs: number) {
     return formatter.format({ minutes: totalMinutes });
   }
 
-  // From one hour on, show hours and minutes, with minutes rounded to 5.
-  const roundedMinutes = Math.round(durationMs / (5 * 60 * 1000)) * 5;
-  return formatter.format({ hours: Math.floor(roundedMinutes / 60), minutes: roundedMinutes % 60 });
+  // From one hour on, only show the minutes when there are more than 5,
+  // so 1h15m reads "1 hour, 15 minutes" but 1h2m stays "1 hour".
+  const minutes = totalMinutes % 60;
+  return formatter.format({ hours: Math.floor(totalMinutes / 60), minutes: minutes > 5 ? minutes : 0 });
 }
 
 function durationAsNumber(durationMs: number): string {
