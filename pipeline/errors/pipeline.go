@@ -41,6 +41,13 @@ func (e *PipelineError) Error() string {
 	return fmt.Sprintf("[%s] %s", e.Type, e.Message)
 }
 
+// CompilerErrorData carries the originating workflow file for errors that are
+// not produced by the linter (variable substitution, YAML parsing, …) so the
+// UI can tell the user which workflow is broken.
+type CompilerErrorData struct {
+	File string `json:"file"`
+}
+
 type ErrInvalidWorkflowSetup struct {
 	Err  error
 	Step *backend_types.Step

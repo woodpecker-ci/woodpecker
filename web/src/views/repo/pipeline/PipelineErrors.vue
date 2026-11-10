@@ -42,7 +42,7 @@
                 </span>
               </span>
               <span
-                v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
+                v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error) || isCompilerError(error)"
                 class="flex items-center gap-x-2 whitespace-nowrap"
               >
                 <span>
@@ -101,6 +101,10 @@ function isDeprecationError(
 
 function isBadHabitError(error: PipelineError): error is PipelineError<{ file?: string; field: string; docs: string }> {
   return error.type === 'bad_habit';
+}
+
+function isCompilerError(error: PipelineError): error is PipelineError<{ file?: string }> {
+  return error.type === 'compiler';
 }
 
 const { t } = useI18n();

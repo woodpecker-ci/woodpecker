@@ -136,7 +136,11 @@ func (b *PipelineBuilder) selectYamls(name string) ([]*YamlFile, error) {
 func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.DependsOn, error) {
 	axes, err := matrix.Parse(file.Data)
 	if err != nil {
-		return nil, err
+		return nil, &pipeline_errors.PipelineError{
+			Message: err.Error(),
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+			Data:    &pipeline_errors.CompilerErrorData{File: SanitizePath(file.Name)},
+		}
 	}
 	if len(axes) == 0 {
 		axes = append(axes, matrix.Axis{})
@@ -148,11 +152,19 @@ func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.Depen
 		environ := b.environmentVariables(b.GetWorkflowMetadata(workflow), axis)
 		substituted, err := metadata.EnvVarSubst(string(file.Data), environ)
 		if err != nil {
-			return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+			return nil, &pipeline_errors.PipelineError{
+				Message: err.Error(),
+				Type:    pipeline_errors.PipelineErrorTypeCompiler,
+				Data:    &pipeline_errors.CompilerErrorData{File: workflow.Name},
+			}
 		}
 		parsed, err := yaml.ParseString(substituted)
 		if err != nil {
-			return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+			return nil, &pipeline_errors.PipelineError{
+				Message: err.Error(),
+				Type:    pipeline_errors.PipelineErrorTypeCompiler,
+				Data:    &pipeline_errors.CompilerErrorData{File: workflow.Name},
+			}
 		}
 		dependencies = append(dependencies, parsed.DependsOn...)
 	}

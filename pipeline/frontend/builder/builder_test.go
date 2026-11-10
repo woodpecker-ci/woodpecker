@@ -1017,6 +1017,13 @@ steps:
 
 	_, err := b.Build()
 	assert.ErrorContains(t, err, "found a tab character that violates indentation")
+	pipelineErrors := errors.GetPipelineErrors(err)
+	require.Len(t, pipelineErrors, 1)
+	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+	// the error points to the offending workflow file so the UI can show it
+	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+	require.True(t, ok)
+	assert.Equal(t, "broken-yaml", data.File)
 }
 
 func TestInvalidSubstitution(t *testing.T) {
@@ -1048,6 +1055,10 @@ steps:
 			pipelineErrors := errors.GetPipelineErrors(err)
 			require.Len(t, pipelineErrors, 1)
 			assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+			// the error points to the offending workflow file so the UI can show it
+			data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+			require.True(t, ok)
+			assert.Equal(t, "broken-substitution", data.File)
 		})
 	}
 }

@@ -78,7 +78,11 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// matrix axes
 		axes, err := matrix.Parse(y.Data)
 		if err != nil {
-			return nil, err
+			return nil, &pipeline_errors.PipelineError{
+				Message: err.Error(),
+				Type:    pipeline_errors.PipelineErrorTypeCompiler,
+				Data:    &pipeline_errors.CompilerErrorData{File: SanitizePath(y.Name)},
+			}
 		}
 		if len(axes) == 0 {
 			axes = append(axes, matrix.Axis{})
@@ -138,13 +142,21 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		return nil, &pipeline_errors.PipelineError{
+			Message: err.Error(),
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+			Data:    &pipeline_errors.CompilerErrorData{File: workflow.Name},
+		}
 	}
 
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		return nil, &pipeline_errors.PipelineError{
+			Message: err.Error(),
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+			Data:    &pipeline_errors.CompilerErrorData{File: workflow.Name},
+		}
 	}
 
 	// lint pipeline
