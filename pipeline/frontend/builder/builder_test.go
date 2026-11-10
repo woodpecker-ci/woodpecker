@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
@@ -1016,6 +1017,39 @@ steps:
 
 	_, err := b.Build()
 	assert.ErrorContains(t, err, "found a tab character that violates indentation")
+}
+
+func TestInvalidSubstitution(t *testing.T) {
+	t.Parallel()
+
+	// with a selected workflow the dependencies get substituted first
+	for _, selected := range []string{"", "broken-substitution"} {
+		t.Run(selected, func(t *testing.T) {
+			t.Parallel()
+
+			m := &testMetadata{}
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				SelectedWorkflow:    selected,
+				Yamls: []*YamlFile{
+					{Name: "broken-substitution", Data: []byte(`
+steps:
+  - name: build
+    image: bash
+    commands:
+      - echo "${ARGS[@]}"
+`)},
+				},
+			}
+
+			_, err := b.Build()
+			assert.ErrorContains(t, err, "compile time environment variable substitution failed: missing closing brace")
+			pipelineErrors := errors.GetPipelineErrors(err)
+			require.Len(t, pipelineErrors, 1)
+			assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+		})
+	}
 }
 
 func TestEnvVarPrecedence(t *testing.T) {
