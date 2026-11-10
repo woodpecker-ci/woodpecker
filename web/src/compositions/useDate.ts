@@ -73,10 +73,14 @@ function prettyDuration(durationMs: number) {
     return formatter.format({ minutes: totalMinutes });
   }
 
-  // From one hour on, only show the minutes when there are more than 5,
-  // so 1h15m reads "1 hour, 15 minutes" but 1h2m stays "1 hour".
+  // From one hour on, only show the minutes when a full hour is more than
+  // 5 minutes away, so 1h15m reads "1 hour, 15 minutes", 1h2m reads
+  // "1 hour" and 1h57m reads "2 hours".
   const minutes = totalMinutes % 60;
-  return formatter.format({ hours: Math.floor(totalMinutes / 60), minutes: minutes > 5 ? minutes : 0 });
+  if (minutes > 5 && minutes < 55) {
+    return formatter.format({ hours: Math.floor(totalMinutes / 60), minutes });
+  }
+  return formatter.format({ hours: Math.round(totalMinutes / 60) });
 }
 
 function durationAsNumber(durationMs: number): string {

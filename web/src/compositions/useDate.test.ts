@@ -21,12 +21,14 @@ describe('prettyDuration', () => {
     expect(prettyDuration(59.4 * 60 * 1000)).toBe('59 minutes');
   });
 
-  it('shows the minutes over one hour only when there are more than 5', () => {
+  it('shows the minutes over one hour only when a full hour is more than 5 minutes away', () => {
     const minute = 60 * 1000;
     expect(prettyDuration(62 * minute)).toBe('1 hour');
     expect(prettyDuration(65 * minute)).toBe('1 hour');
     expect(prettyDuration(66 * minute)).toBe('1 hour, 6 minutes');
     expect(prettyDuration(92 * minute)).toBe('1 hour, 32 minutes');
+    expect(prettyDuration(114 * minute)).toBe('1 hour, 54 minutes');
+    expect(prettyDuration(115 * minute)).toBe('2 hours');
     expect(prettyDuration(119.6 * minute)).toBe('2 hours');
     expect(prettyDuration(150 * minute)).toBe('2 hours, 30 minutes');
   });
