@@ -110,7 +110,7 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 	rawConfig := string(buf)
 
 	if _, err := metadata.EnvVarSubst(rawConfig, nil); err != nil {
-		return err
+		return fmt.Errorf("compile time environment variable substitution failed: %w", err)
 	}
 
 	parsedConfig, err := yaml.ParseString(rawConfig)
