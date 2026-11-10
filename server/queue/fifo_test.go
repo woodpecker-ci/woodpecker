@@ -853,7 +853,8 @@ func TestFifoFilterWaitingKeepsUnchangedTasksInPlace(t *testing.T) {
 	require.Len(t, pendingAfter, 3)
 	assert.Same(t, pendingBefore[0], pendingAfter[0])
 	assert.Same(t, pendingBefore[1], pendingAfter[1])
-	assert.Equal(t, "released", pendingAfter[2].Value.(*model.Task).ID)
+	released, _ := pendingAfter[2].Value.(*model.Task)
+	assert.Equal(t, "released", released.ID)
 	assert.Equal(t, []*list.Element{waitingBefore[0]}, elements(q.waitingOnDeps))
 
 	// a second run on the now steady queue moves nothing.
@@ -891,7 +892,8 @@ func TestFifoFilterWaitingMatchesRequeueAll(t *testing.T) {
 	ids := func(tasks *list.List) []string {
 		var result []string
 		for element := tasks.Front(); element != nil; element = element.Next() {
-			result = append(result, element.Value.(*model.Task).ID)
+			task, _ := element.Value.(*model.Task)
+			result = append(result, task.ID)
 		}
 		return result
 	}
