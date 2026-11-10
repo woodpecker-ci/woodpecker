@@ -3,6 +3,8 @@ run:
   timeout: 15m
   build-tags:
     - test
+    - sqlite
+    - libvirt
     - libvirt_dlopen
 linters:
   default: none

@@ -36,21 +36,50 @@ else
 	endif
 endif
 
+# feature flags (static, sqlite, libvirt, ...)
 TAGS ?=
-override TAGS += libvirt_dlopen
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
+
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
 endif
-CGO_ENABLED ?= 1 # only used to compile server and agent and cli
 
-HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO),GO)
-	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
+# only forwarded on server and agent and cli compilation
+CGO_ENABLED ?= 1
+ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
+        CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
 
+# enable libvirt by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	LIBVIRT_ENABLED ?= true
+else
+	ifeq ($(LIBVIRT_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if LIBVIRT_ENABLED is 'true')
+	endif
+endif
+ifeq ($(LIBVIRT_ENABLED),true)
+	override TAGS += libvirt
+	ifneq ($(STATIC_BUILD),true)
+		# we have dynamic build so we can do dynamic so loading
+	        override TAGS += libvirt_dlopen
+	endif
+endif
+
+# enable sqlite by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	SQLITE_ENABLED ?= true
+else
+	ifeq ($(SQLITE_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if SQLITE_ENABLED is 'true')
+	endif
+endif
+SQLITE_ENABLED ?=
+ifeq ($(SQLITE_ENABLED),true)
+	override TAGS += sqlite sqlite_unlock_notify
+endif
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -69,6 +98,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e TARGETOS="linux" \
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
+		-e LIBVIRT_ENABLED="$(LIBVIRT_ENABLED)" \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
