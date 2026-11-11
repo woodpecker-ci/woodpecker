@@ -18,7 +18,6 @@ import (
 	"container/list"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/rs/zerolog"
 
@@ -186,52 +185,4 @@ func BenchmarkScheduleReady(b *testing.B) {
 			})
 		}
 	}
-}
-
-// BenchmarkSchedulingContention runs heartbeats concurrently with blocked
-// scheduling passes under the queue mutex. Use -mutexprofile to inspect waiting
-// time, and compare the maximum observed heartbeat latency between variants.
-func BenchmarkSchedulingContention(b *testing.B) {
-	b.Run("index", func(b *testing.B) {
-		q := &fifo{
-			pending: list.New(), waitingOnDeps: list.New(), running: make(map[string]*entry),
-			workers: map[*worker]struct{}{{filter: filterFnTrue}: {}},
-		}
-		q.running["heartbeat"] = &entry{item: &model.Task{ID: "heartbeat"}}
-		q.waitingOnDeps.PushBack(&model.Task{ID: "early", ConcurrencyGroup: "deploy"})
-		for i := range 10000 {
-			q.pending.PushBack(&model.Task{
-				ID: fmt.Sprintf("task-%d", i), Created: int64(i + 1), PipelineID: int64(i + 1),
-				ConcurrencyGroup: "deploy", ConcurrencyLimit: 1,
-			})
-		}
-		stop, done := make(chan struct{}), make(chan struct{})
-		started := make(chan struct{})
-		ctx := b.Context()
-		var maximum time.Duration
-		go func() {
-			defer close(done)
-			close(started)
-			for {
-				select {
-				case <-stop:
-					return
-				default:
-					start := time.Now()
-					_ = q.Extend(ctx, 0, "heartbeat")
-					maximum = max(maximum, time.Since(start))
-				}
-			}
-		}()
-		<-started
-		b.ReportAllocs()
-		for b.Loop() {
-			q.Lock()
-			q.assignToWorker(&concurrencyIndex{queue: q})
-			q.Unlock()
-		}
-		close(stop)
-		<-done
-		b.ReportMetric(float64(maximum.Nanoseconds()), "max-heartbeat-ns")
-	})
 }
