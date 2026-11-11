@@ -1126,6 +1126,36 @@ steps:
 	assert.Equal(t, "missing-secret", data.File)
 }
 
+func TestInvalidWhenEvaluate(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "push"}
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: "broken-evaluate", Data: []byte(`
+when:
+  event: push
+  evaluate: 'CI_COMMIT_BRANCH =='
+steps:
+  - name: build
+    image: scratch
+`)},
+		},
+	}
+
+	_, err := b.Build()
+	assert.ErrorContains(t, err, "unexpected token EOF")
+	pipelineErrors := errors.GetPipelineErrors(err)
+	require.Len(t, pipelineErrors, 1)
+	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+	// the error points to the offending workflow file so the UI can show it
+	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+	require.True(t, ok)
+	assert.Equal(t, "broken-evaluate", data.File)
+}
+
 func TestEnvVarPrecedence(t *testing.T) {
 	t.Parallel()
 
