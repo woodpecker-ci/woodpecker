@@ -52,12 +52,6 @@ type concurrencyPipeline struct {
 	queued concurrencyCounts
 }
 
-// newConcurrencyIndex defers construction until a limited candidate is checked,
-// so unlimited queues keep their allocation-free, constant-time fast path.
-func (q *fifo) newConcurrencyIndex() *concurrencyIndex {
-	return &concurrencyIndex{queue: q}
-}
-
 // build takes O(N log N) time and O(N) space. The caller must hold the queue
 // lock; the snapshot includes any unlimited tasks already started this tick.
 func (index *concurrencyIndex) build() {

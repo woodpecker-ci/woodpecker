@@ -271,7 +271,7 @@ func (q *fifo) process() {
 
 		q.resubmitExpiredPipelines()
 		q.filterWaiting()
-		concurrency := q.newConcurrencyIndex()
+		concurrency := &concurrencyIndex{queue: q}
 		for pending, worker := q.assignToWorker(concurrency); pending != nil && worker != nil; pending, worker = q.assignToWorker(concurrency) {
 			task, _ := pending.Value.(*model.Task)
 			concurrency.start(task)

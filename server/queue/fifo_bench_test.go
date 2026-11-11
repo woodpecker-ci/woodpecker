@@ -117,7 +117,7 @@ func BenchmarkAssignToWorker(b *testing.B) {
 				}
 				b.ReportAllocs()
 				for b.Loop() {
-					if element, _ := q.assignToWorker(q.newConcurrencyIndex()); element != nil {
+					if element, _ := q.assignToWorker(&concurrencyIndex{queue: q}); element != nil {
 						b.Fatal("the backlog must stay blocked")
 					}
 				}
@@ -166,7 +166,7 @@ func BenchmarkScheduleReady(b *testing.B) {
 							q.workers[worker] = struct{}{}
 						}
 						b.StartTimer()
-						index := q.newConcurrencyIndex()
+						index := &concurrencyIndex{queue: q}
 						assigned := 0
 						for {
 							var element *list.Element
@@ -241,7 +241,7 @@ func BenchmarkSchedulingContention(b *testing.B) {
 				if scan {
 					scanAssignToWorker(q)
 				} else {
-					q.assignToWorker(q.newConcurrencyIndex())
+					q.assignToWorker(&concurrencyIndex{queue: q})
 				}
 				q.Unlock()
 			}

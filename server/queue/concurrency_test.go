@@ -93,7 +93,7 @@ func TestConcurrencyIndexMatchesScan(t *testing.T) {
 			}
 		}
 
-		index := q.newConcurrencyIndex()
+		index := &concurrencyIndex{queue: q}
 		for {
 			var eligible []*list.Element
 			for element := q.pending.Front(); element != nil; element = element.Next() {
@@ -154,7 +154,7 @@ func TestConcurrencyIndexStarts(t *testing.T) {
 			}
 			q.pending.PushBack(tt.first)
 			q.pending.PushBack(tt.second)
-			index := q.newConcurrencyIndex()
+			index := &concurrencyIndex{queue: q}
 			element, worker := q.assignToWorker(index)
 			require.NotNil(t, element)
 			require.Same(t, tt.first, element.Value)
@@ -173,17 +173,17 @@ func TestConcurrencyIndexUnlimitedMembers(t *testing.T) {
 	task := &model.Task{ID: "limited", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1}
 	q.pending.PushBack(task)
 	q.waitingOnDeps.PushBack(&model.Task{ID: "unlimited", PipelineID: 1, Created: 1, ConcurrencyGroup: "deploy"})
-	require.False(t, q.newConcurrencyIndex().canRun(task))
+	require.False(t, (&concurrencyIndex{queue: q}).canRun(task))
 	q.waitingOnDeps.Init()
 	q.running["unlimited"] = &entry{item: &model.Task{ID: "unlimited", ConcurrencyGroup: "deploy"}}
-	require.False(t, q.newConcurrencyIndex().canRun(task))
+	require.False(t, (&concurrencyIndex{queue: q}).canRun(task))
 }
 
 func TestConcurrencyIndexLazy(t *testing.T) {
 	q := &fifo{pending: list.New(), waitingOnDeps: list.New(), running: make(map[string]*entry)}
 	task := &model.Task{ID: "unlimited"}
 	q.pending.PushBack(task)
-	index := q.newConcurrencyIndex()
+	index := &concurrencyIndex{queue: q}
 	require.True(t, index.canRun(task))
 	index.start(task)
 	require.Nil(t, index.slots, "unlimited scheduling must not build an index")
@@ -196,16 +196,16 @@ func TestConcurrencyIndexFullGroup(t *testing.T) {
 	q.pending.PushBack(low)
 	q.pending.PushBack(high)
 	q.running["active"] = &entry{item: &model.Task{ID: "active", ConcurrencyGroup: "deploy"}}
-	index := q.newConcurrencyIndex()
+	index := &concurrencyIndex{queue: q}
 	require.False(t, index.canRun(low))
 	require.True(t, index.canRun(high), "use the group's maximum candidate limit, not the first limit")
 	q.running["other"] = &entry{item: &model.Task{ID: "other", ConcurrencyGroup: "deploy"}}
-	index = q.newConcurrencyIndex()
+	index = &concurrencyIndex{queue: q}
 	require.False(t, index.canRun(low))
 	require.False(t, index.canRun(high))
 	require.Empty(t, index.slots, "fully occupied groups need no ordered index")
 	delete(q.running, "other")
-	require.True(t, q.newConcurrencyIndex().canRun(high), "the next tick rebuilds occupancy")
+	require.True(t, (&concurrencyIndex{queue: q}).canRun(high), "the next tick rebuilds occupancy")
 }
 
 func TestConcurrencyCounts(t *testing.T) {
