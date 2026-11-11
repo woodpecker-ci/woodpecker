@@ -13,6 +13,9 @@
 
 ### 📈 Enhancement
 
+- Map skipped and canceled workflows to Bitbucket STOPPED / DC CANCELLED [[#7513](https://github.com/woodpecker-ci/woodpecker/pull/7513)]
+- Extend the forge cache TTL on hits [[#7529](https://github.com/woodpecker-ci/woodpecker/pull/7529)]
+- Explain forge timeouts when fetching the pipeline config [[#7521](https://github.com/woodpecker-ci/woodpecker/pull/7521)]
 - In WebUI show pretty durations as hours and minutes via Intl.DurationFormat [[#7530](https://github.com/woodpecker-ci/woodpecker/pull/7530)]
 - Report substitution errors in cli lint and server with custom error [[#7534](https://github.com/woodpecker-ci/woodpecker/pull/7534)]
 - Report skipped and canceled workflows as error to GitHub [[#7517](https://github.com/woodpecker-ci/woodpecker/pull/7517)]
@@ -28,6 +31,7 @@
 
 ### 🐛 Bug Fixes
 
+- Forge status report fixes [[#7520](https://github.com/woodpecker-ci/woodpecker/pull/7520)]
 - Close forge instances before cache replacement [[#7525](https://github.com/woodpecker-ci/woodpecker/pull/7525)]
 - Only auto-cancel older pipelines [[#7345](https://github.com/woodpecker-ci/woodpecker/pull/7345)]
 - Report SQLite database lock on reads instead of "record not found" [[#7503](https://github.com/woodpecker-ci/woodpecker/pull/7503)]
