@@ -11,7 +11,7 @@ variables:
   - &node_image 'docker.io/node:26-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.27.x'
 
-# cspell:words bindata netgo
+# cspell:words netgo
 
 steps:
   build-web:
@@ -40,8 +40,38 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|arm64/v8;linux|amd64;linux|riscv64;windows|amd64;freebsd|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;windows-10|amd64;freebsd|amd64'
+      SQLITE_ENABLED: 'true'
+      STATIC_BUILD: 'true'
+      TAGS: 'netgo'
+      ARCHIVE_IT: '1'
+
+  cross-compile-agent:
+    depends_on:
+      - vendor
+    image: *xgo_image
+    pull: true
+    commands:
+      - apt update
+      - apt install -y tree
+      - make cross-compile-agent
+    environment:
+      PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;linux|arm/v7'
+      STATIC_BUILD: 'false'
+      ARCHIVE_IT: '1'
+
+  cross-compile-cli:
+    depends_on:
+      - vendor
+    image: *xgo_image
+    pull: true
+    commands:
+      - apt update
+      - apt install -y tree
+      - make cross-compile-cli
+    environment:
+      PLATFORMS: 'linux|arm64/v8;linux|amd64;linux|riscv64;linux|arm/v7'
+      STATIC_BUILD: 'false'
       ARCHIVE_IT: '1'
 
   build-tarball:
@@ -73,6 +103,8 @@ steps:
   build-deb-rpm:
     depends_on:
       - cross-compile-server
+      - cross-compile-agent
+      - cross-compile-cli
       - build-agent
       - build-cli
     image: *golang_image
@@ -82,6 +114,8 @@ steps:
   checksums:
     depends_on:
       - cross-compile-server
+      - cross-compile-agent
+      - cross-compile-cli
       - build-agent
       - build-cli
       - build-deb-rpm

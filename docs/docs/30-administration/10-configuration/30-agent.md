@@ -303,7 +303,7 @@ If set to 0 we are always blocking.
 - Name: `WOODPECKER_BACKEND`
 - Default: `auto-detect`
 
-Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local` or `kubernetes`.
+Configures the backend engine to run pipelines on. Possible values are `auto-detect`, `docker`, `local`, `kubernetes` or `libvirt` (experimental).
 
 ### BACKEND_DOCKER\_\*
 
@@ -320,6 +320,12 @@ See [Kubernetes backend configuration](./11-backends/20-kubernetes.md#environmen
 ### BACKEND_LOCAL\_\*
 
 See [Local backend configuration](./11-backends/30-local.md#environment-variables)
+
+---
+
+### BACKEND_LIBVIRT\_\*
+
+See [Libvirt backend configuration](./11-backends/35-libvirt.md)
 
 ### Advanced Settings
 

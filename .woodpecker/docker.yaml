@@ -95,9 +95,11 @@ steps:
       - apt update
       - apt install -y tree
       - make cross-compile-server
-    environment:
-      PLATFORMS: linux|amd64
-      TAGS: sqlite sqlite_unlock_notify netgo
+    environment: &server_env
+      PLATFORMS: 'linux|amd64'
+      SQLITE_ENABLED: 'true'
+      STATIC_BUILD: 'true'
+      TAGS: 'netgo'
     when:
       - event: [pull_request, pull_request_metadata]
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
@@ -115,8 +117,8 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
+      <<: *server_env
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64;freebsd|amd64
-      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}

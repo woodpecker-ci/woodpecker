@@ -13,7 +13,7 @@ COPY . .
 ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
-    make build-cli
+    CGO_ENABLED=0 LIBVIRT_ENABLED=false make build-cli
 
 FROM scratch AS stage
 

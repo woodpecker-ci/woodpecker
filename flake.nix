@@ -63,6 +63,7 @@
               bash
               nushell
               powershell
+              libvirt
             ];
             CFLAGS = "-I${pkgs.glibc.dev}/include";
             LDFLAGS = "-L${pkgs.glibc}/lib";
