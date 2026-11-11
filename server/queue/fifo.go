@@ -294,10 +294,24 @@ func (q *fifo) process() {
 // the combined list was filtered again: newly blocked tasks go in front of the
 // tasks that are still waiting, and released tasks keep their relative order.
 func (q *fifo) filterWaiting() {
-	queuedIDs := q.queuedIDsIfNeeded()
-	if queuedIDs == nil {
-		// no queued task has dependencies, so nothing can be blocked
-		return
+	// The index of queued IDs is only built when the first task with
+	// dependencies shows up, which is before any task moves. It also holds the
+	// waiting tasks, as they can themselves be dependencies.
+	var queuedIDs map[string]struct{}
+	blocked := func(task *model.Task) bool {
+		if len(task.Dependencies) == 0 {
+			return false
+		}
+		if queuedIDs == nil {
+			queuedIDs = make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
+			for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
+				for element := tasks.Front(); element != nil; element = element.Next() {
+					queued, _ := element.Value.(*model.Task)
+					queuedIDs[queued.ID] = struct{}{}
+				}
+			}
+		}
+		return q.depsInQueue(task, queuedIDs)
 	}
 
 	// Insert newly blocked tasks before the first task that was already
@@ -306,8 +320,7 @@ func (q *fifo) filterWaiting() {
 	firstWaiting := q.waitingOnDeps.Front()
 	for element := q.pending.Front(); element != nil; {
 		next := element.Next()
-		task, _ := element.Value.(*model.Task)
-		if q.depsInQueue(task, queuedIDs) {
+		if task, _ := element.Value.(*model.Task); blocked(task) {
 			q.pending.Remove(element)
 			if firstWaiting != nil {
 				q.waitingOnDeps.InsertBefore(task, firstWaiting)
@@ -320,37 +333,12 @@ func (q *fifo) filterWaiting() {
 
 	for element := firstWaiting; element != nil; {
 		next := element.Next()
-		task, _ := element.Value.(*model.Task)
-		if !q.depsInQueue(task, queuedIDs) {
+		if task, _ := element.Value.(*model.Task); !blocked(task) {
 			q.waitingOnDeps.Remove(element)
 			q.pending.PushBack(task)
 		}
 		element = next
 	}
-}
-
-// queuedIDsIfNeeded returns the IDs of all pending and waiting tasks, as
-// waiting tasks can themselves be dependencies. It returns nil if no queued
-// task has dependencies, so the index is only built when it is needed.
-func (q *fifo) queuedIDsIfNeeded() map[string]struct{} {
-	hasDeps := q.waitingOnDeps.Len() > 0
-	for element := q.pending.Front(); element != nil && !hasDeps; element = element.Next() {
-		if task, _ := element.Value.(*model.Task); len(task.Dependencies) > 0 {
-			hasDeps = true
-		}
-	}
-	if !hasDeps {
-		return nil
-	}
-
-	queuedIDs := make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
-	for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
-		for element := tasks.Front(); element != nil; element = element.Next() {
-			task, _ := element.Value.(*model.Task)
-			queuedIDs[task.ID] = struct{}{}
-		}
-	}
-	return queuedIDs
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
