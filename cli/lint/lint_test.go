@@ -79,6 +79,42 @@ func TestLintWalksAllYAMLWhenNoConfig(t *testing.T) {
 	})
 }
 
+func TestLintKeepsUnknownVariables(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	// values of variables are unknown while linting, so they must not end up empty
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker.yaml"), `when:
+  - branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
+
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo ok
+`)
+
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
+	})
+}
+
+func TestLintReportsSubstitutionErrors(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker.yaml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo ${CI_COMMIT_SHA
+`)
+
+	runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.ErrorContains(t, lint(t.Context(), c), "environment variable substitution failed")
+	})
+}
+
 func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) {
 	t.Helper()
 
