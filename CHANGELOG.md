@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Filter waiting queue tasks in place [[#7537](https://github.com/woodpecker-ci/woodpecker/pull/7537)]
 - Allow configuring the plugin-git version for local backend clone [[#7536](https://github.com/woodpecker-ci/woodpecker/pull/7536)]
 - Map skipped and canceled workflows to Bitbucket STOPPED / DC CANCELLED [[#7513](https://github.com/woodpecker-ci/woodpecker/pull/7513)]
 - Extend the forge cache TTL on hits [[#7529](https://github.com/woodpecker-ci/woodpecker/pull/7529)]
