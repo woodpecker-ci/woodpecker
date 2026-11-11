@@ -294,8 +294,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
-
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 
