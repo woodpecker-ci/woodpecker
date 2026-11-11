@@ -15,56 +15,53 @@
 package lint
 
 import (
-	"errors"
 	"fmt"
-	"os"
 
-	"github.com/muesli/termenv"
+	"charm.land/lipgloss/v2"
+	"charm.land/lipgloss/v2/tree"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
 
+var (
+	bold      = lipgloss.NewStyle().Bold(true)
+	underline = lipgloss.NewStyle().Underline(true)
+)
+
+// FormatLintError returns the issues of err as a tree below the file name and
+// an error naming the file if one of them is an error.
 func FormatLintError(file string, err error, strict bool) (string, error) {
 	if err == nil {
 		return "", nil
 	}
 
-	output := termenv.NewOutput(os.Stdout)
-	str := ""
-
+	issues := tree.New()
 	amountErrors := 0
 	amountWarnings := 0
 	linterErrors := pipeline_errors.GetPipelineErrors(err)
 	for _, err := range linterErrors {
-		line := "  "
-
+		icon := "❌"
 		if !strict && err.IsWarning {
-			line = fmt.Sprintf("%s ⚠️ ", line)
+			icon = "⚠️ "
 			amountWarnings++
 		} else {
-			line = fmt.Sprintf("%s ❌", line)
 			amountErrors++
 		}
 
 		if data := pipeline_errors.GetLinterData(err); data != nil {
-			line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
+			issues.Child(fmt.Sprintf("%s %s  %s", icon, bold.Render(data.Field), err.Message))
 		} else {
-			line = fmt.Sprintf("%s %s", line, err.Message)
+			issues.Child(fmt.Sprintf("%s %s", icon, err.Message))
 		}
-
-		// TODO: use table output
-		str = fmt.Sprintf("%s%s\n", str, line)
 	}
 
 	if amountErrors > 0 {
+		root := fmt.Sprintf("🔥 %s has %d errors:", underline.Render(file), len(linterErrors))
 		if amountWarnings > 0 {
-			str = fmt.Sprintf("🔥 %s has %d errors and warnings:\n%s", output.String(file).Underline(), len(linterErrors), str)
-		} else {
-			str = fmt.Sprintf("🔥 %s has %d errors:\n%s", output.String(file).Underline(), len(linterErrors), str)
+			root = fmt.Sprintf("🔥 %s has %d errors and warnings:", underline.Render(file), len(linterErrors))
 		}
-		return str, errors.New("config has errors")
+		return issues.Root(root).String() + "\n", fmt.Errorf("%s has errors", file)
 	}
 
-	str = fmt.Sprintf("⚠️  %s has %d warnings:\n%s", output.String(file).Underline(), len(linterErrors), str)
-	return str, nil
+	return issues.Root(fmt.Sprintf("⚠️  %s has %d warnings:", underline.Render(file), len(linterErrors))).String() + "\n", nil
 }

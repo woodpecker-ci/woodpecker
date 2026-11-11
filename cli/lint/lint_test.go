@@ -18,8 +18,10 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 )
@@ -110,22 +112,52 @@ func TestLintReportsSubstitutionErrors(t *testing.T) {
       - echo ${CI_COMMIT_SHA
 `)
 
-	runLintCommand(t, repoRoot, func(c *cli.Command) {
-		require.ErrorContains(t, lint(t.Context(), c), "environment variable substitution failed")
+	out := runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.EqualError(t, lint(t.Context(), c), ".woodpecker.yaml has errors")
 	})
+	assert.Contains(t, out, "environment variable substitution failed")
 }
 
-func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) {
+func TestLintDirNamesBrokenFiles(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker", "good.yaml"), `when:
+  event: push
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo ok
+`)
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker", "broken.yaml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo ${CI_COMMIT_SHA
+`)
+
+	out := runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.EqualError(t, lint(t.Context(), c), "ERRORS: broken.yaml has errors")
+	})
+	assert.Contains(t, out, "✅ good.yaml is valid")
+	assert.Contains(t, out, "🔥 broken.yaml has 1 errors:\n└── ❌ compile time environment variable substitution failed")
+}
+
+// runLintCommand runs fn as the action of a lint command for dir and returns its output.
+func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) string {
 	t.Helper()
 
+	var out strings.Builder
 	command := &cli.Command{
-		Flags: Command.Flags,
+		Writer: &out,
+		Flags:  Command.Flags,
 		Action: func(_ context.Context, c *cli.Command) error {
 			fn(c)
 			return nil
 		},
 	}
 	require.NoError(t, command.Run(t.Context(), []string{"woodpecker-cli", dir}))
+	return out.String()
 }
 
 func writeFile(t *testing.T, path, content string) {

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"charm.land/lipgloss/v2"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
@@ -76,11 +77,9 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
-			fmt.Println("#", info.Name())
 			if err := lintFile(ctx, c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
-			fmt.Println("")
 			return nil
 		}
 
@@ -110,12 +109,12 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 	rawConfig := string(buf)
 
 	if _, err := metadata.EnvVarSubst(rawConfig, nil); err != nil {
-		return err
+		return report(c, path.Base(file), err)
 	}
 
 	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
-		return err
+		return report(c, path.Base(file), err)
 	}
 
 	config := &linter.WorkflowConfig{
@@ -134,16 +133,17 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
-	if err != nil {
-		str, err := FormatLintError(config.File, err, c.Bool("strict"))
+	return report(c, config.File, err)
+}
 
-		if str != "" {
-			fmt.Print(str)
-		}
-
-		return err
+// report prints the issues of a file and returns an error if it has errors.
+func report(c *cli.Command, file string, err error) error {
+	if err == nil {
+		_, _ = lipgloss.Fprintln(c.Writer, "✅ "+underline.Render(file)+" is valid")
+		return nil
 	}
 
-	fmt.Println("✅ Config is valid")
-	return nil
+	str, err := FormatLintError(file, err, c.Bool("strict"))
+	_, _ = lipgloss.Fprint(c.Writer, str)
+	return err
 }
