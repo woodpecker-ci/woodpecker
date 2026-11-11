@@ -181,7 +181,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 		log.Debug().Str("pipeline", workflow.Name).Msg(
 			"pipeline config could not be parsed",
 		)
-		return nil, multierr.Append(errorsAndWarnings, err)
+		return nil, multierr.Append(errorsAndWarnings, compilerError(err, workflow.Name))
 	}
 
 	var ir *backend_types.Config

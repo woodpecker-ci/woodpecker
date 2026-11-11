@@ -24,6 +24,7 @@ import (
 	"slices"
 	"strings"
 
+	"charm.land/lipgloss/v2"
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -248,7 +249,7 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	items, err := b.Build()
 	if err != nil {
 		str, fmtErr := lint.FormatLintError("pipeline", err, false)
-		fmt.Print(str)
+		_, _ = lipgloss.Fprint(c.Writer, str)
 		if fmtErr != nil {
 			return fmtErr
 		}
