@@ -199,7 +199,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
-			want: "Should not configure both `environment` and `settings`",
+			want: "Cannot configure both `environment` and `settings`",
 		},
 		{
 			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
@@ -243,6 +243,24 @@ func TestLintErrors(t *testing.T) {
 			}
 		}
 		assert.True(t, found, "Expected error %q, got %q", tt.want, lerrors)
+	}
+}
+
+func TestSettingsWithEnvironmentIsBlocking(t *testing.T) {
+	for _, area := range []string{"steps", "clone"} {
+		from := area + ": { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }"
+		if area == "clone" {
+			from = "{ steps: { test: { image: golang, commands: [ 'true' ] } }, " + from + " }"
+		}
+		conf, err := yaml.ParseString(from)
+		require.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      from,
+			RawConfig: from,
+			Workflow:  conf,
+		}})
+		assert.True(t, errors.HasBlockingErrors(lerr), "expected blocking lint error for %s, got %v", area, lerr)
 	}
 }
 
