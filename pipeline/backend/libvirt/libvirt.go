@@ -29,26 +29,23 @@ import (
 	"time"
 
 	"darvaza.org/x/sync/mutex"
-	"github.com/jakobii/syncx"
-
 	"github.com/cenkalti/backoff/v7"
 	"github.com/djherbis/buffer"
 	"github.com/djherbis/nio/v3"
+	"github.com/jakobii/syncx"
+	"github.com/melbahja/goph"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/text/encoding/unicode"
 	virt "libvirt.org/go/libvirt"
 
-	"github.com/melbahja/goph"
-
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 var (
 	ErrUnsupportedStepType = errors.New("unsupported step type")
-	ErrUnsupportedCloning  = errors.New("Automatic cloning is not supported in libvirt. Set 'skip_clone: true'")
+	ErrUnsupportedCloning  = errors.New("automatic cloning is not supported in libvirt, set 'skip_clone: true'")
 )
 
 type libvirt struct {
@@ -75,6 +72,8 @@ const (
 	sharedDiskPattern     = "shared_%s%s"
 	defaultMaxTimeout     = "2m"
 	defaultGuestInterface = "eth0"
+	sshPort               = 22
+	logBufferSize         = 1024 * 1024
 )
 
 func New() backend_types.Backend {
@@ -101,9 +100,9 @@ func ConnectToLibvirt(ctx context.Context) (*virt.Connect, error) {
 	if !ok {
 		return nil, backend_types.ErrNoCliContextFound
 	}
-	libvirtUri := c.String("backend-libvirt-uri")
+	libvirtURI := c.String("backend-libvirt-uri")
 
-	conn, err := virt.NewConnect(libvirtUri)
+	conn, err := virt.NewConnect(libvirtURI)
 	if err != nil {
 		return nil, fmt.Errorf("libvirt backend is unavailable: %w", err)
 	}
@@ -111,7 +110,7 @@ func ConnectToLibvirt(ctx context.Context) (*virt.Connect, error) {
 }
 
 // it's hard to figure out just the socket, so we attempt
-// a basic connection and close it immediately
+// a basic connection and close it immediately.
 func (e *libvirt) IsAvailable(ctx context.Context) bool {
 	conn, err := ConnectToLibvirt(ctx)
 	if err != nil {
@@ -148,12 +147,12 @@ func (e *libvirt) SetupWorkflow(ctx context.Context, conf *backend_types.Config,
 	return nil
 }
 
-func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) (ret_err error) {
+func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskUUID string) (retErr error) {
 	switch step.Type {
-	case types.StepTypeClone:
+	case backend_types.StepTypeClone:
 		return ErrUnsupportedCloning
-	case types.StepTypeCommands:
-	case types.StepTypePlugin:
+	case backend_types.StepTypeCommands:
+	case backend_types.StepTypePlugin:
 		return ErrUnsupportedStepType
 	default:
 		return ErrUnsupportedStepType
@@ -169,8 +168,8 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	log.Debug().Msgf("Step %s acquired lock", step.Name)
 
 	defer func() {
-		if ret_err != nil {
-			mutex.SafeUnlock(&e.stepLock)
+		if retErr != nil {
+			e.unlockStep()
 		}
 	}()
 
@@ -229,7 +228,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	sshPw, ok := step.Environment["LIBVIRT_SSH_PW"]
 	if !ok {
-		return fmt.Errorf("No SSH password set for libvirt guest. Set LIBVIRT_SSH_PW via a secret.")
+		return errors.New("no SSH password set for libvirt guest, set LIBVIRT_SSH_PW via a secret")
 	}
 
 	log.Debug().Msgf("Connecting to %s as user %s", sshAddr, options.SSHConfig.User)
@@ -238,7 +237,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 			User:     options.SSHConfig.User,
 			Auth:     goph.Password(sshPw),
 			Addr:     sshAddr,
-			Port:     22,
+			Port:     sshPort,
 			Timeout:  goph.DefaultTimeout,
 			Callback: ssh.InsecureIgnoreHostKey(),
 		})
@@ -323,7 +322,7 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 
 	// we need to create pipes and set Stdout here
 	// in TailStep it is potentially too late
-	pr, pw := nio.Pipe(buffer.New(1024 * 1024))
+	pr, pw := nio.Pipe(buffer.New(logBufferSize))
 	sshCmd.Stdout = nil // see comment below
 	sshCmd.Stderr = nil
 
@@ -351,12 +350,12 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 		// but never close pw, because they are oblivious to the fact that it's
 		// a pipe. So we need to implement the copy+close ourselves. There is no
 		// EOF callback.
-		io.Copy(pw, stdoutR)
+		_, _ = io.Copy(pw, stdoutR)
 		wg.Done()
 	}()
 
 	go func() {
-		io.Copy(pw, stderrR)
+		_, _ = io.Copy(pw, stderrR)
 		wg.Done()
 	}()
 
@@ -374,7 +373,8 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	go func() {
 		select {
 		case <-ctx.Done():
-			err := e.TerminateSshCommand(options, client, sshCmd, guestOS, taskUUID, step.UUID)
+			// ctx is canceled already, so only keep its values
+			err := e.TerminateSSHCommand(context.WithoutCancel(ctx), options, client, sshCmd, guestOS, taskUUID, step.UUID)
 			if err != nil {
 				log.Debug().Msgf("Failed to terminate SSH command gracefully. Closing session by force. Error was: %s", err)
 			}
@@ -404,62 +404,62 @@ func (e *libvirt) StartStep(ctx context.Context, step *backend_types.Step, taskU
 	return nil
 }
 
-func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (b_state *backend_types.State, ret_err error) {
+func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUUID string) (*backend_types.State, error) {
 	switch step.Type {
-	case types.StepTypeClone:
+	case backend_types.StepTypeClone:
 		return nil, ErrUnsupportedCloning
-	case types.StepTypeCommands:
-	case types.StepTypePlugin:
+	case backend_types.StepTypeCommands:
+	case backend_types.StepTypePlugin:
 		return nil, ErrUnsupportedStepType
 	default:
 		return nil, ErrUnsupportedStepType
 	}
 
-	defer func() {
-		mutex.SafeUnlock(&e.stepLock)
-	}()
+	defer e.unlockStep()
 
-	sshCmd, ok := e.commands.Load(step.UUID)
+	sshCmd, ok := load[*goph.Cmd](&e.commands, step.UUID)
 	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for commands", step.UUID)
+		return nil, fmt.Errorf("could not find key %s for commands", step.UUID)
 	}
 
-	done, ok := e.doneChannel.Load(step.UUID)
+	done, ok := load[chan struct{}](&e.doneChannel, step.UUID)
 	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for doneChannel", step.UUID)
+		return nil, fmt.Errorf("could not find key %s for doneChannel", step.UUID)
 	}
 
-	sshErr := sshCmd.(*goph.Cmd).Wait()
-	close(done.(chan struct{}))
+	sshErr := sshCmd.Wait()
+	close(done)
 
-	domain, ok := e.domains.Load(step.UUID)
+	domain, ok := load[*virt.Domain](&e.domains, step.UUID)
 	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for domains", step.UUID)
+		return nil, fmt.Errorf("could not find key %s for domains", step.UUID)
 	}
 
 	// we need to shut down the VM here, because DestroyStep is less reliable
 	// in terms of timing and can lead to deadlocks when two steps are trying
 	// to acquire a lock
-	err := ShutdownVM(ctx, domain.(*virt.Domain))
+	err := ShutdownVM(ctx, domain)
 	if err != nil {
 		return nil, err
 	}
 	e.domains.Delete(step.UUID)
 
-	switch e := sshErr.(type) {
-	case *ssh.ExitMissingError:
+	var exitMissingErr *ssh.ExitMissingError
+	var exitErr *ssh.ExitError
+	switch {
+	case errors.As(sshErr, &exitMissingErr):
 		return &backend_types.State{
 			Exited:    true,
 			ExitCode:  -1,
 			OOMKilled: false,
 		}, sshErr
-	case *ssh.ExitError:
+	case errors.As(sshErr, &exitErr):
 		return &backend_types.State{
 			Exited:    true,
-			ExitCode:  e.ExitStatus(),
+			ExitCode:  exitErr.ExitStatus(),
 			OOMKilled: false,
 		}, sshErr
-	case nil:
+	case sshErr == nil:
 		return &backend_types.State{
 			Exited:    true,
 			ExitCode:  0,
@@ -470,31 +470,45 @@ func (e *libvirt) WaitStep(ctx context.Context, step *backend_types.Step, taskUU
 	}
 }
 
+// load returns the value of key in m if it has type T.
+func load[T any](m *sync.Map, key string) (T, bool) {
+	v, _ := m.Load(key)
+	t, ok := v.(T)
+	return t, ok
+}
+
+func (e *libvirt) unlockStep() {
+	err := mutex.SafeUnlock(&e.stepLock)
+	if err != nil {
+		log.Debug().Msgf("Error while unlocking step mutex: %s", err.Error())
+	}
+}
+
 type closerFunc func() error
 
 func (f closerFunc) Close() error { return f() }
 
 func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUUID string) (io.ReadCloser, error) {
 	switch step.Type {
-	case types.StepTypeClone:
+	case backend_types.StepTypeClone:
 		return nil, ErrUnsupportedCloning
-	case types.StepTypeCommands:
-	case types.StepTypePlugin:
+	case backend_types.StepTypeCommands:
+	case backend_types.StepTypePlugin:
 		return nil, ErrUnsupportedStepType
 	default:
 		return nil, ErrUnsupportedStepType
 	}
 
-	pOut, ok := e.pipesStdOut.Load(step.UUID)
+	pOut, ok := load[*pipes](&e.pipesStdOut, step.UUID)
 	if !ok {
-		return nil, fmt.Errorf("Could not find key %s for pipesStdOut", step.UUID)
+		return nil, fmt.Errorf("could not find key %s for pipesStdOut", step.UUID)
 	}
 
 	rc := struct {
 		io.Reader
 		io.Closer
 	}{
-		Reader: pOut.(*pipes).pr,
+		Reader: pOut.pr,
 		Closer: closerFunc(func() error {
 			log.Debug().Msgf("Done log streaming")
 			return nil
@@ -506,11 +520,11 @@ func (e *libvirt) TailStep(ctx context.Context, step *backend_types.Step, taskUU
 
 func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, taskUUID string) error {
 	switch step.Type {
-	case types.StepTypeClone:
+	case backend_types.StepTypeClone:
 		// ignore cloning for now
 		return ErrUnsupportedCloning
-	case types.StepTypeCommands:
-	case types.StepTypePlugin:
+	case backend_types.StepTypeCommands:
+	case backend_types.StepTypePlugin:
 		return ErrUnsupportedStepType
 	default:
 		return ErrUnsupportedStepType
@@ -519,15 +533,12 @@ func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, tas
 
 	defer func() {
 		// release lock
-		err := mutex.SafeUnlock(&e.stepLock)
-		if err != nil {
-			log.Debug().Msgf("Error while unlocking step mutex: %s", err.Error())
-		}
+		e.unlockStep()
 
-		keep_tmp := e.c.Bool("backend-libvirt-keep-tmp")
+		keepTmp := e.c.Bool("backend-libvirt-keep-tmp")
 
 		// clean up ephemeral image
-		if !keep_tmp {
+		if !keepTmp {
 			ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(baseImagePattern, "*", taskUUID, step.UUID, ".*"))
 			matches, err := filepath.Glob(ephemeralImgs)
 			if err != nil {
@@ -554,14 +565,14 @@ func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, tas
 		}
 	}()
 
-	sshCmd, ok := e.commands.Load(step.UUID)
+	sshCmd, ok := load[*goph.Cmd](&e.commands, step.UUID)
 	if !ok {
-		return fmt.Errorf("Could not find key %s for commands", step.UUID)
+		return fmt.Errorf("could not find key %s for commands", step.UUID)
 	}
 	log.Debug().Msgf("Destroying ssh connection")
 
 	// closing may return EOF, which we can ignore
-	sshCmd.(*goph.Cmd).Close()
+	_ = sshCmd.Close()
 
 	e.commands.Delete(step.UUID)
 
@@ -572,26 +583,30 @@ func (e *libvirt) DestroyStep(ctx context.Context, step *backend_types.Step, tas
 }
 
 func (e *libvirt) DestroyWorkflow(ctx context.Context, conf *backend_types.Config, taskUUID string) error {
-	err := mutex.SafeUnlock(&e.stepLock)
-	if err != nil {
-		log.Debug().Msgf("Error while unlocking step mutex: %s", err.Error())
-	}
+	e.unlockStep()
 
 	e.commands.Range(func(key, value any) bool {
-		value.(*goph.Cmd).Close()
+		if sshCmd, ok := value.(*goph.Cmd); ok {
+			_ = sshCmd.Close()
+		}
 		e.commands.Delete(key)
 		return true
 	})
 	e.domains.Range(func(key, value any) bool {
-		ShutdownVM(ctx, value.(*virt.Domain))
+		if domain, ok := value.(*virt.Domain); ok {
+			err := ShutdownVM(ctx, domain)
+			if err != nil {
+				log.Debug().Msgf("Error while shutting down domain: %s", err.Error())
+			}
+		}
 		e.domains.Delete(key)
 		return true
 	})
 
-	keep_tmp := e.c.Bool("backend-libvirt-keep-tmp")
+	keepTmp := e.c.Bool("backend-libvirt-keep-tmp")
 
 	// clean up shared disk
-	if !keep_tmp {
+	if !keepTmp {
 		libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 		ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(sharedDiskPattern, taskUUID, ".*"))
 		matches, err := filepath.Glob(ephemeralImgs)
@@ -611,7 +626,7 @@ func (e *libvirt) DestroyWorkflow(ctx context.Context, conf *backend_types.Confi
 	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 
 	// clean up ephemeral images
-	if !keep_tmp {
+	if !keepTmp {
 		{
 			ephemeralImgs := filepath.Join(libvirtImgDir, fmt.Sprintf(baseImagePattern, "*", taskUUID, "*", ".*"))
 			matches, err := filepath.Glob(ephemeralImgs)

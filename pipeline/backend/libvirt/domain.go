@@ -19,6 +19,7 @@ package libvirt
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"slices"
@@ -28,19 +29,21 @@ import (
 	"github.com/beevik/etree"
 	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	virt "libvirt.org/go/libvirt"
 	"libvirt.org/go/libvirtxml"
+
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
 
-func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, persistent bool, sharedDisk SharedDisk, taskUUID string, stepUUID string) (outDomain *virt.Domain, newName string, guestOS string, uuid string, err error) {
+func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]string, persistent bool, sharedDisk SharedDisk, taskUUID, stepUUID string) (outDomain *virt.Domain, newName, guestOS, uuid string, err error) {
 	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 	domain, err := e.conn.LookupDomainByName(image)
 	if err != nil {
 		return nil, "", "", "", err
 	}
 
-	defer domain.Free()
+	// free the looked up domain, not the one created below
+	defer func(d *virt.Domain) { _ = d.Free() }(domain)
 
 	guestOS, err = getGuestOS(domain)
 	if err != nil {
@@ -48,14 +51,14 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	}
 
 	// get the XML from the loaded domain
-	domXml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
+	domXML, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
 	if err != nil {
 		return nil, "", "", "", err
 	}
 
 	domcfg := &libvirtxml.Domain{}
 	{
-		err := domcfg.Unmarshal(domXml)
+		err := domcfg.Unmarshal(domXML)
 		if err != nil {
 			return nil, "", "", "", err
 		}
@@ -65,7 +68,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	domcfg.UUID = ""
 
 	if domcfg.Devices == nil {
-		return nil, "", "", "", fmt.Errorf("No devices in domain")
+		return nil, "", "", "", fmt.Errorf("no devices in domain")
 	}
 
 	if !persistent {
@@ -122,7 +125,7 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 	}
 
 	var disk string
-	var diskUuid string
+	var diskUUID string
 
 	// insert the shared disk if any
 	if sharedDisk.Disk != "" {
@@ -138,16 +141,15 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		log.Debug().Msgf("Inserting shared disk: %s", sharedDisk.Disk)
 
 		if sharedDisk.UUID != "" {
-			diskUuid = sharedDisk.UUID
+			diskUUID = sharedDisk.UUID
 		}
 	} else { // in absence of a config, create a disk from scratch (ntfs for windows, ext4 otherwise)
-
 		diskSize, ok := env["LIBVIRT_DISK_SIZE"]
 		if !ok {
 			diskSize = "10G"
 		}
 
-		disk, diskUuid, err = e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
+		disk, diskUUID, err = e.CreateSharedDisk(ctx, guestOS, domainType, diskSize, taskUUID)
 		if err != nil {
 			return nil, "", "", "", err
 		}
@@ -246,15 +248,15 @@ func (e *libvirt) LoadDomain(ctx context.Context, image string, env map[string]s
 		uuid = serial
 	} else {
 		// if we don't have a disk UUID by now, get it explicitly
-		if diskUuid == "" {
-			diskUuid, err = GetDiskUUID(disk, domainType)
+		if diskUUID == "" {
+			diskUUID, err = GetDiskUUID(disk, domainType)
 			if err != nil {
 				return nil, "", "", "", err
 			}
 		}
 
 		// on unix we mount via the disk uuid, which we must discover
-		uuid = diskUuid
+		uuid = diskUUID
 	}
 
 	// insert
@@ -310,7 +312,6 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	// wait 2 minutes for clean shutdown
@@ -321,7 +322,7 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 		info, err := domain.GetInfo()
 		if err != nil {
 			// sometimes we race and the domain is shut down already
-			if lverr, ok := err.(virt.Error); ok && lverr.Code == virt.ERR_NO_DOMAIN {
+			if lverr, ok := errors.AsType[virt.Error](err); ok && lverr.Code == virt.ERR_NO_DOMAIN {
 				return nil, nil
 			} else {
 				return nil, err
@@ -335,7 +336,7 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 		case virt.DOMAIN_SHUTOFF:
 			return nil, nil
 		default:
-			return nil, backoff.Permanent(fmt.Errorf("Unexpected state: %d", info.State))
+			return nil, backoff.Permanent(fmt.Errorf("unexpected state: %d", info.State))
 		}
 	}, backoff.WithMaxElapsedTime(maxBackOff))
 	if err != nil {
@@ -346,7 +347,7 @@ func ShutdownVM(ctx context.Context, domain *virt.Domain) error {
 		}
 	}
 
-	domain.Free()
+	_ = domain.Free()
 
 	return nil
 }
@@ -356,25 +357,25 @@ func getGuestOS(domain *virt.Domain) (string, error) {
 	guestInfo, err := domain.GetGuestInfo(virt.DOMAIN_GUEST_INFO_OS, 0)
 	if err != nil {
 		// read the XML metadata, which sometimes carries libosinfo stuff
-		domXml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
+		domXML, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
 		if err != nil {
 			return "", err
 		}
 
 		// parse the XML into etree
 		doc := etree.NewDocument()
-		if err := doc.ReadFromString(domXml); err != nil {
+		if err := doc.ReadFromString(domXML); err != nil {
 			return "", err
 		}
 
 		// TODO: there should be a library parsing this properly
 		el := doc.FindElement("/domain/metadata/libosinfo:libosinfo/libosinfo:os")
 		if el == nil {
-			return "", fmt.Errorf("Could not determine guest platform, add libosinfo metadata to the domain")
+			return "", fmt.Errorf("could not determine guest platform, add libosinfo metadata to the domain")
 		}
 		fileAttr := el.SelectAttr("id")
 		if fileAttr == nil {
-			return "", fmt.Errorf("Could not determine guest platform, add libosinfo metadata to the domain")
+			return "", fmt.Errorf("could not determine guest platform, add libosinfo metadata to the domain")
 		}
 		switch {
 		case strings.Contains(fileAttr.Value, "/win/"):
@@ -420,9 +421,8 @@ func getGuestOS(domain *virt.Domain) (string, error) {
 		case strings.Contains(fileAttr.Value, "dragonflybsd"):
 			return "dragonflybsd", nil
 		default:
-			return "", fmt.Errorf("Could not determine guest platform, add libosinfo metadata to the domain")
+			return "", fmt.Errorf("could not determine guest platform, add libosinfo metadata to the domain")
 		}
-
 	} else {
 		// TODO: what does 'ID' return?
 		return guestInfo.OS.ID, nil
@@ -430,13 +430,13 @@ func getGuestOS(domain *virt.Domain) (string, error) {
 }
 
 func GetDomainType(ctx context.Context, domain *virt.Domain) (string, error) {
-	domXml, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
+	domXML, err := domain.GetXMLDesc(virt.DOMAIN_XML_INACTIVE)
 	if err != nil {
 		return "", err
 	}
 	domcfg := &libvirtxml.Domain{}
 	{
-		err := domcfg.Unmarshal(domXml)
+		err := domcfg.Unmarshal(domXML)
 		if err != nil {
 			return "", err
 		}

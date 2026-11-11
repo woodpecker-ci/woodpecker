@@ -28,10 +28,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainType string, diskSize string, taskUUID string) (string, string, error) {
+func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS, domainType, diskSize, taskUUID string) (string, string, error) {
 	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 
-	var diskUuid string
+	var diskUUID string
 	var fstype string
 	if guestOS == "windows" {
 		fstype = "ntfs"
@@ -53,7 +53,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 				log.Debug().Msgf("Create shared disk: %s", cmd.Args)
 				_, err := cmd.Output()
 				if err != nil {
-					return "", "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+					return "", "", cmdError(cmd, err)
 				}
 			}
 
@@ -80,28 +80,26 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 				log.Debug().Msgf("Format disk: %s", cmd.Args)
 				_, err := cmd.Output()
 				if err != nil {
-					return "", "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+					return "", "", cmdError(cmd, err)
 				}
 			}
-
 		}
 
 		// get uuid
-		diskUuid, err = GetQemuDiskUUID(disk)
+		diskUUID, err = GetQemuDiskUUID(disk)
 		if err != nil {
 			return "", "", err
 		}
 
-		return disk, diskUuid, nil
-
+		return disk, diskUUID, nil
 	} else { // raw images (basic qemu without libguest, e.g. bhyve, etc.)
 		// this only works on a linux host!
 		if e.os != "linux" {
-			return "", "", fmt.Errorf("Cannot automatically create raw disk images on %s. Either use a linux host or define 'disk' in the backend options.", e.os)
+			return "", "", fmt.Errorf("cannot automatically create raw disk images on %s. Either use a linux host or define 'disk' in the backend options", e.os)
 		}
 
 		disk := fmt.Sprintf("%s/shared_%s.raw", libvirtImgDir, taskUUID)
-		var loop_dev []byte
+		var loopDev []byte
 
 		_, statErr := os.Stat(disk)
 		if statErr != nil {
@@ -111,7 +109,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 				log.Debug().Msgf("Create shared disk: %s", cmd.Args)
 				_, err := cmd.Output()
 				if err != nil {
-					return "", "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+					return "", "", cmdError(cmd, err)
 				}
 			}
 		}
@@ -119,7 +117,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		// mount loop device
 		{
 			var err error
-			loop_dev, err = MountLoopDev(disk)
+			loopDev, err = MountLoopDev(disk)
 			if err != nil {
 				return "", "", err
 			}
@@ -129,11 +127,11 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 			// format
 			// TODO: this probably doesn't work for NTFS
 			{
-				cmd := CmdViaSudo(fmt.Sprintf("mkfs.%s", fstype), "-E", "lazy_itable_init=1,lazy_journal_init=1", string(loop_dev))
+				cmd := CmdViaSudo(fmt.Sprintf("mkfs.%s", fstype), "-E", "lazy_itable_init=1,lazy_journal_init=1", string(loopDev))
 				log.Debug().Msgf("Format device: %s", cmd.Args)
 				_, err := cmd.Output()
 				if err != nil {
-					return "", "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+					return "", "", cmdError(cmd, err)
 				}
 			}
 		}
@@ -141,7 +139,7 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 		// Get disk UUID
 		{
 			var err error
-			diskUuid, err = GetBhyveDiskUUIDLoop(loop_dev)
+			diskUUID, err = GetBhyveDiskUUIDLoop(loopDev)
 			if err != nil {
 				return "", "", err
 			}
@@ -149,17 +147,17 @@ func (e *libvirt) CreateSharedDisk(ctx context.Context, guestOS string, domainTy
 
 		// detach loop device
 		{
-			err := UnmountLoopDev(loop_dev)
+			err := UnmountLoopDev(loopDev)
 			if err != nil {
 				return "", "", err
 			}
 		}
 
-		return disk, diskUuid, nil
+		return disk, diskUUID, nil
 	}
 }
 
-func (e *libvirt) FromBaseImage(ctx context.Context, baseImage string, targetImg string, overwrite bool) (string, error) {
+func (e *libvirt) FromBaseImage(ctx context.Context, baseImage, targetImg string, overwrite bool) (string, error) {
 	libvirtImgDir := e.c.String("backend-libvirt-image-dir")
 	libvirtImg := filepath.Join(libvirtImgDir, targetImg)
 
@@ -176,7 +174,7 @@ func (e *libvirt) FromBaseImage(ctx context.Context, baseImage string, targetImg
 		cmd := exec.Command("qemu-img", "create", "-o", "backing_fmt=qcow2", "-b", baseImage, "-f", "qcow2", libvirtImg)
 		_, err := cmd.Output()
 		if err != nil {
-			log.Debug().Msgf("Error copying base image %s via qemu-img...falling back to manual copy", string(err.(*exec.ExitError).Stderr))
+			log.Debug().Msgf("Error copying base image %s via qemu-img...falling back to manual copy", cmdError(cmd, err))
 			err := CopyFile(baseImage, libvirtImg, false)
 			if err != nil {
 				return "", err
@@ -192,18 +190,18 @@ func (e *libvirt) FromBaseImage(ctx context.Context, baseImage string, targetImg
 	return libvirtImg, nil
 }
 
-func GetQemuDiskUUID(disk string) (diskUuid string, err error) {
+func GetQemuDiskUUID(disk string) (diskUUID string, err error) {
 	cmd := exec.Command("virt-filesystems", "--long", "--csv", "-a", disk, "--uuid")
 	log.Debug().Msgf("Get UUID: %s", cmd.Args)
 	bytes, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+		return "", cmdError(cmd, err)
 	}
 
 	r := csv.NewReader(strings.NewReader(string(bytes)))
 	header, err := r.Read()
 	if err != nil {
-		return "", fmt.Errorf("Failed parsing CVS output for UUID: %s", err.Error())
+		return "", fmt.Errorf("failed parsing CVS output for UUID: %w", err)
 	}
 	i := -1
 	for ix, e := range header {
@@ -213,37 +211,37 @@ func GetQemuDiskUUID(disk string) (diskUuid string, err error) {
 	}
 
 	if i == -1 {
-		return "", fmt.Errorf("Could not find UUID in: %s", header)
+		return "", fmt.Errorf("could not find UUID in: %s", header)
 	}
 
 	data, err := r.Read()
 	if err != nil {
-		return "", fmt.Errorf("Failed parsing CVS output for UUID: %s", err.Error())
+		return "", fmt.Errorf("failed parsing CVS output for UUID: %w", err)
 	}
-	diskUuid = data[i]
+	diskUUID = data[i]
 
-	return diskUuid, nil
+	return diskUUID, nil
 }
 
-func GetBhyveDiskUUIDLoop(loop_dev []byte) (diskUuid string, err error) {
-	cmd := CmdViaSudo("blkid", "-o", "value", "--match-tag", "UUID", string(loop_dev))
+func GetBhyveDiskUUIDLoop(loopDev []byte) (diskUUID string, err error) {
+	cmd := CmdViaSudo("blkid", "-o", "value", "--match-tag", "UUID", string(loopDev))
 	log.Debug().Msgf("Get UUID: %s", cmd.Args)
 	bytes, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+		return "", cmdError(cmd, err)
 	}
 
-	diskUuid = string(bytes)
+	diskUUID = string(bytes)
 
-	return diskUuid, nil
+	return diskUUID, nil
 }
 
-func GetBhyveDiskUUID(disk string) (diskUuid string, err error) {
-	var loop_dev []byte
+func GetBhyveDiskUUID(disk string) (diskUUID string, err error) {
+	var loopDev []byte
 	// mount loop device
 	{
 		var err error
-		loop_dev, err = MountLoopDev(disk)
+		loopDev, err = MountLoopDev(disk)
 		if err != nil {
 			return "", err
 		}
@@ -252,7 +250,7 @@ func GetBhyveDiskUUID(disk string) (diskUuid string, err error) {
 	// Get disk UUID
 	{
 		var err error
-		diskUuid, err = GetBhyveDiskUUIDLoop(loop_dev)
+		diskUUID, err = GetBhyveDiskUUIDLoop(loopDev)
 		if err != nil {
 			return "", err
 		}
@@ -260,13 +258,13 @@ func GetBhyveDiskUUID(disk string) (diskUuid string, err error) {
 
 	// detach loop device
 	{
-		err = UnmountLoopDev(loop_dev)
+		err = UnmountLoopDev(loopDev)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	return diskUuid, nil
+	return diskUUID, nil
 }
 
 func MountLoopDev(disk string) ([]byte, error) {
@@ -274,22 +272,22 @@ func MountLoopDev(disk string) ([]byte, error) {
 	log.Debug().Msgf("Mount loop device: %s", cmd.Args)
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+		return nil, cmdError(cmd, err)
 	}
 	return out, nil
 }
 
-func UnmountLoopDev(loop_dev []byte) error {
-	cmd := CmdViaSudo("losetup", "--detach", string(loop_dev))
+func UnmountLoopDev(loopDev []byte) error {
+	cmd := CmdViaSudo("losetup", "--detach", string(loopDev))
 	log.Debug().Msgf("Detach loop device: %s", cmd.Args)
 	_, err := cmd.Output()
 	if err != nil {
-		return fmt.Errorf("command %s failed with %s and stderr: %s", cmd.String(), err.Error(), err.(*exec.ExitError).Stderr)
+		return cmdError(cmd, err)
 	}
 	return nil
 }
 
-func GetDiskUUID(disk string, domainType string) (diskUuid string, err error) {
+func GetDiskUUID(disk, domainType string) (diskUUID string, err error) {
 	if (domainType == "kvm" || domainType == "qemu") && hasCommand("guestfish") && hasCommand("qemu-img") { // qemu with libguest stuff
 		return GetQemuDiskUUID(disk)
 	} else {

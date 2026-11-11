@@ -23,7 +23,7 @@ import (
 	"text/template"
 )
 
-func generateScriptWindows(commands []string, env map[string]string, workDir string, stepUUID string, injectEnv bool) string {
+func generateScriptWindows(commands []string, env map[string]string, workDir, stepUUID string, injectEnv bool) string {
 	var buf bytes.Buffer
 	var envBuf bytes.Buffer
 

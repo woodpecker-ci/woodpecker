@@ -25,7 +25,7 @@ import (
 
 // generateScriptPosix is a helper function that generates a step script
 // for a linux container using the given.
-func generateScriptPosix(commands []string, env map[string]string, workDir string, stepUUID string, injectEnv bool) string {
+func generateScriptPosix(commands []string, env map[string]string, workDir, stepUUID string, injectEnv bool) string {
 	var buf bytes.Buffer
 	var envBuf bytes.Buffer
 

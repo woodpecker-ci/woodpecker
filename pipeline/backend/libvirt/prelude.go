@@ -17,6 +17,7 @@
 package libvirt
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -33,22 +34,30 @@ func CmdViaSudo(cmd string, arg ...string) *exec.Cmd {
 	}
 }
 
+// cmdError adds the command and its stderr to err.
+func cmdError(cmd *exec.Cmd, err error) error {
+	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
+		return fmt.Errorf("command %s failed with %w and stderr: %s", cmd, err, exitErr.Stderr)
+	}
+	return fmt.Errorf("command %s failed with %w", cmd, err)
+}
+
 func hasCommand(cmd string) bool {
 	_, err := exec.LookPath(cmd)
 	return err == nil
 }
 
-func CopyFile(from string, to string, overwrite bool) error {
+func CopyFile(from, to string, overwrite bool) error {
 	fromFile, err := os.Open(from)
 	if err != nil {
 		return err
 	}
 	defer fromFile.Close()
 
-	if overwrite == false {
+	if !overwrite {
 		_, err := os.Stat(to)
 		if err == nil {
-			return fmt.Errorf("File %s already exists", to)
+			return fmt.Errorf("file %s already exists", to)
 		}
 	}
 
@@ -67,17 +76,13 @@ func CopyFile(from string, to string, overwrite bool) error {
 }
 
 // derived from https://github.com/rprata/macgo/blob/85ffbfd9b6ec3c18bde5640302adf7521ef1c2c2/generator/generator.go#L11
-// MIT licensed
+// MIT licensed.
 func GenerateRandomMACAddress() (string, error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	var macBytes []byte
+	macBytes := make([]byte, 6)
 
-	macBytes = make([]byte, 6)
-
-	for i := 0; i < len(macBytes); i++ {
-		macBytes[i] = byte(r.Intn(256))
-	}
+	_, _ = r.Read(macBytes) // never fails
 
 	// we want locally administered unicast
 	macBytes[0] |= 0x02

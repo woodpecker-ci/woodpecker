@@ -100,7 +100,7 @@ steps:
       - vendor
     image: *golang_image
     commands:
-      - apt install -y libvirt
+      - apt update && apt install -y libvirt-dev
       - make test-lib
     when:
       - path: *when_path

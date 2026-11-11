@@ -19,6 +19,7 @@ package libvirt
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -30,7 +31,7 @@ import (
 	"golang.org/x/text/encoding/unicode"
 )
 
-func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []string, taskUUID string, stepUUID string) error {
+func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []string, taskUUID, stepUUID string) error {
 	sshCmd, err := client.CommandContext(ctx, cmd, args...)
 	log.Debug().Msgf("Executing via ssh: %s %v", cmd, args)
 	if err != nil {
@@ -43,7 +44,7 @@ func AdhocSSH(ctx context.Context, client *goph.Client, cmd string, args []strin
 	return err
 }
 
-func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args []string, taskUUID string, stepUUID string) error {
+func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args []string, taskUUID, stepUUID string) error {
 	var out string
 	// first figure out if we have 'sudo' or 'doas', so we can have the right privilege escalation mechanism
 	{
@@ -55,7 +56,7 @@ func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args
 		}
 		b, err := sshCmd.Output()
 		if err != nil {
-			return fmt.Errorf("Failed to check for sudo: %s", err)
+			return fmt.Errorf("failed to check for sudo: %w", err)
 		}
 		out = string(b)
 	}
@@ -70,7 +71,7 @@ func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args
 		log.Debug().Msgf("Running as root")
 		command = append([]string{cmd}, args...)
 	default:
-		return fmt.Errorf("Unexpected privilege escalation command: %s", out)
+		return fmt.Errorf("unexpected privilege escalation command: %s", out)
 	}
 
 	// execute command
@@ -80,13 +81,13 @@ func AdhocSSHElevated(ctx context.Context, client *goph.Client, cmd string, args
 // This tries to terminate the command we spawned, not the SSH session itself.
 // It does so, by:
 //
-// 1. send SIGINT... if that doesn't do it
-// 2. send SIGTERM... if that doesn't do it
-// 3. execute 'kill -2 <pid>'
+// 1. Send SIGINT. If that does not work:
+// 2. Send SIGTERM. If that does not work:
+// 3. Execute 'kill -2 <pid>'.
 //
 // We could also try to attach to stdin and send 'Ctrl+c', but that opens up other issues (closing channel
 // at the appropriate time etc.).
-func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS string, taskUUID string, stepUUID string) error {
+func (e *libvirt) TerminateSSHCommand(ctx context.Context, options BackendOptions, client *goph.Client, sshCmd *goph.Cmd, guestOS, taskUUID, stepUUID string) error {
 	pid, err := GetWoodpeckerPid(client, guestOS, stepUUID)
 	if err != nil {
 		return err
@@ -112,14 +113,13 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			log.Debug().Msgf("Running taskkill failed with: %s", err)
 		}
 
-		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+		running, err := CheckSSHPid(ctx, pid, client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
 		if running {
-			return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
+			return errors.New("all methods exhausted, failed to stop SSH process")
 		}
-
 	} else {
 		// try sigint first
 		log.Debug().Msg("Context canceled, sending SIGINT to remote process")
@@ -129,7 +129,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 		}
 
 		// check if the process died
-		running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+		running, err := CheckSSHPid(ctx, pid, client, guestOS, stepUUID)
 		if err != nil {
 			return err
 		}
@@ -142,7 +142,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 			}
 
 			// check if the process died
-			running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+			running, err := CheckSSHPid(ctx, pid, client, guestOS, stepUUID)
 			if err != nil {
 				return err
 			}
@@ -161,12 +161,12 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 				}
 
 				// check if the process died
-				running, err := CheckSshPid(pid, client, guestOS, stepUUID)
+				running, err := CheckSSHPid(ctx, pid, client, guestOS, stepUUID)
 				if err != nil {
 					return err
 				}
 				if running {
-					return fmt.Errorf("All methods exhausted. Failed to stop SSH process!")
+					return errors.New("all methods exhausted, failed to stop SSH process")
 				}
 			}
 		}
@@ -175,7 +175,7 @@ func (e *libvirt) TerminateSshCommand(options BackendOptions, client *goph.Clien
 	return nil
 }
 
-func GetWoodpeckerPid(client *goph.Client, guestOS string, stepUUID string) (string, error) {
+func GetWoodpeckerPid(client *goph.Client, guestOS, stepUUID string) (string, error) {
 	var sshCmd *goph.Cmd
 
 	// assembler the per-platform command to get the running pid
@@ -209,7 +209,7 @@ func GetWoodpeckerPid(client *goph.Client, guestOS string, stepUUID string) (str
 }
 
 // (Re-)Check if the spawned process is still running with a timeout of 15s.
-func CheckSshPid(pid string, client *goph.Client, guestOS string, stepUUID string) (bool, error) {
+func CheckSSHPid(ctx context.Context, pid string, client *goph.Client, guestOS, stepUUID string) (bool, error) {
 	var sshCmd *goph.Cmd
 	maxBackOff, _ := time.ParseDuration("15s")
 
@@ -225,31 +225,33 @@ func CheckSshPid(pid string, client *goph.Client, guestOS string, stepUUID strin
 
 		sshCmd, err = client.Command("powershell.exe", "-noprofile", "-noninteractive", "-encodedcommand", base64Cmd)
 		if err != nil {
-			return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+			return true, backoff.Permanent(fmt.Errorf("error running command: %w", err))
 		}
 	} else {
 		var err error
 		sshCmd, err = client.Command("kill", "-0", pid)
 		if err != nil {
-			return true, backoff.Permanent(fmt.Errorf("Error running command: %s", err))
+			return true, backoff.Permanent(fmt.Errorf("error running command: %w", err))
 		}
 	}
 
 	// run with exponential backoff
-	b, _ := backoff.Retry(context.Background(), func() (bool, error) {
+	b, _ := backoff.Retry(ctx, func() (bool, error) {
 		sshErr := sshCmd.Run()
 		// if we can't figure out if it's running... assume it is
-		switch sshErr.(type) {
-		case *ssh.ExitMissingError:
-			log.Debug().Msgf("ExitMissingError in CheckSshPid: %s", sshErr)
+		var exitMissingErr *ssh.ExitMissingError
+		var exitErr *ssh.ExitError
+		switch {
+		case errors.As(sshErr, &exitMissingErr):
+			log.Debug().Msgf("ExitMissingError in CheckSSHPid: %s", sshErr)
 			return true, nil
-		case *ssh.ExitError:
-			log.Debug().Msgf("ExitError in CheckSshPid: %s", sshErr)
+		case errors.As(sshErr, &exitErr):
+			log.Debug().Msgf("ExitError in CheckSSHPid: %s", sshErr)
 			return false, nil
-		case nil:
-			return true, fmt.Errorf("Process still running")
+		case sshErr == nil:
+			return true, fmt.Errorf("process still running")
 		default:
-			log.Debug().Msgf("Unexpected error in CheckSshPid: %s", sshErr)
+			log.Debug().Msgf("Unexpected error in CheckSSHPid: %s", sshErr)
 			return true, nil
 		}
 	}, backoff.WithMaxElapsedTime(maxBackOff))
