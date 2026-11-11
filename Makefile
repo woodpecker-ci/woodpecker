@@ -266,7 +266,8 @@ release-frontend: build-ui ## Build frontend
 
 cross-compile-server: ## Cross compile the server
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
-		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		TARGETOS_XGO=$(firstword $(subst |, ,$(platform))) \
+		TARGETOS=$(firstword $(subst -, ,$(firstword $(subst |, ,$(platform))))) \
 		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
 		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
 		make release-server-xgo || exit 1; \
@@ -276,11 +277,12 @@ cross-compile-server: ## Cross compile the server
 release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "Building for:"
 	@echo "os:$(TARGETOS)"
+	@echo "os (xgo):$(TARGETOS_XGO)"
 	@echo "arch orgi:$(TARGETARCH)"
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 	# build via xgo
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(or $(TARGETOS_XGO),$(TARGETOS))/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
 	# move binary into subfolder depending on target os and arch
 	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then \
 	  echo "inside xgo image"; \
