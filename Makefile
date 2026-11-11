@@ -52,6 +52,10 @@ ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
 endif
 CGO_CFLAGS ?=
 
+ifneq ($(TARGETOS),linux)
+	override LIBVIRT_ENABLED := false
+endif
+
 # enable libvirt by default if cgo is enabled
 ifeq ($(CGO_ENABLED),1)
 	LIBVIRT_ENABLED ?= true
