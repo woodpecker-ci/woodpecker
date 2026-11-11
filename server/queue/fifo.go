@@ -352,6 +352,12 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 
+		// skip tasks that would exceed their workflow concurrency limit, they
+		// stay pending and are retried on the next process tick.
+		if !slots.canRun(task) {
+			continue
+		}
+
 		var bestWorker *worker
 		var bestScore int
 		for worker := range q.workers {
@@ -361,10 +367,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 				bestScore = score
 			}
 		}
-
-		// skip tasks that would exceed their workflow concurrency limit, they
-		// stay pending and are retried on the next process tick.
-		if bestWorker == nil || !slots.canRun(task) {
+		if bestWorker == nil {
 			continue
 		}
 
