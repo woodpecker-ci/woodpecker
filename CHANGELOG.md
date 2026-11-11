@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Speed up queue scheduling for large concurrency group backlogs [[#7425](https://github.com/woodpecker-ci/woodpecker/pull/7425)]
 - Show the workflow file in config and compile error messages [[#7539](https://github.com/woodpecker-ci/woodpecker/pull/7539)]
 - Filter waiting queue tasks in place [[#7537](https://github.com/woodpecker-ci/woodpecker/pull/7537)]
 - Allow configuring the plugin-git version for local backend clone [[#7536](https://github.com/woodpecker-ci/woodpecker/pull/7536)]
