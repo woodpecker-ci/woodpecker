@@ -998,33 +998,63 @@ depends_on:
 func TestInvalidYAML(t *testing.T) {
 	t.Parallel()
 
-	m := &testMetadata{}
-
-	b := PipelineBuilder{
-		GetWorkflowMetadata: m.GetWorkflowMetadata,
-		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*YamlFile{
-			{Name: "broken-yaml", Data: []byte(`
+	tests := []struct {
+		name string
+		data string
+		err  string
+	}{
+		{
+			// fails in matrix.Parse, before the workflow is parsed
+			name: "syntax",
+			data: `
 when:
   event: push
 steps:
   - name: build
     image: scratch
 	invalid yaml indentation
-`)},
+`,
+			err: "found a tab character that violates indentation",
+		},
+		{
+			// valid yaml, fails in yaml.ParseString
+			name: "type",
+			data: `
+steps:
+  - name: build
+    image: [scratch, alpine]
+`,
+			err: "cannot construct !!seq into string",
 		},
 	}
 
-	_, err := b.Build()
-	assert.ErrorContains(t, err, "found a tab character that violates indentation")
-	pipelineErrors := errors.GetPipelineErrors(err)
-	require.Len(t, pipelineErrors, 1)
-	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
-	assert.NotContains(t, pipelineErrors[0].Message, "[compiler]", "type must not be repeated in the message")
-	// the error points to the offending workflow file so the UI can show it
-	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
-	require.True(t, ok)
-	assert.Equal(t, "broken-yaml", data.File)
+	for _, tt := range tests {
+		// with a selected workflow the dependencies get parsed first
+		for _, selected := range []string{"", "broken-yaml"} {
+			t.Run(tt.name+"/"+selected, func(t *testing.T) {
+				t.Parallel()
+
+				m := &testMetadata{}
+				b := PipelineBuilder{
+					GetWorkflowMetadata: m.GetWorkflowMetadata,
+					RepoTrusted:         &metadata.TrustedConfiguration{},
+					SelectedWorkflow:    selected,
+					Yamls:               []*YamlFile{{Name: "broken-yaml", Data: []byte(tt.data)}},
+				}
+
+				_, err := b.Build()
+				assert.ErrorContains(t, err, tt.err)
+				pipelineErrors := errors.GetPipelineErrors(err)
+				require.Len(t, pipelineErrors, 1)
+				assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+				assert.NotContains(t, pipelineErrors[0].Message, "[compiler]", "type must not be repeated in the message")
+				// the error points to the offending workflow file so the UI can show it
+				data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+				require.True(t, ok)
+				assert.Equal(t, "broken-yaml", data.File)
+			})
+		}
+	}
 }
 
 func TestInvalidSubstitution(t *testing.T) {
