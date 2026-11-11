@@ -757,6 +757,14 @@ func TestFifoFilterWaiting(t *testing.T) {
 			for _, id := range tt.running {
 				q.running[id] = &entry{item: &model.Task{ID: id}}
 			}
+			q.queuedIDs = make(map[string]struct{})
+			for _, tasks := range [][]*model.Task{tt.pending, tt.waiting} {
+				for _, task := range tasks {
+					for _, dep := range task.Dependencies {
+						q.queuedIDs[dep] = struct{}{}
+					}
+				}
+			}
 			ids := func(tasks *list.List) []string {
 				var result []string
 				for element := tasks.Front(); element != nil; element = element.Next() {

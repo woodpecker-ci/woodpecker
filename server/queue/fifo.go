@@ -49,6 +49,7 @@ type fifo struct {
 	running       map[string]*entry
 	pending       *list.List
 	waitingOnDeps *list.List
+	queuedIDs     map[string]struct{} // reused by filterWaiting as scratchpad to have less gc
 	extension     time.Duration
 	paused        bool
 }
@@ -297,21 +298,25 @@ func (q *fifo) filterWaiting() {
 	// The index of queued IDs is only built when the first task with
 	// dependencies shows up, which is before any task moves. It also holds the
 	// waiting tasks, as they can themselves be dependencies.
-	var queuedIDs map[string]struct{}
+	indexed := false
 	blocked := func(task *model.Task) bool {
 		if len(task.Dependencies) == 0 {
 			return false
 		}
-		if queuedIDs == nil {
-			queuedIDs = make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
+		if !indexed {
+			indexed = true
+			if q.queuedIDs == nil {
+				q.queuedIDs = make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
+			}
+			clear(q.queuedIDs)
 			for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
 				for element := tasks.Front(); element != nil; element = element.Next() {
 					queued, _ := element.Value.(*model.Task)
-					queuedIDs[queued.ID] = struct{}{}
+					q.queuedIDs[queued.ID] = struct{}{}
 				}
 			}
 		}
-		return q.depsInQueue(task, queuedIDs)
+		return q.depsInQueue(task, q.queuedIDs)
 	}
 
 	// Insert newly blocked tasks before the first task that was already
