@@ -105,7 +105,7 @@ function isBadHabitError(error: PipelineError): error is PipelineError<{ file?: 
   return error.type === 'bad_habit';
 }
 
-function isCompilerError(error: PipelineError): error is PipelineError<{ file?: string }> {
+function isCompilerError(error: PipelineError): error is PipelineError<{ file?: string; field?: undefined }> {
   return error.type === 'compiler';
 }
 
