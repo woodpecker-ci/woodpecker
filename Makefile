@@ -227,14 +227,14 @@ lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
-	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test libvirt libvirt_dlopen' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
+	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
 
 test-server: ## Test server code
 	# note: do not add 'sqlite_unlock_notify' to tags or test will hang
 	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test sqlite' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test libvirt libvirt_dlopen' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
+	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
 
 # Migration tests reset the shared database, so datastore packages must run serially.
 test-server-datastore: ## Test server datastore
@@ -253,10 +253,10 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test sqlite libvirt libvirt_dlopen' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test-e2e: ## Test by running yaml config and compare expected result
-	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test sqlite' ./e2e/...
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
