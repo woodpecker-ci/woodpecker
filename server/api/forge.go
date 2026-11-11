@@ -20,6 +20,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
@@ -134,6 +135,10 @@ func PatchForge(c *gin.Context) {
 		c.AbortWithStatus(http.StatusConflict)
 		return
 	}
+	// drop the cached forge, so the next use sets it up with the new config
+	if server.Config.Services.Manager != nil {
+		server.Config.Services.Manager.RemoveForge(forgeID)
+	}
 
 	c.JSON(http.StatusOK, forge)
 }
@@ -201,6 +206,9 @@ func DeleteForge(c *gin.Context) {
 	if err = _store.ForgeDelete(forge); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
+	}
+	if server.Config.Services.Manager != nil {
+		server.Config.Services.Manager.RemoveForge(forgeID)
 	}
 	c.Status(http.StatusNoContent)
 }

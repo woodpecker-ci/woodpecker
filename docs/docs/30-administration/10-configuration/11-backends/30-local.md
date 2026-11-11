@@ -84,3 +84,12 @@ Directory to create folders for workflows.
 - Default: `true`
 
 Sets `HOME`, `USERPROFILE` and related variables to an isolated directory for each workflow. If set to `false`, the user's own home directory is used and no netrc file is written.
+
+---
+
+### BACKEND_LOCAL_PLUGIN_GIT_VERSION
+
+- Name: `WOODPECKER_BACKEND_LOCAL_PLUGIN_GIT_VERSION`
+- Default: `latest`
+
+The [plugin-git](https://github.com/woodpecker-ci/plugin-git/releases) release to download for the clone step if `plugin-git` is not in `$PATH`, for example `2.12.1`.

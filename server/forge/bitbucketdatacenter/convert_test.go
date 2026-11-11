@@ -53,11 +53,11 @@ func TestConvertStatus(t *testing.T) {
 		},
 		{
 			from: model.StatusSkipped,
-			to:   bitbucket.BuildStatusStateFailed,
+			to:   bitbucket.BuildStatusStateCancelled,
 		},
 		{
 			from: model.StatusCanceled,
-			to:   bitbucket.BuildStatusStateFailed,
+			to:   bitbucket.BuildStatusStateCancelled,
 		},
 		{
 			from: model.StatusBlocked,
