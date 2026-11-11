@@ -84,7 +84,7 @@ steps:
       - apk add --no-cache -q bash && bash .woodpecker/check-test-file-map-source-file.sh
     when: *when
 
-  test:
+  test-components:
     depends_on:
       - vendor
     image: *golang_image
@@ -92,6 +92,14 @@ steps:
       - make test-agent
       - make test-server
       - make test-cli
+    when:
+      - path: *when_path
+
+  test-engine:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
       - make test-lib
     when:
       - path: *when_path
@@ -151,7 +159,8 @@ steps:
 
   codecov:
     depends_on:
-      - test
+      - test-components
+      - test-engine
       - sqlite
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.3.3
