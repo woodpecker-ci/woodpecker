@@ -28,15 +28,13 @@ import (
 
 var flags = append([]cli.Flag{
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG", "WOODPECKER_LOG_XORM"),
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG"),
 		Name:    "db-log",
-		Aliases: []string{"log-xorm"}, // TODO: remove in v4.0.0
 		Usage:   "enable logging in database engine (currently xorm)",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG_SQL", "WOODPECKER_LOG_XORM_SQL"),
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG_SQL"),
 		Name:    "db-log-sql",
-		Aliases: []string{"log-xorm-sql"}, // TODO: remove in v4.0.0
 		Usage:   "enable logging of sql commands",
 	},
 	&cli.IntFlag{
@@ -304,9 +302,8 @@ var flags = append([]cli.Flag{
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT"),
 		Name:    "config-extension-endpoint",
-		Aliases: []string{"config-service-endpoint"}, // TODO: remove in v4.0.0
 		Usage:   "url used for calling global configuration service endpoint",
 	},
 	&cli.BoolFlag{
@@ -366,7 +363,6 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),
 		Name:    "db-driver",
-		Aliases: []string{"driver"}, // TODO: remove in v4.0.0
 		Usage:   "database driver",
 		Value:   "sqlite3",
 	},
@@ -375,10 +371,9 @@ var flags = append([]cli.Flag{
 			cli.File(os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE")),
 			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE"),
 		),
-		Name:    "db-datasource",
-		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
-		Usage:   "database driver configuration string",
-		Value:   datasourceDefaultValue(),
+		Name:  "db-datasource",
+		Usage: "database driver configuration string",
+		Value: datasourceDefaultValue(),
 		Config: cli.StringConfig{
 			TrimSpace: true,
 		},
