@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Report skipped workflows as skipped to gitea >= 1.25 [[#7514](https://github.com/woodpecker-ci/woodpecker/pull/7514)]
 - Speed up queue scheduling for large concurrency group backlogs [[#7425](https://github.com/woodpecker-ci/woodpecker/pull/7425)]
 - Show the workflow file in config and compile error messages [[#7539](https://github.com/woodpecker-ci/woodpecker/pull/7539)]
 - Filter waiting queue tasks in place [[#7537](https://github.com/woodpecker-ci/woodpecker/pull/7537)]
