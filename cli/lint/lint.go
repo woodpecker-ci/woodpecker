@@ -109,12 +109,11 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 
 	rawConfig := string(buf)
 
-	substituted, err := metadata.EnvVarSubst(rawConfig, nil)
-	if err != nil {
+	if _, err := metadata.EnvVarSubst(rawConfig, nil); err != nil {
 		return err
 	}
 
-	parsedConfig, err := yaml.ParseString(substituted)
+	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
 		return err
 	}
