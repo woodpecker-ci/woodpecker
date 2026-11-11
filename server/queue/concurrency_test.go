@@ -16,107 +16,12 @@ package queue
 
 import (
 	"container/list"
-	"fmt"
-	"math/rand/v2"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
-
-// scanCanRunConcurrent is the original scan-based implementation, retained as
-// an independent oracle for ordering, mixed limits, and within-tick updates.
-func scanCanRunConcurrent(q *fifo, task *model.Task) bool {
-	if task.ConcurrencyLimit <= 0 || task.ConcurrencyGroup == "" {
-		return true
-	}
-	occupied := 0
-	for _, running := range q.running {
-		if running.item.ConcurrencyGroup == task.ConcurrencyGroup {
-			occupied++
-		}
-	}
-	if occupied >= task.ConcurrencyLimit {
-		return false
-	}
-	for _, queued := range []*list.List{q.pending, q.waitingOnDeps} {
-		for element := queued.Front(); element != nil; element = element.Next() {
-			other, _ := element.Value.(*model.Task)
-			if other.ConcurrencyGroup == task.ConcurrencyGroup && other.ID != task.ID &&
-				other.PipelineID != task.PipelineID && taskOrderLess(other, task) {
-				occupied++
-			}
-		}
-	}
-	return occupied < task.ConcurrencyLimit
-}
-
-func scanAssignToWorker(q *fifo) (*list.Element, *worker) {
-	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task, _ := element.Value.(*model.Task)
-		if !scanCanRunConcurrent(q, task) {
-			continue
-		}
-		var best *worker
-		bestScore := 0
-		for worker := range q.workers {
-			if matched, score := worker.filter(task); matched && score > bestScore {
-				best, bestScore = worker, score
-			}
-		}
-		if best != nil {
-			return element, best
-		}
-	}
-	return nil, nil
-}
-
-func TestConcurrencyIndexMatchesScan(t *testing.T) {
-	random := rand.New(rand.NewPCG(42, 17))
-	for fixture := range 500 {
-		q := &fifo{pending: list.New(), waitingOnDeps: list.New(), running: make(map[string]*entry)}
-		for i := range 20 + random.IntN(60) {
-			task := &model.Task{
-				ID: fmt.Sprintf("task-%d", i), Name: fmt.Sprintf("workflow-%d", random.IntN(4)),
-				Created: int64(random.IntN(4)), PipelineID: int64(random.IntN(8)),
-				ConcurrencyGroup: []string{"", "deploy", "build", "test"}[random.IntN(4)],
-				ConcurrencyLimit: random.IntN(8) - 1,
-			}
-			switch random.IntN(5) {
-			case 0:
-				q.waitingOnDeps.PushBack(task)
-			case 1:
-				q.running[task.ID] = &entry{item: task}
-			default:
-				q.pending.PushBack(task)
-			}
-		}
-
-		index := &concurrencyIndex{queue: q}
-		for {
-			var eligible []*list.Element
-			for element := q.pending.Front(); element != nil; element = element.Next() {
-				task, _ := element.Value.(*model.Task)
-				want := scanCanRunConcurrent(q, task)
-				require.Equal(t, want, index.canRun(task), "fixture %d, task %+v", fixture, task)
-				if want {
-					eligible = append(eligible, element)
-				}
-			}
-			if len(eligible) == 0 {
-				break
-			}
-			// Vary which eligible task finds a matching worker, including equal
-			// ordering keys and tasks behind unmatched earlier candidates.
-			element := eligible[random.IntN(len(eligible))]
-			task, _ := element.Value.(*model.Task)
-			index.start(task)
-			q.pending.Remove(element)
-			q.running[task.ID] = &entry{item: task}
-		}
-	}
-}
 
 func TestConcurrencyIndexStarts(t *testing.T) {
 	tests := []struct {

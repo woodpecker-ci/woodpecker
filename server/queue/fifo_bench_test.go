@@ -128,72 +128,62 @@ func BenchmarkAssignToWorker(b *testing.B) {
 
 // BenchmarkScheduleReady includes index construction and all starts in a tick.
 // Fixture restoration is excluded, but assignment/removal/running-entry costs
-// are timed. The scan variant uses the pre-index concurrency rules as a baseline.
+// are timed.
 func BenchmarkScheduleReady(b *testing.B) {
 	level := zerolog.GlobalLevel()
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	b.Cleanup(func() { zerolog.SetGlobalLevel(level) })
 	for _, limited := range []bool{false, true} {
 		for _, size := range []int{100, 1000, 10000} {
-			for _, scan := range []bool{false, true} {
-				b.Run(fmt.Sprintf("limited=%t/%d/scan=%t", limited, size, scan), func(b *testing.B) {
-					q := &fifo{
-						pending: list.New(), waitingOnDeps: list.New(),
-						running: make(map[string]*entry), workers: make(map[*worker]struct{}),
+			b.Run(fmt.Sprintf("limited=%t/%d", limited, size), func(b *testing.B) {
+				q := &fifo{
+					pending: list.New(), waitingOnDeps: list.New(),
+					running: make(map[string]*entry), workers: make(map[*worker]struct{}),
+				}
+				tasks := make([]*model.Task, size)
+				for i := range tasks {
+					tasks[i] = &model.Task{ID: fmt.Sprintf("task-%d", i), PipelineID: int64(i), Created: int64(i)}
+					if limited {
+						tasks[i].ConcurrencyGroup = fmt.Sprintf("group-%d", i%8)
+						tasks[i].ConcurrencyLimit = 8
 					}
-					tasks := make([]*model.Task, size)
-					for i := range tasks {
-						tasks[i] = &model.Task{ID: fmt.Sprintf("task-%d", i), PipelineID: int64(i), Created: int64(i)}
-						if limited {
-							tasks[i].ConcurrencyGroup = fmt.Sprintf("group-%d", i%8)
-							tasks[i].ConcurrencyLimit = 8
-						}
+				}
+				workers := make([]*worker, 64)
+				for i := range workers {
+					workers[i] = &worker{filter: filterFnTrue}
+				}
+				b.ReportAllocs()
+				for b.Loop() {
+					b.StopTimer()
+					q.pending.Init()
+					clear(q.running)
+					clear(q.workers)
+					for _, task := range tasks {
+						q.pending.PushBack(task)
 					}
-					workers := make([]*worker, 64)
-					for i := range workers {
-						workers[i] = &worker{filter: filterFnTrue}
+					for _, worker := range workers {
+						q.workers[worker] = struct{}{}
 					}
-					b.ReportAllocs()
-					for b.Loop() {
-						b.StopTimer()
-						q.pending.Init()
-						clear(q.running)
-						clear(q.workers)
-						for _, task := range tasks {
-							q.pending.PushBack(task)
+					b.StartTimer()
+					index := &concurrencyIndex{queue: q}
+					assigned := 0
+					for {
+						element, worker := q.assignToWorker(index)
+						if element == nil {
+							break
 						}
-						for _, worker := range workers {
-							q.workers[worker] = struct{}{}
-						}
-						b.StartTimer()
-						index := &concurrencyIndex{queue: q}
-						assigned := 0
-						for {
-							var element *list.Element
-							var worker *worker
-							if scan {
-								element, worker = scanAssignToWorker(q)
-							} else {
-								element, worker = q.assignToWorker(index)
-							}
-							if element == nil {
-								break
-							}
-							task, _ := element.Value.(*model.Task)
-							if !scan {
-								index.start(task)
-							}
-							q.pending.Remove(element)
-							delete(q.workers, worker)
-							q.running[task.ID] = &entry{item: task, done: make(chan bool)}
-							assigned++
-						}
-						if assigned != len(workers) {
-							b.Fatalf("assigned %d tasks, want %d", assigned, len(workers))
-						}
+						task, _ := element.Value.(*model.Task)
+						index.start(task)
+						q.pending.Remove(element)
+						delete(q.workers, worker)
+						q.running[task.ID] = &entry{item: task, done: make(chan bool)}
+						assigned++
 					}
-				})
-			}
+					if assigned != len(workers) {
+						b.Fatalf("assigned %d tasks, want %d", assigned, len(workers))
+					}
+				}
+			})
 		}
 	}
 }
@@ -202,52 +192,46 @@ func BenchmarkScheduleReady(b *testing.B) {
 // scheduling passes under the queue mutex. Use -mutexprofile to inspect waiting
 // time, and compare the maximum observed heartbeat latency between variants.
 func BenchmarkSchedulingContention(b *testing.B) {
-	for _, scan := range []bool{false, true} {
-		b.Run(fmt.Sprintf("scan=%t", scan), func(b *testing.B) {
-			q := &fifo{
-				pending: list.New(), waitingOnDeps: list.New(), running: make(map[string]*entry),
-				workers: map[*worker]struct{}{{filter: filterFnTrue}: {}},
-			}
-			q.running["heartbeat"] = &entry{item: &model.Task{ID: "heartbeat"}}
-			q.waitingOnDeps.PushBack(&model.Task{ID: "early", ConcurrencyGroup: "deploy"})
-			for i := range 10000 {
-				q.pending.PushBack(&model.Task{
-					ID: fmt.Sprintf("task-%d", i), Created: int64(i + 1), PipelineID: int64(i + 1),
-					ConcurrencyGroup: "deploy", ConcurrencyLimit: 1,
-				})
-			}
-			stop, done := make(chan struct{}), make(chan struct{})
-			started := make(chan struct{})
-			ctx := b.Context()
-			var maximum time.Duration
-			go func() {
-				defer close(done)
-				close(started)
-				for {
-					select {
-					case <-stop:
-						return
-					default:
-						start := time.Now()
-						_ = q.Extend(ctx, 0, "heartbeat")
-						maximum = max(maximum, time.Since(start))
-					}
+	b.Run("index", func(b *testing.B) {
+		q := &fifo{
+			pending: list.New(), waitingOnDeps: list.New(), running: make(map[string]*entry),
+			workers: map[*worker]struct{}{{filter: filterFnTrue}: {}},
+		}
+		q.running["heartbeat"] = &entry{item: &model.Task{ID: "heartbeat"}}
+		q.waitingOnDeps.PushBack(&model.Task{ID: "early", ConcurrencyGroup: "deploy"})
+		for i := range 10000 {
+			q.pending.PushBack(&model.Task{
+				ID: fmt.Sprintf("task-%d", i), Created: int64(i + 1), PipelineID: int64(i + 1),
+				ConcurrencyGroup: "deploy", ConcurrencyLimit: 1,
+			})
+		}
+		stop, done := make(chan struct{}), make(chan struct{})
+		started := make(chan struct{})
+		ctx := b.Context()
+		var maximum time.Duration
+		go func() {
+			defer close(done)
+			close(started)
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					start := time.Now()
+					_ = q.Extend(ctx, 0, "heartbeat")
+					maximum = max(maximum, time.Since(start))
 				}
-			}()
-			<-started
-			b.ReportAllocs()
-			for b.Loop() {
-				q.Lock()
-				if scan {
-					scanAssignToWorker(q)
-				} else {
-					q.assignToWorker(&concurrencyIndex{queue: q})
-				}
-				q.Unlock()
 			}
-			close(stop)
-			<-done
-			b.ReportMetric(float64(maximum.Nanoseconds()), "max-heartbeat-ns")
-		})
-	}
+		}()
+		<-started
+		b.ReportAllocs()
+		for b.Loop() {
+			q.Lock()
+			q.assignToWorker(&concurrencyIndex{queue: q})
+			q.Unlock()
+		}
+		close(stop)
+		<-done
+		b.ReportMetric(float64(maximum.Nanoseconds()), "max-heartbeat-ns")
+	})
 }

@@ -885,8 +885,12 @@ func TestFifoConcurrencySlots(t *testing.T) {
 			task:    "b",
 		},
 		{
-			name:    "earlier waiting pipeline reserves the slot",
-			pending: []*model.Task{member("late", 2, 2, 1)},
+			name: "earlier waiting pipeline reserves the slot",
+			pending: []*model.Task{
+				// matrix workflows of one pipeline share the same name
+				{ID: "late-1", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+				{ID: "late-2", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+			},
 			waiting: []*model.Task{member("early", 1, 1, 1)},
 		},
 		{
@@ -916,7 +920,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 		},
 		{
 			name:    "free slot is granted",
-			pending: []*model.Task{member("next", 3, 3, 2)},
+			pending: []*model.Task{member("next", 3, 3, 2), member("strict", 4, 4, 1)},
 			running: []*model.Task{member("active", 2, 2, 2)},
 			task:    "next",
 		},
