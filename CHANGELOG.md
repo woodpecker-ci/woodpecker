@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -34,6 +34,7 @@
 
 ### 🐛 Bug Fixes
 
+- Subscribe GitHub webhooks to release events [[#7543](https://github.com/woodpecker-ci/woodpecker/pull/7543)]
 - Forge status report fixes [[#7520](https://github.com/woodpecker-ci/woodpecker/pull/7520)]
 - Close forge instances before cache replacement [[#7525](https://github.com/woodpecker-ci/woodpecker/pull/7525)]
 - Only auto-cancel older pipelines [[#7345](https://github.com/woodpecker-ci/woodpecker/pull/7345)]
