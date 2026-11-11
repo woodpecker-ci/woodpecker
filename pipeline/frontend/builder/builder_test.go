@@ -1020,6 +1020,7 @@ steps:
 	pipelineErrors := errors.GetPipelineErrors(err)
 	require.Len(t, pipelineErrors, 1)
 	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+	assert.NotContains(t, pipelineErrors[0].Message, "[compiler]", "type must not be repeated in the message")
 	// the error points to the offending workflow file so the UI can show it
 	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
 	require.True(t, ok)
