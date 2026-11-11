@@ -160,7 +160,8 @@ steps:
 
   codecov:
     depends_on:
-      - test
+      - test-components
+      - test-engine
       - sqlite
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.3.3
