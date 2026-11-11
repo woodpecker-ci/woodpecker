@@ -15,27 +15,100 @@
 package config
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
+	"github.com/zalando/go-keyring"
 )
 
-func TestConfigMerge(t *testing.T) {
-	config := &Config{
-		ServerURL: "http://localhost:8080",
-		Token:     "1234567890",
-		LogLevel:  "debug",
+const testCLIName = "woodpecker-cli"
+
+// runLoad runs Load for a "repo" subcommand with the given global flags and
+// returns the resulting command so the loaded flag values can be inspected.
+func runLoad(t *testing.T, args ...string) (*cli.Command, error) {
+	t.Helper()
+
+	var loadErr error
+	cmd := &cli.Command{
+		Name: testCLIName,
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "server"},
+			&cli.StringFlag{Name: "token"},
+			&cli.StringFlag{Name: "log-level"},
+			&cli.StringFlag{Name: "contexts-file"},
+		},
+		Action: func(ctx context.Context, c *cli.Command) error {
+			loadErr = Load(ctx, c)
+			return nil
+		},
 	}
 
-	configFromFile := &Config{
-		ServerURL: "https://ci.woodpecker-ci.org",
-		Token:     "",
-		LogLevel:  "info",
-	}
+	args = append(append([]string{testCLIName}, args...), "repo")
+	require.NoError(t, cmd.Run(t.Context(), args))
+	return cmd, loadErr
+}
 
-	config.MergeIfNotSet(configFromFile)
+func TestLoad(t *testing.T) {
+	configDir := t.TempDir()
+	t.Setenv("HOME", configDir)
+	t.Setenv("XDG_CONFIG_HOME", configDir)
+	xdg.Reload()
+	keyring.MockInit()
 
-	assert.Equal(t, config.ServerURL, "http://localhost:8080")
-	assert.Equal(t, config.Token, "1234567890")
-	assert.Equal(t, config.LogLevel, "debug")
+	t.Run("not configured without context or flags", func(t *testing.T) {
+		_, err := runLoad(t)
+		assert.ErrorContains(t, err, "woodpecker-cli is not configured")
+	})
+
+	t.Run("server and token flags work without context", func(t *testing.T) {
+		cmd, err := runLoad(t, "--server", "https://flags.example.test", "--token", "flag-token")
+		require.NoError(t, err)
+		assert.Equal(t, "https://flags.example.test", cmd.String("server"))
+		assert.Equal(t, "flag-token", cmd.String("token"))
+	})
+
+	t.Run("legacy config file is ignored", func(t *testing.T) {
+		legacyFile := filepath.Join(configDir, "woodpecker", "config.json")
+		require.NoError(t, os.MkdirAll(filepath.Dir(legacyFile), 0o755))
+		require.NoError(t, os.WriteFile(legacyFile, []byte(`{"server_url":"https://legacy.example.test"}`), 0o600))
+		require.NoError(t, keyring.Set(testCLIName, "https://legacy.example.test", "legacy-token"))
+
+		_, err := runLoad(t)
+		assert.ErrorContains(t, err, "woodpecker-cli is not configured")
+	})
+
+	require.NoError(t, AddOrUpdateContext(&cli.Command{Name: testCLIName}, "prod", "https://ctx.example.test", "ctx-token", "debug", true))
+
+	t.Run("current context fills server, token and log level", func(t *testing.T) {
+		cmd, err := runLoad(t)
+		require.NoError(t, err)
+		assert.Equal(t, "https://ctx.example.test", cmd.String("server"))
+		assert.Equal(t, "ctx-token", cmd.String("token"))
+		assert.Equal(t, "debug", cmd.String("log-level"))
+	})
+
+	t.Run("flags take precedence over current context", func(t *testing.T) {
+		cmd, err := runLoad(t, "--server", "https://flags.example.test", "--token", "flag-token", "--log-level", "warn")
+		require.NoError(t, err)
+		assert.Equal(t, "https://flags.example.test", cmd.String("server"))
+		assert.Equal(t, "flag-token", cmd.String("token"))
+		assert.Equal(t, "warn", cmd.String("log-level"))
+	})
+
+	t.Run("contexts file flag replaces the default contexts file", func(t *testing.T) {
+		contextsFile := filepath.Join(t.TempDir(), "custom.json")
+		require.NoError(t, os.WriteFile(contextsFile, []byte(`{"current_context":"custom","contexts":{"custom":{"name":"custom","server_url":"https://custom.example.test"}}}`), 0o600))
+		require.NoError(t, keyring.Set(testCLIName, "https://custom.example.test", "custom-token"))
+
+		cmd, err := runLoad(t, "--contexts-file", contextsFile)
+		require.NoError(t, err)
+		assert.Equal(t, "https://custom.example.test", cmd.String("server"))
+		assert.Equal(t, "custom-token", cmd.String("token"))
+	})
 }
