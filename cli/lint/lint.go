@@ -24,8 +24,11 @@ import (
 
 	"charm.land/lipgloss/v2"
 	"github.com/urfave/cli/v3"
+	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
@@ -68,8 +71,8 @@ func lint(ctx context.Context, c *cli.Command) error {
 	return common.RunPipelineFunc(ctx, c, lintFile, lintDir)
 }
 
-func lintDir(ctx context.Context, c *cli.Command, dir string) error {
-	var errorStrings []string
+func lintDir(_ context.Context, c *cli.Command, dir string) error {
+	var files []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
@@ -77,15 +80,36 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
-			if err := lintFile(ctx, c, path); err != nil {
-				errorStrings = append(errorStrings, err.Error())
-			}
-			return nil
+			files = append(files, path)
 		}
-
 		return nil
 	}); err != nil {
 		return err
+	}
+
+	// lint all workflows at once, so their depends_on can be checked
+	issues := make(map[string]error, len(files))
+	fileOfWorkflow := make(map[string]string, len(files))
+	var configs []*linter.WorkflowConfig
+	for _, file := range files {
+		config, err := parseFile(file, builder.SanitizePath(file))
+		if err != nil {
+			issues[file] = err
+			continue
+		}
+		fileOfWorkflow[config.File] = file
+		configs = append(configs, config)
+	}
+	for _, err := range pipeline_errors.GetPipelineErrors(newLinter(c, linter.WithWorkflowDependencies()).Lint(configs)) {
+		file := fileOfWorkflow[pipeline_errors.GetFile(err)]
+		issues[file] = multierr.Append(issues[file], err)
+	}
+
+	var errorStrings []string
+	for _, file := range files {
+		if err := report(c, path.Base(file), issues[file]); err != nil {
+			errorStrings = append(errorStrings, err.Error())
+		}
 	}
 
 	if len(errorStrings) != 0 {
@@ -95,36 +119,41 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 }
 
 func lintFile(_ context.Context, c *cli.Command, file string) error {
-	fi, err := os.Open(file)
-	if err != nil {
-		return err
+	config, err := parseFile(file, path.Base(file))
+	if err == nil {
+		err = newLinter(c).Lint([]*linter.WorkflowConfig{config})
 	}
-	defer fi.Close()
+	return report(c, path.Base(file), err)
+}
 
+// parseFile reads a workflow file and checks its syntax.
+func parseFile(file, name string) (*linter.WorkflowConfig, error) {
 	buf, err := os.ReadFile(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	rawConfig := string(buf)
 
+	// only check the substitution syntax, as the values are unknown here
 	if _, err := metadata.EnvVarSubst(rawConfig, nil); err != nil {
-		return report(c, path.Base(file), err)
+		return nil, err
 	}
 
 	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
-		return report(c, path.Base(file), err)
+		return nil, err
 	}
 
-	config := &linter.WorkflowConfig{
-		File:      path.Base(file),
+	return &linter.WorkflowConfig{
+		File:      name,
 		RawConfig: rawConfig,
 		Workflow:  parsedConfig,
-	}
+	}, nil
+}
 
-	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(
+func newLinter(c *cli.Command, opts ...linter.Option) *linter.Linter {
+	return linter.New(append([]linter.Option{
 		linter.WithTrusted(linter.TrustedConfiguration{
 			Network:  true,
 			Volumes:  true,
@@ -132,8 +161,7 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		}),
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
-	).Lint([]*linter.WorkflowConfig{config})
-	return report(c, config.File, err)
+	}, opts...)...)
 }
 
 // report prints the issues of a file and returns an error if it has errors.

@@ -143,6 +143,32 @@ steps:
 	assert.Contains(t, out, "🔥 broken.yaml has 1 errors:\n└── ❌ compile time environment variable substitution failed")
 }
 
+func TestLintWorkflowDependsOnOnlyForDir(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	file := filepath.Join(repoRoot, ".woodpecker", "test.yaml")
+	writeFile(t, file, `when:
+  event: push
+depends_on: [build]
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo ok
+`)
+
+	// a single file does not know the other workflows
+	runLintCommand(t, file, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
+	})
+
+	out := runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.EqualError(t, lint(t.Context(), c), "ERRORS: test.yaml has errors")
+	})
+	assert.Contains(t, out, `🔥 test.yaml has 1 errors:
+└── ❌ depends_on  Workflow "build" does not exist`)
+}
+
 // runLintCommand runs fn as the action of a lint command for dir and returns its output.
 func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) string {
 	t.Helper()

@@ -168,3 +168,22 @@ func TestHasBlockingErrors(t *testing.T) {
 		assert.Equal(t, tt.expected, pipeline_errors.HasBlockingErrors(tt.err))
 	}
 }
+
+func TestGetFile(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		data any
+		file string
+	}{
+		{data: &pipeline_errors.LinterErrorData{File: "linter"}, file: "linter"},
+		{data: &pipeline_errors.DeprecationErrorData{File: "deprecation"}, file: "deprecation"},
+		{data: &pipeline_errors.BadHabitErrorData{File: "bad-habit"}, file: "bad-habit"},
+		{data: &pipeline_errors.CompilerErrorData{File: "compiler"}, file: "compiler"},
+		{data: nil, file: ""},
+	}
+
+	for _, tt := range tests {
+		assert.Equal(t, tt.file, pipeline_errors.GetFile(&pipeline_errors.PipelineError{Data: tt.data}))
+	}
+}
