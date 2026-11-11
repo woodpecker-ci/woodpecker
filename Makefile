@@ -36,20 +36,31 @@ else
 	endif
 endif
 
+# go build tags, feature flags like SQLITE_ENABLED add to them
 TAGS ?=
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
 endif
-CGO_ENABLED ?= 1 # only used to compile server
-
-HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO),GO)
+# only used to compile server
+CGO_ENABLED ?= 1
+ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
 
+# enable sqlite by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	SQLITE_ENABLED ?= true
+else
+	ifeq ($(SQLITE_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if SQLITE_ENABLED is 'true')
+	endif
+endif
+ifeq ($(SQLITE_ENABLED),true)
+	override TAGS += sqlite sqlite_unlock_notify
+endif
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -191,22 +202,24 @@ lint: ## Lint code
 lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
+# The test targets do not use $(TAGS): it holds sqlite_unlock_notify by default,
+# which makes the datastore tests hang.
 test-agent: ## Test agent code
-	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
+	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
+	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test sqlite' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
+	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
 
 # Migration tests reset the shared database, so datastore packages must run serially.
 test-server-datastore: ## Test server datastore
-	go test -p 1 -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -p 1 -race -timeout 300s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -timeout 300s -tags 'test sqlite' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -race -timeout 300s -tags 'test sqlite' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test sqlite' go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -215,10 +228,10 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test sqlite' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test-e2e: ## Test by running yaml config and compare expected result
-	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test sqlite' ./e2e/...
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests

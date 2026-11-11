@@ -11,7 +11,7 @@ variables:
   - &node_image 'docker.io/node:26-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.27.x'
 
-# cspell:words bindata netgo
+# cspell:words netgo
 
 steps:
   build-web:
@@ -41,7 +41,8 @@ steps:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|arm64/v8;linux|amd64;linux|riscv64;windows-10|amd64;freebsd|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      SQLITE_ENABLED: 'true'
+      TAGS: 'netgo'
       ARCHIVE_IT: '1'
 
   build-tarball:
