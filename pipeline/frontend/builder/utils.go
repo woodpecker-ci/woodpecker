@@ -148,7 +148,7 @@ func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.Depen
 		environ := b.environmentVariables(b.GetWorkflowMetadata(workflow), axis)
 		substituted, err := metadata.EnvVarSubst(string(file.Data), environ)
 		if err != nil {
-			return nil, err
+			return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
 		}
 		parsed, err := yaml.ParseString(substituted)
 		if err != nil {

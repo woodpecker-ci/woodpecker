@@ -222,8 +222,9 @@ func TestGetStatus(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
+		assert.Equalf(t, tt.want, getStatus(tt.status, false), "status %q", tt.status)
 	}
+	assert.Equal(t, statusSkipped, getStatus(model.StatusSkipped, true), "server knows the skipped state")
 }
 
 // newTestForge returns a forge talking to a fake Forgejo API with the given routes.
