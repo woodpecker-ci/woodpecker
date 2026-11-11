@@ -69,6 +69,7 @@ type Repo struct {
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
 	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
 	WebhookSecret                string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	CloneSecret                  *CloneSecret         `json:"-"                               xorm:"json 'clone_secret'"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
@@ -91,6 +92,16 @@ type Repo struct {
 
 	Perm *Perm `json:"-" xorm:"-"`
 } //	@name	Repo
+
+// CloneSecret holds credentials the forge created for Woodpecker to clone only this
+// repository, so pipelines do not need the token of the repository user to clone.
+type CloneSecret struct {
+	// Login and Token are the credentials to clone the repository over HTTP(S).
+	Login string `json:"login,omitempty"`
+	Token string `json:"token,omitempty"`
+	// ID is the forge ID of the credentials, to remove them again.
+	ID string `json:"id,omitempty"`
+}
 
 // TableName return database table name for xorm.
 func (Repo) TableName() string {
