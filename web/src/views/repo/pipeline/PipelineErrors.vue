@@ -42,7 +42,9 @@
                 </span>
               </span>
               <span
-                v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error) || isCompilerError(error)"
+                v-if="
+                  isLinterError(error) || isDeprecationError(error) || isBadHabitError(error) || isCompilerError(error)
+                "
                 class="flex items-center gap-x-2 whitespace-nowrap"
               >
                 <span>
