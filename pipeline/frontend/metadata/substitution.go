@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/drone/envsubst"
+	"github.com/woodpecker-ci/envsubst"
 )
 
 func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
