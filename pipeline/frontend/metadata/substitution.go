@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/woodpecker-ci/envsubst"
+	"github.com/drone/envsubst"
 )
 
 func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
-	return envsubst.Eval(yaml, func(name string) string {
+	substituted, err := envsubst.Eval(yaml, func(name string) string {
 		env := environ[name]
 		// Quote values containing a YAML line break so a user-controlled value
 		// (commit message, branch name, PR title, …) cannot break out of its
@@ -33,4 +33,8 @@ func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
 		}
 		return env
 	})
+	if err != nil {
+		return "", fmt.Errorf("compile time environment variable substitution failed: %w", err)
+	}
+	return substituted, nil
 }

@@ -137,15 +137,14 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 		}
 
 		// User can access his own, admin can access all
-		if (org.Name == user.Login && org.ForgeID == user.ForgeID) || user.Admin {
+		if user.OwnsOrg(org) || user.Admin {
 			c.Next()
 			return
 		}
 
-		// orgs of other forges can share a name with orgs of the user's
-		// forge, so a membership looked up on the user's forge proves
-		// nothing about them
-		if org.ForgeID != user.ForgeID {
+		// Forge membership cannot establish ownership of another user's
+		// personal org or access to an org on a different forge.
+		if org.IsUser || org.ForgeID != user.ForgeID {
 			c.String(http.StatusForbidden, "user not authorized")
 			c.Abort()
 			return

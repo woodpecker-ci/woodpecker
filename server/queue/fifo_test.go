@@ -720,8 +720,9 @@ func TestFifoFilterWaiting(t *testing.T) {
 		{
 			name: "only changed tasks move and keep their order",
 			pending: []*model.Task{
+				{ID: "newly-blocked-1", Dependencies: []string{"root"}},
 				{ID: "ready"},
-				{ID: "newly-blocked", Dependencies: []string{"root"}},
+				{ID: "newly-blocked-2", Dependencies: []string{"root"}},
 			},
 			waiting: []*model.Task{
 				{ID: "still-blocked", Dependencies: []string{"root"}},
@@ -729,7 +730,7 @@ func TestFifoFilterWaiting(t *testing.T) {
 			},
 			running: []string{"root"},
 			ready:   []string{"ready", "released"},
-			blocked: []string{"newly-blocked", "still-blocked"},
+			blocked: []string{"newly-blocked-1", "newly-blocked-2", "still-blocked"},
 		},
 		{
 			name: "cycles remain blocked",
@@ -755,6 +756,14 @@ func TestFifoFilterWaiting(t *testing.T) {
 			}
 			for _, id := range tt.running {
 				q.running[id] = &entry{item: &model.Task{ID: id}}
+			}
+			q.queuedIDs = make(map[string]struct{})
+			for _, tasks := range [][]*model.Task{tt.pending, tt.waiting} {
+				for _, task := range tasks {
+					for _, dep := range task.Dependencies {
+						q.queuedIDs[dep] = struct{}{}
+					}
+				}
 			}
 			ids := func(tasks *list.List) []string {
 				var result []string

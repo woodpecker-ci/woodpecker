@@ -32,6 +32,7 @@ const (
 	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
+	statusStopped = "STOPPED"
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
@@ -42,8 +43,10 @@ func convertStatus(status model.StatusValue) string {
 		return statusPending
 	case model.StatusSuccess:
 		return statusSuccess
-	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined, model.StatusSkipped, model.StatusCanceled:
+	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined:
 		return statusFailure
+	case model.StatusSkipped, model.StatusCanceled:
+		return statusStopped
 	default:
 		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return statusFailure
@@ -53,12 +56,13 @@ func convertStatus(status model.StatusValue) string {
 // convertRepo is a helper function used to convert a Bitbucket repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
+	owner, name, _ := strings.Cut(from.FullName, "/")
 	repo := model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
 		Clone:         cloneLink(from),
 		CloneSSH:      sshCloneLink(from),
-		Owner:         strings.Split(from.FullName, "/")[0],
-		Name:          strings.Split(from.FullName, "/")[1],
+		Owner:         owner,
+		Name:          name,
 		FullName:      from.FullName,
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,

@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type ctxKey struct{}
@@ -293,8 +294,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}
 
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
-
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
 
@@ -512,8 +511,11 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil {
+	// Entries the agent sends again after a retry are already stored and rejected
+	// by the unique index; that is the only error that is safe to drop.
+	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil && !errors.Is(err, types.ErrInsertDuplicateDetected) {
 		log.Error().Err(err).Msg("could not store log entries")
+		return err
 	}
 
 	return nil

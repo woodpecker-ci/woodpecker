@@ -4,7 +4,7 @@ Woodpecker has integrated support for matrix workflows. Woodpecker executes a se
 
 :::warning
 Woodpecker generates at most **64 workflows** per matrix.
-The variables are also limited to **10** per axis.
+The variables are also limited to **64** per axis.
 A matrix with more combinations is rejected with an error.
 :::
 
@@ -119,6 +119,9 @@ steps:
 ```
 
 ### Example matrix pipeline using multiple platforms
+
+Use `${platform}` in `labels` to substitute the matrix value before scheduling. The shell spelling `$platform` stays
+literal here and can leave a workflow pending when agents advertise `linux/amd64` or `linux/arm64`.
 
 ```yaml
 matrix:

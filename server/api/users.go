@@ -32,8 +32,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
-const defaultForgeID = 1
-
 // GetUsers
 //
 //	@Summary		List users
@@ -72,7 +70,7 @@ func GetUsers(c *gin.Context) {
 //	@Param			forge_id		query	string	true	"specify forge (else default will be used)"
 //	@Param			forge_remote_id	query	string	false	"specify user id at forge (else fallback to login)"
 func GetUser(c *gin.Context) {
-	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(model.PrimaryForgeID)), 10, 64)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -115,8 +113,8 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	if in.ForgeID < defaultForgeID {
-		in.ForgeID = defaultForgeID
+	if in.ForgeID < model.PrimaryForgeID {
+		in.ForgeID = model.PrimaryForgeID
 	}
 
 	user, err := store.FromContext(c).GetUserByRemoteID(in.ForgeID, in.ForgeRemoteID)
@@ -173,8 +171,8 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	if in.ForgeID < defaultForgeID {
-		in.ForgeID = defaultForgeID
+	if in.ForgeID < model.PrimaryForgeID {
+		in.ForgeID = model.PrimaryForgeID
 	}
 
 	user := &model.User{
@@ -213,7 +211,7 @@ func PostUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(model.PrimaryForgeID)), 10, 64)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
