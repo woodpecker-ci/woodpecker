@@ -1094,6 +1094,38 @@ steps:
 	}
 }
 
+func TestMissingSecret(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "push"}
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: "missing-secret", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+    environment:
+      TOKEN:
+        from_secret: token
+`)},
+		},
+	}
+
+	_, err := b.Build()
+	assert.ErrorContains(t, err, `secret "token" not found`)
+	pipelineErrors := errors.GetPipelineErrors(err)
+	require.Len(t, pipelineErrors, 1)
+	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+	// the error points to the offending workflow file so the UI can show it
+	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+	require.True(t, ok)
+	assert.Equal(t, "missing-secret", data.File)
+}
+
 func TestEnvVarPrecedence(t *testing.T) {
 	t.Parallel()
 

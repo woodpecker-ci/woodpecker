@@ -188,7 +188,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	if !b.ListOnly {
 		ir, err = b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
 		if err != nil {
-			return nil, multierr.Append(errorsAndWarnings, err)
+			return nil, multierr.Append(errorsAndWarnings, compilerError(err, workflow.Name))
 		}
 
 		if len(ir.Stages) == 0 {
