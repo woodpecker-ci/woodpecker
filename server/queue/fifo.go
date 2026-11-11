@@ -18,6 +18,7 @@ import (
 	"container/list"
 	"context"
 	"errors"
+	"sort"
 	"sync"
 	"time"
 
@@ -347,18 +348,12 @@ func (q *fifo) filterWaiting() {
 }
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
-	var bestWorker *worker
-	var bestScore int
-
+	slots := concurrencySlots{q: q}
 	for element := q.pending.Front(); element != nil; element = element.Next() {
 		task, _ := element.Value.(*model.Task)
 
-		// skip tasks that would exceed their workflow concurrency limit, they
-		// stay pending and are retried on the next process tick.
-		if !q.canRunConcurrent(task) {
-			continue
-		}
-
+		var bestWorker *worker
+		var bestScore int
 		for worker := range q.workers {
 			matched, score := worker.filter(task)
 			if matched && score > bestScore {
@@ -366,20 +361,44 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 				bestScore = score
 			}
 		}
-		if bestWorker != nil {
-			log.Debug().
-				Str("task_id", task.ID).
-				Strs("dependencies", task.Dependencies).
-				Int("score", bestScore).
-				Msg("queue: assigned task to worker")
-			return element, bestWorker
+
+		// skip tasks that would exceed their workflow concurrency limit, they
+		// stay pending and are retried on the next process tick.
+		if bestWorker == nil || !slots.canRun(task) {
+			continue
 		}
+
+		log.Debug().
+			Str("task_id", task.ID).
+			Strs("dependencies", task.Dependencies).
+			Int("score", bestScore).
+			Msg("queue: assigned task to worker")
+		return element, bestWorker
 	}
 
 	return nil, nil
 }
 
-// canRunConcurrent reports whether the given task may currently start without
+// concurrencySlots answers concurrency limit checks for one scheduling
+// attempt. It indexes the queue on first use, so checking many tasks scans the
+// queue once instead of once per task. The queue must stay locked and
+// unchanged while it is in use.
+type concurrencySlots struct {
+	q *fifo
+	// running counts the running tasks per concurrency group.
+	running map[string]int
+	// queued holds the not yet running tasks per group, and per group and
+	// pipeline, each sorted by taskOrderLess.
+	queued           map[string][]*model.Task
+	queuedInPipeline map[pipelineGroup][]*model.Task
+}
+
+type pipelineGroup struct {
+	group    string
+	pipeline int64
+}
+
+// canRun reports whether the given task may currently start without
 // violating its workflow concurrency limit. Tasks without a limit always pass,
 // keeping the default scheduling behavior unchanged.
 //
@@ -396,52 +415,65 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 // test.yaml). Because dependencies never cross pipelines, restricting the
 // reservation to other pipelines keeps the ordering guarantee while making
 // such deadlocks impossible.
-//
-// Expects the queue to be locked by the caller.
-func (q *fifo) canRunConcurrent(task *model.Task) bool {
+func (s *concurrencySlots) canRun(task *model.Task) bool {
 	if task.ConcurrencyLimit <= 0 || task.ConcurrencyGroup == "" {
 		return true
 	}
+	if s.running == nil {
+		s.index()
+	}
 
 	group := task.ConcurrencyGroup
-
-	// count tasks of the same group that already occupy a running slot.
-	running := 0
-	for _, e := range q.running {
-		if e.item.ConcurrencyGroup == group {
-			running++
-		}
-	}
+	running := s.running[group]
 	if running >= task.ConcurrencyLimit {
 		return false
 	}
 
-	// count not-yet-running members of the group from earlier pipelines. They
-	// have priority for the remaining slots, even if they are still waiting on
-	// their dependencies, so cross-pipeline ordering is preserved.
-	ahead := 0
-	countAhead := func(other *model.Task) {
-		if other.ConcurrencyGroup != group || other.ID == task.ID {
-			return
-		}
-		// only reserve order across pipelines; see the function doc above.
-		if other.PipelineID == task.PipelineID {
-			return
-		}
-		if taskOrderLess(other, task) {
-			ahead++
-		}
-	}
-	for element := q.pending.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
-	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
+	// not yet running members of the group from earlier pipelines have
+	// priority for the remaining slots, even if they are still waiting on
+	// their dependencies. The task itself is never counted, as it is not
+	// ordered before itself.
+	ahead := countBefore(s.queued[group], task) -
+		countBefore(s.queuedInPipeline[pipelineGroup{group, task.PipelineID}], task)
 
 	return running+ahead < task.ConcurrencyLimit
+}
+
+func (s *concurrencySlots) index() {
+	s.running = make(map[string]int)
+	s.queued = make(map[string][]*model.Task)
+	s.queuedInPipeline = make(map[pipelineGroup][]*model.Task)
+
+	for _, e := range s.q.running {
+		s.running[e.item.ConcurrencyGroup]++
+	}
+	for _, tasks := range []*list.List{s.q.pending, s.q.waitingOnDeps} {
+		for element := tasks.Front(); element != nil; element = element.Next() {
+			task, _ := element.Value.(*model.Task)
+			if task.ConcurrencyGroup == "" {
+				continue
+			}
+			key := pipelineGroup{task.ConcurrencyGroup, task.PipelineID}
+			s.queued[key.group] = append(s.queued[key.group], task)
+			s.queuedInPipeline[key] = append(s.queuedInPipeline[key], task)
+		}
+	}
+	for _, tasks := range s.queued {
+		sortByTaskOrder(tasks)
+	}
+	for _, tasks := range s.queuedInPipeline {
+		sortByTaskOrder(tasks)
+	}
+}
+
+func sortByTaskOrder(tasks []*model.Task) {
+	sort.Slice(tasks, func(i, j int) bool { return taskOrderLess(tasks[i], tasks[j]) })
+}
+
+// countBefore returns how many of the tasks, sorted by taskOrderLess, are
+// ordered before the given task.
+func countBefore(tasks []*model.Task, task *model.Task) int {
+	return sort.Search(len(tasks), func(i int) bool { return !taskOrderLess(tasks[i], task) })
 }
 
 // taskOrderLess reports whether task a was instantiated before task b. Ordering

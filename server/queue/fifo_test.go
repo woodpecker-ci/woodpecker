@@ -881,7 +881,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 	}{
 		{
 			name:    "same pipeline does not reserve slots",
-			pending: []*model.Task{member("b", 1, 2, 1), member("a", 1, 1, 1)},
+			pending: []*model.Task{member("b", 1, 2, 1), member("c", 1, 3, 1), member("a", 1, 1, 1), member("d", 2, 4, 1)},
 			task:    "b",
 		},
 		{
