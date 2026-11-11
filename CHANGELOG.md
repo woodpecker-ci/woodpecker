@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -13,6 +13,7 @@
 
 ### 📈 Enhancement
 
+- Show the workflow file in config and compile error messages [[#7539](https://github.com/woodpecker-ci/woodpecker/pull/7539)]
 - Filter waiting queue tasks in place [[#7537](https://github.com/woodpecker-ci/woodpecker/pull/7537)]
 - Allow configuring the plugin-git version for local backend clone [[#7536](https://github.com/woodpecker-ci/woodpecker/pull/7536)]
 - Map skipped and canceled workflows to Bitbucket STOPPED / DC CANCELLED [[#7513](https://github.com/woodpecker-ci/woodpecker/pull/7513)]
