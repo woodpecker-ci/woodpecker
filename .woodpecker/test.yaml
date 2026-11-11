@@ -84,7 +84,7 @@ steps:
       - apk add --no-cache -q bash && bash .woodpecker/check-test-file-map-source-file.sh
     when: *when
 
-  test:
+  test-components:
     depends_on:
       - vendor
     image: *golang_image
@@ -92,6 +92,15 @@ steps:
       - make test-agent
       - make test-server
       - make test-cli
+    when:
+      - path: *when_path
+
+  test-engine:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
+      - apt install -y libvirt
       - make test-lib
     when:
       - path: *when_path
