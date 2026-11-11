@@ -54,9 +54,9 @@ func GetFile(e *PipelineError) string {
 	switch data := e.Data.(type) {
 	case *LinterErrorData:
 		return data.File
-	case *DeprecationErrorData:
+	case DeprecationErrorData:
 		return data.File
-	case *BadHabitErrorData:
+	case BadHabitErrorData:
 		return data.File
 	case *CompilerErrorData:
 		return data.File

@@ -177,8 +177,9 @@ func TestGetFile(t *testing.T) {
 		file string
 	}{
 		{data: &pipeline_errors.LinterErrorData{File: "linter"}, file: "linter"},
-		{data: &pipeline_errors.DeprecationErrorData{File: "deprecation"}, file: "deprecation"},
-		{data: &pipeline_errors.BadHabitErrorData{File: "bad-habit"}, file: "bad-habit"},
+		// the linter stores these two as values
+		{data: pipeline_errors.DeprecationErrorData{File: "deprecation"}, file: "deprecation"},
+		{data: pipeline_errors.BadHabitErrorData{File: "bad-habit"}, file: "bad-habit"},
 		{data: &pipeline_errors.CompilerErrorData{File: "compiler"}, file: "compiler"},
 		{data: nil, file: ""},
 	}

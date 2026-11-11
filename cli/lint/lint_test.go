@@ -169,6 +169,23 @@ steps:
 └── ❌ depends_on  Workflow "build" does not exist`)
 }
 
+func TestLintDirKeepsWarnings(t *testing.T) {
+	repoRoot := t.TempDir()
+
+	// no event filter is a bad habit warning
+	writeFile(t, filepath.Join(repoRoot, ".woodpecker", "build.yaml"), `steps:
+  test:
+    image: alpine
+    commands:
+      - echo ok
+`)
+
+	out := runLintCommand(t, repoRoot, func(c *cli.Command) {
+		require.NoError(t, lint(t.Context(), c))
+	})
+	assert.Contains(t, out, "⚠️  build.yaml has 1 warnings:")
+}
+
 // runLintCommand runs fn as the action of a lint command for dir and returns its output.
 func runLintCommand(t *testing.T, dir string, fn func(c *cli.Command)) string {
 	t.Helper()
