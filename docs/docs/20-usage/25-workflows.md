@@ -76,6 +76,17 @@ steps:
 
 Each workflow will report its own status back to your forge.
 
+## Agent information
+
+If available, the WebUI shows which agent runs or ran a workflow.
+Select a step and click the information icon in the **Step Logs** toolbar to see the agent's name, platform and backend.
+**Show labels** lists the agent's custom labels.
+
+The server stores this information when the agent gets the workflow assigned, so it stays available after the agent was changed or deleted.
+
+The information holds no secrets, so every logged in user who can see the pipeline can see it.
+The icon is grayed out while no agent is assigned yet or no agent information is available.
+
 ## Flow control
 
 The workflows run in parallel on separate agents and share nothing.
