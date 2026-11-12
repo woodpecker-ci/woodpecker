@@ -1,0 +1,128 @@
+{
+  "type": "repository",
+  "full_name": "6543/collect-webhooks",
+  "links": {
+    "self": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks"
+    },
+    "html": {
+      "href": "https://bitbucket.org/6543/collect-webhooks"
+    },
+    "avatar": {
+      "href": "https://bytebucket.org/ravatar/%7Bcbddcb41-064e-4190-9685-c0540c2ec622%7D?ts=go"
+    },
+    "pullrequests": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/pullrequests"
+    },
+    "commits": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/commits"
+    },
+    "forks": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/forks"
+    },
+    "watchers": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/watchers"
+    },
+    "branches": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/refs/branches"
+    },
+    "tags": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/refs/tags"
+    },
+    "downloads": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/downloads"
+    },
+    "source": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/src"
+    },
+    "clone": [
+      {
+        "name": "https",
+        "href": "https://6543@bitbucket.org/6543/collect-webhooks.git"
+      },
+      {
+        "name": "ssh",
+        "href": "git@bitbucket.org:6543/collect-webhooks.git"
+      }
+    ],
+    "hooks": {
+      "href": "https://api.bitbucket.org/2.0/repositories/6543/collect-webhooks/hooks"
+    }
+  },
+  "name": "collect-webhooks",
+  "slug": "collect-webhooks",
+  "description": "",
+  "scm": "git",
+  "website": null,
+  "owner": {
+    "display_name": "6543",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/users/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D"
+      },
+      "avatar": {
+        "href": "https://secure.gravatar.com/avatar/e3df5ba3ff85167eb228babbcd37481e?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Fdefault-avatar-1.png"
+      },
+      "html": {
+        "href": "https://bitbucket.org/%7B6cb0e486-3c5a-41bb-b009-2142d2cbe5d7%7D/"
+      }
+    },
+    "type": "user",
+    "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+    "account_id": "5f614bd12d51d4006ab36374",
+    "nickname": "6543"
+  },
+  "workspace": {
+    "type": "workspace",
+    "uuid": "{6cb0e486-3c5a-41bb-b009-2142d2cbe5d7}",
+    "name": "6543",
+    "slug": "6543",
+    "links": {
+      "avatar": {
+        "href": "https://bitbucket.org/workspaces/6543/avatar/?ts=1600212025"
+      },
+      "html": {
+        "href": "https://bitbucket.org/6543/"
+      },
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/workspaces/6543"
+      }
+    }
+  },
+  "is_private": true,
+  "project": {
+    "type": "project",
+    "key": "PROJ",
+    "uuid": "{c66cda6b-6de6-4597-ab33-60b84033558b}",
+    "name": "ProjectX",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/workspaces/6543/projects/PROJ"
+      },
+      "html": {
+        "href": "https://bitbucket.org/6543/workspace/projects/PROJ"
+      },
+      "avatar": {
+        "href": "https://bitbucket.org/6543/workspace/projects/PROJ/avatar/32?ts=1602715515"
+      }
+    }
+  },
+  "fork_policy": "no_public_forks",
+  "created_on": "2025-08-12T12:03:51.341274+00:00",
+  "updated_on": "2025-08-12T15:37:16.501126+00:00",
+  "size": 117160,
+  "language": "go",
+  "uuid": "{cbddcb41-064e-4190-9685-c0540c2ec622}",
+  "mainbranch": {
+    "name": "niam",
+    "type": "branch"
+  },
+  "override_settings": {
+    "default_merge_strategy": true,
+    "branching_model": true
+  },
+  "parent": null,
+  "enforced_signed_commits": null,
+  "has_issues": false,
+  "has_wiki": false
+}
