@@ -155,6 +155,7 @@ func (pipelineV031) TableName() string { return "pipelines" }
 // longer has are not copied.
 var removeSQLiteLegacyInlineUnique = xormigrate.Migration{
 	ID: "remove-sqlite-legacy-inline-unique",
+	Long: true,
 	MigrateSession: func(sess *xorm.Session) error {
 		if sess.Engine().Dialect().URI().DBType != schemas.SQLITE {
 			return nil
