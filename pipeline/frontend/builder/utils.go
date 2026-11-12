@@ -15,6 +15,7 @@
 package builder
 
 import (
+	"errors"
 	"path/filepath"
 	"strings"
 
@@ -24,6 +25,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 )
+
+// compilerError marks err as a compiler error of the given workflow file.
+// An error that already is a pipeline error is reused so its type is not repeated in the message.
+func compilerError(err error, file string) error {
+	pipelineErr, ok := errors.AsType[*pipeline_errors.PipelineError](err)
+	if !ok {
+		pipelineErr = &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+	}
+	pipelineErr.Data = &pipeline_errors.CompilerErrorData{File: file}
+	return pipelineErr
+}
 
 func SanitizePath(path string) string {
 	path = filepath.Base(path)
@@ -136,7 +148,7 @@ func (b *PipelineBuilder) selectYamls(name string) ([]*YamlFile, error) {
 func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.DependsOn, error) {
 	axes, err := matrix.Parse(file.Data)
 	if err != nil {
-		return nil, err
+		return nil, compilerError(err, SanitizePath(file.Name))
 	}
 	if len(axes) == 0 {
 		axes = append(axes, matrix.Axis{})
@@ -148,11 +160,11 @@ func (b *PipelineBuilder) workflowDependencies(file *YamlFile) (constraint.Depen
 		environ := b.environmentVariables(b.GetWorkflowMetadata(workflow), axis)
 		substituted, err := metadata.EnvVarSubst(string(file.Data), environ)
 		if err != nil {
-			return nil, err
+			return nil, compilerError(err, workflow.Name)
 		}
 		parsed, err := yaml.ParseString(substituted)
 		if err != nil {
-			return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+			return nil, compilerError(err, workflow.Name)
 		}
 		dependencies = append(dependencies, parsed.DependsOn...)
 	}

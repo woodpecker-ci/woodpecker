@@ -43,6 +43,11 @@ type RPCServer struct {
 	Impl forge.Forge
 }
 
+func (s *RPCServer) Close(_ []byte, resp *[]byte) error {
+	*resp = []byte{}
+	return s.Impl.Close()
+}
+
 func (s *RPCServer) Name(_ []byte, resp *string) error {
 	*resp = s.Impl.Name()
 	return nil

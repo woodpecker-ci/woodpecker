@@ -35,8 +35,8 @@ func TestConvertStatus(t *testing.T) {
 	assert.Equal(t, statusFailure, convertStatus(model.StatusKilled))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusError))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusDeclined))
-	assert.Equal(t, statusFailure, convertStatus(model.StatusSkipped))
-	assert.Equal(t, statusFailure, convertStatus(model.StatusCanceled))
+	assert.Equal(t, statusStopped, convertStatus(model.StatusSkipped))
+	assert.Equal(t, statusStopped, convertStatus(model.StatusCanceled))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusValue("bogus")))
 }
 
