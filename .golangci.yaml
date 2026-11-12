@@ -182,6 +182,10 @@ linters:
         - pkg: log
           alias: std_log
 
+        # forge sdks
+        - pkg: gitea.dev/sdk
+          alias: gitea
+
         # grpc / protobuf
         - pkg: google.golang.org/grpc/metadata
           alias: grpc_metadata
