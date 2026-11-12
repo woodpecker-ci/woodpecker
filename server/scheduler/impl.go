@@ -111,7 +111,7 @@ func (p *impl) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) 
 //
 
 // PublishPipelineEvent builds a pipeline state-change event and publishes it
-// to the repo topic (and the public topic for public repos).
+// to the repo topic (and the public topic for public projects).
 func (p *impl) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
 	data, err := json.Marshal(model.Event{
 		Repo:     *repo,
@@ -127,8 +127,9 @@ func (p *impl) PublishPipelineEvent(c context.Context, repo *model.Repo, pipelin
 	}
 
 	subTopics := make(pubsub.Topics)
-	// if repo is public, push to public topic
-	if !repo.IsSCMPrivate {
+	// The public topic is read without login, so only public projects go there.
+	// Use the project visibility, not the forge repo privacy, as they can differ.
+	if repo.Visibility == model.VisibilityPublic {
 		subTopics[pubsub.PublicTopic] = struct{}{}
 	}
 	// publish to repo specific topic
