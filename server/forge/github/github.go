@@ -646,6 +646,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"pull_request_review",
 			"deployment",
+			"release",
 		},
 		Config: &github.HookConfig{
 			URL:         &link,

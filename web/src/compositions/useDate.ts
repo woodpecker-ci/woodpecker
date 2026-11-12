@@ -58,21 +58,29 @@ function timeAgo(date: number) {
 }
 
 function prettyDuration(durationMs: number) {
-  const t = splitDuration(durationMs);
+  const formatter = new Intl.DurationFormat(currentLocale, { style: 'long' });
 
-  if (t.totalHours > 1) {
-    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'hour', unitDisplay: 'long' }).format(
-      Math.round(t.totalHours),
-    );
+  const totalSeconds = Math.round(durationMs / 1000);
+  if (totalSeconds < 60) {
+    // secondsDisplay keeps "0 seconds" instead of an empty string.
+    return new Intl.DurationFormat(currentLocale, { style: 'long', secondsDisplay: 'always' }).format({
+      seconds: totalSeconds,
+    });
   }
-  if (t.totalMinutes > 1) {
-    return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(
-      Math.round(t.totalMinutes),
-    );
+
+  const totalMinutes = Math.round(durationMs / (60 * 1000));
+  if (totalMinutes < 60) {
+    return formatter.format({ minutes: totalMinutes });
   }
-  return new Intl.NumberFormat(currentLocale, { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(
-    Math.round(t.totalSeconds),
-  );
+
+  // From one hour on, only show the minutes when a full hour is more than
+  // 5 minutes away, so 1h15m reads "1 hour, 15 minutes", 1h2m reads
+  // "1 hour" and 1h57m reads "2 hours".
+  const minutes = totalMinutes % 60;
+  if (minutes > 5 && minutes < 55) {
+    return formatter.format({ hours: Math.floor(totalMinutes / 60), minutes });
+  }
+  return formatter.format({ hours: Math.round(totalMinutes / 60) });
 }
 
 function durationAsNumber(durationMs: number): string {
