@@ -15,6 +15,9 @@
 package migration
 
 import (
+	"context"
+	"encoding/json"
+
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
@@ -23,8 +26,7 @@ import (
 var perPage005 = 100
 
 var convertToNewPipelineErrorFormat = xormigrate.Migration{
-	ID:   "convert-to-new-pipeline-error-format",
-	Long: true,
+	ID: "convert-to-new-pipeline-error-format",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type pipelineError struct {
 			Type      string `json:"type"`
@@ -39,31 +41,45 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 			Errors []*pipelineError `json:"errors" xorm:"json 'pipeline_errors'"`    // new error format
 		}
 
-		// make sure pipeline_error column exists
-		if err := sess.Sync(new(pipelines)); err != nil {
+		// This migration was Long, so it can run before or after migration
+		// unify-columns-tables renamed pipeline_id and pipeline_errors.
+		dialect := sess.Engine().Dialect()
+		oldNames, err := dialect.IsColumnExist(sess.Engine().DB(), context.Background(), "pipelines", "pipeline_id")
+		if err != nil {
+			return err
+		}
+		idCol, errorsCol := "id", "errors"
+		if oldNames {
+			idCol, errorsCol = "pipeline_id", "pipeline_errors"
+			// make sure pipeline_error column exists
+			if err := sess.Sync(new(pipelines)); err != nil {
+				return err
+			}
+		} else if exist, err := dialect.IsColumnExist(sess.Engine().DB(), context.Background(), "pipelines", "pipeline_error"); err != nil || !exist {
 			return err
 		}
 
 		page := 0
-		oldPipelines := make([]*pipelines, 0, perPage005)
-
 		for {
-			oldPipelines = oldPipelines[:0]
-
-			err := sess.Limit(perPage005, page*perPage005).Cols("pipeline_id", "pipeline_error").Where("pipeline_error != ''").Find(&oldPipelines)
+			var oldPipelines []struct {
+				ID    int64  `xorm:"'id'"`
+				Error string `xorm:"'pipeline_error'"`
+			}
+			err := sess.SQL("SELECT "+idCol+" AS id, pipeline_error FROM pipelines WHERE pipeline_error != '' ORDER BY "+idCol+" LIMIT ? OFFSET ?", perPage005, page*perPage005).Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
 
 			for _, oldPipeline := range oldPipelines {
-				var newPipeline pipelines
-				newPipeline.ID = oldPipeline.ID
-				newPipeline.Errors = []*pipelineError{{
+				newErrors, err := json.Marshal([]*pipelineError{{
 					Type:    "generic",
 					Message: oldPipeline.Error,
-				}}
+				}})
+				if err != nil {
+					return err
+				}
 
-				if _, err := sess.ID(oldPipeline.ID).Cols("pipeline_errors").Update(newPipeline); err != nil {
+				if _, err := sess.Exec("UPDATE pipelines SET "+errorsCol+" = ? WHERE "+idCol+" = ?", string(newErrors), oldPipeline.ID); err != nil {
 					return err
 				}
 			}
