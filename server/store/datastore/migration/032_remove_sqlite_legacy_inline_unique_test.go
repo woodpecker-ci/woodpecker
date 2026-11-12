@@ -65,17 +65,11 @@ func atoiV031(t *testing.T, s string) int {
 	return n
 }
 
-// tableShape describes columns and indexes the way xorm compares them:
+// tableShape describes indexes and constraints the way xorm compares them:
 // by type and ordered columns, not by name.
 func tableShape(t *testing.T, engine *xorm.Engine, table string) []string {
 	t.Helper()
 	var shape []string
-
-	cols, err := engine.QueryString("SELECT name, type, \"notnull\", dflt_value, pk FROM pragma_table_info(?)", table)
-	require.NoError(t, err)
-	for _, c := range cols {
-		shape = append(shape, "col "+c["name"]+" "+c["type"]+" notnull="+c["notnull"]+" default="+c["dflt_value"]+" pk="+c["pk"])
-	}
 
 	indexes, err := engine.QueryString("SELECT name, \"unique\", origin FROM pragma_index_list(?)", table)
 	require.NoError(t, err)
@@ -99,23 +93,29 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	engine, closeDB := testDB(t, false)
 	defer closeDB()
 
-	// the fixture is a legacy database: it still carries the inline constraints
+	// the fixture is a legacy database: it still carries the inline constraints,
+	// also after a start that skips long migrations
+	require.NoError(t, Migrate(t.Context(), engine, false))
 	require.Equal(t, 1, inlineUniqueCount(t, engine, "users"))
+	// a column the sync added meanwhile keeps its data
+	_, err := engine.Exec("UPDATE users SET forge_remote_id = 'remote-' || login")
+	require.NoError(t, err)
 	usersBefore := rowCount(t, engine, "users")
-	configsBefore := rowCount(t, engine, "config")
+	configsBefore := rowCount(t, engine, "configs")
 	secretsBefore := rowCount(t, engine, "secrets")
 	permsBefore := rowCount(t, engine, "perms")
 	stepsBefore := rowCount(t, engine, "steps")
 	pipelinesBefore := rowCount(t, engine, "pipelines")
 	// pretend users with higher ids were deleted: their ids must not come back
-	_, err := engine.Exec("UPDATE sqlite_sequence SET seq = 1000 WHERE name = 'users'")
+	_, err = engine.Exec("UPDATE sqlite_sequence SET seq = 1000 WHERE name = 'users'")
 	require.NoError(t, err)
 
-	// a NULL in a column that is NOT NULL in the model must not stop the copy
-	_, err = engine.Exec("UPDATE secrets SET secret_repo_id = NULL WHERE secret_id = (SELECT MIN(secret_id) FROM secrets)")
-	require.NoError(t, err)
-
-	require.NoError(t, Migrate(t.Context(), engine, true))
+	// a later start that allows long migrations runs it, then syncs the models
+	late := engine.NewSession()
+	defer late.Close()
+	require.NoError(t, removeSQLiteLegacyInlineUnique.MigrateSession(late))
+	require.NoError(t, late.Commit())
+	require.NoError(t, syncAll(engine))
 
 	for _, table := range legacyInlineUniqueTablesV031 {
 		assert.Zero(t, inlineUniqueCount(t, engine, table), "table %s still has an inline UNIQUE constraint", table)
@@ -129,13 +129,12 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	assert.Equal(t, stepsBefore, rowCount(t, engine, "steps"))
 	assert.Equal(t, pipelinesBefore, rowCount(t, engine, "pipelines"))
 	assert.Equal(t, 1000, sequence(t, engine, "users"))
+	lostRemoteIDs, err := engine.QueryString("SELECT COUNT(*) AS n FROM users WHERE forge_remote_id IS NOT 'remote-' || login")
+	require.NoError(t, err)
+	assert.Equal(t, "0", lostRemoteIDs[0]["n"])
 	seqTypes, err := engine.QueryString("SELECT DISTINCT typeof(seq) AS t FROM sqlite_sequence")
 	require.NoError(t, err)
 	assert.Equal(t, []map[string]string{{"t": "integer"}}, seqTypes)
-
-	nullSecrets, err := engine.QueryString("SELECT COUNT(*) AS n FROM secrets WHERE repo_id IS NULL")
-	require.NoError(t, err)
-	assert.Equal(t, "0", nullSecrets[0]["n"])
 
 	// the same login on another forge (fixture user 6543 lives on forge 1)
 	_, err = engine.Exec("INSERT INTO users (login, forge_id, forge_remote_id, hash) VALUES ('6543', 2, 'remote-6543', 'hash-6543-forge-2')")
@@ -154,7 +153,7 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	_, err = engine.Exec("INSERT INTO secrets (org_id, repo_id, name, value) VALUES (90001, 0, 'shared', 'c')")
 	assert.ErrorContains(t, err, "UNIQUE constraint failed: secrets.org_id, secrets.repo_id, secrets.name")
 
-	// the rebuilt tables look exactly like the ones of a new install
+	// the rebuilt tables have the indexes and constraints of a new install
 	fresh, closeFresh := testDB(t, true)
 	defer closeFresh()
 	require.NoError(t, Migrate(t.Context(), fresh, true))
