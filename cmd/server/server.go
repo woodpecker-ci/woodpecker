@@ -42,6 +42,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/finalizer"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/web"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -136,6 +137,28 @@ func run(ctx context.Context, c *cli.Command) error {
 			return err
 		}
 		log.Info().Msg("cron service stopped")
+		return nil
+	})
+
+	serviceWaitingGroup.Go(func() error {
+		log.Info().Msg("starting log finalizer ...")
+		f := &finalizer.Finalizer{
+			Store:    _store,
+			Logs:     server.Config.Services.LogStore,
+			Interval: c.Duration("log-store-finalizer-interval"),
+			Batch:    c.Int("log-store-finalizer-batch"),
+			Paused:   c.Bool("log-store-finalizer-pause"),
+		}
+		if err := f.Run(ctx); err != nil {
+			go stopServerFunc(err)
+			return err
+		}
+		log.Info().Msg("log finalizer stopped")
+		return nil
+	})
+
+	serviceWaitingGroup.Go(func() error {
+		finalizer.RecoverClaims(ctx, _store)
 		return nil
 	})
 

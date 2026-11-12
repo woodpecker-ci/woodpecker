@@ -35,22 +35,12 @@ type Fixtures struct {
 	Repo  *model.Repo
 }
 
-// newStore creates a fully-migrated in-memory sqlite store.
+// newStore creates a fully-migrated store, see datastore.TestStoreOpts.
 func newStore(ctx context.Context, t *testing.T) store.Store {
 	t.Helper()
 
-	s, err := datastore.NewEngine(&store.Opts{
-		Driver: "sqlite3",
-		Config: ":memory:",
-		// MaxOpenConns=1 and MaxIdleConns=1 are required for in-memory sqlite:
-		// without them the pool drops idle connections, destroying the in-memory
-		// schema between calls and breaking migrations.
-		XORM: store.XORM{
-			MaxOpenConns: 1,
-			MaxIdleConns: 1,
-		},
-	})
-	require.NoError(t, err, "create in-memory store")
+	s, err := datastore.NewEngine(datastore.TestStoreOpts(t))
+	require.NoError(t, err, "create store")
 
 	require.NoError(t, s.Ping(), "ping store")
 	require.NoError(t, s.Migrate(ctx, true), "migrate store")

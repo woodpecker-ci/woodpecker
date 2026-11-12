@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
@@ -84,6 +85,30 @@ func TestStepUpdate(t *testing.T) {
 	updated, err := store.StepByUUID(uuid)
 	assert.NoError(t, err)
 	assert.Equal(t, model.StatusRunning, updated.State)
+}
+
+// TestStepUpdateKeepsLogState ensures a step loaded before the log finalizer claimed it
+// does not reset the log state when written back.
+func TestStepUpdateKeepsLogState(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step), new(model.Pipeline))
+	defer closer()
+
+	step := &model.Step{UUID: "late-update", PipelineID: 1, PID: 1, Name: "build", State: model.StatusRunning}
+	sess := store.engine.NewSession()
+	require.NoError(t, store.stepCreate(sess, []*model.Step{step}))
+	require.NoError(t, sess.Commit())
+
+	claim := *step
+	claimed, err := store.StepLogStateSwap(t.Context(), &claim, model.LogStateFinalizing)
+	require.NoError(t, err)
+	require.True(t, claimed)
+	step.State = model.StatusSuccess
+	require.NoError(t, store.StepUpdate(step))
+
+	updated, err := store.StepByUUID("late-update")
+	require.NoError(t, err)
+	assert.Equal(t, model.StatusSuccess, updated.State)
+	assert.Equal(t, model.LogStateFinalizing, updated.LogState)
 }
 
 func TestStepIndexes(t *testing.T) {

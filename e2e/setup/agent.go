@@ -47,6 +47,9 @@ type AgentEnv struct {
 	// Valid only after WaitForAgentRegistered returns.
 	AgentID int64
 
+	// Peer is the agent's connection to the server, e.g. to send log lines like a late agent.
+	Peer rpc.Peer
+
 	// name is used for logging and as the hostname label.
 	name string
 }
@@ -171,6 +174,7 @@ func StartAgent(t *testing.T, grpcAddr string, opts ...AgentOption) *AgentEnv {
 	t.Cleanup(agentConn.Close)
 
 	client := agent_rpc.NewGrpcClient(agentCtx, agentConn.MainConn)
+	env.Peer = client
 
 	grpcCtx := metadata.NewOutgoingContext(agentCtx, metadata.Pairs("hostname", cfg.hostname))
 

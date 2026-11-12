@@ -25,9 +25,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
-
-const logStreamDelayAllowed = 5 * time.Minute
 
 func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, p *model.Pipeline, repo *model.Repo) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
@@ -188,12 +187,18 @@ func checkWorkflowState(state model.StatusValue) (err error) {
 }
 
 func allowAppendingLogs(currPipeline *model.Pipeline, currStep *model.Step) error {
+	// A log claimed or finalized is complete and may already be packed, moved or deleted.
+	if currStep.LogState != model.LogStateOpen {
+		err := ErrAgentIllegalLogStreaming
+		log.Error().Err(err).Msg("caught agent performing illegal instruction")
+		return err
+	}
 	// As long as pipeline is running just let the agent send logs
 	if currStep.State == model.StatusRunning || currPipeline.Status == model.StatusRunning {
 		return nil
 	}
 	// else give some delay where log caches can drain and be send ... because of network outage / server restart / ...
-	if time.Unix(max(currPipeline.Finished, currStep.Finished), 0).Add(logStreamDelayAllowed).After(time.Now()) {
+	if time.Unix(max(currPipeline.Finished, currStep.Finished), 0).Add(service_log.StreamDelayAllowed).After(time.Now()) {
 		return nil
 	}
 
