@@ -30,6 +30,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v3/server/metric"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -40,6 +41,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	scheduler_mocks "go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -444,7 +446,28 @@ func TestRPCUpdate(t *testing.T) {
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "does not belong to current pipeline")
+		assert.Contains(t, err.Error(), "does not belong to current workflow")
+	})
+
+	t.Run("reject step of another workflow in the same pipeline", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		agent := defaultAgent()
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusRunning)
+		step := defaultStep(model.StatusRunning)
+		step.PPID = workflow.PID + 1 // step of a sibling workflow
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123", Exited: true})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "does not belong to current workflow")
 	})
 
 	t.Run("reject agent from wrong org", func(t *testing.T) {
@@ -570,6 +593,41 @@ func TestRPCInit(t *testing.T) {
 		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Init(ctx, "30", rpc.WorkflowState{Started: 100})
+		assert.NoError(t, err)
+	})
+
+	t.Run("sends the forge status once, as running", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		agent := defaultAgent()
+		repo := defaultRepo()
+		repo.UserID = 40
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusPending)
+		user := &model.User{ID: 40, Expiry: time.Now().Add(time.Hour).Unix()}
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
+		mockStore.On("GetUser", int64(40)).Return(user, nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
+		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
+
+		forge := forge_mocks.NewMockForge(t)
+		forge.EXPECT().Status(mock.Anything, user, repo, mock.Anything, mock.MatchedBy(func(w *model.Workflow) bool {
+			return w.ID == 30 && w.State == model.StatusRunning
+		})).Return(nil).Once()
+		manager := manager_mocks.NewMockManager(t)
+		manager.EXPECT().ForgeFromRepo(repo).Return(forge, nil)
+		origManager := server.Config.Services.Manager
+		server.Config.Services.Manager = manager
+		t.Cleanup(func() { server.Config.Services.Manager = origManager })
 
 		rpcInst := newTestRPC(t, mockStore, nil)
 		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))

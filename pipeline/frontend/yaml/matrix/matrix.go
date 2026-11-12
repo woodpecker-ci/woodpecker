@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	limitVariables = 10
+	limitVariables = 64
 	maxWorkflows   = 64
 )
 

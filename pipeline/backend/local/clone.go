@@ -17,18 +17,27 @@ package local
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
+
+// pluginGitReleaseAPI is the GitHub API endpoint of the plugin-git releases (overridden in tests).
+var pluginGitReleaseAPI = "https://api.github.com/repos/woodpecker-ci/plugin-git/releases"
+
+// errNotFound is returned by httpGet on a 404 response.
+var errNotFound = errors.New("not found")
 
 // checkGitCloneCap check if we have the git binary on hand.
 func checkGitCloneCap() error {
@@ -58,7 +67,7 @@ func (e *local) setupClone(ctx context.Context, state *workflowState) error {
 	if e.os == "windows" {
 		state.pluginGitBinary += ".exe"
 	}
-	return e.downloadLatestGitPluginBinary(ctx, state.pluginGitBinary)
+	return e.downloadGitPluginBinary(ctx, state.pluginGitBinary)
 }
 
 // execClone executes a clone-step locally.
@@ -140,63 +149,82 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 	return rmCmd, os.WriteFile(file, []byte(genNetRC(step.Environment)), 0o600)
 }
 
-// downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
-// and saves it to dest.
-func (e *local) downloadLatestGitPluginBinary(ctx context.Context, dest string) error {
-	type asset struct {
-		Name               string
-		BrowserDownloadURL string `json:"browser_download_url"`
+// downloadGitPluginBinary downloads the plugin-git binary of the configured release for the
+// runtime OS and Arch and saves it to dest.
+func (e *local) downloadGitPluginBinary(ctx context.Context, dest string) error {
+	version := e.pluginGitVersion
+	if version == "" {
+		version = "latest"
 	}
 
-	type release struct {
-		Assets []asset
+	releaseURL := pluginGitReleaseAPI + "/latest"
+	if version != "latest" {
+		releaseURL = pluginGitReleaseAPI + "/tags/" + url.PathEscape(version)
 	}
 
-	// get latest release
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/repos/woodpecker-ci/plugin-git/releases/latest", nil)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	resp, err := http.DefaultClient.Do(req)
+	raw, err := httpGet(ctx, releaseURL)
+	if errors.Is(err, errNotFound) {
+		return fmt.Errorf("plugin-git release '%s' does not exist", version)
+	}
 	if err != nil {
-		return fmt.Errorf("could not get latest release: %w", err)
+		return fmt.Errorf("could not get plugin-git release '%s': %w", version, err)
 	}
-	raw, _ := io.ReadAll(resp.Body)
-	_ = resp.Body.Close()
-	var rel release
-	if err := json.Unmarshal(raw, &rel); err != nil {
+
+	var release struct {
+		Assets []struct {
+			Name               string `json:"name"`
+			BrowserDownloadURL string `json:"browser_download_url"`
+		} `json:"assets"`
+	}
+	if err := json.Unmarshal(raw, &release); err != nil {
 		return fmt.Errorf("could not unmarshal github response: %w", err)
 	}
 
-	for _, at := range rel.Assets {
-		if strings.Contains(at.Name, e.os) && strings.Contains(at.Name, e.arch) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, at.BrowserDownloadURL, nil)
-			if err != nil {
-				return err
-			}
-			assetResp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				return fmt.Errorf("could not download plugin-git: %w", err)
-			}
-			defer assetResp.Body.Close()
-
-			file, err := os.Create(dest)
-			if err != nil {
-				return fmt.Errorf("could not create plugin-git: %w", err)
-			}
-			defer file.Close()
-
-			if _, err := io.Copy(file, assetResp.Body); err != nil {
-				return fmt.Errorf("could not download plugin-git: %w", err)
-			}
-			if err := os.Chmod(dest, 0o755); err != nil {
-				return err
-			}
-
-			// download successful
-			log.Trace().Msgf("download of 'plugin-git' to '%s' successful", dest)
-			return nil
+	for _, asset := range release.Assets {
+		if !matchesPlatform(asset.Name, e.os, e.arch) {
+			continue
 		}
+
+		binary, err := httpGet(ctx, asset.BrowserDownloadURL)
+		if err != nil {
+			return fmt.Errorf("could not download plugin-git: %w", err)
+		}
+		if err := os.WriteFile(dest, binary, 0o755); err != nil {
+			return fmt.Errorf("could not write plugin-git: %w", err)
+		}
+
+		log.Trace().Msgf("download of 'plugin-git' %s to '%s' successful", version, dest)
+		return nil
 	}
 
-	return fmt.Errorf("could not download plugin-git, binary for this os/arch not found")
+	return fmt.Errorf("plugin-git release '%s' has no binary for %s/%s", version, e.os, e.arch)
+}
+
+// matchesPlatform reports whether an asset name contains os and arch as separate parts,
+// so "linux-arm_plugin-git" matches linux/arm but "linux-arm64_plugin-git" does not.
+func matchesPlatform(name, os, arch string) bool {
+	parts := strings.FieldsFunc(name, func(r rune) bool {
+		return r == '-' || r == '_' || r == '.'
+	})
+	return slices.Contains(parts, os) && slices.Contains(parts, arch)
+}
+
+// httpGet returns the body of a GET request and fails on non-200 responses.
+func httpGet(ctx context.Context, url string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("GET %s: %w", url, errNotFound)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GET %s: unexpected status %s", url, resp.Status)
+	}
+	return io.ReadAll(resp.Body)
 }
