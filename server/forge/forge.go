@@ -60,6 +60,9 @@ type Forge interface {
 	// Must be unique and constant across all implementations.
 	Name() string
 
+	// Close releases resources held by this forge instance.
+	Close() error
+
 	// Config returns the metadata of the forge instance.
 	Config() metadata.Forge
 

@@ -15,11 +15,14 @@
 package services
 
 import (
+	"context"
 	"crypto"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -47,6 +50,7 @@ type Manager interface {
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
 	ForgeByID(forgeID int64) (forge.Forge, error)
+	RemoveForge(forgeID int64)
 }
 
 type manager struct {
@@ -60,6 +64,24 @@ type manager struct {
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
 	client              *utils.Client
+	// forgeMu serializes creating and removing forge instances, so that
+	// no instance gets replaced in the cache without being closed.
+	forgeMu sync.Mutex
+}
+
+// newForgeCache returns a forge cache that closes every forge it evicts.
+// Eviction callbacks run in their own goroutine, so a slow Close (an addon
+// waiting for in-flight calls) does not block the caller.
+// Hits restart the TTL, so a forge in use is not set up again every
+// forgeCacheTTL; config changes are applied through RemoveForge.
+func newForgeCache() *ttlcache.Cache[int64, forge.Forge] {
+	c := ttlcache.New[int64, forge.Forge]()
+	c.OnEviction(func(_ context.Context, _ ttlcache.EvictionReason, item *ttlcache.Item[int64, forge.Forge]) {
+		if err := item.Value().Close(); err != nil {
+			log.Error().Err(err).Int64("forge-id", item.Key()).Msg("failed to close forge")
+		}
+	})
+	return c
 }
 
 func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -83,6 +105,11 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
+	forgeCache := newForgeCache()
+	// evict (and so close) expired forges even if they are never asked for
+	// again, so an unused addon process does not keep running
+	go forgeCache.Start()
+
 	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
@@ -91,7 +118,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
-		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+		forgeCache:          forgeCache,
 		setupForge:          setupForge,
 		client:              client,
 	}, nil
@@ -148,10 +175,23 @@ func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 }
 
 func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
-	item := m.forgeCache.Get(id)
-	if item != nil && !item.IsExpired() {
+	// ttlcache is safe for concurrent use, so cache hits need no lock of ours
+	// and do not wait for a slow setup of another forge.
+	if item := m.forgeCache.Get(id); item != nil {
 		return item.Value(), nil
 	}
+
+	m.forgeMu.Lock()
+	defer m.forgeMu.Unlock()
+
+	// another call may have created the forge while we waited for the lock
+	if item := m.forgeCache.Get(id); item != nil {
+		return item.Value(), nil
+	}
+
+	// Get does not return expired items, but they stay in the cache and Set
+	// would overwrite them without an eviction. Delete evicts (and closes) them.
+	m.forgeCache.Delete(id)
 
 	forgeModel, err := m.store.ForgeGet(id)
 	if err != nil {
@@ -166,4 +206,11 @@ func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
 	m.forgeCache.Set(id, forge, forgeCacheTTL)
 
 	return forge, nil
+}
+
+func (m *manager) RemoveForge(id int64) {
+	m.forgeMu.Lock()
+	defer m.forgeMu.Unlock()
+
+	m.forgeCache.Delete(id)
 }
