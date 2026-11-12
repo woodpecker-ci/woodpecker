@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/rs/zerolog/log"
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
@@ -118,6 +119,14 @@ func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 		return err
 	}
 
+	pending, err := pendingLongMigrations(e)
+	if err != nil {
+		return err
+	}
+	for _, id := range pending {
+		log.Warn().Msgf("long migration '%s' has not run yet, set WOODPECKER_MIGRATIONS_ALLOW_LONG to run it", id)
+	}
+
 	e.SetDisableGlobalCache(false)
 
 	if err := syncAll(e); err != nil {
@@ -125,6 +134,24 @@ func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	}
 
 	return nil
+}
+
+// pendingLongMigrations returns the IDs of long migrations that have not run yet.
+func pendingLongMigrations(e *xorm.Engine) ([]string, error) {
+	var pending []string
+	for _, task := range migrationTasks {
+		if !task.Long {
+			continue
+		}
+		done, err := e.In("id", task.ID).Count(new(xormigrate.Migration))
+		if err != nil {
+			return nil, err
+		}
+		if done == 0 {
+			pending = append(pending, task.ID)
+		}
+	}
+	return pending, nil
 }
 
 func syncAll(sess *xorm.Engine) error {

@@ -166,3 +166,25 @@ func TestMigrate(t *testing.T) {
 	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
 }
+
+func TestPendingLongMigrations(t *testing.T) {
+	// a new install marks all migrations as done
+	engine, closeDB := testDB(t, true)
+	require.NoError(t, Migrate(t.Context(), engine, false))
+	pending, err := pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Empty(t, pending)
+	closeDB()
+
+	engine, closeDB = testDB(t, false)
+	defer closeDB()
+	require.NoError(t, Migrate(t.Context(), engine, false))
+	pending, err = pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Contains(t, pending, removeSQLiteLegacyInlineUnique.ID)
+
+	require.NoError(t, Migrate(t.Context(), engine, true))
+	pending, err = pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Empty(t, pending)
+}
