@@ -41,9 +41,15 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 			Errors []*pipelineError `json:"errors" xorm:"json 'pipeline_errors'"`    // new error format
 		}
 
+		// nothing to convert without the old column
+		dialect := sess.Engine().Dialect()
+		oldColumn, err := dialect.IsColumnExist(sess.Engine().DB(), context.Background(), "pipelines", "pipeline_error")
+		if err != nil || !oldColumn {
+			return err
+		}
+
 		// This migration was Long, so it can run before or after migration
 		// unify-columns-tables renamed pipeline_id and pipeline_errors.
-		dialect := sess.Engine().Dialect()
 		oldNames, err := dialect.IsColumnExist(sess.Engine().DB(), context.Background(), "pipelines", "pipeline_id")
 		if err != nil {
 			return err
@@ -51,12 +57,10 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 		idCol, errorsCol := "id", "errors"
 		if oldNames {
 			idCol, errorsCol = "pipeline_id", "pipeline_errors"
-			// make sure pipeline_error column exists
+			// make sure pipeline_errors column exists
 			if err := sess.Sync(new(pipelines)); err != nil {
 				return err
 			}
-		} else if exist, err := dialect.IsColumnExist(sess.Engine().DB(), context.Background(), "pipelines", "pipeline_error"); err != nil || !exist {
-			return err
 		}
 
 		page := 0

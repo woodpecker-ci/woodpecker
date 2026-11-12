@@ -59,6 +59,16 @@ func TestConvertToNewPipelineErrorFormat(t *testing.T) {
 		assertConverted(t, engine, old)
 	})
 
+	t.Run("without the old column", func(t *testing.T) {
+		engine, closeDB := testDB(t, false)
+		defer closeDB()
+		_, err := engine.Exec("ALTER TABLE pipelines DROP COLUMN pipeline_error")
+		require.NoError(t, err)
+
+		require.NoError(t, Migrate(t.Context(), engine, false))
+		assertConverted(t, engine, nil)
+	})
+
 	t.Run("after the columns were renamed", func(t *testing.T) {
 		engine, closeDB := testDB(t, false)
 		defer closeDB()
