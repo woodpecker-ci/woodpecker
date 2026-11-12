@@ -720,8 +720,9 @@ func TestFifoFilterWaiting(t *testing.T) {
 		{
 			name: "only changed tasks move and keep their order",
 			pending: []*model.Task{
+				{ID: "newly-blocked-1", Dependencies: []string{"root"}},
 				{ID: "ready"},
-				{ID: "newly-blocked", Dependencies: []string{"root"}},
+				{ID: "newly-blocked-2", Dependencies: []string{"root"}},
 			},
 			waiting: []*model.Task{
 				{ID: "still-blocked", Dependencies: []string{"root"}},
@@ -729,7 +730,7 @@ func TestFifoFilterWaiting(t *testing.T) {
 			},
 			running: []string{"root"},
 			ready:   []string{"ready", "released"},
-			blocked: []string{"newly-blocked", "still-blocked"},
+			blocked: []string{"newly-blocked-1", "newly-blocked-2", "still-blocked"},
 		},
 		{
 			name: "cycles remain blocked",
@@ -755,6 +756,14 @@ func TestFifoFilterWaiting(t *testing.T) {
 			}
 			for _, id := range tt.running {
 				q.running[id] = &entry{item: &model.Task{ID: id}}
+			}
+			q.queuedIDs = make(map[string]struct{})
+			for _, tasks := range [][]*model.Task{tt.pending, tt.waiting} {
+				for _, task := range tasks {
+					for _, dep := range task.Dependencies {
+						q.queuedIDs[dep] = struct{}{}
+					}
+				}
 			}
 			ids := func(tasks *list.List) []string {
 				var result []string
@@ -844,7 +853,7 @@ func TestFifoAssignToWorker(t *testing.T) {
 				q.workers[&worker{agentID: agent, filter: filter}] = struct{}{}
 			}
 
-			element, worker := q.assignToWorker()
+			element, worker := q.assignToWorker(&concurrencyIndex{queue: q})
 			if tt.task == "" {
 				assert.Nil(t, element)
 				assert.Nil(t, worker)
@@ -876,8 +885,12 @@ func TestFifoConcurrencySlots(t *testing.T) {
 			task:    "b",
 		},
 		{
-			name:    "earlier waiting pipeline reserves the slot",
-			pending: []*model.Task{member("late", 2, 2, 1)},
+			name: "earlier waiting pipeline reserves the slot",
+			pending: []*model.Task{
+				// matrix workflows of one pipeline share the same name
+				{ID: "late-1", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+				{ID: "late-2", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+			},
 			waiting: []*model.Task{member("early", 1, 1, 1)},
 		},
 		{
@@ -907,7 +920,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 		},
 		{
 			name:    "free slot is granted",
-			pending: []*model.Task{member("next", 3, 3, 2)},
+			pending: []*model.Task{member("next", 3, 3, 2), member("strict", 4, 4, 1)},
 			running: []*model.Task{member("active", 2, 2, 2)},
 			task:    "next",
 		},
@@ -937,7 +950,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 				q.running[task.ID] = &entry{item: task}
 			}
 
-			element, _ := q.assignToWorker()
+			element, _ := q.assignToWorker(&concurrencyIndex{queue: q})
 			if tt.task == "" {
 				assert.Nil(t, element)
 				return

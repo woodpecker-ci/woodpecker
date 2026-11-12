@@ -101,6 +101,8 @@ func (c *client) Name() string {
 	return "github"
 }
 
+func (c *client) Close() error { return nil }
+
 // Config returns the metadata of the configured forge.
 func (c *client) Config() metadata.Forge {
 	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
@@ -644,6 +646,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"pull_request_review",
 			"deployment",
+			"release",
 		},
 		Config: &github.HookConfig{
 			URL:         &link,

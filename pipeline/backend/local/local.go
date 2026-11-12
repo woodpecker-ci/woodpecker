@@ -46,11 +46,12 @@ type stepState struct {
 }
 
 type local struct {
-	tempDir         string
-	isolatedHome    bool
-	workflows       sync.Map
-	pluginGitBinary string
-	os, arch        string
+	tempDir          string
+	isolatedHome     bool
+	workflows        sync.Map
+	pluginGitBinary  string
+	pluginGitVersion string
+	os, arch         string
 }
 
 var CLIWorkaroundExecAtDir string // To handle edge case for running local backend via cli exec
@@ -86,6 +87,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
 		e.isolatedHome = c.Bool("backend-local-isolated-home")
+		e.pluginGitVersion = c.String("backend-local-plugin-git-version")
 	}
 
 	e.loadClone()
