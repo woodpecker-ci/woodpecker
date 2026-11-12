@@ -30,6 +30,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
@@ -134,5 +135,67 @@ func TestSetPerm(t *testing.T) {
 		assert.False(t, stored.Admin)
 		// not marked as synced, so the next request asks the forge again
 		assert.Equal(t, synced, stored.Synced)
+	})
+
+	t.Run("activator keeps perm if the repo got deleted at the forge", func(t *testing.T) {
+		mgr := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromRepo", mock.Anything).Return(_forge, nil)
+		server.Config.Services.Manager = mgr
+
+		user := &model.User{ID: 13, Login: "dave", ForgeID: 2}
+		repo := &model.Repo{UserID: user.ID, Owner: "acme", Name: "orphan", FullName: "acme/orphan", ForgeID: 2, ForgeRemoteID: "8", IsActive: true}
+		require.NoError(t, s.CreateRepo(repo))
+		synced := time.Now().Add(-2 * time.Hour).Unix()
+		require.NoError(t, s.PermUpsert(&model.Perm{
+			UserID: user.ID, RepoID: repo.ID, Pull: true, Push: true, Admin: true, Synced: synced,
+		}))
+
+		_forge.On("Repo", mock.Anything, user, repo.ForgeRemoteID, repo.Owner, repo.Name).
+			Return(nil, forge_types.ErrRepoNotFound).Once()
+
+		c, _ := newCtx(user, repo)
+
+		SetPerm()(c)
+
+		perm := Perm(c)
+		require.NotNil(t, perm)
+		assert.True(t, perm.Pull)
+		assert.True(t, perm.Push)
+		assert.True(t, perm.Admin)
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		assert.True(t, stored.HasNoForgeRepo)
+	})
+
+	t.Run("other users fall back to read only if the repo got deleted at the forge", func(t *testing.T) {
+		mgr := manager_mocks.NewMockManager(t)
+		_forge := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromRepo", mock.Anything).Return(_forge, nil)
+		server.Config.Services.Manager = mgr
+
+		user := &model.User{ID: 14, Login: "erin", ForgeID: 2}
+		repo := &model.Repo{UserID: 99, Owner: "acme", Name: "orphan2", FullName: "acme/orphan2", ForgeID: 2, ForgeRemoteID: "9", IsActive: true}
+		require.NoError(t, s.CreateRepo(repo))
+		require.NoError(t, s.PermUpsert(&model.Perm{
+			UserID: user.ID, RepoID: repo.ID, Pull: true, Push: true, Admin: true,
+		}))
+
+		_forge.On("Repo", mock.Anything, user, repo.ForgeRemoteID, repo.Owner, repo.Name).
+			Return(nil, forge_types.ErrRepoNotFound).Once()
+
+		c, _ := newCtx(user, repo)
+
+		SetPerm()(c)
+
+		perm := Perm(c)
+		require.NotNil(t, perm)
+		assert.False(t, perm.Push)
+		assert.False(t, perm.Admin)
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		assert.False(t, stored.HasNoForgeRepo)
 	})
 }
