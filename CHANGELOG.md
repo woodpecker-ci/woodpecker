@@ -73,6 +73,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.48.0 [[#7550](https://github.com/woodpecker-ci/woodpecker/pull/7550)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.47.0 [[#7541](https://github.com/woodpecker-ci/woodpecker/pull/7541)]
 - Update golang-packages [[#7532](https://github.com/woodpecker-ci/woodpecker/pull/7532)]
