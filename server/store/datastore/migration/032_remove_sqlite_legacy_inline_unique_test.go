@@ -110,12 +110,8 @@ func TestMigrateRemovesSQLiteLegacyInlineUnique(t *testing.T) {
 	_, err = engine.Exec("UPDATE sqlite_sequence SET seq = 1000 WHERE name = 'users'")
 	require.NoError(t, err)
 
-	// a later start that allows long migrations runs it, then syncs the models
-	late := engine.NewSession()
-	defer late.Close()
-	require.NoError(t, removeSQLiteLegacyInlineUnique.MigrateSession(late))
-	require.NoError(t, late.Commit())
-	require.NoError(t, syncAll(engine))
+	// a later start that allows long migrations runs it
+	require.NoError(t, Migrate(t.Context(), engine, true))
 
 	for _, table := range legacyInlineUniqueTablesV031 {
 		assert.Zero(t, inlineUniqueCount(t, engine, table), "table %s still has an inline UNIQUE constraint", table)
