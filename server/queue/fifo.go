@@ -15,6 +15,7 @@
 package queue
 
 import (
+	"cmp"
 	"container/list"
 	"context"
 	"errors"
@@ -49,6 +50,7 @@ type fifo struct {
 	running       map[string]*entry
 	pending       *list.List
 	waitingOnDeps *list.List
+	queuedIDs     map[string]struct{} // reused by filterWaiting as scratchpad to have less gc
 	extension     time.Duration
 	paused        bool
 }
@@ -269,8 +271,10 @@ func (q *fifo) process() {
 
 		q.resubmitExpiredPipelines()
 		q.filterWaiting()
-		for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
+		concurrency := &concurrencyIndex{queue: q}
+		for pending, worker := q.assignToWorker(concurrency); pending != nil && worker != nil; pending, worker = q.assignToWorker(concurrency) {
 			task, _ := pending.Value.(*model.Task)
+			concurrency.start(task)
 			task.AgentID = worker.agentID
 			delete(q.workers, worker)
 			q.pending.Remove(pending)
@@ -285,45 +289,70 @@ func (q *fifo) process() {
 	}
 }
 
+// filterWaiting moves pending tasks whose dependencies are still queued or
+// running to waitingOnDeps, and waiting tasks whose dependencies have cleared
+// back to the tail of pending. Tasks that keep their state stay where they are,
+// so a steady queue is checked without moving anything.
+//
+// The result is ordered as if all waiting tasks were appended to pending and
+// the combined list was filtered again: newly blocked tasks go in front of the
+// tasks that are still waiting, and released tasks keep their relative order.
 func (q *fifo) filterWaiting() {
-	// resubmits all waiting tasks to pending, deps may have cleared
-	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		task, _ := element.Value.(*model.Task)
-		q.pending.PushBack(task)
-	}
-
-	// rebuild waitingDeps
-	q.waitingOnDeps = list.New()
-	var filtered []*list.Element
-	var pendingIDs map[string]struct{}
-	for element := q.pending.Front(); element != nil; element = element.Next() {
-		task, _ := element.Value.(*model.Task)
+	// The index of queued IDs is only built when the first task with
+	// dependencies shows up, which is before any task moves. It also holds the
+	// waiting tasks, as they can themselves be dependencies.
+	indexed := false
+	blocked := func(task *model.Task) bool {
 		if len(task.Dependencies) == 0 {
-			continue
+			return false
 		}
-		if pendingIDs == nil {
-			// Snapshot all queued IDs before removing any blocked tasks. Waiting
-			// tasks have been requeued above and can themselves be dependencies.
-			// Build the index only when dependencies need checking.
-			pendingIDs = make(map[string]struct{}, q.pending.Len())
-			for pending := q.pending.Front(); pending != nil; pending = pending.Next() {
-				queued, _ := pending.Value.(*model.Task)
-				pendingIDs[queued.ID] = struct{}{}
+		if !indexed {
+			indexed = true
+			if q.queuedIDs == nil {
+				q.queuedIDs = make(map[string]struct{}, q.pending.Len()+q.waitingOnDeps.Len())
+			}
+			clear(q.queuedIDs)
+			for _, tasks := range []*list.List{q.pending, q.waitingOnDeps} {
+				for element := tasks.Front(); element != nil; element = element.Next() {
+					queued, _ := element.Value.(*model.Task)
+					q.queuedIDs[queued.ID] = struct{}{}
+				}
 			}
 		}
-		if q.depsInQueue(task, pendingIDs) {
-			q.waitingOnDeps.PushBack(task)
-			filtered = append(filtered, element)
-		}
+		return q.depsInQueue(task, q.queuedIDs)
 	}
 
-	// filter waiting tasks
-	for _, f := range filtered {
-		q.pending.Remove(f)
+	// Insert newly blocked tasks before the first task that was already
+	// waiting. Inserted tasks are never revisited by the waiting loop below,
+	// as it starts at this element.
+	firstWaiting := q.waitingOnDeps.Front()
+	for element := q.pending.Front(); element != nil; {
+		next := element.Next()
+		if task, _ := element.Value.(*model.Task); blocked(task) {
+			q.pending.Remove(element)
+			if firstWaiting != nil {
+				q.waitingOnDeps.InsertBefore(task, firstWaiting)
+			} else {
+				q.waitingOnDeps.PushBack(task)
+			}
+		}
+		element = next
+	}
+
+	for element := firstWaiting; element != nil; {
+		next := element.Next()
+		if task, _ := element.Value.(*model.Task); !blocked(task) {
+			q.waitingOnDeps.Remove(element)
+			q.pending.PushBack(task)
+		}
+		element = next
 	}
 }
 
-func (q *fifo) assignToWorker() (*list.Element, *worker) {
+func (q *fifo) assignToWorker(concurrency *concurrencyIndex) (*list.Element, *worker) {
+	if len(q.workers) == 0 {
+		return nil, nil
+	}
 	var bestWorker *worker
 	var bestScore int
 
@@ -332,7 +361,7 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 
 		// skip tasks that would exceed their workflow concurrency limit, they
 		// stay pending and are retried on the next process tick.
-		if !q.canRunConcurrent(task) {
+		if !concurrency.canRun(task) {
 			continue
 		}
 
@@ -356,80 +385,16 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	return nil, nil
 }
 
-// canRunConcurrent reports whether the given task may currently start without
-// violating its workflow concurrency limit. Tasks without a limit always pass,
-// keeping the default scheduling behavior unchanged.
-//
-// Slots within a concurrency group are granted in creation order (earliest
-// pipeline first, by the task's Created timestamp, with the workflow name as a
-// deterministic tiebreaker) rather than in the order tasks become ready. This
-// guarantees that a later pipeline whose dependencies happen to finish faster
-// cannot overtake an earlier one that is still waiting.
-//
-// The ordering reservation only applies across pipelines. Within a single
-// pipeline, execution order is already defined by depends_on, and reserving a
-// slot for an earlier workflow could deadlock when it depends on a later
-// workflow that shares the same group (e.g. deploy.yaml depending on
-// test.yaml). Because dependencies never cross pipelines, restricting the
-// reservation to other pipelines keeps the ordering guarantee while making
-// such deadlocks impossible.
-//
-// Expects the queue to be locked by the caller.
-func (q *fifo) canRunConcurrent(task *model.Task) bool {
-	if task.ConcurrencyLimit <= 0 || task.ConcurrencyGroup == "" {
-		return true
-	}
-
-	group := task.ConcurrencyGroup
-
-	// count tasks of the same group that already occupy a running slot.
-	running := 0
-	for _, e := range q.running {
-		if e.item.ConcurrencyGroup == group {
-			running++
-		}
-	}
-	if running >= task.ConcurrencyLimit {
-		return false
-	}
-
-	// count not-yet-running members of the group from earlier pipelines. They
-	// have priority for the remaining slots, even if they are still waiting on
-	// their dependencies, so cross-pipeline ordering is preserved.
-	ahead := 0
-	countAhead := func(other *model.Task) {
-		if other.ConcurrencyGroup != group || other.ID == task.ID {
-			return
-		}
-		// only reserve order across pipelines; see the function doc above.
-		if other.PipelineID == task.PipelineID {
-			return
-		}
-		if taskOrderLess(other, task) {
-			ahead++
-		}
-	}
-	for element := q.pending.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
-	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
-		other, _ := element.Value.(*model.Task)
-		countAhead(other)
-	}
-
-	return running+ahead < task.ConcurrencyLimit
-}
-
 // taskOrderLess reports whether task a was instantiated before task b. Ordering
 // is by the Created timestamp (the pipeline creation time), with the workflow
 // name as a deterministic tiebreaker for tasks created within the same second.
 // The task ID is intentionally not used for ordering.
 func taskOrderLess(a, b *model.Task) bool {
-	if a.Created != b.Created {
-		return a.Created < b.Created
-	}
-	return a.Name < b.Name
+	return taskOrderCompare(a, b) < 0
+}
+
+func taskOrderCompare(a, b *model.Task) int {
+	return cmp.Or(cmp.Compare(a.Created, b.Created), cmp.Compare(a.Name, b.Name))
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
@@ -444,9 +409,9 @@ func (q *fifo) resubmitExpiredPipelines() {
 	}
 }
 
-func (q *fifo) depsInQueue(task *model.Task, pendingIDs map[string]struct{}) bool {
+func (q *fifo) depsInQueue(task *model.Task, queuedIDs map[string]struct{}) bool {
 	for _, dep := range task.Dependencies {
-		if _, ok := pendingIDs[dep]; ok {
+		if _, ok := queuedIDs[dep]; ok {
 			return true
 		}
 		if _, ok := q.running[dep]; ok {

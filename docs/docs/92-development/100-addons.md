@@ -64,6 +64,11 @@ A log that was deleted must stay deleted, even if `StepFinished` comes for it.
 `LogFind` must return the complete log before, during and after the call.
 `LogAppend` should finish within one minute: the server stops waiting then, and a line written later may come after `StepFinished`.
 
+### Forge addons
+
+Forge addons must implement `Close() error`. Woodpecker calls it before unloading an addon,
+so addons should stop any background services they started there.
+
 ### Addon types
 
 | Type      | Addon package                                                  | Service interface                                                  |
