@@ -60,6 +60,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7553](https://github.com/woodpecker-ci/woodpecker/pull/7553)]
 - docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
 - Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
 - Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
@@ -73,6 +74,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7554](https://github.com/woodpecker-ci/woodpecker/pull/7554)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.48.0 [[#7550](https://github.com/woodpecker-ci/woodpecker/pull/7550)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.47.0 [[#7541](https://github.com/woodpecker-ci/woodpecker/pull/7541)]
