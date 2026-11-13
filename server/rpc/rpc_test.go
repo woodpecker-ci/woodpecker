@@ -771,6 +771,8 @@ func TestRPCDone(t *testing.T) {
 		mockStore.AssertCalled(t, "UpdatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
 			return p.Status == model.StatusFailure && p.Finished == 200
 		}))
+		// the agent only marked the workflow as done, it did no work
+		assert.Zero(t, agent.LastWork)
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {
