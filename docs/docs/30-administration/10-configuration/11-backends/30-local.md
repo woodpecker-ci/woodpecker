@@ -56,6 +56,55 @@ For example, to use Bash from a custom location:
 WOODPECKER_SHELL_PATH_bash=/custom/path/bash
 ```
 
+C# scripts can be executed using `csi`, `dotnet-script`, or `csharp`:
+
+```yaml title=".woodpecker.yaml"
+steps:
+  - name: build
+    image: csi
+    commands:
+      - '#r "System.Xml"'
+      - 'using System;'
+      - 'Console.WriteLine("Hello from C#");'
+      - |
+        Console.WriteLine("Second command");
+        Console.WriteLine("Third command");
+```
+
+The commands are combined into a temporary `.csx` file which is passed to the
+script runner. `csi` is provided by Visual Studio, `dotnet-script` is
+cross-platform, and `csharp` is provided by Mono.
+
+### Command output
+
+Like other supported shells, C# script runners emit command markers to
+associate script output with individual entries in `commands`.
+
+However, C# script directives and declarations may need to appear before
+executable statements. To accommodate this, command markers for initial
+header entries are deferred until the first executable entry.
+
+An entry is considered part of the header if it starts with a preprocessor or
+script directive (`#`), a comment (`//` or `/*`), or a `using` directive.
+Leading whitespace is ignored. Empty or whitespace-only entries are also
+considered part of the header.
+
+When the first executable entry is encountered, all deferred command markers
+are emitted before executing that entry. From that point onward, each entry
+is preceded by its command marker, just as with other shells.
+
+If the script contains only header entries, their command markers are emitted
+at the end of the script.
+
+Each YAML list item is handled as a single entry, including multiline blocks.
+Workflow authors should therefore keep script directives, imports, and other
+declarations in separate header entries, without executable statements that
+produce output. Once normal command logging has started, subsequent entries
+are no longer treated as header entries.
+
+As with other shells, a custom executable location can be configured using
+`WOODPECKER_SHELL_PATH_<shell>`.
+
 ### Plugins
 
 ```yaml
