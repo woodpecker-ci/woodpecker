@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-12
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -15,6 +15,7 @@
 
 ### 📈 Enhancement
 
+- Send forge status on cancel [[#7516](https://github.com/woodpecker-ci/woodpecker/pull/7516)]
 - Report skipped workflows as skipped to gitea >= 1.25 [[#7514](https://github.com/woodpecker-ci/woodpecker/pull/7514)]
 - Speed up queue scheduling for large concurrency group backlogs [[#7425](https://github.com/woodpecker-ci/woodpecker/pull/7425)]
 - Show the workflow file in config and compile error messages [[#7539](https://github.com/woodpecker-ci/woodpecker/pull/7539)]
