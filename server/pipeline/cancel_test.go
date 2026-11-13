@@ -134,7 +134,7 @@ func TestCancelSendsStatusOfWorkflowsThatDidNotStart(t *testing.T) {
 
 			assert.NoError(t, Cancel(t.Context(), forge, s, repo, user, pipeline, nil))
 		})
-  }
+	}
 }
 
 func TestCancelPreviousPipelinesOrdering(t *testing.T) {

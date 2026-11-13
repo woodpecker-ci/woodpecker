@@ -99,7 +99,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	}
 
 	// Only send the workflows that never started. Running ones still show
-	// running in the store; their agent sends the final status itself.
+	// running in the store, their agent sends the final status itself.
 	killedPipeline.Workflows = notStarted
 	updatePipelineStatusOnForge(ctx, _forge, killedPipeline, repo, user)
 
