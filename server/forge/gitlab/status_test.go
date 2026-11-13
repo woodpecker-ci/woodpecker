@@ -39,8 +39,8 @@ func TestGetStatus(t *testing.T) {
 		{model.StatusError, gitlab.Failed},
 		{model.StatusKilled, gitlab.Canceled},
 		{model.StatusDeclined, gitlab.Failed},
-		{model.StatusSkipped, gitlab.Failed},
-		{model.StatusCanceled, gitlab.Failed},
+		{model.StatusSkipped, gitlab.Skipped},
+		{model.StatusCanceled, gitlab.Canceled},
 		{model.StatusValue("bogus"), gitlab.Failed},
 	}
 
