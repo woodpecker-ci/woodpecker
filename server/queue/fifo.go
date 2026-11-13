@@ -59,15 +59,24 @@ type fifo struct {
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
 
-// NewMemoryQueue returns a new fifo queue.
+// NewMemoryQueue returns a new fifo queue using the default lease extension
+// of constant.TaskTimeout.
 func NewMemoryQueue(ctx context.Context) Queue {
+	return NewMemoryQueueWithTaskTimeout(ctx, constant.TaskTimeout)
+}
+
+// NewMemoryQueueWithTaskTimeout returns a new fifo queue whose running tasks
+// get a lease of taskTimeout, renewed by agents via Extend. It must be well
+// above the agents' renewal interval of constant.TaskTimeout / 3, so a few
+// missed heartbeats do not expire a task that is still executing.
+func NewMemoryQueueWithTaskTimeout(ctx context.Context, taskTimeout time.Duration) Queue {
 	q := &fifo{
 		ctx:           ctx,
 		workers:       make(map[*worker]struct{}),
 		running:       make(map[string]*entry),
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     constant.TaskTimeout,
+		extension:     taskTimeout,
 		paused:        false,
 	}
 	go q.process()
