@@ -15,10 +15,14 @@
 package api
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -26,6 +30,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
@@ -181,6 +186,81 @@ func TestEventStreamSSEDisconnectedClient(t *testing.T) {
 
 		server.Config.Services.Scheduler = nil
 	}
+}
+
+// A client without login must only get events of public projects,
+// no matter if the forge repo is public or private.
+func TestEventStreamSSEWithoutLogin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	sched := scheduler.NewScheduler(t.Context(), nil, nil, memory.New())
+	server.Config.Services.Scheduler = sched
+	t.Cleanup(func() { server.Config.Services.Scheduler = nil })
+
+	e := gin.New()
+	e.GET("/stream/events", EventStreamSSE)
+	srv := httptest.NewServer(e)
+	t.Cleanup(srv.Close)
+
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, srv.URL+"/stream/events", nil)
+	require.NoError(t, err)
+	resp, err := srv.Client().Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	repoIDs := make(chan int64)
+	go func(body io.Reader) {
+		defer close(repoIDs)
+		scanner := bufio.NewScanner(body)
+		for scanner.Scan() {
+			data, ok := strings.CutPrefix(scanner.Text(), "data: ")
+			if !ok {
+				continue
+			}
+			var event model.Event
+			if json.Unmarshal([]byte(data), &event) == nil {
+				repoIDs <- event.Repo.ID
+			}
+		}
+	}(resp.Body)
+
+	publish := func(id int64, visibility model.RepoVisibility, scmPrivate bool) {
+		repo := &model.Repo{ID: id, Visibility: visibility, IsSCMPrivate: scmPrivate}
+		require.NoError(t, sched.PublishPipelineEvent(t.Context(), repo, &model.Pipeline{RepoID: id}))
+	}
+
+	// The stream subscribes after the first ping, so publish until an event arrives.
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	timeout := time.After(5 * time.Second)
+	for subscribed := false; !subscribed; {
+		select {
+		case <-repoIDs:
+			subscribed = true
+		case <-ticker.C:
+			publish(1, model.VisibilityPublic, false)
+		case <-timeout:
+			t.Fatal("stream did not subscribe")
+		}
+	}
+
+	publish(2, model.VisibilityPublic, true)
+	publish(3, model.VisibilityInternal, false)
+	publish(4, model.VisibilityInternal, true)
+	publish(5, model.VisibilityPrivate, false)
+	publish(6, model.VisibilityPrivate, true)
+
+	got := make(map[int64]bool)
+	for done := false; !done; {
+		select {
+		case id := <-repoIDs:
+			got[id] = true
+		case <-time.After(300 * time.Millisecond):
+			done = true
+		}
+	}
+	delete(got, 1) // late events of the subscribe loop
+	assert.Equal(t, map[int64]bool{2: true}, got)
 }
 
 func TestLogStreamSSEDisconnectedClient(t *testing.T) {
