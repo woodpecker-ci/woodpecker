@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Use repo visibility instead of forge private flag for event stream [[#7559](https://github.com/woodpecker-ci/woodpecker/pull/7559)]
 - Only accept step updates for steps of the agent's own workflow [[#7547](https://github.com/woodpecker-ci/woodpecker/pull/7547)]
 - Only link http(s) forge URLs in the web UI [[#7548](https://github.com/woodpecker-ci/woodpecker/pull/7548)]
 - Check webhooks body signature where already setup [[#7407](https://github.com/woodpecker-ci/woodpecker/pull/7407)]
