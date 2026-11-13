@@ -402,6 +402,9 @@
           "enum": ["fail", "ignore", "cancel"],
           "default": "fail"
         },
+        "signals": {
+          "$ref": "#/definitions/step_signals"
+        },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
         },
@@ -463,10 +466,93 @@
           "enum": ["fail", "ignore"],
           "default": "fail"
         },
+        "signals": {
+          "$ref": "#/definitions/step_signals"
+        },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
         }
       }
+    },
+    "step_signals": {
+      "description": "Map exit codes of this step to signals for the runtime, e.g. `skip: 78` marks the step as successful and skips all remaining steps. Read more: https://woodpecker-ci.org/docs/usage/step-signals",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skip": {
+          "description": "Exit code(s) that mark this step as successful and skip all steps of the workflow that have not started yet.",
+          "$ref": "#/definitions/signal_config"
+        },
+        "success": {
+          "description": "Exit code(s) that mark this step as successful; the workflow continues as usual.",
+          "$ref": "#/definitions/signal_config"
+        },
+        "restart": {
+          "description": "Exit code(s) that run this step again. By default it restarts up to 2 times (3 attempts in total), set `max_restarts` in the long form to change it. Not applied to detached steps and services.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/signal_exit_codes"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["exit_codes"],
+              "properties": {
+                "exit_codes": {
+                  "$ref": "#/definitions/signal_exit_codes"
+                },
+                "max_restarts": {
+                  "description": "How often the step is restarted after the first run.",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10,
+                  "default": 2
+                }
+              }
+            }
+          ]
+        },
+        "cancel": {
+          "description": "Exit code(s) that mark this step as successful and cancel its workflow: running steps are stopped and the workflow is reported as killed. Other workflows are not affected.",
+          "$ref": "#/definitions/signal_config"
+        }
+      }
+    },
+    "signal_config": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/signal_exit_codes"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["exit_codes"],
+          "properties": {
+            "exit_codes": {
+              "$ref": "#/definitions/signal_exit_codes"
+            }
+          }
+        }
+      ]
+    },
+    "signal_exit_codes": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/signal_exit_code"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/signal_exit_code"
+          }
+        }
+      ]
+    },
+    "signal_exit_code": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 255
     },
     "step_when": {
       "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---conditional-execution",

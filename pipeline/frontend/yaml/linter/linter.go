@@ -16,11 +16,13 @@ package linter
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"slices"
 
 	"go.uber.org/multierr"
 
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
@@ -198,8 +200,79 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintDependsOn(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintSignals(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
+	return linterErr
+}
+
+// lintSignals validates the `signals:` mapping of a step: known actions,
+// exit codes in range and each exit code mapped only once. It warns about exit
+// codes that shells and the kernel already use (126, 127 and 128+N for "killed
+// by signal N", e.g. 137 for SIGKILL/OOM).
+func (l *Linter) lintSignals(config *WorkflowConfig, c *types.Container, area string) error {
+	if len(c.Signals) == 0 {
+		return nil
+	}
+
+	var linterErr error
+	seen := make(map[int]string)
+	for _, action := range slices.Sorted(maps.Keys(c.Signals)) {
+		field := fmt.Sprintf("%s.%s.signals.%s", area, c.Name, action)
+		if !backend_types.StepSignal(action).IsValid() {
+			linterErr = multierr.Append(linterErr,
+				newLinterError(fmt.Sprintf("Unknown signal `%s`", action), config.File, field, false))
+			continue
+		}
+		if backend_types.StepSignal(action) == backend_types.StepSignalRestart && (c.Detached || area == "services") {
+			linterErr = multierr.Append(linterErr,
+				newLinterError("The `restart` signal is not applied to detached steps and services, its exit codes count as failure", config.File, field, true))
+		}
+		cfg := c.Signals[action]
+		if cfg.MaxRestarts != nil {
+			switch {
+			case backend_types.StepSignal(action) != backend_types.StepSignalRestart:
+				linterErr = multierr.Append(linterErr, newLinterError(
+					"`max_restarts` is only allowed for the `restart` signal", config.File, field+".max_restarts", false,
+				))
+			case *cfg.MaxRestarts < 1 || *cfg.MaxRestarts > backend_types.StepSignalRestartLimit:
+				linterErr = multierr.Append(linterErr, newLinterError(
+					fmt.Sprintf("`max_restarts` must be between 1 and %d", backend_types.StepSignalRestartLimit),
+					config.File, field+".max_restarts", false,
+				))
+			}
+		}
+		if len(cfg.ExitCodes) == 0 {
+			linterErr = multierr.Append(linterErr,
+				newLinterError(fmt.Sprintf("No exit code configured for signal `%s`", action), config.File, field, false))
+			continue
+		}
+		for _, code := range cfg.ExitCodes {
+			if code < backend_types.MinSignalExitCode || code > backend_types.MaxSignalExitCode {
+				linterErr = multierr.Append(linterErr, newLinterError(
+					fmt.Sprintf("Exit code %d is out of range %d-%d", code, backend_types.MinSignalExitCode, backend_types.MaxSignalExitCode),
+					config.File, field, false,
+				))
+				continue
+			}
+			if other, ok := seen[code]; ok {
+				linterErr = multierr.Append(linterErr, newLinterError(
+					fmt.Sprintf("Exit code %d is mapped to both signal `%s` and `%s`", code, other, action),
+					config.File, field, false,
+				))
+				continue
+			}
+			seen[code] = action
+			if code == 126 || code == 127 || code >= 128 {
+				linterErr = multierr.Append(linterErr, newLinterError(
+					fmt.Sprintf("Exit code %d is used by shells or for processes killed by a signal (e.g. 137 = OOM/SIGKILL), consider a code between 64 and 113", code),
+					config.File, field, true,
+				))
+			}
+		}
+	}
 	return linterErr
 }
 

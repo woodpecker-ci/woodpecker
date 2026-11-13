@@ -36,6 +36,8 @@ type Container struct {
 	When      constraint.When      `yaml:"when,omitempty"`
 	Failure   string               `yaml:"failure,omitempty"`
 	Detached  bool                 `yaml:"detach,omitempty"`
+	// Signals maps a signal action (e.g. "skip") to the exit code(s) that trigger it.
+	Signals map[string]SignalConfig `yaml:"signals,omitempty"`
 	// state
 	Volumes Volumes `yaml:"volumes,omitempty"`
 	// network

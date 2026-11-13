@@ -17,6 +17,7 @@ package runtime
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog"
@@ -42,6 +43,8 @@ type Runtime struct {
 	// All normal (non-cleanup) step operations must use this context.
 	// Cleanup operations should use the runnerCtx passed to Run().
 	ctx context.Context
+	// cancel cancels ctx, e.g. when a step sends the cancel signal.
+	cancel context.CancelCauseFunc
 
 	tracer tracing.Tracer
 	logger logging.Logger
@@ -50,6 +53,12 @@ type Runtime struct {
 
 	taskUUID    string
 	description map[string]string
+
+	// skipRequested is set when a step sends the skip signal (see `signals:`).
+	skipRequested atomic.Bool
+	// skipRemaining is set once the stage of the skipping step has finished.
+	// All steps of the following stages are then traced as skipped.
+	skipRemaining atomic.Bool
 }
 
 // New returns a new Runtime for the given workflow spec and options.
@@ -65,6 +74,7 @@ func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Opti
 	for _, opt := range opts {
 		opt(r)
 	}
+	r.ctx, r.cancel = context.WithCancelCause(r.ctx)
 	return r
 }
 

@@ -72,6 +72,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 				r.err.Set(err)
 			}
 		}
+		// Like errors, a skip signal takes effect for the following stages only,
+		// so all steps of the current stage run regardless of goroutine timing.
+		if r.skipRequested.Load() {
+			r.skipRemaining.Store(true)
+		}
 	}
 
 	// Now we can shutdown the workflow
