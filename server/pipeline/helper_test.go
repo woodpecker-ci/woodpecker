@@ -37,5 +37,5 @@ func TestUpdatePipelineStatusSendsEveryWorkflow(t *testing.T) {
 	forge.EXPECT().Status(mock.Anything, user, repo, pipeline, failing).Return(errors.New("forge unavailable")).Once()
 	forge.EXPECT().Status(mock.Anything, user, repo, pipeline, next).Return(nil).Once()
 
-	updatePipelineStatus(t.Context(), forge, pipeline, repo, user)
+	updatePipelineStatusOnForge(t.Context(), forge, pipeline, repo, user)
 }
