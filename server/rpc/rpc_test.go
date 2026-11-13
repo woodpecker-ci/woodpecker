@@ -758,7 +758,6 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{failedWorkflow, storedWorkflow}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
 		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
-		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
