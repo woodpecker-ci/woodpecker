@@ -117,7 +117,19 @@ func PostHook(c *gin.Context) {
 	// 2. Parse the webhook data
 	//
 
-	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request, repo.WebhookSecret)
+	// A forge whose webhooks can ask for several pipelines (forge.MultiHook) returns all of them;
+	// any other returns one, or none.
+	var repoFromForge *model.Repo
+	var pipelinesFromForge []*model.Pipeline
+	if multiHook, ok := _forge.(forge.MultiHook); ok {
+		repoFromForge, pipelinesFromForge, err = multiHook.HookPipelines(c, c.Request, repo.WebhookSecret)
+	} else {
+		var pipelineFromForge *model.Pipeline
+		repoFromForge, pipelineFromForge, err = _forge.Hook(c, c.Request, repo.WebhookSecret)
+		if pipelineFromForge != nil {
+			pipelinesFromForge = []*model.Pipeline{pipelineFromForge}
+		}
+	}
 	if err != nil {
 		if errors.Is(err, types.ErrInvalidWebhookSignature) {
 			log.Warn().Str("repo", repo.FullName).Msg("ignoring hook: invalid webhook signature")
@@ -137,7 +149,7 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if pipelineFromForge == nil {
+	if len(pipelinesFromForge) == 0 {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
 		c.String(http.StatusOK, msg)
@@ -207,44 +219,66 @@ func PostHook(c *gin.Context) {
 	// 5. Check if pull requests are allowed for this repo
 	//
 
-	if pipelineFromForge.IsPullRequest() && !repo.AllowPull {
-		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
+	pipelinesToCreate := make([]*model.Pipeline, 0, len(pipelinesFromForge))
+	for _, pipelineFromForge := range pipelinesFromForge {
+		if pipelineFromForge.IsPullRequest() && !repo.AllowPull {
+			log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
+			continue
+		}
+		pipelinesToCreate = append(pipelinesToCreate, pipelineFromForge)
+	}
+	if len(pipelinesToCreate) == 0 {
 		c.Status(http.StatusNoContent)
 		return
 	}
 
 	//
-	// 6. Finally create a pipeline
+	// 6. Finally create the pipelines
 	//
 	// Pipeline creation can be slow (forge round-trips, config fetching). To
 	// avoid the forge timing out and retrying the webhook delivery, we wait only
 	// up to WebhookSyncTimeout for creation to finish. If it completes in time we
-	// respond synchronously with the created pipeline (preserving the old
-	// behavior and API response). If it takes longer we respond 202 Accepted and
-	// let creation finish in the background.
-	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
-
-	done := make(chan struct{})
-	var pl *model.Pipeline
+	// respond synchronously with the first created pipeline (preserving the old
+	// behavior and API response when the webhook asks for one). If it takes longer
+	// we respond 202 Accepted and let creation finish in the background.
+	//
+	// A webhook asking for several pipelines (forge.MultiHook) gets each created in
+	// turn, with a creation timeout of its own; one that fails or is filtered out
+	// does not stop the others.
+	type created struct {
+		pipeline *model.Pipeline
+		err      error
+	}
+	// Buffered: once the handler has answered 202 nothing reads from it, and the
+	// goroutine must still be able to finish.
+	done := make(chan created, 1)
 
 	go func() {
-		defer cancel()
-		pl, err = pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
-		if err != nil {
-			// A filtered pipeline is an expected outcome, not a failure.
-			if errors.Is(err, pipeline.ErrFiltered) {
-				log.Debug().Str("repo", repo.FullName).Msg("webhook produced no matching workflows; skipped")
-			} else {
-				log.Error().Err(err).Str("repo", repo.FullName).Msg("could not create pipeline from webhook")
+		var first created
+		for i, pipelineFromForge := range pipelinesToCreate {
+			bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
+			pl, err := pipeline.Create(bgCtx, _store, repo, pipelineFromForge)
+			cancel()
+			if err != nil {
+				// A filtered pipeline is an expected outcome, not a failure.
+				if errors.Is(err, pipeline.ErrFiltered) {
+					log.Debug().Str("repo", repo.FullName).Str("ref", pipelineFromForge.Ref).Msg("webhook produced no matching workflows; skipped")
+				} else {
+					log.Error().Err(err).Str("repo", repo.FullName).Str("ref", pipelineFromForge.Ref).Msg("could not create pipeline from webhook")
+				}
+			}
+			if i == 0 {
+				first = created{pipeline: pl, err: err}
 			}
 		}
-		done <- struct{}{}
+		done <- first
 	}()
 
+	var result created
 	syncTimeout := server.Config.Server.WebhookSyncTimeout
 	if syncTimeout > 0 {
 		select {
-		case <-done:
+		case result = <-done:
 			// handle synchronous
 		case <-time.After(syncTimeout):
 			log.Debug().Str("repo", repo.FullName).Dur("timeout", syncTimeout).Msg("pipeline creation exceeded webhook sync timeout, continuing in background")
@@ -254,13 +288,13 @@ func PostHook(c *gin.Context) {
 		}
 	} else {
 		// we do synchronous
-		<-done
+		result = <-done
 	}
 
-	if err != nil {
-		handlePipelineErr(c, err)
+	if result.err != nil {
+		handlePipelineErr(c, result.err)
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.JSON(http.StatusOK, result.pipeline)
 	}
 }
 

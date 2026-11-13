@@ -448,8 +448,24 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
-	pr, repo, pl, err := parseHook(req)
+//
+// A push webhook can carry several branches or tags; Hook returns the first one only. The
+// webhook handler uses HookPipelines (forge.MultiHook), which returns all of them.
+func (c *config) Hook(ctx context.Context, req *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
+	repo, pls, err := c.HookPipelines(ctx, req, secret)
+	if err != nil {
+		return nil, nil, err
+	}
+	return repo, pls[0], nil
+}
+
+var _ forge.MultiHook = (*config)(nil)
+
+// HookPipelines parses the incoming Bitbucket hook and returns the Repository and every Pipeline
+// it asks for: one for a pull request, one per pushed branch or tag for a push (see
+// parsePushHook). It implements forge.MultiHook.
+func (c *config) HookPipelines(ctx context.Context, req *http.Request, _ string) (*model.Repo, []*model.Pipeline, error) {
+	pr, repo, pls, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -467,24 +483,25 @@ func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 		forge.Refresh(ctx, c, _store, u)
 	}
 
-	switch pl.Event {
-	case model.EventPush:
-		// List only the latest push changes
-		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
-		if err != nil {
-			return nil, nil, err
-		}
-	case model.EventPull:
-		client := c.newClient(ctx, u)
+	client := c.newClient(ctx, u)
+	for _, pl := range pls {
+		switch pl.Event {
+		case model.EventPush:
+			// List only the latest push changes
+			pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+			if err != nil {
+				return nil, nil, err
+			}
+		case model.EventPull:
+			if pr == nil {
+				return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+			}
 
-		if pr == nil {
-			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
-		}
-
-		// List all changes between source & destination branch
-		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
-		if err != nil {
-			return nil, nil, err
+			// List all changes between source & destination branch
+			pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
+			if err != nil {
+				return nil, nil, err
+			}
 		}
 	}
 
@@ -493,7 +510,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 		return nil, nil, err
 	}
 
-	return repo, pl, nil
+	return repo, pls, nil
 }
 
 // OrgMembership returns if user is member of organization and if user
