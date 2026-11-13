@@ -18,6 +18,22 @@ You should not use `sess.Begin()`, `sess.Commit()` or `sess.Close()` inside a mi
 
 To automatically execute the migration after the start of the server, the new migration needs to be added to the end of `migrationTasks` in `server/store/datastore/migration/migration.go`. After a successful execution of that transaction the server will automatically add the migration to a list, so it won't be executed again on the next start.
 
+### Long migrations
+
+A migration that can take a long time can be marked with `Long: true`.
+It is skipped on every start until the admin sets `WOODPECKER_MIGRATIONS_ALLOW_LONG`.
+
+:::warning
+A long migration can run many versions after it was added.
+By then, later migrations have run and the tables match newer models, so columns may have been added, renamed or dropped.
+Write it so it works with any of these schemas:
+
+- Check that a table or column exists before you use it.
+- Do not create or rebuild tables from a copy of a model, it would drop columns that were added later.
+
+Only mark a migration as long if the server works fine while it has not run yet.
+:::
+
 ## Constants of official images
 
 All official default images, are saved in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go) and must be pinned by an exact tag.
