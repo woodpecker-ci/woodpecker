@@ -188,3 +188,29 @@ func TestCancelPreviousPipelinesOrdering(t *testing.T) {
 		}
 	}
 }
+
+func TestCancelPreviousPipelinesKeepsOtherTags(t *testing.T) {
+	repo := &model.Repo{ID: 1, CancelPreviousPipelineEvents: []model.WebhookEvent{model.EventTag}}
+	otherTag := &model.Pipeline{ID: 20, Number: 10, Status: model.StatusRunning, Event: model.EventTag, Ref: "refs/tags/v1.0.0"}
+	older := &model.Pipeline{ID: 21, Number: 11, Status: model.StatusRunning, Event: model.EventTag, Ref: "refs/tags/v1.0.1"}
+	newer := &model.Pipeline{ID: 22, Number: 12, Status: model.StatusPending, Event: model.EventTag, Ref: "refs/tags/v1.0.1"}
+	s := store_mocks.NewMockStore(t)
+	scheduler := scheduler_mocks.NewMockScheduler(t)
+	previous := server.Config.Services.Scheduler
+	server.Config.Services.Scheduler = scheduler
+	t.Cleanup(func() { server.Config.Services.Scheduler = previous })
+
+	s.EXPECT().GetActivePipelineList(repo).Return([]*model.Pipeline{otherTag, older, newer}, nil).Once()
+	s.EXPECT().WorkflowGetTree(mock.Anything).Return([]*model.Workflow{}, nil)
+	scheduler.EXPECT().CancelWorkflows(mock.Anything, mock.Anything).Return(nil)
+	scheduler.EXPECT().PublishPipelineEvent(mock.Anything, repo, mock.Anything).Return(nil)
+	var canceled []*model.Pipeline
+	s.EXPECT().UpdatePipeline(mock.Anything).Run(func(pipeline *model.Pipeline) {
+		canceled = append(canceled, pipeline)
+	}).Return(nil)
+
+	require.NoError(t, cancelPreviousPipelines(t.Context(), nil, s, newer, repo, nil))
+	require.Len(t, canceled, 1)
+	assert.Equal(t, older.ID, canceled[0].ID)
+	assert.Equal(t, newer.Number, canceled[0].CancelInfo.SupersededBy)
+}

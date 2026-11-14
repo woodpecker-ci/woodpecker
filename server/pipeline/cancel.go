@@ -144,6 +144,8 @@ func cancelPreviousPipelines(
 		switch pipeline.Event {
 		case model.EventPush:
 			return pipeline.Branch == active.Branch
+		case model.EventTag:
+			return pipeline.Ref == active.Ref
 		default:
 			return pipeline.Refspec == active.Refspec
 		}
