@@ -94,8 +94,12 @@ func (p *impl) Resume() {
 	p.q.Resume()
 }
 
-func (p *impl) Wait(c context.Context, id string) error {
-	return p.q.Wait(c, id)
+func (p *impl) Wait(c context.Context, agentID int64, id string) error {
+	return p.q.Wait(c, agentID, id)
+}
+
+func (p *impl) Leased(c context.Context, agentID int64, id string) error {
+	return p.q.Leased(c, agentID, id)
 }
 
 //

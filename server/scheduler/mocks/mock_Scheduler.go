@@ -387,6 +387,69 @@ func (_c *MockScheduler_KickAgentWorkers_Call) RunAndReturn(run func(agentID int
 	return _c
 }
 
+// Leased provides a mock function for the type MockScheduler
+func (_mock *MockScheduler) Leased(c context.Context, agentID int64, id string) error {
+	ret := _mock.Called(c, agentID, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Leased")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(c, agentID, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockScheduler_Leased_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Leased'
+type MockScheduler_Leased_Call struct {
+	*mock.Call
+}
+
+// Leased is a helper method to define mock.On call
+//   - c context.Context
+//   - agentID int64
+//   - id string
+func (_e *MockScheduler_Expecter) Leased(c any, agentID any, id any) *MockScheduler_Leased_Call {
+	return &MockScheduler_Leased_Call{Call: _e.mock.On("Leased", c, agentID, id)}
+}
+
+func (_c *MockScheduler_Leased_Call) Run(run func(c context.Context, agentID int64, id string)) *MockScheduler_Leased_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *MockScheduler_Leased_Call) Return(err error) *MockScheduler_Leased_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockScheduler_Leased_Call) RunAndReturn(run func(c context.Context, agentID int64, id string) error) *MockScheduler_Leased_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Pause provides a mock function for the type MockScheduler
 func (_mock *MockScheduler) Pause() {
 	_mock.Called()
@@ -729,16 +792,16 @@ func (_c *MockScheduler_Subscribe_Call) RunAndReturn(run func(c context.Context,
 }
 
 // Wait provides a mock function for the type MockScheduler
-func (_mock *MockScheduler) Wait(c context.Context, id string) error {
-	ret := _mock.Called(c, id)
+func (_mock *MockScheduler) Wait(c context.Context, agentID int64, id string) error {
+	ret := _mock.Called(c, agentID, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Wait")
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = returnFunc(c, id)
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, string) error); ok {
+		r0 = returnFunc(c, agentID, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -752,24 +815,30 @@ type MockScheduler_Wait_Call struct {
 
 // Wait is a helper method to define mock.On call
 //   - c context.Context
+//   - agentID int64
 //   - id string
-func (_e *MockScheduler_Expecter) Wait(c any, id any) *MockScheduler_Wait_Call {
-	return &MockScheduler_Wait_Call{Call: _e.mock.On("Wait", c, id)}
+func (_e *MockScheduler_Expecter) Wait(c any, agentID any, id any) *MockScheduler_Wait_Call {
+	return &MockScheduler_Wait_Call{Call: _e.mock.On("Wait", c, agentID, id)}
 }
 
-func (_c *MockScheduler_Wait_Call) Run(run func(c context.Context, id string)) *MockScheduler_Wait_Call {
+func (_c *MockScheduler_Wait_Call) Run(run func(c context.Context, agentID int64, id string)) *MockScheduler_Wait_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 string
+		var arg1 int64
 		if args[1] != nil {
-			arg1 = args[1].(string)
+			arg1 = args[1].(int64)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
 		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -780,7 +849,7 @@ func (_c *MockScheduler_Wait_Call) Return(err error) *MockScheduler_Wait_Call {
 	return _c
 }
 
-func (_c *MockScheduler_Wait_Call) RunAndReturn(run func(c context.Context, id string) error) *MockScheduler_Wait_Call {
+func (_c *MockScheduler_Wait_Call) RunAndReturn(run func(c context.Context, agentID int64, id string) error) *MockScheduler_Wait_Call {
 	_c.Call.Return(run)
 	return _c
 }
