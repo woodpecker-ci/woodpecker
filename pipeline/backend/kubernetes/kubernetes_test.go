@@ -316,6 +316,29 @@ func TestWaitStepReturnsOnAlreadyDeletedPod(t *testing.T) {
 	}
 }
 
+// A detached step (e.g. a service) is stopped by the workflow teardown, which
+// can delete its pod before WaitStep observed the termination. That is the
+// expected end of the step and must not be reported as an error.
+func TestWaitStepDetachedStepPodRemoved(t *testing.T) {
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+	step := makeStep("pod-delete-detached")
+	step.Detached = true
+	step.Type = types.StepTypeService
+	namespace := "test-ns"
+
+	podName := createPod(t, client, step, namespace)
+	err := client.CoreV1().Pods(namespace).Delete(t.Context(), podName, kube_meta_v1.DeleteOptions{})
+	require.NoError(t, err)
+
+	ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+	defer cancel()
+
+	state, err := engine.WaitStep(ctx, step, "task-1")
+	require.NoError(t, err)
+	assert.Equal(t, &types.State{Exited: true}, state)
+}
+
 func TestWaitStepReturnsOnPodDeletedBeforeInformerSync(t *testing.T) {
 	client := fake.NewClientset()
 	engine := makeEngine(client)
