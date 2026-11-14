@@ -851,14 +851,22 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
+	files := make([]string, 0, defaultPerPage*2)
+	diffOpts := &gitlab.ListMergeRequestDiffsOptions{
+		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
 	}
-
-	files := make([]string, 0, len(changes)*2)
-	for _, file := range changes {
-		files = append(files, file.NewPath, file.OldPath)
+	for {
+		changes, resp, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, diffOpts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range changes {
+			files = append(files, file.NewPath, file.OldPath)
+		}
+		if resp == nil || resp.NextPage == 0 {
+			break
+		}
+		diffOpts.Page = resp.NextPage
 	}
 	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 

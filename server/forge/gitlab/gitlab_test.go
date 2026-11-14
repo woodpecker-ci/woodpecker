@@ -907,6 +907,34 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		assert.Equal(t, "v1.0", pipeline.PullRequestMilestone)
 	})
 
+	t.Run("merge request changed files span all diff pages", func(t *testing.T) {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":4}`))
+		})
+		mux.HandleFunc("/api/v4/projects/4/merge_requests/3/diffs", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			if r.URL.Query().Get("page") == "2" {
+				_, _ = w.Write([]byte(`[{"old_path":"second.go","new_path":"second.go"}]`))
+				return
+			}
+			w.Header().Set("X-Next-Page", "2")
+			_, _ = w.Write([]byte(`[{"old_path":"first.go","new_path":"first.go"}]`))
+		})
+		mux.HandleFunc("/api/v4/projects/4/milestones/6088906", func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":6088906,"title":"v1.0"}`))
+		})
+		server := httptest.NewServer(mux)
+		t.Cleanup(server.Close)
+		client := load(server.URL + "?client_id=test&client_secret=test")
+
+		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, fixtures.HookPullRequestMilestoned, fixtures.ServiceHookHeaders), "")
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []string{"first.go", "second.go"}, pipeline.ChangedFiles)
+	})
+
 	t.Run("tag without message loads the tagged commit", func(t *testing.T) {
 		var payload map[string]any
 		require.NoError(t, json.Unmarshal(fixtures.HookTag, &payload))
