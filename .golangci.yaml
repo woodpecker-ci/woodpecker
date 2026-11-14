@@ -1,8 +1,9 @@
 version: '2'
 run:
-  timeout: 15m
+  timeout: 30m
   build-tags:
     - test
+    - sqlite
 linters:
   default: none
   enable:
