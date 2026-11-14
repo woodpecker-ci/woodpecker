@@ -1,5 +1,107 @@
 # Changelog
 
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-14
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
+
+### 🔒 Security
+
+- Update module go.opentelemetry.io/otel/trace to v1.47.0 [SECURITY] [[#7564](https://github.com/woodpecker-ci/woodpecker/pull/7564)]
+- Use repo visibility instead of forge private flag for event stream [[#7559](https://github.com/woodpecker-ci/woodpecker/pull/7559)]
+- Only accept step updates for steps of the agent's own workflow [[#7547](https://github.com/woodpecker-ci/woodpecker/pull/7547)]
+- Only link http(s) forge URLs in the web UI [[#7548](https://github.com/woodpecker-ci/woodpecker/pull/7548)]
+- Check webhooks body signature where already setup [[#7407](https://github.com/woodpecker-ci/woodpecker/pull/7407)]
+- Add flag to restrict admins to the primary forge [[#7430](https://github.com/woodpecker-ci/woodpecker/pull/7430)]
+
+### 📈 Enhancement
+
+- local: add initial support for C# script runners [[#7215](https://github.com/woodpecker-ci/woodpecker/pull/7215)]
+- Report skipped and canceled workflows as such to GitLab [[#7512](https://github.com/woodpecker-ci/woodpecker/pull/7512)]
+- Send forge status on cancel [[#7516](https://github.com/woodpecker-ci/woodpecker/pull/7516)]
+- Report skipped workflows as skipped to gitea >= 1.25 [[#7514](https://github.com/woodpecker-ci/woodpecker/pull/7514)]
+- Speed up queue scheduling for large concurrency group backlogs [[#7425](https://github.com/woodpecker-ci/woodpecker/pull/7425)]
+- Show the workflow file in config and compile error messages [[#7539](https://github.com/woodpecker-ci/woodpecker/pull/7539)]
+- Filter waiting queue tasks in place [[#7537](https://github.com/woodpecker-ci/woodpecker/pull/7537)]
+- Allow configuring the plugin-git version for local backend clone [[#7536](https://github.com/woodpecker-ci/woodpecker/pull/7536)]
+- Map skipped and canceled workflows to Bitbucket STOPPED / DC CANCELLED [[#7513](https://github.com/woodpecker-ci/woodpecker/pull/7513)]
+- Extend the forge cache TTL on hits [[#7529](https://github.com/woodpecker-ci/woodpecker/pull/7529)]
+- Explain forge timeouts when fetching the pipeline config [[#7521](https://github.com/woodpecker-ci/woodpecker/pull/7521)]
+- In WebUI show pretty durations as hours and minutes via Intl.DurationFormat [[#7530](https://github.com/woodpecker-ci/woodpecker/pull/7530)]
+- Report substitution errors in cli lint and server with custom error [[#7534](https://github.com/woodpecker-ci/woodpecker/pull/7534)]
+- Report skipped and canceled workflows as error to GitHub [[#7517](https://github.com/woodpecker-ci/woodpecker/pull/7517)]
+- Report skipped workflows as skipped to forgejo >= 16 [[#7515](https://github.com/woodpecker-ci/woodpecker/pull/7515)]
+- Raise matrix per-axis variable limit from 10 to 64 [[#7526](https://github.com/woodpecker-ci/woodpecker/pull/7526)]
+- Show the latest release of plugins in the plugin index if exist [[#7480](https://github.com/woodpecker-ci/woodpecker/pull/7480)]
+- For Bitbucket avoid looking up all repositories in forge  when enabling only one [[#7491](https://github.com/woodpecker-ci/woodpecker/pull/7491)]
+- Make builtin env var scopes more descriptive [[#7486](https://github.com/woodpecker-ci/woodpecker/pull/7486)]
+- Add support for forgejo to pull draft metadata [[#7470](https://github.com/woodpecker-ci/woodpecker/pull/7470)]
+- Add CI_FORGE_HOST as a built-in environment variable [[#7391](https://github.com/woodpecker-ci/woodpecker/pull/7391)]
+- Fetch config directories on GitHub via a single GraphQL request [[#7025](https://github.com/woodpecker-ci/woodpecker/pull/7025)]
+- Add optional display name for forges [[#7445](https://github.com/woodpecker-ci/woodpecker/pull/7445)]
+
+### 🐛 Bug Fixes
+
+- Subscribe GitHub webhooks to release events [[#7543](https://github.com/woodpecker-ci/woodpecker/pull/7543)]
+- Forge status report fixes [[#7520](https://github.com/woodpecker-ci/woodpecker/pull/7520)]
+- Close forge instances before cache replacement [[#7525](https://github.com/woodpecker-ci/woodpecker/pull/7525)]
+- Only auto-cancel older pipelines [[#7345](https://github.com/woodpecker-ci/woodpecker/pull/7345)]
+- Report SQLite database lock on reads instead of "record not found" [[#7503](https://github.com/woodpecker-ci/woodpecker/pull/7503)]
+- Reject Bitbucket webhooks whose repository full name has no owner [[#7507](https://github.com/woodpecker-ci/woodpecker/pull/7507)]
+- Fail pipelines whose workflows depend on each other in a cycle [[#7471](https://github.com/woodpecker-ci/woodpecker/pull/7471)]
+- Return log store errors to the agent, except for duplicate entries [[#7501](https://github.com/woodpecker-ci/woodpecker/pull/7501)]
+- Preserve previous pull request file paths for gitea & forgejo [[#7492](https://github.com/woodpecker-ci/woodpecker/pull/7492)]
+- Add small margin between log groups [[#7485](https://github.com/woodpecker-ci/woodpecker/pull/7485)]
+- Fix image tag detection for registries with a port [[#7454](https://github.com/woodpecker-ci/woodpecker/pull/7454)]
+- Use OrgID to match Orgs belong to users [[#7441](https://github.com/woodpecker-ci/woodpecker/pull/7441)]
+- CreateUser in one SQL session and report back constrain name on insert error [[#7439](https://github.com/woodpecker-ci/woodpecker/pull/7439)]
+- Add `/tmp` to server & agent scratch images [[#7452](https://github.com/woodpecker-ci/woodpecker/pull/7452)]
+- Fix addon logger dropping log fields [[#7453](https://github.com/woodpecker-ci/woodpecker/pull/7453)]
+
+### 🧪 Tests
+
+- Make sure test file names map source files names [[#7338](https://github.com/woodpecker-ci/woodpecker/pull/7338)]
+
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#7562](https://github.com/woodpecker-ci/woodpecker/pull/7562)]
+- Update docs npm deps non-major [[#7553](https://github.com/woodpecker-ci/woodpecker/pull/7553)]
+- docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
+- Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
+- Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
+- Remove overrides from docs dependencies [[#7497](https://github.com/woodpecker-ci/woodpecker/pull/7497)]
+- Update docs npm deps non-major [[#7493](https://github.com/woodpecker-ci/woodpecker/pull/7493)]
+- Update dependency tslib to v2.9.1 [[#7461](https://github.com/woodpecker-ci/woodpecker/pull/7461)]
+- Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
+- Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
+- Fix dead links in CLI readme and docs pages [[#7451](https://github.com/woodpecker-ci/woodpecker/pull/7451)]
+- Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
+
+### 📦️ Dependency
+
+- Update dependency jsdom to v31.0.1 [[#7565](https://github.com/woodpecker-ci/woodpecker/pull/7565)]
+- Update web npm deps non-major [[#7563](https://github.com/woodpecker-ci/woodpecker/pull/7563)]
+- Update web npm deps non-major [[#7554](https://github.com/woodpecker-ci/woodpecker/pull/7554)]
+- Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.48.0 [[#7550](https://github.com/woodpecker-ci/woodpecker/pull/7550)]
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.47.0 [[#7541](https://github.com/woodpecker-ci/woodpecker/pull/7541)]
+- Update golang-packages [[#7532](https://github.com/woodpecker-ci/woodpecker/pull/7532)]
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.45.0 [[#7518](https://github.com/woodpecker-ci/woodpecker/pull/7518)]
+- Lock file maintenance [[#7519](https://github.com/woodpecker-ci/woodpecker/pull/7519)]
+- Update golang-packages [[#7508](https://github.com/woodpecker-ci/woodpecker/pull/7508)]
+- Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
+- Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
+- Update woodpeckerci/plugin-release Docker tag to v1 [[#7499](https://github.com/woodpecker-ci/woodpecker/pull/7499)]
+- Update dependency jsdom to v31 [[#7496](https://github.com/woodpecker-ci/woodpecker/pull/7496)]
+- Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
+- Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
+- Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
+- Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
+- Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
+- Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
+- Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
+
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
