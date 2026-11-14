@@ -33,7 +33,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, "issue:created")
 
-		_, r, b, err := parseHook(req)
+		_, r, b, _, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
@@ -45,7 +45,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullCreated)
 
-		_, _, _, err := parseHook(req)
+		_, _, _, _, err := parseHook(req)
 		assert.Error(t, err)
 	})
 
@@ -55,7 +55,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullCreated)
 
-		_, r, b, err := parseHook(req)
+		_, r, b, _, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, errIncompleteHook)
@@ -67,7 +67,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		_, r, b, err := parseHook(req)
+		_, r, b, _, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, errIncompleteHook)
@@ -79,7 +79,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullCreated)
 
-		pr, r, b, err := parseHook(req)
+		pr, r, b, _, err := parseHook(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "user_name/repo_name", r.FullName)
@@ -93,7 +93,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullMerged)
 
-		pr, r, b, err := parseHook(req)
+		pr, r, b, _, err := parseHook(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
@@ -107,7 +107,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPullDeclined)
 
-		pr, r, b, err := parseHook(req)
+		pr, r, b, _, err := parseHook(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, pr)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
@@ -121,7 +121,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		_, _, _, err := parseHook(req)
+		_, _, _, _, err := parseHook(req)
 		assert.Error(t, err)
 	})
 
@@ -131,7 +131,7 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		_, r, b, err := parseHook(req)
+		_, r, b, _, err := parseHook(req)
 		assert.Nil(t, r)
 		assert.Nil(t, b)
 		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
@@ -143,12 +143,13 @@ func TestParseHook(t *testing.T) {
 		req.Header = http.Header{}
 		req.Header.Set(hookEvent, hookPush)
 
-		pr, r, b, err := parseHook(req)
+		pr, r, b, prevCommit, err := parseHook(req)
 		assert.NoError(t, err)
 		assert.Nil(t, pr)
 		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 		assert.Equal(t, "https://bitbucket.org/martinherren1984/publictestrepo", r.Clone)
 		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+		assert.Equal(t, "a51241ae1f00cbe728930db48e890b18fd527f99", prevCommit)
 		assert.Equal(t, "a\n", b.Message)
 	})
 }

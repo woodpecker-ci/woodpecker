@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -218,11 +219,22 @@ func TestBitbucket(t *testing.T) {
 	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
 	mockStore.On("GetRepoForgeID", mock.Anything, mock.Anything).Return(fakeRepoFromHook, nil)
 
+	// The changed files cover the whole push, not only its head commit.
 	r, b, err := c.Hook(ctx, req, "")
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.ElementsMatch(t, []string{"main.go", "docs/README.md"}, b.ChangedFiles)
+
+	// A force push has no meaningful range: only the head commit is listed.
+	buf = bytes.NewBufferString(strings.Replace(fixtures.HookPush, `"forced": false`, `"forced": true`, 1))
+	req, _ = http.NewRequest(http.MethodPost, "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, hookPush)
+
+	_, b, err = c.Hook(ctx, req, "")
+	assert.NoError(t, err)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
 }
 
