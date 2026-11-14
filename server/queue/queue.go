@@ -19,9 +19,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 var (
@@ -147,6 +149,12 @@ type Queue interface {
 type Config struct {
 	Backend Type
 	Store   store.Store
+	// TaskTimeout is the lease a running task gets and agents have to renew
+	// via Extend. Zero falls back to constant.TaskTimeout. Values below
+	// constant.TaskTimeout are rejected: agents renew every
+	// constant.TaskTimeout / 3, so a shorter lease would expire tasks that
+	// merely missed one or two heartbeats.
+	TaskTimeout time.Duration
 }
 
 // Queue type.
@@ -160,9 +168,17 @@ const (
 func New(ctx context.Context, config Config) (Queue, error) {
 	var q Queue
 
+	if config.TaskTimeout != 0 && config.TaskTimeout < constant.TaskTimeout {
+		return nil, fmt.Errorf("task timeout must be at least %s, got %s", constant.TaskTimeout, config.TaskTimeout)
+	}
+
 	switch config.Backend {
 	case TypeMemory:
-		q = NewMemoryQueue(ctx)
+		if config.TaskTimeout != 0 {
+			q = NewMemoryQueueWithTaskTimeout(ctx, config.TaskTimeout)
+		} else {
+			q = NewMemoryQueue(ctx)
+		}
 		if config.Store != nil {
 			q = WithTaskStore(ctx, q, config.Store)
 		}

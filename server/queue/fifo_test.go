@@ -1336,6 +1336,43 @@ func TestFifoLeaseManagement(t *testing.T) {
 	})
 }
 
+func TestFifoCustomTaskTimeout(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueueWithTaskTimeout(ctx, 500*time.Millisecond).(*fifo)
+	require.NotNil(t, q, "Failed to create queue")
+	assert.Equal(t, 500*time.Millisecond, q.extension)
+
+	// a missed heartbeat must not expire a task that is still renewed
+	dummyTask := &model.Task{ID: "custom-timeout-1"}
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	errCh := make(chan error, 1)
+	go func() { errCh <- q.Wait(ctx, got.ID) }()
+
+	for range 3 {
+		time.Sleep(200 * time.Millisecond)
+		assert.NoError(t, q.Extend(ctx, 1, got.ID))
+	}
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 1, "task with renewed lease must not expire")
+
+	// stop renewing: the custom 500ms lease must expire the task
+	select {
+	case werr := <-errCh:
+		assert.ErrorIs(t, werr, ErrTaskExpired)
+	case <-time.After(3 * time.Second):
+		t.Fatal("timeout waiting for Wait to return")
+	}
+	info = q.Info(ctx)
+	assert.Len(t, info.Running, 0)
+	assert.Len(t, info.Pending, 1, "expired task must be resubmitted")
+}
+
 func TestFifoWorkerManagement(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)

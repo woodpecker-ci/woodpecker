@@ -303,6 +303,12 @@ var flags = append([]cli.Flag{
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_TASK_TIMEOUT"),
+		Name:    "task-timeout",
+		Usage:   "time until a running task whose lease is not renewed by its agent is considered dead and gets rescheduled; agents renew every 20s, so values below 1m will expire tasks that only missed a heartbeat (minimum 1m)",
+		Value:   time.Minute,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
 		Name:    "config-extension-endpoint",
