@@ -853,7 +853,7 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 
 	files := make([]string, 0, defaultPerPage*2)
 	diffOpts := &gitlab.ListMergeRequestDiffsOptions{
-		ListOptions: gitlab.ListOptions{PerPage: defaultPerPage},
+		PerPage: defaultPerPage,
 	}
 	for {
 		changes, resp, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, diffOpts, gitlab.WithContext(ctx))
