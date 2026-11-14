@@ -213,7 +213,7 @@ importers:
         version: 3.10.2(@swc/core@1.16.22)(@swc/html@1.16.22)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.32))(csso@5.0.5)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(svgo@3.3.5)
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.7.1
-        version: 4.7.1(@vue/compiler-sfc@3.5.45)(prettier@3.10.0)(supports-color@10.2.2)
+        version: 4.7.1(@vue/compiler-sfc@3.5.45)(prettier@3.10.1)(supports-color@10.2.2)
       '@types/node':
         specifier: ^26.0.0
         version: 26.6.6
@@ -231,7 +231,7 @@ importers:
         version: 3.5.45
       prettier:
         specifier: ^3.8.1
-        version: 3.10.0
+        version: 3.10.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -262,7 +262,7 @@ importers:
         version: 3.10.2(@swc/core@1.16.22)(@swc/html@1.16.22)(clean-css@5.3.3)(cssnano@6.1.2(postcss@8.5.32))(csso@5.0.5)(html-minifier-terser@7.2.0)(lightningcss@1.33.0)(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(svgo@3.3.5)
       '@tsconfig/docusaurus':
         specifier: ^2.0.7
-        version: 2.0.9
+        version: 2.0.10
       '@types/node':
         specifier: ^26.0.0
         version: 26.6.6
@@ -2260,8 +2260,8 @@ packages:
     resolution: {integrity: sha512-+PmQX0PiAYPMeVYe237LJAYvOMYW1j2rH5YROyS3b4CTVJum34HfRvKvAzozHAQG0TnHNdUfY9nCeUyRAs//cw==}
     engines: {node: '>=14.16'}
 
-  '@tsconfig/docusaurus@2.0.9':
-    resolution: {integrity: sha512-0jVxZCgy2v7TnJrW9kVNikNwJHeiWb68Zhiiw2vHw4tzBFSP5vS2zn3O5EY2oPEVz5dXZRkK7MnWG3Ay5q0mIg==}
+  '@tsconfig/docusaurus@2.0.10':
+    resolution: {integrity: sha512-/z4AecMQyqG3/RjL5K9XINuqfpg4jP1zMDBBKguoTvTp0bMtCdB0PIq0WwUdBJMfmVxRFa41OXvHXziRjcdsPQ==}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -5321,8 +5321,8 @@ packages:
     resolution: {integrity: sha512-LJlKCCAUFKOuZxipUdYw1NzIITEsPcgyOG9LkvRJvuKj/bRzbuRY0ARXvL0pWGpsZvn8jku+LMep2eU0seHp8g==}
     engines: {node: ^10 || ^12 || >=14}
 
-  prettier@3.10.0:
-    resolution: {integrity: sha512-mBi4765LgjO1PFjlEs7pUeK0nb1bw71c+N4/ItfeUWNdY5cV2pRKaFpbbFRYmDJMO+5ZwzGxHRqHxFZna7iv5w==}
+  prettier@3.10.1:
+    resolution: {integrity: sha512-70vp3ZUYoPlFbF9uiTdXHUUCGEIp7d4+6p+8DYbkm2jP7x/3i/paXVF6dopSI3zd/CEitrZN1rc4i85xWmmXlg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -8837,13 +8837,13 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.45)(prettier@3.10.0)(supports-color@10.2.2)':
+  '@ianvs/prettier-plugin-sort-imports@4.7.1(@vue/compiler-sfc@3.5.45)(prettier@3.10.1)(supports-color@10.2.2)':
     dependencies:
       '@babel/generator': 7.29.13
       '@babel/parser': 7.29.13
       '@babel/traverse': 7.29.13(supports-color@10.2.2)
       '@babel/types': 7.29.11
-      prettier: 3.10.0
+      prettier: 3.10.1
       semver: 7.8.6
     optionalDependencies:
       '@vue/compiler-sfc': 3.5.45
@@ -9596,7 +9596,7 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tsconfig/docusaurus@2.0.9': {}
+  '@tsconfig/docusaurus@2.0.10': {}
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
@@ -13175,7 +13175,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
-  prettier@3.10.0: {}
+  prettier@3.10.1: {}
 
   pretty-error@4.0.0:
     dependencies:
