@@ -447,6 +447,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
 
+	// The agent only marked a skipped workflow as done, it did no work.
+	if workflow.State == model.StatusSkipped {
+		return nil
+	}
+
 	return s.updateAgentLastWork(agent)
 }
 
