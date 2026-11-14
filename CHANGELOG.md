@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Update module go.opentelemetry.io/otel/trace to v1.47.0 [SECURITY] [[#7564](https://github.com/woodpecker-ci/woodpecker/pull/7564)]
 - Use repo visibility instead of forge private flag for event stream [[#7559](https://github.com/woodpecker-ci/woodpecker/pull/7559)]
 - Only accept step updates for steps of the agent's own workflow [[#7547](https://github.com/woodpecker-ci/woodpecker/pull/7547)]
 - Only link http(s) forge URLs in the web UI [[#7548](https://github.com/woodpecker-ci/woodpecker/pull/7548)]
@@ -79,6 +80,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency jsdom to v31.0.1 [[#7565](https://github.com/woodpecker-ci/woodpecker/pull/7565)]
 - Update web npm deps non-major [[#7563](https://github.com/woodpecker-ci/woodpecker/pull/7563)]
 - Update web npm deps non-major [[#7554](https://github.com/woodpecker-ci/woodpecker/pull/7554)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
