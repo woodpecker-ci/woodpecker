@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-13
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -78,6 +78,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7563](https://github.com/woodpecker-ci/woodpecker/pull/7563)]
 - Update web npm deps non-major [[#7554](https://github.com/woodpecker-ci/woodpecker/pull/7554)]
 - Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.48.0 [[#7550](https://github.com/woodpecker-ci/woodpecker/pull/7550)]
