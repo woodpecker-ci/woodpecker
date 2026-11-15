@@ -81,6 +81,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency vue-i18n to v11.4.20 [[#7573](https://github.com/woodpecker-ci/woodpecker/pull/7573)]
 - Update web npm deps non-major [[#7571](https://github.com/woodpecker-ci/woodpecker/pull/7571)]
 - Update golang-packages [[#7569](https://github.com/woodpecker-ci/woodpecker/pull/7569)]
 - Update dependency vue-router to v5.5.1 [[#7567](https://github.com/woodpecker-ci/woodpecker/pull/7567)]
