@@ -81,6 +81,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7569](https://github.com/woodpecker-ci/woodpecker/pull/7569)]
 - Update dependency vue-router to v5.5.1 [[#7567](https://github.com/woodpecker-ci/woodpecker/pull/7567)]
 - Update dependency jsdom to v31.0.1 [[#7565](https://github.com/woodpecker-ci/woodpecker/pull/7565)]
 - Update web npm deps non-major [[#7563](https://github.com/woodpecker-ci/woodpecker/pull/7563)]
