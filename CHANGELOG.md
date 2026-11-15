@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-14
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -65,6 +65,7 @@
 
 ### 📚 Documentation
 
+- Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
 - Update docs npm deps non-major [[#7562](https://github.com/woodpecker-ci/woodpecker/pull/7562)]
 - Update docs npm deps non-major [[#7553](https://github.com/woodpecker-ci/woodpecker/pull/7553)]
 - docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
