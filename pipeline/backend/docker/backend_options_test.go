@@ -49,6 +49,21 @@ func TestParseBackendOptions(t *testing.T) {
 			want: BackendOptions{User: "1000:1000"},
 		},
 		{
+			name: "with capabilities option",
+			step: &backend_types.Step{BackendOptions: map[string]any{
+				"docker": map[string]any{
+					"capabilities": map[string]any{
+						"add":  []string{"SYS_PTRACE"},
+						"drop": []string{"ALL"},
+					},
+				},
+			}},
+			want: BackendOptions{Capabilities: &Capabilities{
+				Add:  []string{"SYS_PTRACE"},
+				Drop: []string{"ALL"},
+			}},
+		},
+		{
 			name:    "invalid backend options",
 			step:    &backend_types.Step{BackendOptions: map[string]any{"docker": "invalid"}},
 			want:    BackendOptions{},

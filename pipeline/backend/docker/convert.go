@@ -77,7 +77,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error) {
+func toHostConfig(step *types.Step, options BackendOptions, conf *config) (*container.HostConfig, error) {
 	config := &container.HostConfig{
 		CPUQuota:   conf.resourceLimit.CPUQuota,
 		CPUShares:  conf.resourceLimit.CPUShares,
@@ -91,6 +91,10 @@ func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error)
 		Privileged: step.Privileged,
 	}
 
+	if options.Capabilities != nil {
+		config.CapAdd = options.Capabilities.Add
+		config.CapDrop = options.Capabilities.Drop
+	}
 	if conf.apparmor != "" {
 		config.SecurityOpt = []string{"apparmor=" + conf.apparmor}
 	}

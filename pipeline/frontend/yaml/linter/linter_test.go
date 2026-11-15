@@ -143,6 +143,59 @@ steps:
 	require.NoError(t, err)
 }
 
+func TestLintDockerCapabilities(t *testing.T) {
+	config := `
+when:
+  event: push
+steps:
+  test:
+    image: golang
+    backend_options:
+      docker:
+        capabilities:
+          add:
+            - SYS_PTRACE
+          drop:
+            - ALL
+`
+	dropOnly := `
+when:
+  event: push
+steps:
+  test:
+    image: golang
+    backend_options:
+      docker:
+        capabilities:
+          drop:
+            - ALL
+`
+
+	lint := func(t *testing.T, raw string, l *linter.Linter) error {
+		t.Helper()
+		workflow, err := yaml.ParseString(raw)
+		require.NoError(t, err)
+		return l.Lint([]*linter.WorkflowConfig{{
+			File:      "caps.yml",
+			RawConfig: raw,
+			Workflow:  workflow,
+		}})
+	}
+
+	t.Run("add requires security trust", func(t *testing.T) {
+		assert.Error(t, lint(t, config, linter.New()))
+		assert.Error(t, lint(t, config, linter.New(linter.WithTrusted(linter.TrustedConfiguration{Network: true, Volumes: true}))))
+	})
+
+	t.Run("add is allowed with security trust", func(t *testing.T) {
+		assert.NoError(t, lint(t, config, linter.New(linter.WithTrusted(linter.TrustedConfiguration{Security: true}))))
+	})
+
+	t.Run("drop does not require trust", func(t *testing.T) {
+		assert.NoError(t, lint(t, dropOnly, linter.New()))
+	})
+}
+
 func TestLintErrors(t *testing.T) {
 	testdata := []struct {
 		from string
@@ -159,6 +212,10 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
 			want: "Insufficient trust level to use `privileged` mode",
+		},
+		{
+			from: "steps: { build: { image: golang, backend_options: { docker: { capabilities: { add: [ SYS_PTRACE ] } } } }  }",
+			want: "Insufficient trust level to add capabilities with `backend_options.docker.capabilities.add`",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",

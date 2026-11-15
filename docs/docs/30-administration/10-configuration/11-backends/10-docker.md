@@ -37,6 +37,27 @@ steps:
 
 The syntax is the same as the [docker run](https://docs.docker.com/engine/reference/run/#user) `--user` flag.
 
+### Capabilities
+
+By default the step container runs with the default set of Linux capabilities of the container runtime. Use the `capabilities` backend option to add capabilities to or drop capabilities from this set, like the `--cap-add` and `--cap-drop` flags of [docker run](https://docs.docker.com/engine/containers/run/#runtime-privilege-and-linux-capabilities):
+
+```yaml
+steps:
+  - name: example
+    image: alpine
+    commands:
+      - ping -c 1 example.com
+    backend_options:
+      docker:
+        capabilities:
+          add:
+            - SYS_PTRACE
+          drop:
+            - MKNOD
+```
+
+Dropping capabilities (for example `ALL`) is always allowed. Adding capabilities increases the privileges of the container, therefore it is only possible in repositories with the [security trust level](../../../20-usage/75-project-settings.md#trusted).
+
 ## Tips and tricks
 
 ### Image cleanup

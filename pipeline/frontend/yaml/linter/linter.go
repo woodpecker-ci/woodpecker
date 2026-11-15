@@ -19,6 +19,7 @@ import (
 	"regexp"
 	"slices"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
@@ -280,6 +281,9 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 		if c.Privileged {
 			errors = append(errors, "Insufficient trust level to use `privileged` mode")
 		}
+		if len(dockerCapabilitiesToAdd(c)) != 0 {
+			errors = append(errors, "Insufficient trust level to add capabilities with `backend_options.docker.capabilities.add`")
+		}
 	}
 	if !l.trusted.Network {
 		if len(c.DNS) != 0 {
@@ -318,6 +322,20 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	}
 
 	return nil
+}
+
+// dockerCapabilitiesToAdd returns the capabilities requested via the docker backend options of a container.
+func dockerCapabilitiesToAdd(c *types.Container) []string {
+	var options struct {
+		Capabilities struct {
+			Add []string `mapstructure:"add"`
+		} `mapstructure:"capabilities"`
+	}
+	if err := mapstructure.WeakDecode(c.BackendOptions["docker"], &options); err != nil {
+		// malformed options are reported by the schema linter
+		return nil
+	}
+	return options.Capabilities.Add
 }
 
 func (l *Linter) lintSchema(config *WorkflowConfig) error {

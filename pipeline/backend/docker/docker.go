@@ -188,7 +188,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend_types.Step, taskUU
 	if err != nil {
 		return err
 	}
-	hostConfig, err := toHostConfig(step, &e.config)
+	hostConfig, err := toHostConfig(step, options, &e.config)
 	if err != nil {
 		return err
 	}
