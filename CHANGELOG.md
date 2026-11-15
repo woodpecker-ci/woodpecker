@@ -82,6 +82,7 @@
 
 ### 📦️ Dependency
 
+- Update dependency dompurify to v3.4.18 [[#7577](https://github.com/woodpecker-ci/woodpecker/pull/7577)]
 - Update dependency vue-i18n to v11.4.20 [[#7573](https://github.com/woodpecker-ci/woodpecker/pull/7573)]
 - Update web npm deps non-major [[#7571](https://github.com/woodpecker-ci/woodpecker/pull/7571)]
 - Update golang-packages [[#7569](https://github.com/woodpecker-ci/woodpecker/pull/7569)]
