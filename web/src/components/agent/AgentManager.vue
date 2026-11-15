@@ -34,6 +34,7 @@
 </template>
 
 <script lang="ts" setup>
+import { useIntervalFn } from '@vueuse/core';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -63,7 +64,15 @@ const { t } = useI18n();
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
 
-const { resetPage, data: agents, loading } = usePagination(props.loadAgents);
+const { resetPage, refresh, data: agents, loading } = usePagination(props.loadAgents);
+
+// keep the list up to date, e.g. to see agents started by an autoscaler
+useIntervalFn(async () => {
+  if (selectedAgent.value || document.visibilityState !== 'visible') {
+    return;
+  }
+  await refresh();
+}, 10 * 1000);
 
 const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedAgent.value) {
