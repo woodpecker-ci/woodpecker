@@ -43,6 +43,7 @@
 
 ### 🐛 Bug Fixes
 
+- For gitlab do paginate loading changed files [[#7561](https://github.com/woodpecker-ci/woodpecker/pull/7561)]
 - Subscribe GitHub webhooks to release events [[#7543](https://github.com/woodpecker-ci/woodpecker/pull/7543)]
 - Forge status report fixes [[#7520](https://github.com/woodpecker-ci/woodpecker/pull/7520)]
 - Close forge instances before cache replacement [[#7525](https://github.com/woodpecker-ci/woodpecker/pull/7525)]
