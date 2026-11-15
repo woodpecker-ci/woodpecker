@@ -344,7 +344,7 @@ func TestWithTaskStoreRestoresDepStatusAfterReload(t *testing.T) {
 
 			// first server: the dependency runs and finishes, the gate stays queued
 			ctx1, cancel1 := context.WithCancelCause(t.Context())
-			q1 := WithTaskStore(ctx1, NewMemoryQueue(ctx1), s)
+			q1 := WithTaskStore(ctx1, NewMemoryQueue(ctx1, 0), s)
 			require.NoError(t, q1.PushAtOnce(ctx1, []*model.Task{dep, gate}))
 			polled, err := q1.Poll(ctx1, 1, filterFnTrue)
 			require.NoError(t, err)
@@ -356,7 +356,7 @@ func TestWithTaskStoreRestoresDepStatusAfterReload(t *testing.T) {
 			// second server: reload the still queued gate from the store
 			ctx2, cancel2 := context.WithCancelCause(t.Context())
 			defer cancel2(nil)
-			q2 := WithTaskStore(ctx2, NewMemoryQueue(ctx2), s)
+			q2 := WithTaskStore(ctx2, NewMemoryQueue(ctx2, 0), s)
 
 			reloaded := queuedTask(t, q2.Info(ctx2), gate.ID)
 			assert.Equal(t, tt.depState, reloaded.DepStatus[dep.ID])
@@ -375,7 +375,7 @@ func TestWithTaskStoreKeepsUnfinishedDepStatusEmpty(t *testing.T) {
 
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
-	q := WithTaskStore(ctx, NewMemoryQueue(ctx), s)
+	q := WithTaskStore(ctx, NewMemoryQueue(ctx, 0), s)
 
 	reloaded := queuedTask(t, q.Info(ctx), gate.ID)
 	assert.NotContains(t, reloaded.DepStatus, dep.ID)

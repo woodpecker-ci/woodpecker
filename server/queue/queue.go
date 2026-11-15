@@ -174,11 +174,7 @@ func New(ctx context.Context, config Config) (Queue, error) {
 
 	switch config.Backend {
 	case TypeMemory:
-		if config.TaskTimeout != 0 {
-			q = NewMemoryQueueWithTaskTimeout(ctx, config.TaskTimeout)
-		} else {
-			q = NewMemoryQueue(ctx)
-		}
+		q = NewMemoryQueue(ctx, config.TaskTimeout)
 		if config.Store != nil {
 			q = WithTaskStore(ctx, q, config.Store)
 		}

@@ -44,7 +44,7 @@ func setupTestQueue(t *testing.T) (context.Context, context.CancelCauseFunc, *fi
 	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
-	q, _ := NewMemoryQueue(ctx).(*fifo)
+	q, _ := NewMemoryQueue(ctx, 0).(*fifo)
 	require.NotNil(t, q, "Failed to create queue")
 
 	return ctx, cancel, q
@@ -1340,7 +1340,7 @@ func TestFifoCustomTaskTimeout(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
-	q, _ := NewMemoryQueueWithTaskTimeout(ctx, 500*time.Millisecond).(*fifo)
+	q, _ := NewMemoryQueue(ctx, 500*time.Millisecond).(*fifo)
 	require.NotNil(t, q, "Failed to create queue")
 	assert.Equal(t, 500*time.Millisecond, q.extension)
 
@@ -1507,7 +1507,7 @@ func TestFifoLabelBasedScoring(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
 
-	q := NewMemoryQueue(ctx)
+	q := NewMemoryQueue(ctx, 0)
 
 	tasks := []*model.Task{
 		{ID: "1", Labels: map[string]string{"org-id": "123", "platform": "linux"}},

@@ -28,13 +28,17 @@ func TestNewTaskTimeoutValidation(t *testing.T) {
 	t.Run("zero falls back to default", func(t *testing.T) {
 		q, err := New(t.Context(), Config{Backend: TypeMemory})
 		require.NoError(t, err)
-		require.NotNil(t, q)
+		fifoQ, ok := q.(*fifo)
+		require.True(t, ok)
+		assert.Equal(t, constant.TaskTimeout, fifoQ.extension)
 	})
 
 	t.Run("custom timeout is accepted", func(t *testing.T) {
 		q, err := New(t.Context(), Config{Backend: TypeMemory, TaskTimeout: 15 * time.Minute})
 		require.NoError(t, err)
-		require.NotNil(t, q)
+		fifoQ, ok := q.(*fifo)
+		require.True(t, ok)
+		assert.Equal(t, 15*time.Minute, fifoQ.extension)
 	})
 
 	t.Run("below default is rejected", func(t *testing.T) {
