@@ -22,6 +22,8 @@ You can also run every `.yaml` and `.yml` file in a workflow directory:
 woodpecker-cli exec .woodpecker/
 ```
 
+The workflows are executed like on a server: they run in parallel, wait for the workflows they depend on, and are skipped if one of those failed, unless their `status` filter says otherwise (see [flow control](./25-workflows.md#flow-control)). The command exits with an error if the pipeline did not succeed.
+
 By default, Woodpecker auto-detects a backend. Select one explicitly when you want the local run to match a specific agent backend:
 
 ```shell
