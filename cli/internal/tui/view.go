@@ -21,7 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 	"github.com/charmbracelet/x/ansi"
@@ -113,16 +112,14 @@ func (m *Model) resize() {
 	bodyHeight := m.height - messagesHeight - 1 // footer
 
 	// what showed its end has to show it in the new size too
-	logAtBottom, messagesAtBottom := m.logView.AtBottom(), m.messagesView.AtBottom()
+	messagesAtBottom := m.messagesView.AtBottom()
 
 	m.logView.SetWidth(max(0, m.width-stepsWidth-paneFrameWidth))
 	m.logView.SetHeight(max(0, bodyHeight-paneFrameHeight-2)) //nolint:mnd // title and step status
 	m.messagesView.SetWidth(max(0, m.width-paneFrameWidth))
 	m.messagesView.SetHeight(max(0, messagesHeight-paneFrameHeight))
 
-	if logAtBottom {
-		m.logView.GotoBottom()
-	}
+	m.moveLogCursor(0)
 	if messagesAtBottom {
 		m.messagesView.GotoBottom()
 	}
@@ -234,22 +231,6 @@ func (m *Model) renderLog(width int) string {
 	return title + "\n" + log + "\n" + end
 }
 
-// logGutter renders the line number and, each time it changes, the seconds
-// since the step started in front of a log line.
-func (m *Model) logGutter(ctx viewport.GutterContext) string {
-	entries := m.logs[m.selected]
-	if ctx.Soft || ctx.Index >= len(entries) {
-		return strings.Repeat(" ", 12) //nolint:mnd
-	}
-
-	entry := entries[ctx.Index]
-	took := ""
-	if ctx.Index == 0 || entries[ctx.Index-1].Time != entry.Time {
-		took = fmt.Sprintf("%ds", entry.Time)
-	}
-	return styleMuted.Render(fmt.Sprintf("%5d %5s ", entry.Line+1, took))
-}
-
 func (m *Model) renderFooter() string {
 	quit := "quit"
 	if m.OnCancel != nil && !m.canceled && m.active() {
@@ -262,8 +243,12 @@ func (m *Model) renderFooter() string {
 		state = "canceling…"
 	}
 
+	keys := "↑/↓ select · enter fold/open log"
+	if m.focus == paneLog {
+		keys = "↑/↓ move · enter fold · c/e fold/unfold all"
+	}
 	footer := " " + statusIcon(string(pipelineStatus), true) + " " + state +
-		styleMuted.Render("  ↑/↓ select · enter fold/open log · tab switch pane · q "+quit)
+		styleMuted.Render("  "+keys+" · tab switch pane · q "+quit)
 	return ansi.Truncate(footer, m.width, "…")
 }
 
