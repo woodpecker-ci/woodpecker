@@ -16,13 +16,16 @@
 package gitea
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -239,6 +242,17 @@ func parsePullRequest(b []byte) (*pullRequestHook, error) {
 func parseRelease(b []byte) (*releaseHook, error) {
 	pr := new(releaseHook)
 	return pr, json.Unmarshal(b, pr)
+}
+
+// validSignature reports whether signature is the hex encoded HMAC-SHA256 of payload with secret.
+func validSignature(secret, signature string, payload []byte) bool {
+	expected, err := hex.DecodeString(signature)
+	if err != nil {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write(payload)
+	return hmac.Equal(mac.Sum(nil), expected)
 }
 
 // fixMalformedAvatar fixes an avatar url if malformed (currently a known bug with gitea).

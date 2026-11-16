@@ -446,7 +446,28 @@ func TestRPCUpdate(t *testing.T) {
 
 		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123"})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "does not belong to current pipeline")
+		assert.Contains(t, err.Error(), "does not belong to current workflow")
+	})
+
+	t.Run("reject step of another workflow in the same pipeline", func(t *testing.T) {
+		mockStore := store_mocks.NewMockStore(t)
+		agent := defaultAgent()
+		pipeline := defaultPipeline(model.StatusRunning)
+		workflow := defaultWorkflow(model.StatusRunning)
+		step := defaultStep(model.StatusRunning)
+		step.PPID = workflow.PID + 1 // step of a sibling workflow
+
+		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
+		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
+		mockStore.On("StepByUUID", "step-uuid-123").Return(step, nil)
+
+		rpcInst := newTestRPC(t, mockStore, nil)
+		ctx := context.WithValue(t.Context(), agentIDKey, int64(1))
+
+		err := rpcInst.Update(ctx, "30", rpc.StepState{StepUUID: "step-uuid-123", Exited: true})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "does not belong to current workflow")
 	})
 
 	t.Run("reject agent from wrong org", func(t *testing.T) {

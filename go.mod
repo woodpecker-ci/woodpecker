@@ -6,10 +6,10 @@ require (
 	al.essio.dev/pkg/shellescape v1.6.1
 	charm.land/huh/v2 v2.0.3
 	charm.land/lipgloss/v2 v2.0.1
-	code.gitea.io/sdk/gitea v0.25.1
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
+	gitea.dev/sdk v1.5.2-0.20261108232917-9fe07596a08d
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.10.4
@@ -37,8 +37,8 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.53
 	github.com/migueleliasweb/go-github-mock v1.5.0
-	github.com/moby/moby/api v1.56.1
-	github.com/moby/moby/client v0.6.2
+	github.com/moby/moby/api v1.57.0
+	github.com/moby/moby/client v0.6.3
 	github.com/moby/term v0.5.2
 	github.com/neticdk/go-bitbucket v1.0.5
 	github.com/oklog/ulid/v2 v2.1.2
@@ -54,7 +54,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.6.2
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v3 v3.47.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.51.0
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/image v0.48.0
@@ -117,7 +117,6 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
-	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/errors v0.22.9 // indirect
@@ -204,9 +203,10 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0 // indirect
-	go.opentelemetry.io/otel v1.45.0 // indirect
-	go.opentelemetry.io/otel/metric v1.45.0 // indirect
-	go.opentelemetry.io/otel/trace v1.45.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/log v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/arch v0.22.0 // indirect
