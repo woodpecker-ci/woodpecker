@@ -43,6 +43,7 @@
 
 ### 🐛 Bug Fixes
 
+- Do not count marking a skipped workflow as done as agent work [[#7560](https://github.com/woodpecker-ci/woodpecker/pull/7560)]
 - For gitlab do paginate loading changed files [[#7561](https://github.com/woodpecker-ci/woodpecker/pull/7561)]
 - Subscribe GitHub webhooks to release events [[#7543](https://github.com/woodpecker-ci/woodpecker/pull/7543)]
 - Forge status report fixes [[#7520](https://github.com/woodpecker-ci/woodpecker/pull/7520)]
