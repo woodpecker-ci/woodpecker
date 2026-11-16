@@ -30,6 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 const (
@@ -38,14 +39,14 @@ const (
 )
 
 // The request and response match server/services/config/http.go. The cli may not
-// import the server packages, so the repo and pipeline fields are declared here
-// with the JSON names of server/model.Repo and server/model.Pipeline.
+// import the server packages, so the envelope is declared here and the repo and
+// pipeline use the types of the go client.
 type (
 	configExtensionRequest struct {
-		Repo          configExtensionRepo     `json:"repo"`
-		Pipeline      configExtensionPipeline `json:"pipeline"`
-		Restart       bool                    `json:"restart"`
-		Configuration []*configExtensionFile  `json:"configuration,omitempty"`
+		Repo          *woodpecker.Repo       `json:"repo"`
+		Pipeline      *woodpecker.Pipeline   `json:"pipeline"`
+		Restart       bool                   `json:"restart"`
+		Configuration []*configExtensionFile `json:"configuration,omitempty"`
 	}
 
 	configExtensionResponse struct {
@@ -56,50 +57,6 @@ type (
 		Name string `json:"name"`
 		Data string `json:"data"`
 	}
-
-	configExtensionRepo struct {
-		ID       int64                  `json:"id,omitempty"`
-		Owner    string                 `json:"owner"`
-		Name     string                 `json:"name"`
-		FullName string                 `json:"full_name"`
-		ForgeURL string                 `json:"forge_url,omitempty"`
-		Clone    string                 `json:"clone_url,omitempty"`
-		CloneSSH string                 `json:"clone_url_ssh"`
-		Branch   string                 `json:"default_branch,omitempty"`
-		Private  bool                   `json:"private"`
-		Trusted  configExtensionTrusted `json:"trusted"`
-	}
-
-	configExtensionTrusted struct {
-		Network  bool `json:"network"`
-		Volumes  bool `json:"volumes"`
-		Security bool `json:"security"`
-	}
-
-	configExtensionPipeline struct {
-		Number               int64    `json:"number"`
-		Parent               int64    `json:"parent"`
-		Event                string   `json:"event"`
-		Created              int64    `json:"created"`
-		Started              int64    `json:"started"`
-		DeployTo             string   `json:"deploy_to"`
-		DeployTask           string   `json:"deploy_task"`
-		Commit               string   `json:"commit"`
-		Branch               string   `json:"branch"`
-		Ref                  string   `json:"ref"`
-		Refspec              string   `json:"refspec"`
-		Author               string   `json:"author"`
-		Avatar               string   `json:"author_avatar"`
-		Email                string   `json:"author_email"`
-		Message              string   `json:"message"`
-		Timestamp            int64    `json:"timestamp"`
-		ForgeURL             string   `json:"forge_url"`
-		ChangedFiles         []string `json:"changed_files,omitempty"`
-		PullRequestLabels    []string `json:"pr_labels,omitempty"`
-		PullRequestMilestone string   `json:"pr_milestone,omitempty"`
-		PullRequestDraft     bool     `json:"pr_draft,omitempty"`
-		Cron                 string   `json:"cron,omitempty"`
-	}
 )
 
 func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) *configExtensionRequest {
@@ -109,23 +66,23 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 	}
 
 	req := &configExtensionRequest{
-		Repo: configExtensionRepo{
-			ID:       m.Repo.ID,
-			Owner:    m.Repo.Owner,
-			Name:     m.Repo.Name,
-			FullName: fullName,
-			ForgeURL: m.Repo.ForgeURL,
-			Clone:    m.Repo.CloneURL,
-			CloneSSH: m.Repo.CloneSSHURL,
-			Branch:   m.Repo.Branch,
-			Private:  m.Repo.Private,
-			Trusted: configExtensionTrusted{
+		Repo: &woodpecker.Repo{
+			ID:           m.Repo.ID,
+			Owner:        m.Repo.Owner,
+			Name:         m.Repo.Name,
+			FullName:     fullName,
+			ForgeURL:     m.Repo.ForgeURL,
+			Clone:        m.Repo.CloneURL,
+			CloneSSH:     m.Repo.CloneSSHURL,
+			Branch:       m.Repo.Branch,
+			IsSCMPrivate: m.Repo.Private,
+			Trusted: woodpecker.TrustedConfiguration{
 				Network:  m.Repo.Trusted.Network,
 				Volumes:  m.Repo.Trusted.Volumes,
 				Security: m.Repo.Trusted.Security,
 			},
 		},
-		Pipeline: configExtensionPipeline{
+		Pipeline: &woodpecker.Pipeline{
 			Number:               m.Curr.Number,
 			Parent:               m.Curr.Parent,
 			Event:                string(m.Curr.Event),
