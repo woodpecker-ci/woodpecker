@@ -258,6 +258,12 @@ func runExec(ctx context.Context, c *cli.Command, yamls []*builder.YamlFile, rep
 	if err != nil {
 		return err
 	}
+	if c.Bool("ignore-labels") {
+		// labels are only used to select the backend
+		for _, item := range items {
+			item.Labels = nil
+		}
+	}
 	// if we use the local backend we should signal to run at $repoPath
 	if slices.ContainsFunc(execBackends, func(b execBackend) bool { return b.Name() == "local" }) {
 		local.CLIWorkaroundExecAtDir = repoPath
