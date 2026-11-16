@@ -50,7 +50,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 		platform = runtime.GOOS + "/" + runtime.GOARCH
 	}
 
-	metadataFileAndOverrideOrDefault(c, "repo-name", func(fullRepoName string) {
+	metadataFileAndOverrideOrDefault(c, "repo", func(fullRepoName string) {
 		if owner, name, found := strings.CutLast(fullRepoName, "/"); found {
 			m.Repo.Owner = owner
 			m.Repo.Name = name

@@ -83,6 +83,11 @@ var flags = []cli.Flag{
 		Name:    "secrets-file",
 		Usage:   "path to yaml file with secrets map",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT"),
+		Name:    "config-extension-endpoint",
+		Usage:   "fetch the workflows from this configuration extension endpoint, like the server does; local workflow files are sent along and used when the extension responds with 204 No Content",
+	},
 
 	//
 	// backend options for pipeline compiler
