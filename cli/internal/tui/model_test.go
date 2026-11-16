@@ -168,6 +168,21 @@ func TestLogIgnoresLinesItAlreadyHas(t *testing.T) {
 	assert.Len(t, m.logs[2], 1)
 }
 
+func TestStepLogMsgReplacesTheLogOfAStep(t *testing.T) {
+	m := New()
+	send(m, testWorkflows())
+	// line 1 got lost
+	send(m, LogMsg{{StepID: 12, Line: 0}, {StepID: 12, Line: 2}, {StepID: 13, Line: 0}})
+	send(m, tickMsg{})
+
+	send(m, StepLogMsg{StepID: 12, Entries: []*woodpecker.LogEntry{{Line: 0}, {Line: 1}, {Line: 2}}})
+
+	require.Len(t, m.logs[12], 3)
+	assert.Equal(t, 1, m.logs[12][1].Line)
+	assert.Len(t, m.logs[13], 1, "other steps keep their log")
+	assert.True(t, m.logChanged, "the shown log gets redrawn")
+}
+
 // commandLog is the log of two commands with something printed before them.
 func commandLog(stepID int64) LogMsg {
 	var log LogMsg
