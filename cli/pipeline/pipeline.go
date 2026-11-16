@@ -47,6 +47,7 @@ var Command = &cli.Command{
 		pipelineShowCmd,
 		pipelineStartCmd,
 		pipelineStopCmd,
+		pipelineViewCmd,
 	},
 }
 
