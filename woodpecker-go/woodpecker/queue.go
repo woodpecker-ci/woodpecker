@@ -19,8 +19,8 @@ import "fmt"
 const pathQueue = "%s/api/queue"
 
 // QueueInfo returns queue info.
-func (c *client) QueueInfo() (*Info, error) {
-	out := new(Info)
+func (c *client) QueueInfo() (*QueueInfo, error) {
+	out := new(QueueInfo)
 	uri := fmt.Sprintf(pathQueue+"/info", c.addr)
 	err := c.get(uri, out)
 	return out, err

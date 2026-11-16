@@ -3208,23 +3208,23 @@ func (_c *MockClient_PipelineStop_Call) RunAndReturn(run func(repoID int64, pipe
 }
 
 // QueueInfo provides a mock function for the type MockClient
-func (_mock *MockClient) QueueInfo() (*woodpecker.Info, error) {
+func (_mock *MockClient) QueueInfo() (*woodpecker.QueueInfo, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for QueueInfo")
 	}
 
-	var r0 *woodpecker.Info
+	var r0 *woodpecker.QueueInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.Info, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*woodpecker.QueueInfo, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *woodpecker.Info); ok {
+	if returnFunc, ok := ret.Get(0).(func() *woodpecker.QueueInfo); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*woodpecker.Info)
+			r0 = ret.Get(0).(*woodpecker.QueueInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -3252,12 +3252,12 @@ func (_c *MockClient_QueueInfo_Call) Run(run func()) *MockClient_QueueInfo_Call 
 	return _c
 }
 
-func (_c *MockClient_QueueInfo_Call) Return(info *woodpecker.Info, err error) *MockClient_QueueInfo_Call {
+func (_c *MockClient_QueueInfo_Call) Return(info *woodpecker.QueueInfo, err error) *MockClient_QueueInfo_Call {
 	_c.Call.Return(info, err)
 	return _c
 }
 
-func (_c *MockClient_QueueInfo_Call) RunAndReturn(run func() (*woodpecker.Info, error)) *MockClient_QueueInfo_Call {
+func (_c *MockClient_QueueInfo_Call) RunAndReturn(run func() (*woodpecker.QueueInfo, error)) *MockClient_QueueInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }

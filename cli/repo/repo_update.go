@@ -133,7 +133,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 
 	if c.IsSet("require-approval") {
 		if mode := woodpecker.ApprovalMode(requireApproval); mode.Valid() {
-			patch.RequireApproval = &mode
+			patch.RequireApproval = &requireApproval
 		} else {
 			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
 		}

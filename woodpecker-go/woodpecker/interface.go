@@ -223,7 +223,7 @@ type Client interface {
 	GlobalSecretDelete(secret string) error
 
 	// QueueInfo returns the queue state.
-	QueueInfo() (*Info, error)
+	QueueInfo() (*QueueInfo, error)
 
 	// Version returns the version of the server.
 	Version() (*Version, error)

@@ -27,7 +27,7 @@ func TestClient_QueueInfo(t *testing.T) {
 	tests := []struct {
 		name     string
 		handler  http.HandlerFunc
-		expected *Info
+		expected *QueueInfo
 		wantErr  bool
 	}{
 		{
@@ -60,8 +60,8 @@ func TestClient_QueueInfo(t *testing.T) {
 				}`)
 				assert.NoError(t, err)
 			},
-			expected: &Info{
-				Running: []Task{
+			expected: &QueueInfo{
+				Running: []QueueTask{
 					{
 						ID: "4696",
 						Labels: map[string]string{
@@ -73,19 +73,7 @@ func TestClient_QueueInfo(t *testing.T) {
 						RunOn:        nil,
 					},
 				},
-				Stats: struct {
-					Workers       int `json:"worker_count"`
-					Pending       int `json:"pending_count"`
-					WaitingOnDeps int `json:"waiting_on_deps_count"`
-					Running       int `json:"running_count"`
-					Complete      int `json:"completed_count"`
-				}{
-					Workers:       2,
-					Pending:       0,
-					WaitingOnDeps: 0,
-					Running:       0,
-					Complete:      0,
-				},
+				Stats: QueueStats{WorkerCount: 2},
 			},
 			wantErr: false,
 		},

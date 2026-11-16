@@ -90,7 +90,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 var tmplPipelinePs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m" + `
 Step: {{ .step.Name }}
 Started: {{ .step.Started }}
-Stopped: {{ .step.Stopped }}
+Stopped: {{ .step.Finished }}
 Type: {{ .step.Type }}
 State: {{ .step.State }}
 `
