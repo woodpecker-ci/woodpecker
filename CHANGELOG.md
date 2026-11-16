@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-15
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -66,6 +66,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
 - Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
 - Update docs npm deps non-major [[#7562](https://github.com/woodpecker-ci/woodpecker/pull/7562)]
 - Update docs npm deps non-major [[#7553](https://github.com/woodpecker-ci/woodpecker/pull/7553)]
@@ -82,6 +83,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.51.0 [[#7579](https://github.com/woodpecker-ci/woodpecker/pull/7579)]
 - Update dependency dompurify to v3.4.18 [[#7577](https://github.com/woodpecker-ci/woodpecker/pull/7577)]
 - Update dependency vue-i18n to v11.4.20 [[#7573](https://github.com/woodpecker-ci/woodpecker/pull/7573)]
 - Update web npm deps non-major [[#7571](https://github.com/woodpecker-ci/woodpecker/pull/7571)]
