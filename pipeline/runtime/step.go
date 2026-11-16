@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -106,6 +107,39 @@ func (r *Runtime) setStepEnv(step *backend_types.Step) error {
 	step.Environment["CI_STEP_TYPE"] = string(step.Type)
 	step.Environment["CI_STEP_NAME"] = step.Name
 
+	if prev := r.prevStep(step); prev != nil {
+		r.exitCodesMu.Lock()
+		code, ok := r.exitCodes[prev.UUID]
+		r.exitCodesMu.Unlock()
+		if ok {
+			step.Environment["CI_PREV_STEP_EXIT_CODE"] = strconv.Itoa(code)
+		}
+	}
+
+	return nil
+}
+
+// prevStep returns the step whose exit code is exposed as CI_PREV_STEP_EXIT_CODE:
+// the only entry of depends_on, or without depends_on the only step of the stage before.
+// It returns nil if there is no single previous step.
+func (r *Runtime) prevStep(step *backend_types.Step) *backend_types.Step {
+	switch len(step.DependsOn) {
+	case 0:
+		for i := 1; i < len(r.spec.Stages); i++ {
+			if slices.Contains(r.spec.Stages[i].Steps, step) && len(r.spec.Stages[i-1].Steps) == 1 {
+				return r.spec.Stages[i-1].Steps[0]
+			}
+		}
+	case 1:
+		// depends_on only names workflow steps, which run after the clone and service stages
+		for _, stage := range slices.Backward(r.spec.Stages) {
+			for _, s := range stage.Steps {
+				if s.Name == step.DependsOn[0] {
+					return s
+				}
+			}
+		}
+	}
 	return nil
 }
 
@@ -238,6 +272,12 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 
 	processState, err := r.completeStep(runnerCtx, step, waitForLogs, startTime)
 	logger.Debug().Str("step", step.Name).Msg("complete")
+
+	if processState != nil && processState.Exited {
+		r.exitCodesMu.Lock()
+		r.exitCodes[step.UUID] = processState.ExitCode
+		r.exitCodesMu.Unlock()
+	}
 
 	if r.cancelFallout(err) {
 		err = r.cancelErr(err, step)

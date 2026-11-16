@@ -115,6 +115,8 @@ Most variables are available in both scopes. Variables scoped only to `runtime` 
 | `CI_STEP_NUMBER`                   | `runtime`          | step number                                                                                                                                      | `0`                                                                                                                             |
 | `CI_STEP_STARTED`                  | `runtime`          | step started UNIX timestamp                                                                                                                      | `1722617519`                                                                                                                    |
 | `CI_STEP_URL`                      | `runtime`          | URL to step in UI                                                                                                                                | `https://ci.example.com/repos/7/pipeline/8`                                                                                     |
+|                                    |                    | **Previous step**                                                                                                                                |                                                                                                                                 |
+| `CI_PREV_STEP_EXIT_CODE`           | `runtime`          | exit code of the previous step, see [`CI_PREV_STEP_EXIT_CODE`](#ci_prev_step_exit_code)                                                          | `0`, `1`                                                                                                                        |
 |                                    |                    | **Previous commit**                                                                                                                              |                                                                                                                                 |
 | `CI_PREV_COMMIT_SHA`               | `compile, runtime` | previous commit SHA                                                                                                                              | `deadbee...`                                                                                                                    |
 | `CI_PREV_COMMIT_REF`               | `compile, runtime` | previous commit ref                                                                                                                              | `refs/heads/main`                                                                                                               |
@@ -245,6 +247,28 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
      image: woodpeckerci/plugin-s3
      settings:
 +      target: /target/${CI_COMMIT_TAG##v}
+```
+
+## `CI_PREV_STEP_EXIT_CODE`
+
+`CI_PREV_STEP_EXIT_CODE` holds the exit code of the step that ran right before the current one. For a step with [`depends_on`](./20-workflow-syntax.md#depends_on), that is its dependency if it has exactly one. For a step without `depends_on`, that is the step before it, as long as no other step ran in parallel with it.
+
+The variable is not set if there is no single previous step, or if the previous step was skipped or is detached.
+
+A failing step stops the workflow unless it has [`failure: ignore`](./20-workflow-syntax.md#failure), so set that on the step whose exit code you want to act on:
+
+```yaml
+steps:
+  - name: check
+    image: alpine
+    commands:
+      - ./check.sh
+    failure: ignore
+
+  - name: report
+    image: alpine
+    commands:
+      - if [ "$CI_PREV_STEP_EXIT_CODE" = "0" ]; then echo "check passed"; else echo "check failed with $CI_PREV_STEP_EXIT_CODE"; fi
 ```
 
 ## `CI_COMMIT_PULL_REQUEST_DRAFT` forge support

@@ -34,6 +34,10 @@ type Runtime struct {
 	// err holds the first error that occurred in the workflow.
 	err utils.Protected[error]
 
+	// exitCodes holds the exit code of every finished blocking step, keyed by step UUID.
+	exitCodes   map[string]int
+	exitCodesMu sync.Mutex
+
 	spec    *backend_types.Config
 	engine  backend_types.Backend
 	started int64
@@ -56,6 +60,7 @@ type Runtime struct {
 func New(spec *backend_types.Config, backend backend_types.Backend, opts ...Option) *Runtime {
 	r := new(Runtime)
 	r.err = utils.NewProtected[error](nil)
+	r.exitCodes = make(map[string]int)
 	r.description = make(map[string]string)
 	r.spec = spec
 	r.engine = backend
