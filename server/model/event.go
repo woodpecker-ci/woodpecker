@@ -20,6 +20,6 @@ type EventType string
 
 // Event represents a pipeline event.
 type Event struct {
-	Repo     Repo     `json:"repo"`
-	Pipeline Pipeline `json:"pipeline"`
+	Repo     Repo         `json:"repo"`
+	Pipeline *APIPipeline `json:"pipeline"`
 }

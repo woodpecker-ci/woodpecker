@@ -85,6 +85,9 @@ func (Pipeline) TableName() string {
 }
 
 func (p *Pipeline) ToAPIModel() *APIPipeline {
+	if p == nil {
+		return nil
+	}
 	ap := &APIPipeline{
 		Pipeline: p,
 	}

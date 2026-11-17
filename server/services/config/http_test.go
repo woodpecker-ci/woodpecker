@@ -58,3 +58,31 @@ func TestHTTPFetchSendsRestart(t *testing.T) {
 		assert.Equal(t, restart, *got.Restart)
 	}
 }
+
+// Extensions still read the deprecated pipeline fields.
+func TestHTTPFetchSendsAPIPipeline(t *testing.T) {
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+
+	var got struct {
+		Pipeline map[string]any `json:"pipeline"`
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer ts.Close()
+
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
+	require.NoError(t, err)
+	fetcher := config.NewHTTP(ts.URL, client, false)
+
+	pipeline := &model.Pipeline{Number: 1, Event: model.EventPush, Commit: &model.Commit{SHA: "abc123", Message: "fix the thing"}}
+	_, err = fetcher.Fetch(t.Context(), nil, &model.User{}, &model.Repo{FullName: "owner/repo"}, pipeline, nil, false)
+	require.NoError(t, err)
+	assert.Equal(t, "abc123", got.Pipeline["commit"])
+	assert.Equal(t, "fix the thing", got.Pipeline["message"])
+}

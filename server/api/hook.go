@@ -260,7 +260,7 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, pl)
+		c.JSON(http.StatusOK, pl.ToAPIModel())
 	}
 }
 

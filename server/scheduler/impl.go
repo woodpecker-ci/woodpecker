@@ -115,7 +115,7 @@ func (p *impl) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) 
 func (p *impl) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
 	data, err := json.Marshal(model.Event{
 		Repo:     *repo,
-		Pipeline: *pipeline,
+		Pipeline: pipeline.ToAPIModel(),
 	})
 	if err != nil {
 		return fmt.Errorf("can't marshal JSON: %w", err)

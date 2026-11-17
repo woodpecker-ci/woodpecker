@@ -603,7 +603,7 @@ func GetPipelineQueue(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting pipeline queue. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, out)
+	c.JSON(http.StatusOK, model.ToAPIFeeds(out))
 }
 
 // PostPipeline

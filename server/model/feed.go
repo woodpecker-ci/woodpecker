@@ -64,6 +64,15 @@ func (f *Feed) ToAPIModel() *APIFeed {
 	return af
 }
 
+// ToAPIFeeds converts a list of feed items to the API model.
+func ToAPIFeeds(feeds []*Feed) []*APIFeed {
+	out := make([]*APIFeed, 0, len(feeds))
+	for _, f := range feeds {
+		out = append(out, f.ToAPIModel())
+	}
+	return out
+}
+
 // APIFeed TODO remove in next major.
 type APIFeed struct {
 	*Feed
