@@ -86,6 +86,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.4 [[#7591](https://github.com/woodpecker-ci/woodpecker/pull/7591)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
