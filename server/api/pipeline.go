@@ -92,11 +92,6 @@ func CreatePipeline(c *gin.Context) {
 }
 
 func createTmpPipeline(commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
-	if commit.Timestamp == 0 {
-		// not every forge reports the commit time
-		commit.Timestamp = time.Now().UTC().Unix()
-	}
-
 	return &model.Pipeline{
 		Event:         model.EventManual,
 		Commit:        commit,
