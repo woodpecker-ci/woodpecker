@@ -66,7 +66,7 @@ const defaultTaskTimeout = 3 * constant.TaskRenewInterval
 
 // NewMemoryQueue returns a new fifo queue. Running tasks get a lease of
 // taskTimeout, renewed by agents via Extend. A taskTimeout of zero or less
-// falls back to defaultTaskTimeout. taskTimeout must be well above the
+// falls back to defaultTaskTimeout. The taskTimeout must be well above the
 // agents' renewal interval of constant.TaskRenewInterval, so a few missed
 // heartbeats do not expire a task that is still executing.
 func NewMemoryQueue(ctx context.Context, taskTimeout time.Duration) Queue {
