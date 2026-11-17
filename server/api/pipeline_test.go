@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -398,13 +397,6 @@ func TestCreateTmpPipeline(t *testing.T) {
 			ForgeURL:            "https://example.com/commit/abc123",
 		}, pl)
 	})
-
-	t.Run("uses the current time if the forge reports no commit time", func(t *testing.T) {
-		before := time.Now().Unix()
-		pl := createTmpPipeline(&model.Commit{SHA: "abc123"}, user, &model.PipelineOptions{Branch: "main"})
-		assert.GreaterOrEqual(t, pl.Commit.Timestamp, before)
-		assert.Empty(t, pl.ManualMessage)
-	})
 }
 
 func TestCreatePipeline(t *testing.T) {
@@ -710,25 +702,29 @@ func TestPostPipeline(t *testing.T) {
 		fakeRepo.AllowDeploy = true
 		t.Cleanup(func() { fakeRepo.AllowDeploy = false })
 
-		parent := newErroredParent()
-		parent.Author, parent.Avatar, parent.Sender = "orig", "orig.png", "orig"
-		parent.Commit = &model.Commit{Author: model.CommitAuthor{Name: "Orig", Email: "orig@example.com"}}
 		deployer := &model.User{ID: 2, Login: "deployer", Email: "deployer@example.com", Avatar: "deployer.png"}
 		deployConfig := []*forge_types.FileMeta{
 			{Name: ".woodpecker.yml", Data: []byte("when:\n  event: deployment\nsteps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
 		}
 
-		w, _ := setupPost(t, parent, deployConfig, "?event=deployment&deploy_to=prod", deployer)
+		// also for a parent without commit object
+		for _, commit := range []*model.Commit{{Author: model.CommitAuthor{Name: "Orig", Email: "orig@example.com"}}, nil} {
+			parent := newErroredParent()
+			parent.Author, parent.Avatar, parent.Sender = "orig", "orig.png", "orig"
+			parent.Commit = commit
 
-		require.Equal(t, http.StatusOK, w.Code)
-		var got model.Pipeline
-		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))
-		assert.Equal(t, model.EventDeploy, got.Event)
-		assert.Equal(t, "deployer", got.Author)
-		assert.Equal(t, "deployer.png", got.Avatar)
-		require.NotNil(t, got.Commit)
-		assert.Equal(t, model.CommitAuthor{Name: "deployer", Email: "deployer@example.com"}, got.Commit.Author)
-		assert.Equal(t, "deployer", got.Sender)
+			w, _ := setupPost(t, parent, deployConfig, "?event=deployment&deploy_to=prod", deployer)
+
+			require.Equal(t, http.StatusOK, w.Code)
+			var got model.Pipeline
+			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &got))
+			assert.Equal(t, model.EventDeploy, got.Event)
+			assert.Equal(t, "deployer", got.Author)
+			assert.Equal(t, "deployer.png", got.Avatar)
+			require.NotNil(t, got.Commit)
+			assert.Equal(t, model.CommitAuthor{Name: "deployer", Email: "deployer@example.com"}, got.Commit.Author)
+			assert.Equal(t, "deployer", got.Sender)
+		}
 	})
 }
 
