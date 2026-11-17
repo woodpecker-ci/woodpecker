@@ -48,6 +48,8 @@ If a tool is not installed, `make lint`, `make format` and `make generate` start
 
 To generate the gRPC code, which is part of `make generate`, you also need [`protoc`](https://protobuf.dev/installation/). It is not installed by `make install-tools`.
 
+The types of the go client in `woodpecker-go/woodpecker/types_generated.go` are written from the server models in `server/model`. After you changed a model, update them with `make generate-go-client`.
+
 ## Install Node.js & `pnpm`
 
 Install [Node.js](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.

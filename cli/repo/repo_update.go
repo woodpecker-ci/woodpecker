@@ -95,7 +95,6 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		requireApproval = c.String("require-approval")
-		pipelineCounter = c.Int("pipeline-counter")
 		unsafe          = c.Bool("unsafe")
 	)
 
@@ -133,7 +132,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 
 	if c.IsSet("require-approval") {
 		if mode := woodpecker.ApprovalMode(requireApproval); mode.Valid() {
-			patch.RequireApproval = &mode
+			patch.RequireApproval = &requireApproval
 		} else {
 			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
 		}
@@ -155,7 +154,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		fmt.Printf("Setting the pipeline counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
 	}
 	if c.IsSet("pipeline-counter") && unsafe {
-		patch.PipelineCounter = &pipelineCounter
+		// TODO(7586): remove
 	}
 
 	repo, err := client.RepoPatch(repoID, patch)

@@ -12,6 +12,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- (CLI) Custom `--format` templates have to use `.DeployTo` instead of `.Deploy` for pipelines and `.Finished` instead of `.Stopped` for workflows and steps.
 
 ### API changes
 
@@ -23,6 +24,18 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `tag_title` for tag events
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
+- The types of the go client (`woodpecker-go`) are now generated from the server, so they have every field of the API. Following names changed:
+  - `Info` => `QueueInfo`
+  - `Info.Pending`, `Info.WaitingOnDeps` and `Info.Running` are of type `[]QueueTask` instead of `[]Task`
+  - `QueueStats.Workers` => `QueueStats.WorkerCount`
+  - `QueueStats.Pending` => `QueueStats.PendingCount`
+  - `QueueStats.WaitingOnDeps` => `QueueStats.WaitingOnDepsCount`
+  - `QueueStats.Running` => `QueueStats.RunningCount`
+  - `Pipeline.Deploy` => `Pipeline.DeployTo`
+  - `Workflow.Stopped` => `Workflow.Finished`
+  - `Step.Stopped` => `Step.Finished`
+  - `RepoPatch.RequireApproval` is of type `*string` instead of `*ApprovalMode`
+  - `User.Active`, `Repo.SCMKind`, `Feed.Remote`, `RepoPatch.IsTrusted`, `RepoPatch.PipelineCounter` and `QueueStats.Complete` are removed, the server never used them
 
 ### Admin-facing migrations
 

@@ -223,6 +223,7 @@
     "Tunnelmole",
     "typecheck",
     "Typeflag",
+    "typegen",
     "tzdata",
     "unplugin",
     "unsanitize",

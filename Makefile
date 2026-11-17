@@ -139,6 +139,9 @@ generate: generate-openapi ## Run all code generations
 generate-openapi: ## Run openapi code generation
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
+generate-go-client: ## Run code generation of the go client types
+	CGO_ENABLED=0 go generate ./woodpecker-go/woodpecker/
+
 generate-license-header:
 	@if command -v addlicense > /dev/null 2>&1; then \
 		addlicense -c "Woodpecker Authors" -l apache -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go; \

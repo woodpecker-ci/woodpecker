@@ -149,5 +149,5 @@ Branch: {{ .Branch }}
 Ref: {{ .Ref }}
 Message: {{ .Message }}
 Author: {{ .Author }}
-Target: {{ .Deploy }}
+Target: {{ .DeployTo }}
 `
