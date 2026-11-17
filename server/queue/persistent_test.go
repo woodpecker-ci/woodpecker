@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -38,7 +39,7 @@ func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(types.ErrRecordNotExist).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 
@@ -59,8 +60,9 @@ func TestPersistentQueuePollDropsTaskWithMissingWorkflow(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 	store.EXPECT().WorkflowLoad(int64(1)).Return(nil, types.ErrRecordNotExist).Once()
+	store.EXPECT().TaskDelete("1").Return(nil).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 
@@ -93,8 +95,9 @@ func TestPersistentQueuePollDropsTerminalWorkflowTask(t *testing.T) {
 			defer cancel(nil)
 
 			store := store_mocks.NewMockStore(t)
-			store.EXPECT().TaskDelete("1").Return(nil).Once()
+			store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 			store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: state}, nil).Once()
+			store.EXPECT().TaskDelete("1").Return(nil).Once()
 
 			pq := &persistentQueue{Queue: q, store: store}
 
@@ -119,7 +122,7 @@ func TestPersistentQueuePollReturnsLiveTask(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
@@ -156,7 +159,7 @@ func TestPersistentQueueDoneIgnoresAlreadyRemovedBackupTask(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
 	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
 
@@ -379,6 +382,79 @@ func TestWithTaskStoreKeepsUnfinishedDepStatusEmpty(t *testing.T) {
 
 	reloaded := queuedTask(t, q.Info(ctx), gate.ID)
 	assert.NotContains(t, reloaded.DepStatus, dep.ID)
+}
+
+// A server restart must keep the task an agent is running, so the agent can
+// reconnect, still gets cancel signals and blocks the tasks depending on it.
+func TestWithTaskStoreRestoresRunningTask(t *testing.T) {
+	s := newSQLiteStore(t)
+	dep, gate := pollOnFirstServer(t, s)
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	q := WithTaskStore(ctx, NewMemoryQueue(ctx, 0), s)
+	waitForProcess()
+
+	info := q.Info(ctx)
+	require.Len(t, info.Running, 1)
+	assert.Equal(t, dep.ID, info.Running[0].ID)
+	assert.Equal(t, int64(1), info.Running[0].AgentID)
+	require.Len(t, info.WaitingOnDeps, 1, "gate must wait for its running dependency")
+	assert.Equal(t, gate.ID, info.WaitingOnDeps[0].ID)
+
+	assert.NoError(t, q.Extend(ctx, 1, dep.ID))
+
+	errCh := make(chan error, 1)
+	go func() { errCh <- q.Wait(ctx, dep.ID) }()
+	waitForProcess()
+	require.NoError(t, q.ErrorAtOnce(ctx, []string{dep.ID}, ErrCancel))
+	select {
+	case err := <-errCh:
+		assert.ErrorIs(t, err, ErrCancel)
+	case <-time.After(time.Second):
+		t.Fatal("Wait did not return after cancel")
+	}
+
+	tasks, err := s.TaskList()
+	require.NoError(t, err)
+	require.Len(t, tasks, 1, "canceled task must be removed from the store")
+	assert.Equal(t, gate.ID, tasks[0].ID)
+}
+
+// A restored task whose agent does not come back expires and is queued again.
+func TestWithTaskStoreRestoredTaskExpires(t *testing.T) {
+	s := newSQLiteStore(t)
+	dep, _ := pollOnFirstServer(t, s)
+
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	q := WithTaskStore(ctx, NewMemoryQueue(ctx, 200*time.Millisecond), s)
+
+	require.Eventually(t, func() bool {
+		for _, task := range q.Info(ctx).Pending {
+			if task.ID == dep.ID {
+				return true
+			}
+		}
+		return false
+	}, 2*time.Second, 50*time.Millisecond, "expired task must be queued again")
+}
+
+// pollOnFirstServer queues a dependency and its gate, lets agent 1 pick up the
+// dependency and then stops that server.
+func pollOnFirstServer(t *testing.T, s store.Store) (dep, gate *model.Task) {
+	t.Helper()
+
+	dep, gate = createDepAndGate(t, s, []string{string(model.StatusSuccess)})
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+	q := WithTaskStore(ctx, NewMemoryQueue(ctx, 0), s)
+	require.NoError(t, q.PushAtOnce(ctx, []*model.Task{dep, gate}))
+	polled, err := q.Poll(ctx, 1, filterFnTrue)
+	require.NoError(t, err)
+	require.Equal(t, dep.ID, polled.ID)
+	setWorkflowState(t, s, dep.ID, model.StatusRunning)
+	return dep, gate
 }
 
 // A dependency that cannot be loaded must not stop the other dependencies of

@@ -82,9 +82,18 @@ func NewMemoryQueue(ctx context.Context, taskTimeout time.Duration) Queue {
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
+// Tasks with an agent are restored as running and get a new lease.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
+		if task.AgentID != 0 {
+			q.running[task.ID] = &entry{
+				item:     task,
+				done:     make(chan bool),
+				deadline: time.Now().Add(q.extension),
+			}
+			continue
+		}
 		q.pending.PushBack(task)
 	}
 	q.Unlock()
