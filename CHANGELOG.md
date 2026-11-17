@@ -86,6 +86,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7593](https://github.com/woodpecker-ci/woodpecker/pull/7593)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.4 [[#7591](https://github.com/woodpecker-ci/woodpecker/pull/7591)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
