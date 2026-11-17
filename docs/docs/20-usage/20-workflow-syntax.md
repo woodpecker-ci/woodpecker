@@ -456,11 +456,11 @@ when:
   - evaluate: 'CI_PIPELINE_EVENT == "push" && CI_REPO == "owner/repo" && CI_COMMIT_BRANCH == CI_REPO_DEFAULT_BRANCH'
 ```
 
-Run on commits created by user `woodpecker-ci`:
+Run on pipelines started by user `woodpecker-ci`:
 
 ```yaml
 when:
-  - evaluate: 'CI_COMMIT_AUTHOR == "woodpecker-ci"'
+  - evaluate: 'CI_PIPELINE_AUTHOR == "woodpecker-ci"'
 ```
 
 Skip all commits containing `please ignore me` in the commit message:
