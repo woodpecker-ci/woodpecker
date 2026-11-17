@@ -157,10 +157,6 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		metadata.Commit.Author.Name = pipeline.Commit.Author.Name
 		metadata.Commit.Author.Email = pipeline.Commit.Author.Email
 	}
-	if metadata.Commit.Author.Name == "" {
-		// not every forge reports the commit author, fall back to the pipeline author
-		metadata.Commit.Author.Name = pipeline.Author
-	}
 
 	if pipeline.Release != nil {
 		metadata.Release.Title = pipeline.Release.Title
