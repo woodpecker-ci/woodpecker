@@ -217,7 +217,7 @@ func TestEventStreamSSEWithoutLogin(t *testing.T) {
 			if !ok {
 				continue
 			}
-			var event model.Event
+			var event scheduler.PipelineEvent
 			if json.Unmarshal([]byte(data), &event) == nil {
 				repoIDs <- event.Repo.ID
 			}
