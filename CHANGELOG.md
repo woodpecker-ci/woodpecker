@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Make the task lease timeout configurable via WOODPECKER_TASK_TIMEOUT [[#7558](https://github.com/woodpecker-ci/woodpecker/pull/7558)]
 - Remove `--pipeline-counter` arg from CLI repo update [[#7586](https://github.com/woodpecker-ci/woodpecker/pull/7586)]
 - local: add initial support for C# script runners [[#7215](https://github.com/woodpecker-ci/woodpecker/pull/7215)]
 - Report skipped and canceled workflows as such to GitLab [[#7512](https://github.com/woodpecker-ci/woodpecker/pull/7512)]
