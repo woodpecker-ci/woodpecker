@@ -69,6 +69,8 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7596](https://github.com/woodpecker-ci/woodpecker/pull/7596)]
+- Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
 - Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
 - Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
 - Update docs npm deps non-major [[#7562](https://github.com/woodpecker-ci/woodpecker/pull/7562)]
