@@ -65,6 +65,9 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 		fullName = m.Repo.Owner + "/" + m.Repo.Name
 	}
 
+	// TODO: the go client types lack clone_url_ssh, deploy_task, changed_files,
+	// pr_labels, pr_milestone, pr_draft and cron, so they are not sent. Set them
+	// once https://github.com/woodpecker-ci/woodpecker/pull/7588 is merged.
 	req := &configExtensionRequest{
 		Repo: &woodpecker.Repo{
 			ID:           m.Repo.ID,
@@ -73,7 +76,6 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 			FullName:     fullName,
 			ForgeURL:     m.Repo.ForgeURL,
 			Clone:        m.Repo.CloneURL,
-			CloneSSH:     m.Repo.CloneSSHURL,
 			Branch:       m.Repo.Branch,
 			IsSCMPrivate: m.Repo.Private,
 			Trusted: woodpecker.TrustedConfiguration{
@@ -83,28 +85,22 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 			},
 		},
 		Pipeline: &woodpecker.Pipeline{
-			Number:               m.Curr.Number,
-			Parent:               m.Curr.Parent,
-			Event:                string(m.Curr.Event),
-			Created:              m.Curr.Created,
-			Started:              m.Curr.Started,
-			DeployTo:             m.Curr.DeployTo,
-			DeployTask:           m.Curr.DeployTask,
-			Commit:               m.Curr.Commit.Sha,
-			Branch:               m.Curr.Commit.Branch,
-			Ref:                  m.Curr.Commit.Ref,
-			Refspec:              m.Curr.Commit.Refspec,
-			Author:               m.Curr.Commit.Author.Name,
-			Avatar:               m.Curr.Avatar,
-			Email:                m.Curr.Commit.Author.Email,
-			Message:              m.Curr.Commit.Message,
-			Timestamp:            m.Curr.Commit.Timestamp,
-			ForgeURL:             m.Curr.ForgeURL,
-			ChangedFiles:         m.Curr.Commit.ChangedFiles,
-			PullRequestLabels:    m.Curr.Commit.PullRequestLabels,
-			PullRequestMilestone: m.Curr.Commit.PullRequestMilestone,
-			PullRequestDraft:     m.Curr.Commit.PullRequestDraft,
-			Cron:                 m.Curr.Cron,
+			Number:    m.Curr.Number,
+			Parent:    m.Curr.Parent,
+			Event:     string(m.Curr.Event),
+			Created:   m.Curr.Created,
+			Started:   m.Curr.Started,
+			Deploy:    m.Curr.DeployTo,
+			Commit:    m.Curr.Commit.Sha,
+			Branch:    m.Curr.Commit.Branch,
+			Ref:       m.Curr.Commit.Ref,
+			Refspec:   m.Curr.Commit.Refspec,
+			Author:    m.Curr.Commit.Author.Name,
+			Avatar:    m.Curr.Avatar,
+			Email:     m.Curr.Commit.Author.Email,
+			Message:   m.Curr.Commit.Message,
+			Timestamp: m.Curr.Commit.Timestamp,
+			ForgeURL:  m.Curr.ForgeURL,
 		},
 	}
 	for _, y := range local {
