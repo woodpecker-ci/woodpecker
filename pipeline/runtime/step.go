@@ -108,10 +108,8 @@ func (r *Runtime) setStepEnv(step *backend_types.Step) error {
 	step.Environment["CI_STEP_NAME"] = step.Name
 
 	if prev := r.prevStep(step); prev != nil {
-		r.exitCodesMu.Lock()
-		code, ok := r.exitCodes[prev.UUID]
-		r.exitCodesMu.Unlock()
-		if ok {
+		code, _ := r.exitCodes.Load(prev.UUID)
+		if code, ok := code.(int); ok {
 			step.Environment["CI_PREV_STEP_EXIT_CODE"] = strconv.Itoa(code)
 		}
 	}
@@ -274,9 +272,7 @@ func (r *Runtime) runBlockingStep(runnerCtx context.Context, step *backend_types
 	logger.Debug().Str("step", step.Name).Msg("complete")
 
 	if processState != nil && processState.Exited {
-		r.exitCodesMu.Lock()
-		r.exitCodes[step.UUID] = processState.ExitCode
-		r.exitCodesMu.Unlock()
+		r.exitCodes.Store(step.UUID, processState.ExitCode)
 	}
 
 	if r.cancelFallout(err) {
