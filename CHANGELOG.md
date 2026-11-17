@@ -86,33 +86,9 @@
 
 ### 📦️ Dependency
 
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.51.0 [[#7579](https://github.com/woodpecker-ci/woodpecker/pull/7579)]
-- Update dependency dompurify to v3.4.18 [[#7577](https://github.com/woodpecker-ci/woodpecker/pull/7577)]
-- Update dependency vue-i18n to v11.4.20 [[#7573](https://github.com/woodpecker-ci/woodpecker/pull/7573)]
-- Update web npm deps non-major [[#7571](https://github.com/woodpecker-ci/woodpecker/pull/7571)]
-- Update golang-packages [[#7569](https://github.com/woodpecker-ci/woodpecker/pull/7569)]
-- Update dependency vue-router to v5.5.1 [[#7567](https://github.com/woodpecker-ci/woodpecker/pull/7567)]
-- Update dependency jsdom to v31.0.1 [[#7565](https://github.com/woodpecker-ci/woodpecker/pull/7565)]
-- Update web npm deps non-major [[#7563](https://github.com/woodpecker-ci/woodpecker/pull/7563)]
-- Update web npm deps non-major [[#7554](https://github.com/woodpecker-ci/woodpecker/pull/7554)]
-- Update pre-commit hook rbubley/mirrors-prettier to v3.10.1 [[#7555](https://github.com/woodpecker-ci/woodpecker/pull/7555)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.48.0 [[#7550](https://github.com/woodpecker-ci/woodpecker/pull/7550)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.47.0 [[#7541](https://github.com/woodpecker-ci/woodpecker/pull/7541)]
-- Update golang-packages [[#7532](https://github.com/woodpecker-ci/woodpecker/pull/7532)]
-- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.45.0 [[#7518](https://github.com/woodpecker-ci/woodpecker/pull/7518)]
-- Lock file maintenance [[#7519](https://github.com/woodpecker-ci/woodpecker/pull/7519)]
-- Update golang-packages [[#7508](https://github.com/woodpecker-ci/woodpecker/pull/7508)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
-- Update web npm deps non-major to v4.3.5 [[#7505](https://github.com/woodpecker-ci/woodpecker/pull/7505)]
-- Update woodpeckerci/plugin-release Docker tag to v1 [[#7499](https://github.com/woodpecker-ci/woodpecker/pull/7499)]
-- Update dependency jsdom to v31 [[#7496](https://github.com/woodpecker-ci/woodpecker/pull/7496)]
-- Update woodpeckerci/plugin-git Docker tag to v2.12.0 [[#7495](https://github.com/woodpecker-ci/woodpecker/pull/7495)]
-- Update web npm deps non-major [[#7494](https://github.com/woodpecker-ci/woodpecker/pull/7494)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
-- Update golang-packages [[#7477](https://github.com/woodpecker-ci/woodpecker/pull/7477)]
-- Update golang-packages [[#7475](https://github.com/woodpecker-ci/woodpecker/pull/7475)]
-- Update module go.yaml.in/yaml/v4 to v4.0.0-rc.7 [[#7462](https://github.com/woodpecker-ci/woodpecker/pull/7462)]
 
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
