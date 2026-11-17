@@ -920,12 +920,12 @@ func TestPersistentQueueCancelExpiredPendingPreservesOtherTasks(t *testing.T) {
 	oldWaiter := expirePersistentLease(t, ctx, q, expired.ID)
 
 	q.Lock()
-	reserved := !q.canRunConcurrent(unrelated)
+	reserved := !(&concurrencyIndex{queue: q}).canRun(unrelated)
 	q.Unlock()
 	require.True(t, reserved, "the expired pending task must retain its concurrency reservation")
 	require.NoError(t, pq.ErrorAtOnce(ctx, []string{expired.ID}, ErrCancel))
 	q.Lock()
-	released := q.canRunConcurrent(unrelated)
+	released := (&concurrencyIndex{queue: q}).canRun(unrelated)
 	dependencyStatus := dependent.DepStatus[expired.ID]
 	q.Unlock()
 	require.True(t, released, "cancellation must free the expired task's reservation")
