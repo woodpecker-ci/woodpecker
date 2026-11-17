@@ -612,6 +612,10 @@ func PostPipeline(c *gin.Context) {
 	repo := session.Repo(c)
 	pl := session.Pipeline(c)
 
+	if pl.Commit == nil {
+		pl.Commit = new(model.Commit)
+	}
+
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		handleDBError(c, err)
@@ -648,9 +652,7 @@ func PostPipeline(c *gin.Context) {
 		}
 		pl.Author = deployer.Login
 		pl.Avatar = deployer.Avatar
-		if pl.Commit != nil {
-			pl.Commit.Author = model.CommitAuthor{Name: deployer.Login, Email: deployer.Email}
-		}
+		pl.Commit.Author = model.CommitAuthor{Name: deployer.Login, Email: deployer.Email}
 		pl.Sender = deployer.Login
 
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
