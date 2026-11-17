@@ -20,8 +20,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestNewTaskTimeoutValidation(t *testing.T) {
@@ -30,7 +28,7 @@ func TestNewTaskTimeoutValidation(t *testing.T) {
 		require.NoError(t, err)
 		fifoQ, ok := q.(*fifo)
 		require.True(t, ok)
-		assert.Equal(t, constant.TaskTimeout, fifoQ.extension)
+		assert.Equal(t, defaultTaskTimeout, fifoQ.extension)
 	})
 
 	t.Run("custom timeout is accepted", func(t *testing.T) {
@@ -43,6 +41,6 @@ func TestNewTaskTimeoutValidation(t *testing.T) {
 
 	t.Run("below default is rejected", func(t *testing.T) {
 		_, err := New(t.Context(), Config{Backend: TypeMemory, TaskTimeout: 30 * time.Second})
-		assert.ErrorContains(t, err, constant.TaskTimeout.String())
+		assert.ErrorContains(t, err, defaultTaskTimeout.String())
 	})
 }

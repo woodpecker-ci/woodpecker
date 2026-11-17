@@ -306,8 +306,8 @@ var flags = append([]cli.Flag{
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_TASK_TIMEOUT"),
 		Name:    "task-timeout",
-		Usage:   "time until a running task whose lease is not renewed by its agent is considered dead and gets rescheduled; agents renew every 20s, so values below 1m will expire tasks that only missed a heartbeat (minimum 1m)",
-		Value:   time.Minute,
+		Usage:   "time until a running task whose lease is not renewed by its agent is considered dead and gets rescheduled; agents renew every " + constant.TaskRenewInterval.String() + ", so the default and minimum of three renew intervals tolerate two missed heartbeats",
+		Value:   3 * constant.TaskRenewInterval,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
