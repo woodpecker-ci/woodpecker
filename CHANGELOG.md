@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Remove `--pipeline-counter` arg from CLI repo update [[#7586](https://github.com/woodpecker-ci/woodpecker/pull/7586)]
 - local: add initial support for C# script runners [[#7215](https://github.com/woodpecker-ci/woodpecker/pull/7215)]
 - Report skipped and canceled workflows as such to GitLab [[#7512](https://github.com/woodpecker-ci/woodpecker/pull/7512)]
 - Send forge status on cancel [[#7516](https://github.com/woodpecker-ci/woodpecker/pull/7516)]
