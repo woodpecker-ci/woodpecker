@@ -178,8 +178,7 @@ type Peer interface {
 	// that the workflow is still actively executing and prevent premature timeout.
 	//
 	// If agents don't call Extend periodically, the workflow will be rescheduled to a new
-	// agent once the lease expires (three renew intervals by default, configurable via
-	// the server's task-timeout flag).
+	// agent after the server's task timeout expires.
 	//
 	// This acts as a heartbeat mechanism to detect stuck workflow executions. If an agent
 	// dies or becomes unresponsive, the server will eventually timeout the workflow and

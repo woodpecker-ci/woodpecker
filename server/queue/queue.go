@@ -149,11 +149,8 @@ type Queue interface {
 type Config struct {
 	Backend Type
 	Store   store.Store
-	// TaskTimeout is the lease a running task gets and agents have to renew
-	// via Extend. Zero falls back to defaultTaskTimeout. Values below
-	// defaultTaskTimeout are rejected: agents renew every
-	// constant.TaskRenewInterval, so a shorter lease would expire tasks
-	// that merely missed one or two renewals.
+	// TaskTimeout is the lease of a running task, renewed by agents via Extend.
+	// Zero uses the default, shorter values are rejected.
 	TaskTimeout time.Duration
 }
 

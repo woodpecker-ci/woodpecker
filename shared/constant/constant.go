@@ -37,7 +37,5 @@ var TrustedClonePlugins = []string{
 	"quay.io/woodpeckerci/plugin-git",
 }
 
-// TaskRenewInterval is the interval at which agents renew the lease of their
-// running tasks by calling Extend. The default and minimum task lease is
-// three renew intervals, so a lease survives two missed renewals.
+// TaskRenewInterval is how often agents extend the lease of a running task.
 const TaskRenewInterval = 20 * time.Second

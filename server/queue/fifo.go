@@ -59,16 +59,11 @@ type fifo struct {
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
 
-// defaultTaskTimeout is the lease a running task gets when none is
-// configured: three renewal intervals, so a lease survives two missed
-// renewals.
+// defaultTaskTimeout lets a lease survive two missed renewals.
 const defaultTaskTimeout = 3 * constant.TaskRenewInterval
 
-// NewMemoryQueue returns a new fifo queue. Running tasks get a lease of
-// taskTimeout, renewed by agents via Extend. A taskTimeout of zero or less
-// falls back to defaultTaskTimeout. The taskTimeout must be well above the
-// agents' renewal interval of constant.TaskRenewInterval, so a few missed
-// heartbeats do not expire a task that is still executing.
+// NewMemoryQueue returns a new fifo queue.
+// A taskTimeout of zero or less uses defaultTaskTimeout.
 func NewMemoryQueue(ctx context.Context, taskTimeout time.Duration) Queue {
 	if taskTimeout <= 0 {
 		taskTimeout = defaultTaskTimeout
