@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-17
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @kevin9327, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @bitskeptic, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -30,7 +30,6 @@
 - Map skipped and canceled workflows to Bitbucket STOPPED / DC CANCELLED [[#7513](https://github.com/woodpecker-ci/woodpecker/pull/7513)]
 - Extend the forge cache TTL on hits [[#7529](https://github.com/woodpecker-ci/woodpecker/pull/7529)]
 - Explain forge timeouts when fetching the pipeline config [[#7521](https://github.com/woodpecker-ci/woodpecker/pull/7521)]
-- In WebUI show pretty durations as hours and minutes via Intl.DurationFormat [[#7530](https://github.com/woodpecker-ci/woodpecker/pull/7530)]
 - Report substitution errors in cli lint and server with custom error [[#7534](https://github.com/woodpecker-ci/woodpecker/pull/7534)]
 - Report skipped and canceled workflows as error to GitHub [[#7517](https://github.com/woodpecker-ci/woodpecker/pull/7517)]
 - Report skipped workflows as skipped to forgejo >= 16 [[#7515](https://github.com/woodpecker-ci/woodpecker/pull/7515)]
@@ -45,6 +44,7 @@
 
 ### 🐛 Bug Fixes
 
+- Allow `failure: cancel` on plugin steps in the schema [[#7594](https://github.com/woodpecker-ci/woodpecker/pull/7594)]
 - Do not count marking a skipped workflow as done as agent work [[#7560](https://github.com/woodpecker-ci/woodpecker/pull/7560)]
 - For gitlab do paginate loading changed files [[#7561](https://github.com/woodpecker-ci/woodpecker/pull/7561)]
 - Subscribe GitHub webhooks to release events [[#7543](https://github.com/woodpecker-ci/woodpecker/pull/7543)]
@@ -69,7 +69,6 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7596](https://github.com/woodpecker-ci/woodpecker/pull/7596)]
 - Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
 - Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
 - Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
@@ -88,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- Lock file maintenance [[#7596](https://github.com/woodpecker-ci/woodpecker/pull/7596)]
 - Update golang-packages [[#7592](https://github.com/woodpecker-ci/woodpecker/pull/7592)]
 - Update web npm deps non-major [[#7593](https://github.com/woodpecker-ci/woodpecker/pull/7593)]
 - Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.4 [[#7591](https://github.com/woodpecker-ci/woodpecker/pull/7591)]
