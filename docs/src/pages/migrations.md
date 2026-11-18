@@ -28,6 +28,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
+- removed env var `WOODPECKER_FILTER_LABELS`, use `WOODPECKER_AGENT_LABELS`
+- removed agent flag `filter`, use `labels`
 
 #### Extensions
 
