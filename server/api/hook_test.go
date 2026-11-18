@@ -15,6 +15,7 @@
 package api_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -140,4 +141,98 @@ func TestHookRejectsInvalidSignature(t *testing.T) {
 	api.PostHook(c)
 
 	assert.Equal(t, http.StatusForbidden, c.Writer.Status())
+}
+
+// multiHookForge is a forge whose webhook asks for several pipelines at once (forge.MultiHook).
+type multiHookForge struct {
+	*forge_mocks.MockForge
+	repo      *model.Repo
+	pipelines []*model.Pipeline
+}
+
+func (f *multiHookForge) HookPipelines(_ context.Context, _ *http.Request, _ string) (*model.Repo, []*model.Pipeline, error) {
+	return f.repo, f.pipelines, nil
+}
+
+func TestHookMultiplePipelines(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	_manager := manager_mocks.NewMockManager(t)
+	_store := store_mocks.NewMockStore(t)
+	_configService := config_service_mocks.NewMockService(t)
+	_secretService := secret_service_mocks.NewMockService(t)
+	_registryService := registry_service_mocks.NewMockService(t)
+	server.Config.Services.Manager = _manager
+	server.Config.Permissions.Open = true
+	server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+	server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", _store)
+	user := &model.User{
+		ID: 123,
+	}
+	repo := &model.Repo{
+		ID:            123,
+		ForgeRemoteID: "123",
+		Owner:         "owner",
+		Name:          "name",
+		IsActive:      true,
+		UserID:        user.ID,
+		WebhookSecret: "secret-123-this-is-a-secret",
+	}
+	// One push webhook that moved two branches.
+	pipelines := []*model.Pipeline{
+		{RepoID: repo.ID, Event: model.EventPush, Branch: "develop", Ref: "refs/heads/develop", Commit: "1111111111111111111111111111111111111111"},
+		{RepoID: repo.ID, Event: model.EventPush, Branch: "release/1.2", Ref: "refs/heads/release/1.2", Commit: "2222222222222222222222222222222222222222"},
+	}
+	_forge := &multiHookForge{MockForge: forge_mocks.NewMockForge(t), repo: repo, pipelines: pipelines}
+
+	repoToken := token.New(token.HookToken)
+	repoToken.Set("repo-id", fmt.Sprintf("%d", repo.ID))
+	signedToken, err := repoToken.Sign("secret-123-this-is-a-secret")
+	assert.NoError(t, err)
+
+	header := http.Header{}
+	header.Set("Authorization", fmt.Sprintf("Bearer %s", signedToken))
+	c.Request = &http.Request{
+		Header: header,
+		URL: &url.URL{
+			Scheme: "https",
+		},
+	}
+
+	_manager.On("ForgeFromRepo", repo).Return(_forge, nil)
+	_store.On("GetRepo", repo.ID).Return(repo, nil)
+	_store.On("GetUser", user.ID).Return(user, nil)
+	_store.On("UpdateRepo", repo).Return(nil)
+	_store.On("CreatePipeline", mock.Anything).Return(nil)
+	_manager.On("ConfigServiceFromRepo", repo).Return(_configService)
+	_configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	_forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
+	_store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	_manager.On("SecretServiceFromRepo", repo).Return(_secretService)
+	_secretService.On("SecretListPipeline", mock.Anything, repo, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+	_manager.On("RegistryServiceFromRepo", repo).Return(_registryService)
+	_registryService.On("RegistryListPipeline", mock.Anything, repo, mock.Anything, mock.Anything).Return(nil, nil)
+	_manager.On("EnvironmentService").Return(nil)
+	_store.On("DeletePipeline", mock.Anything).Return(nil)
+
+	api.PostHook(c)
+
+	// Both pipelines are created, the second one too; neither has workflows, so both are filtered
+	// out and the response is that of the first.
+	_store.AssertNumberOfCalls(t, "CreatePipeline", 2)
+	created := make(map[string]bool)
+	for _, call := range _store.Calls {
+		if call.Method != "CreatePipeline" {
+			continue
+		}
+		pl, ok := call.Arguments.Get(0).(*model.Pipeline)
+		require.True(t, ok)
+		created[pl.Ref] = true
+	}
+	assert.Equal(t, map[string]bool{"refs/heads/develop": true, "refs/heads/release/1.2": true}, created)
+	assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+	assert.Equal(t, "true", w.Header().Get("Pipeline-Filtered"))
 }
