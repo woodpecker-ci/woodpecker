@@ -384,7 +384,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	if err == nil {
 		rememberTermination(pod)
 	} else if kube_errors.IsNotFound(err) && observedPod.Load() == nil {
-		return nil, err
+		return removedPodState(step, err)
 	}
 
 	select {
@@ -424,6 +424,9 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}),
 	)
 	if err != nil {
+		if kube_errors.IsNotFound(err) {
+			return removedPodState(step, err)
+		}
 		return nil, err
 	}
 
@@ -445,6 +448,17 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	return bs, nil
+}
+
+// removedPodState handles a pod that is gone without its termination ever being
+// observed. A detached step (e.g. a service) runs until the workflow teardown
+// deletes its pod, so a pod that vanished is the expected end of such a step and
+// is not reported as an error. For all other steps the missing pod is an error.
+func removedPodState(step *types.Step, err error) (*types.State, error) {
+	if step.Detached {
+		return &types.State{Exited: true}, nil
+	}
+	return nil, err
 }
 
 // TailStep tails the pipeline step logs.
