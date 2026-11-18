@@ -72,7 +72,7 @@ var renameCommand = &cli.Command{
 }
 
 func listContexts(_ context.Context, c *cli.Command) error {
-	contexts, err := config.LoadContexts()
+	contexts, err := config.LoadContexts(c)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func useContext(_ context.Context, c *cli.Command) error {
 		return fmt.Errorf("context name is required")
 	}
 
-	err := config.SetCurrentContext(contextName)
+	err := config.SetCurrentContext(c, contextName)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func renameContext(_ context.Context, c *cli.Command) error {
 	oldName := c.Args().Get(0)
 	newName := c.Args().Get(1)
 
-	err := config.RenameContext(oldName, newName)
+	err := config.RenameContext(c, oldName, newName)
 	if err != nil {
 		return err
 	}
