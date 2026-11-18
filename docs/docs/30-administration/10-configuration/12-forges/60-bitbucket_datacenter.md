@@ -22,7 +22,6 @@ To enable Bitbucket Server you should configure the Woodpecker container using t
 +      - WOODPECKER_BITBUCKET_DC_CLIENT_ID=xxx
 +      - WOODPECKER_BITBUCKET_DC_CLIENT_SECRET=yyy
 +      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
-+      - WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN=true
 
    woodpecker-agent:
      [...]
@@ -37,6 +36,7 @@ Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server doe
 Woodpecker must be registered with Bitbucket Datacenter / Server.
 In the administration section of Bitbucket choose "Application Links" and then "Create link".
 Woodpecker should be listed as "External Application" and the direction should be set to "Incoming".
+The link must allow the `PROJECT_ADMIN` scope, Woodpecker needs it for organization secrets and to list the repositories of a project.
 Note the client id and client secret of the registration to be used in the configuration of Woodpecker.
 
 See also [Configure an incoming link](https://confluence.atlassian.com/bitbucketserver/configure-an-incoming-link-1108483657.html).
@@ -125,12 +125,3 @@ Read the value for `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD` from the specified fil
 - Default: `false`
 
 Configure if SSL verification should be skipped.
-
----
-
-### BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN
-
-- Name: `WOODPECKER_BITBUCKET_DC_ENABLE_OAUTH2_SCOPE_PROJECT_ADMIN`
-- Default: `false`
-
-When enabled, the Bitbucket Application Link for Woodpecker should include the `PROJECT_ADMIN` scope. Enabling this feature flag will allow the users of Bitbucket Datacenter to use organization secrets and properly list repositories within the organization.
