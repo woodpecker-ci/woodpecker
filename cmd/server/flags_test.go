@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/urfave/cli/v3"
 )
 
 func TestDatasourceDefaultValue(t *testing.T) {
@@ -57,6 +58,22 @@ func TestGetFirstNonEmptyEnvVar(t *testing.T) {
 	t.Run("no args", func(t *testing.T) {
 		assert.Empty(t, getFirstNonEmptyEnvVar())
 	})
+}
+
+func TestForgeSkipVerifyEnvVars(t *testing.T) {
+	var skipVerify *cli.BoolFlag
+	for _, f := range flags {
+		if bf, ok := f.(*cli.BoolFlag); ok && bf.Name == "forge-skip-verify" {
+			skipVerify = bf
+			break
+		}
+	}
+	require.NotNil(t, skipVerify)
+
+	envKeys := skipVerify.Sources.EnvKeys()
+	assert.Contains(t, envKeys, "WOODPECKER_FORGE_SKIP_VERIFY")
+	assert.Contains(t, envKeys, "WOODPECKER_BITBUCKET_SKIP_VERIFY")
+	assert.Contains(t, envKeys, "WOODPECKER_BITBUCKET_DC_SKIP_VERIFY")
 }
 
 // unsetEnvForTest removes an env var and returns a function that restores its
