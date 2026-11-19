@@ -64,7 +64,7 @@ func TestResolvePath(t *testing.T) {
 		file := filepath.Join(t.TempDir(), "pipeline.yaml")
 		require.NoError(t, os.WriteFile(file, []byte("steps: {}\n"), 0o644))
 
-		path, isDir, err := resolvePath(file)
+		path, isDir, err := ResolvePath(file)
 
 		require.NoError(t, err)
 		assert.False(t, isDir)
@@ -75,7 +75,7 @@ func TestResolvePath(t *testing.T) {
 		dir := t.TempDir()
 		require.NoError(t, os.Mkdir(filepath.Join(dir, ".woodpecker"), 0o755))
 
-		path, isDir, err := resolvePath(dir)
+		path, isDir, err := ResolvePath(dir)
 
 		require.NoError(t, err)
 		assert.True(t, isDir)
@@ -85,7 +85,7 @@ func TestResolvePath(t *testing.T) {
 	t.Run("DirWithoutConfig", func(t *testing.T) {
 		dir := t.TempDir()
 
-		path, isDir, err := resolvePath(dir)
+		path, isDir, err := ResolvePath(dir)
 
 		require.NoError(t, err)
 		assert.True(t, isDir)
@@ -93,7 +93,7 @@ func TestResolvePath(t *testing.T) {
 	})
 
 	t.Run("NonExistent", func(t *testing.T) {
-		_, _, err := resolvePath(filepath.Join(t.TempDir(), "does-not-exist"))
+		_, _, err := ResolvePath(filepath.Join(t.TempDir(), "does-not-exist"))
 
 		require.Error(t, err)
 		assert.True(t, os.IsNotExist(err))

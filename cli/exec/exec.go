@@ -64,7 +64,104 @@ var backends = []backend_types.Backend{
 }
 
 func run(ctx context.Context, c *cli.Command) error {
+	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
+		return execConfigExtension(ctx, c, endpoint)
+	}
 	return common.RunPipelineFunc(ctx, c, execFile, execDir)
+}
+
+// execConfigExtension runs the workflows returned by a configuration extension.
+// The workflow files given as arguments, or else found at the default config
+// paths of the repository, are sent to the extension like the server sends the
+// files from the forge. Without any, the request has no configuration, as in
+// exclusive mode.
+func execConfigExtension(ctx context.Context, c *cli.Command, endpoint string) error {
+	repoPath := c.String("repo-path")
+	if repoPath == "" {
+		repoPath = "."
+	}
+	repoPath, err := filepath.Abs(repoPath)
+	if err != nil {
+		return err
+	}
+
+	local, err := localConfigs(c.Args().Slice(), repoPath)
+	if err != nil {
+		return err
+	}
+
+	m, err := metadataFromContext(ctx, c, nil)
+	if err != nil {
+		return fmt.Errorf("could not create metadata: %w", err)
+	}
+
+	yamls, err := fetchConfigExtension(ctx, endpoint, m, local)
+	if err != nil {
+		return err
+	}
+
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return runExec(ctx, c, yamls, repoPath)
+}
+
+// localConfigs reads the workflow files at args, or else the ones at the default
+// config paths of repoPath. Names are relative to repoPath, like the file names
+// the server gets from the forge.
+func localConfigs(args []string, repoPath string) ([]*builder.YamlFile, error) {
+	if len(args) == 0 {
+		_, config, found, err := common.FindPipelineConfig(repoPath)
+		if err != nil {
+			return nil, err
+		}
+		if !found {
+			return nil, nil
+		}
+		args = []string{config}
+	}
+
+	var yamls []*builder.YamlFile
+	for _, arg := range args {
+		path, isDir, err := common.ResolvePath(arg)
+		if err != nil {
+			return nil, err
+		}
+
+		var files []*builder.YamlFile
+		if isDir {
+			files, err = readConfigDir(path)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			dat, err := os.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
+			files = []*builder.YamlFile{{Name: path, Data: dat}}
+		}
+
+		for _, file := range files {
+			file.Name = relativeConfigName(repoPath, file.Name)
+		}
+		yamls = append(yamls, files...)
+	}
+	return yamls, nil
+}
+
+// relativeConfigName returns name relative to repoPath, or name itself when it
+// is outside repoPath.
+func relativeConfigName(repoPath, name string) string {
+	abs, err := filepath.Abs(name)
+	if err != nil {
+		return name
+	}
+	rel, err := filepath.Rel(repoPath, abs)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return name
+	}
+	return filepath.ToSlash(rel)
 }
 
 // TODO: do parallel runs with output to multiple _windows_ e.g. tmux like
@@ -80,6 +177,16 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		repoPath = convertPathForWindows(repoPath)
 	}
 
+	yamls, err := readConfigDir(dir)
+	if err != nil {
+		return err
+	}
+
+	return runExec(ctx, c, yamls, repoPath)
+}
+
+// readConfigDir reads every .yaml and .yml file below dir.
+func readConfigDir(dir string) ([]*builder.YamlFile, error) {
 	var yamls []*builder.YamlFile
 	walkErr := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
@@ -95,10 +202,9 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		return nil
 	})
 	if walkErr != nil {
-		return walkErr
+		return nil, walkErr
 	}
-
-	return runExec(ctx, c, yamls, repoPath)
+	return yamls, nil
 }
 
 func repoRootFromFile(file string) string {
