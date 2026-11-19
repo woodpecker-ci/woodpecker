@@ -355,7 +355,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := e.PodInformerFactory(step.OrgID, podName)
+	si := e.podInformerFactory(step.OrgID, podName)
 	podInformer := si.Core().V1().Pods().Informer()
 	handler, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
@@ -448,11 +448,11 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
-// PodInformerFactory returns an informer factory that lists and watches only
+// podInformerFactory returns an informer factory that lists and watches only
 // the named pod. Without the field selector, every informer would cache all pods
 // of the namespace, so the agent's memory would grow with the number of steps
 // waited on in parallel times the number of pods in the namespace.
-func (e *kube) PodInformerFactory(orgID int64, podName string) informers.SharedInformerFactory {
+func (e *kube) podInformerFactory(orgID int64, podName string) informers.SharedInformerFactory {
 	return informers.NewSharedInformerFactoryWithOptions(
 		e.client,
 		defaultResyncDuration,
@@ -493,7 +493,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := e.PodInformerFactory(step.OrgID, podName)
+	si := e.podInformerFactory(step.OrgID, podName)
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
