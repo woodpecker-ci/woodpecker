@@ -60,6 +60,7 @@ type Repo struct {
 	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	VisibilitySync               bool                 `json:"visibility_sync"                 xorm:"visibility_sync"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
@@ -101,13 +102,6 @@ type RepoFilter struct {
 	Name string
 }
 
-func (r *Repo) ResetVisibility() {
-	r.Visibility = VisibilityPublic
-	if r.IsSCMPrivate {
-		r.Visibility = VisibilityPrivate
-	}
-}
-
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
 	before, after, _ := strings.Cut(str, "/")
@@ -145,7 +139,9 @@ func (r *Repo) Update(from *Repo) {
 	// overwrite the authoritative value previously synced from the forge API
 	// during activation or repair, breaking netrc-protected clones.
 	if from.Visibility != "" {
-		r.Visibility = from.Visibility
+		if r.VisibilitySync {
+			r.Visibility = from.Visibility
+		}
 		r.IsSCMPrivate = from.IsSCMPrivate
 	}
 }
@@ -157,6 +153,7 @@ type RepoPatch struct {
 	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
+	VisibilitySync               *bool                      `json:"visibility_sync,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
