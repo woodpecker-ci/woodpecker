@@ -43,7 +43,7 @@ What the pipeline can do then depends on the author the forge reports, the [appr
   With [multiple forges](../30-administration/10-configuration/12-forges/11-overview.md#known-limitations), a user with a listed login on any connected forge becomes admin.
 - Admins of a repository on the forge can change its [project settings](./75-project-settings.md).
 - Users with push access can start, restart, cancel, approve and decline pipelines, and manage crons.
-- Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody.
+- Users with read access can see pipelines and their logs. The [project visibility](./75-project-settings.md#project-visibility) can give read access to everybody, it only follows the visibility on the forge if synced.
 
 Woodpecker caches the permissions of a user for up to [one hour](https://github.com/woodpecker-ci/woodpecker/blob/5d41af5c30bc11f52bbaee298d387191e16192c8/server/router/middleware/session/repo.go#L35).
 If fetching permissions failed, the user is downgraded to read access till fetching works again.
