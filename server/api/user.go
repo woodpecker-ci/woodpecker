@@ -151,6 +151,7 @@ func GetRepos(c *gin.Context) {
 					delete(dbStaleReposMap, existingRepo.ID)
 				} else if r.Perm.Admin {
 					// you must be admin of the remote repo to enable the repo
+					r.VisibilitySync = true // default on activation
 					repos = append(repos, r)
 				}
 			}

@@ -118,9 +118,13 @@ func PostRepo(c *gin.Context) {
 
 	from.ForgeID = user.ForgeID
 	if enabledOnce {
+		// re-activation keeps the visibility set in woodpecker
+		visibility := repo.Visibility
 		repo.Update(from)
+		repo.Visibility = visibility
 	} else {
 		repo = from
+		repo.VisibilitySync = true
 		repo.RequireApproval = server.Config.Pipeline.DefaultApprovalMode
 		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
@@ -298,7 +302,10 @@ func PatchRepo(c *gin.Context) {
 	if in.NetrcTrusted != nil {
 		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
-	if in.Visibility != nil {
+	if in.VisibilitySync != nil {
+		repo.VisibilitySync = *in.VisibilitySync
+	}
+	if in.Visibility != nil && !repo.VisibilitySync {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
 			repo.Visibility = model.RepoVisibility(*in.Visibility)
@@ -806,6 +813,9 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 			return err
 		}
 	}
+
+	// TODO: remove in v4.1.0, only here to move legacy repos to the sync
+	repo.VisibilitySync = true
 
 	repo.Update(from)
 
