@@ -131,6 +131,7 @@ and return configurations, secrets or registries. They are called before a pipel
 Agents connect with a [system or agent token](../30-administration/10-configuration/30-agent.md#agent-registration),
 using TLS only with [`WOODPECKER_GRPC_SECURE`](../30-administration/10-configuration/30-agent.md#grpc_secure).
 The server serves gRPC without TLS, so put it behind a [TLS proxy](../30-administration/10-configuration/10-server.md#reverse-proxy) or use a [unix socket](../30-administration/10-configuration/10-server.md#grpc_addr) for agents on the same host.
+The server logs failed agent logins with the client address, so we recommend [fail2ban](../30-administration/05-installation/40-fail2ban.md) to block clients that guess agent tokens.
 Organization admins, and every user for their own repositories, can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
 Every admin of an organization can see the tokens of all its agents, also of the ones other admins added, and can edit and remove them.
 This gives no more access than adding an own agent, as [organization agents](../30-administration/10-configuration/30-agent.md#agent-filters) only get workflows of their organization.
