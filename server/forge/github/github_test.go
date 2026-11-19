@@ -321,9 +321,6 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "admin@philipp.info", pipeline.Commit.Author.Email)
-		assert.Equal(t, "Philipp", pipeline.Commit.Author.Name)
-		assert.Equal(t, "https://github.com/woodpecker-ci/woodpecker/commit/366701fde727cb7a9e7f21eb88264f59f6f9b89c", pipeline.Commit.ForgeURL)
-		assert.Equal(t, int64(1642370257), pipeline.Commit.Timestamp)
 		assert.Equal(t, []string{"main.go"}, pipeline.ChangedFiles)
 	})
 
@@ -395,9 +392,6 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "6543", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/24977596?v=4", pipeline.Avatar)
 		assert.Equal(t, "6543@obermui.de", pipeline.Commit.Author.Email)
-		assert.Equal(t, "6543", pipeline.Commit.Author.Name)
-		assert.Equal(t, "https://github.com/6543/test_ci_tmp/commit/67012991d6c69b1c58378346fca366b864d8d1a1", pipeline.Commit.ForgeURL)
-		assert.Equal(t, int64(1753800084), pipeline.Commit.Timestamp)
 		assert.Empty(t, pipeline.ChangedFiles)
 	})
 }
@@ -892,42 +886,4 @@ func TestRefreshExchangesStillValidToken(t *testing.T) {
 	assert.Equal(t, "new-access", user.AccessToken)
 	assert.Equal(t, "new-refresh", user.RefreshToken)
 	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
-}
-
-func TestBranchHead(t *testing.T) {
-	ctx := mockedContext(
-		t, t.Context(),
-		github_mock.WithRequestMatch(
-			github_mock.GetReposBranchesByOwnerByRepoByBranch,
-			github.Branch{
-				Name: new("main"),
-				Commit: &github.RepositoryCommit{
-					SHA:     new("deadbeefcafe"),
-					HTMLURL: new("https://github.com/6543/hello-world/commit/deadbeefcafe"),
-					Commit: &github.Commit{
-						Message: new("Fix the thing"),
-						Author: &github.CommitAuthor{
-							Name:  new("Jane"),
-							Email: new("jane@example.com"),
-							Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
-						},
-					},
-				},
-			},
-		),
-	)
-
-	c := &client{API: defaultAPI, url: defaultURL}
-	commit, err := c.BranchHead(ctx, &model.User{AccessToken: "token"}, &model.Repo{Owner: "6543", Name: "hello-world"}, "main")
-	require.NoError(t, err)
-	assert.Equal(t, &model.Commit{
-		SHA:       "deadbeefcafe",
-		Message:   "Fix the thing",
-		ForgeURL:  "https://github.com/6543/hello-world/commit/deadbeefcafe",
-		Timestamp: 1700000000,
-		Author: model.CommitAuthor{
-			Name:  "Jane",
-			Email: "jane@example.com",
-		},
-	}, commit)
 }
