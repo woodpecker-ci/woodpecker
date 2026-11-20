@@ -264,7 +264,7 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 		return newLinterError("Cannot configure both `entrypoint` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Environment) != 0 {
-		return newLinterError("Should not configure both `environment` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+		return newLinterError("Cannot configure both `environment` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
 }
