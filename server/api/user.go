@@ -184,6 +184,25 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
+	// server admins also see orphaned repos of other users, so they can be cleaned up
+	if user.Admin {
+		orphanedRepos, err := _store.RepoListOrphaned()
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+
+		listed := make(map[int64]bool, len(activeRepos))
+		for _, repo := range activeRepos {
+			listed[repo.ID] = true
+		}
+		for _, repo := range orphanedRepos {
+			if !listed[repo.ID] && (filter.Name == "" || filter.Name == repo.Name) {
+				activeRepos = append(activeRepos, repo)
+			}
+		}
+	}
+
 	repoIDs := make([]int64, len(activeRepos))
 	for i, repo := range activeRepos {
 		repoIDs[i] = repo.ID

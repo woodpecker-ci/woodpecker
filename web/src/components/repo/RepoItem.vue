@@ -7,8 +7,11 @@
     <div class="grid grid-cols-[auto_1fr] items-center gap-y-4">
       <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
       <div class="text-wp-text-100 ml-auto">
+        <div v-if="repo.has_no_forge_repo" class="text-wp-error-200" :title="$t('repo.orphaned')">
+          <Icon name="repo-orphaned" />
+        </div>
         <div
-          v-if="repo.visibility === RepoVisibility.Private"
+          v-else-if="repo.visibility === RepoVisibility.Private"
           :title="`${$t('repo.visibility.visibility')}: ${$t(`repo.visibility.private.private`)}`"
         >
           <Icon name="visibility-private" />

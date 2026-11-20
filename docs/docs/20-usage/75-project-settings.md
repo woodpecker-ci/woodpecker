@@ -80,3 +80,7 @@ After this timeout a pipeline has to finish or will be treated as timed out.
 ## Cancel previous pipelines
 
 By enabling this option for a pipeline event previous pipelines of the same event and context will be canceled before starting the newly triggered one.
+
+## Orphaned projects
+
+If a repository gets deleted at the forge, Woodpecker keeps the project and marks it as orphaned. Orphaned projects are still shown in the repository list (with a broken link icon) to the user who activated them and to server admins, so their settings and secrets can be migrated. Use the actions in the project settings to repair the project, move it to a new location, or delete it.
