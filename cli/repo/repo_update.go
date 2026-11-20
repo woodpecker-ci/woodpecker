@@ -147,8 +147,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	}
 
 	if c.IsSet("visibility-sync") {
-		sync := c.Bool("visibility-sync")
-		patch.VisibilitySync = &sync
+		patch.VisibilitySync = new(c.Bool("visibility-sync"))
 	}
 
 	repo, err := client.RepoPatch(repoID, patch)
