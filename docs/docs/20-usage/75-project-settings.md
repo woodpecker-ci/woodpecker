@@ -75,7 +75,7 @@ You can change the visibility of your project by this setting. If a user has acc
 
 With **Sync visibility with forge** enabled, the visibility follows the repository on the forge: public becomes `Public`, private becomes `Private`, and GitLab internal or a Gitea/Forgejo owner with limited visibility becomes `Internal`.
 It is updated whenever Woodpecker gets the repository from the forge.
-New repositories have it enabled.
+New repositories have it enabled by default.
 
 ## Timeout
 
