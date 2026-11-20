@@ -16,10 +16,12 @@
 package bitbucket
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -167,6 +169,27 @@ func TestConvertPushHook(t *testing.T) {
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
 	assert.Equal(t, change.New.Target.Message, pipeline.Message)
 	assert.Equal(t, change.New.Target.Date.Unix(), pipeline.Timestamp)
+}
+
+func TestConvertPushPrevCommit(t *testing.T) {
+	tests := []struct {
+		name   string
+		change string
+		want   string
+	}{
+		{name: "fast-forward push", change: `{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}}`, want: "aaa"},
+		{name: "new ref", change: `{"new": {"target": {"hash": "bbb"}}, "old": null}`, want: ""},
+		{name: "force push", change: `{"new": {"target": {"hash": "bbb"}}, "old": {"target": {"hash": "aaa"}}, "forced": true}`, want: ""},
+		{name: "ref not moved", change: `{"new": {"target": {"hash": "aaa"}}, "old": {"target": {"hash": "aaa"}}}`, want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var change internal.Change
+			require.NoError(t, json.Unmarshal([]byte(tt.change), &change))
+			assert.Equal(t, tt.want, convertPushPrevCommit(&change))
+		})
+	}
 }
 
 func TestConvertPushHookTag(t *testing.T) {

@@ -46,6 +46,11 @@ func Handler() http.Handler {
 }
 
 func getCommitDiffstat(c *gin.Context) {
+	// The whole push of HookPush: its new commit compared to its old one.
+	if c.Param("commit") == "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277..a51241ae1f00cbe728930db48e890b18fd527f99" {
+		c.String(http.StatusOK, diffStatPushPayload)
+		return
+	}
 	c.String(http.StatusOK, diffStatPayload)
 }
 
@@ -484,6 +489,28 @@ const diffStatPayload = `
 						},
 						"new": {
 								"path": "main.go"
+						}
+				}
+		]
+}
+`
+
+// diffStatPushPayload also has the file changed by an earlier commit of the push.
+const diffStatPushPayload = `
+{
+		"values": [
+				{
+						"old": {
+								"path": "main.go"
+						},
+						"new": {
+								"path": "main.go"
+						}
+				},
+				{
+						"old": null,
+						"new": {
+								"path": "docs/README.md"
 						}
 				}
 		]
