@@ -12,6 +12,9 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- Only the exact default clone plugin (e.g. `docker.io/woodpeckerci/plugin-git:2.12.0`) is trusted by default.
+  Custom clone steps with another version or registry of `woodpeckerci/plugin-git` no longer get the Git credentials.
+  Add them to `WOODPECKER_PLUGINS_TRUSTED_CLONE` or the trusted clone plugins of the repository if needed.
 
 ### API changes
 

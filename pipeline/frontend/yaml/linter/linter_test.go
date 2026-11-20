@@ -24,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestLint(t *testing.T) {
@@ -92,6 +93,21 @@ steps:
 	}, {
 		Title: "explicitly privileged container",
 		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+	}, {
+		Title: "default clone plugin", Data: `
+when:
+  event: push
+
+clone:
+  git:
+    image: ` + constant.DefaultClonePlugin + `
+
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+`,
 	}}
 
 	for _, testd := range testdatas {
@@ -211,6 +227,14 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc is not injected",
+		},
+		{
+			from: "{steps: { build: { image: golang } }, when: { event: push }, clone: { git: { image: woodpeckerci/plugin-git:2.11.0 } } }",
+			want: "Specified clone image does not match allow list, netrc is not injected",
+		},
+		{
+			from: "{steps: { build: { image: golang } }, when: { event: push }, clone: { git: { image: quay.io/woodpeckerci/plugin-git } } }",
 			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
 		{
