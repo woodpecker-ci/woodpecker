@@ -3,7 +3,7 @@
 Woodpecker logs every failed agent login together with the address of the client.
 You can use [fail2ban](https://github.com/fail2ban/fail2ban) to block clients that try to guess agent tokens.
 
-```json
+```log
 {"level":"warn","error":"...","ip":"203.0.113.7","time":"2026-11-20T10:00:00Z","message":"agent authentication failed from 203.0.113.7"}
 ```
 
@@ -29,7 +29,7 @@ ignoreregex =
 Behind a proxy the server only sees the address of the proxy.
 It then also logs the addresses it gets in the `X-Real-IP` and `X-Forwarded-For` headers:
 
-```json
+```log
 {"level":"warn","error":"...","ip":"10.0.0.2","x-forwarded-for":"198.51.100.1,203.0.113.7","time":"2026-11-20T10:00:00Z","message":"agent authentication failed from 10.0.0.2 x-forwarded-for=198.51.100.1,203.0.113.7"}
 ```
 
