@@ -98,7 +98,9 @@ func moveRepoForge(t *testing.T) *forge_mocks.MockForge {
 	return mockForge
 }
 
-func TestMoveRepoUpdatesOrg(t *testing.T) {
+// A repo whose owner changed must not keep the old org, or its org secrets,
+// registries and agents would still apply.
+func TestOwnerChangeUpdatesOrg(t *testing.T) {
 	s := newTestStore(t)
 
 	seed := func(t *testing.T, forgeID int64, owner, name string) (*model.User, *model.Org, *model.Repo) {
@@ -188,6 +190,87 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		stored, err := s.GetRepo(repo.ID)
 		require.NoError(t, err)
 		assert.Equal(t, target.ID, stored.OrgID)
+		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
+	})
+
+	t.Run("webhook with a new owner relinks the repo", func(t *testing.T) {
+		_, oldOrg, repo := seed(t, 1, "oldhook", "hook")
+		mockForge := moveRepoForge(t)
+		from := &model.Repo{ForgeRemoteID: repo.ForgeRemoteID, Owner: "newhook", Name: "hook", FullName: "newhook/hook"}
+		// pull requests are disabled, so the handler stops right after saving the repo
+		mockForge.On("Hook", mock.Anything, mock.Anything).Return(from, &model.Pipeline{Event: model.EventPull}, nil)
+		mockForge.On("Org", mock.Anything, mock.Anything, "newhook").Return(&model.Org{Name: "newhook"}, nil)
+
+		hookToken := token.New(token.HookToken)
+		hookToken.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+		hookToken.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
+		signed, err := hookToken.Sign(repo.WebhookSecret)
+		require.NoError(t, err)
+		tc := newTestContext(t, s)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/api/hook?access_token="+signed, nil)
+		PostHook(tc.Ctx)
+		require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		newOrg, err := s.OrgFindByName("newhook", repo.ForgeID)
+		require.NoError(t, err)
+		assert.Equal(t, newOrg.ID, stored.OrgID)
+		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
+	})
+
+	t.Run("repair relinks a repo that kept the org of a former owner", func(t *testing.T) {
+		_, oldOrg, repo := seed(t, 1, "stale", "kept")
+		// the owner was already updated, but the org was not
+		target := &model.Org{Name: "current", ForgeID: 1}
+		require.NoError(t, s.OrgCreate(target))
+		repo.Owner, repo.FullName = "current", "current/kept"
+		require.NoError(t, s.UpdateRepo(repo))
+
+		mockForge := moveRepoForge(t)
+		from := &model.Repo{
+			ForgeRemoteID: repo.ForgeRemoteID, Owner: "current", Name: "kept", FullName: "current/kept",
+			Perm: &model.Perm{Admin: true},
+		}
+		mockForge.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, nil)
+		mockForge.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		mockForge.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		tc := newTestContext(t, s)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos/1/repair", nil)
+		RepairRepo(tc.Ctx)
+		require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		assert.Equal(t, target.ID, stored.OrgID)
+		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
+	})
+
+	t.Run("repair with a new owner relinks the repo", func(t *testing.T) {
+		_, oldOrg, repo := seed(t, 1, "oldfix", "fix")
+		mockForge := moveRepoForge(t)
+		from := &model.Repo{
+			ForgeRemoteID: repo.ForgeRemoteID, Owner: "newfix", Name: "fix", FullName: "newfix/fix",
+			Perm: &model.Perm{Admin: true},
+		}
+		mockForge.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, nil)
+		mockForge.On("Org", mock.Anything, mock.Anything, "newfix").Return(&model.Org{Name: "newfix"}, nil)
+		mockForge.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		mockForge.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		tc := newTestContext(t, s)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos/1/repair", nil)
+		RepairRepo(tc.Ctx)
+		require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		newOrg, err := s.OrgFindByName("newfix", repo.ForgeID)
+		require.NoError(t, err)
+		assert.Equal(t, newOrg.ID, stored.OrgID)
 		assert.NotEqual(t, oldOrg.ID, stored.OrgID)
 	})
 }
