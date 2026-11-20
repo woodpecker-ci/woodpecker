@@ -15,6 +15,7 @@
         'animate-spin': service && pipelineStatusColors[status] === 'blue',
       }"
     />
+    <span v-if="showLabel">{{ statusDescriptions[status] }}</span>
   </div>
 </template>
 
@@ -26,9 +27,10 @@ import type { PipelineStatus } from '~/lib/api/types';
 
 import { pipelineStatusColors } from './pipeline-status';
 
-const { status, service } = defineProps<{
+const { status, service, showLabel } = defineProps<{
   status: PipelineStatus;
   service?: boolean;
+  showLabel?: boolean;
 }>();
 
 const { t } = useI18n();
