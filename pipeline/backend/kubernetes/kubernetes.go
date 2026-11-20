@@ -448,10 +448,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
-// podInformerFactory returns an informer factory that lists and watches only
-// the named pod. Without the field selector, every informer would cache all pods
-// of the namespace, so the agent's memory would grow with the number of steps
-// waited on in parallel times the number of pods in the namespace.
+// podInformerFactory watches only podName, so each informer doesn't cache every pod in the namespace.
 func (e *kube) podInformerFactory(orgID int64, podName string) informers.SharedInformerFactory {
 	return informers.NewSharedInformerFactoryWithOptions(
 		e.client,
