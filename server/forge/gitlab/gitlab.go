@@ -570,9 +570,9 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		return nil
 	}
 	repo.CloneSecret = &model.CloneSecret{
-		Login: cloneToken.Username,
-		Token: cloneToken.Token,
-		ID:    strconv.FormatInt(cloneToken.ID, 10),
+		Login:         cloneToken.Username,
+		Token:         cloneToken.Token,
+		ForgeRemoteID: model.ForgeRemoteID(strconv.FormatInt(cloneToken.ID, 10)),
 	}
 	return nil
 }
@@ -596,7 +596,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	}
 
 	if repo.CloneSecret != nil {
-		id, _ := strconv.ParseInt(repo.CloneSecret.ID, 10, 64)
+		id, _ := strconv.ParseInt(string(repo.CloneSecret.ForgeRemoteID), 10, 64)
 		if _, err := client.DeployTokens.DeleteProjectDeployToken(_repo.ID, id, gitlab.WithContext(ctx)); err != nil {
 			log.Warn().Err(err).Msgf("could not delete the deploy token of %s", repo.FullName)
 		}

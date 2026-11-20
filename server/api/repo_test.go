@@ -148,7 +148,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 		mockForge.EXPECT().Activate(mock.Anything, user, mock.Anything, mock.Anything).
 			RunAndReturn(func(_ context.Context, _ *model.User, activated *model.Repo, _ string) error {
-				activated.CloneSecret = &model.CloneSecret{ID: "moved"}
+				activated.CloneSecret = &model.CloneSecret{ForgeRemoteID: "moved"}
 				return nil
 			})
 
@@ -158,7 +158,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		stored, err := s.GetRepo(repo.ID)
 		require.NoError(t, err)
 		assert.Equal(t, "newcorp/rocket", stored.FullName)
-		assert.Equal(t, &model.CloneSecret{ID: "moved"}, stored.CloneSecret, "persist the clone secret written by activation")
+		assert.Equal(t, &model.CloneSecret{ForgeRemoteID: "moved"}, stored.CloneSecret, "persist the clone secret written by activation")
 		assert.NotEqual(t, oldOrg.ID, stored.OrgID, "repo must not stay linked to the old org")
 
 		newOrg, err := s.OrgFindByName("newcorp", repo.ForgeID)
@@ -350,7 +350,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 						})
 						assert.Error(t, err, "the new URL must not use the old signing key")
 						if test.activateErr == nil {
-							activatedSecret = &model.CloneSecret{ID: "token-" + activated.WebhookSecret}
+							activatedSecret = &model.CloneSecret{ForgeRemoteID: model.ForgeRemoteID("token-" + activated.WebhookSecret)}
 							activated.CloneSecret = activatedSecret
 						}
 						return test.activateErr
@@ -414,7 +414,7 @@ func TestDeactivateRepoDropsCloneSecret(t *testing.T) {
 		UserID:        user.ID,
 		WebhookSecret: "hash-carol",
 		IsActive:      true,
-		CloneSecret:   &model.CloneSecret{Login: "deploy", Token: "secret", ID: "1"},
+		CloneSecret:   &model.CloneSecret{Login: "deploy", Token: "secret", ForgeRemoteID: "1"},
 	}
 	require.NoError(t, s.CreateRepo(repo))
 

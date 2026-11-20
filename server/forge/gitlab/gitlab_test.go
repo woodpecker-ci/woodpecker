@@ -1152,7 +1152,7 @@ func TestNetrc(t *testing.T) {
 
 	// activation creates a deploy token that pipelines clone with instead
 	require.NoError(t, client.Activate(t.Context(), user, repo, link))
-	assert.Equal(t, &model.CloneSecret{Login: "gitlab+deploy-token-7", Token: "deploy-secret", ID: "7"}, repo.CloneSecret)
+	assert.Equal(t, &model.CloneSecret{Login: "gitlab+deploy-token-7", Token: "deploy-secret", ForgeRemoteID: "7"}, repo.CloneSecret)
 	netrc, err = client.Netrc(user, repo)
 	require.NoError(t, err)
 	assert.Equal(t, &model.Netrc{Machine: "gitlab.example.com", Login: "gitlab+deploy-token-7", Password: "deploy-secret", Type: model.ForgeTypeGitlab}, netrc)

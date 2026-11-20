@@ -99,8 +99,8 @@ type CloneSecret struct {
 	// Login and Token are the credentials to clone the repository over HTTP(S).
 	Login string `json:"login,omitempty"`
 	Token string `json:"token,omitempty"`
-	// ID is the forge ID of the credentials, to remove them again.
-	ID string `json:"id,omitempty"`
+	// ForgeRemoteID is the forge ID of the credentials, to remove them again.
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id,omitempty"`
 }
 
 // TableName return database table name for xorm.
