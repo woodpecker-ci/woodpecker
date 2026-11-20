@@ -64,6 +64,10 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "visibility",
 			Usage: "repository visibility",
 		},
+		&cli.BoolFlag{
+			Name:  "visibility-sync",
+			Usage: "sync the repository visibility with the forge",
+		},
 		&cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path. Example: .woodpecker.yml",
@@ -140,6 +144,11 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		case "public", "private", "internal":
 			patch.Visibility = &visibility
 		}
+	}
+
+	if c.IsSet("visibility-sync") {
+		sync := c.Bool("visibility-sync")
+		patch.VisibilitySync = &sync
 	}
 
 	repo, err := client.RepoPatch(repoID, patch)
