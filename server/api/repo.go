@@ -814,9 +814,6 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 		}
 	}
 
-	// TODO: remove in v4.1.0, only here to move legacy repos to the sync
-	repo.VisibilitySync = true
-
 	repo.Update(from)
 
 	if updatePermissions {

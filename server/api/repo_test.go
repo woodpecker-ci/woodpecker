@@ -389,7 +389,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 	}
 }
 
-func TestRepairRepoSyncsVisibility(t *testing.T) {
+func TestRepairRepoKeepsVisibility(t *testing.T) {
 	originalManager := server.Config.Services.Manager
 	originalHost := server.Config.Server.WebhookHost
 	t.Cleanup(func() {
@@ -404,14 +404,14 @@ func TestRepairRepoSyncsVisibility(t *testing.T) {
 			require.NoError(t, s.CreateUser(user))
 			repo := &model.Repo{
 				Owner: "owner", Name: "repo", FullName: "owner/repo", ForgeID: user.ForgeID, ForgeRemoteID: "123",
-				UserID: user.ID, IsActive: true, Visibility: model.VisibilityPublic,
+				UserID: user.ID, IsActive: true, Visibility: model.VisibilityPrivate,
 			}
 			require.NoError(t, s.CreateRepo(repo))
 
 			driver := moveRepoForge(t)
 			driver.On("Repo", mock.Anything, mock.Anything, repo.ForgeRemoteID, repo.Owner, repo.Name).Return(&model.Repo{
 				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName, ForgeRemoteID: repo.ForgeRemoteID,
-				Visibility: model.VisibilityPrivate, IsSCMPrivate: true, Perm: &model.Perm{Admin: true},
+				Visibility: model.VisibilityPublic, Perm: &model.Perm{Admin: true},
 			}, nil)
 			driver.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			driver.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -427,7 +427,7 @@ func TestRepairRepoSyncsVisibility(t *testing.T) {
 
 			stored, err := s.GetRepo(repo.ID)
 			require.NoError(t, err)
-			assert.True(t, stored.VisibilitySync)
+			assert.False(t, stored.VisibilitySync)
 			assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
 		})
 	}
