@@ -15,7 +15,13 @@
 package woodpecker
 
 import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
@@ -33,6 +39,7 @@ const (
 	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
 	pathPipelineLogs   = "%s/api/repos/%d/logs/%d"
 	pathStepLogs       = "%s/api/repos/%d/logs/%d/%d"
+	pathStepLogStream  = "%s/api/stream/logs/%d/%d/%d"
 	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
@@ -422,6 +429,64 @@ func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
 	var out []*LogEntry
 	err := c.get(uri, &out)
 	return out, err
+}
+
+// StepLogStream calls handle for each log entry of a step that is not finished
+// yet, including the ones already written, until the log ends.
+func (c *client) StepLogStream(ctx context.Context, repoID, num, step int64, handle func(*LogEntry)) error {
+	uri := fmt.Sprintf(pathStepLogStream, c.addr, repoID, num, step)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode > http.StatusPartialContent {
+		out, _ := io.ReadAll(resp.Body)
+		return &ClientError{
+			StatusCode: resp.StatusCode,
+			Message:    string(out),
+		}
+	}
+
+	// The server sends events: an optional "event:" line names the event the
+	// following "data:" line belongs to, an empty line ends it.
+	// Unnamed events carry a log entry.
+	reader := bufio.NewReader(resp.Body)
+	event := ""
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				err = io.ErrUnexpectedEOF
+			}
+			return err
+		}
+
+		line = strings.TrimRight(line, "\r\n")
+		field, value, _ := strings.Cut(line, ": ")
+		switch {
+		case line == "":
+			event = ""
+		case field == "event":
+			event = value
+		case field != "data":
+			// a comment to keep the connection alive or a field not needed
+		case event == "eof":
+			return nil
+		case event == "error":
+			return errors.New(value)
+		case event == "":
+			entry := new(LogEntry)
+			if err := json.Unmarshal([]byte(value), entry); err != nil {
+				return err
+			}
+			handle(entry)
+		}
+	}
 }
 
 // StepLogsPurge purges the pipeline logs for the specified step.
