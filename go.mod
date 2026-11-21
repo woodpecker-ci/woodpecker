@@ -8,7 +8,7 @@ require (
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
-	gitea.dev/sdk v1.5.2-0.20261108232917-9fe07596a08d
+	gitea.dev/sdk v1.5.2-0.20261121024034-0a741c051d52
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.10.4
@@ -52,9 +52,9 @@ require (
 	github.com/urfave/cli-docs/v3 v3.2.0
 	github.com/urfave/cli/v3 v3.14.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yaronf/httpsign v0.6.3
+	github.com/yaronf/httpsign v0.6.4
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v3 v3.54.0
+	gitlab.com/gitlab-org/api/client-go/v3 v3.54.1
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/image v0.48.0
@@ -108,7 +108,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/davidmz/go-pageant v1.0.2 // indirect
+	github.com/davidmz/go-pageant v1.1.0 // indirect
 	github.com/docker/docker-credential-helpers v0.8.0 // indirect
 	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect

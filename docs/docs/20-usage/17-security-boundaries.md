@@ -104,6 +104,7 @@ as they can at least compromise the hosts agents run on!
 
 For private repositories, or with [`WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`](../30-administration/10-configuration/10-server.md#authenticate_public_repos),
 Woodpecker creates Git credentials of a forge user. They can also push to the repository.
+On [GitLab](../30-administration/10-configuration/12-forges/40-gitlab.md#clone-credentials) Woodpecker uses read-only credentials of only this repository instead, if it can create them.
 
 They are only passed to the default clone step, to plugins in the [trusted clone plugins](./75-project-settings.md#custom-trusted-clone-plugins)
 and to every step of a repository with the [security option](#trusted-repositories).
@@ -131,6 +132,7 @@ and return configurations, secrets or registries. They are called before a pipel
 Agents connect with a [system or agent token](../30-administration/10-configuration/30-agent.md#agent-registration),
 using TLS only with [`WOODPECKER_GRPC_SECURE`](../30-administration/10-configuration/30-agent.md#grpc_secure).
 The server serves gRPC without TLS, so put it behind a [TLS proxy](../30-administration/10-configuration/10-server.md#reverse-proxy) or use a [unix socket](../30-administration/10-configuration/10-server.md#grpc_addr) for agents on the same host.
+The server logs failed agent logins with the client address, so we recommend [fail2ban](../30-administration/05-installation/40-fail2ban.md) to block clients that guess agent tokens.
 Organization admins, and every user for their own repositories, can add own agents, unless [`WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`](../30-administration/10-configuration/10-server.md#disable_user_agent_registration) is set.
 Every admin of an organization can see the tokens of all its agents, also of the ones other admins added, and can edit and remove them.
 This gives no more access than adding an own agent, as [organization agents](../30-administration/10-configuration/30-agent.md#agent-filters) only get workflows of their organization.

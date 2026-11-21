@@ -147,7 +147,11 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newcorp", "rocket").Return(from, nil)
 		mockForge.On("Org", mock.Anything, user, "newcorp").Return(&model.Org{Name: "newcorp"}, nil)
 		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
-		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+		mockForge.EXPECT().Activate(mock.Anything, user, mock.Anything, mock.Anything).
+			RunAndReturn(func(_ context.Context, _ *model.User, activated *model.Repo, _ string) error {
+				activated.CloneSecret = &model.CloneSecret{ForgeRemoteID: "moved"}
+				return nil
+			})
 
 		code, body := move(t, user, repo, "newcorp/rocket")
 		require.Equal(t, http.StatusNoContent, code, body)
@@ -155,6 +159,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		stored, err := s.GetRepo(repo.ID)
 		require.NoError(t, err)
 		assert.Equal(t, "newcorp/rocket", stored.FullName)
+		assert.Equal(t, &model.CloneSecret{ForgeRemoteID: "moved"}, stored.CloneSecret, "persist the clone secret written by activation")
 		assert.NotEqual(t, oldOrg.ID, stored.OrgID, "repo must not stay linked to the old org")
 
 		newOrg, err := s.OrgFindByName("newcorp", repo.ForgeID)
@@ -317,6 +322,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			driver.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, test.lookupErr)
 
 			var oldSecret string
+			var activatedSecret *model.CloneSecret
 			if test.lookupErr == nil {
 				driver.EXPECT().Deactivate(mock.Anything, mock.Anything, mock.Anything, server.Config.Server.WebhookHost).
 					RunAndReturn(func(_ context.Context, _ *model.User, repairing *model.Repo, _ string) error {
@@ -344,6 +350,10 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 							return oldSecret, nil
 						})
 						assert.Error(t, err, "the new URL must not use the old signing key")
+						if test.activateErr == nil {
+							activatedSecret = &model.CloneSecret{ForgeRemoteID: model.ForgeRemoteID("token-" + activated.WebhookSecret)}
+							activated.CloneSecret = activatedSecret
+						}
 						return test.activateErr
 					})
 			}
@@ -383,6 +393,9 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 				} else {
 					assert.NotEqual(t, oldSecret, stored.WebhookSecret)
 					assert.Error(t, err, "old URLs must remain revoked even when activation fails")
+				}
+				if test.lookupErr == nil && test.activateErr == nil {
+					assert.Equal(t, activatedSecret, stored.CloneSecret, "persist the clone secret written by activation")
 				}
 			}
 		})
@@ -527,4 +540,37 @@ func TestPatchRepoVisibilitySync(t *testing.T) {
 	stored = patch(t, &model.RepoPatch{VisibilitySync: new(false), Visibility: new(string(model.VisibilityPublic))})
 	assert.False(t, stored.VisibilitySync)
 	assert.Equal(t, model.VisibilityPublic, stored.Visibility)
+}
+
+func TestDeactivateRepoDropsCloneSecret(t *testing.T) {
+	s := newTestStore(t)
+	user := &model.User{Login: "carol", ForgeID: 1, ForgeRemoteID: "u-carol", Hash: "userhash-carol"}
+	require.NoError(t, s.CreateUser(user))
+	repo := &model.Repo{
+		ForgeID:       1,
+		ForgeRemoteID: "r-carol",
+		Owner:         "acme",
+		Name:          "carol",
+		FullName:      "acme/carol",
+		UserID:        user.ID,
+		WebhookSecret: "hash-carol",
+		IsActive:      true,
+		CloneSecret:   &model.CloneSecret{Login: "deploy", Token: "secret", ForgeRemoteID: "1"},
+	}
+	require.NoError(t, s.CreateRepo(repo))
+
+	mockForge := moveRepoForge(t)
+	mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+	tc := newTestContext(t, s)
+	withUser(user)(tc)
+	withRepo(repo, &model.Perm{Admin: true})(tc)
+	tc.Ctx.Request = httptest.NewRequest(http.MethodDelete, "/repos/1", nil)
+	DeleteRepo(tc.Ctx)
+	require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+	stored, err := s.GetRepo(repo.ID)
+	require.NoError(t, err)
+	assert.False(t, stored.IsActive)
+	assert.Nil(t, stored.CloneSecret, "an inactive repo must not keep clone credentials")
 }
