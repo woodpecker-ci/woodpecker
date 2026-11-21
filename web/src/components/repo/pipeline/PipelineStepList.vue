@@ -93,6 +93,15 @@
                 class="pr-2px mr-1"
               />
             </button>
+            <div v-else class="flex items-center gap-2 rounded-md px-1 py-2">
+              <PipelineStatusIcon :status="workflow.state" class="h-4! w-4!" />
+              <span class="truncate">{{ workflow.name }}</span>
+              <PipelineStepDuration
+                v-if="workflow.started !== workflow.finished"
+                :workflow="workflow"
+                class="pr-2px mr-1"
+              />
+            </div>
           </div>
           <div
             class="transition-height overflow-hidden duration-150"
