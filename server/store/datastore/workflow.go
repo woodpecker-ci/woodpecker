@@ -84,6 +84,19 @@ func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.W
 }
 
 func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
+	// The snapshot locks taken below must be held until the workflows are gone.
+	// WorkflowsReplace already runs in a transaction, pipeline deletion does not.
+	if !sess.IsInTx() {
+		if err := sess.Begin(); err != nil {
+			return err
+		}
+		defer sess.Rollback() //nolint:errcheck
+		if err := s.workflowsDelete(sess, pipelineID); err != nil {
+			return err
+		}
+		return wrapUpdate(0, sess.Commit())
+	}
+
 	// delete related steps
 	for {
 		stepIDs := make([]int64, 0, perPage)
@@ -99,6 +112,10 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 				return err
 			}
 		}
+	}
+
+	if err := s.agentSnapshotsDeleteUnused(sess, pipelineID); err != nil {
+		return err
 	}
 
 	_, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow))

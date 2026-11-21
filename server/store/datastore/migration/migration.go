@@ -63,6 +63,7 @@ var migrationTasks = []*xormigrate.Migration{
 
 var allBeans = []any{
 	new(model.Agent),
+	new(model.AgentSnapshot),
 	new(model.Pipeline),
 	new(model.PipelineConfig),
 	new(model.Config),
