@@ -735,6 +735,27 @@
         "user": {
           "description": "User or user:group used to run the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#run-user",
           "type": "string"
+        },
+        "capabilities": {
+          "description": "Linux capabilities that are added to or dropped from the default set of the container. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/docker#capabilities",
+          "type": "object",
+          "properties": {
+            "add": {
+              "description": "Capabilities to add to the container. Requires a repository with the security trust level.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "drop": {
+              "description": "Capabilities to drop from the container. Use `ALL` to drop every capability.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
         }
       }
     },
