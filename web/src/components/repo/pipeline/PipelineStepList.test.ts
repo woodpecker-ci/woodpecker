@@ -167,4 +167,15 @@ describe('pipelineStepList', () => {
     expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(true);
     expect(wrapper.find('button[title="workflow-2"]').exists()).toBe(true);
   });
+
+  it('only links http(s) forge URLs', () => {
+    const pipeline = makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]);
+    expect(mountStepList(pipeline).find('a[href="https://example.com"]').exists()).toBe(true);
+
+    pipeline.forge_url = 'javascript:void(0)';
+    const hrefs = mountStepList(pipeline)
+      .findAll('a')
+      .map((a) => a.attributes('href'));
+    expect(hrefs).not.toContain('javascript:void(0)');
+  });
 });

@@ -32,6 +32,7 @@ const (
 	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
+	statusStopped = "STOPPED"
 )
 
 // convertStatus is a helper function used to convert a Woodpecker status to a
@@ -42,8 +43,10 @@ func convertStatus(status model.StatusValue) string {
 		return statusPending
 	case model.StatusSuccess:
 		return statusSuccess
-	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined, model.StatusSkipped, model.StatusCanceled:
+	case model.StatusFailure, model.StatusKilled, model.StatusError, model.StatusDeclined:
 		return statusFailure
+	case model.StatusSkipped, model.StatusCanceled:
+		return statusStopped
 	default:
 		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")
 		return statusFailure

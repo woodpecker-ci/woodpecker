@@ -293,3 +293,22 @@ func TestForgeByIDConcurrentMissSetsUpOnce(t *testing.T) {
 		assert.Same(t, got[0], f)
 	}
 }
+
+func TestForgeByIDHitExtendsTTL(t *testing.T) {
+	// no store expectations: a miss would call ForgeGet and fail the test
+	m := &manager{
+		store:      store_mocks.NewMockStore(t),
+		forgeCache: newForgeCache(),
+	}
+	cached := &closeTrackingForge{}
+	m.forgeCache.Set(1, cached, time.Second)
+
+	// each hit restarts the TTL, so the forge outlives its first TTL
+	for range 2 {
+		time.Sleep(600 * time.Millisecond)
+		got, err := m.ForgeByID(1)
+		require.NoError(t, err)
+		assert.Same(t, cached, got)
+	}
+	assert.False(t, cached.closed.Load())
+}

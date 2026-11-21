@@ -139,6 +139,15 @@ func TestSchema(t *testing.T) {
 			fail:     true,
 		},
 		{
+			name:     "Failure policies of command and plugin steps",
+			testFile: ".woodpecker/test-failure.yaml",
+		},
+		{
+			name:     "Unknown failure policy",
+			testFile: ".woodpecker/test-broken-failure.yaml",
+			fail:     true,
+		},
+		{
 			name:     "Service without name in array syntax",
 			testFile: ".woodpecker/test-broken-service-without-name.yaml",
 			fail:     true,

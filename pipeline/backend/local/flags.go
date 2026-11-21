@@ -34,4 +34,10 @@ var Flags = []cli.Flag{
 		Usage:   "set HOME, USERPROFILE and other variables to an isolated directory, if false we ignore netrc",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_LOCAL_PLUGIN_GIT_VERSION"),
+		Name:    "backend-local-plugin-git-version",
+		Usage:   "plugin-git release to download if plugin-git is not in $PATH",
+		Value:   "latest",
+	},
 }
