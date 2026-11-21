@@ -8,7 +8,7 @@ require (
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
-	gitea.dev/sdk v1.5.2-0.20261108232917-9fe07596a08d
+	gitea.dev/sdk v1.5.2-0.20261121024034-0a741c051d52
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.10.4
@@ -108,7 +108,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/danieljoos/wincred v1.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/davidmz/go-pageant v1.0.2 // indirect
+	github.com/davidmz/go-pageant v1.1.0 // indirect
 	github.com/docker/docker-credential-helpers v0.8.0 // indirect
 	github.com/dunglas/httpsfv v1.1.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
