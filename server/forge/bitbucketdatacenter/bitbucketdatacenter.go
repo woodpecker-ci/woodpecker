@@ -16,6 +16,7 @@ package bitbucketdatacenter
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -52,6 +53,7 @@ type Opts struct {
 	OAuthClientSecret            string // OAuth 2.0 client secret
 	OAuthHost                    string // OAuth 2.0 host
 	OAuthEnableProjectAdminScope bool   // Whether to enable project admin scope. Should be set as default in the next major version.
+	SkipVerify                   bool   // Skip ssl verification.
 }
 
 type client struct {
@@ -64,6 +66,7 @@ type client struct {
 	username                     string
 	password                     string
 	oauthEnableProjectAdminScope bool
+	skipVerify                   bool
 }
 
 // New returns a Forge implementation that integrates with Bitbucket DataCenter/Server,
@@ -79,6 +82,7 @@ func New(id int64, opts Opts) (forge.Forge, error) {
 		username:                     opts.Username,
 		password:                     opts.Password,
 		oauthEnableProjectAdminScope: opts.OAuthEnableProjectAdminScope,
+		skipVerify:                   opts.SkipVerify,
 	}
 
 	switch {
@@ -108,6 +112,7 @@ func (c *client) Config() metadata.Forge {
 }
 
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
+	ctx = c.withHTTPClient(ctx)
 	config := c.newOAuth2Config()
 
 	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
@@ -146,6 +151,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 }
 
 func (c *client) Refresh(ctx context.Context, u *model.User) (bool, error) {
+	ctx = c.withHTTPClient(ctx)
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
 		RefreshToken: u.RefreshToken,
@@ -771,7 +777,19 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 	}
 }
 
+// withHTTPClient makes oauth2 use an HTTP client honoring the skip-verify setting.
+func (c *client) withHTTPClient(ctx context.Context) context.Context {
+	if !c.skipVerify {
+		return ctx
+	}
+	return context.WithValue(ctx, oauth2.HTTPClient, &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		Proxy:           http.ProxyFromEnvironment,
+	}})
+}
+
 func (c *client) newClient(ctx context.Context, u *model.User) (*bitbucket.Client, error) {
+	ctx = c.withHTTPClient(ctx)
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
 		AccessToken: u.AccessToken,
