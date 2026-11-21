@@ -69,6 +69,7 @@
 
 ### 📚 Documentation
 
+- Update dependency isomorphic-dompurify to v4.8.0 [[#7607](https://github.com/woodpecker-ci/woodpecker/pull/7607)]
 - Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
 - Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
 - Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
@@ -87,6 +88,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7606](https://github.com/woodpecker-ci/woodpecker/pull/7606)]
 - Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
 - Update golang-packages [[#7605](https://github.com/woodpecker-ci/woodpecker/pull/7605)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
