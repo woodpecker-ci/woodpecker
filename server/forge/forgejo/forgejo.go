@@ -638,7 +638,7 @@ func getStatus(status model.StatusValue, canSkip bool) forgejo.StatusState {
 		return forgejo.StatusFailure
 	case model.StatusSkipped:
 		if canSkip {
-			return forgejo.StatusState
+			return forgejo.StatusSkipped
 		}
 		return forgejo.StatusFailure
 	case model.StatusDeclined:
