@@ -8,6 +8,8 @@
 
 ### 🔒 Security
 
+- Log agent auth fails fail2ban friendly [[#7601](https://github.com/woodpecker-ci/woodpecker/pull/7601)]
+- Use project read-only deploy-token to clone gitlab repos [[#7590](https://github.com/woodpecker-ci/woodpecker/pull/7590)]
 - Update module go.opentelemetry.io/otel/trace to v1.47.0 [[#7564](https://github.com/woodpecker-ci/woodpecker/pull/7564)]
 - Use repo visibility instead of forge private flag for event stream [[#7559](https://github.com/woodpecker-ci/woodpecker/pull/7559)]
 - Only accept step updates for steps of the agent's own workflow [[#7547](https://github.com/woodpecker-ci/woodpecker/pull/7547)]
