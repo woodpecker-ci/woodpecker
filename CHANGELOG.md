@@ -87,6 +87,7 @@
 
 ### 📦️ Dependency
 
+- Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
 - Update golang-packages [[#7605](https://github.com/woodpecker-ci/woodpecker/pull/7605)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
