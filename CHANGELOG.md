@@ -88,6 +88,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/postgres Docker tag to v19 [[#7608](https://github.com/woodpecker-ci/woodpecker/pull/7608)]
 - Update web npm deps non-major [[#7606](https://github.com/woodpecker-ci/woodpecker/pull/7606)]
 - Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
 - Update golang-packages [[#7605](https://github.com/woodpecker-ci/woodpecker/pull/7605)]
