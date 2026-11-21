@@ -18,11 +18,13 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
@@ -38,6 +40,8 @@ type Linter struct {
 	trusted             TrustedConfiguration
 	privilegedPlugins   *[]string
 	trustedClonePlugins *[]string
+
+	workflowDependencies bool
 }
 
 type TrustedConfiguration struct {
@@ -74,6 +78,40 @@ func (l *Linter) Lint(configs []*WorkflowConfig) error {
 		if err := l.lintFile(config); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+	}
+
+	if l.workflowDependencies {
+		if err := lintWorkflowDependencies(configs); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
+	}
+
+	return linterErr
+}
+
+// lintWorkflowDependencies checks that the workflow depends_on only names
+// linted workflows and that no workflows depend on each other in a loop.
+func lintWorkflowDependencies(configs []*WorkflowConfig) error {
+	dependencies := make(map[string]constraint.DependsOn, len(configs))
+	for _, config := range configs {
+		dependencies[config.File] = config.Workflow.DependsOn
+	}
+
+	var linterErr error
+	for _, config := range configs {
+		for _, dep := range config.Workflow.DependsOn {
+			if _, ok := dependencies[dep.Name]; !ok && !dep.Optional {
+				linterErr = multierr.Append(linterErr, newLinterError(
+					fmt.Sprintf("Workflow %q does not exist", dep.Name), config.File, "depends_on", false,
+				))
+			}
+		}
+	}
+
+	if cycle := constraint.FindDependencyCycle(dependencies); cycle != nil {
+		linterErr = multierr.Append(linterErr, newLinterError(
+			"Workflow dependency cycle: "+strings.Join(append(cycle, cycle[0]), " -> "), cycle[0], "depends_on", false,
+		))
 	}
 
 	return linterErr
