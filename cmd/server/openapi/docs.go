@@ -2332,6 +2332,9 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/Repo"
                         }
+                    },
+                    "409": {
+                        "description": "a step log is being finalized or deleted, try again later"
                     }
                 }
             },
@@ -2772,6 +2775,9 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "409": {
+                        "description": "a step log is being finalized or deleted, try again later"
                     }
                 }
             }
@@ -3265,6 +3271,9 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    },
+                    "409": {
+                        "description": "a step log is being finalized or deleted, try again later"
                     }
                 }
             }

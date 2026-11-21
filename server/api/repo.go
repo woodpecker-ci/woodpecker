@@ -489,6 +489,7 @@ func GetRepoPullRequests(c *gin.Context) {
 //	@Router		/repos/{repo_id} [delete]
 //	@Produce	json
 //	@Success	200	{object}	Repo
+//	@Failure	409	"a step log is being finalized or deleted, try again later"
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
@@ -521,7 +522,7 @@ func DeleteRepo(c *gin.Context) {
 
 	if remove {
 		if err := deleteStoredRepoLogs(c, _store, repo); err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(deleteLogsStatus(err), err)
 			return
 		}
 
