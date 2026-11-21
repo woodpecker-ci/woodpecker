@@ -69,6 +69,7 @@
 
 ### 📚 Documentation
 
+- Update dependency @vue/compiler-sfc to v3.5.46 [[#7609](https://github.com/woodpecker-ci/woodpecker/pull/7609)]
 - Update dependency isomorphic-dompurify to v4.8.0 [[#7607](https://github.com/woodpecker-ci/woodpecker/pull/7607)]
 - Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
 - Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
