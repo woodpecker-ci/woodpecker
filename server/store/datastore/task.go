@@ -28,6 +28,17 @@ func (s storage) TaskInsert(task *model.Task) error {
 	return wrapInsert(s.engine.Insert(task))
 }
 
+func (s storage) TaskSetAgent(id string, agentID int64) error {
+	return retryWrite(func() error {
+		count, err := s.engine.Where("id = ?", id).Cols("agent_id").Update(&model.Task{AgentID: agentID})
+		if err != nil || count > 0 {
+			return wrapUpdate(count, err)
+		}
+		// MySQL only counts changed rows, so an unchanged agent also reports zero.
+		return wrapGet(s.engine.Exist(&model.Task{ID: id}))
+	})
+}
+
 func (s storage) TaskDelete(id string) error {
 	return retryWrite(func() error {
 		return wrapDelete(s.engine.Where("id = ?", id).Delete(new(model.Task)))

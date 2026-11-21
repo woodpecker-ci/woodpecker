@@ -337,29 +337,6 @@ func (_c *MockManager_ForgeFromUser_Call) RunAndReturn(run func(user *model.User
 	return _c
 }
 
-// RemoveForge provides a mock function for the type MockManager
-func (_mock *MockManager) RemoveForge(forgeID int64) {
-	_mock.Called(forgeID)
-}
-
-// MockManager_RemoveForge_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RemoveForge'
-type MockManager_RemoveForge_Call struct {
-	*mock.Call
-}
-
-// RemoveForge is a helper method to define mock.On call
-//   - forgeID int64
-func (_e *MockManager_Expecter) RemoveForge(forgeID any) *MockManager_RemoveForge_Call {
-	return &MockManager_RemoveForge_Call{Call: _e.mock.On("RemoveForge", forgeID)}
-}
-
-func (_c *MockManager_RemoveForge_Call) Run(run func(forgeID int64)) *MockManager_RemoveForge_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int64))
-	})
-	return _c
-}
-
 // RegistryService provides a mock function for the type MockManager
 func (_mock *MockManager) RegistryService() registry.Service {
 	ret := _mock.Called()
@@ -456,6 +433,46 @@ func (_c *MockManager_RegistryServiceFromRepo_Call) Return(service registry.Serv
 
 func (_c *MockManager_RegistryServiceFromRepo_Call) RunAndReturn(run func(repo *model.Repo) registry.Service) *MockManager_RegistryServiceFromRepo_Call {
 	_c.Call.Return(run)
+	return _c
+}
+
+// RemoveForge provides a mock function for the type MockManager
+func (_mock *MockManager) RemoveForge(forgeID int64) {
+	_mock.Called(forgeID)
+	return
+}
+
+// MockManager_RemoveForge_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RemoveForge'
+type MockManager_RemoveForge_Call struct {
+	*mock.Call
+}
+
+// RemoveForge is a helper method to define mock.On call
+//   - forgeID int64
+func (_e *MockManager_Expecter) RemoveForge(forgeID any) *MockManager_RemoveForge_Call {
+	return &MockManager_RemoveForge_Call{Call: _e.mock.On("RemoveForge", forgeID)}
+}
+
+func (_c *MockManager_RemoveForge_Call) Run(run func(forgeID int64)) *MockManager_RemoveForge_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockManager_RemoveForge_Call) Return() *MockManager_RemoveForge_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockManager_RemoveForge_Call) RunAndReturn(run func(forgeID int64)) *MockManager_RemoveForge_Call {
+	_c.Run(run)
 	return _c
 }
 

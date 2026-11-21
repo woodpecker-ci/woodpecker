@@ -174,11 +174,11 @@ type Peer interface {
 
 	// Extend extends the timeout for the workflow with the given ID in the task queue.
 	//
-	// Agents must call Extend() regularly (e.g., every constant.TaskTimeout / 3) to signal
+	// Agents must call Extend() regularly (every constant.TaskRenewInterval) to signal
 	// that the workflow is still actively executing and prevent premature timeout.
 	//
 	// If agents don't call Extend periodically, the workflow will be rescheduled to a new
-	// agent after the timeout period expires (specified in constant.TaskTimeout).
+	// agent after the server's task timeout expires.
 	//
 	// This acts as a heartbeat mechanism to detect stuck workflow executions. If an agent
 	// dies or becomes unresponsive, the server will eventually timeout the workflow and
