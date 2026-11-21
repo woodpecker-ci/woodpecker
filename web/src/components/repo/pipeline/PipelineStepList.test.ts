@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { createI18n } from 'vue-i18n';
 
+import Panel from '~/components/layout/Panel.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
@@ -114,11 +115,13 @@ describe('pipelineStepList', () => {
   it('renders a single stepless workflow without throwing', () => {
     const pipeline = makePipeline([makeWorkflow(1, null, 'skipped')]);
 
-    let wrapper;
+    let wrapper!: ReturnType<typeof mountStepList>;
     expect(() => {
       wrapper = mountStepList(pipeline);
     }).not.toThrow();
     expect(wrapper).toBeDefined();
+    expect(wrapper.text()).toContain('workflow-1');
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
   });
 
   it('renders a normal workflow with steps', () => {
@@ -150,10 +153,13 @@ describe('pipelineStepList', () => {
     expect(
       wrapper.findAll('button[title]').filter((b) => (b.attributes('title') ?? '').startsWith('workflow-')),
     ).toHaveLength(0);
+    expect(wrapper.findComponent(Panel).exists()).toBe(true);
+    expect(wrapper.text()).not.toContain('workflow-');
   });
 
   it('hides the collapse button for a single workflow', () => {
     const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]));
+    expect(wrapper.text()).toContain('workflow-1');
     expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
   });
 
