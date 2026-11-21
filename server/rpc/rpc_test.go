@@ -758,7 +758,6 @@ func TestRPCDone(t *testing.T) {
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{failedWorkflow, storedWorkflow}, nil)
 		mockStore.On("UpdatePipeline", mock.Anything).Return(nil)
 		mockStore.On("GetUser", mock.Anything).Return(nil, errors.New("user not found"))
-		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 		mockQueue.On("Done", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		rpcInst := newTestRPC(t, mockStore, mockQueue)
@@ -771,6 +770,8 @@ func TestRPCDone(t *testing.T) {
 		mockStore.AssertCalled(t, "UpdatePipeline", mock.MatchedBy(func(p *model.Pipeline) bool {
 			return p.Status == model.StatusFailure && p.Finished == 200
 		}))
+		// the agent only marked the workflow as done, it did no work
+		assert.Zero(t, agent.LastWork)
 	})
 
 	t.Run("reject workflow already finished", func(t *testing.T) {

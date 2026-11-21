@@ -15,11 +15,18 @@
 package rpc
 
 import (
+	"bytes"
 	"errors"
+	"net"
 	"testing"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -282,4 +289,70 @@ func TestGetAgent(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, int64(8), got.ID)
 	})
+}
+
+// The fail2ban docs match this line.
+func TestAuthLogsFailureWithClientAddress(t *testing.T) {
+	var buf bytes.Buffer
+	orig := log.Logger
+	log.Logger = zerolog.New(&buf).With().Timestamp().Logger()
+	t.Cleanup(func() { log.Logger = orig })
+
+	store := store_mocks.NewMockStore(t)
+	store.On("AgentFindByToken", mock.Anything).Return(nil, types.ErrRecordNotExist)
+	srv := newAuthServer(t, "master", store)
+
+	ctx := peer.NewContext(t.Context(), &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("203.0.113.7"), Port: 41234}})
+	_, err := srv.Auth(ctx, &proto.AuthRequest{AgentId: 3, AgentToken: "wrong-token"})
+	require.Error(t, err)
+	assert.Contains(t, buf.String(), "agent authentication failed from 203.0.113.7")
+	assert.NotContains(t, buf.String(), "wrong-token")
+
+	ctx = peer.NewContext(t.Context(), &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("2001:db8::1"), Port: 41234}})
+	_, err = srv.Auth(ctx, &proto.AuthRequest{AgentId: 3, AgentToken: "wrong-token"})
+	require.Error(t, err)
+	assert.Contains(t, buf.String(), "agent authentication failed from 2001:db8::1")
+}
+
+// Only valid addresses from proxy headers are logged.
+func TestAuthLogsForwardedClientAddress(t *testing.T) {
+	var buf bytes.Buffer
+	orig := log.Logger
+	log.Logger = zerolog.New(&buf).With().Timestamp().Logger()
+	t.Cleanup(func() { log.Logger = orig })
+
+	store := store_mocks.NewMockStore(t)
+	store.On("AgentFindByToken", mock.Anything).Return(nil, types.ErrRecordNotExist)
+	srv := newAuthServer(t, "master", store)
+	proxy := &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("10.0.0.2"), Port: 41234}}
+
+	for name, tc := range map[string]struct {
+		md   metadata.MD
+		want string
+	}{
+		"no headers": {
+			md:   metadata.MD{},
+			want: `"agent authentication failed from 10.0.0.2"`,
+		},
+		"both headers": {
+			md:   metadata.Pairs("x-real-ip", "203.0.113.7", "x-forwarded-for", "198.51.100.1, 203.0.113.7"),
+			want: `"agent authentication failed from 10.0.0.2 x-real-ip=203.0.113.7 x-forwarded-for=198.51.100.1,203.0.113.7"`,
+		},
+		"ipv6": {
+			md:   metadata.Pairs("x-forwarded-for", "2001:db8::1"),
+			want: `"agent authentication failed from 10.0.0.2 x-forwarded-for=2001:db8::1"`,
+		},
+		"text is not logged": {
+			md:   metadata.Pairs("x-real-ip", "1.2.3.4 x-real-ip=9.9.9.9", "x-forwarded-for", "evil, 203.0.113.7"),
+			want: `"agent authentication failed from 10.0.0.2"`,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			buf.Reset()
+			ctx := metadata.NewIncomingContext(peer.NewContext(t.Context(), proxy), tc.md)
+			_, err := srv.Auth(ctx, &proto.AuthRequest{AgentId: 3, AgentToken: "wrong-token"})
+			require.Error(t, err)
+			assert.Contains(t, buf.String(), `"message":`+tc.want)
+		})
+	}
 }

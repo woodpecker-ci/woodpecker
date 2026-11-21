@@ -180,7 +180,7 @@ steps:
 
 services:
   postgres:
-    image: docker.io/postgres:18
+    image: docker.io/postgres:19
     ports: ['5432']
     environment:
       POSTGRES_USER: postgres

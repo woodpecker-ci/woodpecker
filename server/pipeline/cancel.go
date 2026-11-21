@@ -44,10 +44,16 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 	// with that and can leave them killed.
 	for _, workflow := range workflows {
 		for _, step := range workflow.Children {
-			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled); err != nil {
-					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-				}
+			switch step.State {
+			case model.StatusPending:
+				_, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusCanceled)
+			case model.StatusBlocked:
+				_, err = UpdateStepToStatusSkipped(store, *step, 0, model.StatusSkipped)
+			default:
+				continue
+			}
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 			}
 		}
 	}
@@ -66,16 +72,20 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 
 	hasPendingOnly := true
 
-	// Then update the DB status for pending pipelines
+	// Then update the DB status for workflows that did not start
 	// Running ones will be set when the agents stop on the cancel signal
+	var notStarted []*model.Workflow
 	for _, workflow := range workflows {
-		if workflow.State == model.StatusPending {
-			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
-				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
-			}
-		} else {
+		if workflow.State != model.StatusPending && workflow.State != model.StatusBlocked {
 			hasPendingOnly = false
+			continue
 		}
+		skipped, err := UpdateWorkflowToStatusSkipped(store, *workflow)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+			continue
+		}
+		notStarted = append(notStarted, skipped)
 	}
 
 	plState := model.StatusKilled
@@ -88,7 +98,10 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		return err
 	}
 
-	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
+	// Only send the workflows that never started. Running ones still show
+	// running in the store, their agent sends the final status itself.
+	killedPipeline.Workflows = notStarted
+	updatePipelineStatusOnForge(ctx, _forge, killedPipeline, repo, user)
 
 	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err

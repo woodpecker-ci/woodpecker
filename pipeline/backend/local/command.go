@@ -170,6 +170,8 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
+	case "csi", "dotnet-script", "csharp":
+		return genCSharpScript(cmdList, baseDir)
 	}
 }
 
