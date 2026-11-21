@@ -67,3 +67,31 @@ func TestGetUserWorkspaceMembership(t *testing.T) {
 		assert.Equal(t, 2, requests)
 	})
 }
+
+func TestListChangedFilesByURL(t *testing.T) {
+	// a pull request diff stat link as Bitbucket sends it in webhooks
+	const link = "/2.0/repositories/ws/repo/diffstat/ws/fork:39f188d78e1e%0D859c737a468f"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// the link must be used as is, only the page gets added
+		query := r.URL.Query()
+		if r.URL.EscapedPath() != link || query.Get("from_pullrequest_id") != "2" || query.Get("topic") != "true" {
+			http.Error(w, "unexpected request "+r.URL.String(), http.StatusBadRequest)
+			return
+		}
+		switch query.Get("page") {
+		case "1":
+			_, _ = w.Write([]byte(`{"values":[{"old":{"path":"a.go"},"new":{"path":"b.go"}}],"next":"next-page"}`))
+		case "2":
+			_, _ = w.Write([]byte(`{"values":[{"old":null,"new":{"path":"c.go"}}]}`))
+		default:
+			http.Error(w, "no page "+query.Get("page"), http.StatusNotFound)
+		}
+	}))
+	t.Cleanup(server.Close)
+
+	files, err := NewClient(t.Context(), server.URL, http.DefaultClient).
+		ListChangedFilesByURL(server.URL + link + "?from_pullrequest_id=2&topic=true")
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []string{"a.go", "b.go", "c.go"}, files)
+}

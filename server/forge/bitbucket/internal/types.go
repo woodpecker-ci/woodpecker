@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-// cspell:words pagelen
+// cspell:words diffstat pagelen
 
 type Account struct {
 	UUID  string `json:"uuid"`
@@ -93,10 +93,11 @@ type HookResp struct {
 }
 
 type Links struct {
-	Self   Link   `json:"self"`
-	Avatar Link   `json:"avatar"`
-	HTML   Link   `json:"html"`
-	Clone  []Link `json:"clone"`
+	Self     Link   `json:"self"`
+	Avatar   Link   `json:"avatar"`
+	HTML     Link   `json:"html"`
+	Clone    []Link `json:"clone"`
+	DiffStat Link   `json:"diffstat"`
 }
 
 type Link struct {
