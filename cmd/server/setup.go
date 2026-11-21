@@ -106,10 +106,11 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(ctx context.Context, s store.Store) (queue.Queue, error) {
+func setupQueue(ctx context.Context, c *cli.Command, s store.Store) (queue.Queue, error) {
 	return queue.New(ctx, queue.Config{
-		Backend: queue.TypeMemory,
-		Store:   s,
+		Backend:     queue.TypeMemory,
+		Store:       s,
+		TaskTimeout: c.Duration("task-timeout"),
 	})
 }
 
@@ -164,7 +165,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
 	pubsub := memory.New()
-	queue, err := setupQueue(ctx, s)
+	queue, err := setupQueue(ctx, c, s)
 	if err != nil {
 		return fmt.Errorf("could not setup queue: %w", err)
 	}

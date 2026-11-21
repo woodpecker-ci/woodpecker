@@ -18,7 +18,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"os"
+	"slices"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -38,7 +43,7 @@ func TestPersistentQueuePollDropsStaleTask(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(types.ErrRecordNotExist).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 
@@ -59,8 +64,9 @@ func TestPersistentQueuePollDropsTaskWithMissingWorkflow(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 	store.EXPECT().WorkflowLoad(int64(1)).Return(nil, types.ErrRecordNotExist).Once()
+	store.EXPECT().TaskDelete("1").Return(nil).Once()
 
 	pq := &persistentQueue{Queue: q, store: store}
 
@@ -89,12 +95,14 @@ func TestPersistentQueuePollDropsTerminalWorkflowTask(t *testing.T) {
 
 	for _, state := range terminalStates {
 		t.Run(string(state), func(t *testing.T) {
+			t.Parallel()
 			ctx, cancel, q := setupTestQueue(t)
 			defer cancel(nil)
 
 			store := store_mocks.NewMockStore(t)
-			store.EXPECT().TaskDelete("1").Return(nil).Once()
+			store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 			store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: state}, nil).Once()
+			store.EXPECT().TaskDelete("1").Return(nil).Once()
 
 			pq := &persistentQueue{Queue: q, store: store}
 
@@ -110,27 +118,6 @@ func TestPersistentQueuePollDropsTerminalWorkflowTask(t *testing.T) {
 			assert.Equal(t, 0, info.Stats.Running)
 		})
 	}
-}
-
-// A task that is still present in the backup store and whose workflow is still
-// active is polled normally.
-func TestPersistentQueuePollReturnsLiveTask(t *testing.T) {
-	ctx, cancel, q := setupTestQueue(t)
-	defer cancel(nil)
-
-	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
-	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
-
-	pq := &persistentQueue{Queue: q, store: store}
-
-	task := genDummyTask()
-	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task}))
-
-	got, err := pq.Poll(ctx, 1, filterFnTrue)
-	assert.NoError(t, err)
-	assert.NotNil(t, got)
-	assert.Equal(t, "1", got.ID)
 }
 
 func TestPersistentQueueDoneRemovesPendingTaskFromBackup(t *testing.T) {
@@ -156,7 +143,7 @@ func TestPersistentQueueDoneIgnoresAlreadyRemovedBackupTask(t *testing.T) {
 	defer cancel(nil)
 
 	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskDelete("1").Return(nil).Once()
+	store.EXPECT().TaskSetAgent("1", int64(1)).Return(nil).Once()
 	store.EXPECT().WorkflowLoad(int64(1)).Return(&model.Workflow{ID: 1, State: model.StatusPending}, nil).Once()
 	store.EXPECT().TaskDelete("1").Return(types.ErrRecordNotExist).Once()
 
@@ -203,19 +190,6 @@ func TestPersistentQueueResumePersistsState(t *testing.T) {
 	assert.False(t, pq.Info(ctx).Paused)
 }
 
-func TestWithTaskStoreRestoresPausedState(t *testing.T) {
-	ctx, cancel, q := setupTestQueue(t)
-	defer cancel(nil)
-
-	store := store_mocks.NewMockStore(t)
-	store.EXPECT().TaskList().Return(nil, nil).Once()
-	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("true", nil).Once()
-
-	pq := WithTaskStore(ctx, q, store)
-
-	assert.True(t, pq.Info(ctx).Paused)
-}
-
 func TestWithTaskStoreLeavesQueueRunningWhenNotPaused(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)
@@ -242,145 +216,6 @@ func TestWithTaskStoreLeavesQueueRunningWhenNoPausedConfig(t *testing.T) {
 	assert.False(t, pq.Info(ctx).Paused)
 }
 
-func TestWithTaskStoreRestoresPausedStateAfterRestart(t *testing.T) {
-	ctx, cancel, q := setupTestQueue(t)
-	defer cancel(nil)
-
-	store := store_mocks.NewMockStore(t)
-	store.EXPECT().ServerConfigSet(serverConfigQueuePaused, "true").Return(nil).Once()
-
-	pq := &persistentQueue{Queue: q, store: store}
-	pq.Pause()
-	assert.True(t, pq.Info(ctx).Paused)
-
-	// Fresh in-memory queue after process restart; paused flag comes from store.
-	ctx2, cancel2, q2 := setupTestQueue(t)
-	defer cancel2(nil)
-
-	store.EXPECT().TaskList().Return(nil, nil).Once()
-	store.EXPECT().ServerConfigGet(serverConfigQueuePaused).Return("true", nil).Once()
-
-	restored := WithTaskStore(ctx2, q2, store)
-	assert.True(t, restored.Info(ctx2).Paused)
-}
-
-func newSQLiteStore(t *testing.T) store.Store {
-	t.Helper()
-
-	s, err := datastore.NewEngine(&store.Opts{
-		Driver: "sqlite3",
-		Config: ":memory:",
-		// in-memory sqlite loses its schema when the pool drops the connection
-		XORM: store.XORM{MaxOpenConns: 1, MaxIdleConns: 1},
-	})
-	require.NoError(t, err)
-	require.NoError(t, s.Migrate(t.Context(), true))
-	t.Cleanup(func() { _ = s.Close() })
-	return s
-}
-
-// A dependency can finish while its dependent task is still queued. The
-// queue tracks that outcome only in memory, so a reload (server restart or
-// HA leader change) must restore it, otherwise Task.ShouldRun() sees an empty
-// DepStatus and vacuously lets the dependent run (#7154).
-func TestWithTaskStoreRestoresDepStatusAfterReload(t *testing.T) {
-	failed := func(ctx context.Context, q Queue, id string) error {
-		return q.Error(ctx, id, errors.New("workflow finished with error"))
-	}
-	done := func(state model.StatusValue) func(context.Context, Queue, string) error {
-		return func(ctx context.Context, q Queue, id string) error {
-			return q.Done(ctx, id, state)
-		}
-	}
-
-	tests := []struct {
-		name     string
-		depState model.StatusValue
-		finish   func(context.Context, Queue, string) error
-		runOn    []string
-		wantRun  bool
-	}{
-		{
-			name:     "failed dependency blocks success gate",
-			depState: model.StatusFailure,
-			finish:   failed,
-			runOn:    []string{string(model.StatusSuccess)},
-			wantRun:  false,
-		},
-		{
-			name:     "succeeded dependency lets success gate run",
-			depState: model.StatusSuccess,
-			finish:   done(model.StatusSuccess),
-			runOn:    []string{string(model.StatusSuccess)},
-			wantRun:  true,
-		},
-		{
-			name:     "succeeded dependency blocks failure-only gate",
-			depState: model.StatusSuccess,
-			finish:   done(model.StatusSuccess),
-			runOn:    []string{string(model.StatusFailure)},
-			wantRun:  false,
-		},
-		{
-			name:     "skipped dependency blocks success gate",
-			depState: model.StatusSkipped,
-			finish:   done(model.StatusSkipped),
-			runOn:    []string{string(model.StatusSuccess)},
-			wantRun:  false,
-		},
-		{
-			name:     "killed dependency blocks success gate",
-			depState: model.StatusKilled,
-			finish:   done(model.StatusKilled),
-			runOn:    []string{string(model.StatusSuccess)},
-			wantRun:  false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := newSQLiteStore(t)
-			dep, gate := createDepAndGate(t, s, tt.runOn)
-
-			// first server: the dependency runs and finishes, the gate stays queued
-			ctx1, cancel1 := context.WithCancelCause(t.Context())
-			q1 := WithTaskStore(ctx1, NewMemoryQueue(ctx1), s)
-			require.NoError(t, q1.PushAtOnce(ctx1, []*model.Task{dep, gate}))
-			polled, err := q1.Poll(ctx1, 1, filterFnTrue)
-			require.NoError(t, err)
-			require.Equal(t, dep.ID, polled.ID)
-			setWorkflowState(t, s, dep.ID, tt.depState)
-			require.NoError(t, tt.finish(ctx1, q1, dep.ID))
-			cancel1(nil)
-
-			// second server: reload the still queued gate from the store
-			ctx2, cancel2 := context.WithCancelCause(t.Context())
-			defer cancel2(nil)
-			q2 := WithTaskStore(ctx2, NewMemoryQueue(ctx2), s)
-
-			reloaded := queuedTask(t, q2.Info(ctx2), gate.ID)
-			assert.Equal(t, tt.depState, reloaded.DepStatus[dep.ID])
-			assert.Equal(t, tt.wantRun, reloaded.ShouldRun())
-		})
-	}
-}
-
-// A dependency that has not finished yet is left to the live queue, which
-// sets its status once the agent reports back.
-func TestWithTaskStoreKeepsUnfinishedDepStatusEmpty(t *testing.T) {
-	s := newSQLiteStore(t)
-	dep, gate := createDepAndGate(t, s, []string{string(model.StatusSuccess)})
-	require.NoError(t, s.TaskInsert(gate))
-	setWorkflowState(t, s, dep.ID, model.StatusRunning)
-
-	ctx, cancel := context.WithCancelCause(t.Context())
-	defer cancel(nil)
-	q := WithTaskStore(ctx, NewMemoryQueue(ctx), s)
-
-	reloaded := queuedTask(t, q.Info(ctx), gate.ID)
-	assert.NotContains(t, reloaded.DepStatus, dep.ID)
-}
-
 // A dependency that cannot be loaded must not stop the other dependencies of
 // the task from being restored.
 func TestRestoreDepStatusSkipsUnloadableDependency(t *testing.T) {
@@ -392,31 +227,6 @@ func TestRestoreDepStatusSkipsUnloadableDependency(t *testing.T) {
 	restoreDepStatus(s, task)
 
 	assert.Equal(t, map[string]model.StatusValue{"2": model.StatusFailure}, task.DepStatus)
-}
-
-// createDepAndGate stores a pending dependency workflow and a pending gate
-// workflow depending on it, and returns their queue tasks.
-func createDepAndGate(t *testing.T, s store.Store, gateRunOn []string) (dep, gate *model.Task) {
-	t.Helper()
-
-	workflows := []*model.Workflow{
-		{PipelineID: 1, PID: 1, Name: "dep", State: model.StatusPending},
-		{PipelineID: 1, PID: 2, Name: "gate", State: model.StatusPending},
-	}
-	require.NoError(t, s.WorkflowsCreate(workflows))
-
-	dep = &model.Task{
-		ID:        fmt.Sprint(workflows[0].ID),
-		RunOn:     []string{string(model.StatusSuccess)},
-		DepStatus: make(map[string]model.StatusValue),
-	}
-	gate = &model.Task{
-		ID:           fmt.Sprint(workflows[1].ID),
-		Dependencies: []string{dep.ID},
-		RunOn:        gateRunOn,
-		DepStatus:    make(map[string]model.StatusValue),
-	}
-	return dep, gate
 }
 
 func setWorkflowState(t *testing.T, s store.Store, id string, state model.StatusValue) {
@@ -431,14 +241,199 @@ func setWorkflowState(t *testing.T, s store.Store, id string, state model.Status
 	require.NoError(t, s.WorkflowUpdate(workflow))
 }
 
-func queuedTask(t *testing.T, info InfoT, id string) *model.Task {
+// A server restart must bring the queue back as it was: queued, waiting and
+// running tasks, finished dependencies (#7154) and the paused flag. Running
+// tasks only get a new lease, so their agents can reconnect and go on.
+func TestWithTaskStoreRestart(t *testing.T) {
+	s := newTestStore(t)
+	tasks := createTasks(t, s, "running", "canceled", "limited", "dependent", "done", "after-done", "failed", "after-failed", "queued")
+	for _, name := range []string{"running", "limited"} {
+		tasks[name].ConcurrencyGroup, tasks[name].ConcurrencyLimit = "group", 1
+	}
+	tasks["dependent"].Dependencies = []string{tasks["running"].ID}
+	tasks["after-done"].Dependencies = []string{tasks["done"].ID}
+	tasks["after-failed"].Dependencies = []string{tasks["failed"].ID}
+
+	// first server: fill the queue, then pause and stop it
+	ctx1, cancel1 := context.WithCancelCause(t.Context())
+	fifo1, _ := NewMemoryQueue(ctx1, 0).(*fifo)
+	q1 := WithTaskStore(ctx1, fifo1, s)
+	require.False(t, q1.Info(ctx1).Paused)
+	require.NoError(t, q1.PushAtOnce(ctx1, slices.Collect(maps.Values(tasks))))
+	polls := map[string]int64{"running": 1, "canceled": 2, "done": 2, "failed": 2}
+	var wg sync.WaitGroup
+	for name, agentID := range polls {
+		wg.Go(func() {
+			got, err := q1.Poll(ctx1, agentID, onlyTask(tasks[name]))
+			assert.NoError(t, err)
+			assert.Equal(t, tasks[name], got)
+		})
+	}
+	wg.Wait()
+	for name := range polls {
+		setWorkflowState(t, s, tasks[name].ID, model.StatusRunning)
+	}
+	setWorkflowState(t, s, tasks["done"].ID, model.StatusSuccess)
+	require.NoError(t, q1.Done(ctx1, tasks["done"].ID, model.StatusSuccess))
+	setWorkflowState(t, s, tasks["failed"].ID, model.StatusFailure)
+	require.NoError(t, q1.Error(ctx1, tasks["failed"].ID, errors.New("workflow failed")))
+	waitForProcess()
+	before := q1.Info(ctx1)
+	oldLease := leaseOf(fifo1, tasks["running"])
+	q1.Pause()
+	cancel1(nil)
+
+	// second server: same queue, new lease
+	ctx2, cancel2 := context.WithCancelCause(t.Context())
+	defer cancel2(nil)
+	fifo2, _ := NewMemoryQueue(ctx2, 0).(*fifo)
+	q2 := WithTaskStore(ctx2, fifo2, s)
+	require.True(t, q2.Info(ctx2).Paused)
+	canceled := make(chan error, 1)
+	go func() { canceled <- q2.Wait(ctx2, tasks["canceled"].ID) }()
+	q2.Resume()
+	waitForProcess()
+	after := q2.Info(ctx2)
+	assert.Equal(t, queueState(before), queueState(after))
+	assert.True(t, leaseOf(fifo2, tasks["running"]).After(oldLease), "restored task must get a new lease")
+	assert.True(t, queuedTask(after, tasks["after-done"]).ShouldRun())
+	assert.False(t, queuedTask(after, tasks["after-failed"]).ShouldRun())
+
+	// the agents of the running tasks can go on
+	assert.NoError(t, q2.Extend(ctx2, 1, tasks["running"].ID))
+	pollCtx, pollCancel := context.WithTimeout(ctx2, 2*processTimeInterval)
+	got, _ := q2.Poll(pollCtx, 3, onlyTask(tasks["limited"]))
+	pollCancel()
+	assert.Nil(t, got, "restored running task must still use its concurrency slot")
+	require.NoError(t, q2.ErrorAtOnce(ctx2, []string{tasks["canceled"].ID}, ErrCancel))
+	select {
+	case err := <-canceled:
+		assert.ErrorIs(t, err, ErrCancel)
+	case <-time.After(time.Second):
+		t.Fatal("cancel did not reach Wait")
+	}
+
+	// finishing the running task frees its slot and its dependent
+	require.NoError(t, q2.Done(ctx2, tasks["running"].ID, model.StatusSuccess))
+	pollCtx, pollCancel = context.WithTimeout(ctx2, time.Second)
+	got, err := q2.Poll(pollCtx, 3, onlyTask(tasks["limited"]))
+	pollCancel()
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	require.Eventually(t, func() bool {
+		dependent := queuedTask(q2.Info(ctx2), tasks["dependent"])
+		return dependent != nil && dependent.DepStatus[tasks["running"].ID] == model.StatusSuccess
+	}, time.Second, 10*time.Millisecond, "dependent must be released")
+
+	stored, err := s.TaskList()
+	require.NoError(t, err)
+	var names []string
+	for _, task := range stored {
+		names = append(names, task.Name)
+	}
+	assert.ElementsMatch(t, []string{"limited", "dependent", "after-done", "after-failed", "queued"}, names)
+	cancel2(nil)
+
+	// third server: the agent of the restored task does not come back
+	ctx3, cancel3 := context.WithCancelCause(t.Context())
+	defer cancel3(nil)
+	q3 := WithTaskStore(ctx3, NewMemoryQueue(ctx3, 200*time.Millisecond), s)
+	running := q3.Info(ctx3).Running
+	require.Len(t, running, 1)
+	assert.Equal(t, int64(3), running[0].AgentID)
+	require.Eventually(t, func() bool {
+		return queuedTask(q3.Info(ctx3), tasks["limited"]) != nil
+	}, 2*time.Second, 10*time.Millisecond, "expired task must be queued again")
+}
+
+// newTestStore returns a migrated in-memory SQLite store, or the database set
+// by WOODPECKER_DATABASE_DRIVER and WOODPECKER_DATABASE_DATASOURCE.
+func newTestStore(t *testing.T) store.Store {
 	t.Helper()
 
-	for _, task := range append(info.Pending, info.WaitingOnDeps...) {
-		if task.ID == id {
-			return task
+	opts := &store.Opts{
+		Driver: "sqlite3",
+		Config: ":memory:",
+		// in-memory sqlite loses its schema when the pool drops the connection
+		XORM: store.XORM{MaxOpenConns: 1, MaxIdleConns: 1},
+	}
+	if driver := os.Getenv("WOODPECKER_DATABASE_DRIVER"); driver != "" {
+		opts = &store.Opts{Driver: driver, Config: os.Getenv("WOODPECKER_DATABASE_DATASOURCE")}
+	}
+	s, err := datastore.NewEngine(opts)
+	require.NoError(t, err)
+	require.NoError(t, s.Migrate(t.Context(), true))
+	t.Cleanup(func() { _ = s.Close() })
+
+	// a shared database must not keep the queue between tests
+	clearQueue := func() {
+		tasks, err := s.TaskList()
+		require.NoError(t, err)
+		for _, task := range tasks {
+			require.NoError(t, s.TaskDelete(task.ID))
+		}
+		_ = s.ServerConfigDelete(serverConfigQueuePaused)
+	}
+	clearQueue()
+	t.Cleanup(clearQueue)
+	return s
+}
+
+// createTasks stores a pending workflow per name and returns their queue
+// tasks by name.
+func createTasks(t *testing.T, s store.Store, names ...string) map[string]*model.Task {
+	t.Helper()
+
+	// a new pipeline id per call, as a shared database keeps old workflows
+	pipelineID := time.Now().UnixNano()
+	workflows := make([]*model.Workflow, len(names))
+	for i, name := range names {
+		workflows[i] = &model.Workflow{PipelineID: pipelineID, PID: i + 1, Name: name, State: model.StatusPending}
+	}
+	require.NoError(t, s.WorkflowsCreate(workflows))
+
+	tasks := make(map[string]*model.Task, len(names))
+	for _, workflow := range workflows {
+		tasks[workflow.Name] = &model.Task{
+			ID:        fmt.Sprint(workflow.ID),
+			Name:      workflow.Name,
+			DepStatus: make(map[string]model.StatusValue),
 		}
 	}
-	require.FailNowf(t, "task not queued", "task %s not in %s", id, info.String())
+	return tasks
+}
+
+// queueState lists the tasks of each queue list in a comparable form.
+func queueState(info InfoT) map[string][]string {
+	state := make(map[string][]string)
+	for list, tasks := range map[string][]*model.Task{"pending": info.Pending, "waiting": info.WaitingOnDeps, "running": info.Running} {
+		for _, task := range tasks {
+			state[list] = append(state[list], fmt.Sprintf("%s agent=%d deps=%v status=%v group=%s/%d",
+				task.Name, task.AgentID, task.Dependencies, task.DepStatus, task.ConcurrencyGroup, task.ConcurrencyLimit))
+		}
+		slices.Sort(state[list])
+	}
+	return state
+}
+
+func queuedTask(info InfoT, task *model.Task) *model.Task {
+	for _, queued := range append(info.Pending, info.WaitingOnDeps...) {
+		if queued.ID == task.ID {
+			return queued
+		}
+	}
 	return nil
+}
+
+func leaseOf(q *fifo, task *model.Task) time.Time {
+	q.Lock()
+	defer q.Unlock()
+	if running, ok := q.running[task.ID]; ok {
+		return running.deadline
+	}
+	return time.Time{}
+}
+
+func onlyTask(task *model.Task) func(*model.Task) (bool, int) {
+	return func(candidate *model.Task) (bool, int) { return candidate.ID == task.ID, 1 }
 }
