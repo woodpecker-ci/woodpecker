@@ -156,6 +156,93 @@ describe('usePaginate', () => {
     expect(usePaginationComposition.data.value.length).toBe(6);
   });
 
+  describe('refresh', () => {
+    it('replaces the loaded pages without emptying the data', async () => {
+      const pages = [
+        [{ name: 'a1' }, { name: 'a2' }, { name: 'a3' }],
+        [{ name: 'b1' }, { name: 'b2' }, { name: 'b3' }],
+      ];
+      let usePaginationComposition = null as unknown as ReturnType<typeof usePagination>;
+      mountComposition(() => {
+        usePaginationComposition = usePagination<{ name: string }>(
+          async (page) => pages[page - 1] ?? [],
+          () => true,
+          {
+            pageSize: 3,
+          },
+        );
+      });
+      await waitForState(usePaginationComposition.loading, true);
+      await waitForState(usePaginationComposition.loading, false);
+      usePaginationComposition.nextPage();
+      await waitForState(usePaginationComposition.loading, false);
+      expect(usePaginationComposition.data.value.length).toBe(6);
+
+      pages[1] = [{ name: 'b1' }, { name: 'b2' }, { name: 'new' }];
+      const lengths: number[] = [];
+      watch(usePaginationComposition.data, (data) => lengths.push(data.length));
+      await usePaginationComposition.refresh();
+      await nextTick();
+
+      expect(lengths).toStrictEqual([6]);
+      expect(usePaginationComposition.data.value.at(-1)).toStrictEqual({ name: 'new' });
+      expect(usePaginationComposition.loading.value).toBe(false);
+    });
+
+    it('detects new data on a page that was the last one before', async () => {
+      const pages = [[{ name: 'a1' }, { name: 'a2' }]];
+      let usePaginationComposition = null as unknown as ReturnType<typeof usePagination>;
+      mountComposition(() => {
+        usePaginationComposition = usePagination<{ name: string }>(
+          async (page) => pages[page - 1] ?? [],
+          () => true,
+          {
+            pageSize: 3,
+          },
+        );
+      });
+      await waitForState(usePaginationComposition.loading, true);
+      await waitForState(usePaginationComposition.loading, false);
+      expect(usePaginationComposition.hasMore.value).toBe(false);
+
+      pages[0] = [{ name: 'a1' }, { name: 'a2' }, { name: 'a3' }];
+      await usePaginationComposition.refresh();
+
+      expect(usePaginationComposition.data.value.length).toBe(3);
+      expect(usePaginationComposition.hasMore.value).toBe(true);
+    });
+
+    it('discards the refresh when resetPage is called meanwhile', async () => {
+      let resolveRefresh: (value: { name: string }[]) => void = () => {};
+      let calls = 0;
+      let usePaginationComposition = null as unknown as ReturnType<typeof usePagination>;
+      mountComposition(() => {
+        usePaginationComposition = usePagination<{ name: string }>(
+          async () => {
+            calls += 1;
+            if (calls === 2) {
+              return new Promise((resolve) => {
+                resolveRefresh = resolve;
+              });
+            }
+            return [{ name: `call${calls}` }];
+          },
+          () => true,
+          { pageSize: 3 },
+        );
+      });
+      await waitForState(usePaginationComposition.loading, true);
+      await waitForState(usePaginationComposition.loading, false);
+
+      const refreshing = usePaginationComposition.refresh();
+      await usePaginationComposition.resetPage();
+      resolveRefresh([{ name: 'stale' }]);
+      await refreshing;
+
+      expect(usePaginationComposition.data.value).toStrictEqual([{ name: 'call3' }]);
+    });
+  });
+
   describe('reset while a request is in flight', () => {
     interface Deferred {
       page: number;
