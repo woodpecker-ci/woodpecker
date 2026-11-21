@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-20
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -87,11 +87,7 @@
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7603](https://github.com/woodpecker-ci/woodpecker/pull/7603)]
-- Lock file maintenance [[#7596](https://github.com/woodpecker-ci/woodpecker/pull/7596)]
-- Update golang-packages [[#7592](https://github.com/woodpecker-ci/woodpecker/pull/7592)]
-- Update web npm deps non-major [[#7593](https://github.com/woodpecker-ci/woodpecker/pull/7593)]
-- Update docker.io/woodpeckerci/plugin-ready-release-go Docker tag to v4.1.4 [[#7591](https://github.com/woodpecker-ci/woodpecker/pull/7591)]
+- Update golang-packages [[#7605](https://github.com/woodpecker-ci/woodpecker/pull/7605)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
