@@ -76,7 +76,7 @@ func CreatePipeline(c *gin.Context) {
 		return
 	}
 
-	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
+	tmpPipeline := createTmpPipeline(lastCommit, user, &opts)
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
@@ -91,31 +91,23 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
-	pl := &model.Pipeline{
-		Event:     event,
-		Commit:    commit.SHA,
-		Branch:    opts.Branch,
-		Timestamp: time.Now().UTC().Unix(),
+func createTmpPipeline(commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+	return &model.Pipeline{
+		Event:         model.EventManual,
+		Commit:        commit,
+		Branch:        opts.Branch,
+		ManualMessage: opts.Message,
 
-		Avatar:  user.Avatar,
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Avatar: user.Avatar,
 
 		Ref:                 "refs/heads/" + opts.Branch,
 		AdditionalVariables: opts.Variables,
 		SelectedWorkflow:    opts.Workflow,
 
 		Author: user.Login,
-		Email:  user.Email,
 
 		ForgeURL: commit.ForgeURL,
 	}
-
-	if opts.Message != "" {
-		pl.Message = "MANUAL: " + opts.Message + " @ " + opts.Branch
-	}
-
-	return pl
 }
 
 // GetRepoWorkflows
@@ -148,7 +140,7 @@ func GetRepoWorkflows(c *gin.Context) {
 		return
 	}
 
-	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(model.EventManual, lastCommit, user, &opts))
+	workflows, err := pipeline.ListWorkflows(c, _forge, _store, repo, createTmpPipeline(lastCommit, user, &opts))
 	if err != nil {
 		handlePipelineErr(c, err)
 		return
@@ -599,7 +591,7 @@ func GetPipelineQueue(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting pipeline queue. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, out)
+	c.JSON(http.StatusOK, model.ToAPIFeeds(out))
 }
 
 // PostPipeline
@@ -619,6 +611,10 @@ func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	pl := session.Pipeline(c)
+
+	if pl.Commit == nil {
+		pl.Commit = new(model.Commit)
+	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
@@ -656,7 +652,7 @@ func PostPipeline(c *gin.Context) {
 		}
 		pl.Author = deployer.Login
 		pl.Avatar = deployer.Avatar
-		pl.Email = deployer.Email
+		pl.Commit.Author = model.CommitAuthor{Name: deployer.Login, Email: deployer.Email}
 		pl.Sender = deployer.Login
 
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)

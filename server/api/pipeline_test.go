@@ -673,7 +673,8 @@ func TestPostPipeline(t *testing.T) {
 		t.Cleanup(func() { fakeRepo.AllowDeploy = false })
 
 		parent := newErroredParent()
-		parent.Author, parent.Avatar, parent.Email, parent.Sender = "orig", "orig.png", "orig@example.com", "orig"
+		parent.Author, parent.Avatar, parent.Sender = "orig", "orig.png", "orig"
+		parent.Commit = &model.Commit{Author: model.CommitAuthor{Email: "orig@example.com"}}
 		deployer := &model.User{ID: 2, Login: "deployer", Email: "deployer@example.com", Avatar: "deployer.png"}
 		deployConfig := []*forge_types.FileMeta{
 			{Name: ".woodpecker.yml", Data: []byte("when:\n  event: deployment\nsteps:\n  test:\n    image: alpine:latest\n    commands:\n      - echo test")},
@@ -687,7 +688,7 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, model.EventDeploy, got.Event)
 		assert.Equal(t, "deployer", got.Author)
 		assert.Equal(t, "deployer.png", got.Avatar)
-		assert.Equal(t, "deployer@example.com", got.Email)
+		assert.Equal(t, "deployer@example.com", got.Commit.Author.Email)
 		assert.Equal(t, "deployer", got.Sender)
 	})
 }

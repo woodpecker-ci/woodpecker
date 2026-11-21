@@ -58,7 +58,7 @@ func TestPipelineToAPIModel(t *testing.T) {
 		},
 		{
 			name:     "push leaves derived fields untouched",
-			pipeline: Pipeline{Event: EventPush, Message: "fix bug"},
+			pipeline: Pipeline{Event: EventPush, Commit: &Commit{Message: "fix bug"}},
 			// message is the stored commit message, not overwritten
 			wantMessage: "fix bug",
 		},

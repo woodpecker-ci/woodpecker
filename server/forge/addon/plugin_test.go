@@ -87,7 +87,7 @@ func TestRPCRoundTrip(t *testing.T) {
 	ctx := t.Context()
 	user := testUser()
 	repo := testRepo()
-	pipeline := &model.Pipeline{Number: 6, Event: model.EventPush, Commit: "abc", Ref: "refs/heads/main"}
+	pipeline := &model.Pipeline{Number: 6, Event: model.EventPush, Commit: &model.Commit{SHA: "abc"}, Ref: "refs/heads/main"}
 	listOpts := &model.ListOptions{Page: 2, PerPage: 10}
 
 	t.Run("name and config", func(t *testing.T) {

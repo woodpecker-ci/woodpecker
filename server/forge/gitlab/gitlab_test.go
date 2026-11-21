@@ -835,7 +835,7 @@ func TestGitLabStatusIgnoresRejectedTransition(t *testing.T) {
 			client := load(server.URL + "?client_id=test&client_secret=test")
 			user := &model.User{Login: "test_user", AccessToken: "token"}
 			repo := &model.Repo{ForgeRemoteID: "4", Owner: "diaspora", Name: "diaspora-client", FullName: "diaspora/diaspora-client"}
-			pipeline := &model.Pipeline{Number: 1, Commit: "abc123", Event: model.EventPush}
+			pipeline := &model.Pipeline{Number: 1, Commit: &model.Commit{SHA: "abc123"}, Event: model.EventPush}
 			workflow := &model.Workflow{Name: "build", State: model.StatusPending}
 
 			err := client.Status(t.Context(), user, repo, pipeline, workflow)
@@ -953,12 +953,12 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		_, pipeline, err := client.Hook(storeContext(t), hookRequest(t, body, fixtures.ServiceHookHeaders), "")
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
-		assert.Equal(t, "Release v22", pipeline.Message)
+		assert.Equal(t, "Release v22", pipeline.Commit.Message)
 		// the author stays the authenticated webhook username, not the git
 		// commit author name (CVE-2026-58370 approval-bypass fix)
 		assert.Equal(t, "test", pipeline.Author)
-		assert.Equal(t, "jane@example.com", pipeline.Email)
-		assert.Equal(t, time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC).Unix(), pipeline.Timestamp)
+		assert.Equal(t, "jane@example.com", pipeline.Commit.Author.Email)
+		assert.Equal(t, time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC).Unix(), pipeline.Commit.Timestamp)
 		assert.NotEmpty(t, pipeline.Avatar)
 	})
 
@@ -985,8 +985,8 @@ func TestHookLoadsMetadataFromForge(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "refs/tags/v22", pipeline.Ref)
-		assert.Equal(t, commitSHA, pipeline.Commit)
-		assert.Equal(t, "Release v22", pipeline.Message)
+		assert.Equal(t, commitSHA, pipeline.Commit.SHA)
+		assert.Equal(t, "Release v22", pipeline.Commit.Message)
 	})
 
 	t.Run("release gets the release author", func(t *testing.T) {
@@ -1178,7 +1178,7 @@ func TestNetrc(t *testing.T) {
 func TestFileAndDir(t *testing.T) {
 	user := &model.User{AccessToken: "token"}
 	repo := &model.Repo{ForgeRemoteID: "4"}
-	pipeline := &model.Pipeline{Commit: "abc"}
+	pipeline := &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
@@ -1225,7 +1225,7 @@ func TestFileAndDir(t *testing.T) {
 func TestDirPagination(t *testing.T) {
 	user := &model.User{AccessToken: "token"}
 	repo := &model.Repo{ForgeRemoteID: "4"}
-	pipeline := &model.Pipeline{Commit: "abc"}
+	pipeline := &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}
 
 	// fullPage returns a page with defaultPerPage sub folders and the given blob,
 	// so the client has to ask for the next page.

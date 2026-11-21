@@ -40,11 +40,11 @@ type configData struct {
 }
 
 type requestStructure struct {
-	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"pipeline"`
-	Netrc         *model.Netrc    `json:"netrc"`
-	Restart       bool            `json:"restart"`
-	Configuration []*configData   `json:"configuration,omitempty"`
+	Repo          *model.Repo        `json:"repo"`
+	Pipeline      *model.APIPipeline `json:"pipeline"`
+	Netrc         *model.Netrc       `json:"netrc"`
+	Restart       bool               `json:"restart"`
+	Configuration []*configData      `json:"configuration,omitempty"`
 }
 
 type responseStructure struct {
@@ -64,7 +64,7 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 	response := new(responseStructure)
 	body := requestStructure{
 		Repo:          repo,
-		Pipeline:      pipeline,
+		Pipeline:      pipeline.ToAPIModel(),
 		Restart:       restart,
 		Configuration: configuration,
 	}

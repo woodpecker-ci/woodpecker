@@ -96,7 +96,7 @@ func RunCron(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, pl)
+	c.JSON(http.StatusOK, pl.ToAPIModel())
 }
 
 // PostCron

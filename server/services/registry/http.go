@@ -30,9 +30,9 @@ type httpExtension struct {
 }
 
 type requestStructure struct {
-	Repo     *model.Repo     `json:"repo"`
-	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc    *model.Netrc    `json:"netrc,omitempty"`
+	Repo     *model.Repo        `json:"repo"`
+	Pipeline *model.APIPipeline `json:"pipeline"`
+	Netrc    *model.Netrc       `json:"netrc,omitempty"`
 }
 
 type responseStructure struct {
@@ -55,7 +55,7 @@ func (h *httpExtension) RegistryListPipeline(ctx context.Context, repo *model.Re
 	response := new(responseStructure)
 	body := requestStructure{
 		Repo:     repo,
-		Pipeline: pipeline,
+		Pipeline: pipeline.ToAPIModel(),
 	}
 	if h.includeNetrc {
 		body.Netrc = netrc

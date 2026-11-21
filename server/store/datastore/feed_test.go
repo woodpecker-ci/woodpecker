@@ -48,17 +48,21 @@ func TestGetPipelineQueue(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 	pipeline1 := &model.Pipeline{
-		RepoID:  repo1.ID,
-		Status:  model.StatusPending,
-		Number:  1,
-		Event:   "push",
-		Commit:  "abc123",
-		Branch:  "main",
-		Ref:     "refs/heads/main",
-		Message: "Initial commit",
-		Author:  "joe",
-		Email:   "foo@bar.com",
-		Title:   "First pipeline",
+		RepoID: repo1.ID,
+		Status: model.StatusPending,
+		Number: 1,
+		Event:  "push",
+		Commit: &model.Commit{
+			SHA:     "abc123",
+			Message: "Initial commit",
+			Author: model.CommitAuthor{
+				Email: "foo@bar.com",
+			},
+		},
+		Branch: "main",
+		Ref:    "refs/heads/main",
+		Author: "joe",
+		Title:  "First pipeline",
 	}
 	assert.NoError(t, store.CreatePipeline(pipeline1))
 
@@ -77,9 +81,9 @@ func TestGetPipelineQueue(t *testing.T) {
 	assert.Equal(t, pipeline1.Branch, feedItem.Branch)
 	assert.Equal(t, pipeline1.Ref, feedItem.Ref)
 	assert.Equal(t, pipeline1.Title, feedItem.Title)
-	assert.Equal(t, pipeline1.Message, feedItem.Message)
+	assert.Equal(t, pipeline1.Commit.Message, feedItem.Commit.Message)
 	assert.Equal(t, pipeline1.Author, feedItem.Author)
-	assert.Equal(t, pipeline1.Email, feedItem.Email)
+	assert.Equal(t, pipeline1.Commit.Author.Email, feedItem.Commit.Author.Email)
 }
 
 func TestUserFeed(t *testing.T) {

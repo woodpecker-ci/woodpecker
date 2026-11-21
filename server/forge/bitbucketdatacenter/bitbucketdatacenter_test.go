@@ -209,9 +209,11 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		ID:       1,
-		Number:   42,
-		Commit:   "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		ID:     1,
+		Number: 42,
+		Commit: &model.Commit{
+			SHA: "3ce383490b3d90d79460c60f67ba2580acc6cc59",
+		},
 		Started:  1759825800,
 		Finished: 1759825883,
 		Branch:   "feature-branch",
@@ -294,7 +296,7 @@ func TestHook(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPush, pipeline.Event)
-		assert.Equal(t, "Update dependencies", pipeline.Message)
+		assert.Equal(t, "Update dependencies", pipeline.Commit.Message)
 		assert.Equal(t, []string{"go.mod", "go.sum", "renovate.json"}, pipeline.ChangedFiles)
 	})
 
@@ -364,17 +366,17 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 
 	t.Run("annotated tag points the pipeline to the tagged commit", func(t *testing.T) {
 		// for annotated tags Bitbucket sends the tag object SHA as ToHash
-		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventTag, Commit: tagObjectSHA}, tagObjectSHA, "")
+		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventTag, Commit: &model.Commit{SHA: tagObjectSHA}}, tagObjectSHA, "")
 		require.NoError(t, err)
-		assert.Equal(t, commitSHA, p.Commit)
+		assert.Equal(t, commitSHA, p.Commit.SHA)
 		assert.Equal(t, "https://bitbucket.example.com/projects/PRJ/repos/repo/commits/"+commitSHA, p.ForgeURL)
-		assert.Equal(t, "Release", p.Message)
+		assert.Equal(t, "Release", p.Commit.Message)
 	})
 
 	t.Run("push keeps its commit and url", func(t *testing.T) {
-		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventPush, Commit: tagObjectSHA, ForgeURL: "keep"}, tagObjectSHA, "")
+		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: tagObjectSHA}, ForgeURL: "keep"}, tagObjectSHA, "")
 		require.NoError(t, err)
-		assert.Equal(t, tagObjectSHA, p.Commit)
+		assert.Equal(t, tagObjectSHA, p.Commit.SHA)
 		assert.Equal(t, "keep", p.ForgeURL)
 	})
 }
@@ -539,7 +541,7 @@ func TestFileAndDir(t *testing.T) {
 
 	s := mock.NewMockServer(
 		mock.WithRequestMatchHandler(browse, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			assert.Equal(t, fakePipeline.Commit, r.URL.Query().Get("at"))
+			assert.Equal(t, fakePipeline.Commit.SHA, r.URL.Query().Get("at"))
 			switch r.URL.Path {
 			case "/api/latest/projects/PRJ/repos/repo/browse/.woodpecker/build.yaml":
 				writeJSON(t, w, bitbucket.FileContent{
@@ -618,6 +620,7 @@ func TestBranchHead(t *testing.T) {
 			}
 			writeJSON(t, w, bitbucket.BranchList{LastPage: true, Branches: branches})
 		})),
+		mock.WithRequestMatch(mock.GetCommit, bitbucket.Commit{ID: "abc", Message: "Fix the thing"}),
 	)
 	defer s.Close()
 
@@ -626,7 +629,7 @@ func TestBranchHead(t *testing.T) {
 
 	commit, err := c.BranchHead(t.Context(), fakeUser, repo, "main")
 	require.NoError(t, err)
-	assert.Equal(t, &model.Commit{SHA: "abc", ForgeURL: "https://bitbucket.example.com/projects/PRJ/repos/repo/commits/abc"}, commit)
+	assert.Equal(t, &model.Commit{SHA: "abc", Message: "Fix the thing", ForgeURL: "https://bitbucket.example.com/projects/PRJ/repos/repo/commits/abc"}, commit)
 
 	_, err = c.BranchHead(t.Context(), fakeUser, repo, "dev")
 	assert.ErrorContains(t, err, "no matching branches found")

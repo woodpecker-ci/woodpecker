@@ -59,6 +59,8 @@ var migrationTasks = []*xormigrate.Migration{
 	&replaceZeroForgeIDsInUsers,
 	&deduplicateLogEntries,
 	&drop024MigrationArtifacts,
+	&updatePipelineStructureCommit,
+	&moveManualPipelineMessage,
 }
 
 var allBeans = []any{

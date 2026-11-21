@@ -4930,13 +4930,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_email": {
+                    "description": "deprecated, use commit_pipeline.author.email instead",
                     "type": "string"
                 },
                 "branch": {
                     "type": "string"
                 },
                 "commit": {
+                    "description": "deprecated, use commit_pipeline.sha instead",
                     "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
@@ -4953,8 +4963,12 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
+                },
                 "message": {
-                    "description": "// Deprecated",
+                    "description": "deprecated, use commit_pipeline.message, tag_title (tag) or release.title (release) instead",
                     "type": "string"
                 },
                 "number": {
@@ -5188,6 +5202,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_email": {
+                    "description": "deprecated, use commit_pipeline.author.email instead",
                     "type": "string"
                 },
                 "branch": {
@@ -5203,7 +5218,16 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
+                    "description": "deprecated, use commit_pipeline.sha instead",
                     "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
@@ -5249,7 +5273,12 @@ const docTemplate = `{
                     "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
+                "manual_message": {
+                    "description": "custom message of a manual pipeline",
+                    "type": "string"
+                },
                 "message": {
+                    "description": "deprecated, use commit_pipeline.message, cron (cron), tag_title (tag) or release.title (release) instead",
                     "type": "string"
                 },
                 "number": {
@@ -5311,6 +5340,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "description": "deprecated, use commit_pipeline.timestamp instead",
                     "type": "integer"
                 },
                 "title": {
@@ -6456,6 +6486,37 @@ const docTemplate = `{
                 "RequireApprovalPullRequests",
                 "RequireApprovalAllEvents"
             ]
+        },
+        "model.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/model.CommitAuthor"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.CommitAuthor": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         },
         "model.ForgeType": {
             "type": "string",

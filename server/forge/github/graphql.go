@@ -98,7 +98,7 @@ func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Rep
 		"variables": map[string]string{
 			"owner":      r.Owner,
 			"name":       r.Name,
-			"expression": b.Commit + ":" + strings.TrimPrefix(path, "/"),
+			"expression": b.Commit.SHA + ":" + strings.TrimPrefix(path, "/"),
 		},
 	})
 	if err != nil {

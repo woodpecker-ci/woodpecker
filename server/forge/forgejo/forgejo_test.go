@@ -191,7 +191,9 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{
+			SHA: "9ecad50",
+		},
 	}
 
 	fakeWorkflow = &model.Workflow{
@@ -338,7 +340,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
-		assert.Equal(t, "abc123", pipeline.Commit)
+		assert.Equal(t, "abc123", pipeline.Commit.SHA)
 	})
 
 	t.Run("tag events get the commit of their tag, not the annotated tag object", func(t *testing.T) {
@@ -351,7 +353,7 @@ func TestHookLoadsTagCommit(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
-		assert.Equal(t, "abc123", pipeline.Commit)
+		assert.Equal(t, "abc123", pipeline.Commit.SHA)
 	})
 
 	t.Run("missing tag fails the hook", func(t *testing.T) {
@@ -491,7 +493,7 @@ func TestFileAndDir(t *testing.T) {
 	})
 	user := &model.User{AccessToken: "token"}
 	repo := &model.Repo{Owner: "owner", Name: "repo"}
-	pipeline := &model.Pipeline{Commit: "abc"}
+	pipeline := &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}
 
 	_, err := g.File(t.Context(), user, repo, pipeline, ".woodpecker.yaml")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})

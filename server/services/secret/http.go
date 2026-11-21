@@ -30,9 +30,9 @@ type httpExtension struct {
 }
 
 type secretRequestStructure struct {
-	Repo     *model.Repo     `json:"repo"`
-	Pipeline *model.Pipeline `json:"pipeline"`
-	Netrc    *model.Netrc    `json:"netrc,omitempty"`
+	Repo     *model.Repo        `json:"repo"`
+	Pipeline *model.APIPipeline `json:"pipeline"`
+	Netrc    *model.Netrc       `json:"netrc,omitempty"`
 }
 
 type secretResponseStructure struct {
@@ -48,7 +48,7 @@ func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) *httpExte
 func (h *httpExtension) SecretListPipeline(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, netrc *model.Netrc) ([]*model.Secret, error) {
 	body := secretRequestStructure{
 		Repo:     repo,
-		Pipeline: pipeline,
+		Pipeline: pipeline.ToAPIModel(),
 	}
 	if h.includeNetrc {
 		body.Netrc = netrc

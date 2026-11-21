@@ -62,8 +62,11 @@ func TestCreatePipeline(t *testing.T) {
 	})
 	assert.NoError(t, err)
 	assert.EqualValues(t, &model.Pipeline{
-		Branch:   "default",
-		Commit:   "sha1",
+		Branch: "default",
+		Commit: &model.Commit{
+			ForgeURL: "https://example.com/sha1",
+			SHA:      "sha1",
+		},
 		Event:    "cron",
 		ForgeURL: "https://example.com/sha1",
 		Ref:      "refs/heads/default",
