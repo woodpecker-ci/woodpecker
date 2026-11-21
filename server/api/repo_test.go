@@ -34,6 +34,7 @@ import (
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
@@ -399,6 +400,146 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRepairRepoKeepsVisibility(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+	})
+
+	for _, all := range []bool{false, true} {
+		t.Run("all="+strconv.FormatBool(all), func(t *testing.T) {
+			s := newTestStore(t)
+			user := &model.User{Login: "owner", ForgeID: 7}
+			require.NoError(t, s.CreateUser(user))
+			repo := &model.Repo{
+				Owner: "owner", Name: "repo", FullName: "owner/repo", ForgeID: user.ForgeID, ForgeRemoteID: "123",
+				UserID: user.ID, IsActive: true, Visibility: model.VisibilityPrivate,
+			}
+			require.NoError(t, s.CreateRepo(repo))
+
+			driver := moveRepoForge(t)
+			driver.On("Repo", mock.Anything, mock.Anything, repo.ForgeRemoteID, repo.Owner, repo.Name).Return(&model.Repo{
+				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName, ForgeRemoteID: repo.ForgeRemoteID,
+				Visibility: model.VisibilityPublic, Perm: &model.Perm{Admin: true},
+			}, nil)
+			driver.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			driver.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+			tc := newTestContext(t, s)
+			withRepo(repo, &model.Perm{Admin: true})(tc)
+			if all {
+				RepairAllRepos(tc.Ctx)
+			} else {
+				RepairRepo(tc.Ctx)
+			}
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+			stored, err := s.GetRepo(repo.ID)
+			require.NoError(t, err)
+			assert.False(t, stored.VisibilitySync)
+			assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
+		})
+	}
+}
+
+func TestPostRepoVisibilitySync(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	originalAllowlist := server.Config.Permissions.OwnersAllowlist
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+		server.Config.Permissions.OwnersAllowlist = originalAllowlist
+	})
+	server.Config.Server.WebhookHost = "https://woodpecker.example"
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(nil)
+
+	activate := func(t *testing.T, s store.Store, user *model.User, remoteID model.ForgeRemoteID) {
+		t.Helper()
+		mgr := manager_mocks.NewMockManager(t)
+		driver := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromUser", user).Return(driver, nil)
+		server.Config.Services.Manager = mgr
+		driver.On("Repo", mock.Anything, user, remoteID, "", "").Return(&model.Repo{
+			ForgeRemoteID: remoteID, Owner: "acme", Name: "rocket", FullName: "acme/rocket",
+			Visibility: model.VisibilityPrivate, IsSCMPrivate: true, Perm: &model.Perm{Admin: true},
+		}, nil)
+		driver.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos?forge_remote_id="+string(remoteID), nil)
+		PostRepo(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+	}
+
+	t.Run("new repos sync their visibility", func(t *testing.T) {
+		s := newTestStore(t)
+		user := &model.User{Login: "alice", ForgeID: 1}
+		require.NoError(t, s.CreateUser(user))
+		require.NoError(t, s.OrgCreate(&model.Org{Name: "acme", ForgeID: 1}))
+
+		activate(t, s, user, "42")
+
+		stored, err := s.GetRepoForgeID(1, "42")
+		require.NoError(t, err)
+		assert.True(t, stored.VisibilitySync)
+		assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
+	})
+
+	t.Run("re-activation keeps the visibility settings", func(t *testing.T) {
+		for _, sync := range []bool{false, true} {
+			s := newTestStore(t)
+			user := &model.User{Login: "alice", ForgeID: 1}
+			require.NoError(t, s.CreateUser(user))
+			require.NoError(t, s.OrgCreate(&model.Org{Name: "acme", ForgeID: 1}))
+			require.NoError(t, s.CreateRepo(&model.Repo{
+				ForgeID: 1, ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket",
+				Visibility: model.VisibilityInternal, VisibilitySync: sync, WebhookSecret: "secret",
+			}))
+
+			activate(t, s, user, "42")
+
+			stored, err := s.GetRepoForgeID(1, "42")
+			require.NoError(t, err)
+			assert.Equal(t, sync, stored.VisibilitySync)
+			assert.Equal(t, model.VisibilityInternal, stored.Visibility)
+			assert.True(t, stored.IsSCMPrivate)
+		}
+	})
+}
+
+func TestPatchRepoVisibilitySync(t *testing.T) {
+	s := newTestStore(t)
+	user := &model.User{Login: "alice", ForgeID: 1}
+	require.NoError(t, s.CreateUser(user))
+	repo := &model.Repo{ForgeID: 1, ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket", Visibility: model.VisibilityPrivate}
+	require.NoError(t, s.CreateRepo(repo))
+
+	patch := func(t *testing.T, in *model.RepoPatch) *model.Repo {
+		t.Helper()
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		withRequest(http.MethodPatch, in)(tc)
+		PatchRepo(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		return stored
+	}
+
+	stored := patch(t, &model.RepoPatch{VisibilitySync: new(true), Visibility: new(string(model.VisibilityPublic))})
+	assert.True(t, stored.VisibilitySync)
+	assert.Equal(t, model.VisibilityPrivate, stored.Visibility, "the sync overwrites the visibility anyway")
+
+	stored = patch(t, &model.RepoPatch{VisibilitySync: new(false), Visibility: new(string(model.VisibilityPublic))})
+	assert.False(t, stored.VisibilitySync)
+	assert.Equal(t, model.VisibilityPublic, stored.Visibility)
 }
 
 func TestDeactivateRepoDropsCloneSecret(t *testing.T) {

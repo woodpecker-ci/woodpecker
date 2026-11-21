@@ -99,7 +99,16 @@
       </InputField>
 
       <InputField docs-url="docs/usage/project-settings#project-visibility" :label="$t('repo.visibility.visibility')">
-        <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
+        <Checkbox
+          v-model="repoSettings.visibility_sync"
+          :label="$t('repo.visibility.sync.sync')"
+          :description="$t('repo.visibility.sync.desc')"
+        />
+        <RadioField
+          v-model="repoSettings.visibility"
+          :options="projectVisibilityOptions"
+          :disabled="repoSettings.visibility_sync"
+        />
       </InputField>
 
       <InputField
@@ -209,6 +218,7 @@ function loadRepoSettings() {
     config_file: repo.value.config_file,
     timeout: repo.value.timeout,
     visibility: repo.value.visibility,
+    visibility_sync: repo.value.visibility_sync,
     require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
     approval_allowed_users: repo.value.approval_allowed_users || [],
