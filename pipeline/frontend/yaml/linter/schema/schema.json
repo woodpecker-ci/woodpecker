@@ -397,10 +397,7 @@
           "type": "boolean"
         },
         "failure": {
-          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
-          "type": "string",
-          "enum": ["fail", "ignore", "cancel"],
-          "default": "fail"
+          "$ref": "#/definitions/step_failure"
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
@@ -458,10 +455,7 @@
           "type": "boolean"
         },
         "failure": {
-          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
-          "type": "string",
-          "enum": ["fail", "ignore"],
-          "default": "fail"
+          "$ref": "#/definitions/step_failure"
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
@@ -715,6 +709,12 @@
     "step_directory": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#directory",
       "type": "string"
+    },
+    "step_failure": {
+      "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+      "type": "string",
+      "enum": ["fail", "ignore", "cancel"],
+      "default": "fail"
     },
     "step_backend_options": {
       "description": "Advanced options for the different agent backends. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#backend_options",

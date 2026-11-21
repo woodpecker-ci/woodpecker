@@ -16,8 +16,10 @@ package bitbucket
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
+	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -34,6 +36,18 @@ const (
 	stateClosed      = "MERGED"
 	stateDeclined    = "DECLINED"
 )
+
+var errIncompleteHook = errors.New("incomplete webhook payload")
+
+// validateRepo rejects a payload whose repository is missing the fields the
+// conversion needs. The full name carries the owner and the repository name,
+// so without a separator there is nothing to split.
+func validateRepo(repo *internal.Repo) error {
+	if !strings.Contains(repo.FullName, "/") {
+		return errIncompleteHook
+	}
+	return nil
+}
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns Pull Request,
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -69,6 +83,9 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 		if change.New.Target.Hash == "" {
 			continue
 		}
+		if err := validateRepo(&hook.Repo); err != nil {
+			return nil, nil, err
+		}
 		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
 	}
 	return nil, nil, &types.ErrIgnoreEvent{Event: "push", Reason: "BB reports no Changes"}
@@ -80,6 +97,9 @@ func parsePullHook(payload []byte) (*internal.PullRequestHook, *model.Repo, *mod
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
+		return nil, nil, nil, err
+	}
+	if err := validateRepo(&hook.Repo); err != nil {
 		return nil, nil, nil, err
 	}
 

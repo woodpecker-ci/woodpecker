@@ -17,12 +17,11 @@ package forgejo
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v3"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -184,6 +183,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels:    convertLabels(hook.PullRequest.Labels),
 		PullRequestMilestone: convertMilestone(hook.PullRequest.Milestone),
+		PullRequestDraft:     hook.PullRequest.Draft,
 		FromFork:             hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
@@ -225,22 +225,19 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 }
 
 // helper function that parses a push hook from a read closer.
-func parsePush(r io.Reader) (*pushHook, error) {
+func parsePush(b []byte) (*pushHook, error) {
 	push := new(pushHook)
-	err := json.NewDecoder(r).Decode(push)
-	return push, err
+	return push, json.Unmarshal(b, push)
 }
 
-func parsePullRequest(r io.Reader) (*pullRequestHook, error) {
+func parsePullRequest(b []byte) (*pullRequestHook, error) {
 	pr := new(pullRequestHook)
-	err := json.NewDecoder(r).Decode(pr)
-	return pr, err
+	return pr, json.Unmarshal(b, pr)
 }
 
-func parseRelease(r io.Reader) (*releaseHook, error) {
+func parseRelease(b []byte) (*releaseHook, error) {
 	pr := new(releaseHook)
-	err := json.NewDecoder(r).Decode(pr)
-	return pr, err
+	return pr, json.Unmarshal(b, pr)
 }
 
 // fixMalformedAvatar is a helper function that fixes an avatar url if malformed

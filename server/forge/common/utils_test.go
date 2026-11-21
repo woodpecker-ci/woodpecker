@@ -210,3 +210,25 @@ func TestRepoUserForgeID(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestHostFromURL(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		url  string
+		want string
+	}{
+		{name: "root url", url: "https://git.example.com", want: "git.example.com"},
+		{name: "path prefix is not part of the host", url: "https://example.com/gitea", want: "example.com"},
+		{name: "port is kept", url: "http://forgejo.internal:3000", want: "forgejo.internal:3000"},
+		{name: "empty url", url: "", want: ""},
+		{name: "unparsable url", url: "://bad", want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, common.HostFromURL(tt.url))
+		})
+	}
+}

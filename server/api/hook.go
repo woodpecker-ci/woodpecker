@@ -117,8 +117,13 @@ func PostHook(c *gin.Context) {
 	// 2. Parse the webhook data
 	//
 
-	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request)
+	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request, repo.WebhookSecret)
 	if err != nil {
+		if errors.Is(err, types.ErrInvalidWebhookSignature) {
+			log.Warn().Str("repo", repo.FullName).Msg("ignoring hook: invalid webhook signature")
+			c.String(http.StatusForbidden, "invalid webhook signature")
+			return
+		}
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
 			msg := fmt.Sprintf("forge driver: %s", err)
 			log.Debug().Err(err).Msg(msg)

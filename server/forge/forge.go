@@ -24,6 +24,7 @@ import (
 	"context"
 	"net/http"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -59,9 +60,11 @@ type Forge interface {
 	// Must be unique and constant across all implementations.
 	Name() string
 
-	// URL returns the root URL of the forge instance.
-	// Examples: "https://github.com", "https://gitlab.example.com"
-	URL() string
+	// Close releases resources held by this forge instance.
+	Close() error
+
+	// Config returns the metadata of the forge instance.
+	Config() metadata.Forge
 
 	// Login authenticates a user via OAuth2.
 	//
@@ -152,18 +155,20 @@ type Forge interface {
 	// Webhook Processing Flow:
 	//  1. HTTP request arrives at /api/hook with forge-specific format
 	//  2. Webhook token verified against repo.WebhookSecret
-	//  3. Hook() parses webhook and returns (Repo, Pipeline, error)
+	//  3. Hook() verifies the body signature with the secret if the forge signs it,
+	//     then parses webhook and returns (Repo, Pipeline, error)
 	//
 	// Return Semantics:
 	// - (repo, pipeline, nil): Execute pipeline for this event
 	// - (repo, nil, nil): Valid webhook, no pipeline should run
 	// - (nil, nil, types.ErrIgnoreEvent): Event ignored (logged)
+	// - (nil, nil, types.ErrInvalidWebhookSignature): Body signature does not match the secret
 	// - (nil, nil, error): Invalid webhook or parsing error
 	//
 	// Must verify webhook signature to prevent spoofing.
 	// Should return types.ErrIgnoreEvent for non-pipeline events
 	// (e.g. repository settings changed).
-	Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error)
+	Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error)
 
 	// OrgMembership checks if user is member of organization and their permission.
 	// Should return (Member: false, Admin: false) if not a member.

@@ -17,22 +17,58 @@ package addon
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/rpc"
 	"os/exec"
+	"sync"
 
 	"github.com/hashicorp/go-plugin"
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
-// make sure RPC implements forge.Forge.
-var _ forge.Forge = new(RPC)
+// make sure rpcForge implements forge.Forge.
+var _ forge.Forge = new(rpcForge)
+
+var ErrAddonClosed = errors.New("forge addon is closed")
+
+// ErrAddon is an error returned by the addon itself, not by the addon system.
+// Only the message of the error crosses the RPC boundary. Err is set to the
+// error the server checks for, if the addon sent its kind.
+type ErrAddon struct {
+	Message string
+	Err     error
+}
+
+func (err *ErrAddon) Error() string {
+	return err.Message
+}
+
+func (err *ErrAddon) Unwrap() error {
+	return err.Err
+}
+
+func (*ErrAddon) Is(target error) bool {
+	_, ok := target.(*ErrAddon)
+	return ok
+}
+
+// addonError turns an error returned by the addon into an ErrAddon and keeps
+// errors of the addon system as they are.
+func addonError(err error) error {
+	if serverErr, ok := errors.AsType[rpc.ServerError](err); ok {
+		return &ErrAddon{Message: string(serverErr)}
+	}
+	return err
+}
 
 func Load(file string) (forge.Forge, error) {
 	client := plugin.NewClient(&plugin.ClientConfig{
@@ -45,7 +81,12 @@ func Load(file string) (forge.Forge, error) {
 			Logger: log.With().Str("addon", file).Logger(),
 		},
 	})
-	// TODO: defer client.Kill()
+	success := false
+	defer func() {
+		if !success {
+			client.Kill()
+		}
+	}()
 
 	rpcClient, err := client.Client()
 	if err != nil {
@@ -57,41 +98,80 @@ func Load(file string) (forge.Forge, error) {
 		return nil, err
 	}
 
-	extension, _ := raw.(forge.Forge)
+	extension, ok := raw.(*rpcForge)
+	if !ok {
+		return nil, fmt.Errorf("invalid forge addon client %T", raw)
+	}
+	extension.plugin = client
+	success = true
 	return extension, nil
 }
 
-type RPC struct {
+// rpcForge is the forge.Forge of one addon process.
+type rpcForge struct {
+	mu     sync.RWMutex
 	client *rpc.Client
+	plugin *plugin.Client
+	closed bool
 }
 
-func (g *RPC) Name() string {
+func (g *rpcForge) call(method string, args, reply any) error {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	if g.closed {
+		return ErrAddonClosed
+	}
+	return g.client.Call(method, args, reply)
+}
+
+func (g *rpcForge) Close() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if g.closed {
+		return nil
+	}
+	g.closed = true
+
+	var resp []byte
+	err := g.client.Call("Plugin.Close", []byte{}, &resp)
+	if g.plugin != nil {
+		g.plugin.Kill()
+	}
+	return addonError(err)
+}
+
+func (g *rpcForge) Name() string {
 	var resp string
-	err := g.client.Call("Plugin.Name", []byte{}, &resp)
+	err := g.call("Plugin.Name", []byte{}, &resp)
 	if err != nil {
 		log.Error().Err(err).Msg("addon Plugin.Name call failed")
 	}
 	return resp
 }
 
-func (g *RPC) URL() string {
-	var resp string
-	err := g.client.Call("Plugin.URL", []byte{}, &resp)
-	if err != nil {
-		log.Error().Err(err).Msg("addon Plugin.URL call failed")
+// Config returns the metadata of the configured forge.
+func (g *rpcForge) Config() metadata.Forge {
+	var config metadata.Forge
+	var jsonResp []byte
+	err := g.call("Plugin.Config", []byte{}, &jsonResp)
+	if err == nil {
+		err = json.Unmarshal(jsonResp, &config)
 	}
-	return resp
+	if err != nil {
+		log.Error().Err(err).Msg("addon Plugin.Config call failed")
+	}
+	return config
 }
 
-func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, string, error) {
+func (g *rpcForge) Login(_ context.Context, r *types.OAuthRequest) (*model.User, string, error) {
 	args, err := json.Marshal(r)
 	if err != nil {
 		return nil, "", err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Login", args, &jsonResp)
+	err = g.call("Plugin.Login", args, &jsonResp)
 	if err != nil {
-		return nil, "", err
+		return nil, "", addonError(err)
 	}
 
 	var resp responseLogin
@@ -103,7 +183,7 @@ func (g *RPC) Login(_ context.Context, r *types.OAuthRequest) (*model.User, stri
 	return resp.User.asModel(), resp.RedirectURL, nil
 }
 
-func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
+func (g *rpcForge) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Team, error) {
 	args, err := json.Marshal(&argumentsTeams{
 		U: modelUserFromModel(u),
 		P: p,
@@ -112,16 +192,16 @@ func (g *RPC) Teams(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Teams", args, &jsonResp)
+	err = g.call("Plugin.Teams", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp []*model.Team
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
+func (g *rpcForge) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
 	args, err := json.Marshal(&argumentsRepo{
 		U:        modelUserFromModel(u),
 		RemoteID: remoteID,
@@ -132,9 +212,9 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Repo", args, &jsonResp)
+	err = g.call("Plugin.Repo", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp modelRepo
@@ -145,7 +225,7 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 	return resp.asModel(), nil
 }
 
-func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
+func (g *rpcForge) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*model.Repo, error) {
 	args, err := json.Marshal(&argumentsRepos{
 		U: modelUserFromModel(u),
 		P: p,
@@ -154,9 +234,9 @@ func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Repos", args, &jsonResp)
+	err = g.call("Plugin.Repos", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 
 	var resp []*modelRepo
@@ -171,7 +251,7 @@ func (g *RPC) Repos(_ context.Context, u *model.User, p *model.ListOptions) ([]*
 	return modelRepos, nil
 }
 
-func (g *RPC) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
+func (g *rpcForge) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
 	args, err := json.Marshal(&argumentsFileDir{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -182,10 +262,12 @@ func (g *RPC) File(_ context.Context, u *model.User, r *model.Repo, b *model.Pip
 		return nil, err
 	}
 	var resp []byte
-	return resp, g.client.Call("Plugin.File", args, &resp)
+	return resp, addonError(
+		g.call("Plugin.File", args, &resp),
+	)
 }
 
-func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
+func (g *rpcForge) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*types.FileMeta, error) {
 	args, err := json.Marshal(&argumentsFileDir{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -196,15 +278,15 @@ func (g *RPC) Dir(_ context.Context, u *model.User, r *model.Repo, b *model.Pipe
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Dir", args, &jsonResp)
+	err = g.call("Plugin.Dir", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []*types.FileMeta
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Status(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error {
+func (g *rpcForge) Status(_ context.Context, u *model.User, r *model.Repo, b *model.Pipeline, p *model.Workflow) error {
 	args, err := json.Marshal(&argumentsStatus{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -215,10 +297,12 @@ func (g *RPC) Status(_ context.Context, u *model.User, r *model.Repo, b *model.P
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Status", args, &jsonResp)
+	return addonError(
+		g.call("Plugin.Status", args, &jsonResp),
+	)
 }
 
-func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
+func (g *rpcForge) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 	args, err := json.Marshal(&argumentsNetrc{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -227,15 +311,15 @@ func (g *RPC) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Netrc", args, &jsonResp)
+	err = g.call("Plugin.Netrc", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Netrc
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link string) error {
+func (g *rpcForge) Activate(_ context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
 		U:    modelUserFromModel(u),
 		R:    modelRepoFromModel(r),
@@ -245,10 +329,12 @@ func (g *RPC) Activate(_ context.Context, u *model.User, r *model.Repo, link str
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Activate", args, &jsonResp)
+	return addonError(
+		g.call("Plugin.Activate", args, &jsonResp),
+	)
 }
 
-func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link string) error {
+func (g *rpcForge) Deactivate(_ context.Context, u *model.User, r *model.Repo, link string) error {
 	args, err := json.Marshal(&argumentsActivateDeactivate{
 		U:    modelUserFromModel(u),
 		R:    modelRepoFromModel(r),
@@ -258,10 +344,12 @@ func (g *RPC) Deactivate(_ context.Context, u *model.User, r *model.Repo, link s
 		return err
 	}
 	var jsonResp []byte
-	return g.client.Call("Plugin.Deactivate", args, &jsonResp)
+	return addonError(
+		g.call("Plugin.Deactivate", args, &jsonResp),
+	)
 }
 
-func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
+func (g *rpcForge) Branches(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -271,15 +359,15 @@ func (g *RPC) Branches(_ context.Context, u *model.User, r *model.Repo, p *model
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Branches", args, &jsonResp)
+	err = g.call("Plugin.Branches", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []string
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
+func (g *rpcForge) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	args, err := json.Marshal(&argumentsBranchHead{
 		U:      modelUserFromModel(u),
 		R:      modelRepoFromModel(r),
@@ -289,15 +377,15 @@ func (g *RPC) BranchHead(_ context.Context, u *model.User, r *model.Repo, branch
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.BranchHead", args, &jsonResp)
+	err = g.call("Plugin.BranchHead", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Commit
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
+func (g *rpcForge) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
 	args, err := json.Marshal(&argumentsBranchesPullRequests{
 		U: modelUserFromModel(u),
 		R: modelRepoFromModel(r),
@@ -307,15 +395,15 @@ func (g *RPC) PullRequests(_ context.Context, u *model.User, r *model.Repo, p *m
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.PullRequests", args, &jsonResp)
+	err = g.call("Plugin.PullRequests", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp []*model.PullRequest
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *rpcForge) Hook(_ context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, nil, err
@@ -326,24 +414,28 @@ func (g *RPC) Hook(_ context.Context, r *http.Request) (*model.Repo, *model.Pipe
 		Header: r.Header,
 		Form:   r.Form,
 		Body:   body,
+		Secret: secret,
 	})
 	if err != nil {
 		return nil, nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Hook", args, &jsonResp)
+	err = g.call("Plugin.Hook", args, &jsonResp)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, addonError(err)
 	}
 	var resp responseHook
 	err = json.Unmarshal(jsonResp, &resp)
 	if err != nil {
 		return nil, nil, err
 	}
+	if resp.ErrorKind != "" {
+		return nil, nil, decodeErrorKinds(resp.ErrorKind, resp.ErrorMessage)
+	}
 	return resp.Repo.asModel(), resp.Pipeline, nil
 }
 
-func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*model.OrgPerm, error) {
+func (g *rpcForge) OrgMembership(_ context.Context, u *model.User, org string) (*model.OrgPerm, error) {
 	args, err := json.Marshal(&argumentsOrgMembershipOrg{
 		U:   modelUserFromModel(u),
 		Org: org,
@@ -352,15 +444,15 @@ func (g *RPC) OrgMembership(_ context.Context, u *model.User, org string) (*mode
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.OrgMembership", args, &jsonResp)
+	err = g.call("Plugin.OrgMembership", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.OrgPerm
 	return resp, json.Unmarshal(jsonResp, &resp)
 }
 
-func (g *RPC) Org(_ context.Context, u *model.User, org string) (*model.Org, error) {
+func (g *rpcForge) Org(_ context.Context, u *model.User, org string) (*model.Org, error) {
 	args, err := json.Marshal(&argumentsOrgMembershipOrg{
 		U:   modelUserFromModel(u),
 		Org: org,
@@ -369,9 +461,9 @@ func (g *RPC) Org(_ context.Context, u *model.User, org string) (*model.Org, err
 		return nil, err
 	}
 	var jsonResp []byte
-	err = g.client.Call("Plugin.Org", args, &jsonResp)
+	err = g.call("Plugin.Org", args, &jsonResp)
 	if err != nil {
-		return nil, err
+		return nil, addonError(err)
 	}
 	var resp *model.Org
 	return resp, json.Unmarshal(jsonResp, &resp)

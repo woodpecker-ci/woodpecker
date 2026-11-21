@@ -78,7 +78,7 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		// matrix axes
 		axes, err := matrix.Parse(y.Data)
 		if err != nil {
-			return nil, err
+			return nil, compilerError(err, SanitizePath(y.Name))
 		}
 		if len(axes) == 0 {
 			axes = append(axes, matrix.Axis{})
@@ -113,6 +113,14 @@ func (b *PipelineBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 	items = filterMissingDependencies(items)
 
+	// workflows in a cycle would wait for each other in the queue forever
+	if cycle := findDependencyCycle(items); cycle != nil {
+		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeCompiler,
+			Message: fmt.Sprintf("workflow dependency cycle: %s", strings.Join(cycle, " -> ")),
+		})
+	}
+
 	if b.SelectedWorkflow != "" && !ContainsItemWithName(selected, items) {
 		return nil, multierr.Append(errorsAndWarnings, &pipeline_errors.PipelineError{
 			Type:    pipeline_errors.PipelineErrorTypeGeneric,
@@ -130,13 +138,13 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
 	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
+		return nil, compilerError(err, workflow.Name)
 	}
 
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		return nil, compilerError(err, workflow.Name)
 	}
 
 	// lint pipeline
@@ -180,7 +188,7 @@ func (b *PipelineBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axi
 	if !b.ListOnly {
 		ir, err = b.toInternalRepresentation(parsed, axis, workflowMetadata, workflow.ID)
 		if err != nil {
-			return nil, multierr.Append(errorsAndWarnings, err)
+			return nil, multierr.Append(errorsAndWarnings, compilerError(err, workflow.Name))
 		}
 
 		if len(ir.Stages) == 0 {

@@ -17,6 +17,7 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -156,6 +157,7 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 	var (
 		entries  []*rpc.LogEntry
 		stepUUID string
+		errs     []error
 	)
 
 	write := func() error {
@@ -177,16 +179,20 @@ func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto
 			Type:     int(reqEntry.GetType()),
 		}
 		if entry.StepUUID != stepUUID {
-			_ = write()
+			if err := write(); err != nil {
+				errs = append(errs, err)
+			}
 			stepUUID = entry.StepUUID
 			entries = entries[:0]
 		}
 		entries = append(entries, entry)
 	}
 
-	res := new(proto.Empty)
-	err := write()
-	return res, err
+	if err := write(); err != nil {
+		errs = append(errs, err)
+	}
+
+	return new(proto.Empty), errors.Join(errs...)
 }
 
 // RegisterAgent register our agent to the server.

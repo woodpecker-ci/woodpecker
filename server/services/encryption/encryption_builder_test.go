@@ -173,6 +173,40 @@ func TestGetServiceNoKeysIsError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestBuildWhileNotEnabled(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{name: "without a key", args: []string{"woodpecker"}},
+		{name: "disable flag with a key", args: []string{"woodpecker", "--encryption-raw-key", "secret", "--encryption-disable-flag"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			// the strict mock fails on any write, so nothing gets encrypted
+			s := store_mocks.NewMockStore(t)
+			s.On("ServerConfigGet", ciphertextSampleConfigKey).Return("", store_types.ErrRecordNotExist)
+			client := &fakeClient{}
+			cmd := &cli.Command{
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: rawKeyConfigFlag},
+					&cli.StringFlag{Name: tinkKeysetFilepathConfigFlag},
+					&cli.BoolFlag{Name: disableEncryptionConfigFlag},
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					return Encryption(c, s).WithClient(client).Build()
+				},
+			}
+			require.NoError(t, cmd.Run(t.Context(), tt.args))
+			assert.IsType(t, &noEncryption{}, client.service)
+		})
+	}
+}
+
 func TestBuilderIsEnabled(t *testing.T) {
 	t.Parallel()
 

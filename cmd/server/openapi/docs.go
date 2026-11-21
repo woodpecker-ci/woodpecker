@@ -3116,7 +3116,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "the options for the pipeline to run",
-                        "name": "options",
+                        "name": "pipelineOptions",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -5004,6 +5004,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "name": {
+                    "type": "string"
+                },
                 "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
@@ -5038,6 +5041,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "oauth_client_secret": {
                     "type": "string"
@@ -5382,27 +5388,30 @@ const docTemplate = `{
                     }
                 },
                 "stats": {
-                    "type": "object",
-                    "properties": {
-                        "pending_count": {
-                            "type": "integer"
-                        },
-                        "running_count": {
-                            "type": "integer"
-                        },
-                        "waiting_on_deps_count": {
-                            "type": "integer"
-                        },
-                        "worker_count": {
-                            "type": "integer"
-                        }
-                    }
+                    "$ref": "#/definitions/QueueStats"
                 },
                 "waiting_on_deps": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.QueueTask"
                     }
+                }
+            }
+        },
+        "QueueStats": {
+            "type": "object",
+            "properties": {
+                "pending_count": {
+                    "type": "integer"
+                },
+                "running_count": {
+                    "type": "integer"
+                },
+                "waiting_on_deps_count": {
+                    "type": "integer"
+                },
+                "worker_count": {
+                    "type": "integer"
                 }
             }
         },
@@ -6211,6 +6220,9 @@ const docTemplate = `{
         "metadata.Forge": {
             "type": "object",
             "properties": {
+                "host": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 },

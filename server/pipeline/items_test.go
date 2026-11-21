@@ -25,6 +25,7 @@ import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types" //nolint:depguard // needed to construct builder.Item.Config in tests; will be resolved when backend-specific fields move to BackendOptions (see enrichPipelineItemSteps TODO)
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -139,8 +140,7 @@ func TestCreatePipelineItemsKeepsPipelineOnSaveError(t *testing.T) {
 
 	forge := forge_mocks.NewMockForge(t)
 	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
-	forge.On("Name").Return("github")
-	forge.On("URL").Return("https://github.com")
+	forge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)
@@ -210,8 +210,7 @@ steps:
 		Login:    "user",
 		Password: "password",
 	}, nil)
-	forge.On("Name").Return("github")
-	forge.On("URL").Return("https://github.com")
+	forge.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"})
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, pipeline.Number).Return(&model.Pipeline{}, nil)
@@ -261,8 +260,8 @@ func TestParsePipelineRecoversPanic(t *testing.T) {
 
 	forge := forge_mocks.NewMockForge(t)
 	forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
-	// Name is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
-	forge.On("Name").Panic("injected test panic")
+	// Config is first called by GetWorkflowMetadata inside PipelineBuilder.Build.
+	forge.On("Config").Panic("injected test panic")
 
 	store := store_mocks.NewMockStore(t)
 	store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil)

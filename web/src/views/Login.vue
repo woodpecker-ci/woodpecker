@@ -59,7 +59,9 @@ import Icon from '~/components/atomic/Icon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import { useWPTitle } from '~/compositions/useWPTitle';
+import { forgeDisplayName } from '~/lib/forgeDisplayName';
 import type { Forge } from '~/lib/api/types';
+import { httpUrl } from '~/lib/utils';
 
 const route = useRoute();
 const { authenticate } = useAuthentication();
@@ -79,11 +81,7 @@ const authErrorMessages = {
 
 const errorMessage = ref<string>();
 const errorDescription = ref<string>(route.query.error_description as string);
-// only link http(s) URIs, anything else (e.g. javascript:) could run code on click
-const errorUri = computed(() => {
-  const uri = route.query.error_uri as string | undefined;
-  return uri?.startsWith('http') ? uri : undefined;
-});
+const errorUri = computed(() => httpUrl(route.query.error_uri as string | undefined));
 
 onMounted(async () => {
   forges.value = (await apiClient.getForges()) ?? [];
@@ -100,18 +98,16 @@ const failedForgeFavicons = ref(new Set<number>()); // Track which favicons fail
 
 const forgesWithNameAndFavicon = computed(() =>
   forges.value.map((forge) => {
-    let name = forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
     let favicon: null | string = null;
 
-    if (forge.url || forge.oauth_host) {
-      const url = new URL(forge.oauth_host || forge.url);
-      name = url.hostname;
+    if ((forge.url !== undefined && forge.url !== '') || (forge.oauth_host !== undefined && forge.oauth_host !== '')) {
+      const url = new URL(forge.oauth_host ?? forge.url);
       favicon = `${url.origin}/favicon.ico`;
     }
 
     return {
       ...forge,
-      name,
+      name: forgeDisplayName(forge),
       favicon,
     };
   }),
