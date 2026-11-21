@@ -320,7 +320,8 @@ func TestWithOptions(t *testing.T) {
 	t.Parallel()
 	engine := dummy.New()
 	tracer := newTestTracer(t)
-	ctx := t.Context()
+	type ctxKey struct{}
+	ctx := context.WithValue(t.Context(), ctxKey{}, "parent")
 	desc := map[string]string{"repo": "test"}
 
 	r := New(
@@ -335,7 +336,8 @@ func TestWithOptions(t *testing.T) {
 
 	assert.Equal(t, engine, r.engine)
 	assert.Equal(t, tracer, r.tracer)
-	assert.Equal(t, ctx, r.ctx)
+	// r.ctx is a cancelable child of the given context (used by the cancel signal).
+	assert.Equal(t, "parent", r.ctx.Value(ctxKey{}))
 	assert.Equal(t, "custom-uuid", r.taskUUID)
 	assert.Equal(t, "test", r.description["repo"])
 }

@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 
 	"codeberg.org/6543/xyaml/v2"
 	"github.com/rs/zerolog/log"
@@ -323,14 +324,25 @@ func convertPathForWindows(path string) string {
 
 // newLogger builds a logger that masks the pipeline's secret values in the
 // streamed step output by wrapping the line writer in a shared secrets writer.
+// It keeps one writer per step, so line numbers continue when the logger is
+// called again for the same step (e.g. after a restart signal).
 func newLogger(config *backend_types.Config) logging.Logger {
 	var secrets []string
 	for _, s := range config.Secrets {
 		secrets = append(secrets, s.Value)
 	}
+	var (
+		writersMu sync.Mutex
+		writers   = make(map[string]io.Writer)
+	)
 	return func(step *backend_types.Step, rc io.ReadCloser) error {
-		logWriter := NewLineWriter(step.Name, step.UUID)
-		masked := shared.NewSecretsReplaceWriter(logWriter, secrets)
+		writersMu.Lock()
+		masked, ok := writers[step.UUID]
+		if !ok {
+			masked = shared.NewSecretsReplaceWriter(NewLineWriter(step.Name, step.UUID), secrets)
+			writers[step.UUID] = masked
+		}
+		writersMu.Unlock()
 		return pipeline_utils.CopyLineByLine(masked, rc, pipeline.MaxLogLineLength)
 	}
 }

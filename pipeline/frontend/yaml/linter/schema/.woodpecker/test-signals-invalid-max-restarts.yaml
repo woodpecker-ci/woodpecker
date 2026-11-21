@@ -1,0 +1,9 @@
+steps:
+  flaky:
+    image: alpine
+    commands:
+      - exit 75
+    signals:
+      restart:
+        exit_codes: 75
+        max_restarts: 50
