@@ -155,6 +155,7 @@ type Store interface {
 	// TaskList TODO: paginate & opt filter
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
+	TaskSetAgent(id string, agentID int64) error
 	TaskDelete(string) error
 
 	// ServerConfig

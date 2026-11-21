@@ -529,7 +529,7 @@ func TestActivate(t *testing.T) {
 	require.NotNil(t, created)
 	assert.Equal(t, "https://ci.example.com/api/hook?access_token=new", created.GetConfig().GetURL())
 	assert.Equal(t, "form", created.GetConfig().GetContentType())
-	assert.ElementsMatch(t, []string{"push", "pull_request", "pull_request_review", "deployment"}, created.Events)
+	assert.ElementsMatch(t, []string{"push", "pull_request", "pull_request_review", "deployment", "release"}, created.Events)
 }
 
 func TestDeactivateWithoutMatchingHook(t *testing.T) {

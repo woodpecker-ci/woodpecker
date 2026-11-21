@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestTaskList(t *testing.T) {
@@ -45,4 +46,21 @@ func TestTaskList(t *testing.T) {
 	list, err = store.TaskList()
 	assert.NoError(t, err)
 	assert.Len(t, list, 0, "Want empty task list after delete")
+}
+
+func TestTaskSetAgent(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Task))
+	defer closer()
+
+	assert.NoError(t, store.TaskInsert(&model.Task{ID: "1"}))
+	assert.NoError(t, store.TaskSetAgent("1", 5))
+	// setting the same agent again is no error
+	assert.NoError(t, store.TaskSetAgent("1", 5))
+
+	list, err := store.TaskList()
+	assert.NoError(t, err)
+	assert.Len(t, list, 1)
+	assert.Equal(t, int64(5), list[0].AgentID)
+
+	assert.ErrorIs(t, store.TaskSetAgent("2", 5), types.ErrRecordNotExist)
 }

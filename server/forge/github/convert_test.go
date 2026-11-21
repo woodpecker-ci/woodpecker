@@ -38,8 +38,8 @@ func TestConvertStatus(t *testing.T) {
 		{name: "pending", status: model.StatusPending, want: statusPending},
 		{name: "running", status: model.StatusRunning, want: statusPending},
 		{name: "blocked", status: model.StatusBlocked, want: statusPending},
-		{name: "skipped", status: model.StatusSkipped, want: statusPending},
-		{name: "canceled", status: model.StatusCanceled, want: statusPending},
+		{name: "skipped", status: model.StatusSkipped, want: statusError},
+		{name: "canceled", status: model.StatusCanceled, want: statusError},
 		// StatusCreated is internal-only and never terminal.
 		{name: "created", status: model.StatusCreated, want: statusPending},
 		{name: "out of enum", status: model.StatusValue("bogus"), want: statusError},

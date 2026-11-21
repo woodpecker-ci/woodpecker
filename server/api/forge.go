@@ -135,6 +135,10 @@ func PatchForge(c *gin.Context) {
 		c.AbortWithStatus(http.StatusConflict)
 		return
 	}
+	// drop the cached forge, so the next use sets it up with the new config
+	if server.Config.Services.Manager != nil {
+		server.Config.Services.Manager.RemoveForge(forgeID)
+	}
 
 	c.JSON(http.StatusOK, forge)
 }

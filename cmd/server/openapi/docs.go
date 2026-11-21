@@ -5466,27 +5466,30 @@ const docTemplate = `{
                     }
                 },
                 "stats": {
-                    "type": "object",
-                    "properties": {
-                        "pending_count": {
-                            "type": "integer"
-                        },
-                        "running_count": {
-                            "type": "integer"
-                        },
-                        "waiting_on_deps_count": {
-                            "type": "integer"
-                        },
-                        "worker_count": {
-                            "type": "integer"
-                        }
-                    }
+                    "$ref": "#/definitions/QueueStats"
                 },
                 "waiting_on_deps": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.QueueTask"
                     }
+                }
+            }
+        },
+        "QueueStats": {
+            "type": "object",
+            "properties": {
+                "pending_count": {
+                    "type": "integer"
+                },
+                "running_count": {
+                    "type": "integer"
+                },
+                "waiting_on_deps_count": {
+                    "type": "integer"
+                },
+                "worker_count": {
+                    "type": "integer"
                 }
             }
         },

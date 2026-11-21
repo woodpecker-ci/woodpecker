@@ -72,8 +72,10 @@ type manager struct {
 // newForgeCache returns a forge cache that closes every forge it evicts.
 // Eviction callbacks run in their own goroutine, so a slow Close (an addon
 // waiting for in-flight calls) does not block the caller.
+// Hits restart the TTL, so a forge in use is not set up again every
+// forgeCacheTTL; config changes are applied through RemoveForge.
 func newForgeCache() *ttlcache.Cache[int64, forge.Forge] {
-	c := ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]())
+	c := ttlcache.New[int64, forge.Forge]()
 	c.OnEviction(func(_ context.Context, _ ttlcache.EvictionReason, item *ttlcache.Item[int64, forge.Forge]) {
 		if err := item.Value().Close(); err != nil {
 			log.Error().Err(err).Int64("forge-id", item.Key()).Msg("failed to close forge")
@@ -103,6 +105,11 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
+	forgeCache := newForgeCache()
+	// evict (and so close) expired forges even if they are never asked for
+	// again, so an unused addon process does not keep running
+	go forgeCache.Start()
+
 	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
@@ -111,7 +118,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		registry:            setupRegistryService(store, c.String("docker-config"), c.String("registry-extension-endpoint"), c.Bool("registry-extension-netrc"), client),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
-		forgeCache:          newForgeCache(),
+		forgeCache:          forgeCache,
 		setupForge:          setupForge,
 		client:              client,
 	}, nil

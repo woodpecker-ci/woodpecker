@@ -26,11 +26,14 @@ type QueueInfo struct {
 	Pending       []QueueTask `json:"pending"`
 	WaitingOnDeps []QueueTask `json:"waiting_on_deps"`
 	Running       []QueueTask `json:"running"`
-	Stats         struct {
-		WorkerCount        int `json:"worker_count"`
-		PendingCount       int `json:"pending_count"`
-		WaitingOnDepsCount int `json:"waiting_on_deps_count"`
-		RunningCount       int `json:"running_count"`
-	} `json:"stats"`
-	Paused bool `json:"paused"`
+	Stats         QueueStats  `json:"stats"`
+	Paused        bool        `json:"paused"`
 } //	@name	QueueInfo
+
+// QueueStats counts the workers and the tasks of the queue by state.
+type QueueStats struct {
+	WorkerCount        int `json:"worker_count"`
+	PendingCount       int `json:"pending_count"`
+	WaitingOnDepsCount int `json:"waiting_on_deps_count"`
+	RunningCount       int `json:"running_count"`
+} //	@name	QueueStats
