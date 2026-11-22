@@ -92,6 +92,8 @@
 
 ### 📦️ Dependency
 
+- Update dependency anchore/syft to v1.57.2 [[#7619](https://github.com/woodpecker-ci/woodpecker/pull/7619)]
+- Update ghcr.io/aquasecurity/trivy Docker tag to v0.76.2 [[#7618](https://github.com/woodpecker-ci/woodpecker/pull/7618)]
 - Update golang-packages [[#7615](https://github.com/woodpecker-ci/woodpecker/pull/7615)]
 - Update codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 digest to 0f7befc [[#7617](https://github.com/woodpecker-ci/woodpecker/pull/7617)]
 - Update pre-commit hook igorshubovych/markdownlint-cli to v0.50.1 [[#7616](https://github.com/woodpecker-ci/woodpecker/pull/7616)]
