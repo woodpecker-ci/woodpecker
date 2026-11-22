@@ -643,11 +643,6 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		if !repo.AllowDeploy {
-			_ = c.AbortWithError(http.StatusForbidden, fmt.Errorf("repo does not allow deployments"))
-			return
-		}
-
 		// The deployment is attributed to whoever triggered it, not the original pipeline's author.
 		deployer := session.User(c)
 		if deployer == nil {
@@ -662,6 +657,11 @@ func PostPipeline(c *gin.Context) {
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 		// a workflow picked for the manual run must not narrow the deployment
 		pl.SelectedWorkflow = ""
+	}
+
+	if pl.Event == model.EventDeploy && !repo.AllowDeploy {
+		_ = c.AbortWithError(http.StatusForbidden, fmt.Errorf("repo does not allow deployments"))
+		return
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
