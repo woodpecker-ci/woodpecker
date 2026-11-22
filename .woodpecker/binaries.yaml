@@ -85,7 +85,7 @@ steps:
     depends_on:
       - vendor
       - build-web
-    image: ghcr.io/aquasecurity/trivy:0.76.1
+    image: ghcr.io/aquasecurity/trivy:0.76.2
     commands:
       - export GOPATH="$${PWD}/dist/.sbom-go"
       - mkdir -p dist
