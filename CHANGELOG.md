@@ -19,6 +19,7 @@
 
 ### 📈 Enhancement
 
+- Generate SBOM on release [[#6075](https://github.com/woodpecker-ci/woodpecker/pull/6075)]
 - Make the task lease timeout configurable via WOODPECKER_TASK_TIMEOUT [[#7558](https://github.com/woodpecker-ci/woodpecker/pull/7558)]
 - Remove `--pipeline-counter` arg from CLI repo update [[#7586](https://github.com/woodpecker-ci/woodpecker/pull/7586)]
 - local: add initial support for C# script runners [[#7215](https://github.com/woodpecker-ci/woodpecker/pull/7215)]
