@@ -118,10 +118,7 @@ func PostRepo(c *gin.Context) {
 
 	from.ForgeID = user.ForgeID
 	if enabledOnce {
-		// re-activation keeps the visibility set in woodpecker
-		visibility := repo.Visibility
 		repo.Update(from)
-		repo.Visibility = visibility
 	} else {
 		repo = from
 		repo.VisibilitySync = true
