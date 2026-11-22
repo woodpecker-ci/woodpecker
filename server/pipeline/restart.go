@@ -107,7 +107,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		if newPipeline, uErr := UpdateToStatusError(store, *newPipeline, err); uErr != nil {
 			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, newPipeline.Number)
 		} else {
-			updatePipelineStatus(ctx, forge, newPipeline, repo, user)
+			updatePipelineStatusOnForge(ctx, forge, newPipeline, repo, user)
 		}
 		return nil, err
 	}
