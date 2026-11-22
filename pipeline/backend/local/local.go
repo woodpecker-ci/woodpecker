@@ -250,7 +250,7 @@ func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string
 		state.output = nil
 	}
 	if state.cmd != nil {
-		_ = state.cmd.Cancel()
+		killAndReap(state.cmd)
 		state.cmd = nil
 	}
 	workflowState, err := e.getWorkflowState(taskUUID)
@@ -278,7 +278,7 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 				state.output = nil
 			}
 			if state.cmd != nil {
-				_ = state.cmd.Cancel()
+				killAndReap(state.cmd)
 				state.cmd = nil
 			}
 		}
@@ -295,6 +295,18 @@ func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID str
 	e.workflows.Delete(taskUUID)
 
 	return err
+}
+
+// killAndReap kills the step process and, if nobody has waited for it yet
+// (e.g. WaitStep returned early because the workflow context got canceled),
+// reaps it in the background so it does not stay around as a zombie.
+func killAndReap(cmd *exec.Cmd) {
+	_ = cmd.Cancel()
+	if cmd.Process != nil && cmd.ProcessState == nil {
+		go func(p *os.Process) {
+			_, _ = p.Wait()
+		}(cmd.Process)
+	}
 }
 
 func (e *local) getWorkflowState(taskUUID string) (*workflowState, error) {

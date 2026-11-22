@@ -193,3 +193,52 @@ func pidAlive(pid int) bool {
 	}
 	return false
 }
+
+// TestDestroyStepReapsCanceledStep ensures a step process that was killed
+// because the workflow context got canceled is waited for, so it does not
+// stay around as a zombie child of the agent.
+func TestDestroyStepReapsCanceledStep(t *testing.T) {
+	path := resolveTestPath(t, "sh", "sleep")
+	prepairEnv(t)
+	//nolint:usetesting // see prepairEnv
+	os.Setenv("PATH", path)
+
+	backend, _ := New().(*local)
+	backend.tempDir = t.TempDir()
+	ctx, cancel := context.WithCancelCause(t.Context())
+	defer cancel(nil)
+
+	taskUUID := "test-reap-canceled"
+	require.NoError(t, backend.SetupWorkflow(ctx, &types.Config{}, taskUUID))
+	t.Cleanup(func() {
+		_ = backend.DestroyWorkflow(context.WithoutCancel(t.Context()), &types.Config{}, taskUUID)
+	})
+
+	step := &types.Step{
+		UUID:     "step-reap",
+		Name:     "reap",
+		Type:     types.StepTypeCommands,
+		Image:    "sh",
+		Commands: []string{"sleep 30"},
+	}
+
+	require.NoError(t, backend.StartStep(ctx, step, taskUUID))
+
+	stepState, err := backend.getStepState(taskUUID, step.UUID)
+	require.NoError(t, err)
+	require.NotNil(t, stepState.cmd)
+	require.NotNil(t, stepState.cmd.Process)
+	pid := stepState.cmd.Process.Pid
+
+	cancel(nil)
+
+	// WaitStep returns early on a canceled context without waiting for the process.
+	_, _ = backend.WaitStep(ctx, step, taskUUID)
+	require.NoError(t, backend.DestroyStep(context.WithoutCancel(ctx), step, taskUUID))
+
+	require.Eventuallyf(t, func() bool {
+		_, err := os.Stat("/proc/" + strconv.Itoa(pid))
+		return os.IsNotExist(err)
+	}, 3*time.Second, 50*time.Millisecond,
+		"step pid %d was never reaped after cancel and is left as a zombie", pid)
+}
