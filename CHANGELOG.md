@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Sync repo visibility with forge as new default option [[#7602](https://github.com/woodpecker-ci/woodpecker/pull/7602)]
 - Log agent auth fails fail2ban friendly [[#7601](https://github.com/woodpecker-ci/woodpecker/pull/7601)]
 - Use project read-only deploy-token to clone gitlab repos [[#7590](https://github.com/woodpecker-ci/woodpecker/pull/7590)]
 - Update module go.opentelemetry.io/otel/trace to v1.47.0 [[#7564](https://github.com/woodpecker-ci/woodpecker/pull/7564)]
