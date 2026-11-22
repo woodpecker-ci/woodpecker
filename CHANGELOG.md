@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-21
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -91,6 +91,7 @@
 
 ### 📦️ Dependency
 
+- Update pre-commit hook igorshubovych/markdownlint-cli to v0.50.1 [[#7616](https://github.com/woodpecker-ci/woodpecker/pull/7616)]
 - Update web npm deps non-major to v3.5.46 [[#7610](https://github.com/woodpecker-ci/woodpecker/pull/7610)]
 - Update docker.io/postgres Docker tag to v19 [[#7608](https://github.com/woodpecker-ci/woodpecker/pull/7608)]
 - Update web npm deps non-major [[#7606](https://github.com/woodpecker-ci/woodpecker/pull/7606)]
