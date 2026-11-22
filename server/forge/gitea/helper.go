@@ -38,6 +38,15 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
+	visibility := model.VisibilityPrivate
+	if !from.Private {
+		switch from.Owner.Visibility {
+		case gitea.VisibleTypePublic:
+			visibility = model.VisibilityPublic
+		case gitea.VisibleTypeLimited:
+			visibility = model.VisibilityInternal
+		}
+	}
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 		Name:          name,
@@ -45,7 +54,8 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		FullName:      from.FullName,
 		Avatar:        avatar,
 		ForgeURL:      from.HTMLURL,
-		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
+		IsSCMPrivate:  visibility != model.VisibilityPublic,
+		Visibility:    visibility,
 		Clone:         from.CloneURL,
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
