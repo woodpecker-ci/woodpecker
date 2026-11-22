@@ -7,7 +7,7 @@ require (
 	charm.land/huh/v2 v2.0.3
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
-	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.1-0.20261120105818-8aee3653bfb9
+	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.1-0.20261121172830-0f7befc6b835
 	gitea.dev/sdk v1.5.2-0.20261121024034-0a741c051d52
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
