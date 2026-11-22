@@ -100,7 +100,7 @@ steps:
     image: *golang_image
     environment:
       # renovate: datasource=github-releases depName=anchore/syft
-      SYFT_VERSION: v1.55.0
+      SYFT_VERSION: v1.57.2
     commands:
       - curl -sSfL https://get.anchore.io/syft | sh -s -- -b /usr/local/bin "$${SYFT_VERSION}"
       - syft scan file:dist/server/linux_amd64/woodpecker-server -o spdx-json > dist/server-deps.spdx.json
