@@ -68,7 +68,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.37.2
 	k8s.io/apimachinery v0.37.2
-	k8s.io/client-go v0.37.2
+	k8s.io/client-go v11.0.0+incompatible
 	sigs.k8s.io/yaml v1.6.0
 	src.techknowlogick.com/xormigrate v1.8.0
 	xorm.io/builder v0.3.13
