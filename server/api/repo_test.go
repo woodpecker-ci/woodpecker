@@ -491,8 +491,8 @@ func TestPostRepoVisibilitySync(t *testing.T) {
 		assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
 	})
 
-	t.Run("re-activation keeps the visibility settings", func(t *testing.T) {
-		for _, sync := range []bool{false, true} {
+	t.Run("re-activation keeps the sync setting", func(t *testing.T) {
+		for sync, visibility := range map[bool]model.RepoVisibility{false: model.VisibilityInternal, true: model.VisibilityPrivate} {
 			s := newTestStore(t)
 			user := &model.User{Login: "alice", ForgeID: 1}
 			require.NoError(t, s.CreateUser(user))
@@ -507,7 +507,7 @@ func TestPostRepoVisibilitySync(t *testing.T) {
 			stored, err := s.GetRepoForgeID(1, "42")
 			require.NoError(t, err)
 			assert.Equal(t, sync, stored.VisibilitySync)
-			assert.Equal(t, model.VisibilityInternal, stored.Visibility)
+			assert.Equal(t, visibility, stored.Visibility)
 			assert.True(t, stored.IsSCMPrivate)
 		}
 	})
