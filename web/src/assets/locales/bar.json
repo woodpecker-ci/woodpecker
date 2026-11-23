@@ -515,9 +515,9 @@
             "agents": {
                 "desc": "Agents de wo fia de Organisation registriert san.",
                 "require_org_agents": {
-                    "require": "Pipelines nur mid Agents vo da Organisation laffa lassn",
+                    "require": "Pipelines nur auf Agents vo da Organisation laffa lassn",
                     "desc": "Workflows vo Repos vo dera Organisation wern nur vo Agents gnumma, de wo fia de Organisation registriert san, ned vo de Agents vom ganzn Server.",
-                    "saved": "Organisations-Einstellunga gspeichert"
+                    "saved": "Organisations-Eistellunga gspeichert"
                 }
             }
         }
@@ -677,6 +677,6 @@
     "forge_name_placeholder": "Optional, wird auf da Login-Seitn ozeigt",
     "delete": "Löschn",
     "allowed_orgs": "Erlaubte Organisationa",
-    "allowed_orgs_desc": "Organisationa, wo d'Mitglieder se üba de Forge eiloggn deafn, zuasätzlich zu de globaln WOODPECKER_ORGS-Eistellung.",
+    "allowed_orgs_desc": "Organisationa, wo d'Mitglieder se üba de Forge eiloggn deafn, zuasätzlich zu da globaln WOODPECKER_ORGS-Eistellung.",
     "allowed_orgs_placeholder": "Nama vo da Organisation"
 }
