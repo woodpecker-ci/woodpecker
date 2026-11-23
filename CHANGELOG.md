@@ -74,38 +74,16 @@
 
 ### 📚 Documentation
 
-- Lock file maintenance [[#7624](https://github.com/woodpecker-ci/woodpecker/pull/7624)]
-- Update dependency @vue/compiler-sfc to v3.5.46 [[#7609](https://github.com/woodpecker-ci/woodpecker/pull/7609)]
-- Update dependency isomorphic-dompurify to v4.8.0 [[#7607](https://github.com/woodpecker-ci/woodpecker/pull/7607)]
-- Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
-- Lock file maintenance [[#7580](https://github.com/woodpecker-ci/woodpecker/pull/7580)]
-- Update pnpm to v12.21.0 [[#7570](https://github.com/woodpecker-ci/woodpecker/pull/7570)]
-- Update docs npm deps non-major [[#7562](https://github.com/woodpecker-ci/woodpecker/pull/7562)]
-- Update docs npm deps non-major [[#7553](https://github.com/woodpecker-ci/woodpecker/pull/7553)]
 - docs: clarify matrix variable expansion in platform labels [[#7511](https://github.com/woodpecker-ci/woodpecker/pull/7511)]
-- Update dependency concurrently to v10.0.7 [[#7510](https://github.com/woodpecker-ci/woodpecker/pull/7510)]
-- Update dependency isomorphic-dompurify to v4.7.0 [[#7509](https://github.com/woodpecker-ci/woodpecker/pull/7509)]
 - Remove overrides from docs dependencies [[#7497](https://github.com/woodpecker-ci/woodpecker/pull/7497)]
-- Update docs npm deps non-major [[#7493](https://github.com/woodpecker-ci/woodpecker/pull/7493)]
-- Update dependency tslib to v2.9.1 [[#7461](https://github.com/woodpecker-ci/woodpecker/pull/7461)]
 - Add plugin Betterleaks [[#7446](https://github.com/woodpecker-ci/woodpecker/pull/7446)]
-- Update docs npm deps non-major [[#7455](https://github.com/woodpecker-ci/woodpecker/pull/7455)]
 - Fix dead links in CLI readme and docs pages [[#7451](https://github.com/woodpecker-ci/woodpecker/pull/7451)]
 - Clarify trusted permissions config for the TLS DinD example [[#7356](https://github.com/woodpecker-ci/woodpecker/pull/7356)]
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7623](https://github.com/woodpecker-ci/woodpecker/pull/7623)]
-- Update dependency anchore/syft to v1.57.2 [[#7619](https://github.com/woodpecker-ci/woodpecker/pull/7619)]
-- Update ghcr.io/aquasecurity/trivy Docker tag to v0.76.2 [[#7618](https://github.com/woodpecker-ci/woodpecker/pull/7618)]
-- Update golang-packages [[#7615](https://github.com/woodpecker-ci/woodpecker/pull/7615)]
 - Update codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 digest to 0f7befc [[#7617](https://github.com/woodpecker-ci/woodpecker/pull/7617)]
-- Update pre-commit hook igorshubovych/markdownlint-cli to v0.50.1 [[#7616](https://github.com/woodpecker-ci/woodpecker/pull/7616)]
-- Update web npm deps non-major to v3.5.46 [[#7610](https://github.com/woodpecker-ci/woodpecker/pull/7610)]
-- Update docker.io/postgres Docker tag to v19 [[#7608](https://github.com/woodpecker-ci/woodpecker/pull/7608)]
-- Update web npm deps non-major [[#7606](https://github.com/woodpecker-ci/woodpecker/pull/7606)]
 - Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
-- Update golang-packages [[#7605](https://github.com/woodpecker-ci/woodpecker/pull/7605)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
