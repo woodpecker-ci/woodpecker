@@ -20,6 +20,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -146,6 +147,90 @@ func TestGitea(t *testing.T) {
 		assert.Equal(t, model.EventPull, b.Event)
 		assert.Equal(t, []string{"README.md", "src/old.go", "CHANGELOG.md", "a.go", "b.go", "c.go"}, b.ChangedFiles)
 	})
+}
+
+func TestCloneToken(t *testing.T) {
+	keys := `[{"id":3,"key_type":"token","title":"woodpecker-clone"},{"id":4,"key_type":"ssh","title":"woodpecker-clone"},{"id":5,"key_type":"token","title":"other"}]`
+	var deleted []string
+	createStatus := http.StatusCreated
+	serverVersion := "28.0.0"
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v1/version", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"version":"` + serverVersion + `"}`))
+	})
+	mux.HandleFunc("GET /api/v1/repositories/5", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":5,"owner":{"login":"test_name"},"name":"repo_name","full_name":"test_name/repo_name"}`))
+	})
+	mux.HandleFunc("POST /api/v1/repos/test_name/repo_name/hooks", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"id":1}`))
+	})
+	mux.HandleFunc("GET /api/v1/repos/test_name/repo_name/hooks", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`[]`))
+	})
+	mux.HandleFunc("GET /api/v1/repos/test_name/repo_name/keys", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("page") != "1" {
+			_, _ = w.Write([]byte(`[]`))
+			return
+		}
+		_, _ = w.Write([]byte(keys))
+	})
+	mux.HandleFunc("POST /api/v1/repos/test_name/repo_name/keys/tokens", func(w http.ResponseWriter, r *http.Request) {
+		assert.NotEqual(t, "1.27.3", serverVersion, "do not ask Gitea before v28 for a deploy token")
+		var opts gitea.CreateDeployKeyTokenOption
+		assert.NoError(t, json.NewDecoder(r.Body).Decode(&opts))
+		assert.Equal(t, gitea.CreateDeployKeyTokenOption{Title: "woodpecker-clone", ReadOnly: true}, opts, "the token must only read the repository")
+		w.WriteHeader(createStatus)
+		if createStatus == http.StatusCreated {
+			keys = `[{"id":7,"key_type":"token","title":"woodpecker-clone"}]`
+			_, _ = w.Write([]byte(`{"id":7,"key_type":"token","title":"woodpecker-clone","token":"gdt_secret","read_only":true}`))
+		}
+	})
+	mux.HandleFunc("DELETE /api/v1/repos/test_name/repo_name/keys/{id}", func(w http.ResponseWriter, r *http.Request) {
+		deleted = append(deleted, r.PathValue("id"))
+		w.WriteHeader(http.StatusNoContent)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	c, err := New(1, Opts{URL: server.URL})
+	require.NoError(t, err)
+	repo := &model.Repo{ForgeRemoteID: "5", Owner: "test_name", Name: "repo_name", FullName: "test_name/repo_name", Clone: fakeRepo.Clone}
+	link := "http://localhost/hook?access_token=token"
+	userNetrc := &model.Netrc{Machine: "gitea.com", Login: fakeUser.Login, Password: fakeUser.AccessToken, Type: model.ForgeTypeGitea}
+
+	// a repo without a deploy token clones with the token of the user
+	netrc, err := c.Netrc(fakeUser, repo)
+	require.NoError(t, err)
+	assert.Equal(t, userNetrc, netrc)
+
+	// activation replaces a left over token and pipelines clone with the new one
+	require.NoError(t, c.Activate(t.Context(), fakeUser, repo, link))
+	assert.Equal(t, []string{"3"}, deleted, "only delete the deploy token Woodpecker created")
+	assert.Equal(t, &model.CloneSecret{Login: "woodpecker-clone", Token: "gdt_secret", ForgeRemoteID: "7"}, repo.CloneSecret)
+	netrc, err = c.Netrc(fakeUser, repo)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Netrc{Machine: "gitea.com", Login: "woodpecker-clone", Password: "gdt_secret", Type: model.ForgeTypeGitea}, netrc)
+
+	// deactivation deletes the deploy token
+	require.NoError(t, c.Deactivate(t.Context(), fakeUser, repo, link))
+	assert.Equal(t, []string{"3", "7"}, deleted)
+
+	// without the right to create a deploy token, activation still works and drops the old one
+	createStatus = http.StatusForbidden
+	require.NoError(t, c.Activate(t.Context(), fakeUser, repo, link))
+	assert.Nil(t, repo.CloneSecret)
+	netrc, err = c.Netrc(fakeUser, repo)
+	require.NoError(t, err)
+	assert.Equal(t, userNetrc, netrc)
+
+	// Gitea before v28 has no deploy tokens, so pipelines clone with the token of the user
+	serverVersion = "1.27.3"
+	old, err := New(1, Opts{URL: server.URL})
+	require.NoError(t, err)
+	repo.CloneSecret = &model.CloneSecret{Token: "stale"}
+	require.NoError(t, old.Activate(t.Context(), fakeUser, repo, link))
+	assert.Nil(t, repo.CloneSecret)
 }
 
 var (
