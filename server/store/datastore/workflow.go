@@ -88,7 +88,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	// WorkflowsReplace already runs in a transaction, pipeline deletion does not.
 	if !sess.IsInTx() {
 		if err := sess.Begin(); err != nil {
-			return err
+			return wrapUpdate(0, err)
 		}
 		defer sess.Rollback() //nolint:errcheck
 		if err := s.workflowsDelete(sess, pipelineID); err != nil {
@@ -118,8 +118,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 		return err
 	}
 
-	_, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
-	return err
+	return wrapUpdate(sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow)))
 }
 
 func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {

@@ -45,7 +45,7 @@ func (s storage) WorkflowUpdateWithSnapshot(workflow *model.Workflow, snapshot *
 		sess := s.engine.NewSession()
 		defer sess.Close()
 		if err := sess.Begin(); err != nil {
-			return err
+			return wrapUpdate(0, err)
 		}
 
 		// Lock an existing snapshot before reading it, so concurrent cleanup commits first.
@@ -83,7 +83,7 @@ func (s storage) agentSnapshotsDeleteUnused(sess *xorm.Session, pipelineID int64
 	if err := sess.Table(new(model.Workflow)).Distinct("agent_snapshot_id").
 		Where("pipeline_id = ? AND agent_snapshot_id > 0", pipelineID).
 		OrderBy("agent_snapshot_id").Find(&ids); err != nil {
-		return err
+		return wrapUpdate(0, err)
 	}
 
 	for _, id := range ids {
@@ -104,7 +104,7 @@ func (s storage) agentSnapshotsDeleteUnused(sess *xorm.Session, pipelineID int64
 		if used {
 			continue
 		}
-		if _, err := sess.ID(id).Delete(new(model.AgentSnapshot)); err != nil {
+		if err := wrapUpdate(sess.ID(id).Delete(new(model.AgentSnapshot))); err != nil {
 			return err
 		}
 	}
