@@ -334,7 +334,7 @@
                 },
                 "custom_labels": {
                     "custom_labels": "Eigene Labels",
-                    "desc": "De eigenen Labels de wo vom Agent-Admin beim Starten gsetzt worn san."
+                    "desc": "De eigenen Labels de wo vom Agent-Moa beim Starten gsetzt worn san."
                 },
                 "org": {
                     "badge": "org"
@@ -356,7 +356,7 @@
                     "delete": "Filter löschn"
                 }
             },
-            "settings": "Admin-Eistellunga",
+            "settings": "Moa-Eistellunga",
             "not_allowed": "Du deafst de Server-Eistellunga ned ändarn",
             "secrets": {
                 "desc": "Globale Secrets kennan in de Pipelines vo olle Repos verwendt wern.",
@@ -403,9 +403,9 @@
                 "created": "Benutzer erstäid",
                 "saved": "Benutzer gspeichert",
                 "admin": {
-                    "admin": "Admin",
-                    "placeholder": "Benutzer is a Admin",
-                    "admin_warning": "Dea Benutzer is in da WOODPECKER_ADMIN-Umgebungsvariable. Wennsd eam do de Admin-Rechte wegnimmst, hoit des nur bis zum nächstn Neistart vom Server. Wennsd n fia imma zum hiabe macha mechst, muasd eam a aus de Umgebungsvariablen aussanehma.",
+                    "admin": "Moa",
+                    "placeholder": "Benutzer is a Moa",
+                    "admin_warning": "Dea Benutzer is in da WOODPECKER_ADMIN-Umgebungsvariable. Wennsd eam do an Moa wegnimmst, hoit des nur bis zum nächstn Neistart vom Server. Wennsd n fia imma zum Hiabe macha mechst, muasd eam a aus de Umgebungsvariablen aussanehma.",
                     "admin_env": "Moa (env)",
                     "admin_env_desc": "Moa, weil dea Benutzer in WOODPECKER_ADMIN steht.",
                     "admin_revoked": "Moa derweil weggnumma",
