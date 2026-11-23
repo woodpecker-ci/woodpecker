@@ -363,6 +363,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			server.Config.Services.Manager = manager
 			server.Config.Server.WebhookHost = "https://woodpecker.example"
 			driver.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, test.lookupErr)
+			driver.EXPECT().Org(mock.Anything, mock.Anything, repo.Owner).Return(&model.Org{Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil).Maybe()
 
 			var oldSecret string
 			var activatedSecret *model.CloneSecret
@@ -469,6 +470,7 @@ func TestRepairRepoKeepsVisibility(t *testing.T) {
 				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName, ForgeRemoteID: repo.ForgeRemoteID,
 				Visibility: model.VisibilityPublic, Perm: &model.Perm{Admin: true},
 			}, nil)
+			driver.On("Org", mock.Anything, mock.Anything, repo.Owner).Return(&model.Org{Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil)
 			driver.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			driver.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
@@ -617,4 +619,136 @@ func TestDeactivateRepoDropsCloneSecret(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, stored.IsActive)
 	assert.Nil(t, stored.CloneSecret, "an inactive repo must not keep clone credentials")
+}
+
+// TestSyncFollowsRepoOwnerChanges moves a repo between owners on the forge and
+// checks after every change that a sync links the repo to the right org.
+// Orgs are told apart by their forge remote id, not by their name.
+func TestSyncFollowsRepoOwnerChanges(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+	})
+
+	syncs := map[string]func(t *testing.T, s store.Store, user *model.User, repoID int64){
+		"hook": func(t *testing.T, s store.Store, _ *model.User, repoID int64) {
+			repo, err := s.GetRepo(repoID)
+			require.NoError(t, err)
+			hookToken := token.New(token.HookToken)
+			hookToken.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+			hookToken.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
+			signed, err := hookToken.Sign(repo.WebhookSecret)
+			require.NoError(t, err)
+
+			tc := newTestContext(t, s)
+			tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/api/hook", nil)
+			tc.Ctx.Request.Header.Set("Authorization", "Bearer "+signed)
+			PostHook(tc.Ctx)
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		},
+		"repair": func(t *testing.T, s store.Store, user *model.User, repoID int64) {
+			repo, err := s.GetRepo(repoID)
+			require.NoError(t, err)
+
+			tc := newTestContext(t, s)
+			withUser(user)(tc)
+			withRepo(repo, &model.Perm{Admin: true})(tc)
+			RepairRepo(tc.Ctx)
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		},
+	}
+
+	for name, sync := range syncs {
+		t.Run(name, func(t *testing.T) {
+			// the forge: the owner of the repo and the current name of each org by its remote id
+			repoOwner := "alpha"
+			orgs := map[model.ForgeRemoteID]string{"o1": "alpha"}
+			forgeRepo := func() *model.Repo {
+				return &model.Repo{
+					ForgeRemoteID: "42", Owner: repoOwner, Name: "rocket", FullName: repoOwner + "/rocket",
+					Perm: &model.Perm{Admin: true},
+				}
+			}
+
+			driver := moveRepoForge(t)
+			driver.EXPECT().Repo(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(context.Context, *model.User, model.ForgeRemoteID, string, string) (*model.Repo, error) {
+					return forgeRepo(), nil
+				}).Maybe()
+			driver.EXPECT().Hook(mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(context.Context, *http.Request, string) (*model.Repo, *model.Pipeline, error) {
+					// a pull request event ends the hook after the sync, as pull requests are not allowed
+					return forgeRepo(), &model.Pipeline{Event: model.EventPull}, nil
+				}).Maybe()
+			driver.EXPECT().Org(mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(_ context.Context, _ *model.User, name string) (*model.Org, error) {
+					for id, orgName := range orgs {
+						if orgName == name {
+							return &model.Org{Name: orgName, ForgeRemoteID: id}, nil
+						}
+					}
+					return nil, forge_types.ErrOrgNotFound
+				})
+			driver.EXPECT().OrgByRemoteID(mock.Anything, mock.Anything, mock.Anything, false).
+				RunAndReturn(func(_ context.Context, _ *model.User, id model.ForgeRemoteID, _ bool) (*model.Org, error) {
+					if orgName, ok := orgs[id]; ok {
+						return &model.Org{Name: orgName, ForgeRemoteID: id}, nil
+					}
+					return nil, forge_types.ErrOrgNotFound
+				}).Maybe()
+			driver.EXPECT().Deactivate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+			driver.EXPECT().Activate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+			s := newTestStore(t)
+			user := &model.User{Login: "alice", ForgeID: 1, ForgeRemoteID: "u-alice", Hash: "alice"}
+			require.NoError(t, s.CreateUser(user))
+			alpha := &model.Org{Name: "alpha", ForgeID: 1, ForgeRemoteID: "o1"}
+			require.NoError(t, s.OrgCreate(alpha))
+			repo := &model.Repo{
+				ForgeID: 1, ForgeRemoteID: "42", Owner: "alpha", Name: "rocket", FullName: "alpha/rocket",
+				UserID: user.ID, IsActive: true, WebhookSecret: "secret", OrgID: alpha.ID,
+			}
+			require.NoError(t, s.CreateRepo(repo))
+
+			for _, step := range []struct {
+				name   string
+				change func()
+				org    model.ForgeRemoteID
+			}{
+				{
+					name:   "repo moved to a new owner",
+					change: func() { orgs["o2"] = "bravo"; repoOwner = "bravo" },
+					org:    "o2",
+				},
+				{
+					name:   "new owner renamed itself",
+					change: func() { orgs["o2"] = "charlie"; repoOwner = "charlie" },
+					org:    "o2",
+				},
+				{
+					name:   "owner renamed again and a new org with its old name got the repo",
+					change: func() { orgs["o2"] = "delta"; orgs["o3"] = "charlie"; repoOwner = "charlie" },
+					org:    "o3",
+				},
+			} {
+				step.change()
+				sync(t, s, user, repo.ID)
+
+				stored, err := s.GetRepo(repo.ID)
+				require.NoError(t, err)
+				assert.Equal(t, repoOwner+"/rocket", stored.FullName, step.name)
+				org, err := s.OrgGet(stored.OrgID)
+				require.NoError(t, err)
+				assert.Equal(t, step.org, org.ForgeRemoteID, "%s: the repo must be linked to the org that owns it now", step.name)
+				// stored orgs keep their forge remote id and follow renames
+				for id, orgName := range orgs {
+					org, err := s.OrgFindByRemoteID(1, id)
+					require.NoError(t, err, step.name)
+					assert.Equal(t, orgName, org.Name, step.name)
+				}
+			}
+		})
+	}
 }

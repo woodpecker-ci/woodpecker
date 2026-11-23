@@ -92,6 +92,8 @@ func TestHook(t *testing.T) {
 	_forge.On("Hook", mock.Anything, mock.Anything, repo.WebhookSecret).Return(repo, pipeline, nil)
 	_store.On("GetRepo", repo.ID).Return(repo, nil)
 	_store.On("GetUser", user.ID).Return(user, nil)
+	_forge.On("Org", mock.Anything, user, repo.Owner).Return(&model.Org{Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil)
+	_store.On("OrgFindByRemoteID", repo.ForgeID, model.ForgeRemoteID("o-owner")).Return(&model.Org{ID: 5, Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil)
 	_store.On("UpdateRepo", repo).Return(nil)
 	_store.On("CreatePipeline", mock.Anything).Return(nil)
 	_manager.On("ConfigServiceFromRepo", repo).Return(_configService)
@@ -109,6 +111,7 @@ func TestHook(t *testing.T) {
 
 	assert.Equal(t, http.StatusNoContent, c.Writer.Status())
 	assert.Equal(t, "true", w.Header().Get("Pipeline-Filtered"))
+	assert.EqualValues(t, 5, repo.OrgID, "the hook links the repo to the org of its owner")
 }
 
 func TestHookRejectsInvalidSignature(t *testing.T) {

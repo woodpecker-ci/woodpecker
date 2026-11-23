@@ -813,6 +813,13 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 
 	repo.Update(from)
 
+	// the owner can be another org now, even under the same name
+	org, err := getOrCreateOrg(c, _store, _forge, repoUser, repo.ForgeID, repo.Owner)
+	if err != nil {
+		return err
+	}
+	repo.OrgID = org.ID
+
 	if updatePermissions {
 		repo.Perm = from.Perm
 		repo.Perm.Synced = time.Now().Unix()
