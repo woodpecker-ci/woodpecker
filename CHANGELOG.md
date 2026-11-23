@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-22
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -74,6 +74,7 @@
 
 ### 📚 Documentation
 
+- Lock file maintenance [[#7624](https://github.com/woodpecker-ci/woodpecker/pull/7624)]
 - Update dependency @vue/compiler-sfc to v3.5.46 [[#7609](https://github.com/woodpecker-ci/woodpecker/pull/7609)]
 - Update dependency isomorphic-dompurify to v4.8.0 [[#7607](https://github.com/woodpecker-ci/woodpecker/pull/7607)]
 - Update dependency marked to v18.2.1 [[#7595](https://github.com/woodpecker-ci/woodpecker/pull/7595)]
@@ -94,6 +95,7 @@
 
 ### 📦️ Dependency
 
+- Update golang-packages [[#7623](https://github.com/woodpecker-ci/woodpecker/pull/7623)]
 - Update dependency anchore/syft to v1.57.2 [[#7619](https://github.com/woodpecker-ci/woodpecker/pull/7619)]
 - Update ghcr.io/aquasecurity/trivy Docker tag to v0.76.2 [[#7618](https://github.com/woodpecker-ci/woodpecker/pull/7618)]
 - Update golang-packages [[#7615](https://github.com/woodpecker-ci/woodpecker/pull/7615)]
