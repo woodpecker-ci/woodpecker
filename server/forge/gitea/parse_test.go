@@ -28,6 +28,7 @@ import (
 
 func TestGiteaParser(t *testing.T) {
 	pullMetaWebhookRepo := &model.Repo{
+		Visibility:    model.VisibilityPublic,
 		ForgeRemoteID: "1234",
 		Owner:         "a_nice_user",
 		Name:          "hello_world_ci",
@@ -64,6 +65,7 @@ func TestGiteaParser(t *testing.T) {
 			data:  fixtures.HookPushBranch,
 			event: "push",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "50820",
 				Owner:         "meisam",
 				Name:          "woodpecktester",
@@ -108,6 +110,7 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "http://gitea.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@gitea.golang.org:gordon/hello-world.git",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -133,6 +136,7 @@ func TestGiteaParser(t *testing.T) {
 			data:  fixtures.HookPushMulti,
 			event: "push",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "6",
 				Owner:         "Test-CI",
 				Name:          "multi-line-secrets",
@@ -177,6 +181,7 @@ func TestGiteaParser(t *testing.T) {
 				CloneSSH:      "git@gitea.golang.org:gordon/hello-world.git",
 				Branch:        "main",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -210,6 +215,7 @@ func TestGiteaParser(t *testing.T) {
 				CloneSSH:      "",
 				Branch:        "main",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -248,6 +254,7 @@ func TestGiteaParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -286,6 +293,7 @@ func TestGiteaParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -316,6 +324,7 @@ func TestGiteaParser(t *testing.T) {
 			data:  fixtures.HookPullRequestClosed,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "46534",
 				Owner:         "anbraten",
 				Name:          "test-repo",
@@ -596,6 +605,7 @@ func TestGiteaParser(t *testing.T) {
 			data:  fixtures.HookPullRequestMerged,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "46534",
 				Owner:         "anbraten",
 				Name:          "test-repo",
@@ -644,6 +654,7 @@ func TestGiteaParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
