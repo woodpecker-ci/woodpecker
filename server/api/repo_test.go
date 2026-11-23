@@ -30,6 +30,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
@@ -67,12 +68,13 @@ func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
 		Perm:          &model.Perm{Admin: true},
 	}
 
-	org := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID}
+	org := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID, ForgeRemoteID: "5"}
 
 	mockManager.On("ForgeFromUser", user).Return(mockForge, nil)
 	mockStore.On("GetRepoForgeID", user.ForgeID, forgeRemoteID).Return(nil, types.ErrRecordNotExist)
 	mockForge.On("Repo", mock.Anything, user, forgeRemoteID, "", "").Return(forgeRepo, nil)
-	mockStore.On("OrgFindByName", forgeRepo.Owner, user.ForgeID).Return(org, nil)
+	mockForge.On("Org", mock.Anything, user, forgeRepo.Owner).Return(&model.Org{Name: "acme", ForgeRemoteID: "5"}, nil)
+	mockStore.On("OrgFindByRemoteID", user.ForgeID, org.ForgeRemoteID).Return(org, nil)
 	mockForge.On("Activate", mock.Anything, user, mock.AnythingOfType("*model.Repo"), mock.AnythingOfType("string")).Return(nil)
 	mockStore.On("CreateRepo", mock.AnythingOfType("*model.Repo")).Return(types.ErrInsertDuplicateDetected)
 
@@ -87,6 +89,47 @@ func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
 	assert.Equal(t, http.StatusConflict, w.Code)
 	assert.Contains(t, w.Body.String(), "Remove the stale repository entry")
 	mockStore.AssertNotCalled(t, "PermUpsert", mock.Anything)
+}
+
+func TestPostRepoReturnsConflictOnOrgNameOfGoneForgeAccount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockStore := store_mocks.NewMockStore(t)
+	mockManager := manager_mocks.NewMockManager(t)
+	mockForge := forge_mocks.NewMockForge(t)
+
+	server.Config.Services.Manager = mockManager
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(nil)
+	server.Config.Pipeline.DefaultTimeout = 60
+	server.Config.Pipeline.MaxTimeout = 120
+
+	user := &model.User{ID: 10, ForgeID: 7, Login: "alice"}
+	forgeRepo := &model.Repo{ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket", Perm: &model.Perm{Admin: true}}
+	// the stored org named acme belongs to a forge account that is gone
+	stale := &model.Org{ID: 3, Name: "acme", ForgeID: user.ForgeID, ForgeRemoteID: "5"}
+
+	mockManager.On("ForgeFromUser", user).Return(mockForge, nil)
+	mockStore.On("GetRepoForgeID", user.ForgeID, forgeRepo.ForgeRemoteID).Return(nil, types.ErrRecordNotExist)
+	mockForge.On("Repo", mock.Anything, user, forgeRepo.ForgeRemoteID, "", "").Return(forgeRepo, nil)
+	mockForge.On("Org", mock.Anything, user, "acme").Return(&model.Org{Name: "acme", ForgeRemoteID: "6"}, nil)
+	mockStore.On("OrgFindByRemoteID", user.ForgeID, model.ForgeRemoteID("6")).Return(nil, types.ErrRecordNotExist)
+	mockStore.On("OrgFindByName", "acme", user.ForgeID).Return(stale, nil)
+	mockForge.On("OrgByRemoteID", mock.Anything, user, stale.ForgeRemoteID, false).Return(nil, forge_types.ErrOrgNotFound)
+	mockStore.On("OrgUpdate", mock.Anything).Return(nil)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("store", mockStore)
+	c.Set("user", user)
+	c.Request = httptest.NewRequest(http.MethodPost, "/repos?forge_remote_id=42", nil)
+
+	PostRepo(c)
+
+	assert.Equal(t, http.StatusConflict, w.Code)
+	assert.Contains(t, w.Body.String(), "an admin has to resolve the conflict")
+	assert.EqualValues(t, "6", stale.ConflictForgeRemoteID)
+	mockForge.AssertNotCalled(t, "Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockStore.AssertNotCalled(t, "CreateRepo", mock.Anything)
 }
 
 func moveRepoForge(t *testing.T) *forge_mocks.MockForge {
@@ -172,7 +215,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		user, oldOrg, repo := seed(t, 1, "oldinc", "probe")
 		// same-named org on ANOTHER forge that must not be picked
 		require.NoError(t, s.OrgCreate(&model.Org{Name: "newinc", ForgeID: 2}))
-		target := &model.Org{Name: "newinc", ForgeID: 1}
+		target := &model.Org{Name: "newinc", ForgeID: 1, ForgeRemoteID: "o-newinc"}
 		require.NoError(t, s.OrgCreate(target))
 
 		mockForge := moveRepoForge(t)
@@ -183,8 +226,8 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 			FullName:      "newinc/probe",
 			Perm:          &model.Perm{Admin: true},
 		}
-		// no Org() expectation: forge must not be asked for a known org
 		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newinc", "probe").Return(from, nil)
+		mockForge.On("Org", mock.Anything, user, "newinc").Return(&model.Org{Name: "newinc", ForgeRemoteID: "o-newinc"}, nil)
 		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 
@@ -320,6 +363,7 @@ func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
 			server.Config.Services.Manager = manager
 			server.Config.Server.WebhookHost = "https://woodpecker.example"
 			driver.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, test.lookupErr)
+			driver.EXPECT().Org(mock.Anything, mock.Anything, repo.Owner).Return(&model.Org{Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil).Maybe()
 
 			var oldSecret string
 			var activatedSecret *model.CloneSecret
@@ -426,6 +470,7 @@ func TestRepairRepoKeepsVisibility(t *testing.T) {
 				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName, ForgeRemoteID: repo.ForgeRemoteID,
 				Visibility: model.VisibilityPublic, Perm: &model.Perm{Admin: true},
 			}, nil)
+			driver.On("Org", mock.Anything, mock.Anything, repo.Owner).Return(&model.Org{Name: repo.Owner, ForgeRemoteID: "o-owner"}, nil)
 			driver.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 			driver.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
@@ -468,6 +513,7 @@ func TestPostRepoVisibilitySync(t *testing.T) {
 			ForgeRemoteID: remoteID, Owner: "acme", Name: "rocket", FullName: "acme/rocket",
 			Visibility: model.VisibilityPrivate, IsSCMPrivate: true, Perm: &model.Perm{Admin: true},
 		}, nil)
+		driver.On("Org", mock.Anything, user, "acme").Return(&model.Org{Name: "acme", ForgeRemoteID: "o-acme"}, nil)
 		driver.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
 
 		tc := newTestContext(t, s)
@@ -573,4 +619,136 @@ func TestDeactivateRepoDropsCloneSecret(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, stored.IsActive)
 	assert.Nil(t, stored.CloneSecret, "an inactive repo must not keep clone credentials")
+}
+
+// TestSyncFollowsRepoOwnerChanges moves a repo between owners on the forge and
+// checks after every change that a sync links the repo to the right org.
+// Orgs are told apart by their forge remote id, not by their name.
+func TestSyncFollowsRepoOwnerChanges(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+	})
+
+	syncs := map[string]func(t *testing.T, s store.Store, user *model.User, repoID int64){
+		"hook": func(t *testing.T, s store.Store, _ *model.User, repoID int64) {
+			repo, err := s.GetRepo(repoID)
+			require.NoError(t, err)
+			hookToken := token.New(token.HookToken)
+			hookToken.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+			hookToken.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
+			signed, err := hookToken.Sign(repo.WebhookSecret)
+			require.NoError(t, err)
+
+			tc := newTestContext(t, s)
+			tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/api/hook", nil)
+			tc.Ctx.Request.Header.Set("Authorization", "Bearer "+signed)
+			PostHook(tc.Ctx)
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		},
+		"repair": func(t *testing.T, s store.Store, user *model.User, repoID int64) {
+			repo, err := s.GetRepo(repoID)
+			require.NoError(t, err)
+
+			tc := newTestContext(t, s)
+			withUser(user)(tc)
+			withRepo(repo, &model.Perm{Admin: true})(tc)
+			RepairRepo(tc.Ctx)
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		},
+	}
+
+	for name, sync := range syncs {
+		t.Run(name, func(t *testing.T) {
+			// the forge: the owner of the repo and the current name of each org by its remote id
+			repoOwner := "alpha"
+			orgs := map[model.ForgeRemoteID]string{"o1": "alpha"}
+			forgeRepo := func() *model.Repo {
+				return &model.Repo{
+					ForgeRemoteID: "42", Owner: repoOwner, Name: "rocket", FullName: repoOwner + "/rocket",
+					Perm: &model.Perm{Admin: true},
+				}
+			}
+
+			driver := moveRepoForge(t)
+			driver.EXPECT().Repo(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(context.Context, *model.User, model.ForgeRemoteID, string, string) (*model.Repo, error) {
+					return forgeRepo(), nil
+				}).Maybe()
+			driver.EXPECT().Hook(mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(context.Context, *http.Request, string) (*model.Repo, *model.Pipeline, error) {
+					// a pull request event ends the hook after the sync, as pull requests are not allowed
+					return forgeRepo(), &model.Pipeline{Event: model.EventPull}, nil
+				}).Maybe()
+			driver.EXPECT().Org(mock.Anything, mock.Anything, mock.Anything).
+				RunAndReturn(func(_ context.Context, _ *model.User, name string) (*model.Org, error) {
+					for id, orgName := range orgs {
+						if orgName == name {
+							return &model.Org{Name: orgName, ForgeRemoteID: id}, nil
+						}
+					}
+					return nil, forge_types.ErrOrgNotFound
+				})
+			driver.EXPECT().OrgByRemoteID(mock.Anything, mock.Anything, mock.Anything, false).
+				RunAndReturn(func(_ context.Context, _ *model.User, id model.ForgeRemoteID, _ bool) (*model.Org, error) {
+					if orgName, ok := orgs[id]; ok {
+						return &model.Org{Name: orgName, ForgeRemoteID: id}, nil
+					}
+					return nil, forge_types.ErrOrgNotFound
+				}).Maybe()
+			driver.EXPECT().Deactivate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+			driver.EXPECT().Activate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+			s := newTestStore(t)
+			user := &model.User{Login: "alice", ForgeID: 1, ForgeRemoteID: "u-alice", Hash: "alice"}
+			require.NoError(t, s.CreateUser(user))
+			alpha := &model.Org{Name: "alpha", ForgeID: 1, ForgeRemoteID: "o1"}
+			require.NoError(t, s.OrgCreate(alpha))
+			repo := &model.Repo{
+				ForgeID: 1, ForgeRemoteID: "42", Owner: "alpha", Name: "rocket", FullName: "alpha/rocket",
+				UserID: user.ID, IsActive: true, WebhookSecret: "secret", OrgID: alpha.ID,
+			}
+			require.NoError(t, s.CreateRepo(repo))
+
+			for _, step := range []struct {
+				name   string
+				change func()
+				org    model.ForgeRemoteID
+			}{
+				{
+					name:   "repo moved to a new owner",
+					change: func() { orgs["o2"] = "bravo"; repoOwner = "bravo" },
+					org:    "o2",
+				},
+				{
+					name:   "new owner renamed itself",
+					change: func() { orgs["o2"] = "charlie"; repoOwner = "charlie" },
+					org:    "o2",
+				},
+				{
+					name:   "owner renamed again and a new org with its old name got the repo",
+					change: func() { orgs["o2"] = "delta"; orgs["o3"] = "charlie"; repoOwner = "charlie" },
+					org:    "o3",
+				},
+			} {
+				step.change()
+				sync(t, s, user, repo.ID)
+
+				stored, err := s.GetRepo(repo.ID)
+				require.NoError(t, err)
+				assert.Equal(t, repoOwner+"/rocket", stored.FullName, step.name)
+				org, err := s.OrgGet(stored.OrgID)
+				require.NoError(t, err)
+				assert.Equal(t, step.org, org.ForgeRemoteID, "%s: the repo must be linked to the org that owns it now", step.name)
+				// stored orgs keep their forge remote id and follow renames
+				for id, orgName := range orgs {
+					org, err := s.OrgFindByRemoteID(1, id)
+					require.NoError(t, err, step.name)
+					assert.Equal(t, orgName, org.Name, step.name)
+				}
+			}
+		})
+	}
 }

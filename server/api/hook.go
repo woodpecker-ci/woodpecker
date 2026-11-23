@@ -197,6 +197,21 @@ func PostHook(c *gin.Context) {
 	}
 
 	repo.Update(repoFromForge)
+
+	// the owner can be another org now, even under the same name
+	org, err := getOrCreateOrg(c, _store, _forge, user, repo.ForgeID, repo.Owner)
+	if errors.Is(err, errNameConflict) {
+		c.String(http.StatusConflict, "Organization %s: %s.", repo.Owner, err)
+		return
+	}
+	if err != nil {
+		msg := fmt.Sprintf("Could not find or create organization %s.", repo.Owner)
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+	repo.OrgID = org.ID
+
 	err = _store.UpdateRepo(repo)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

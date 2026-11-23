@@ -7,7 +7,20 @@
         class="bg-wp-background-200! dark:bg-wp-background-200! items-center gap-2"
       >
         <span>{{ org.name }}</span>
+        <Badge
+          v-if="org.conflict_forge_remote_id"
+          :label="$t('admin.settings.orgs.name_conflict')"
+          :title="$t('admin.settings.orgs.name_conflict_desc')"
+        />
         <div class="ml-auto flex items-center gap-2">
+          <IconButton
+            v-if="org.conflict_forge_remote_id"
+            icon="heal"
+            :title="$t('admin.settings.orgs.remap')"
+            class="h-8 w-8"
+            :is-loading="isRemapping"
+            @click="remapOrg(org)"
+          />
           <IconButton
             icon="chevron-right"
             :title="$t('admin.settings.orgs.view')"
@@ -42,6 +55,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -71,6 +85,17 @@ const { doSubmit: deleteOrg, isLoading: isDeleting } = useAsyncAction(async (_or
 
   await apiClient.deleteOrg(_org);
   notifications.notify({ title: t('admin.settings.orgs.deleted'), type: 'success' });
+  await resetPage();
+});
+
+const { doSubmit: remapOrg, isLoading: isRemapping } = useAsyncAction(async (_org: Org) => {
+  // eslint-disable-next-line no-alert
+  if (!confirm(t('admin.settings.orgs.remap_confirm'))) {
+    return;
+  }
+
+  await apiClient.remapOrg(_org);
+  notifications.notify({ title: t('admin.settings.orgs.remapped'), type: 'success' });
   await resetPage();
 });
 

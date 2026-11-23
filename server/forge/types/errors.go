@@ -26,6 +26,7 @@ import (
 var (
 	ErrNotImplemented          = errors.New("not implemented")
 	ErrRepoNotFound            = errors.New("repo not found")
+	ErrOrgNotFound             = errors.New("org not found")
 	ErrInvalidWebhookSignature = errors.New("invalid webhook signature")
 )
 

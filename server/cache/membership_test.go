@@ -34,6 +34,7 @@ func TestMembershipCacheForgeScoping(t *testing.T) {
 	// forge-local remote id
 	userForge1 := &model.User{ID: 1, Login: "alice", ForgeID: 1, ForgeRemoteID: "42"}
 	userForge2 := &model.User{ID: 2, Login: "bob", ForgeID: 2, ForgeRemoteID: "42"}
+	acme := &model.Org{ID: 1, Name: "acme"}
 
 	forge1 := forge_mocks.NewMockForge(t)
 	forge1.On("OrgMembership", mock.Anything, userForge1, "acme").
@@ -43,23 +44,66 @@ func TestMembershipCacheForgeScoping(t *testing.T) {
 	forge2.On("OrgMembership", mock.Anything, userForge2, "acme").
 		Return(&model.OrgPerm{}, nil).Once()
 
-	perm1, err := cache.Get(t.Context(), forge1, userForge1, "acme")
+	perm1, err := cache.Get(t.Context(), forge1, userForge1, acme)
 	require.NoError(t, err)
 	assert.True(t, perm1.Admin)
 
 	// must NOT be served from userForge1's cache entry
-	perm2, err := cache.Get(t.Context(), forge2, userForge2, "acme")
+	perm2, err := cache.Get(t.Context(), forge2, userForge2, acme)
 	require.NoError(t, err)
 	assert.False(t, perm2.Member, "membership of a same-remote-id user on another forge leaked from the cache")
 	assert.False(t, perm2.Admin)
 
 	// repeated lookups are served from the per-user cache entries (the
 	// .Once() expectations above fail the test on a second forge call)
-	perm1again, err := cache.Get(t.Context(), forge1, userForge1, "acme")
+	perm1again, err := cache.Get(t.Context(), forge1, userForge1, acme)
 	require.NoError(t, err)
 	assert.True(t, perm1again.Admin)
 
-	perm2again, err := cache.Get(t.Context(), forge2, userForge2, "acme")
+	perm2again, err := cache.Get(t.Context(), forge2, userForge2, acme)
 	require.NoError(t, err)
 	assert.False(t, perm2again.Member)
+}
+
+func TestMembershipOnlyCountsForTheStoredOrg(t *testing.T) {
+	user := &model.User{ID: 1, Login: "alice", AccessToken: "token"}
+	member := &model.OrgPerm{Member: true, Admin: true}
+
+	t.Run("forge org with the same remote id", func(t *testing.T) {
+		f := forge_mocks.NewMockForge(t)
+		f.On("OrgMembership", mock.Anything, user, "acme").Return(member, nil)
+		f.On("Org", mock.Anything, user, "acme").Return(&model.Org{Name: "acme", ForgeRemoteID: "1"}, nil)
+
+		perm, err := NewMembershipService(nil).Get(t.Context(), f, user, &model.Org{ID: 1, Name: "acme", ForgeRemoteID: "1"})
+		require.NoError(t, err)
+		assert.Equal(t, member, perm)
+	})
+
+	t.Run("name now used by another forge org", func(t *testing.T) {
+		f := forge_mocks.NewMockForge(t)
+		f.On("OrgMembership", mock.Anything, user, "acme").Return(member, nil)
+		f.On("Org", mock.Anything, user, "acme").Return(&model.Org{Name: "acme", ForgeRemoteID: "2"}, nil)
+
+		perm, err := NewMembershipService(nil).Get(t.Context(), f, user, &model.Org{ID: 1, Name: "acme", ForgeRemoteID: "1"})
+		require.NoError(t, err)
+		assert.Equal(t, &model.OrgPerm{}, perm)
+	})
+
+	t.Run("org stored without remote id", func(t *testing.T) {
+		f := forge_mocks.NewMockForge(t)
+		f.On("OrgMembership", mock.Anything, user, "acme").Return(member, nil)
+
+		perm, err := NewMembershipService(nil).Get(t.Context(), f, user, &model.Org{ID: 1, Name: "acme"})
+		require.NoError(t, err)
+		assert.Equal(t, member, perm)
+	})
+
+	t.Run("no member, no org lookup", func(t *testing.T) {
+		f := forge_mocks.NewMockForge(t)
+		f.On("OrgMembership", mock.Anything, user, "acme").Return(&model.OrgPerm{}, nil)
+
+		perm, err := NewMembershipService(nil).Get(t.Context(), f, user, &model.Org{ID: 1, Name: "acme", ForgeRemoteID: "1"})
+		require.NoError(t, err)
+		assert.Equal(t, &model.OrgPerm{}, perm)
+	})
 }
