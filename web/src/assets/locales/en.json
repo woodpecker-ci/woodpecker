@@ -107,6 +107,10 @@
       "internal": {
         "internal": "Internal",
         "desc": "Only authenticated users of the Woodpecker instance can see this project."
+      },
+      "sync": {
+        "sync": "Sync visibility with forge",
+        "desc": "The visibility follows the repository on the forge."
       }
     },
     "settings": {

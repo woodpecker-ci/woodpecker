@@ -57,6 +57,10 @@ func convertStatus(status model.StatusValue) string {
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 	owner, name, _ := strings.Cut(from.FullName, "/")
+	visibility := model.VisibilityPublic
+	if from.IsPrivate {
+		visibility = model.VisibilityPrivate
+	}
 	repo := model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(from.UUID),
 		Clone:         cloneLink(from),
@@ -66,6 +70,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		FullName:      from.FullName,
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
+		Visibility:    visibility,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
