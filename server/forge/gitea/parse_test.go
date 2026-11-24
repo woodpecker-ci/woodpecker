@@ -93,6 +93,7 @@ func TestGiteaParser(t *testing.T) {
 						Name:  "meisam",
 						Email: "meisam@noreply.codeberg.org",
 					},
+					Timestamp: 1657652967, // 2022-07-12T21:09:27+02:00
 				},
 				Branch:       "fdsafdsa",
 				Ref:          "refs/heads/fdsafdsa",
@@ -175,6 +176,7 @@ func TestGiteaParser(t *testing.T) {
 						Name:  "6543",
 						Email: "6543@obermui.de",
 					},
+					Timestamp: 1708557487, // 2024-02-22T00:18:07+01:00
 				},
 				Branch:       "main",
 				Ref:          "refs/heads/main",
@@ -207,14 +209,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event:  model.EventTag,
-				Author: "gordon",
-				Commit: &model.Commit{
-					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
-					Author: model.CommitAuthor{
-						Email: "gordon@golang.org",
-					},
-				},
+				Event:    model.EventTag,
+				Author:   "gordon",
+				Commit:   &model.Commit{SHA: "ef98532add3b2feb7a137426bba1248724367df5"},
 				Ref:      "refs/tags/v1.0.0",
 				TagTitle: "v1.0.0",
 				Sender:   "gordon",
@@ -245,15 +242,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author: "gordon",
-				Event:  "pull_request",
-				Commit: &model.Commit{
-					SHA:     "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
-					Message: "Update the README with new information",
-					Author: model.CommitAuthor{
-						Email: "gordon@golang.org",
-					},
-				},
+				Author:            "gordon",
+				Event:             "pull_request",
+				Commit:            &model.Commit{SHA: "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"},
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
 				Refspec:           "feature/changes:main",
@@ -288,15 +279,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author: "6543",
-				Event:  "pull_request",
-				Commit: &model.Commit{
-					SHA:     "36b5813240a9d2daa29b05046d56a53e18f39a3e",
-					Message: "Some ned more AAAA",
-					Author: model.CommitAuthor{
-						Email: "6543@noreply.codeberg.org",
-					},
-				},
+				Author:            "6543",
+				Event:             "pull_request",
+				Commit:            &model.Commit{SHA: "36b5813240a9d2daa29b05046d56a53e18f39a3e"},
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
 				Refspec:           "6543-patch-1:main",
@@ -331,15 +316,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author: "test",
-				Event:  "pull_request",
-				Commit: &model.Commit{
-					SHA:     "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25",
-					Message: "New Pull",
-					Author: model.CommitAuthor{
-						Email: "test@noreply.localhost",
-					},
-				},
+				Author:   "test",
+				Event:    "pull_request",
+				Commit:   &model.Commit{SHA: "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25"},
 				Branch:   "main",
 				Ref:      "refs/pull/2/head",
 				Refspec:  "test-patch-1:main",
@@ -376,15 +355,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author: "anbraten",
-				Event:  "pull_request_closed",
-				Commit: &model.Commit{
-					SHA:     "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
-					Message: "Adjust file",
-					Author: model.CommitAuthor{
-						Email: "anbraten@sender.gitea.com",
-					},
-				},
+				Author:            "anbraten",
+				Event:             "pull_request_closed",
+				Commit:            &model.Commit{SHA: "d555a5dd07f4d0148a58d4686ec381502ae6a2d4"},
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
 				Refspec:           "anbraten-patch-1:main",
@@ -401,16 +374,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request",
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"edited"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "Edit pull title :D",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"edited"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -427,16 +394,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request",
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"edited"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"edited"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -473,16 +434,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"label_updated"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"label_updated"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -499,16 +454,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"label_updated"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"label_updated"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -525,16 +474,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"label_cleared"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"label_cleared"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -551,16 +494,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_milestone
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"milestoned"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:               "jony",
+				Event:                model.EventPullMetadata,
+				EventReason:          []string{"milestoned"},
+				Commit:               &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:               "main",
 				Ref:                  "refs/pull/7/head",
 				Refspec:              "jony-patch-1:main",
@@ -578,16 +515,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_milestone
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"milestoned"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:               "jony",
+				Event:                model.EventPullMetadata,
+				EventReason:          []string{"milestoned"},
+				Commit:               &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:               "main",
 				Ref:                  "refs/pull/7/head",
 				Refspec:              "jony-patch-1:main",
@@ -605,16 +536,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_milestone
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"demilestoned"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:               "jony",
+				Event:                model.EventPullMetadata,
+				EventReason:          []string{"demilestoned"},
+				Commit:               &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:               "main",
 				Ref:                  "refs/pull/7/head",
 				Refspec:              "jony-patch-1:main",
@@ -632,16 +557,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_assign
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"assigned"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"assigned"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -658,16 +577,10 @@ func TestGiteaParser(t *testing.T) {
 			event: "pull_request", // type: pull_request_assign
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
-				Author:      "jony",
-				Event:       model.EventPullMetadata,
-				EventReason: []string{"unassigned"},
-				Commit: &model.Commit{
-					SHA:     "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-					Message: "somepull",
-					Author: model.CommitAuthor{
-						Email: "a_nice_user@noreply.example.org",
-					},
-				},
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       []string{"unassigned"},
+				Commit:            &model.Commit{SHA: "07977177c2cd7d46bad37b8472a9d50e7acb9d1f"},
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
@@ -701,15 +614,9 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author: "anbraten",
-				Event:  "pull_request_closed",
-				Commit: &model.Commit{
-					SHA:     "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
-					Message: "Adjust file",
-					Author: model.CommitAuthor{
-						Email: "anbraten@noreply.gitea.com",
-					},
-				},
+				Author:            "anbraten",
+				Event:             "pull_request_closed",
+				Commit:            &model.Commit{SHA: "d555a5dd07f4d0148a58d4686ec381502ae6a2d4"},
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",
 				Refspec:           "anbraten-patch-1:main",
@@ -744,12 +651,8 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Commit: &model.Commit{
-					Author: model.CommitAuthor{
-						Email: "anbraten@noreply.xxx",
-					},
-				},
-				Event: model.EventRelease,
+				Commit: &model.Commit{},
+				Event:  model.EventRelease,
 				Release: &model.Release{
 					Title: "Version 0.0.5",
 				},
@@ -771,9 +674,6 @@ func TestGiteaParser(t *testing.T) {
 				assert.ErrorIs(t, err, tt.err)
 			} else if assert.NoError(t, err) {
 				assert.EqualValues(t, tt.repo, r)
-				if p != nil && p.Commit != nil {
-					p.Commit.Timestamp = 0
-				}
 				assert.EqualValues(t, tt.pipe, p)
 			}
 		})

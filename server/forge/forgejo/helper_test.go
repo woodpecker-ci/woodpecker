@@ -128,7 +128,7 @@ func TestParsePullRequest(t *testing.T) {
 		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/pull/1", pipeline.ForgeURL)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "feature/changes:main", pipeline.Refspec)
-		assert.Equal(t, hook.PullRequest.Title, pipeline.Commit.Message)
+		assert.Empty(t, pipeline.Commit.Message)
 		assert.Equal(t, "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
 		assert.Equal(t, hook.PullRequest.Poster.UserName, pipeline.Author)
 	})

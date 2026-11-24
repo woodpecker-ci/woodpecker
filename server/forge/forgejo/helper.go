@@ -100,6 +100,27 @@ func convertPayloadCommit(from *forgejo.PayloadCommit) *model.Commit {
 	return commit
 }
 
+// convertCommit converts a commit loaded from the API to the common
+// Woodpecker commit structure.
+func convertCommit(from *forgejo.Commit) *model.Commit {
+	commit := &model.Commit{ForgeURL: from.HTMLURL}
+	if from.CommitMeta != nil {
+		commit.SHA = from.SHA
+	}
+	if from.RepoCommit == nil {
+		return commit
+	}
+	commit.Message = from.RepoCommit.Message
+	if author := from.RepoCommit.Author; author != nil {
+		commit.Author = model.CommitAuthor{Name: author.Name, Email: author.Email}
+		// https://github.com/go-gitea/gitea/blob/b1a6cda/services/convert/git_commit.go#L149
+		if date, err := time.Parse(time.RFC3339, author.Date); err == nil {
+			commit.Timestamp = date.Unix()
+		}
+	}
+	return commit
+}
+
 // pipelineFromPush extracts the Pipeline data from a Forgejo push hook.
 func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
@@ -120,9 +141,6 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 
 	commit := convertPayloadCommit(&headCommit)
 	commit.SHA = hook.After
-	if commit.Timestamp == 0 {
-		commit.Timestamp = time.Now().UTC().Unix()
-	}
 
 	return &model.Pipeline{
 		Event:        model.EventPush,
@@ -163,13 +181,8 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 
 	return &model.Pipeline{
 		Event: model.EventTag,
-		Commit: &model.Commit{
-			SHA:       hook.Sha,
-			Timestamp: time.Now().UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: hook.Sender.Email,
-			},
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{SHA: hook.Sha},
 		Ref:      fmt.Sprintf("refs/tags/%s", ref),
 		TagTitle: ref,
 		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
@@ -202,13 +215,8 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 
 	pipeline := &model.Pipeline{
 		Event: event,
-		Commit: &model.Commit{
-			SHA:     hook.PullRequest.Head.Sha,
-			Message: hook.PullRequest.Title,
-			Author: model.CommitAuthor{
-				Email: hook.Sender.Email,
-			},
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{SHA: hook.PullRequest.Head.Sha},
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
@@ -249,11 +257,8 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 
 	return &model.Pipeline{
 		Event: model.EventRelease,
-		Commit: &model.Commit{
-			Author: model.CommitAuthor{
-				Email: hook.Sender.Email,
-			},
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{},
 		Ref:      fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL: hook.Release.HTMLURL,
 		Branch:   hook.Release.Target,

@@ -35,6 +35,7 @@ func Handler() http.Handler {
 	e.POST("/api/v1/repos/:owner/:name/statuses/:commit", createRepoCommitStatus)
 	e.GET("/api/v1/repos/:owner/:name/pulls", listRepoPulls)
 	e.GET("/api/v1/repos/:owner/:name/pulls/:index/files", getPRFiles)
+	e.GET("/api/v1/repos/:owner/:name/git/commits/:sha", getCommit)
 	e.GET("/api/v1/user/repos", getUserRepos)
 	e.GET("/api/v1/version", getVersion)
 
@@ -57,6 +58,10 @@ func getRepo(c *gin.Context) {
 	default:
 		c.String(http.StatusOK, repoPayload)
 	}
+}
+
+func getCommit(c *gin.Context) {
+	c.String(http.StatusOK, `{"sha":"`+c.Param("sha")+`","commit":{"message":"fix the thing"}}`)
 }
 
 func getRepoByID(c *gin.Context) {
