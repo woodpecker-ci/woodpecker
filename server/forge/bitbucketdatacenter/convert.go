@@ -100,13 +100,8 @@ func convertRepositoryPushEvent(ev *bitbucket.RepositoryPushEvent, baseURL strin
 	}
 
 	pipeline := &model.Pipeline{
-		Commit: &model.Commit{
-			SHA:       change.ToHash,
-			Timestamp: time.Time(ev.Date).UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: ev.Actor.Email,
-			},
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{SHA: change.ToHash},
 		Branch:   change.Ref.DisplayID,
 		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:   authorLabel(ev.Actor.Name),
@@ -140,14 +135,8 @@ func convertGetCommitRange(ev *bitbucket.RepositoryPushEvent) (currCommit, prevC
 
 func convertPullRequestEvent(ev *bitbucket.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit: &model.Commit{
-			SHA:       ev.PullRequest.Source.Latest,
-			Message:   ev.PullRequest.Title,
-			Timestamp: time.Time(ev.Date).UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: ev.Actor.Email,
-			},
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{SHA: ev.PullRequest.Source.Latest},
 		Branch:   ev.PullRequest.Source.DisplayID,
 		Title:    ev.PullRequest.Title,
 		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),

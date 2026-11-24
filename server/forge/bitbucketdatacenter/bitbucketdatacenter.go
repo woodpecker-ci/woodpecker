@@ -578,13 +578,9 @@ func (c *client) updatePipelineFromCommits(ctx context.Context, u *model.User, r
 		p.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, commit.ID)
 	}
 
-	pushed := p.Commit
-	p.Commit = convertCommit(commit, fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, pushed.SHA))
-	p.Commit.SHA = pushed.SHA
-	if p.Commit.Timestamp == 0 {
-		// keep the time of the push if the commit does not report its own
-		p.Commit.Timestamp = pushed.Timestamp
-	}
+	sha := p.Commit.SHA
+	p.Commit = convertCommit(commit, fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, sha))
+	p.Commit.SHA = sha
 
 	opts := &bitbucket.CompareChangesOptions{}
 	if currCommit != "" {
@@ -615,6 +611,13 @@ func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.Use
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
+
+	// the hook only carries the sha
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit.SHA)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read commit: %w", err)
+	}
+	p.Commit = convertCommit(commit, fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", c.url, r.Owner, r.Name, p.Commit.SHA))
 
 	opts := &bitbucket.ListOptions{}
 	for {

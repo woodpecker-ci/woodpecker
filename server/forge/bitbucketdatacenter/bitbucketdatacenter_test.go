@@ -302,8 +302,17 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, []string{"go.mod", "go.sum", "renovate.json"}, pipeline.ChangedFiles)
 	})
 
-	t.Run("pull request collects the changed files of all pages", func(t *testing.T) {
+	t.Run("pull request loads its commit and collects the changed files of all pages", func(t *testing.T) {
 		s := mock.NewMockServer(
+			mock.WithRequestMatchHandler(mock.GetCommit, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/latest/projects/DEV/repos/network-monitor/commits/1c7589876bc8b5e83122b1656925d679915193d4", r.URL.Path)
+				writeJSON(t, w, bitbucket.Commit{
+					ID:       "1c7589876bc8b5e83122b1656925d679915193d4",
+					Message:  "Fix the thing",
+					Author:   bitbucket.GitUser{Name: "Jane Doe", Email: "jane@example.com"},
+					Authored: bitbucket.DateTime(time.Unix(1700000000, 0)),
+				})
+			})),
 			mock.WithRequestMatchHandler(prChanges, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, "/api/latest/projects/DEV/repos/network-monitor/pull-requests/125/changes", r.URL.Path)
 				if r.URL.Query().Get("start") == "0" {
@@ -323,6 +332,13 @@ func TestHook(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPull, pipeline.Event)
+		assert.Equal(t, &model.Commit{
+			SHA:       "1c7589876bc8b5e83122b1656925d679915193d4",
+			Message:   "Fix the thing",
+			ForgeURL:  "https://bitbucket.example.com/projects/DEV/repos/network-monitor/commits/1c7589876bc8b5e83122b1656925d679915193d4",
+			Author:    model.CommitAuthor{Name: "Jane Doe", Email: "jane@example.com"},
+			Timestamp: 1700000000,
+		}, pipeline.Commit)
 		assert.Equal(t, []string{"main.go", "README.md"}, pipeline.ChangedFiles)
 	})
 
@@ -376,10 +392,12 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 	})
 
 	t.Run("push keeps its commit and url", func(t *testing.T) {
-		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: tagObjectSHA}, ForgeURL: "keep"}, tagObjectSHA, "")
+		p, err := c.updatePipelineFromCommits(t.Context(), fakeUser, repo, &model.Pipeline{Event: model.EventPush, Commit: &model.Commit{SHA: tagObjectSHA, Timestamp: 42}, ForgeURL: "keep"}, tagObjectSHA, "")
 		require.NoError(t, err)
 		assert.Equal(t, tagObjectSHA, p.Commit.SHA)
 		assert.Equal(t, "keep", p.ForgeURL)
+		// no fallback to the push time, the commit reports none here
+		assert.Zero(t, p.Commit.Timestamp)
 	})
 }
 

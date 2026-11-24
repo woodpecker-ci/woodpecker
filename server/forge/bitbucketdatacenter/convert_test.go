@@ -177,14 +177,7 @@ func TestConvertRepositoryPushEvent(t *testing.T) {
 				},
 			},
 			to: &model.Pipeline{
-				Commit: &model.Commit{
-					SHA:       "1234567890abcdef",
-					Message:   "",
-					Timestamp: now.UTC().Unix(),
-					Author: model.CommitAuthor{
-						Email: "john.doe@mail.com",
-					},
-				},
+				Commit:   &model.Commit{SHA: "1234567890abcdef"},
 				Branch:   "branch",
 				Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
 				Author:   "John Doe",
@@ -239,14 +232,7 @@ func TestConvertPullRequestEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit: &model.Commit{
-			SHA:       "1234567890abcdef",
-			Message:   "my title",
-			Timestamp: now.UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: "john.doe@mail.com",
-			},
-		},
+		Commit:   &model.Commit{SHA: "1234567890abcdef"},
 		Branch:   "branch",
 		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author:   "John Doe",
@@ -297,14 +283,7 @@ func TestConvertPullRequestCloseEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit: &model.Commit{
-			SHA:       "1234567890abcdef",
-			Message:   "my title",
-			Timestamp: now.UTC().Unix(),
-			Author: model.CommitAuthor{
-				Email: "john.doe@mail.com",
-			},
-		},
+		Commit:   &model.Commit{SHA: "1234567890abcdef"},
 		Branch:   "branch",
 		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author:   "John Doe",
