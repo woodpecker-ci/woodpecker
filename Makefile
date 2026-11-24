@@ -37,9 +37,10 @@ else
 	endif
 endif
 
-# go build tags, feature flags like SQLITE_ENABLED add to them
+# go build tags, feature flags like SQLITE_ENABLED and LIBVIRT_ENABLED add to them
 TAGS ?=
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
+
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
@@ -50,6 +51,27 @@ ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
+
+# on non linux targets we force disable libvirt backend
+ifneq ($(TARGETOS),linux)
+	override LIBVIRT_ENABLED := false
+endif
+
+# enable libvirt by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	LIBVIRT_ENABLED ?= true
+else
+	ifeq ($(LIBVIRT_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if LIBVIRT_ENABLED is 'true')
+	endif
+endif
+ifeq ($(LIBVIRT_ENABLED),true)
+	override TAGS += libvirt
+	ifneq ($(STATIC_BUILD),true)
+		# we have dynamic build so we can do dynamic so loading
+		override TAGS += libvirt_dlopen
+	endif
+endif
 
 # enable sqlite by default if cgo is enabled
 ifeq ($(CGO_ENABLED),1)
@@ -80,6 +102,8 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e TARGETOS="linux" \
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
+		-e LIBVIRT_ENABLED="$(LIBVIRT_ENABLED)" \
+		-e SQLITE_ENABLED="$(SQLITE_ENABLED)" \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
@@ -204,21 +228,24 @@ lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
-	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
+	go test -race -cover -coverpkg=./... -coverprofile agent-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/agent go.woodpecker-ci.org/woodpecker/v3/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
+	# note: do not add 'sqlite_unlock_notify' to tags or test will hang
+	go test -race -cover -coverpkg=./... -coverprofile server-coverage.out -timeout 60s -tags 'test sqlite' go.woodpecker-ci.org/woodpecker/v3/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v3/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
+	go test -race -cover -coverpkg=./... -coverprofile cli-coverage.out -timeout 60s -tags 'test' go.woodpecker-ci.org/woodpecker/v3/cmd/cli go.woodpecker-ci.org/woodpecker/v3/cli/...
 
 # Migration tests reset the shared database, so datastore packages must run serially.
 test-server-datastore: ## Test server datastore
-	go test -p 1 -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
-	go test -p 1 -race -timeout 300s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	# note: do not add 'sqlite_unlock_notify' to tags or test will hang
+	go test -p 1 -timeout 300s -tags 'test sqlite' -run TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	go test -p 1 -race -timeout 300s -tags 'test sqlite' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v3/server/store/...
+	# note: do not add 'sqlite_unlock_notify' to tags or test will hang
+	go test -race -cover -coverpkg=./... -coverprofile datastore-coverage.out -timeout 300s -tags 'test sqlite' go.woodpecker-ci.org/woodpecker/v3/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -227,10 +254,10 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverpkg=./... -coverprofile coverage.out -timeout 60s -tags 'test sqlite libvirt libvirt_dlopen' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 test-e2e: ## Test by running yaml config and compare expected result
-	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test $(TAGS)' ./e2e/...
+	go test -race -cover -coverpkg=./... -coverprofile e2e-coverage.out -timeout 60s -tags 'test sqlite' ./e2e/...
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib test-e2e ## Run all tests
@@ -334,12 +361,8 @@ release-server: ## Create server binaries for release
 	  tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX); \
 	fi
 
-release-agent: ## Create agent binaries for release
+release-agent: ## Create non-linux agent binaries for release (linux: cross-compile-agent)
 	# compile
-	GOOS=linux   GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_riscv64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
-	GOOS=linux   GOARCH=arm     CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v3/cmd/agent
@@ -348,10 +371,6 @@ release-agent: ## Create agent binaries for release
 	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_amd64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/openbsd_arm64/woodpecker-agent     go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 	# tar binary files
-	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
-	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
-	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_riscv64.tar.gz -C ${DIST_DIR}/agent/linux_riscv64 woodpecker-agent
-	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm.tar.gz     -C ${DIST_DIR}/agent/linux_arm     woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_amd64.tar.gz  -C ${DIST_DIR}/agent/darwin_amd64  woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_arm64.tar.gz  -C ${DIST_DIR}/agent/darwin_arm64  woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_freebsd_amd64.tar.gz -C ${DIST_DIR}/agent/freebsd_amd64 woodpecker-agent
@@ -362,12 +381,8 @@ release-agent: ## Create agent binaries for release
 	rm -f  ${DIST_DIR}/woodpecker-agent_windows_amd64.zip
 	zip -j ${DIST_DIR}/woodpecker-agent_windows_amd64.zip          ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe
 
-release-cli: ## Create cli binaries for release
+release-cli: ## Create non-linux cli binaries for release (linux: cross-compile-cli)
 	# compile
-	GOOS=linux   GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_amd64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=riscv64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_riscv64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
-	GOOS=linux   GOARCH=arm     CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm/woodpecker-cli         go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=windows GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=darwin  GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=darwin  GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v3/cmd/cli
@@ -376,10 +391,6 @@ release-cli: ## Create cli binaries for release
 	GOOS=openbsd GOARCH=amd64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/openbsd_amd64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	GOOS=openbsd GOARCH=arm64   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/openbsd_arm64/woodpecker-cli     go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 	# tar binary files
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DIST_DIR}/cli/linux_amd64   woodpecker-cli
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DIST_DIR}/cli/linux_arm64   woodpecker-cli
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_riscv64.tar.gz -C ${DIST_DIR}/cli/linux_riscv64 woodpecker-cli
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DIST_DIR}/cli/linux_arm     woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DIST_DIR}/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DIST_DIR}/cli/darwin_arm64  woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_freebsd_amd64.tar.gz -C ${DIST_DIR}/cli/freebsd_amd64 woodpecker-cli
@@ -430,7 +441,7 @@ docs-dependencies: ## Install docs dependencies
 
 .PHONY: generate-docs
 generate-docs: ## Generate docs (currently only for the cli)
-	CGO_ENABLED=0 go generate cmd/cli/app.go
+	CGO_ENABLED=1 GOFLAGS="$(GOFLAGS) -tags=libvirt,libvirt_dlopen" go generate cmd/cli/app.go
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 .PHONY: build-docs

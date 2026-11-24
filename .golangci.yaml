@@ -4,6 +4,8 @@ run:
   build-tags:
     - test
     - sqlite
+    - libvirt
+    - libvirt_dlopen
 linters:
   default: none
   enable:
@@ -193,6 +195,10 @@ linters:
           alias: grpc_credentials
         - pkg: google.golang.org/protobuf/proto
           alias: grpc_proto
+
+        # libvirt
+        - pkg: libvirt.org/go/libvirt
+          alias: virt
 
         # woodpecker internal
         - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types
