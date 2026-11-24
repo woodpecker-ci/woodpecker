@@ -462,8 +462,8 @@ github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9dec
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/zalando/go-keyring v0.2.8 h1:6sD/Ucpl7jNq10rM2pgqTs0sZ9V3qMrqfIIy5YPccHs=
 github.com/zalando/go-keyring v0.2.8/go.mod h1:tsMo+VpRq5NGyKfxoBVjCuMrG47yj8cmakZDO5QGii0=
-gitlab.com/gitlab-org/api/client-go/v3 v3.55.0 h1:4GeU69exRk9MfesSvFQ6V1c4qZ8zFgiRimh1bcU6XT4=
-gitlab.com/gitlab-org/api/client-go/v3 v3.55.0/go.mod h1:8cuzgeUJzkVvaRvw57iZ8foGmL5q8GZXi4lHTiF5edY=
+gitlab.com/gitlab-org/api/client-go/v3 v3.56.0 h1:wZ60ER9r1WuqEewwi25AJ2H0Z3NTdEX4a3mtN14XwYg=
+gitlab.com/gitlab-org/api/client-go/v3 v3.56.0/go.mod h1:8cuzgeUJzkVvaRvw57iZ8foGmL5q8GZXi4lHTiF5edY=
 go.mongodb.org/mongo-driver/v2 v2.5.0 h1:yXUhImUjjAInNcpTcAlPHiT7bIXhshCTL3jVBkF3xaE=
 go.mongodb.org/mongo-driver/v2 v2.5.0/go.mod h1:yOI9kBsufol30iFsl1slpdq1I0eHPzybRWdyYUs8K/0=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
