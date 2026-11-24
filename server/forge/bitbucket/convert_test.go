@@ -128,7 +128,6 @@ func TestConvertPullHook(t *testing.T) {
 	hook.PullRequest.Source.Commit.Hash = "c8411d7"
 	hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
 	hook.PullRequest.Title = "updated README"
-	hook.PullRequest.Updated = time.Now()
 	hook.PullRequest.ID = 1
 
 	pipeline := convertPullHook(hook)
@@ -140,8 +139,8 @@ func TestConvertPullHook(t *testing.T) {
 	assert.Equal(t, hook.PullRequest.Links.HTML.Href, pipeline.ForgeURL)
 	assert.Equal(t, "refs/pull-requests/1/from", pipeline.Ref)
 	assert.Equal(t, "change:main", pipeline.Refspec)
-	assert.Equal(t, hook.PullRequest.Title, pipeline.Commit.Message)
-	assert.Equal(t, hook.PullRequest.Updated.Unix(), pipeline.Commit.Timestamp)
+	// the commit data is loaded from the forge later
+	assert.Equal(t, &model.Commit{SHA: hook.PullRequest.Source.Commit.Hash}, pipeline.Commit)
 }
 
 func TestConvertPushHook(t *testing.T) {

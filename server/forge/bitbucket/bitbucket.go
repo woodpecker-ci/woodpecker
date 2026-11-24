@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -421,16 +422,7 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	head := &model.Commit{
-		SHA:      commit.Hash,
-		Message:  commit.Message,
-		ForgeURL: commit.Links.HTML.Href,
-		Author:   convertCommitAuthor(commit.Author.Raw),
-	}
-	if !commit.Date.IsZero() {
-		head.Timestamp = commit.Date.UTC().Unix()
-	}
-	return head, nil
+	return convertCommit(commit), nil
 }
 
 // PullRequests returns the pull requests of the named repository.
@@ -473,6 +465,12 @@ func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 		forge.Refresh(ctx, c, _store, u)
 	}
 
+	if pr != nil {
+		if pl.Commit, err = pullCommit(c.newClient(ctx, u), repo, pr, pl.Commit.SHA); err != nil {
+			return nil, nil, err
+		}
+	}
+
 	switch pl.Event {
 	case model.EventPush:
 		// List only the latest push changes
@@ -500,6 +498,20 @@ func (c *config) Hook(ctx context.Context, req *http.Request, _ string) (*model.
 	}
 
 	return repo, pl, nil
+}
+
+// pullCommit loads the commit of a pull request hook, as the hook only carries its short sha.
+// The commit of an open pull request is in its source repo, a merge commit in the target repo.
+func pullCommit(client *internal.Client, repo *model.Repo, pr *internal.PullRequestHook, sha string) (*model.Commit, error) {
+	owner, name := repo.Owner, repo.Name
+	if sha == pr.PullRequest.Source.Commit.Hash {
+		owner, name, _ = strings.Cut(pr.PullRequest.Source.Repo.FullName, "/")
+	}
+	commit, err := client.GetCommit(owner, name, sha)
+	if err != nil {
+		return nil, err
+	}
+	return convertCommit(commit), nil
 }
 
 // OrgMembership returns if user is member of organization and if user

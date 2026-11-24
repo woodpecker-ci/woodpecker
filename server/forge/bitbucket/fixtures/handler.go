@@ -40,6 +40,7 @@ func Handler() http.Handler {
 	e.GET("/2.0/user/emails", getEmails)
 	e.GET("/2.0/user/workspaces/:workspace/permissions/repositories", getPermissions)
 	e.GET("/2.0/repositories/:owner/:name/commits/:commit", getBranchHead)
+	e.GET("/2.0/repositories/:owner/:name/commit/:commit", getCommit)
 	e.GET("/2.0/repositories/:owner/:name/pullrequests", getPullRequests)
 	e.GET("/2.0/repositories/:owner/:name/diffstat/:commit", getCommitDiffstat)
 	return e
@@ -141,6 +142,11 @@ func getBranchHead(c *gin.Context) {
 	default:
 		c.String(http.StatusNotFound, "")
 	}
+}
+
+func getCommit(c *gin.Context) {
+	sha := c.Param("commit")
+	c.String(http.StatusOK, fmt.Sprintf(commitPayload, sha, c.Param("owner"), c.Param("name"), sha))
 }
 
 func getPullRequests(c *gin.Context) {
@@ -625,5 +631,21 @@ const permissionHookPayLoad = `
 			"permission": "admin"
 		}
 	]
+}
+`
+
+const commitPayload = `
+{
+	"hash": "%sfull",
+	"message": "fix the thing",
+	"date": "2023-11-14T22:13:20+00:00",
+	"author": {
+		"raw": "Jane Doe <jane@example.com>"
+	},
+	"links": {
+		"html": {
+			"href": "https://bitbucket.org/%s/%s/commit/%s"
+		}
+	}
 }
 `

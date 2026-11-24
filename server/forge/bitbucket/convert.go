@@ -180,12 +180,9 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 
 	pipeline := &model.Pipeline{
 		Event: event,
-		Commit: &model.Commit{
-			SHA:       from.PullRequest.Source.Commit.Hash,
-			Message:   from.PullRequest.Title,
-			Timestamp: from.PullRequest.Updated.UTC().Unix(),
-		},
-		Ref: fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
+		// the commit data is loaded from the forge later
+		Commit: &model.Commit{SHA: from.PullRequest.Source.Commit.Hash},
+		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf(
 			"%s:%s",
 			from.PullRequest.Source.Branch.Name,
@@ -235,6 +232,20 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
 	return pipeline
+}
+
+// convertCommit converts a Bitbucket commit to the common Woodpecker commit structure.
+func convertCommit(from *internal.Commit) *model.Commit {
+	commit := &model.Commit{
+		SHA:      from.Hash,
+		Message:  from.Message,
+		ForgeURL: from.Links.HTML.Href,
+		Author:   convertCommitAuthor(from.Author.Raw),
+	}
+	if !from.Date.IsZero() {
+		commit.Timestamp = from.Date.UTC().Unix()
+	}
+	return commit
 }
 
 // regex for git author fields (e.g. "name <name@mail.tld>").
