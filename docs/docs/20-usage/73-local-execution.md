@@ -68,8 +68,10 @@ woodpecker-cli exec \
 
 The CLI sends the request the server sends, built from the metadata flags. Workflow files given as arguments, or found at the default config paths, are sent as `configuration` and are run when the extension responds with `204 No Content`. Without local files the request has no `configuration`, as in exclusive mode.
 
+The request is signed the same way the server signs extension calls: an ed25519 [HTTP signature](https://tools.ietf.org/html/draft-cavage-http-signatures) over `@request-target` and `content-digest`. The signature name is `woodpecker-cli-extensions`, not the server's `woodpecker-ci-extensions`, so the extension can trust both. The first time the option is used, the private key is generated and stored in the system keyring, in the same place as CLI tokens (`woodpecker-cli` / `config-extension-signing-key`). The public key is printed as PEM, in the same format as the server's `GET /api/signature/public-key`. Configure the extension with that public key.
+
 :::note
-The CLI does not sign the request and does not send `netrc` credentials. An extension that verifies the server's signature rejects requests from the CLI.
+The CLI does not send `netrc` credentials. A system without a keyring cannot store the signing key, and the command fails instead of sending an unsigned request.
 :::
 
 ## Pass environment variables and secrets

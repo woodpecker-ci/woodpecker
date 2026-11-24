@@ -29,7 +29,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
@@ -112,8 +111,21 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 // fetchConfigExtension asks the configuration extension at endpoint for the
 // workflows of the pipeline described by m. The local files are sent as the
 // repository's config files and are returned when the extension responds with
-// 204 No Content, the same as the server does.
+// 204 No Content, the same as the server does. The request is signed with the
+// CLI's ed25519 key, and the matching public key is written to stderr.
 func fetchConfigExtension(ctx context.Context, endpoint string, m *metadata.Metadata, local []*builder.YamlFile) ([]*builder.YamlFile, error) {
+	privateKey, err := configExtensionPrivateKey()
+	if err != nil {
+		return nil, err
+	}
+	if err := provideConfigExtensionPublicKey(privateKey); err != nil {
+		return nil, err
+	}
+	client, err := newConfigExtensionClient(privateKey)
+	if err != nil {
+		return nil, err
+	}
+
 	body, err := json.Marshal(newConfigExtensionRequest(m, local))
 	if err != nil {
 		return nil, fmt.Errorf("could not encode config extension request: %w", err)
@@ -128,7 +140,6 @@ func fetchConfigExtension(ctx context.Context, endpoint string, m *metadata.Meta
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Transport: httputil.NewUserAgentRoundTripper(nil, "cli")}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("could not fetch config from extension: %w", err)

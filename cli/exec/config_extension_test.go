@@ -18,7 +18,10 @@ package exec
 
 import (
 	"bytes"
+	"crypto/ed25519"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -28,10 +31,19 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/yaronf/httpsign"
+	"github.com/zalando/go-keyring"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
+
+func TestMain(m *testing.M) {
+	// Keep the signing key in memory. The real keyring would prompt or persist
+	// a key on the machine running the tests.
+	keyring.MockInit()
+	os.Exit(m.Run())
+}
 
 const extensionWorkflow = `when:
   - event: manual
@@ -54,11 +66,21 @@ func TestFetchConfigExtension(t *testing.T) {
 	local := []*builder.YamlFile{{Name: ".woodpecker.yaml", Data: []byte("steps: {}\n")}}
 
 	t.Run("ReturnsConfigs", func(t *testing.T) {
+		privateKey, err := configExtensionPrivateKey()
+		require.NoError(t, err)
+		publicKey, ok := privateKey.Public().(ed25519.PublicKey)
+		require.True(t, ok)
+
 		var got map[string]any
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodPost, r.Method)
 			assert.Equal(t, "application/json", r.Header.Get("Content-Type"))
 			assert.Contains(t, r.Header.Get("User-Agent"), "Woodpecker/")
+			verifier, verifyErr := httpsign.NewEd25519Verifier(publicKey,
+				httpsign.NewVerifyConfig(),
+				httpsign.Headers("@request-target", "content-digest"))
+			assert.NoError(t, verifyErr)
+			assert.NoError(t, httpsign.VerifyRequest(configExtensionSignatureName, *verifier, r))
 			assert.NoError(t, json.NewDecoder(r.Body).Decode(&got))
 			assert.NoError(t, json.NewEncoder(w).Encode(configExtensionResponse{
 				Configs: []*configExtensionFile{{Name: "build", Data: extensionWorkflow}},
@@ -148,7 +170,9 @@ func TestExecConfigExtension(t *testing.T) {
 		repoDir := t.TempDir()
 
 		var got map[string]any
+		var signatureInput string
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			signatureInput = r.Header.Get("Signature-Input")
 			assert.NoError(t, json.NewDecoder(r.Body).Decode(&got))
 			assert.NoError(t, json.NewEncoder(w).Encode(configExtensionResponse{
 				Configs: []*configExtensionFile{{Name: "build", Data: extensionWorkflow}},
@@ -168,6 +192,8 @@ func TestExecConfigExtension(t *testing.T) {
 		})
 
 		assert.Contains(t, output, "echo from-extension")
+		assert.Contains(t, output, "BEGIN PUBLIC KEY")
+		assert.Contains(t, signatureInput, configExtensionSignatureName)
 		repo, ok := got["repo"].(map[string]any)
 		require.True(t, ok)
 		assert.Equal(t, "octocat/hello-world", repo["full_name"])
@@ -206,6 +232,41 @@ steps:
 
 		assert.Contains(t, output, "echo from-local")
 		assert.Equal(t, []any{map[string]any{"name": ".woodpecker.yaml", "data": localWorkflow}}, got["configuration"])
+	})
+}
+
+func TestConfigExtensionPrivateKey(t *testing.T) {
+	t.Run("ReusesStoredKey", func(t *testing.T) {
+		first, err := configExtensionPrivateKey()
+		require.NoError(t, err)
+		second, err := configExtensionPrivateKey()
+		require.NoError(t, err)
+		assert.Equal(t, []byte(first), []byte(second))
+	})
+
+	t.Run("RejectsCorruptStoredKey", func(t *testing.T) {
+		require.NoError(t, keyring.Set(configExtensionKeyringService, configExtensionKeyringUser, "not-hex"))
+		t.Cleanup(func() {
+			assert.NoError(t, keyring.Delete(configExtensionKeyringService, configExtensionKeyringUser))
+		})
+
+		_, err := configExtensionPrivateKey()
+		assert.ErrorContains(t, err, "could not decode the stored config extension signing key")
+	})
+
+	t.Run("PublicKeyMatchesServerFormat", func(t *testing.T) {
+		privateKey, err := configExtensionPrivateKey()
+		require.NoError(t, err)
+		encoded, err := configExtensionPublicKeyPEM(privateKey)
+		require.NoError(t, err)
+
+		block, rest := pem.Decode([]byte(encoded))
+		require.NotNil(t, block)
+		assert.Empty(t, rest)
+		assert.Equal(t, "PUBLIC KEY", block.Type)
+		parsed, err := x509.ParsePKIXPublicKey(block.Bytes)
+		require.NoError(t, err)
+		assert.Equal(t, privateKey.Public(), parsed)
 	})
 }
 
