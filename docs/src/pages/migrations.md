@@ -28,6 +28,9 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 - changed env var `WOODPECKER_CONFIG_SERVICE_ENDPOINT` to `WOODPECKER_CONFIG_EXTENSION_ENDPOINT`
 - changed env var `WOODPECKER_GRPC_VERIFY` to `WOODPECKER_GRPC_SKIP_VERIFY`. ⚠️ The env var was inverted before, the naming was fixed. Setting to `true` disables verification.
+- (SQLite) A new migration removes old database constraints that can block creating users, configs or secrets.
+  It only changes databases that still have them and only runs if `WOODPECKER_MIGRATIONS_ALLOW_LONG` is set to `true`.
+  It needs free disk space of about twice the size of the database file.
 
 #### Extensions
 
