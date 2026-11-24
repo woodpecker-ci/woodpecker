@@ -1106,12 +1106,68 @@ func TestOrg(t *testing.T) {
 }
 
 func TestNetrc(t *testing.T) {
-	client := load("https://gitlab.example.com?client_id=test&client_secret=test")
-	repo := &model.Repo{Clone: "https://gitlab.example.com/group/repo.git"}
+	var deleted []string
+	createStatus := http.StatusCreated
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/v4/projects/4", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":4,"path_with_namespace":"group/repo"}`))
+	})
+	mux.HandleFunc("POST /api/v4/projects/4/hooks", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"id":1}`))
+	})
+	mux.HandleFunc("GET /api/v4/projects/4/hooks", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`[]`))
+	})
+	mux.HandleFunc("POST /api/v4/projects/4/deploy_tokens", func(w http.ResponseWriter, r *http.Request) {
+		var opts struct {
+			Name   string   `json:"name"`
+			Scopes []string `json:"scopes"`
+		}
+		assert.NoError(t, json.NewDecoder(r.Body).Decode(&opts))
+		assert.Equal(t, "woodpecker-clone", opts.Name)
+		assert.Equal(t, []string{"read_repository"}, opts.Scopes, "the token must only read the repository")
+		w.WriteHeader(createStatus)
+		if createStatus == http.StatusCreated {
+			_, _ = w.Write([]byte(`{"id":7,"name":"woodpecker-clone","username":"gitlab+deploy-token-7","token":"deploy-secret","scopes":["read_repository"]}`))
+		}
+	})
+	mux.HandleFunc("DELETE /api/v4/projects/4/deploy_tokens/{id}", func(w http.ResponseWriter, r *http.Request) {
+		deleted = append(deleted, r.PathValue("id"))
+		w.WriteHeader(http.StatusNoContent)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
 
-	netrc, err := client.Netrc(&model.User{AccessToken: "token"}, repo)
+	client := load(server.URL + "?client_id=test&client_secret=test")
+	user := &model.User{AccessToken: "token"}
+	repo := &model.Repo{ForgeRemoteID: "4", FullName: "group/repo", Clone: "https://gitlab.example.com/group/repo.git"}
+	link := "http://example.com/api/hook?access_token=token"
+	userNetrc := &model.Netrc{Machine: "gitlab.example.com", Login: "oauth2", Password: "token", Type: model.ForgeTypeGitlab}
+
+	// a repo without a deploy token clones with the token of the user
+	netrc, err := client.Netrc(user, repo)
 	require.NoError(t, err)
-	assert.Equal(t, &model.Netrc{Machine: "gitlab.example.com", Login: "oauth2", Password: "token", Type: model.ForgeTypeGitlab}, netrc)
+	assert.Equal(t, userNetrc, netrc)
+
+	// activation creates a deploy token that pipelines clone with instead
+	require.NoError(t, client.Activate(t.Context(), user, repo, link))
+	assert.Equal(t, &model.CloneSecret{Login: "gitlab+deploy-token-7", Token: "deploy-secret", ForgeRemoteID: "7"}, repo.CloneSecret)
+	netrc, err = client.Netrc(user, repo)
+	require.NoError(t, err)
+	assert.Equal(t, &model.Netrc{Machine: "gitlab.example.com", Login: "gitlab+deploy-token-7", Password: "deploy-secret", Type: model.ForgeTypeGitlab}, netrc)
+
+	// deactivation deletes the deploy token
+	require.NoError(t, client.Deactivate(t.Context(), user, repo, link))
+	assert.Equal(t, []string{"7"}, deleted)
+
+	// without the right to create a deploy token, activation still works and drops the old one
+	createStatus = http.StatusForbidden
+	require.NoError(t, client.Activate(t.Context(), user, repo, link))
+	assert.Nil(t, repo.CloneSecret)
+	netrc, err = client.Netrc(user, repo)
+	require.NoError(t, err)
+	assert.Equal(t, userNetrc, netrc)
 
 	// without a user only the machine is known
 	netrc, err = client.Netrc(nil, repo)

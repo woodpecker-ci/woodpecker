@@ -64,17 +64,13 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "visibility",
 			Usage: "repository visibility",
 		},
+		&cli.BoolFlag{
+			Name:  "visibility-sync",
+			Usage: "sync the repository visibility with the forge",
+		},
 		&cli.StringFlag{
 			Name:  "config",
 			Usage: "repository configuration path. Example: .woodpecker.yml",
-		},
-		&cli.IntFlag{
-			Name:  "pipeline-counter",
-			Usage: "repository starting pipeline number",
-		},
-		&cli.BoolFlag{
-			Name:  "unsafe",
-			Usage: "allow unsafe operations",
 		},
 	},
 }
@@ -95,8 +91,6 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		requireApproval = c.String("require-approval")
-		pipelineCounter = c.Int("pipeline-counter")
-		unsafe          = c.Bool("unsafe")
 	)
 
 	patch := new(woodpecker.RepoPatch)
@@ -151,11 +145,9 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 			patch.Visibility = &visibility
 		}
 	}
-	if c.IsSet("pipeline-counter") && !unsafe {
-		fmt.Printf("Setting the pipeline counter is an unsafe operation that could put your repository in an inconsistent state. Please use --unsafe to proceed")
-	}
-	if c.IsSet("pipeline-counter") && unsafe {
-		patch.PipelineCounter = &pipelineCounter
+
+	if c.IsSet("visibility-sync") {
+		patch.VisibilitySync = new(c.Bool("visibility-sync"))
 	}
 
 	repo, err := client.RepoPatch(repoID, patch)

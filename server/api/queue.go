@@ -66,12 +66,7 @@ func GetQueueInfo(c *gin.Context) {
 		Pending:       pendingWithAgents,
 		WaitingOnDeps: waitingWithAgents,
 		Running:       runningWithAgents,
-		Stats: struct {
-			WorkerCount        int `json:"worker_count"`
-			PendingCount       int `json:"pending_count"`
-			WaitingOnDepsCount int `json:"waiting_on_deps_count"`
-			RunningCount       int `json:"running_count"`
-		}{
+		Stats: model.QueueStats{
 			WorkerCount:        info.Stats.Workers,
 			PendingCount:       info.Stats.Pending,
 			WaitingOnDepsCount: info.Stats.WaitingOnDeps,

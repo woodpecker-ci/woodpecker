@@ -59,15 +59,22 @@ type fifo struct {
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
 
+// defaultTaskTimeout lets a lease survive two missed renewals.
+const defaultTaskTimeout = 3 * constant.TaskRenewInterval
+
 // NewMemoryQueue returns a new fifo queue.
-func NewMemoryQueue(ctx context.Context) Queue {
+// A taskTimeout of zero or less uses defaultTaskTimeout.
+func NewMemoryQueue(ctx context.Context, taskTimeout time.Duration) Queue {
+	if taskTimeout <= 0 {
+		taskTimeout = defaultTaskTimeout
+	}
 	q := &fifo{
 		ctx:           ctx,
 		workers:       make(map[*worker]struct{}),
 		running:       make(map[string]*entry),
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     constant.TaskTimeout,
+		extension:     taskTimeout,
 		paused:        false,
 	}
 	go q.process()
@@ -75,9 +82,18 @@ func NewMemoryQueue(ctx context.Context) Queue {
 }
 
 // PushAtOnce pushes multiple tasks to the tail of this queue.
+// Tasks with an agent are restored as running and get a new lease.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
+		if task.AgentID != 0 {
+			q.running[task.ID] = &entry{
+				item:     task,
+				done:     make(chan bool),
+				deadline: time.Now().Add(q.extension),
+			}
+			continue
+		}
 		q.pending.PushBack(task)
 	}
 	q.Unlock()

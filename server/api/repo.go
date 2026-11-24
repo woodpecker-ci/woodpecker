@@ -121,6 +121,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.VisibilitySync = true
 		repo.RequireApproval = server.Config.Pipeline.DefaultApprovalMode
 		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
@@ -298,7 +299,10 @@ func PatchRepo(c *gin.Context) {
 	if in.NetrcTrusted != nil {
 		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
-	if in.Visibility != nil {
+	if in.VisibilitySync != nil {
+		repo.VisibilitySync = *in.VisibilitySync
+	}
+	if in.Visibility != nil && !repo.VisibilitySync {
 		switch *in.Visibility {
 		case string(model.VisibilityInternal), string(model.VisibilityPrivate), string(model.VisibilityPublic):
 			repo.Visibility = model.RepoVisibility(*in.Visibility)
@@ -532,6 +536,7 @@ func DeleteRepo(c *gin.Context) {
 	} else {
 		repo.IsActive = false
 		repo.UserID = 0
+		repo.CloneSecret = nil
 
 		if err := _store.UpdateRepo(repo); err != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -693,6 +698,11 @@ func MoveRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
+	// keep what the forge wrote on activation, like a new clone secret
+	if err := _store.UpdateRepo(repo); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 	c.Status(http.StatusNoContent)
 }
 
@@ -848,7 +858,11 @@ func repairRepo(c *gin.Context, repo *model.Repo, updatePermissions bool) error 
 		log.Debug().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
 
-	return _forge.Activate(c, repoUser, repo, hookURL)
+	if err := _forge.Activate(c, repoUser, repo, hookURL); err != nil {
+		return err
+	}
+	// keep what the forge wrote on activation, like a new clone secret
+	return _store.UpdateRepo(repo)
 }
 
 func repairRepoUser(c *gin.Context, repo *model.Repo, _store store.Store) (*model.User, error) {
