@@ -95,7 +95,7 @@ func execConfigExtension(ctx context.Context, c *cli.Command, endpoint string) e
 		return fmt.Errorf("could not create metadata: %w", err)
 	}
 
-	yamls, err := fetchConfigExtension(ctx, endpoint, m, local)
+	yamls, err := fetchConfigExtension(ctx, endpoint, m, local, !c.Bool("config-extension-unsigned"))
 	if err != nil {
 		return err
 	}

@@ -86,7 +86,11 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT"),
 		Name:    "config-extension-endpoint",
-		Usage:   "fetch the workflows from this configuration extension endpoint, like the server does; the request is signed with an ed25519 key stored in the system keyring and the public key is printed; local workflow files are sent along and used when the extension responds with 204 No Content",
+		Usage:   "fetch the workflows from this configuration extension endpoint, like the server does; the request is signed with an ed25519 key stored in the system keyring and the public key is printed unless --config-extension-unsigned is set; local workflow files are sent along and used when the extension responds with 204 No Content",
+	},
+	&cli.BoolFlag{
+		Name:  "config-extension-unsigned",
+		Usage: "send config extension requests without an HTTP signature; only for extensions that do not verify signatures",
 	},
 
 	//

@@ -88,7 +88,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		yamls, err := fetchConfigExtension(t.Context(), srv.URL, m, local)
+		yamls, err := fetchConfigExtension(t.Context(), srv.URL, m, local, true)
 		require.NoError(t, err)
 		require.Len(t, yamls, 1)
 		assert.Equal(t, "build", yamls[0].Name)
@@ -117,7 +117,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		yamls, err := fetchConfigExtension(t.Context(), srv.URL, m, local)
+		yamls, err := fetchConfigExtension(t.Context(), srv.URL, m, local, true)
 		require.NoError(t, err)
 		assert.Equal(t, local, yamls)
 	})
@@ -128,7 +128,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		_, err := fetchConfigExtension(t.Context(), srv.URL, m, nil)
+		_, err := fetchConfigExtension(t.Context(), srv.URL, m, nil, true)
 		assert.ErrorContains(t, err, "no local workflow files")
 	})
 
@@ -138,7 +138,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local)
+		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local, true)
 		assert.ErrorContains(t, err, "status 501: language not supported")
 	})
 
@@ -149,7 +149,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local)
+		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local, true)
 		assert.ErrorContains(t, err, "returned no configs")
 	})
 
@@ -160,7 +160,7 @@ func TestFetchConfigExtension(t *testing.T) {
 		}))
 		t.Cleanup(srv.Close)
 
-		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local)
+		_, err := fetchConfigExtension(t.Context(), srv.URL, m, local, true)
 		assert.ErrorContains(t, err, "could not decode config extension response")
 	})
 }
@@ -200,6 +200,34 @@ func TestExecConfigExtension(t *testing.T) {
 		assert.NotContains(t, got, "configuration", "no local workflow files, so none are sent")
 	})
 
+	t.Run("UnsignedSkipsSignatureAndKey", func(t *testing.T) {
+		repoDir := t.TempDir()
+		var signatureInput string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			signatureInput = r.Header.Get("Signature-Input")
+			assert.NoError(t, json.NewEncoder(w).Encode(configExtensionResponse{
+				Configs: []*configExtensionFile{{Name: "build", Data: extensionWorkflow}},
+			}))
+		}))
+		t.Cleanup(srv.Close)
+
+		clearEnv(t)
+		output := captureStderr(t, func() {
+			require.NoError(t, Command.Run(t.Context(), []string{
+				"woodpecker-cli",
+				"--backend-engine", "dummy",
+				"--repo-path", repoDir,
+				"--repo", "octocat/hello-world",
+				"--config-extension-endpoint", srv.URL,
+				"--config-extension-unsigned",
+			}))
+		})
+
+		assert.Contains(t, output, "echo from-extension")
+		assert.NotContains(t, output, "BEGIN PUBLIC KEY")
+		assert.Empty(t, signatureInput)
+	})
+
 	t.Run("NoContentRunsLocalWorkflow", func(t *testing.T) {
 		repoDir := t.TempDir()
 		localWorkflow := `when:
@@ -233,6 +261,25 @@ steps:
 		assert.Contains(t, output, "echo from-local")
 		assert.Equal(t, []any{map[string]any{"name": ".woodpecker.yaml", "data": localWorkflow}}, got["configuration"])
 	})
+}
+
+func TestFetchConfigExtensionUnsigned(t *testing.T) {
+	m := &metadata.Metadata{
+		Repo: metadata.Repo{Owner: "octocat", Name: "hello-world", Branch: "main"},
+		Curr: metadata.Pipeline{Event: metadata.EventManual},
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Empty(t, r.Header.Get("Signature"), "unsigned request must not carry a signature")
+		assert.Empty(t, r.Header.Get("Signature-Input"), "unsigned request must not carry signature input")
+		assert.NoError(t, json.NewEncoder(w).Encode(configExtensionResponse{
+			Configs: []*configExtensionFile{{Name: "build", Data: extensionWorkflow}},
+		}))
+	}))
+	t.Cleanup(srv.Close)
+
+	yamls, err := fetchConfigExtension(t.Context(), srv.URL, m, nil, false)
+	require.NoError(t, err)
+	require.Len(t, yamls, 1)
 }
 
 func TestConfigExtensionPrivateKey(t *testing.T) {

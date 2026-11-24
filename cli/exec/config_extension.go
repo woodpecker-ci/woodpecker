@@ -29,6 +29,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/builder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
 	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
@@ -108,12 +109,19 @@ func newConfigExtensionRequest(m *metadata.Metadata, local []*builder.YamlFile) 
 	return req
 }
 
-// fetchConfigExtension asks the configuration extension at endpoint for the
-// workflows of the pipeline described by m. The local files are sent as the
-// repository's config files and are returned when the extension responds with
-// 204 No Content, the same as the server does. The request is signed with the
-// CLI's ed25519 key, and the matching public key is written to stderr.
-func fetchConfigExtension(ctx context.Context, endpoint string, m *metadata.Metadata, local []*builder.YamlFile) ([]*builder.YamlFile, error) {
+// configExtensionDoer sends a request to the configuration extension. It is the
+// signing client when signing is on, and a plain client otherwise.
+type configExtensionDoer interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
+// configExtensionClient returns the client for config extension requests. With
+// sign set, the request is signed with the CLI's ed25519 key, and the matching
+// public key is written to stderr so the extension can be configured with it.
+func configExtensionClient(sign bool) (configExtensionDoer, error) {
+	if !sign {
+		return &http.Client{Transport: httputil.NewUserAgentRoundTripper(nil, "cli")}, nil
+	}
 	privateKey, err := configExtensionPrivateKey()
 	if err != nil {
 		return nil, err
@@ -121,7 +129,16 @@ func fetchConfigExtension(ctx context.Context, endpoint string, m *metadata.Meta
 	if err := provideConfigExtensionPublicKey(privateKey); err != nil {
 		return nil, err
 	}
-	client, err := newConfigExtensionClient(privateKey)
+	return newConfigExtensionClient(privateKey)
+}
+
+// fetchConfigExtension asks the configuration extension at endpoint for the
+// workflows of the pipeline described by m. The local files are sent as the
+// repository's config files and are returned when the extension responds with
+// 204 No Content, the same as the server does. Requests are signed unless sign
+// is false.
+func fetchConfigExtension(ctx context.Context, endpoint string, m *metadata.Metadata, local []*builder.YamlFile, sign bool) ([]*builder.YamlFile, error) {
+	client, err := configExtensionClient(sign)
 	if err != nil {
 		return nil, err
 	}
