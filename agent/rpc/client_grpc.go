@@ -115,7 +115,6 @@ func (c *client) IsConnected() bool {
 type failureWindowBackOff struct {
 	backoff.BackOff
 	window       time.Duration
-	now          func() time.Time
 	firstFailure time.Time
 }
 
@@ -123,12 +122,12 @@ func newFailureWindowBackOff(window time.Duration) *failureWindowBackOff {
 	exp := backoff.NewExponentialBackOff()
 	exp.MaxInterval = 10 * time.Second          //nolint:mnd
 	exp.InitialInterval = 10 * time.Millisecond //nolint:mnd
-	return &failureWindowBackOff{BackOff: exp, window: window, now: time.Now}
+	return &failureWindowBackOff{BackOff: exp, window: window}
 }
 
 // attemptFailed starts a new streak if the attempt outlived window, as it was connected meanwhile.
 func (b *failureWindowBackOff) attemptFailed(started time.Time) {
-	now := b.now()
+	now := time.Now()
 	if b.window > 0 && now.Sub(started) > b.window {
 		b.Reset()
 	}
@@ -139,10 +138,10 @@ func (b *failureWindowBackOff) attemptFailed(started time.Time) {
 
 func (b *failureWindowBackOff) NextBackOff() time.Duration {
 	if b.firstFailure.IsZero() {
-		b.firstFailure = b.now()
+		b.firstFailure = time.Now()
 	}
 	next := b.BackOff.NextBackOff()
-	if b.window > 0 && b.now().Sub(b.firstFailure)+next > b.window {
+	if b.window > 0 && time.Since(b.firstFailure)+next > b.window {
 		return backoff.Stop
 	}
 	return next
@@ -194,7 +193,7 @@ func (c *client) retryOpts(op string, b backoff.BackOff) []backoff.RetryOption {
 func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.Operation[T]) (T, error) {
 	b := newFailureWindowBackOff(c.connectionRetryTimeout)
 	attempt := func() (T, error) {
-		started := b.now()
+		started := time.Now()
 		res, err := op()
 		if err != nil {
 			b.attemptFailed(started)
