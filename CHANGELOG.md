@@ -49,6 +49,7 @@
 
 ### 🐛 Bug Fixes
 
+- Harden config service [[#7241](https://github.com/woodpecker-ci/woodpecker/pull/7241)]
 - Migrate legacy SQLite inline constrains and fix long running ones [[#7440](https://github.com/woodpecker-ci/woodpecker/pull/7440)]
 - Allow `failure: cancel` on plugin steps in the schema [[#7594](https://github.com/woodpecker-ci/woodpecker/pull/7594)]
 - Do not count marking a skipped workflow as done as agent work [[#7560](https://github.com/woodpecker-ci/woodpecker/pull/7560)]
