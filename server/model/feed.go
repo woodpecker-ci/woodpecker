@@ -56,6 +56,8 @@ func (f *Feed) ToAPIModel() *APIFeed {
 	switch af.Event {
 	case EventManual:
 		af.Message = manualMessage(af.ManualMessage, af.Branch)
+	case EventPull, EventPullClosed, EventPullMetadata:
+		af.Message = af.Title
 	case EventTag:
 		af.Message = fmt.Sprintf("created tag %s", af.TagTitle)
 	case EventRelease:
@@ -82,6 +84,6 @@ type APIFeed struct {
 	*Feed
 
 	Commit  string `json:"commit,omitempty"`       // deprecated, use commit_pipeline.sha instead
-	Message string `json:"message,omitempty"`      // deprecated, use commit_pipeline.message, tag_title (tag) or release.title (release) instead
+	Message string `json:"message,omitempty"`      // deprecated, use commit_pipeline.message, tag_title (tag), release.title (release) or title (pull) instead
 	Email   string `json:"author_email,omitempty"` // deprecated, use commit_pipeline.author.email instead
 } //	@name	Feed

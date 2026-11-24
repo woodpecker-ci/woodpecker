@@ -4968,7 +4968,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "message": {
-                    "description": "deprecated, use commit_pipeline.message, tag_title (tag) or release.title (release) instead",
+                    "description": "deprecated, use commit_pipeline.message, tag_title (tag), release.title (release) or title (pull) instead",
                     "type": "string"
                 },
                 "number": {
@@ -5278,7 +5278,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "message": {
-                    "description": "deprecated, use commit_pipeline.message, cron (cron), tag_title (tag) or release.title (release) instead",
+                    "description": "deprecated, use commit_pipeline.message, cron (cron), tag_title (tag), release.title (release) or title (pull) instead",
                     "type": "string"
                 },
                 "number": {

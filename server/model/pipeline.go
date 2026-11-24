@@ -75,7 +75,7 @@ type APIPipeline struct {
 
 	IsPrerelease bool   `json:"is_prerelease,omitempty"` // deprecated, use release.is_prerelease instead
 	Commit       string `json:"commit"`                  // deprecated, use commit_pipeline.sha instead
-	Message      string `json:"message"`                 // deprecated, use commit_pipeline.message, cron (cron), tag_title (tag) or release.title (release) instead
+	Message      string `json:"message"`                 // deprecated, use commit_pipeline.message, cron (cron), tag_title (tag), release.title (release) or title (pull) instead
 	Timestamp    int64  `json:"timestamp"`               // deprecated, use commit_pipeline.timestamp instead
 	Email        string `json:"author_email"`            // deprecated, use commit_pipeline.author.email instead
 } //	@name	Pipeline
@@ -106,6 +106,8 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		ap.Sender = p.Cron
 	case EventManual:
 		ap.Message = manualMessage(p.ManualMessage, p.Branch)
+	case EventPull, EventPullClosed, EventPullMetadata:
+		ap.Message = p.Title
 	case EventTag:
 		ap.Message = fmt.Sprintf("created tag %s", p.TagTitle)
 	case EventRelease:
