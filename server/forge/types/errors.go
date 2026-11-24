@@ -16,14 +16,17 @@
 package types
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 var (
-	ErrNotImplemented = errors.New("not implemented")
-	ErrRepoNotFound   = errors.New("repo not found")
+	ErrNotImplemented          = errors.New("not implemented")
+	ErrRepoNotFound            = errors.New("repo not found")
+	ErrInvalidWebhookSignature = errors.New("invalid webhook signature")
 )
 
 type ErrIgnoreEvent struct {
@@ -54,4 +57,32 @@ func (m *ErrConfigNotFound) Error() string {
 func (*ErrConfigNotFound) Is(target error) bool {
 	_, ok := target.(*ErrConfigNotFound)
 	return ok
+}
+
+// ErrConfigFetchTimeout is returned when the forge did not deliver the pipeline config
+// within the configured forge timeout on any attempt.
+type ErrConfigFetchTimeout struct {
+	Timeout  time.Duration
+	Attempts uint
+	Configs  []string
+}
+
+func (m *ErrConfigFetchTimeout) Error() string {
+	configs := make([]string, 0, len(m.Configs))
+	for _, conf := range m.Configs {
+		configs = append(configs, fmt.Sprintf("'%s'", strings.Trim(conf, "'")))
+	}
+
+	return fmt.Sprintf("forge did not answer within %s (tried %d times) while fetching %s; "+
+		"the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT",
+		m.Timeout, m.Attempts, strings.Join(configs, ", "))
+}
+
+func (*ErrConfigFetchTimeout) Is(target error) bool {
+	_, ok := target.(*ErrConfigFetchTimeout)
+	return ok
+}
+
+func (*ErrConfigFetchTimeout) Unwrap() error {
+	return context.DeadlineExceeded
 }

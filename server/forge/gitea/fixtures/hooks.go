@@ -19,81 +19,81 @@ import _ "embed"
 // HookPush is a sample Gitea push hook.
 //
 //go:embed HookPush.json
-var HookPush string
+var HookPush []byte
 
 // HookPushMulti push multible commits to a branch.
 //
 //go:embed HookPushMulti.json
-var HookPushMulti string
+var HookPushMulti []byte
 
 // HookPushBranch is a sample Gitea push hook where a new branch was created from an existing commit.
 //
 //go:embed HookPushBranch.json
-var HookPushBranch string
+var HookPushBranch []byte
 
 // HookTag is a sample Gitea tag hook.
 //
 //go:embed HookTag.json
-var HookTag string
+var HookTag []byte
 
 // HookPullRequest is a sample pull_request webhook payload.
 //
 //go:embed HookPullRequest.json
-var HookPullRequest string
+var HookPullRequest []byte
 
 //go:embed HookPullRequestUpdated.json
-var HookPullRequestUpdated string
+var HookPullRequestUpdated []byte
 
 //go:embed HookPullRequestMerged.json
-var HookPullRequestMerged string
+var HookPullRequestMerged []byte
 
 //go:embed HookPullRequestClosed.json
-var HookPullRequestClosed string
+var HookPullRequestClosed []byte
 
 //go:embed HookPullRequestChangeTitle.json
-var HookPullRequestChangeTitle string
+var HookPullRequestChangeTitle []byte
 
 //go:embed HookPullRequestChangeBody.json
-var HookPullRequestChangeBody string
+var HookPullRequestChangeBody []byte
 
 //go:embed HookPullRequestAddReviewRequest.json
-var HookPullRequestAddReviewRequest string
+var HookPullRequestAddReviewRequest []byte
 
 //go:embed HookPullRequestReviewAck.json
-var HookPullRequestReviewAck string
+var HookPullRequestReviewAck []byte
 
 //go:embed HookPullRequestReviewDeny.json
-var HookPullRequestReviewDeny string
+var HookPullRequestReviewDeny []byte
 
 //go:embed HookPullRequestReviewComment.json
-var HookPullRequestReviewComment string
+var HookPullRequestReviewComment []byte
 
 //go:embed HookPullRequestAddLabel.json
-var HookPullRequestAddLabel string
+var HookPullRequestAddLabel []byte
 
 //go:embed HookPullRequestChangeLabel.json
-var HookPullRequestChangeLabel string
+var HookPullRequestChangeLabel []byte
 
 //go:embed HookPullRequestRemoveLabel.json
-var HookPullRequestRemoveLabel string
+var HookPullRequestRemoveLabel []byte
 
 //go:embed HookPullRequestAddMile.json
-var HookPullRequestAddMile string
+var HookPullRequestAddMile []byte
 
 //go:embed HookPullRequestChangeMile.json
-var HookPullRequestChangeMile string
+var HookPullRequestChangeMile []byte
 
 //go:embed HookPullRequestRemoveMile.json
-var HookPullRequestRemoveMile string
+var HookPullRequestRemoveMile []byte
 
 //go:embed HookPullRequestAssigneesAdded.json
-var HookPullRequestAssigneesAdded string
+var HookPullRequestAssigneesAdded []byte
 
 //go:embed HookPullRequestAssigneesRemoved.json
-var HookPullRequestAssigneesRemoved string
+var HookPullRequestAssigneesRemoved []byte
 
 //go:embed HookRelease.json
-var HookRelease string
+var HookRelease []byte
 
 //go:embed HookPullRequestReopened.json
-var HookPullRequestReopened string
+var HookPullRequestReopened []byte

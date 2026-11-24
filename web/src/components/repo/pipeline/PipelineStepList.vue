@@ -19,7 +19,7 @@
           // eslint-enable vue/html-indent
         "
         class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
-        :href="pipeline.forge_url"
+        :href="httpUrl(pipeline.forge_url)"
       >
         <Icon name="pull-request" />
         <span class="truncate">{{ prettyRef }}</span>
@@ -47,7 +47,7 @@
         <a
           v-else
           class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-          :href="pipeline.forge_url"
+          :href="httpUrl(pipeline.forge_url)"
           target="_blank"
         >
           <Icon name="commit" />
@@ -134,6 +134,7 @@ import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuratio
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
 import type { Pipeline, PipelineStep } from '~/lib/api/types';
+import { httpUrl } from '~/lib/utils';
 
 const props = defineProps<{
   pipeline: Pipeline;

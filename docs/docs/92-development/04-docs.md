@@ -19,6 +19,10 @@ pnpm start
 pnpm build
 ```
 
+The plugin index fetches the docs and the latest release of each plugin from its forge.
+Anonymous requests hit the rate limits fast,
+so you can set read only tokens in `GITHUB_TOKEN` and `CODEBERG_TOKEN`.
+
 ## Versions
 
 The folder `docs/docs/` contains the documentation of the upcoming version (`next`). This is where changes normally go. The documentation of each released version is a snapshot in `docs/versioned_docs/`. Only change it as well if a fix should also show up in an already released version.

@@ -15,6 +15,7 @@
 package config_test
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -334,4 +335,84 @@ func TestFetch(t *testing.T) {
 			assert.ElementsMatch(t, tt.expectedFileNames, matchingFiles, "expected some other pipeline files")
 		})
 	}
+}
+
+func TestFetchTimeout(t *testing.T) {
+	t.Parallel()
+
+	blockUntilDone := func(args mock.Arguments) {
+		ctx, ok := args.Get(0).(context.Context)
+		if !ok {
+			t.Fatal("first forge argument is not a context")
+		}
+		<-ctx.Done()
+	}
+	// what an HTTP client returns when the request context hits its deadline
+	httpDeadlineErr := fmt.Errorf("Get \"https://forge.example/api\": %w", context.DeadlineExceeded)
+
+	testTable := []struct {
+		name       string
+		repoConfig string
+		wantErr    string
+	}{
+		{
+			name:       "default config order",
+			repoConfig: "",
+			wantErr:    "forge did not answer within 20ms (tried 2 times) while fetching '.woodpecker/', '.woodpecker.yaml', '.woodpecker.yml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT",
+		},
+		{
+			name:       "user defined config",
+			repoConfig: "ci/build.yaml",
+			wantErr:    "forge did not answer within 20ms (tried 2 times) while fetching 'ci/build.yaml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT",
+		},
+	}
+
+	for _, tt := range testTable {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			f := new(mocks.MockForge)
+			f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(blockUntilDone).Return(nil, httpDeadlineErr)
+			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(blockUntilDone).Return(nil, httpDeadlineErr)
+
+			configFetcher := config.NewForge(20*time.Millisecond, 2, constant.DefaultConfigOrder, []string{".yaml", ".yml"})
+			files, err := configFetcher.Fetch(
+				t.Context(),
+				f,
+				&model.User{AccessToken: "xxx"},
+				&model.Repo{Owner: "owner", Name: "repo", Config: tt.repoConfig},
+				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+				nil,
+				false,
+			)
+			assert.Nil(t, files)
+			require.EqualError(t, err, tt.wantErr)
+			assert.ErrorIs(t, err, &forge_types.ErrConfigFetchTimeout{})
+			assert.ErrorIs(t, err, context.DeadlineExceeded)
+			assert.NotErrorIs(t, err, &forge_types.ErrConfigNotFound{})
+		})
+	}
+
+	t.Run("parent deadline is not reported as forge timeout", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, cancel := context.WithTimeout(t.Context(), 20*time.Millisecond)
+		defer cancel()
+		f := new(mocks.MockForge)
+		f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(blockUntilDone).Return(nil, httpDeadlineErr)
+		f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(blockUntilDone).Return(nil, httpDeadlineErr)
+
+		configFetcher := config.NewForge(time.Minute, 1, constant.DefaultConfigOrder, []string{".yaml", ".yml"})
+		_, err := configFetcher.Fetch(
+			ctx,
+			f,
+			&model.User{AccessToken: "xxx"},
+			&model.Repo{Owner: "owner", Name: "repo"},
+			&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+			nil,
+			false,
+		)
+		require.ErrorIs(t, err, context.DeadlineExceeded)
+		assert.NotErrorIs(t, err, &forge_types.ErrConfigFetchTimeout{})
+	})
 }

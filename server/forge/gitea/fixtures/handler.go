@@ -128,11 +128,17 @@ func getVersion(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]any{"version": "1.18.0"})
 }
 
+// getPRFiles serves the changed files over several pages. The rename on the
+// first page gives more file names than files, the later pages have none.
 func getPRFiles(c *gin.Context) {
-	page := c.Query("page")
-	if page == "1" {
+	switch c.Query("page") {
+	case "1":
 		c.String(http.StatusOK, prFilesPayload)
-	} else {
+	case "2":
+		c.String(http.StatusOK, `[{"filename": "a.go", "status": "added"}, {"filename": "b.go", "status": "modified"}]`)
+	case "3":
+		c.String(http.StatusOK, `[{"filename": "c.go", "status": "deleted"}]`)
+	default:
 		c.String(http.StatusOK, "[]")
 	}
 }
@@ -198,13 +204,18 @@ const prFilesPayload = `
 [
 	{
 		"filename": "README.md",
-		"status": "changed",
+		"previous_filename": "src/old.go",
+		"status": "renamed",
 		"additions": 2,
 		"deletions": 0,
 		"changes": 2,
 		"html_url": "http://localhost/username/repo/src/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md",
 		"contents_url": "http://localhost:3000/api/v1/repos/username/repo/contents/README.md?ref=e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd",
 		"raw_url": "http://localhost/username/repo/raw/commit/e79e4b0e8d9dd6f72b70e776c3317db7c19ca0fd/README.md"
+	},
+	{
+		"filename": "CHANGELOG.md",
+		"status": "changed"
 	}
 ]
 `

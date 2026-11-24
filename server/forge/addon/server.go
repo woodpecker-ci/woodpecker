@@ -43,6 +43,11 @@ type RPCServer struct {
 	Impl forge.Forge
 }
 
+func (s *RPCServer) Close(_ []byte, resp *[]byte) error {
+	*resp = []byte{}
+	return s.Impl.Close()
+}
+
 func (s *RPCServer) Name(_ []byte, resp *string) error {
 	*resp = s.Impl.Name()
 	return nil
@@ -250,8 +255,12 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 	}
 	req.Header = a.Header
 	req.Form = a.Form
-	repo, pipeline, err := s.Impl.Hook(mkCtx(), req)
+	repo, pipeline, err := s.Impl.Hook(mkCtx(), req, a.Secret)
 	if err != nil {
+		if found, kind, msg := encodeErrorKinds(err); found {
+			*resp, err = json.Marshal(&responseHook{ErrorKind: kind, ErrorMessage: msg})
+			return err
+		}
 		return err
 	}
 	*resp, err = json.Marshal(&responseHook{

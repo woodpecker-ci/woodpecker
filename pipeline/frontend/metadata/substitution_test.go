@@ -34,6 +34,11 @@ func TestEnvVarSubst(t *testing.T) {
 			command: echo "some env\nwith newline"`, result)
 }
 
+func TestEnvVarSubstError(t *testing.T) {
+	_, err := EnvVarSubst(`echo "${ARGS[@]}"`, nil)
+	assert.EqualError(t, err, "compile time environment variable substitution failed: missing closing brace")
+}
+
 // TestEnvVarSubstEscapes pins the escape rules of the config pre-processor.
 // Outside of ${...}, "\\" and "\/" are unescaped like "$$", so configs that
 // double backslashes (evaluate regexes, branch patterns) keep working.

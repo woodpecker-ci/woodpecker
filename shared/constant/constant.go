@@ -27,7 +27,7 @@ var DefaultConfigOrder = []string{
 const (
 	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.11.0"
+	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.12.1"
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
@@ -37,5 +37,5 @@ var TrustedClonePlugins = []string{
 	"quay.io/woodpeckerci/plugin-git",
 }
 
-// TaskTimeout is the time till a running task is counted as dead.
-var TaskTimeout = time.Minute
+// TaskRenewInterval is how often agents extend the lease of a running task.
+const TaskRenewInterval = 20 * time.Second

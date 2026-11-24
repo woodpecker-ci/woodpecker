@@ -43,6 +43,7 @@ import (
 const (
 	defaultScope   = "api"
 	defaultPerPage = 100
+	cloneTokenName = "woodpecker-clone"
 )
 
 // Opts defines configuration options.
@@ -84,6 +85,8 @@ func New(id int64, opts Opts) (forge.Forge, error) {
 func (g *GitLab) Name() string {
 	return "gitlab"
 }
+
+func (g *GitLab) Close() error { return nil }
 
 // Config returns the metadata of the configured forge.
 func (g *GitLab) Config() metadata.Forge {
@@ -489,29 +492,27 @@ func isRejectedStatusTransition(err error) bool {
 		strings.Contains(errResp.Message, "Cannot transition status")
 }
 
-// Netrc returns a netrc file capable of authenticating Gitlab requests and
-// cloning Gitlab repositories. The netrc will use the global machine account
-// when configured.
+// Netrc returns a netrc file capable of cloning Gitlab repositories.
+// It uses the deploy token of the repository and falls back to the token of the user.
 func (g *GitLab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	login := ""
-	token := ""
-
-	if u != nil {
-		login = "oauth2"
-		token = u.AccessToken
-	}
-
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.Netrc{
-		Login:    login,
-		Password: token,
-		Machine:  host,
-		Type:     model.ForgeTypeGitlab,
-	}, nil
+	netrc := &model.Netrc{
+		Machine: host,
+		Type:    model.ForgeTypeGitlab,
+	}
+	switch {
+	case r.CloneSecret != nil:
+		netrc.Login = r.CloneSecret.Login
+		netrc.Password = r.CloneSecret.Token
+	case u != nil:
+		netrc.Login = "oauth2"
+		netrc.Password = u.AccessToken
+	}
+	return netrc, nil
 }
 
 func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error) {
@@ -525,7 +526,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 }
 
 // Activate activates a repository by adding a Post-commit hook and
-// a Public Deploy key, if applicable.
+// a read-only deploy token to clone it, if allowed.
 func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
@@ -555,12 +556,29 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		DeploymentEvents:      new(true),
 		EnableSSLVerification: new(!g.skipVerify),
 	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return err
+	}
 
-	return err
+	cloneToken, _, err := client.DeployTokens.CreateProjectDeployToken(_repo.ID, &gitlab.CreateProjectDeployTokenOptions{
+		Name:   new(cloneTokenName),
+		Scopes: &[]string{"read_repository"},
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		log.Warn().Err(err).Msgf("could not create a deploy token for %s, pipelines clone with the user token", repo.FullName)
+		repo.CloneSecret = nil
+		return nil
+	}
+	repo.CloneSecret = &model.CloneSecret{
+		Login:         cloneToken.Username,
+		Token:         cloneToken.Token,
+		ForgeRemoteID: model.ForgeRemoteID(strconv.FormatInt(cloneToken.ID, 10)),
+	}
+	return nil
 }
 
 // Deactivate removes a repository by removing all the post-commit hooks
-// which are equal to link and removing the SSH deploy key.
+// which are equal to link and the deploy token to clone it.
 func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
@@ -575,6 +593,13 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	_, webURL, err := g.getTokenAndWebURL(link)
 	if err != nil {
 		return err
+	}
+
+	if repo.CloneSecret != nil {
+		id, _ := strconv.ParseInt(string(repo.CloneSecret.ForgeRemoteID), 10, 64)
+		if _, err := client.DeployTokens.DeleteProjectDeployToken(_repo.ID, id, gitlab.WithContext(ctx)); err != nil {
+			log.Warn().Err(err).Msgf("could not delete the deploy token of %s", repo.FullName)
+		}
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
@@ -661,7 +686,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *GitLab) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -849,14 +874,22 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
+	files := make([]string, 0, defaultPerPage*2)
+	diffOpts := &gitlab.ListMergeRequestDiffsOptions{
+		PerPage: defaultPerPage,
 	}
-
-	files := make([]string, 0, len(changes)*2)
-	for _, file := range changes {
-		files = append(files, file.NewPath, file.OldPath)
+	for {
+		changes, resp, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, diffOpts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range changes {
+			files = append(files, file.NewPath, file.OldPath)
+		}
+		if resp == nil || resp.NextPage == 0 {
+			break
+		}
+		diffOpts.Page = resp.NextPage
 	}
 	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 

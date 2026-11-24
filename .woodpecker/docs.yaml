@@ -74,6 +74,11 @@ steps:
   - name: build
     image: *node_image
     directory: docs/
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token_readonly
+      CODEBERG_TOKEN:
+        from_secret: codeberg_token_readonly
     commands:
       - npx get-pnpm
       - export PNPM_HOME='/root/.local/share/pnpm'

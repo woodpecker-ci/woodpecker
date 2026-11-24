@@ -101,6 +101,8 @@ func (c *client) Name() string {
 	return "github"
 }
 
+func (c *client) Close() error { return nil }
+
 // Config returns the metadata of the configured forge.
 func (c *client) Config() metadata.Forge {
 	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
@@ -644,6 +646,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"pull_request_review",
 			"deployment",
+			"release",
 		},
 		Config: &github.HookConfig{
 			URL:         &link,
@@ -696,7 +699,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	pull, repo, pipeline, currCommit, prevCommit, err := parseHook(r, c.MergeRef)
 	if err != nil {
 		return nil, nil, err

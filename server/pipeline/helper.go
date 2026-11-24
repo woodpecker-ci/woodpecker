@@ -23,12 +23,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func updatePipelineStatus(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {
+func updatePipelineStatusOnForge(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, user *model.User) {
 	for _, workflow := range pipeline.Workflows {
 		err := forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
-			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
-			return
+			log.Error().Err(err).Msgf("error setting commit status for %s/%d workflow %s", repo.FullName, pipeline.Number, workflow.Name)
 		}
 	}
 }

@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
@@ -720,6 +721,78 @@ depends_on:
 	assert.Empty(t, items, "Workflows with missing dependencies should be filtered out")
 }
 
+func TestWorkflowDependencyCycle(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "push"}
+
+	workflow := func(name, dependsOn string) *YamlFile {
+		data := "when:\n  event: push\nsteps:\n  - name: build\n    image: scratch\n"
+		if dependsOn != "" {
+			data += "depends_on: " + dependsOn + "\n"
+		}
+		return &YamlFile{Name: name, Data: []byte(data)}
+	}
+
+	tests := []struct {
+		name  string
+		yamls []*YamlFile
+		cycle string
+	}{
+		{
+			name:  "workflows depend on each other",
+			yamls: []*YamlFile{workflow("build", "[deploy]"), workflow("deploy", "[build]")},
+			cycle: "build -> deploy -> build",
+		},
+		{
+			name:  "workflow depends on itself",
+			yamls: []*YamlFile{workflow("build", "[build]")},
+			cycle: "build -> build",
+		},
+		{
+			name:  "cycle behind a dependency",
+			yamls: []*YamlFile{workflow("a", "[b]"), workflow("b", "[c]"), workflow("c", "[b]")},
+			cycle: "b -> c -> b",
+		},
+		{
+			name:  "optional dependency that exists",
+			yamls: []*YamlFile{workflow("build", "[{name: deploy, optional: true}]"), workflow("deploy", "[build]")},
+			cycle: "build -> deploy -> build",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				Yamls:               tt.yamls,
+			}
+
+			items, err := b.Build()
+			assert.Nil(t, items)
+			assert.True(t, errors.HasBlockingErrors(err))
+			assert.ErrorContains(t, err, "workflow dependency cycle: "+tt.cycle)
+		})
+	}
+
+	t.Run("shared dependency is no cycle", func(t *testing.T) {
+		b := PipelineBuilder{
+			GetWorkflowMetadata: m.GetWorkflowMetadata,
+			RepoTrusted:         &metadata.TrustedConfiguration{},
+			Yamls: []*YamlFile{
+				workflow("build", ""),
+				workflow("deploy", "[build, test]"),
+				workflow("test", "[build]"),
+			},
+		}
+
+		items, err := b.Build()
+		assert.NoError(t, err)
+		assert.Len(t, items, 3)
+	})
+}
+
 func TestDependsOnOptionalFlag(t *testing.T) {
 	t.Parallel()
 
@@ -925,25 +998,132 @@ depends_on:
 func TestInvalidYAML(t *testing.T) {
 	t.Parallel()
 
-	m := &testMetadata{}
-
-	b := PipelineBuilder{
-		GetWorkflowMetadata: m.GetWorkflowMetadata,
-		RepoTrusted:         &metadata.TrustedConfiguration{},
-		Yamls: []*YamlFile{
-			{Name: "broken-yaml", Data: []byte(`
+	tests := []struct {
+		name string
+		data string
+		err  string
+	}{
+		{
+			// fails in matrix.Parse, before the workflow is parsed
+			name: "syntax",
+			data: `
 when:
   event: push
 steps:
   - name: build
     image: scratch
 	invalid yaml indentation
+`,
+			err: "found a tab character that violates indentation",
+		},
+		{
+			// valid yaml, fails in yaml.ParseString
+			name: "type",
+			data: `
+steps:
+  - name: build
+    image: [scratch, alpine]
+`,
+			err: "cannot construct !!seq into string",
+		},
+	}
+
+	for _, tt := range tests {
+		// with a selected workflow the dependencies get parsed first
+		for _, selected := range []string{"", "broken-yaml"} {
+			t.Run(tt.name+"/"+selected, func(t *testing.T) {
+				t.Parallel()
+
+				m := &testMetadata{}
+				b := PipelineBuilder{
+					GetWorkflowMetadata: m.GetWorkflowMetadata,
+					RepoTrusted:         &metadata.TrustedConfiguration{},
+					SelectedWorkflow:    selected,
+					Yamls:               []*YamlFile{{Name: "broken-yaml", Data: []byte(tt.data)}},
+				}
+
+				_, err := b.Build()
+				assert.ErrorContains(t, err, tt.err)
+				pipelineErrors := errors.GetPipelineErrors(err)
+				require.Len(t, pipelineErrors, 1)
+				assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+				assert.NotContains(t, pipelineErrors[0].Message, "[compiler]", "type must not be repeated in the message")
+				// the error points to the offending workflow file so the UI can show it
+				data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+				require.True(t, ok)
+				assert.Equal(t, "broken-yaml", data.File)
+			})
+		}
+	}
+}
+
+func TestInvalidSubstitution(t *testing.T) {
+	t.Parallel()
+
+	// with a selected workflow the dependencies get substituted first
+	for _, selected := range []string{"", "broken-substitution"} {
+		t.Run(selected, func(t *testing.T) {
+			t.Parallel()
+
+			m := &testMetadata{}
+			b := PipelineBuilder{
+				GetWorkflowMetadata: m.GetWorkflowMetadata,
+				RepoTrusted:         &metadata.TrustedConfiguration{},
+				SelectedWorkflow:    selected,
+				Yamls: []*YamlFile{
+					{Name: "broken-substitution", Data: []byte(`
+steps:
+  - name: build
+    image: bash
+    commands:
+      - echo "${ARGS[@]}"
+`)},
+				},
+			}
+
+			_, err := b.Build()
+			assert.ErrorContains(t, err, "compile time environment variable substitution failed: missing closing brace")
+			pipelineErrors := errors.GetPipelineErrors(err)
+			require.Len(t, pipelineErrors, 1)
+			assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+			// the error points to the offending workflow file so the UI can show it
+			data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+			require.True(t, ok)
+			assert.Equal(t, "broken-substitution", data.File)
+		})
+	}
+}
+
+func TestMissingSecret(t *testing.T) {
+	t.Parallel()
+
+	m := &testMetadata{pipelineEvent: "push"}
+	b := PipelineBuilder{
+		GetWorkflowMetadata: m.GetWorkflowMetadata,
+		RepoTrusted:         &metadata.TrustedConfiguration{},
+		Yamls: []*YamlFile{
+			{Name: "missing-secret", Data: []byte(`
+when:
+  event: push
+steps:
+  - name: build
+    image: scratch
+    environment:
+      TOKEN:
+        from_secret: token
 `)},
 		},
 	}
 
 	_, err := b.Build()
-	assert.ErrorContains(t, err, "found a tab character that violates indentation")
+	assert.ErrorContains(t, err, `secret "token" not found`)
+	pipelineErrors := errors.GetPipelineErrors(err)
+	require.Len(t, pipelineErrors, 1)
+	assert.Equal(t, errors.PipelineErrorTypeCompiler, pipelineErrors[0].Type)
+	// the error points to the offending workflow file so the UI can show it
+	data, ok := pipelineErrors[0].Data.(*errors.CompilerErrorData)
+	require.True(t, ok)
+	assert.Equal(t, "missing-secret", data.File)
 }
 
 func TestEnvVarPrecedence(t *testing.T) {

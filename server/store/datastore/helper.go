@@ -62,13 +62,16 @@ func isErrDatabaseLocked(err error) bool {
 
 // wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
-	if !exist {
-		return types.ErrRecordNotExist
+	if isErrDatabaseLocked(err) {
+		return types.ErrDatabaseLocked
 	}
 	if err != nil {
 		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
+	}
+	if !exist {
+		return types.ErrRecordNotExist
 	}
 	return nil
 }
