@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-23
+## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -82,6 +82,7 @@
 
 ### 📦️ Dependency
 
+- Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.56.0 [[#7626](https://github.com/woodpecker-ci/woodpecker/pull/7626)]
 - Update codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 digest to 0f7befc [[#7617](https://github.com/woodpecker-ci/woodpecker/pull/7617)]
 - Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
 - Update woodpeckerci/plugin-git Docker tag to v2.12.1 [[#7506](https://github.com/woodpecker-ci/woodpecker/pull/7506)]
