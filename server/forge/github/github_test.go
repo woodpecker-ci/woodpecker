@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -243,14 +244,27 @@ var (
 func TestHook(t *testing.T) {
 	// Mock GitHub API for changed files
 	mockedHTTPClient := github_mock.NewMockedHTTPClient(
-		github_mock.WithRequestMatch(
+		github_mock.WithRequestMatchHandler(
 			github_mock.GetReposCommitsByOwnerByRepoByRef,
-			github.RepositoryCommit{
-				Files: []*github.CommitFile{
-					{Filename: new("README.md")},
-					{Filename: new("main.go")},
-				},
-			},
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				sha := path.Base(r.URL.Path)
+				_, _ = w.Write(github_mock.MustMarshal(github.RepositoryCommit{
+					SHA:     new(sha),
+					HTMLURL: new("https://github.com/6543/hello-world/commit/" + sha),
+					Commit: &github.Commit{
+						Message: new("fix the thing"),
+						Author: &github.CommitAuthor{
+							Name:  new("Jane"),
+							Email: new("jane@example.com"),
+							Date:  &github.Timestamp{Time: time.Unix(1700000000, 0)},
+						},
+					},
+					Files: []*github.CommitFile{
+						{Filename: new("README.md")},
+						{Filename: new("main.go")},
+					},
+				}))
+			}),
 		),
 		github_mock.WithRequestMatch(
 			github_mock.GetReposCompareByOwnerByRepoByBasehead,
@@ -340,8 +354,13 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/pull/1/head", pipeline.Ref)
 		assert.Equal(t, "changes:main", pipeline.Refspec)
-		assert.Equal(t, "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c", pipeline.Commit.SHA)
-		assert.Equal(t, "Update the README with new information", pipeline.Commit.Message)
+		assert.Equal(t, &model.Commit{
+			SHA:       "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+			Message:   "fix the thing",
+			ForgeURL:  "https://github.com/6543/hello-world/commit/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+			Author:    model.CommitAuthor{Name: "Jane", Email: "jane@example.com"},
+			Timestamp: 1700000000,
+		}, pipeline.Commit)
 		assert.Equal(t, "Update the README with new information", pipeline.Title)
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
@@ -364,8 +383,13 @@ func TestHook(t *testing.T) {
 		assert.Equal(t, model.EventDeploy, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, "9049f1265b7d61be4a8904a9a27120d2064dab3b", pipeline.Commit.SHA)
-		assert.Equal(t, "", pipeline.Commit.Message)
+		assert.Equal(t, &model.Commit{
+			SHA:       "9049f1265b7d61be4a8904a9a27120d2064dab3b",
+			Message:   "fix the thing",
+			ForgeURL:  "https://github.com/6543/hello-world/commit/9049f1265b7d61be4a8904a9a27120d2064dab3b",
+			Author:    model.CommitAuthor{Name: "Jane", Email: "jane@example.com"},
+			Timestamp: 1700000000,
+		}, pipeline.Commit)
 		assert.Equal(t, "https://api.github.com/repos/baxterthehacker/public-repo/deployments/710692", pipeline.ForgeURL)
 		assert.Equal(t, "baxterthehacker", pipeline.Author)
 		assert.Equal(t, "https://avatars.githubusercontent.com/u/6752317?v=3", pipeline.Avatar)
@@ -396,7 +420,7 @@ func TestHook(t *testing.T) {
 	})
 }
 
-func TestGetTagCommit(t *testing.T) {
+func TestGetCommit(t *testing.T) {
 	// Tags API paginates 30 per page; put the target tag on the second page
 	// to exercise pagination instead of a first-page match.
 	mockedHTTPClient := github_mock.NewMockedHTTPClient(
@@ -454,7 +478,7 @@ func TestGetTagCommit(t *testing.T) {
 	c := &client{API: defaultAPI, url: defaultURL}
 
 	t.Run("finds a tag beyond the first page", func(t *testing.T) {
-		commit, err := c.getTagCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "v1.0.3")
+		commit, err := c.getCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "", "v1.0.3")
 		require.NoError(t, err)
 		assert.Equal(t, &model.Commit{
 			SHA:       "deadbeefcafe",
@@ -469,7 +493,7 @@ func TestGetTagCommit(t *testing.T) {
 	})
 
 	t.Run("returns an error instead of looping forever when the tag does not exist", func(t *testing.T) {
-		_, err := c.getTagCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "does-not-exist")
+		_, err := c.getCommit(ctx, &model.Repo{ForgeRemoteID: "1", FullName: "6543/hello-world"}, "", "does-not-exist")
 		require.Error(t, err)
 	})
 }

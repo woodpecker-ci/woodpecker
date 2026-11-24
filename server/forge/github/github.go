@@ -703,19 +703,27 @@ func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Re
 	}
 
 	if pipeline != nil {
-		switch pipeline.Event { //nolint:gocritic // ignore lint issue as this will get more cases later
+		switch pipeline.Event {
 		case model.EventRelease:
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
 			if pipeline.Commit.SHA == "" {
-				commit, err := c.getTagCommit(ctx, repo, pipeline.TagTitle)
+				commit, err := c.getCommit(ctx, repo, "", pipeline.TagTitle)
 				if err != nil {
 					return nil, nil, err
 				}
 				if commit != nil {
 					pipeline.Commit = commit
 				}
+			}
+		case model.EventPull, model.EventPullClosed, model.EventPullMetadata, model.EventDeploy:
+			commit, err := c.getCommit(ctx, repo, pipeline.Commit.SHA, "")
+			if err != nil {
+				return nil, nil, err
+			}
+			if commit != nil {
+				pipeline.Commit = commit
 			}
 		}
 	}
@@ -782,8 +790,9 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	return pipeline, err
 }
 
-// getTagCommit returns the commit a tag points to.
-func (c *client) getTagCommit(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
+// getCommit loads a commit from the forge, as hooks do not carry all of its data.
+// With a tagName the commit of that tag is loaded.
+func (c *client) getCommit(ctx context.Context, repo *model.Repo, sha, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
@@ -810,32 +819,34 @@ func (c *client) getTagCommit(ctx context.Context, repo *model.Repo, tagName str
 		return nil, err
 	}
 
-	opts := &github.ListOptions{Page: 1}
-	var tag *github.RepositoryTag
-	for opts.Page > 0 {
-		tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
-		if err != nil {
-			return nil, err
-		}
+	if tagName != "" {
+		opts := &github.ListOptions{Page: 1}
+		var tag *github.RepositoryTag
+		for opts.Page > 0 {
+			tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, t := range tags {
-			if t.GetName() == tagName {
-				tag = t
+			for _, t := range tags {
+				if t.GetName() == tagName {
+					tag = t
+					break
+				}
+			}
+			if tag != nil {
 				break
 			}
-		}
-		if tag != nil {
-			break
-		}
 
-		opts.Page = resp.NextPage
-	}
-	if tag == nil {
-		return nil, fmt.Errorf("could not find tag %s", tagName)
+			opts.Page = resp.NextPage
+		}
+		if tag == nil {
+			return nil, fmt.Errorf("could not find tag %s", tagName)
+		}
+		sha = tag.GetCommit().GetSHA()
 	}
 
-	// the tag list only carries the sha, load the commit for the rest
-	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, tag.GetCommit().GetSHA(), nil)
+	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, sha, nil)
 	if err != nil {
 		return nil, err
 	}

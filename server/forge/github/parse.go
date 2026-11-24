@@ -158,10 +158,8 @@ func parsePushHook(hook *github.PushEvent) (_ *model.Repo, _ *model.Pipeline, cu
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
 		Event: model.EventDeploy,
-		Commit: &model.Commit{
-			SHA:     hook.GetDeployment().GetSHA(),
-			Message: hook.GetDeployment().GetDescription(),
-		},
+		// the commit data is loaded from the forge later
+		Commit:     &model.Commit{SHA: hook.GetDeployment().GetSHA()},
 		ForgeURL:   hook.GetDeployment().GetURL(),
 		Ref:        hook.GetDeployment().GetRef(),
 		Branch:     hook.GetDeployment().GetRef(),
@@ -221,10 +219,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	pipeline := &model.Pipeline{
 		Event:       event,
 		EventReason: []string{eventAction},
-		Commit: &model.Commit{
-			SHA:     hook.GetPullRequest().GetHead().GetSHA(),
-			Message: hook.GetPullRequest().GetTitle(),
-		},
+		// the commit data is loaded from the forge later
+		Commit:   &model.Commit{SHA: hook.GetPullRequest().GetHead().GetSHA()},
 		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
 		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:   hook.GetPullRequest().GetBase().GetRef(),
