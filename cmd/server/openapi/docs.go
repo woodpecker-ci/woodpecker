@@ -5598,6 +5598,9 @@ const docTemplate = `{
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
+                },
+                "visibility_sync": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5720,6 +5723,9 @@ const docTemplate = `{
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
+                },
+                "visibility_sync": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5785,6 +5791,9 @@ const docTemplate = `{
                 },
                 "visibility": {
                     "type": "string"
+                },
+                "visibility_sync": {
+                    "type": "boolean"
                 }
             }
         },

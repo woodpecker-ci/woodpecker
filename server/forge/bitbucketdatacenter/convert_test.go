@@ -109,7 +109,13 @@ func TestConvertRepo(t *testing.T) {
 		ForgeURL:      "https://git.domain/self",
 		PREnabled:     true,
 		IsSCMPrivate:  true,
+		Visibility:    model.VisibilityPrivate,
 	}, to)
+
+	from.Public = true
+	to = convertRepo(from, perm, "main")
+	assert.True(t, to.IsSCMPrivate)
+	assert.Equal(t, model.VisibilityPublic, to.Visibility)
 }
 
 func TestConvertRepositoryPushEvent(t *testing.T) {

@@ -87,12 +87,17 @@ func convertDesc(status model.StatusValue) string {
 // convertRepo is a helper function used to convert a GitHub repository
 // structure to the common Woodpecker repository structure.
 func convertRepo(from *github.Repository) *model.Repo {
+	visibility := model.VisibilityPublic
+	if from.GetPrivate() {
+		visibility = model.VisibilityPrivate
+	}
 	repo := &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.GetID())),
 		Name:          from.GetName(),
 		FullName:      from.GetFullName(),
 		ForgeURL:      from.GetHTMLURL(),
 		IsSCMPrivate:  from.GetPrivate(),
+		Visibility:    visibility,
 		Clone:         from.GetCloneURL(),
 		CloneSSH:      from.GetSSHURL(),
 		Branch:        from.GetDefaultBranch(),
@@ -146,6 +151,10 @@ func convertTeam(from *github.Organization) *model.Team {
 // convertRepoHook is a helper function used to extract the Repository details
 // from a webhook and convert to the common Woodpecker repository structure.
 func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
+	visibility := model.VisibilityPublic
+	if eventRepo.GetPrivate() {
+		visibility = model.VisibilityPrivate
+	}
 	repo := &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(eventRepo.GetID())),
 		Owner:         eventRepo.GetOwner().GetLogin(),
@@ -153,6 +162,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		FullName:      eventRepo.GetFullName(),
 		ForgeURL:      eventRepo.GetHTMLURL(),
 		IsSCMPrivate:  eventRepo.GetPrivate(),
+		Visibility:    visibility,
 		Clone:         eventRepo.GetCloneURL(),
 		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),

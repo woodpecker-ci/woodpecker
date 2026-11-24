@@ -68,6 +68,7 @@ type (
 		SCMKind                      string               `json:"scm,omitempty"`
 		Timeout                      int64                `json:"timeout,omitempty"`
 		Visibility                   string               `json:"visibility"`
+		VisibilitySync               bool                 `json:"visibility_sync"`
 		IsSCMPrivate                 bool                 `json:"private"`
 		Trusted                      TrustedConfiguration `json:"trusted"`
 		RequireApproval              ApprovalMode         `json:"require_approval"`
@@ -93,6 +94,7 @@ type (
 		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
 		Timeout         *int64                     `json:"timeout,omitempty"`
 		Visibility      *string                    `json:"visibility"`
+		VisibilitySync  *bool                      `json:"visibility_sync,omitempty"`
 		AllowPull       *bool                      `json:"allow_pr,omitempty"`
 		PipelineCounter *int                       `json:"pipeline_counter,omitempty"`
 	}

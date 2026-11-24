@@ -60,6 +60,7 @@ func TestConvertRepo(t *testing.T) {
 	assert.Equal(t, "hello-world", to.Name)
 	assert.Equal(t, "default", to.Branch)
 	assert.Equal(t, from.IsPrivate, to.IsSCMPrivate)
+	assert.Equal(t, model.VisibilityPrivate, to.Visibility)
 	assert.Equal(t, from.Links.HTML.Href, to.Clone)
 	assert.Equal(t, from.Links.HTML.Href, to.ForgeURL)
 	assert.True(t, to.Perm.Push)

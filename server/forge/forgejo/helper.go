@@ -34,6 +34,15 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
+	visibility := model.VisibilityPrivate
+	if !from.Private {
+		switch from.Owner.Visibility {
+		case forgejo.VisibleTypePublic:
+			visibility = model.VisibilityPublic
+		case forgejo.VisibleTypeLimited:
+			visibility = model.VisibilityInternal
+		}
+	}
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 		Name:          name,
@@ -41,7 +50,8 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 		FullName:      from.FullName,
 		Avatar:        avatar,
 		ForgeURL:      from.HTMLURL,
-		IsSCMPrivate:  from.Private || from.Owner.Visibility != forgejo.VisibleTypePublic,
+		IsSCMPrivate:  visibility != model.VisibilityPublic,
+		Visibility:    visibility,
 		Clone:         from.CloneURL,
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,

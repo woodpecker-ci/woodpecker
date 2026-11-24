@@ -204,6 +204,23 @@ func TestToRepo(t *testing.T) {
 	assert.Equal(t, from.Owner.AvatarURL, repo.Avatar)
 	assert.Equal(t, from.Private, repo.IsSCMPrivate)
 	assert.True(t, repo.Perm.Admin)
+
+	for _, tt := range []struct {
+		private bool
+		owner   gitea.VisibleType
+		want    model.RepoVisibility
+	}{
+		{private: false, owner: gitea.VisibleTypePublic, want: model.VisibilityPublic},
+		{private: false, owner: gitea.VisibleTypeLimited, want: model.VisibilityInternal},
+		{private: false, owner: gitea.VisibleTypePrivate, want: model.VisibilityPrivate},
+		{private: true, owner: gitea.VisibleTypeLimited, want: model.VisibilityPrivate},
+	} {
+		from.Private = tt.private
+		from.Owner.Visibility = tt.owner
+		repo := toRepo(&from)
+		assert.Equal(t, tt.want, repo.Visibility, "private %v, owner %s", tt.private, tt.owner)
+		assert.Equal(t, tt.want != model.VisibilityPublic, repo.IsSCMPrivate, "private %v, owner %s", tt.private, tt.owner)
+	}
 }
 
 func TestFixMalformedAvatar(t *testing.T) {

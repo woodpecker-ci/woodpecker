@@ -57,12 +57,17 @@ func anonymizeLink(link string) (href string) {
 }
 
 func convertRepo(from *bitbucket.Repository, perm *model.Perm, branch string) *model.Repo {
+	visibility := model.VisibilityPrivate
+	if from.Public {
+		visibility = model.VisibilityPublic
+	}
 	r := &model.Repo{
 		ForgeRemoteID: convertID(from.ID),
 		Name:          from.Slug,
 		Owner:         from.Project.Key,
 		Branch:        branch,
 		IsSCMPrivate:  true, // Since we have to use Netrc it has to always be private :/ TODO: Is this really true?
+		Visibility:    visibility,
 		FullName:      fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 		Perm:          perm,
 		PREnabled:     true,

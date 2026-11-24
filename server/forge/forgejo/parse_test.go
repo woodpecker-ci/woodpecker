@@ -45,6 +45,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPushBranch,
 			event: "push",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "50820",
 				Owner:         "meisam",
 				Name:          "woodpecktester",
@@ -95,6 +96,7 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -126,6 +128,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPushMulti,
 			event: "push",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "6",
 				Owner:         "Test-CI",
 				Name:          "multi-line-secrets",
@@ -176,6 +179,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
 				Branch:        "main",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -213,6 +217,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "",
 				Branch:        "main",
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -255,6 +260,7 @@ func TestForgejoParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -297,6 +303,7 @@ func TestForgejoParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -331,6 +338,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestEdited,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "46534",
 				Owner:         "anbraten",
 				Name:          "test-repo",
@@ -373,6 +381,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestClosed,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "46534",
 				Owner:         "anbraten",
 				Name:          "test-repo",
@@ -414,6 +423,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestMerged,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "46534",
 				Owner:         "anbraten",
 				Name:          "test-repo",
@@ -466,6 +476,7 @@ func TestForgejoParser(t *testing.T) {
 				Branch:        "main",
 				PREnabled:     true,
 				IsSCMPrivate:  true,
+				Visibility:    model.VisibilityPrivate,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -496,6 +507,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestAssigneesAdded,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -539,6 +551,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestMilestoneAdded,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -583,6 +596,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestLabelAdded,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -627,6 +641,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestAssigneeCleared,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -671,6 +686,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestMilestoneChanged,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -715,6 +731,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestLabelsUpdated,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -759,6 +776,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestLabelsCleared,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
@@ -803,6 +821,7 @@ func TestForgejoParser(t *testing.T) {
 			data:  fixtures.HookPullRequestMilestoneCleared,
 			event: "pull_request",
 			repo: &model.Repo{
+				Visibility:    model.VisibilityPublic,
 				ForgeRemoteID: "138564",
 				Owner:         "test_it",
 				Name:          "test_ci_thing",
