@@ -40,17 +40,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, errors.New(msg)
 	}
 
-	var commitSHA, commitMessage string
+	ref, commitMessage := pipeline.Ref, ""
 	if pipeline.Commit != nil {
-		commitSHA = pipeline.Commit.SHA
+		if pipeline.Commit.SHA != "" {
+			ref = pipeline.Commit.SHA
+		}
 		commitMessage = pipeline.Commit.Message
 	}
 
 	if constraint.IsSkipCommitMessage(metadata.Event(pipeline.Event), commitMessage) {
-		ref := commitSHA
-		if len(ref) == 0 {
-			ref = pipeline.Ref
-		}
 		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, commitMessage)
 		return nil, ErrFiltered
 	}
