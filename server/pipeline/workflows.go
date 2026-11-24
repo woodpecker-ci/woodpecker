@@ -51,7 +51,7 @@ func ListWorkflows(ctx context.Context, _forge forge.Forge, _store store.Store, 
 		// unexpected status code from config endpoint - using previous config as fallback, same as Create
 		log.Warn().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', will fallback to old config", repo.Config, pipeline.Ref, repoUser.Login)
 	case configFetchErr != nil:
-		return nil, fmt.Errorf("could not load config from forge: %w", configFetchErr)
+		return nil, fmt.Errorf("could not load config: %w", configFetchErr)
 	}
 
 	// Substitute and parse like a run would, without linting or compiling.

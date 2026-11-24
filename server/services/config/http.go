@@ -22,6 +22,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -57,6 +58,17 @@ func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) Service {
 }
 
 func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) ([]*types.FileMeta, error) {
+	files, err := h.fetch(ctx, forge, user, repo, pipeline, oldConfigData, restart)
+	if err != nil {
+		return files, &pipeline_errors.PipelineError{
+			Type:    pipeline_errors.PipelineErrorTypeExtension,
+			Message: "config extension: " + err.Error(),
+		}
+	}
+	return files, nil
+}
+
+func (h *httpService) fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) ([]*types.FileMeta, error) {
 	configuration := make([]*configData, len(oldConfigData))
 	for i, oldConfig := range oldConfigData {
 		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
@@ -80,6 +92,10 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 
 	status, err := h.client.Send(ctx, http.MethodPost, h.endpoint, body, response)
 	if err != nil && status != http.StatusNoContent {
+		if status == 0 {
+			// no response at all, e.g. DNS, TLS or connection errors
+			return nil, fmt.Errorf("could not reach endpoint: %w", err)
+		}
 		return nil, fmt.Errorf("failed to fetch config via http (status: %d): %w", status, err)
 	}
 
@@ -101,7 +117,7 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 	for i, config := range response.Configs {
 		// the answer of an extension is foreign input and can contain anything
 		if config == nil {
-			return nil, errors.New("config extension returned an empty config")
+			return nil, errors.New("returned an empty config")
 		}
 		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
