@@ -103,6 +103,7 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
 		-e LIBVIRT_ENABLED="$(LIBVIRT_ENABLED)" \
+		-e SQLITE_ENABLED="$(SQLITE_ENABLED)" \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
