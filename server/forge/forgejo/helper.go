@@ -34,7 +34,7 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
-	return &model.Repo{
+	repo := &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 		Name:          name,
 		Owner:         from.Owner.UserName,
@@ -48,6 +48,10 @@ func toRepo(from *forgejo.Repository) *model.Repo {
 		Perm:          toPerm(from.Permissions),
 		PREnabled:     from.HasPullRequests,
 	}
+	// Repo.Update only propagates visibility when it is set,
+	// so derive it from the privacy flag here.
+	repo.ResetVisibility()
+	return repo
 }
 
 // toPerm converts a Forgejo permission to a Woodpecker permission.

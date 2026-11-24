@@ -55,6 +55,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "git@codeberg.org:meisam/woodpecktester.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -88,6 +89,7 @@ func TestForgejoParser(t *testing.T) {
 				ForgeURL:      "http://forgejo.golang.org/gordon/hello-world",
 				Clone:         "http://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
+				Visibility:    model.VisibilityPrivate,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -123,6 +125,7 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -157,6 +160,7 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "http://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@forgejo.golang.org:gordon/hello-world.git",
 				Branch:        "main",
+				Visibility:    model.VisibilityPrivate,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -190,6 +194,7 @@ func TestForgejoParser(t *testing.T) {
 				Clone:         "https://forgejo.golang.org/gordon/hello-world.git",
 				CloneSSH:      "",
 				Branch:        "main",
+				Visibility:    model.VisibilityPrivate,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -228,6 +233,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				IsSCMPrivate:  false,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -266,6 +272,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				IsSCMPrivate:  false,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -307,6 +314,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "git@forgejo.com:anbraten/test-repo.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -345,6 +353,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "git@forgejo.com:anbraten/test-repo.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -382,6 +391,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "git@forgejo.com:anbraten/test-repo.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -419,6 +429,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@git.xxx:22/anbraten/demo.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPrivate,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -456,6 +467,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -495,6 +507,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -535,6 +548,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -575,6 +589,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -615,6 +630,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -655,6 +671,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -695,6 +712,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -735,6 +753,7 @@ func TestForgejoParser(t *testing.T) {
 				CloneSSH:      "ssh://git@codeberg.org/test_it/test_ci_thing.git",
 				Branch:        "main",
 				PREnabled:     true,
+				Visibility:    model.VisibilityPublic,
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,

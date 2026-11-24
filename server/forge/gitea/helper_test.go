@@ -206,6 +206,58 @@ func TestToRepo(t *testing.T) {
 	assert.True(t, repo.Perm.Admin)
 }
 
+func TestToRepoVisibility(t *testing.T) {
+	tests := []struct {
+		name        string
+		private     bool
+		ownerVis    gitea.VisibleType
+		wantVis     model.RepoVisibility
+		wantPrivate bool
+	}{
+		{"public repo, public owner", false, gitea.VisibleTypePublic, model.VisibilityPublic, false},
+		{"private repo, public owner", true, gitea.VisibleTypePublic, model.VisibilityPrivate, true},
+		{"public repo, private owner", false, gitea.VisibleTypePrivate, model.VisibilityPrivate, true},
+		{"public repo, limited owner", false, gitea.VisibleTypeLimited, model.VisibilityPrivate, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			from := gitea.Repository{
+				FullName: "gophers/hello-world",
+				Owner: &gitea.User{
+					UserName:   "gordon",
+					Visibility: tt.ownerVis,
+				},
+				Private: tt.private,
+			}
+			repo := toRepo(&from)
+			assert.Equal(t, tt.wantPrivate, repo.IsSCMPrivate)
+			// Repo.Update only propagates visibility if it is set here.
+			assert.Equal(t, tt.wantVis, repo.Visibility)
+		})
+	}
+}
+
+func TestToRepoVisibilityUpdatePropagation(t *testing.T) {
+	// a repo that became private on the forge must turn private in the store
+	stored := &model.Repo{Visibility: model.VisibilityPublic}
+	stored.Update(toRepo(&gitea.Repository{
+		FullName: "gophers/hello-world",
+		Owner:    &gitea.User{UserName: "gordon", Visibility: gitea.VisibleTypePublic},
+		Private:  true,
+	}))
+	assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
+	assert.True(t, stored.IsSCMPrivate)
+
+	// and a repo that became public again must propagate back
+	stored.Update(toRepo(&gitea.Repository{
+		FullName: "gophers/hello-world",
+		Owner:    &gitea.User{UserName: "gordon", Visibility: gitea.VisibleTypePublic},
+		Private:  false,
+	}))
+	assert.Equal(t, model.VisibilityPublic, stored.Visibility)
+	assert.False(t, stored.IsSCMPrivate)
+}
+
 func TestFixMalformedAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
