@@ -175,161 +175,164 @@ func TestProcessLogsFlushesContinuousStream(t *testing.T) {
 	})
 }
 
-// fakeClock drives failureWindowBackOff without sleeping.
-type fakeClock struct{ t time.Time }
+func newTestWindow(window time.Duration) *failureWindowBackOff {
+	b := newFailureWindowBackOff(window)
+	b.BackOff = backoff.NewConstantBackOff(time.Millisecond)
+	return b
+}
 
-func (f *fakeClock) now() time.Time          { return f.t }
-func (f *fakeClock) advance(d time.Duration) { f.t = f.t.Add(d) }
-func newFakeWindow(window time.Duration) (*failureWindowBackOff, *fakeClock) {
-	clock := &fakeClock{t: time.Unix(1_700_000_000, 0)}
-	b := &failureWindowBackOff{BackOff: backoff.NewConstantBackOff(time.Millisecond), window: window, now: clock.now}
-	return b, clock
+// failAfter runs a failing attempt that lasts d.
+func failAfter(b *failureWindowBackOff, d time.Duration) {
+	started := time.Now()
+	time.Sleep(d)
+	b.attemptFailed(started)
 }
 
 func TestFailureWindowBackOff(t *testing.T) {
 	t.Parallel()
 
-	t.Run("delegates until the window elapses since the first failure", func(t *testing.T) {
+	t.Run("stops once the window elapsed since the first failure", func(t *testing.T) {
 		t.Parallel()
-
-		b, clock := newFakeWindow(time.Minute)
-		b.attemptFailed(clock.now())
-		assert.Equal(t, time.Millisecond, b.NextBackOff())
-		clock.advance(59 * time.Second)
-		assert.Equal(t, time.Millisecond, b.NextBackOff())
-		clock.advance(2 * time.Second)
-		assert.Equal(t, backoff.Stop, b.NextBackOff())
+		synctest.Test(t, func(t *testing.T) {
+			b := newTestWindow(time.Minute)
+			failAfter(b, 0)
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+			time.Sleep(59 * time.Second)
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+			time.Sleep(2 * time.Second)
+			assert.Equal(t, backoff.Stop, b.NextBackOff())
+		})
 	})
 
 	t.Run("reset starts over", func(t *testing.T) {
 		t.Parallel()
-
-		b, clock := newFakeWindow(time.Minute)
-		b.attemptFailed(clock.now())
-		clock.advance(2 * time.Minute)
-		assert.Equal(t, backoff.Stop, b.NextBackOff())
-		b.Reset()
-		assert.Equal(t, time.Millisecond, b.NextBackOff())
+		synctest.Test(t, func(t *testing.T) {
+			b := newTestWindow(time.Minute)
+			failAfter(b, 0)
+			time.Sleep(2 * time.Minute)
+			assert.Equal(t, backoff.Stop, b.NextBackOff())
+			b.Reset()
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+		})
 	})
 
 	t.Run("an attempt that outlived the window starts a new streak", func(t *testing.T) {
 		t.Parallel()
-
-		b, clock := newFakeWindow(time.Minute)
-		b.attemptFailed(clock.now()) // quick failure: streak begins
-		clock.advance(3 * time.Hour) // the next attempt reconnected and long-polled
-		b.attemptFailed(clock.now().Add(-3 * time.Hour))
-		assert.Equal(t, time.Millisecond, b.NextBackOff(), "failure of a long-lived attempt must be retried")
-
-		clock.advance(30 * time.Second)
-		b.attemptFailed(clock.now().Add(-time.Second)) // quick failure inside the new streak
-		assert.Equal(t, time.Millisecond, b.NextBackOff())
-		clock.advance(31 * time.Second)
-		b.attemptFailed(clock.now().Add(-time.Second))
-		assert.Equal(t, backoff.Stop, b.NextBackOff(), "new streak is bounded by the window too")
+		synctest.Test(t, func(t *testing.T) {
+			b := newTestWindow(time.Minute)
+			failAfter(b, 0)
+			failAfter(b, 3*time.Hour)
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+			failAfter(b, 30*time.Second)
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+			failAfter(b, 31*time.Second)
+			assert.Equal(t, backoff.Stop, b.NextBackOff(), "new streak is bounded by the window too")
+		})
 	})
 
 	t.Run("zero window never stops", func(t *testing.T) {
 		t.Parallel()
-
-		b, clock := newFakeWindow(0)
-		b.attemptFailed(clock.now())
-		clock.advance(24 * time.Hour)
-		assert.Equal(t, time.Millisecond, b.NextBackOff())
+		synctest.Test(t, func(t *testing.T) {
+			b := newTestWindow(0)
+			failAfter(b, 0)
+			time.Sleep(24 * time.Hour)
+			assert.Equal(t, time.Millisecond, b.NextBackOff())
+		})
 	})
 }
 
 func TestRetryRPCWindowStartsAtFirstFailure(t *testing.T) {
-	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		c := &client{connectionRetryTimeout: time.Minute}
+		var attempts int
 
-	// A long poll (Next/Wait) blocks longer than the whole retry window before
-	// it fails for the first time. The failure must still be retried.
-	ctx := t.Context()
-	c := &client{connectionRetryTimeout: 200 * time.Millisecond}
-	var attempts int
+		_, err := retryRPC(t.Context(), c, "test", func() (struct{}, error) {
+			attempts++
+			if attempts == 1 {
+				time.Sleep(5 * time.Minute) // long poll
+				return struct{}{}, classifyRPCErr(t.Context(), status.Error(codes.Unavailable, "server restarting"))
+			}
+			return struct{}{}, nil
+		})
 
-	_, err := retryRPC(ctx, c, "test", func() (struct{}, error) {
-		attempts++
-		if attempts == 1 {
-			time.Sleep(2 * c.connectionRetryTimeout)
-			return struct{}{}, classifyRPCErr(ctx, status.Error(codes.Unavailable, "server restarting"))
-		}
-		return struct{}{}, nil
+		require.NoError(t, err)
+		assert.Equal(t, 2, attempts)
 	})
-
-	require.NoError(t, err)
-	assert.Equal(t, 2, attempts)
 }
 
 func TestRetryRPCLongAttemptStartsNewFailureStreak(t *testing.T) {
-	t.Parallel()
+	synctest.Test(t, func(t *testing.T) {
+		c := &client{connectionRetryTimeout: time.Minute}
+		var attempts int
 
-	// Within one retry loop: a quick failure starts a streak, the next attempt
-	// reconnects and blocks for longer than the whole window (a long poll)
-	// before it fails again. That failure must start a new streak and be
-	// retried instead of exhausting the old one.
-	ctx := t.Context()
-	c := &client{connectionRetryTimeout: 200 * time.Millisecond}
-	var attempts int
+		_, err := retryRPC(t.Context(), c, "test", func() (struct{}, error) {
+			attempts++
+			switch attempts {
+			case 1:
+				return struct{}{}, classifyRPCErr(t.Context(), status.Error(codes.Unavailable, "server restarting"))
+			case 2:
+				time.Sleep(5 * time.Minute) // reconnected long poll
+				return struct{}{}, classifyRPCErr(t.Context(), status.Error(codes.Unavailable, "server restarting again"))
+			default:
+				return struct{}{}, nil
+			}
+		})
 
-	_, err := retryRPC(ctx, c, "test", func() (struct{}, error) {
-		attempts++
-		switch attempts {
-		case 1:
-			return struct{}{}, classifyRPCErr(ctx, status.Error(codes.Unavailable, "server restarting"))
-		case 2:
-			time.Sleep(2 * c.connectionRetryTimeout)
-			return struct{}{}, classifyRPCErr(ctx, status.Error(codes.Unavailable, "server restarting again"))
-		default:
-			return struct{}{}, nil
-		}
+		require.NoError(t, err)
+		assert.Equal(t, 3, attempts)
 	})
-
-	require.NoError(t, err)
-	assert.Equal(t, 3, attempts)
 }
 
 func TestRetryRPCGivesUpAfterWindow(t *testing.T) {
 	t.Parallel()
 
+	const window = time.Minute
 	tc := []struct {
 		name               string
 		err                error
 		classify           bool
+		firstAttempt       time.Duration
 		wantConnectionLost bool
 	}{
 		// the guard error is returned by the operations as-is
-		{"not connected guard", errNotConnected, false, true},
-		{"transport unavailable", status.Error(codes.Unavailable, "connection refused"), true, false},
-		{"unauthenticated", status.Error(codes.Unauthenticated, "expired token"), true, false},
+		{"not connected guard", errNotConnected, false, 0, true},
+		{"transport unavailable", status.Error(codes.Unavailable, "connection refused"), true, 0, false},
+		{"unauthenticated", status.Error(codes.Unauthenticated, "expired token"), true, 0, false},
+		{"after a long poll", status.Error(codes.Unavailable, "connection refused"), true, 5 * time.Minute, false},
 	}
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			synctest.Test(t, func(t *testing.T) {
+				c := &client{connectionRetryTimeout: window}
+				var attempts int
+				var firstFailure time.Time
 
-			ctx := t.Context()
-			c := &client{connectionRetryTimeout: 200 * time.Millisecond}
-			var attempts int
-			started := time.Now()
+				_, err := retryRPC(t.Context(), c, "test", func() (struct{}, error) {
+					attempts++
+					if attempts == 1 {
+						time.Sleep(tt.firstAttempt)
+						firstFailure = time.Now()
+					}
+					if tt.classify {
+						return struct{}{}, classifyRPCErr(t.Context(), tt.err)
+					}
+					return struct{}{}, tt.err
+				})
 
-			_, err := retryRPC(ctx, c, "test", func() (struct{}, error) {
-				attempts++
-				if tt.classify {
-					return struct{}{}, classifyRPCErr(ctx, tt.err)
+				require.Error(t, err)
+				assert.Greater(t, attempts, 1, "must retry before giving up")
+				assert.LessOrEqual(t, time.Since(firstFailure), window)
+				// next backoff is at most 10s plus 50% jitter
+				assert.Greater(t, time.Since(firstFailure), window-15*time.Second, "must not give up early")
+				if tt.wantConnectionLost {
+					assert.ErrorIs(t, err, ErrConnectionLost)
+				} else {
+					assert.ErrorIs(t, err, backoff.ErrMaxElapsedTime)
+					assert.NotErrorIs(t, err, ErrConnectionLost)
 				}
-				return struct{}{}, tt.err
 			})
-
-			require.Error(t, err)
-			assert.Greater(t, attempts, 1, "must retry before giving up")
-			assert.Less(t, time.Since(started), 3*c.connectionRetryTimeout, "must give up close to the window")
-			if tt.wantConnectionLost {
-				assert.ErrorIs(t, err, ErrConnectionLost)
-			} else {
-				assert.ErrorIs(t, err, backoff.ErrMaxElapsedTime)
-				assert.NotErrorIs(t, err, ErrConnectionLost)
-			}
 		})
 	}
 }
