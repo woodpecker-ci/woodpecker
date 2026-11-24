@@ -49,6 +49,7 @@
 
 ### 🐛 Bug Fixes
 
+- Migrate legacy SQLite inline constrains and fix long running ones [[#7440](https://github.com/woodpecker-ci/woodpecker/pull/7440)]
 - Allow `failure: cancel` on plugin steps in the schema [[#7594](https://github.com/woodpecker-ci/woodpecker/pull/7594)]
 - Do not count marking a skipped workflow as done as agent work [[#7560](https://github.com/woodpecker-ci/woodpecker/pull/7560)]
 - For gitlab do paginate loading changed files [[#7561](https://github.com/woodpecker-ci/woodpecker/pull/7561)]
