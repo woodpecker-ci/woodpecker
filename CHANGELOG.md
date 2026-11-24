@@ -92,6 +92,10 @@
 - Update module github.com/mattn/go-sqlite3 to v1.14.53 [[#7488](https://github.com/woodpecker-ci/woodpecker/pull/7488)]
 - Update module go.yaml.in/yaml/v4 to v4.0.0 [[#7482](https://github.com/woodpecker-ci/woodpecker/pull/7482)]
 
+### Misc
+
+- Modernize and fix build system [[#7546](https://github.com/woodpecker-ci/woodpecker/pull/7546)]
+
 ## [3.20.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.20.1) - 2026-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
