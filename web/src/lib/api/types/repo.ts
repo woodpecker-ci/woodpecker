@@ -67,6 +67,9 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
+  // Whether the visibility follows the repository on the forge.
+  visibility_sync: boolean;
+
   last_pipeline_number?: number;
 
   last_pipeline?: Pipeline;
@@ -127,6 +130,7 @@ export type RepoSettings = Pick<
   | 'config_file'
   | 'timeout'
   | 'visibility'
+  | 'visibility_sync'
   | 'trusted'
   | 'require_approval'
   | 'approval_allowed_users'
