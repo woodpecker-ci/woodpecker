@@ -647,7 +647,6 @@ func PostPipeline(c *gin.Context) {
 		}
 		pl.Author = deployer.Login
 		pl.Avatar = deployer.Avatar
-		pl.Commit.Author = model.CommitAuthor{Name: deployer.Login, Email: deployer.Email}
 		pl.Sender = deployer.Login
 
 		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)

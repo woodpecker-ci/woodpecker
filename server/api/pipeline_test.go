@@ -711,8 +711,9 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, model.EventDeploy, got.Event)
 		assert.Equal(t, "deployer", got.Author)
 		assert.Equal(t, "deployer.png", got.Avatar)
-		assert.Equal(t, "deployer@example.com", got.Commit.Author.Email)
 		assert.Equal(t, "deployer", got.Sender)
+		// the commit stays the same, so does its git author
+		assert.Equal(t, "orig@example.com", got.Commit.Author.Email)
 	})
 }
 
