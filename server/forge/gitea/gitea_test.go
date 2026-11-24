@@ -29,7 +29,7 @@ import (
 	"testing"
 	"time"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -205,8 +205,9 @@ func TestGetStatus(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		assert.Equalf(t, tt.want, getStatus(tt.status), "status %q", tt.status)
+		assert.Equalf(t, tt.want, getStatus(tt.status, false), "status %q", tt.status)
 	}
+	assert.Equal(t, gitea.StatusSkipped, getStatus(model.StatusSkipped, true), "server knows the skipped state")
 }
 
 // newTestForge returns a forge talking to a fake Gitea API with the given routes.

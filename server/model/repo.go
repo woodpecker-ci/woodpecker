@@ -60,6 +60,7 @@ type Repo struct {
 	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	VisibilitySync               bool                 `json:"visibility_sync"                 xorm:"visibility_sync"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
@@ -69,6 +70,7 @@ type Repo struct {
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
 	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
 	WebhookSecret                string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	CloneSecret                  *CloneSecret         `json:"-"                               xorm:"json 'clone_secret'"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
@@ -92,6 +94,16 @@ type Repo struct {
 	Perm *Perm `json:"-" xorm:"-"`
 } //	@name	Repo
 
+// CloneSecret holds credentials the forge created for Woodpecker to clone only this
+// repository, so pipelines do not need the token of the repository user to clone.
+type CloneSecret struct {
+	// Login and Token are the credentials to clone the repository over HTTP(S).
+	Login string `json:"login,omitempty"`
+	Token string `json:"token,omitempty"`
+	// ForgeRemoteID is the forge ID of the credentials, to remove them again.
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id,omitempty"`
+}
+
 // TableName return database table name for xorm.
 func (Repo) TableName() string {
 	return "repos"
@@ -99,13 +111,6 @@ func (Repo) TableName() string {
 
 type RepoFilter struct {
 	Name string
-}
-
-func (r *Repo) ResetVisibility() {
-	r.Visibility = VisibilityPublic
-	if r.IsSCMPrivate {
-		r.Visibility = VisibilityPrivate
-	}
 }
 
 // ParseRepo parses the repository owner and name from a string.
@@ -145,7 +150,9 @@ func (r *Repo) Update(from *Repo) {
 	// overwrite the authoritative value previously synced from the forge API
 	// during activation or repair, breaking netrc-protected clones.
 	if from.Visibility != "" {
-		r.Visibility = from.Visibility
+		if r.VisibilitySync {
+			r.Visibility = from.Visibility
+		}
 		r.IsSCMPrivate = from.IsSCMPrivate
 	}
 }
@@ -157,6 +164,7 @@ type RepoPatch struct {
 	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
+	VisibilitySync               *bool                      `json:"visibility_sync,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`

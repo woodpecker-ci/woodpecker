@@ -14,7 +14,12 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge h-8 w-8" />
+      <IconButton
+        :href="httpUrl(repo.forge_url)"
+        :title="$t('repo.open_in_forge')"
+        :icon="forgeIcon"
+        class="forge h-8 w-8"
+      />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -74,6 +79,7 @@ import { provide } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import useRepos from '~/compositions/useRepos';
 import type { Forge, Repo, RepoPermissions } from '~/lib/api/types';
+import { httpUrl } from '~/lib/utils';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 

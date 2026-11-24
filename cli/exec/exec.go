@@ -73,6 +73,14 @@ func backendFlags(backends []backend_types.Backend) []cli.Flag {
 	return all
 }
 
+func backendFlags(backends []backend_types.Backend) []cli.Flag {
+	var all []cli.Flag
+	for _, b := range backends {
+		all = append(all, b.Flags()...)
+	}
+	return all
+}
+
 func run(ctx context.Context, c *cli.Command) error {
 	return common.RunPipelineFunc(ctx, c, execFile, execDir)
 }

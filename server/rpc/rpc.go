@@ -183,11 +183,13 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if step.PipelineID != currentPipeline.ID {
-		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current pipeline", state.StepUUID)
+	if step.PipelineID != currentPipeline.ID || step.PPID != workflow.PID {
+		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current workflow", state.StepUUID)
 		log.Error().
 			Int64("stepPipelineID", step.PipelineID).
 			Int64("currentPipelineID", currentPipeline.ID).
+			Int("stepPPID", step.PPID).
+			Int("workflowPID", workflow.PID).
 			Msg(msg)
 		return errors.New(msg)
 	}
@@ -443,6 +445,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 	if currentPipeline.IsMultiPipeline() {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
+	}
+
+	// The agent only marked a skipped workflow as done, it did no work.
+	if workflow.State == model.StatusSkipped {
+		return nil
 	}
 
 	return s.updateAgentLastWork(agent)

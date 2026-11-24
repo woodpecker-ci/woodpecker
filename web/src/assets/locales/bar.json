@@ -37,6 +37,10 @@
             "internal": {
                 "internal": "Intern",
                 "desc": "Nur eigloggte Leit vo da Woodpecker-Instanz kennan des seng."
+            },
+            "sync": {
+                "sync": "Gleich wia auf da Forge",
+                "desc": "Wer's seng ko, richt se nach'm Repo auf da Forge."
             }
         },
         "pipeline": {
@@ -77,7 +81,7 @@
                 "log_auto_scroll_off": "Automatisch scrollen ausschoidn",
                 "skipped": "Da Schrid is ausglosn woan.",
                 "expand_all": "Erweiter ole",
-                "collapse_all": "Schiab zammad alle"
+                "collapse_all": "Olle zammaklappn"
             },
             "event": {
                 "push": "Push",
@@ -126,8 +130,10 @@
                 "canceled_by_user": "Abgewürgt duach {user}",
                 "canceled_by_step": "Abgwürgt wenga {step}"
             },
-            "version": "De Woodpecker Version auf dea die Pipeline ausgefüad wurde.",
-            "version_header": "Woodpecker Version"
+            "version": "De Woodpecker-Version, auf dera de Pipeline glaffa is.",
+            "version_header": "Woodpecker Version",
+            "parse_errors": "Fella beim Eilesn",
+            "runtime_errors": "Fella beim Laffa"
         },
         "manual_pipeline": {
             "title": "Pipeline vo Hand starten",
@@ -141,16 +147,23 @@
                 "value": "Variabl-Wert"
             },
             "show_pipelines": "Pipelines zoang",
-            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf das zumindest oa Workflow auf des von hand lafa Ereignis head.",
+            "no_manual_workflows": "Koane basadn Workflows gfundn. Bas auf dass zumindest oa Workflow auf des von hand lafa Ereignis head.",
             "message": {
-                "desc": "De nachricht wird zu de Pipeline Nachrichtn dazougschrimm als weidere Infos."
+                "desc": "De nachricht wird zu de Pipeline Nachrichtn dazougschrimm als weidere Infos.",
+                "title": "Nachricht"
+            },
+            "workflow": {
+                "title": "Workflow",
+                "desc": "Laft nur auf ausgwähltn Workflow und dem seine Abhängigkeiten.",
+                "all": "Olle Workflows",
+                "load_error": "Hob den Workflow von dem Branch ned lon kena. Schau da numoi o ob der Branch do is und ob de Konfiguration basd."
             }
         },
         "activity": "Des wos bassiert is",
         "branches": "Branches",
         "pull_requests": "Pull Requests",
         "add": "Repo dazua doa",
-        "user_none": "De Organisation/da User hod no koane Projekte",
+        "user_none": "De Organisation/da Benutza hod no koane Projekte",
         "not_allowed": "Du deafst do ned nei",
         "open_in_forge": "Repo in da Forge aufmacha",
         "settings": {
@@ -269,7 +282,8 @@
                 }
             }
         },
-        "refresh": "Repos nei lon"
+        "refresh": "Repos nei lon",
+        "perm_sync_failed": "Deine Rechte für des Repo hod ma ned mit da Forge obgleichn kenna. Drum deafst derweil nur oschaung."
     },
     "admin": {
         "settings": {
@@ -320,7 +334,7 @@
                 },
                 "custom_labels": {
                     "custom_labels": "Eigene Labels",
-                    "desc": "De eigenen Labels de wo vom Agent-Admin beim Starten gsetzt worn san."
+                    "desc": "De eigenen Labels de wo vom Agent-Moa beim Starten gsetzt worn san."
                 },
                 "org": {
                     "badge": "org"
@@ -333,17 +347,24 @@
                 "never": "Nia",
                 "delete_confirm": "Wuisd du wirkli den Agent löschn? Er ko dann nahad nimmer mid'm Server obandln.",
                 "edit_agent": "Agent beabadn",
-                "delete_agent": "Agent löschn"
+                "delete_agent": "Agent löschn",
+                "filters": {
+                    "name": "Filter",
+                    "desc": "Labels füa Agents, de wo da Server vorgibt, zum Workflows filtan",
+                    "key": "Nama vom Label",
+                    "value": "Filterwert",
+                    "delete": "Filter löschn"
+                }
             },
-            "settings": "Admin-Eistellunga",
+            "settings": "Moa-Eistellunga",
             "not_allowed": "Du deafst de Server-Eistellunga ned ändarn",
             "secrets": {
                 "desc": "Globale Secrets kennan in de Pipelines vo olle Repos verwendt wern.",
-                "warning": "De Secrets san füa olle User verfügbar."
+                "warning": "De Secrets san füa olle Benutzer verfügbar."
             },
             "registries": {
                 "desc": "Globale Registry-Credentials kennan dann dazuagfügt wern zum private Images füa olle Pipelines verwenden.",
-                "warning": "De Registry-Credentials san füa olle User verfügbar."
+                "warning": "De Registry-Credentials san füa olle Benutzer verfügbar."
             },
             "queue": {
                 "queue": "Warteschlong",
@@ -369,25 +390,29 @@
             "users": {
                 "users": "Benutzer",
                 "desc": "Benutzer de wo auf dem Server registriert san.",
-                "login": "Benutzer Nama",
+                "login": "Benutzanama",
                 "email": "E-Mail",
                 "avatar_url": "Avatar-URL",
-                "save": "Benutzer speichan",
+                "save": "Benutza speichan",
                 "cancel": "Abbrechn",
                 "show": "Benutzer zoang",
-                "add": "Benutzer dazua doa",
+                "add": "Benutza dazua doa",
                 "none": "Do gibts no koane Benutzer.",
-                "delete_confirm": "Wuisd du wirkli den Benutzer löschn? Des löscht a olle Repos de wo dem Benutzer ghörn.",
-                "deleted": "Benutzer glöscht",
-                "created": "Benutzer erstäid",
-                "saved": "Benutzer gspeichert",
+                "delete_confirm": "Wuisd du wirkli den Benutza löschn? Des löscht a olle Repos de wo dem Benutza ghörn.",
+                "deleted": "Benutza glöscht",
+                "created": "Benutza erstäid",
+                "saved": "Benutza gspeichert",
                 "admin": {
-                    "admin": "Admin",
-                    "placeholder": "Benutzer is a Admin",
-                    "admin_warning": "Dea Benutzer is Admin, weilla üba umgebungs Variablen so configuriert woan is. Wennsd n zum hiabe macha mechst, muasd de zerst obasn sunsd ändad si nix."
+                    "admin": "Moa",
+                    "placeholder": "Benutza is a Moa",
+                    "admin_warning": "Dea Benutza is in da WOODPECKER_ADMIN-Umgebungsvariable. Wennsd eam do an Moa wegnimmst, hoit des nur bis zum nächstn Neistart vom Server. Wennsd n fia imma zum Hiabe macha mechst, muasd eam a aus de Umgebungsvariablen aussanehma.",
+                    "admin_env": "Moa (env)",
+                    "admin_env_desc": "Moa, weil dea Benutza in WOODPECKER_ADMIN steht.",
+                    "admin_revoked": "Moa derweil weggnumma",
+                    "admin_revoked_desc": "Dea Benutza is in da WOODPECKER_ADMIN-Umgebungsvariable, aba Moa is a ez nimma. Nachm nächstn Neistart vom Server is'as wieda Moa, außa ma nimmt eam aus WOODPECKER_ADMIN aussa."
                 },
-                "delete_user": "Benutzer löschn",
-                "edit_user": "Benutzer beabadn",
+                "delete_user": "Benutza löschn",
+                "edit_user": "Benutza beabadn",
                 "forge": "Forge"
             },
             "orgs": {
@@ -440,7 +465,7 @@
     "merge_ref_desc": "Ref zum füa de Merge-Basis verwenden. Des wird verwendt zum Diff füa Pull Requests bestimma.",
     "public_only": "Nur öffentliche",
     "public_only_desc": "Nur öffentliche Repos zoang.",
-    "git_username": "Git-Benutzername",
+    "git_username": "Git-Benutzanama",
     "repositories": {
         "title": "Repositorys",
         "all": {
@@ -488,13 +513,18 @@
                 "desc": "Organisations-Registry-Credentials kennan dazuagfügt wern zum private Images fia olle Pipelines vo ana Organisation verwenden."
             },
             "agents": {
-                "desc": "Agents de wo fia de Organisation registriert san."
+                "desc": "Agents de wo fia de Organisation registriert san.",
+                "require_org_agents": {
+                    "require": "Pipelines nur auf Agents vo da Organisation laffa lassn",
+                    "desc": "Workflows vo Repos vo dera Organisation wern nur vo Agents gnumma, de wo fia de Organisation registriert san, ned vo de Agents vom ganzn Server.",
+                    "saved": "Organisations-Eistellunga gspeichert"
+                }
             }
         }
     },
     "user": {
         "settings": {
-            "settings": "Benutzer-Eistellunga",
+            "settings": "Benutza-Eistellunga",
             "general": {
                 "general": "Konto",
                 "language": "Sproch",
@@ -513,10 +543,10 @@
                 }
             },
             "secrets": {
-                "desc": "User-Secrets kennan in de Pipelines vo olle Repos vom User verwendt wern."
+                "desc": "Benutza-Secrets kennan in de Pipelines vo olle Repos vom Benutza verwendt wern."
             },
             "registries": {
-                "desc": "User-Registry-Credentials kennan dann dazuagfügt wern zum private Images füa olle persönlichen Pipelines verwenden."
+                "desc": "Benutza-Registry-Credentials kennan dann dazuagfügt wern zum private Images füa olle persönlichen Pipelines verwenden."
             },
             "cli_and_api": {
                 "cli_and_api": "CLI & API",
@@ -529,7 +559,12 @@
                 "swagger_ui": "Swagger UI"
             },
             "agents": {
-                "desc": "Agents de wo füa dei Account-Repos registriert san."
+                "desc": "Agents de wo füa dei Account-Repos registriert san.",
+                "require_user_agents": {
+                    "require": "Pipelines nur auf deine Agents laffa lassn",
+                    "desc": "Workflows vo deine eignan Repos wern nur vo Agents gnumma, de füa dein Account registriert san, ned vo Agents vom ganzn Server.",
+                    "saved": "Benutza-Eistellunga gspeichert"
+                }
             }
         }
     },
@@ -600,9 +635,9 @@
     "oauth_client_secret": "OAuth Client Secret",
     "oauth_host": "OAuth Host",
     "merge_ref": "Merge Ref",
-    "git_username_desc": "Benutzername fia'n Git-User.",
+    "git_username_desc": "Benutzanama fia'n Git-Benutza.",
     "git_password": "Git-Passwort",
-    "git_password_desc": "Passwort oda persönlicher Access-Token fia'n Git-User.",
+    "git_password_desc": "Passwort oda persönlicher Access-Token fia'n Git-Benutza.",
     "executable": "Ausführbare Datei",
     "executable_desc": "Pfad zur Addon-Executable.",
     "save": "Speichan",
@@ -610,13 +645,13 @@
     "skip_verify": "SSL-Überprüfung überspringen",
     "skip_verify_desc": "SSL-Überprüfung füa de API-Verbindung überspringen. Des is ned empfohln füan Produktiv-Einsatz.",
     "url": "URL",
-    "forge_managed_by_env": "De primäre Forge wird über Umgebungsvariabln verwaltet. Olle Änderunga an dera Forge wern bei am Neustart zruckgsetzt.",
+    "forge_managed_by_env": "De primäre Forge wird über Umgebungsvariabln verwaltet. Olle Änderunga an dera Forge wern bei am Neistart zruckgsetzt.",
     "oauth_redirect_url": "OAuth Redirect-URL",
     "forge_created": "Forge erstäid",
     "advanced_options": "Erweiterte Optionen",
     "leave_empty_to_keep_current_value": "Leer lassn zum aktuellen Wert behalten",
     "forge_deleted": "Forge glöscht",
-    "forge_delete_confirm": "Wuisd du wirkli de Forge löschn? Des löscht a olle Repos, User und Pipelines de wo zu dera Forge ghörn.",
+    "forge_delete_confirm": "Wuisd du wirkli de Forge löschn? Des löscht a olle Repos, Benutzer und Pipelines de wo zu dera Forge ghörn.",
     "edit_forge": "Forge beabadn",
     "delete_forge": "Forge löschn",
     "no_forges": "Do gibts no koane Forges.",
@@ -631,11 +666,17 @@
     "weblate": "unserm Weblate",
     "disabled": "Abgschoidn",
     "config_extension_exclusive": "Ganz Alloa",
-    "config_extension_exclusive_desc": "Wenn ogschoid, werdn alle anderen konfigurations Möglichkeitn überganga, a de Forge.",
+    "config_extension_exclusive_desc": "Wenn ogschoid, wern olle andan Weg zum Config hoin übersprunga, a de Forge.",
     "global_level_registry": "Globale Registry",
     "org_level_registry": "Organisations-Registry",
     "registry_extension_endpoint": "Registry-Erweiterungs-Endpunkt",
     "secret_extension_endpoint": "Secret-Erweitarung-Endpunkt",
     "extension_netrc": "Dua Netrc Anmeldedaten dazua",
-    "extension_netrc_desc": "Schig de Forge Netrc Anmeldetaten zua Erweiterung mid."
+    "extension_netrc_desc": "Schig de Forge Netrc Anmeldetaten zua Erweiterung mid.",
+    "forge_name": "Ozeignama",
+    "forge_name_placeholder": "Optional, wird auf da Login-Seitn ozeigt",
+    "delete": "Löschn",
+    "allowed_orgs": "Erlaubte Organisationa",
+    "allowed_orgs_desc": "Organisationa, wo d'Mitglieder se üba de Forge eiloggn deafn, zuasätzlich zu da globaln WOODPECKER_ORGS-Eistellung.",
+    "allowed_orgs_placeholder": "Nama vo da Organisation"
 }

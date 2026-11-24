@@ -44,7 +44,7 @@ func setupTestQueue(t *testing.T) (context.Context, context.CancelCauseFunc, *fi
 	ctx, cancel := context.WithCancelCause(t.Context())
 	t.Cleanup(func() { cancel(nil) })
 
-	q, _ := NewMemoryQueue(ctx).(*fifo)
+	q, _ := NewMemoryQueue(ctx, 0).(*fifo)
 	require.NotNil(t, q, "Failed to create queue")
 
 	return ctx, cancel, q
@@ -853,7 +853,7 @@ func TestFifoAssignToWorker(t *testing.T) {
 				q.workers[&worker{agentID: agent, filter: filter}] = struct{}{}
 			}
 
-			element, worker := q.assignToWorker()
+			element, worker := q.assignToWorker(&concurrencyIndex{queue: q})
 			if tt.task == "" {
 				assert.Nil(t, element)
 				assert.Nil(t, worker)
@@ -885,8 +885,12 @@ func TestFifoConcurrencySlots(t *testing.T) {
 			task:    "b",
 		},
 		{
-			name:    "earlier waiting pipeline reserves the slot",
-			pending: []*model.Task{member("late", 2, 2, 1)},
+			name: "earlier waiting pipeline reserves the slot",
+			pending: []*model.Task{
+				// matrix workflows of one pipeline share the same name
+				{ID: "late-1", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+				{ID: "late-2", Name: "late", PipelineID: 2, Created: 2, ConcurrencyGroup: "deploy", ConcurrencyLimit: 1},
+			},
 			waiting: []*model.Task{member("early", 1, 1, 1)},
 		},
 		{
@@ -916,7 +920,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 		},
 		{
 			name:    "free slot is granted",
-			pending: []*model.Task{member("next", 3, 3, 2)},
+			pending: []*model.Task{member("next", 3, 3, 2), member("strict", 4, 4, 1)},
 			running: []*model.Task{member("active", 2, 2, 2)},
 			task:    "next",
 		},
@@ -946,7 +950,7 @@ func TestFifoConcurrencySlots(t *testing.T) {
 				q.running[task.ID] = &entry{item: task}
 			}
 
-			element, _ := q.assignToWorker()
+			element, _ := q.assignToWorker(&concurrencyIndex{queue: q})
 			if tt.task == "" {
 				assert.Nil(t, element)
 				return
@@ -1332,6 +1336,43 @@ func TestFifoLeaseManagement(t *testing.T) {
 	})
 }
 
+func TestFifoCustomTaskTimeout(t *testing.T) {
+	ctx, cancel := context.WithCancelCause(t.Context())
+	t.Cleanup(func() { cancel(nil) })
+
+	q, _ := NewMemoryQueue(ctx, 500*time.Millisecond).(*fifo)
+	require.NotNil(t, q, "Failed to create queue")
+	assert.Equal(t, 500*time.Millisecond, q.extension)
+
+	// a missed heartbeat must not expire a task that is still renewed
+	dummyTask := &model.Task{ID: "custom-timeout-1"}
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{dummyTask}))
+	waitForProcess()
+	got, err := q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, err)
+
+	errCh := make(chan error, 1)
+	go func() { errCh <- q.Wait(ctx, got.ID) }()
+
+	for range 3 {
+		time.Sleep(200 * time.Millisecond)
+		assert.NoError(t, q.Extend(ctx, 1, got.ID))
+	}
+	info := q.Info(ctx)
+	assert.Len(t, info.Running, 1, "task with renewed lease must not expire")
+
+	// stop renewing: the custom 500ms lease must expire the task
+	select {
+	case werr := <-errCh:
+		assert.ErrorIs(t, werr, ErrTaskExpired)
+	case <-time.After(3 * time.Second):
+		t.Fatal("timeout waiting for Wait to return")
+	}
+	info = q.Info(ctx)
+	assert.Len(t, info.Running, 0)
+	assert.Len(t, info.Pending, 1, "expired task must be resubmitted")
+}
+
 func TestFifoWorkerManagement(t *testing.T) {
 	ctx, cancel, q := setupTestQueue(t)
 	defer cancel(nil)
@@ -1466,7 +1507,7 @@ func TestFifoLabelBasedScoring(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(t.Context())
 	defer cancel(nil)
 
-	q := NewMemoryQueue(ctx)
+	q := NewMemoryQueue(ctx, 0)
 
 	tasks := []*model.Task{
 		{ID: "1", Labels: map[string]string{"org-id": "123", "platform": "linux"}},

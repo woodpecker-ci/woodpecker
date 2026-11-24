@@ -16,13 +16,16 @@
 package gitea
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
-	"code.gitea.io/sdk/gitea"
+	gitea "gitea.dev/sdk"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
@@ -35,6 +38,15 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		from.HTMLURL,
 		from.Owner.AvatarURL,
 	)
+	visibility := model.VisibilityPrivate
+	if !from.Private {
+		switch from.Owner.Visibility {
+		case gitea.VisibleTypePublic:
+			visibility = model.VisibilityPublic
+		case gitea.VisibleTypeLimited:
+			visibility = model.VisibilityInternal
+		}
+	}
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
 		Name:          name,
@@ -42,7 +54,8 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		FullName:      from.FullName,
 		Avatar:        avatar,
 		ForgeURL:      from.HTMLURL,
-		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
+		IsSCMPrivate:  visibility != model.VisibilityPublic,
+		Visibility:    visibility,
 		Clone:         from.CloneURL,
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
@@ -239,6 +252,17 @@ func parsePullRequest(b []byte) (*pullRequestHook, error) {
 func parseRelease(b []byte) (*releaseHook, error) {
 	pr := new(releaseHook)
 	return pr, json.Unmarshal(b, pr)
+}
+
+// validSignature reports whether signature is the hex encoded HMAC-SHA256 of payload with secret.
+func validSignature(secret, signature string, payload []byte) bool {
+	expected, err := hex.DecodeString(signature)
+	if err != nil {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write(payload)
+	return hmac.Equal(mac.Sum(nil), expected)
 }
 
 // fixMalformedAvatar fixes an avatar url if malformed (currently a known bug with gitea).

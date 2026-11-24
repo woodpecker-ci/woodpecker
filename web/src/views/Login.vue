@@ -61,6 +61,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import { useWPTitle } from '~/compositions/useWPTitle';
 import { forgeDisplayName } from '~/lib/forgeDisplayName';
 import type { Forge } from '~/lib/api/types';
+import { httpUrl } from '~/lib/utils';
 
 const route = useRoute();
 const { authenticate } = useAuthentication();
@@ -80,11 +81,7 @@ const authErrorMessages = {
 
 const errorMessage = ref<string>();
 const errorDescription = ref<string>(route.query.error_description as string);
-// only link http(s) URIs, anything else (e.g. javascript:) could run code on click
-const errorUri = computed(() => {
-  const uri = route.query.error_uri as string | undefined;
-  return uri?.startsWith('http') ? uri : undefined;
-});
+const errorUri = computed(() => httpUrl(route.query.error_uri as string | undefined));
 
 onMounted(async () => {
   forges.value = (await apiClient.getForges()) ?? [];

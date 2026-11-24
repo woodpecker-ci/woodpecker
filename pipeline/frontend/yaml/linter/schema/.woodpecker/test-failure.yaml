@@ -1,0 +1,25 @@
+steps:
+  lint:
+    image: golang
+    commands:
+      - go vet ./...
+    failure: ignore
+
+  test:
+    image: golang
+    commands:
+      - go test ./...
+    failure: cancel
+
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+      tags: latest
+    failure: cancel
+
+  notify:
+    image: plugins/slack
+    settings:
+      channel: dev
+    failure: ignore
