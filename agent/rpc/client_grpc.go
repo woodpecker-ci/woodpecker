@@ -56,10 +56,8 @@ type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 	logs   chan *proto.LogEntry
-	// connectionRetryTimeout bounds how long an RPC keeps failing before it
-	// gives up. Zero means infinite. The clock starts at the first failure, not
-	// when the RPC was issued (see failureWindowBackOff). Whether a give-up
-	// ends the agent is decided by the callers (cmd/agent/core/agent.go).
+	// connectionRetryTimeout is how long an RPC may keep failing before it gives up.
+	// Zero means infinite.
 	connectionRetryTimeout time.Duration
 	// logEntryBufferSize sets the buffer size before the log reader is blocking.
 	// If you have enough memory and log bursts, set it higher.
@@ -112,16 +110,8 @@ func (c *client) IsConnected() bool {
 	return state == connectivity.Ready || state == connectivity.Idle
 }
 
-// failureWindowBackOff wraps the exponential policy and stops it once the
-// operation has been failing for longer than window, counted from the first
-// failure of the current streak.
-//
-// The library's backoff.WithMaxElapsedTime cannot express this: it counts from
-// the moment backoff.Retry was called, but Next and Wait are long polls that
-// legitimately block for far longer than the window before anything goes
-// wrong. Counted from the start of the call, the first transport error after
-// such a poll (typically a server restart) exceeded the window immediately and
-// gave up without a single retry.
+// failureWindowBackOff stops once failures last longer than window (0 = never).
+// Unlike backoff.WithMaxElapsedTime it ignores the running call, so long polls still get retried.
 type failureWindowBackOff struct {
 	backoff.BackOff
 	window       time.Duration
@@ -129,8 +119,6 @@ type failureWindowBackOff struct {
 	firstFailure time.Time
 }
 
-// newFailureWindowBackOff keeps the original tuning of the exponential policy
-// (10 ms initial, 10 s cap) and bounds a failure streak by window.
 func newFailureWindowBackOff(window time.Duration) *failureWindowBackOff {
 	exp := backoff.NewExponentialBackOff()
 	exp.MaxInterval = 10 * time.Second          //nolint:mnd
@@ -138,11 +126,7 @@ func newFailureWindowBackOff(window time.Duration) *failureWindowBackOff {
 	return &failureWindowBackOff{BackOff: exp, window: window, now: time.Now}
 }
 
-// attemptFailed records a failed attempt that began at started. An attempt
-// that stayed alive for longer than the window evidently had a working
-// connection for that long (a long poll that was reconnected and broke again
-// later), so its failure starts a new streak instead of extending one that
-// began before the attempt.
+// attemptFailed starts a new streak if the attempt outlived window, as it was connected meanwhile.
 func (b *failureWindowBackOff) attemptFailed(started time.Time) {
 	now := b.now()
 	if b.window > 0 && now.Sub(started) > b.window {
@@ -153,8 +137,6 @@ func (b *failureWindowBackOff) attemptFailed(started time.Time) {
 	}
 }
 
-// NextBackOff returns backoff.Stop once the window has elapsed since the first
-// failure of the current streak. A zero window never stops.
 func (b *failureWindowBackOff) NextBackOff() time.Duration {
 	if b.firstFailure.IsZero() {
 		b.firstFailure = b.now()
@@ -166,16 +148,12 @@ func (b *failureWindowBackOff) NextBackOff() time.Duration {
 	return next
 }
 
-// Reset forgets the current failure streak and resets the wrapped policy.
 func (b *failureWindowBackOff) Reset() {
 	b.firstFailure = time.Time{}
 	b.BackOff.Reset()
 }
 
-// retryOpts returns the backoff options used for every retry loop in this
-// file. The retry window is enforced by b (a failureWindowBackOff); when it
-// elapses, backoff.Retry returns the last error, which retryRPC translates
-// into ErrConnectionLost if the server was unreachable.
+// retryOpts returns the backoff options used for every retry loop in this file.
 func (c *client) retryOpts(op string, b backoff.BackOff) []backoff.RetryOption {
 	notify := func(err error, next time.Duration) {
 		// The "too_many_pings" GOAWAY is well-known noise; demote to trace.
@@ -193,24 +171,20 @@ func (c *client) retryOpts(op string, b backoff.BackOff) []backoff.RetryOption {
 
 	return []backoff.RetryOption{
 		backoff.WithBackOff(b),
-		// The window lives in b; 0 disables the library's own limit, which
-		// counts from the start of the call and would otherwise default to
-		// 15 minutes.
-		backoff.WithMaxElapsedTime(0),
+		backoff.WithMaxElapsedTime(0), // b enforces the timeout; 0 drops the 15m library default
 		backoff.WithNotify(notify),
 	}
 }
 
 // retryRPC is the workhorse used by every RPC method in this file. It runs op
-// under backoff.Retry with the standard options, tells the retry policy how
-// long each failed attempt lived, and translates the few special outcomes the
-// callers care about:
+// under backoff.Retry with the standard options, and translates the few
+// special outcomes the callers care about:
 //
-//   - op succeeds                       -> (result, nil)
-//   - ctx canceled                      -> (zero, nil)            same contract as before
-//   - retry window hit, not connected   -> (zero, ErrConnectionLost)
-//   - retry window hit, other error     -> (zero, err wrapping backoff.ErrMaxElapsedTime)
-//   - permanent (fatal)                 -> (zero, underlying err)
+//   - op succeeds           -> (result, nil)
+//   - ctx canceled          -> (zero, nil)            same contract as before
+//   - timeout, disconnected -> (zero, ErrConnectionLost)
+//   - timeout, other error  -> (zero, err wrapping backoff.ErrMaxElapsedTime)
+//   - permanent (fatal)     -> (zero, underlying err)
 //
 // The op closure is responsible for:
 //   - returning errNotConnected when IsConnected() is false (Retry will sleep
@@ -244,14 +218,12 @@ func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.O
 
 	re := backoff.AsRetryError(err)
 
-	// The window is enforced by the policy, which Retry reports as
-	// ErrExhausted. Surface it as ErrMaxElapsedTime, the cause callers and log
-	// readers know from before the window moved into the policy.
+	// b reports the timeout as ErrExhausted; keep the known ErrMaxElapsedTime cause.
 	if errors.Is(re.Cause, backoff.ErrExhausted) {
 		err = &backoff.RetryError{LastErr: re.LastErr, Cause: backoff.ErrMaxElapsedTime}
 	}
 
-	// Retry window exhausted while we were still in errNotConnected — give up.
+	// Timeout hit while still in errNotConnected: give up.
 	if errors.Is(re.LastErr, errNotConnected) {
 		log.Error().Msgf("grpc: %s(): connection lost, giving up", opName)
 		return zero, ErrConnectionLost
