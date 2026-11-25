@@ -80,6 +80,22 @@ func TestSecretPipelineList(t *testing.T) {
 	assert.Len(t, list, 4)
 }
 
+func TestSecretListOrgZeroIsolation(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Secret))
+	defer closer()
+
+	assert.NoError(t, store.SecretCreate(&model.Secret{
+		RepoID: 1,
+		OrgID:  0,
+		Name:   "repo1-only-secret",
+		Value:  "top-secret-value",
+	}))
+
+	list, err := store.SecretList(&model.Repo{ID: 2, OrgID: 0}, true, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}})
+	assert.NoError(t, err)
+	assert.Empty(t, list, "repo 2 (OrgID 0) must not see repo 1's repo-scoped secret just because both have OrgID 0")
+}
+
 func TestSecretUpdate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()

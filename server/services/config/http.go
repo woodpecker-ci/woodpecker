@@ -16,6 +16,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -43,6 +44,7 @@ type requestStructure struct {
 	Repo          *model.Repo     `json:"repo"`
 	Pipeline      *model.Pipeline `json:"pipeline"`
 	Netrc         *model.Netrc    `json:"netrc"`
+	Restart       bool            `json:"restart"`
 	Configuration []*configData   `json:"configuration,omitempty"`
 }
 
@@ -54,7 +56,7 @@ func NewHTTP(endpoint string, client *utils.Client, includeNetrc bool) Service {
 	return &httpService{endpoint, client, includeNetrc}
 }
 
-func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
+func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, restart bool) ([]*types.FileMeta, error) {
 	configuration := make([]*configData, len(oldConfigData))
 	for i, oldConfig := range oldConfigData {
 		configuration[i] = &configData{Name: oldConfig.Name, Data: string(oldConfig.Data)}
@@ -64,6 +66,7 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 	body := requestStructure{
 		Repo:          repo,
 		Pipeline:      pipeline,
+		Restart:       restart,
 		Configuration: configuration,
 	}
 
@@ -96,6 +99,10 @@ func (h *httpService) Fetch(ctx context.Context, forge forge.Forge, user *model.
 
 	fileMetaList := make([]*types.FileMeta, len(response.Configs))
 	for i, config := range response.Configs {
+		// the answer of an extension is foreign input and can contain anything
+		if config == nil {
+			return nil, errors.New("config extension returned an empty config")
+		}
 		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
 

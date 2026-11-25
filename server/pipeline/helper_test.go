@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -106,7 +107,7 @@ func TestUpdatePipelineStatusPostsThePersistedState(t *testing.T) {
 	db := &persisted{pipeline: model.StatusRunning, workflows: map[int64]model.StatusValue{
 		1: model.StatusPending, 2: model.StatusSuccess, 3: model.StatusRunning,
 	}}
-	got := &posted{states: map[int64][]model.StatusValue{}}
+	got := &posted{states: make(map[int64][]model.StatusValue)}
 	f := forge_mocks.NewMockForge(t)
 	f.On("Status", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Run(func(args mock.Arguments) { got.add(postedWorkflow(t, args)) }).Return(nil)
@@ -122,6 +123,26 @@ func TestUpdatePipelineStatusPostsThePersistedState(t *testing.T) {
 	}
 }
 
+// A status the forge refuses for one workflow must not keep the other
+// workflows of the pipeline from getting theirs.
+func TestUpdatePipelineStatusSendsEveryWorkflow(t *testing.T) {
+	repo := &model.Repo{ID: 1, FullName: "octocat/hello-world"}
+	user := &model.User{ID: 1}
+	pl := statusPipeline(2)
+	db := &persisted{pipeline: model.StatusRunning, workflows: map[int64]model.StatusValue{
+		1: model.StatusSuccess, 2: model.StatusFailure,
+	}}
+	workflow := func(id int64) any {
+		return mock.MatchedBy(func(w *model.Workflow) bool { return w.ID == id })
+	}
+
+	f := forge_mocks.NewMockForge(t)
+	f.EXPECT().Status(mock.Anything, user, repo, mock.Anything, workflow(1)).Return(errors.New("forge unavailable")).Once()
+	f.EXPECT().Status(mock.Anything, user, repo, mock.Anything, workflow(2)).Return(nil).Once()
+
+	updatePipelineStatus(t.Context(), statusStore(t, db), f, pl, repo, user)
+}
+
 // The race the first test cannot show: the pipeline's post of a workflow has
 // read its state and is still on its way to the forge when the agent finishes
 // that workflow and posts its end. The end must reach the forge last.
@@ -130,7 +151,7 @@ func TestPostWorkflowStatusKeepsOneWorkflowsPostsInOrder(t *testing.T) {
 	wf := pl.Workflows[0]
 	db := &persisted{pipeline: model.StatusRunning, workflows: map[int64]model.StatusValue{1: model.StatusPending}}
 	s := statusStore(t, db)
-	got := &posted{states: map[int64][]model.StatusValue{}}
+	got := &posted{states: make(map[int64][]model.StatusValue)}
 
 	inFlight := make(chan struct{})
 	release := make(chan struct{})
@@ -156,7 +177,7 @@ func TestPostWorkflowStatusKeepsOneWorkflowsPostsInOrder(t *testing.T) {
 	bulk := make(chan struct{})
 	go func() {
 		defer close(bulk)
-		updatePipelineStatus(context.Background(), s, f, pl, &model.Repo{}, &model.User{})
+		updatePipelineStatus(t.Context(), s, f, pl, &model.Repo{}, &model.User{})
 	}()
 	<-inFlight
 
@@ -165,7 +186,7 @@ func TestPostWorkflowStatusKeepsOneWorkflowsPostsInOrder(t *testing.T) {
 	done := &model.Workflow{ID: wf.ID, PID: wf.PID, Name: wf.Name, State: model.StatusSuccess}
 	agent := make(chan error, 1)
 	go func() {
-		agent <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, pl, done)
+		agent <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, pl, done)
 	}()
 
 	// give the agent's post every chance to overtake the held one
@@ -201,12 +222,12 @@ func TestPostWorkflowStatusDoesNotSerializeOtherWorkflows(t *testing.T) {
 
 	held := make(chan error, 1)
 	go func() {
-		held <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[0])
+		held <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[0])
 	}()
 	<-inFlight
 	other := make(chan error, 1)
 	go func() {
-		other <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[1])
+		other <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[1])
 	}()
 	select {
 	case err := <-other:
@@ -258,7 +279,7 @@ func TestPostWorkflowStatusOrdersADeploymentsPosts(t *testing.T) {
 
 	held := make(chan error, 1)
 	go func() {
-		held <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[0])
+		held <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, pl, pl.Workflows[0])
 	}()
 	<-inFlight
 	db.mu.Lock()
@@ -268,7 +289,7 @@ func TestPostWorkflowStatusOrdersADeploymentsPosts(t *testing.T) {
 	finished.Status = model.StatusSuccess
 	other := make(chan error, 1)
 	go func() {
-		other <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, &finished, pl.Workflows[1])
+		other <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, &finished, pl.Workflows[1])
 	}()
 	time.Sleep(100 * time.Millisecond)
 	releaseOnce()
@@ -310,7 +331,7 @@ func TestStatusLocksExcludeUnderContention(t *testing.T) {
 	for range 32 {
 		wg.Go(func() {
 			for range 500 {
-				unlock, err := k.lock(context.Background(), statusKey{id: 1})
+				unlock, err := k.lock(t.Context(), statusKey{id: 1})
 				if err != nil {
 					broken.Store(true)
 					return
@@ -371,7 +392,7 @@ func TestPostWorkflowStatusBoundsThePostAndRefreshesTimestamps(t *testing.T) {
 		}).Return(nil)
 
 	// a caller context with no deadline of its own, as on the RPC path
-	assert.NoError(t, PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, pipeline, handed))
+	assert.NoError(t, PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, pipeline, handed))
 	assert.Equal(t, model.StatusPending, handed.State, "the caller's workflow must not be rewritten")
 }
 
@@ -406,7 +427,7 @@ func TestPostWorkflowStatusDeadlineStartsAtThePost(t *testing.T) {
 
 	done := make(chan error, 1)
 	go func() {
-		done <- PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, &model.Pipeline{ID: 80}, &model.Workflow{ID: 8})
+		done <- PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, &model.Pipeline{ID: 80}, &model.Workflow{ID: 8})
 	}()
 	time.Sleep(queued)
 	unlockOnce()
@@ -469,7 +490,7 @@ func TestPostWorkflowStatusBoundsTheWaitWithoutACallerDeadline(t *testing.T) {
 	f := forge_mocks.NewMockForge(t)
 
 	err = within(t, 5*time.Second, func() error {
-		return PostWorkflowStatus(context.Background(), s, f, &model.User{}, &model.Repo{}, &model.Pipeline{ID: 100}, &model.Workflow{ID: 10})
+		return PostWorkflowStatus(t.Context(), s, f, &model.User{}, &model.Repo{}, &model.Pipeline{ID: 100}, &model.Workflow{ID: 10})
 	})
 	assert.ErrorIs(t, err, context.DeadlineExceeded)
 }

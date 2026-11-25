@@ -89,7 +89,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -123,7 +123,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -159,7 +159,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -197,7 +197,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -232,7 +232,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = false
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -265,7 +265,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -295,7 +295,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -334,7 +334,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -367,7 +367,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -404,7 +404,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -441,7 +441,7 @@ func TestHandleAuth(t *testing.T) {
 		server.Config.Services.Manager = _manager
 		server.Config.Permissions.Open = true
 		server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-		server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+		server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Set("store", _store)
@@ -517,7 +517,7 @@ func TestHandleAuthUpdatesTokenExpiry(t *testing.T) {
 			server.Config.Services.Manager = _manager
 			server.Config.Permissions.Open = true
 			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 
 			stored := &model.User{
 				ID: 1, OrgID: 1, ForgeID: 1, ForgeRemoteID: "remote-id-1",
@@ -676,7 +676,7 @@ func TestHandleAuthAllowedOrgs(t *testing.T) {
 			server.Config.Services.Manager = _manager
 			server.Config.Permissions.Open = true
 			server.Config.Permissions.Orgs = permissions.NewOrgs(tt.globalOrgs)
-			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil, false)
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			c.Set("store", _store)

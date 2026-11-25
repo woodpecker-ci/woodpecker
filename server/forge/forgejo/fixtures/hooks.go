@@ -19,66 +19,66 @@ import _ "embed"
 // HookPush is a sample Forgejo push hook.
 //
 //go:embed HookPush.json
-var HookPush string
+var HookPush []byte
 
 // HookPushMulti push multible commits to a branch.
 //
 //go:embed HookPushMulti.json
-var HookPushMulti string
+var HookPushMulti []byte
 
 // HookPushBranch is a sample Forgejo push hook where a new branch was created from an existing commit.
 //
 //go:embed HookPushBranch.json
-var HookPushBranch string
+var HookPushBranch []byte
 
 // HookTag is a sample Forgejo tag hook.
 //
 //go:embed HookTag.json
-var HookTag string
+var HookTag []byte
 
 // HookPullRequest is a sample pull_request webhook payload.
 //
 //go:embed HookPullRequest.json
-var HookPullRequest string
+var HookPullRequest []byte
 
 //go:embed HookPullRequestUpdated.json
-var HookPullRequestUpdated string
+var HookPullRequestUpdated []byte
 
 //go:embed HookPullRequestMerged.json
-var HookPullRequestMerged string
+var HookPullRequestMerged []byte
 
 //go:embed HookPullRequestClosed.json
-var HookPullRequestClosed string
+var HookPullRequestClosed []byte
 
 //go:embed HookPullRequestEdited.json
-var HookPullRequestEdited string
+var HookPullRequestEdited []byte
 
 //go:embed HookRelease.json
-var HookRelease string
+var HookRelease []byte
 
 //go:embed HookPullRequestAssigneesAdded.json
-var HookPullRequestAssigneesAdded string
+var HookPullRequestAssigneesAdded []byte
 
 //go:embed HookPullRequestMilestoneAdded.json
-var HookPullRequestMilestoneAdded string
+var HookPullRequestMilestoneAdded []byte
 
 //go:embed HookPullRequestLabelAdded.json
-var HookPullRequestLabelAdded string
+var HookPullRequestLabelAdded []byte
 
 //go:embed HookPullRequestAssigneeCleared.json
-var HookPullRequestAssigneeCleared string
+var HookPullRequestAssigneeCleared []byte
 
 //go:embed HookPullRequestMilestoneChanged.json
-var HookPullRequestMilestoneChanged string
+var HookPullRequestMilestoneChanged []byte
 
 //go:embed HookPullRequestLabelsUpdated.json
-var HookPullRequestLabelsUpdated string
+var HookPullRequestLabelsUpdated []byte
 
 //go:embed HookPullRequestLabelsCleared.json
-var HookPullRequestLabelsCleared string
+var HookPullRequestLabelsCleared []byte
 
 //go:embed HookPullRequestMilestoneCleared.json
-var HookPullRequestMilestoneCleared string
+var HookPullRequestMilestoneCleared []byte
 
 //go:embed HookPullRequestReopened.json
-var HookPullRequestReopened string
+var HookPullRequestReopened []byte

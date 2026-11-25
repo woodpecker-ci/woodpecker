@@ -157,7 +157,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 				logger.Debug().Msg("workflow context done")
 				return
 
-			case <-time.After(constant.TaskTimeout / 3):
+			case <-time.After(constant.TaskRenewInterval):
 				logger.Debug().Msg("renewing workflow lease")
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					logger.Error().Err(err).Msg("failed to extend workflow lease")

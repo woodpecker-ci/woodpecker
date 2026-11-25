@@ -97,6 +97,8 @@ The name for a `depends_on` entry is the filename without the path, leading dots
 +  - test
 ```
 
+When triggering a pipeline manually, a single workflow can be selected. Only workflows whose `when` conditions match the `manual` event can be selected. Woodpecker then runs only this workflow and, recursively, the workflows it hard depends on.
+
 Workflows that need to run even on failures should set the `status` filter.
 
 ```diff

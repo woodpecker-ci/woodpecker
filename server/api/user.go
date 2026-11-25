@@ -114,9 +114,9 @@ func GetRepos(c *gin.Context) {
 			return
 		}
 
-		dbReposMap := map[model.ForgeRemoteID]*model.Repo{}
-		dbStaleReposMap := map[int64]*model.Repo{}
-		dbReposFullNameMap := map[string]*model.Repo{}
+		dbReposMap := make(map[model.ForgeRemoteID]*model.Repo)
+		dbStaleReposMap := make(map[int64]*model.Repo)
+		dbReposFullNameMap := make(map[string]*model.Repo)
 		for _, r := range dbRepos {
 			dbReposMap[r.ForgeRemoteID] = r
 			dbReposFullNameMap[strings.ToLower(r.FullName)] = r
@@ -151,6 +151,7 @@ func GetRepos(c *gin.Context) {
 					delete(dbStaleReposMap, existingRepo.ID)
 				} else if r.Perm.Admin {
 					// you must be admin of the remote repo to enable the repo
+					r.VisibilitySync = true // default on activation
 					repos = append(repos, r)
 				}
 			}

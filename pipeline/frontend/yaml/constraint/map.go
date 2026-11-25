@@ -62,11 +62,11 @@ func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 		Include map[string]string
 		Exclude map[string]string
 	}{
-		Include: map[string]string{},
-		Exclude: map[string]string{},
+		Include: make(map[string]string),
+		Exclude: make(map[string]string),
 	}
 
-	out2 := map[string]string{}
+	out2 := make(map[string]string)
 
 	_ = unmarshal(&out1) // it contains include and exclude statement
 	_ = unmarshal(&out2) // it contains no include/exclude statement, assume include as default

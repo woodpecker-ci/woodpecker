@@ -1762,6 +1762,74 @@ func (_c *MockClient_OrgLookup_Call) RunAndReturn(run func(orgName string) (*woo
 	return _c
 }
 
+// OrgPatch provides a mock function for the type MockClient
+func (_mock *MockClient) OrgPatch(orgID int64, org *woodpecker.OrgPatch) (*woodpecker.Org, error) {
+	ret := _mock.Called(orgID, org)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgPatch")
+	}
+
+	var r0 *woodpecker.Org
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.OrgPatch) (*woodpecker.Org, error)); ok {
+		return returnFunc(orgID, org)
+	}
+	if returnFunc, ok := ret.Get(0).(func(int64, *woodpecker.OrgPatch) *woodpecker.Org); ok {
+		r0 = returnFunc(orgID, org)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Org)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(int64, *woodpecker.OrgPatch) error); ok {
+		r1 = returnFunc(orgID, org)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockClient_OrgPatch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrgPatch'
+type MockClient_OrgPatch_Call struct {
+	*mock.Call
+}
+
+// OrgPatch is a helper method to define mock.On call
+//   - orgID int64
+//   - org *woodpecker.OrgPatch
+func (_e *MockClient_Expecter) OrgPatch(orgID any, org any) *MockClient_OrgPatch_Call {
+	return &MockClient_OrgPatch_Call{Call: _e.mock.On("OrgPatch", orgID, org)}
+}
+
+func (_c *MockClient_OrgPatch_Call) Run(run func(orgID int64, org *woodpecker.OrgPatch)) *MockClient_OrgPatch_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 int64
+		if args[0] != nil {
+			arg0 = args[0].(int64)
+		}
+		var arg1 *woodpecker.OrgPatch
+		if args[1] != nil {
+			arg1 = args[1].(*woodpecker.OrgPatch)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockClient_OrgPatch_Call) Return(org1 *woodpecker.Org, err error) *MockClient_OrgPatch_Call {
+	_c.Call.Return(org1, err)
+	return _c
+}
+
+func (_c *MockClient_OrgPatch_Call) RunAndReturn(run func(orgID int64, org *woodpecker.OrgPatch) (*woodpecker.Org, error)) *MockClient_OrgPatch_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // OrgRegistry provides a mock function for the type MockClient
 func (_mock *MockClient) OrgRegistry(orgID int64, registry string) (*woodpecker.Registry, error) {
 	ret := _mock.Called(orgID, registry)

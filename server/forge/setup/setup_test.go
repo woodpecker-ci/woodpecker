@@ -72,7 +72,7 @@ func TestForgeBitbucketDatacenterMissingOptions(t *testing.T) {
 		t.Parallel()
 		_, err := Forge(&model.Forge{
 			Type:              model.ForgeTypeBitbucketDatacenter,
-			AdditionalOptions: map[string]any{},
+			AdditionalOptions: make(map[string]any),
 		})
 		assert.Error(t, err)
 	})
@@ -103,7 +103,7 @@ func TestForgeAddonMissingExecutable(t *testing.T) {
 	t.Parallel()
 	_, err := Forge(&model.Forge{
 		Type:              model.ForgeTypeAddon,
-		AdditionalOptions: map[string]any{},
+		AdditionalOptions: make(map[string]any),
 	})
 	assert.Error(t, err)
 }

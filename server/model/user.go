@@ -68,6 +68,10 @@ type User struct {
 
 	AdminEnv bool `json:"admin_env,omitempty" xorm:"-"`
 
+	// AdminRevoked is set when the user is listed in WOODPECKER_ADMIN, but admin
+	// was revoked and is not granted again before the next server restart.
+	AdminRevoked bool `json:"admin_revoked,omitempty" xorm:"-"`
+
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'hash'"`
 
@@ -78,6 +82,11 @@ type User struct {
 // TableName return database table name for xorm.
 func (User) TableName() string {
 	return "users"
+}
+
+// OwnsOrg reports whether org is the user's linked personal organization.
+func (u *User) OwnsOrg(org *Org) bool {
+	return org.IsUser && u.OrgID != 0 && u.OrgID == org.ID && u.ForgeID == org.ForgeID
 }
 
 // Validate validates the required fields and formats.

@@ -50,6 +50,12 @@
   flex-wrap: wrap;
 }
 
+.wp-plugin-release {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .wp-plugin-search {
   width: 100%;
   max-width: 32rem;

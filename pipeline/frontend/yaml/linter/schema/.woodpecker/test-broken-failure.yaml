@@ -1,0 +1,6 @@
+steps:
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+    failure: retry

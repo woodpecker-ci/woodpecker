@@ -1,8 +1,9 @@
 version: '2'
 run:
-  timeout: 15m
+  timeout: 30m
   build-tags:
     - test
+    - sqlite
 linters:
   default: none
   enable:
@@ -181,6 +182,10 @@ linters:
         - pkg: log
           alias: std_log
 
+        # forge sdks
+        - pkg: gitea.dev/sdk
+          alias: gitea
+
         # grpc / protobuf
         - pkg: google.golang.org/grpc/metadata
           alias: grpc_metadata
@@ -293,11 +298,16 @@ linters:
         - random.GetRandomBytes
     revive:
       rules:
+        - name: enforce-map-style
+          arguments: [make]
         - name: var-naming
           arguments:
             - []
             - []
             - - skipPackageNameChecks: true
+    usetesting:
+      context-background: true
+      context-todo: true
   exclusions:
     generated: lax
     presets:

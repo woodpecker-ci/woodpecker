@@ -1,6 +1,6 @@
 variables:
   - &golang_image 'docker.io/golang:1.27'
-  - &node_image 'docker.io/node:24-alpine'
+  - &node_image 'docker.io/node:26-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.27.x'
   - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:6.1.2'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64'
@@ -70,7 +70,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm install --frozen-lockfile
       - pnpm build
     when:
@@ -93,9 +95,10 @@ steps:
       - apt update
       - apt install -y tree
       - make cross-compile-server
-    environment:
-      PLATFORMS: linux|amd64
-      TAGS: sqlite sqlite_unlock_notify netgo
+    environment: &server_env
+      PLATFORMS: 'linux|amd64'
+      SQLITE_ENABLED: 'true'
+      TAGS: 'netgo'
     when:
       - event: [pull_request, pull_request_metadata]
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
@@ -113,8 +116,8 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
+      <<: *server_env
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64;freebsd|amd64
-      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}

@@ -154,6 +154,12 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY"),
+		Name:    "admin-primary-forge-only",
+		Usage:   "only accept users of the primary forge as admins",
+		Value:   false,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ORGS"),
 		Name:    "orgs",
@@ -296,6 +302,12 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
 		Name:    "keepalive-min-time",
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
+	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_TASK_TIMEOUT"),
+		Name:    "task-timeout",
+		Usage:   "time until a running task whose lease is not renewed by its agent is considered dead and gets rescheduled; agents renew every " + constant.TaskRenewInterval.String() + ", so the default and minimum of three renew intervals tolerate two missed heartbeats",
+		Value:   3 * constant.TaskRenewInterval,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONFIG_EXTENSION_ENDPOINT", "WOODPECKER_CONFIG_SERVICE_ENDPOINT"), // TODO remove _SERVICE_ var in 4.0.0
@@ -464,7 +476,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 5,
+		Value:   time.Second * 30,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),

@@ -94,6 +94,16 @@ func (c *Client) ListWorkspaces(opts *ListOpts) (*WorkspacesResp, error) {
 	return out, err
 }
 
+func (c *Client) ListWorkspacesAll() ([]*WorkspaceAccess, error) {
+	return shared_utils.Paginate(func(page int) ([]*WorkspaceAccess, error) {
+		resp, err := c.ListWorkspaces(&ListOpts{Page: page, PageLen: pageSize})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
+	}, -1)
+}
+
 func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.base, owner, name)
@@ -224,9 +234,11 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
-	out := new(WorkspaceMembershipResp)
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
+		// decode each page into a new value, the last page has no next link
+		// and must not keep the one of the page before
+		out := new(WorkspaceMembershipResp)
 		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
 		_, err := c.do(uri, http.MethodGet, nil, out)
 		if err != nil {

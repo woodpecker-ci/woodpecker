@@ -4,6 +4,7 @@ export interface Org {
   id: number;
   name: string;
   is_user: boolean;
+  require_org_agents: boolean;
 }
 
 export interface OrgPermissions {

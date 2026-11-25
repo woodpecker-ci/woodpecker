@@ -68,6 +68,7 @@ type (
 		SCMKind                      string               `json:"scm,omitempty"`
 		Timeout                      int64                `json:"timeout,omitempty"`
 		Visibility                   string               `json:"visibility"`
+		VisibilitySync               bool                 `json:"visibility_sync"`
 		IsSCMPrivate                 bool                 `json:"private"`
 		Trusted                      TrustedConfiguration `json:"trusted"`
 		RequireApproval              ApprovalMode         `json:"require_approval"`
@@ -93,6 +94,7 @@ type (
 		RequireApproval *ApprovalMode              `json:"require_approval,omitempty"`
 		Timeout         *int64                     `json:"timeout,omitempty"`
 		Visibility      *string                    `json:"visibility"`
+		VisibilitySync  *bool                      `json:"visibility_sync,omitempty"`
 		AllowPull       *bool                      `json:"allow_pr,omitempty"`
 		PipelineCounter *int                       `json:"pipeline_counter,omitempty"`
 	}
@@ -134,6 +136,8 @@ type (
 		Reviewed    int64            `json:"reviewed"`
 		Workflows   []*Workflow      `json:"workflows,omitempty"`
 		Release     *Release         `json:"release,omitempty"`
+		// SelectedWorkflow limits a manual pipeline to this workflow and its hard dependencies.
+		SelectedWorkflow string `json:"selected_workflow,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -272,6 +276,7 @@ type (
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
+		Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 	}
 
 	// Agent is the JSON data for an agent.
@@ -305,8 +310,14 @@ type (
 
 	// Org is the JSON data for an organization.
 	Org struct {
-		ID     int64  `json:"id"`
-		Name   string `json:"name"`
-		IsUser bool   `json:"is_user"`
+		ID               int64  `json:"id"`
+		Name             string `json:"name"`
+		IsUser           bool   `json:"is_user"`
+		RequireOrgAgents bool   `json:"require_org_agents"`
+	}
+
+	// OrgPatch defines an organization patch request.
+	OrgPatch struct {
+		RequireOrgAgents *bool `json:"require_org_agents,omitempty"`
 	}
 )

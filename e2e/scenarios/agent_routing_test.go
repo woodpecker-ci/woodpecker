@@ -18,6 +18,7 @@ package scenarios
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -82,11 +83,8 @@ func TestAgentLabelRouting(t *testing.T) {
 	setup.AssertWorkflowRanOnAgent(t, env.Store, finished, "woodpecker", gpuAgent)
 }
 
-/*
-// TODO: The agent assignment is currently flaky and so is the test, fix that.
-
-// orgPipelineYAML is a plain single-step pipeline used for org-preference tests.
-Var orgPipelineYAML = []byte(`
+// orgPipelineYAML is a plain single-step pipeline used for org agent tests.
+var orgPipelineYAML = []byte(`
 steps:
   - name: build
     image: dummy
@@ -97,29 +95,30 @@ steps:
 // TestOrgAgentPreferredOverGlobal starts a global agent and an org-scoped agent
 // for the same org as the test repo. It asserts that the org agent is always
 // preferred by the queue (score 10 vs 1) and picks up the pipeline.
-Func TestOrgAgentPreferredOverGlobal(t *testing.T) {
+func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
 		{Name: ".woodpecker.yaml", Data: orgPipelineYAML},
 	})
 
 	// Global agent: matches org-id=* (score 1).
-	globalAgent := setup.StartAgent(t, env.GRPCAddr,
+	globalAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("global-agent"),
 	)
 
-	// Org agent: will be patched with the repo's OrgID (score 10).
-	orgAgent := setup.StartAgent(t, env.GRPCAddr,
+	// Org agent: created for the repo's OrgID (score 10).
+	orgAgent := setup.StartAgent(
+		t, env.GRPCAddr,
 		setup.WithHostname("org-agent"),
-		setup.WithOrgID(env.Fixtures.Repo.OrgID),
+		setup.WithOrgID(env.Store, env.Fixtures.Repo.OrgID),
 	)
 
 	setup.WaitForAgentRegistered(t, env.Store, globalAgent, orgAgent)
 
 	// Wait until both agents have connected their poll goroutines to the queue.
-	// The org-agent reads its OrgID label from the DB at Poll time — if we
-	// create the pipeline before the org-agent is polling, the global agent
-	// can steal the task first (it's already blocking on Poll and wins the
-	// race). agentMaxWorkflows slots per agent = 8 workers total.
+	// If we create the pipeline before the org-agent is polling, the global
+	// agent can steal the task first (it's already blocking on Poll and wins
+	// the race). agentMaxWorkflows slots per agent = 8 workers total.
 	setup.WaitForWorkersReady(t, env.Queue, 2*setup.AgentMaxWorkflows)
 
 	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
@@ -131,5 +130,46 @@ Func TestOrgAgentPreferredOverGlobal(t *testing.T) {
 	// The workflow must have been picked up by the org-scoped agent, not the
 	// global one — the queue scores exact org-id matches 10× higher.
 	setup.AssertWorkflowRanOnAgent(t, env.Store, finished, "woodpecker", orgAgent)
-}.
-*/
+}
+
+// TestRequireOrgAgents asserts that a global agent never picks up workflows of
+// an org requiring its own agents: the workflow stays pending until an org
+// agent connects and then runs on that org agent.
+func TestRequireOrgAgents(t *testing.T) {
+	env := setup.StartServer(t.Context(), t, []*forge_types.FileMeta{
+		{Name: ".woodpecker.yaml", Data: orgPipelineYAML},
+	})
+
+	env.Fixtures.Org.RequireOrgAgents = true
+	require.NoError(t, env.Store.OrgUpdate(env.Fixtures.Org), "require org agents")
+
+	// Global agent: matches org-id=*, which is rejected for this org.
+	globalAgent := setup.StartAgent(
+		t, env.GRPCAddr,
+		setup.WithHostname("global-agent"),
+	)
+	setup.WaitForAgentRegistered(t, env.Store, globalAgent)
+	setup.WaitForWorkersReady(t, env.Queue, setup.AgentMaxWorkflows)
+
+	created, err := pipeline.Create(t.Context(), env.Store, env.Fixtures.Repo, env.DummyPipeline(model.EventPush))
+	require.NoError(t, err, "create pipeline")
+
+	assert.Never(t, func() bool {
+		p, err := env.Store.GetPipeline(created.ID)
+		require.NoError(t, err, "get pipeline")
+		return p.Status != model.StatusPending
+	}, 2*time.Second, 100*time.Millisecond, "global agent must not pick up the workflow")
+
+	// Org agent: the only agent allowed to run workflows of this org.
+	orgAgent := setup.StartAgent(
+		t, env.GRPCAddr,
+		setup.WithHostname("org-agent"),
+		setup.WithOrgID(env.Store, env.Fixtures.Repo.OrgID),
+	)
+	setup.WaitForAgentRegistered(t, env.Store, orgAgent)
+
+	finished := setup.WaitForPipeline(t, env.Store, created.ID)
+	assert.Equal(t, model.StatusSuccess, finished.Status, "pipeline should succeed")
+
+	setup.AssertWorkflowRanOnAgent(t, env.Store, finished, "woodpecker", orgAgent)
+}

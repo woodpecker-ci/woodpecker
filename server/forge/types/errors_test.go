@@ -15,8 +15,10 @@
 package types
 
 import (
+	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -58,5 +60,24 @@ func TestErrConfigNotFound(t *testing.T) {
 		err := &ErrConfigNotFound{Configs: []string{"x"}}
 		assert.ErrorIs(t, err, &ErrConfigNotFound{})
 		assert.NotErrorIs(t, errors.New("other"), &ErrConfigNotFound{})
+	})
+}
+
+func TestErrConfigFetchTimeout(t *testing.T) {
+	t.Parallel()
+
+	t.Run("message names timeout, attempts and configs", func(t *testing.T) {
+		t.Parallel()
+		err := &ErrConfigFetchTimeout{Timeout: 10 * time.Second, Attempts: 3, Configs: []string{".woodpecker/", ".woodpecker.yaml", ".woodpecker.yml"}}
+		assert.Equal(t, "forge did not answer within 10s (tried 3 times) while fetching '.woodpecker/', '.woodpecker.yaml', '.woodpecker.yml'; the forge may be overloaded, try again later. Admins can raise WOODPECKER_FORGE_TIMEOUT", err.Error())
+	})
+
+	t.Run("errors.Is matches any ErrConfigFetchTimeout and the deadline", func(t *testing.T) {
+		t.Parallel()
+		err := &ErrConfigFetchTimeout{Timeout: time.Second, Attempts: 1, Configs: []string{"x"}}
+		assert.ErrorIs(t, err, &ErrConfigFetchTimeout{})
+		assert.ErrorIs(t, err, context.DeadlineExceeded)
+		assert.NotErrorIs(t, err, &ErrConfigNotFound{})
+		assert.NotErrorIs(t, errors.New("other"), &ErrConfigFetchTimeout{})
 	})
 }

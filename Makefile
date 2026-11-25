@@ -6,6 +6,7 @@ GOLANGCI_LINT_VERSION := v2.15.0
 XGO_VERSION := go-1.27.x
 
 GO_PACKAGES ?= $(shell go list ./... | grep -v /vendor/)
+GO_MODULE ?= $(shell go list -m)
 
 TARGETOS ?= $(shell go env GOOS)
 TARGETARCH ?= $(shell go env GOARCH)
@@ -36,20 +37,31 @@ else
 	endif
 endif
 
+# go build tags, feature flags like SQLITE_ENABLED add to them
 TAGS ?=
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
 endif
-CGO_ENABLED ?= 1 # only used to compile server
-
-HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO),GO)
+# only forwarded on server and agent and cli compilation
+CGO_ENABLED ?= 1
+ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
 
+# enable sqlite by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	SQLITE_ENABLED ?= true
+else
+	ifeq ($(SQLITE_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if SQLITE_ENABLED is 'true')
+	endif
+endif
+ifeq ($(SQLITE_ENABLED),true)
+	override TAGS += sqlite
+endif
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -125,7 +137,7 @@ clean: ## Clean build artifacts
 clean-all: clean ## Clean all artifacts
 	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
-	rm -rf docs/docs/40-cli.md docs/openapi.json
+	rm -rf docs/docs/40-cli/90-reference.md docs/openapi.json
 
 .PHONY: generate
 generate: generate-openapi ## Run all code generations
@@ -242,10 +254,10 @@ build-server: build-ui generate-openapi ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/server
 
 build-agent: ## Build agent
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 
 build-cli: ## Build cli
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 
 build-tarball: ## Build tar archive
 	mkdir -p ${DIST_DIR} && tar chzvf ${DIST_DIR}/woodpecker-src.tar.gz \
@@ -264,43 +276,52 @@ build: build-agent build-server build-cli ## Build all binaries
 .PHONY: release-frontend
 release-frontend: build-ui ## Build frontend
 
+.PHONY: cross-compile-server
 cross-compile-server: ## Cross compile the server
+.PHONY: cross-compile-agent
+cross-compile-agent: ## Cross compile the agent
+.PHONY: cross-compile-cli
+cross-compile-cli: ## Cross compile the cli
+cross-compile-server cross-compile-agent cross-compile-cli: cross-compile-%:
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
-		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		COMPONENT=$* \
+		TARGETOS_XGO=$(firstword $(subst |, ,$(platform))) \
+		TARGETOS=$(firstword $(subst -, ,$(firstword $(subst |, ,$(platform))))) \
 		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
 		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
-		make release-server-xgo || exit 1; \
+		make release-xgo || exit 1; \
 	)
 	tree ${DIST_DIR}
 
-release-server-xgo: check-xgo ## Create server binaries for release using xgo
+release-xgo: check-xgo ## Create binaries of COMPONENT (server, agent or cli) for release using xgo
 	@echo "Building for:"
 	@echo "os:$(TARGETOS)"
+	@echo "os (xgo):$(TARGETOS_XGO)"
 	@echo "arch orgi:$(TARGETARCH)"
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 	# build via xgo
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(or $(TARGETOS_XGO),$(TARGETOS))/$(TARGETARCH_XGO)' -out woodpecker-$(COMPONENT) -pkg cmd/$(COMPONENT) .
 	# move binary into subfolder depending on target os and arch
 	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then \
 	  echo "inside xgo image"; \
-	  mkdir -p ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
-	  mv -vf /build/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  mkdir -p ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX); \
+	  mv -vf /build/woodpecker-$(COMPONENT)* ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	else \
 	  echo "outside xgo image"; \
-	  [ -f "${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
-	  mv -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  [ -f "${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
+	  mv -v ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-$(COMPONENT)* ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	fi
 	# if enabled package it in an archive
 	@if [ "$${ARCHIVE_IT:-0}" -eq "1" ]; then \
 	  if [ "$(BIN_SUFFIX)" = ".exe" ]; then \
-		  rm -f  ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip; \
-	    zip -j ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server.exe; \
+		  rm -f  ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).zip; \
+	    zip -j ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).zip ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT).exe; \
 	  else \
-	    tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX); \
+	    tar -cvzf ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	  fi; \
 	else \
-	  echo "skip creating '${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"; \
+	  echo "skip creating '${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"; \
 	fi
 
 release-server: ## Create server binaries for release
@@ -431,5 +452,106 @@ man-server: ## Generate man pages for server
 
 .PHONY: man
 man: man-cli man-agent man-server ## Generate all man pages
+
+##@ SBOM
+.PHONY: sbom
+sbom: sbom-trivy sbom-syft sbom-calc sbom-clean ## Generate SBOM (runs all SBOM subtargets)
+	@echo "✓ SBOM generation complete!"
+	@echo ""
+	@echo "=== Files Generated ==="
+	@echo "  - ${DIST_DIR}/server.spdx.json"
+	@echo "  - ${DIST_DIR}/agent.spdx.json"
+	@echo "  - ${DIST_DIR}/cli.spdx.json"
+
+.PHONY: sbom-trivy
+sbom-trivy: ## Generate base SBOMs with Trivy (license information)
+	@mkdir -p dist
+	@# Check if vendor exist
+	@if [ ! -d vendor ]; then \
+		echo "Error: golang vendor not found. Run 'make vendor' first."; \
+		exit 1; \
+	fi
+	@# Check if node_modules exist
+	@if [ ! -d web/node_modules ]; then \
+		echo "Error: WebUI node_modules not found. Run 'make build-ui' first."; \
+		exit 1; \
+	fi
+	@echo "=== Generating base SBOM with license information ==="
+	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/base.go.spdx.json go.mod
+	@echo ""
+	@echo "=== Generating WebUI SBOM ==="
+	trivy fs --scanners license --license-full --format spdx-json -o ${DIST_DIR}/webui.spdx.json web/
+
+.PHONY: sbom-syft
+sbom-syft: ## Generate binary-specific dependency lists with Syft
+	@mkdir -p dist
+	@# Check if binaries exist
+	@if [ ! -f ${DIST_DIR}/server/linux_amd64/woodpecker-server ]; then \
+		echo "Error: Server binary not found. Run 'make release-server' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DIST_DIR}/agent/linux_amd64/woodpecker-agent ]; then \
+		echo "Error: Agent binary not found. Run 'make release-agent' first."; \
+		exit 1; \
+	fi
+	@if [ ! -f ${DIST_DIR}/cli/linux_amd64/woodpecker-cli ]; then \
+		echo "Error: CLI binary not found. Run 'make release-cli' first."; \
+		exit 1; \
+	fi
+	@echo "=== Generating binary-specific dependency lists ==="
+	syft scan file:${DIST_DIR}/server/linux_amd64/woodpecker-server -o spdx-json > ${DIST_DIR}/server-deps.spdx.json
+	syft scan file:${DIST_DIR}/agent/linux_amd64/woodpecker-agent -o spdx-json   > ${DIST_DIR}/agent-deps.spdx.json
+	syft scan file:${DIST_DIR}/cli/linux_amd64/woodpecker-cli -o spdx-json       > ${DIST_DIR}/cli-deps.spdx.json
+
+.PHONY: sbom-calc
+sbom-calc: ## Calculate and filter final SBOMs with jq
+	@mkdir -p dist
+	@# The main module's license is declared in this repository, outside the dependency cache.
+	@jq '(.packages[] | select(.name == "${GO_MODULE}")) |= (.licenseDeclared = "Apache-2.0" | .licenseConcluded = "Apache-2.0")' \
+		${DIST_DIR}/base.go.spdx.json > ${DIST_DIR}/base.go.spdx.json.tmp
+	@mv ${DIST_DIR}/base.go.spdx.json.tmp ${DIST_DIR}/base.go.spdx.json
+	@echo "=== Filtering base SBOM for each binary ==="
+	@# Filter Server
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .SPDXID]) as $$valid_ids | $$base | .packages |= map(select(.name as $$n | $$binary.packages[] | select(.name == $$n))) | (.packages[0].SPDXID) as $$first_pkg | .relationships |= (map(select(.spdxElementId as $$e | $$valid_ids | contains([$$e])) | select(.relatedSpdxElement as $$r | ($$r == "SPDXRef-DOCUMENT") or ($$valid_ids | contains([$$r])))) + [{spdxElementId: "SPDXRef-DOCUMENT", relationshipType: "DESCRIBES", relatedSpdxElement: $$first_pkg}]) | .name = "woodpecker-server" | .creationInfo.creators += ["Tool: syft"] | .creationInfo.created = (now | strftime("%Y-%m-%dT%H:%M:%SZ"))' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/server-deps.spdx.json > ${DIST_DIR}/server-go.spdx.json
+	@# Filter Agent
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .SPDXID]) as $$valid_ids | $$base | .packages |= map(select(.name as $$n | $$binary.packages[] | select(.name == $$n))) | (.packages[0].SPDXID) as $$first_pkg | .relationships |= (map(select(.spdxElementId as $$e | $$valid_ids | contains([$$e])) | select(.relatedSpdxElement as $$r | ($$r == "SPDXRef-DOCUMENT") or ($$valid_ids | contains([$$r])))) + [{spdxElementId: "SPDXRef-DOCUMENT", relationshipType: "DESCRIBES", relatedSpdxElement: $$first_pkg}]) | .name = "woodpecker-agent" | .creationInfo.creators += ["Tool: syft"] | .creationInfo.created = (now | strftime("%Y-%m-%dT%H:%M:%SZ"))' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/agent-deps.spdx.json > ${DIST_DIR}/agent.spdx.json
+	@# Filter CLI
+	@jq -s '.[0] as $$base | .[1] as $$binary | ([$$binary.packages[] | .SPDXID]) as $$valid_ids | $$base | .packages |= map(select(.name as $$n | $$binary.packages[] | select(.name == $$n))) | (.packages[0].SPDXID) as $$first_pkg | .relationships |= (map(select(.spdxElementId as $$e | $$valid_ids | contains([$$e])) | select(.relatedSpdxElement as $$r | ($$r == "SPDXRef-DOCUMENT") or ($$valid_ids | contains([$$r])))) + [{spdxElementId: "SPDXRef-DOCUMENT", relationshipType: "DESCRIBES", relatedSpdxElement: $$first_pkg}]) | .name = "woodpecker-cli" | .creationInfo.creators += ["Tool: syft"] | .creationInfo.created = (now | strftime("%Y-%m-%dT%H:%M:%SZ"))' \
+		${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/cli-deps.spdx.json > ${DIST_DIR}/cli.spdx.json
+	@echo ""
+	@echo "=== Combining Server + WebUI ==="
+	@jq -s '([.[0].packages[], .[1].packages[]] | map(.SPDXID)) as $$valid_ids | (.[0].packages[0].SPDXID) as $$first_pkg | {SPDXID: "SPDXRef-DOCUMENT", spdxVersion: .[0].spdxVersion, creationInfo: (.[0].creationInfo | .creators += ["Tool: syft"] | .created = (now | strftime("%Y-%m-%dT%H:%M:%SZ"))), name: "woodpecker-server", dataLicense: .[0].dataLicense, documentNamespace: (.[0].documentNamespace | sub("server"; "server-combined")), packages: (.[0].packages + .[1].packages), relationships: (([.[0].relationships[], .[1].relationships[]] | map(select(.spdxElementId as $$e | $$valid_ids | contains([$$e])) | select(.relatedSpdxElement as $$r | ($$r == "SPDXRef-DOCUMENT") or ($$valid_ids | contains([$$r]))))) + [{spdxElementId: "SPDXRef-DOCUMENT", relationshipType: "DESCRIBES", relatedSpdxElement: $$first_pkg}])}' \
+		${DIST_DIR}/server-go.spdx.json ${DIST_DIR}/webui.spdx.json > ${DIST_DIR}/server.spdx.json
+	@echo ""
+	@echo "=== Package Counts ==="
+	@echo "Base (all go.mod):  $$(jq '.packages | length' ${DIST_DIR}/base.go.spdx.json) packages"
+	@echo "Server (combined):  $$(jq '.packages | length' ${DIST_DIR}/server.spdx.json) packages"
+	@echo "  Server (Go):      $$(jq '.packages | length' ${DIST_DIR}/server-go.spdx.json) packages"
+	@echo "  Server (WebUI):   $$(jq '.packages | length' ${DIST_DIR}/webui.spdx.json) packages"
+	@echo "Agent binary:       $$(jq '.packages | length' ${DIST_DIR}/agent.spdx.json) packages"
+	@echo "CLI binary:         $$(jq '.packages | length' ${DIST_DIR}/cli.spdx.json) packages"
+	@echo ""
+	@echo "=== License Coverage ==="
+	@echo "Server with licenses: $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/server.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/server.spdx.json)"
+	@echo "Agent with licenses:  $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/agent.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/agent.spdx.json)"
+	@echo "CLI with licenses:    $$(jq '[.packages[] | select(.licenseConcluded != null and .licenseConcluded != "NOASSERTION")] | length' ${DIST_DIR}/cli.spdx.json)/$$(jq '.packages | length' ${DIST_DIR}/cli.spdx.json)"
+	@echo ""
+	@echo "=== License Distribution (Server) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/server.spdx.json
+	@echo ""
+	@echo "=== License Distribution (Agent) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/agent.spdx.json
+	@echo ""
+	@echo "=== License Distribution (CLI) ==="
+	@jq -r '[.packages[] | .licenseConcluded // "NOASSERTION"] | group_by(.) | map({license: .[0], count: length}) | sort_by(-.count) | .[] | "  \(.count | tostring | . + " " * (6 - length))\(.license)"' ${DIST_DIR}/cli.spdx.json
+	@echo ""
+
+.PHONY: sbom-clean
+sbom-clean:
+	@echo "=== Cleaning up intermediate files ==="
+	@rm -f ${DIST_DIR}/cli-deps.spdx.json ${DIST_DIR}/agent-deps.spdx.json ${DIST_DIR}/server-deps.spdx.json ${DIST_DIR}/server-go.spdx.json ${DIST_DIR}/base.go.spdx.json ${DIST_DIR}/webui.spdx.json
+	@echo ""
 
 endif

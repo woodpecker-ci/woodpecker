@@ -25,6 +25,11 @@ Support for connecting multiple forges is not finished yet and has to be conside
 
 Only **one** forge can be configured using environment variables. Enabling several forge drivers at once does not create several forges. All other forges have to be added by an admin under `Settings` -> `Forges` and exist in the database only. The forge from the environment is written back on every server start, so changing its driver replaces it instead of adding a new one.
 
+### Granting admin
+
+By default [`WOODPECKER_ADMIN`](../10-server.md#admin) is matched by login name only. A user with a matching login on **any** connected forge becomes an admin.
+Set [`WOODPECKER_ADMIN_PRIMARY_FORGE_ONLY=true`](../10-server.md#admin_primary_forge_only) to only make users of the primary forge admin (recommended).
+
 ### Restricting who can log in
 
 [`WOODPECKER_ORGS`](../10-server.md#orgs) applies to all connected forges. In addition, each forge can carry its own list under `Settings` -> `Forges` -> `Advanced options` -> `Allowed organizations`. Members of an organization on that list may log in using that forge, on top of everyone allowed by `WOODPECKER_ORGS`. A forge without an own list only uses `WOODPECKER_ORGS`; if neither is set, organizations are not checked at all.
@@ -35,7 +40,8 @@ The forge configured through environment variables has no own environment settin
 
 Use the organization name, for GitLab the group's [`full_path`](https://docs.gitlab.com/api/groups/) like `my-group/my-subgroup`. Matching is case-insensitive and only happens while logging in.
 
+Also see [security boundaries](../../../20-usage/17-security-boundaries.md#what-woodpecker-trusts-the-forge-with).
+
 ### Known limitations
 
-- [`WOODPECKER_ADMIN`](../10-server.md#admin) is matched by login name only. A user with a matching login on **any** connected forge becomes an admin.
 - Users are stored per forge, so the same person logging in through two forges gets two independent accounts.

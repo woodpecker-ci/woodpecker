@@ -182,7 +182,7 @@ func updatePipelineStatus(ctx context.Context, _store store.Store, forge forge.F
 
 			if err := PostWorkflowStatus(ctx, _store, forge, user, repo, pipeline, workflow); err != nil {
 				failed.Add(1)
-				log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
+				log.Error().Err(err).Msgf("error setting commit status for %s/%d workflow %s", repo.FullName, pipeline.Number, workflow.Name)
 			}
 		})
 	}

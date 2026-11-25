@@ -78,7 +78,13 @@ steps:
       - bash -c 'shopt -s globstar; addlicense -check -ignore "vendor/**" -ignore cmd/server/openapi/docs.go **/*.go'
     when: *when
 
-  test:
+  check-test-file-map-source-file:
+    image: docker.io/alpine:3.24
+    commands:
+      - apk add --no-cache -q bash && bash .woodpecker/check-test-file-map-source-file.sh
+    when: *when
+
+  test-components:
     depends_on:
       - vendor
     image: *golang_image
@@ -86,6 +92,14 @@ steps:
       - make test-agent
       - make test-server
       - make test-cli
+    when:
+      - path: *when_path
+
+  test-engine:
+    depends_on:
+      - vendor
+    image: *golang_image
+    commands:
       - make test-lib
     when:
       - path: *when_path
@@ -145,7 +159,8 @@ steps:
 
   codecov:
     depends_on:
-      - test
+      - test-components
+      - test-engine
       - sqlite
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.3.3
@@ -165,7 +180,7 @@ steps:
 
 services:
   postgres:
-    image: docker.io/postgres:18
+    image: docker.io/postgres:19
     ports: ['5432']
     environment:
       POSTGRES_USER: postgres
@@ -173,7 +188,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:26.7.0
+    image: docker.io/mysql:26.10.0
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test

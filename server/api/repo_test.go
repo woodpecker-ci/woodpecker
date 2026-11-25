@@ -15,8 +15,12 @@
 package api
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -30,8 +34,10 @@ import (
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 func TestPostRepoReturnsConflictOnDuplicateRepository(t *testing.T) {
@@ -110,7 +116,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 			FullName:      owner + "/" + name,
 			OrgID:         oldOrg.ID,
 			UserID:        user.ID,
-			Hash:          "hash-" + name,
+			WebhookSecret: "hash-" + name,
 			IsActive:      true,
 		}
 		require.NoError(t, s.CreateRepo(repo))
@@ -141,7 +147,11 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		mockForge.On("Repo", mock.Anything, user, model.ForgeRemoteID(""), "newcorp", "rocket").Return(from, nil)
 		mockForge.On("Org", mock.Anything, user, "newcorp").Return(&model.Org{Name: "newcorp"}, nil)
 		mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
-		mockForge.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+		mockForge.EXPECT().Activate(mock.Anything, user, mock.Anything, mock.Anything).
+			RunAndReturn(func(_ context.Context, _ *model.User, activated *model.Repo, _ string) error {
+				activated.CloneSecret = &model.CloneSecret{ForgeRemoteID: "moved"}
+				return nil
+			})
 
 		code, body := move(t, user, repo, "newcorp/rocket")
 		require.Equal(t, http.StatusNoContent, code, body)
@@ -149,6 +159,7 @@ func TestMoveRepoUpdatesOrg(t *testing.T) {
 		stored, err := s.GetRepo(repo.ID)
 		require.NoError(t, err)
 		assert.Equal(t, "newcorp/rocket", stored.FullName)
+		assert.Equal(t, &model.CloneSecret{ForgeRemoteID: "moved"}, stored.CloneSecret, "persist the clone secret written by activation")
 		assert.NotEqual(t, oldOrg.ID, stored.OrgID, "repo must not stay linked to the old org")
 
 		newOrg, err := s.OrgFindByName("newcorp", repo.ForgeID)
@@ -201,7 +212,7 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 			Name:          name,
 			FullName:      "acme/" + name,
 			UserID:        user.ID,
-			Hash:          "hash-" + name,
+			WebhookSecret: "hash-" + name,
 			IsActive:      true,
 		}
 		require.NoError(t, s.CreateRepo(repo))
@@ -243,7 +254,7 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 		user, repo, steps := seed(t, "rocket")
 		mockLogStore := setLogStore(t)
 		for _, step := range steps {
-			mockLogStore.On("LogDelete", mock.MatchedBy(func(s *model.Step) bool { return s.ID == step.ID })).Return(nil).Once()
+			mockLogStore.On("LogDelete", mock.Anything, mock.MatchedBy(func(s *model.Step) bool { return s.ID == step.ID })).Return(nil).Once()
 		}
 
 		require.Equal(t, http.StatusOK, deleteRepo(t, user, repo))
@@ -255,11 +266,311 @@ func TestDeleteRepoDeletesStoredLogs(t *testing.T) {
 	t.Run("a failed log delete keeps the repo", func(t *testing.T) {
 		user, repo, _ := seed(t, "probe")
 		mockLogStore := setLogStore(t)
-		mockLogStore.On("LogDelete", mock.Anything).Return(assert.AnError)
+		mockLogStore.On("LogDelete", mock.Anything, mock.Anything).Return(assert.AnError)
 
 		assert.Equal(t, http.StatusInternalServerError, deleteRepo(t, user, repo))
 
 		_, err := s.GetRepo(repo.ID)
 		assert.NoError(t, err)
 	})
+}
+
+func TestRepairRepoRotatesWebhookSecret(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+	})
+
+	for _, test := range []struct {
+		name          string
+		all           bool
+		lookupErr     error
+		deactivateErr error
+		activateErr   error
+		remoteID      model.ForgeRemoteID
+	}{
+		{name: "single repository"},
+		{name: "all repositories", all: true},
+		{name: "deactivation fails", deactivateErr: errors.New("forge unavailable")},
+		{name: "activation fails", activateErr: errors.New("forge unavailable")},
+		{name: "repository lookup fails", lookupErr: errors.New("forge unavailable")},
+		{name: "repository ID changes", remoteID: "456"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s := newTestStore(t)
+			user := &model.User{Login: "owner", ForgeID: 7}
+			require.NoError(t, s.CreateUser(user))
+			repo := &model.Repo{
+				Owner: "owner", Name: "repo", FullName: "owner/repo", ForgeID: user.ForgeID,
+				ForgeRemoteID: "123", WebhookSecret: "old-secret", UserID: user.ID, IsActive: true,
+			}
+			require.NoError(t, s.CreateRepo(repo))
+			from := &model.Repo{
+				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName,
+				ForgeRemoteID: repo.ForgeRemoteID, Perm: &model.Perm{Admin: true},
+			}
+			if test.remoteID.IsValid() {
+				from.ForgeRemoteID = test.remoteID
+			}
+			driver := forge_mocks.NewMockForge(t)
+			manager := manager_mocks.NewMockManager(t)
+			manager.On("ForgeFromRepo", mock.Anything).Return(driver, nil)
+			server.Config.Services.Manager = manager
+			server.Config.Server.WebhookHost = "https://woodpecker.example"
+			driver.On("Repo", mock.Anything, mock.Anything, mock.Anything, repo.Owner, repo.Name).Return(from, test.lookupErr)
+
+			var oldSecret string
+			var activatedSecret *model.CloneSecret
+			if test.lookupErr == nil {
+				driver.EXPECT().Deactivate(mock.Anything, mock.Anything, mock.Anything, server.Config.Server.WebhookHost).
+					RunAndReturn(func(_ context.Context, _ *model.User, repairing *model.Repo, _ string) error {
+						stored, err := s.GetRepo(repairing.ID)
+						require.NoError(t, err)
+						assert.NotEqual(t, oldSecret, stored.WebhookSecret, "persist the new secret before replacing the webhook")
+						assert.Equal(t, repairing.WebhookSecret, stored.WebhookSecret)
+						return test.deactivateErr
+					})
+				driver.EXPECT().Activate(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+					RunAndReturn(func(_ context.Context, _ *model.User, activated *model.Repo, hookURL string) error {
+						stored, err := s.GetRepo(activated.ID)
+						require.NoError(t, err)
+						assert.Equal(t, stored.WebhookSecret, activated.WebhookSecret)
+						uri, err := url.Parse(hookURL)
+						require.NoError(t, err)
+						signed := uri.Query().Get("access_token")
+						parsed, err := token.Parse([]token.Type{token.HookToken}, signed, func(*token.Token) (string, error) {
+							return stored.WebhookSecret, nil
+						})
+						require.NoError(t, err)
+						assert.Equal(t, string(from.ForgeRemoteID), parsed.Get("repo-forge-remote-id"))
+						assert.Equal(t, strconv.FormatInt(repo.ForgeID, 10), parsed.Get("forge-id"))
+						_, err = token.Parse([]token.Type{token.HookToken}, signed, func(*token.Token) (string, error) {
+							return oldSecret, nil
+						})
+						assert.Error(t, err, "the new URL must not use the old signing key")
+						if test.activateErr == nil {
+							activatedSecret = &model.CloneSecret{ForgeRemoteID: model.ForgeRemoteID("token-" + activated.WebhookSecret)}
+							activated.CloneSecret = activatedSecret
+						}
+						return test.activateErr
+					})
+			}
+
+			// Repeat repair so every recreation must revoke the preceding credential.
+			for range 2 {
+				stored, err := s.GetRepo(repo.ID)
+				require.NoError(t, err)
+				oldSecret = stored.WebhookSecret
+				oldToken := token.New(token.HookToken)
+				oldToken.Set("repo-forge-remote-id", string(stored.ForgeRemoteID))
+				oldToken.Set("forge-id", strconv.FormatInt(stored.ForgeID, 10))
+				oldSigned, err := oldToken.Sign(oldSecret)
+				require.NoError(t, err)
+				tc := newTestContext(t, s)
+				withRepo(stored, &model.Perm{Admin: true})(tc)
+				tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos/1/repair", nil)
+				if test.all {
+					RepairAllRepos(tc.Ctx)
+				} else {
+					RepairRepo(tc.Ctx)
+				}
+
+				expectedStatus := http.StatusNoContent
+				if test.lookupErr != nil || test.activateErr != nil {
+					expectedStatus = http.StatusInternalServerError
+				}
+				assert.Equal(t, expectedStatus, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+				stored, err = s.GetRepo(repo.ID)
+				require.NoError(t, err)
+				_, err = token.Parse([]token.Type{token.HookToken}, oldSigned, func(*token.Token) (string, error) {
+					return stored.WebhookSecret, nil
+				})
+				if test.lookupErr != nil {
+					assert.Equal(t, oldSecret, stored.WebhookSecret)
+					assert.NoError(t, err, "failed preflight must leave the existing webhook usable")
+				} else {
+					assert.NotEqual(t, oldSecret, stored.WebhookSecret)
+					assert.Error(t, err, "old URLs must remain revoked even when activation fails")
+				}
+				if test.lookupErr == nil && test.activateErr == nil {
+					assert.Equal(t, activatedSecret, stored.CloneSecret, "persist the clone secret written by activation")
+				}
+			}
+		})
+	}
+}
+
+func TestRepairRepoKeepsVisibility(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+	})
+
+	for _, all := range []bool{false, true} {
+		t.Run("all="+strconv.FormatBool(all), func(t *testing.T) {
+			s := newTestStore(t)
+			user := &model.User{Login: "owner", ForgeID: 7}
+			require.NoError(t, s.CreateUser(user))
+			repo := &model.Repo{
+				Owner: "owner", Name: "repo", FullName: "owner/repo", ForgeID: user.ForgeID, ForgeRemoteID: "123",
+				UserID: user.ID, IsActive: true, Visibility: model.VisibilityPrivate,
+			}
+			require.NoError(t, s.CreateRepo(repo))
+
+			driver := moveRepoForge(t)
+			driver.On("Repo", mock.Anything, mock.Anything, repo.ForgeRemoteID, repo.Owner, repo.Name).Return(&model.Repo{
+				Owner: repo.Owner, Name: repo.Name, FullName: repo.FullName, ForgeRemoteID: repo.ForgeRemoteID,
+				Visibility: model.VisibilityPublic, Perm: &model.Perm{Admin: true},
+			}, nil)
+			driver.On("Deactivate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+			driver.On("Activate", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+			tc := newTestContext(t, s)
+			withRepo(repo, &model.Perm{Admin: true})(tc)
+			if all {
+				RepairAllRepos(tc.Ctx)
+			} else {
+				RepairRepo(tc.Ctx)
+			}
+			require.Equal(t, http.StatusNoContent, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+			stored, err := s.GetRepo(repo.ID)
+			require.NoError(t, err)
+			assert.False(t, stored.VisibilitySync)
+			assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
+		})
+	}
+}
+
+func TestPostRepoVisibilitySync(t *testing.T) {
+	originalManager := server.Config.Services.Manager
+	originalHost := server.Config.Server.WebhookHost
+	originalAllowlist := server.Config.Permissions.OwnersAllowlist
+	t.Cleanup(func() {
+		server.Config.Services.Manager = originalManager
+		server.Config.Server.WebhookHost = originalHost
+		server.Config.Permissions.OwnersAllowlist = originalAllowlist
+	})
+	server.Config.Server.WebhookHost = "https://woodpecker.example"
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(nil)
+
+	activate := func(t *testing.T, s store.Store, user *model.User, remoteID model.ForgeRemoteID) {
+		t.Helper()
+		mgr := manager_mocks.NewMockManager(t)
+		driver := forge_mocks.NewMockForge(t)
+		mgr.On("ForgeFromUser", user).Return(driver, nil)
+		server.Config.Services.Manager = mgr
+		driver.On("Repo", mock.Anything, user, remoteID, "", "").Return(&model.Repo{
+			ForgeRemoteID: remoteID, Owner: "acme", Name: "rocket", FullName: "acme/rocket",
+			Visibility: model.VisibilityPrivate, IsSCMPrivate: true, Perm: &model.Perm{Admin: true},
+		}, nil)
+		driver.On("Activate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		tc.Ctx.Request = httptest.NewRequest(http.MethodPost, "/repos?forge_remote_id="+string(remoteID), nil)
+		PostRepo(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+	}
+
+	t.Run("new repos sync their visibility", func(t *testing.T) {
+		s := newTestStore(t)
+		user := &model.User{Login: "alice", ForgeID: 1}
+		require.NoError(t, s.CreateUser(user))
+		require.NoError(t, s.OrgCreate(&model.Org{Name: "acme", ForgeID: 1}))
+
+		activate(t, s, user, "42")
+
+		stored, err := s.GetRepoForgeID(1, "42")
+		require.NoError(t, err)
+		assert.True(t, stored.VisibilitySync)
+		assert.Equal(t, model.VisibilityPrivate, stored.Visibility)
+	})
+
+	t.Run("re-activation keeps the sync setting", func(t *testing.T) {
+		for sync, visibility := range map[bool]model.RepoVisibility{false: model.VisibilityInternal, true: model.VisibilityPrivate} {
+			s := newTestStore(t)
+			user := &model.User{Login: "alice", ForgeID: 1}
+			require.NoError(t, s.CreateUser(user))
+			require.NoError(t, s.OrgCreate(&model.Org{Name: "acme", ForgeID: 1}))
+			require.NoError(t, s.CreateRepo(&model.Repo{
+				ForgeID: 1, ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket",
+				Visibility: model.VisibilityInternal, VisibilitySync: sync, WebhookSecret: "secret",
+			}))
+
+			activate(t, s, user, "42")
+
+			stored, err := s.GetRepoForgeID(1, "42")
+			require.NoError(t, err)
+			assert.Equal(t, sync, stored.VisibilitySync)
+			assert.Equal(t, visibility, stored.Visibility)
+			assert.True(t, stored.IsSCMPrivate)
+		}
+	})
+}
+
+func TestPatchRepoVisibilitySync(t *testing.T) {
+	s := newTestStore(t)
+	user := &model.User{Login: "alice", ForgeID: 1}
+	require.NoError(t, s.CreateUser(user))
+	repo := &model.Repo{ForgeID: 1, ForgeRemoteID: "42", Owner: "acme", Name: "rocket", FullName: "acme/rocket", Visibility: model.VisibilityPrivate}
+	require.NoError(t, s.CreateRepo(repo))
+
+	patch := func(t *testing.T, in *model.RepoPatch) *model.Repo {
+		t.Helper()
+		tc := newTestContext(t, s)
+		withUser(user)(tc)
+		withRepo(repo, &model.Perm{Admin: true})(tc)
+		withRequest(http.MethodPatch, in)(tc)
+		PatchRepo(tc.Ctx)
+		require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+		stored, err := s.GetRepo(repo.ID)
+		require.NoError(t, err)
+		return stored
+	}
+
+	stored := patch(t, &model.RepoPatch{VisibilitySync: new(true), Visibility: new(string(model.VisibilityPublic))})
+	assert.True(t, stored.VisibilitySync)
+	assert.Equal(t, model.VisibilityPrivate, stored.Visibility, "the sync overwrites the visibility anyway")
+
+	stored = patch(t, &model.RepoPatch{VisibilitySync: new(false), Visibility: new(string(model.VisibilityPublic))})
+	assert.False(t, stored.VisibilitySync)
+	assert.Equal(t, model.VisibilityPublic, stored.Visibility)
+}
+
+func TestDeactivateRepoDropsCloneSecret(t *testing.T) {
+	s := newTestStore(t)
+	user := &model.User{Login: "carol", ForgeID: 1, ForgeRemoteID: "u-carol", Hash: "userhash-carol"}
+	require.NoError(t, s.CreateUser(user))
+	repo := &model.Repo{
+		ForgeID:       1,
+		ForgeRemoteID: "r-carol",
+		Owner:         "acme",
+		Name:          "carol",
+		FullName:      "acme/carol",
+		UserID:        user.ID,
+		WebhookSecret: "hash-carol",
+		IsActive:      true,
+		CloneSecret:   &model.CloneSecret{Login: "deploy", Token: "secret", ForgeRemoteID: "1"},
+	}
+	require.NoError(t, s.CreateRepo(repo))
+
+	mockForge := moveRepoForge(t)
+	mockForge.On("Deactivate", mock.Anything, user, mock.Anything, mock.Anything).Return(nil)
+
+	tc := newTestContext(t, s)
+	withUser(user)(tc)
+	withRepo(repo, &model.Perm{Admin: true})(tc)
+	tc.Ctx.Request = httptest.NewRequest(http.MethodDelete, "/repos/1", nil)
+	DeleteRepo(tc.Ctx)
+	require.Equal(t, http.StatusOK, tc.Ctx.Writer.Status(), tc.Recorder.Body.String())
+
+	stored, err := s.GetRepo(repo.ID)
+	require.NoError(t, err)
+	assert.False(t, stored.IsActive)
+	assert.Nil(t, stored.CloneSecret, "an inactive repo must not keep clone credentials")
 }

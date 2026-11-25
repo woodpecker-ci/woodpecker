@@ -22,6 +22,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/tink-crypto/tink-go/v2/subtle/random"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -30,8 +31,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
-
-const defaultForgeID = 1
 
 // GetUsers
 //
@@ -50,8 +49,10 @@ func GetUsers(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
 		return
 	}
+	admins := server.Config.Permissions.Admins
 	for _, user := range users {
-		user.AdminEnv = server.Config.Permissions.Admins.IsAdmin(user)
+		user.AdminRevoked = admins.IsRevoked(user)
+		user.AdminEnv = user.AdminRevoked || admins.IsAdmin(user)
 	}
 	c.JSON(http.StatusOK, users)
 }
@@ -69,7 +70,7 @@ func GetUsers(c *gin.Context) {
 //	@Param			forge_id		query	string	true	"specify forge (else default will be used)"
 //	@Param			forge_remote_id	query	string	false	"specify user id at forge (else fallback to login)"
 func GetUser(c *gin.Context) {
-	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(model.PrimaryForgeID)), 10, 64)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -112,8 +113,8 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	if in.ForgeID < defaultForgeID {
-		in.ForgeID = defaultForgeID
+	if in.ForgeID < model.PrimaryForgeID {
+		in.ForgeID = model.PrimaryForgeID
 	}
 
 	user, err := store.FromContext(c).GetUserByRemoteID(in.ForgeID, in.ForgeRemoteID)
@@ -128,6 +129,13 @@ func PatchUser(c *gin.Context) {
 			handleDBError(c, err)
 			return
 		}
+	}
+
+	// a revoked admin from WOODPECKER_ADMIN would get admin back at the next sign in
+	admins := server.Config.Permissions.Admins
+	if !in.Admin && admins.IsAdmin(user) {
+		admins.Revoke(user.Login)
+		log.Warn().Str("user", user.Login).Msg("admin from WOODPECKER_ADMIN is revoked until the server restarts, also remove the user from WOODPECKER_ADMIN")
 	}
 
 	// TODO: disallow to change login, email, avatar if the user is using oauth
@@ -163,8 +171,8 @@ func PostUser(c *gin.Context) {
 		return
 	}
 
-	if in.ForgeID < defaultForgeID {
-		in.ForgeID = defaultForgeID
+	if in.ForgeID < model.PrimaryForgeID {
+		in.ForgeID = model.PrimaryForgeID
 	}
 
 	user := &model.User{
@@ -203,7 +211,7 @@ func PostUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(defaultForgeID)), 10, 64)
+	forgeID, err := strconv.ParseInt(c.DefaultQuery("forge_id", fmt.Sprint(model.PrimaryForgeID)), 10, 64)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return

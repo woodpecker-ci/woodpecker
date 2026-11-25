@@ -30,9 +30,11 @@ func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 		return gitlab.Running
 	case model.StatusSuccess:
 		return gitlab.Success
-	case model.StatusFailure, model.StatusError, model.StatusSkipped, model.StatusCanceled, model.StatusDeclined:
+	case model.StatusFailure, model.StatusError, model.StatusDeclined:
 		return gitlab.Failed
-	case model.StatusKilled:
+	case model.StatusSkipped:
+		return gitlab.Skipped
+	case model.StatusKilled, model.StatusCanceled:
 		return gitlab.Canceled
 	default:
 		log.Warn().Str("status", string(status)).Msg("unknown pipeline status")

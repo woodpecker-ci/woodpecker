@@ -85,6 +85,7 @@ func TestBitbucketDC(t *testing.T) {
 		Perm:          &model.Perm{Pull: true, Push: true},
 		Branch:        "main",
 		IsSCMPrivate:  true,
+		Visibility:    model.VisibilityPrivate,
 		PREnabled:     true,
 		ForgeRemoteID: model.ForgeRemoteID("1234"),
 		FullName:      "PRJ/repo-slug-2",
@@ -166,10 +167,34 @@ func TestBitbucketDCRepoByIDWithSpacesInName(t *testing.T) {
 		Perm:          &model.Perm{Pull: true, Push: true},
 		Branch:        "main",
 		IsSCMPrivate:  true,
+		Visibility:    model.VisibilityPrivate,
 		PREnabled:     true,
 		ForgeRemoteID: model.ForgeRemoteID("1234"),
 		FullName:      "TEST/test-repo",
 	}, repo)
+}
+
+func TestBitbucketDCRepoByIDStopsAtTheMatch(t *testing.T) {
+	// the repository is on the first page of many, no further page is needed
+	requests := 0
+	s := mock.NewMockServer(
+		mock.WithRequestMatchHandler(mock.SearchRepositories, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			requests++
+			writeJSON(t, w, bitbucket.RepositoryList{
+				Repositories:  []*bitbucket.Repository{{ID: uint64(1234), Slug: "test-repo", Project: &bitbucket.Project{Key: "TEST"}}},
+				LastPage:      requests > 3,
+				NextPageStart: uint(requests * listLimit),
+			})
+		})),
+		mock.WithRequestMatch(mock.GetDefaultBranch, bitbucket.Branch{DisplayID: "main", Default: true}),
+	)
+	defer s.Close()
+	c := &client{urlAPI: s.URL}
+
+	repo, err := c.Repo(t.Context(), fakeUser, model.ForgeRemoteID("1234"), "TEST", "test-repo")
+	require.NoError(t, err)
+	assert.Equal(t, "TEST/test-repo", repo.FullName)
+	assert.Equal(t, 1, requests)
 }
 
 var (
@@ -264,10 +289,10 @@ func TestHook(t *testing.T) {
 		defer s.Close()
 
 		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		dbRepo := &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", Hash: "secret"}
+		dbRepo := &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1684", dbRepo)
 
-		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"))
+		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "secret")
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPush, pipeline.Event)
@@ -289,31 +314,27 @@ func TestHook(t *testing.T) {
 		defer s.Close()
 
 		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		dbRepo := &model.Repo{ID: 3, UserID: 1, Owner: "DEV", Name: "network-monitor", Hash: "secret"}
+		dbRepo := &model.Repo{ID: 3, UserID: 1, Owner: "DEV", Name: "network-monitor", WebhookSecret: "secret"}
 		ctx := hookContext(t, "1079", dbRepo)
 
-		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "pr:opened", fixtures.HookPull, "secret"))
+		repo, pipeline, err := c.Hook(ctx, signedHookRequest(t, "pr:opened", fixtures.HookPull, "secret"), "secret")
 		require.NoError(t, err)
 		assert.Equal(t, dbRepo, repo)
 		assert.Equal(t, model.EventPull, pipeline.Event)
 		assert.Equal(t, []string{"main.go", "README.md"}, pipeline.ChangedFiles)
 	})
 
-	t.Run("rejects a payload signed with another secret", func(t *testing.T) {
-		// no API route is registered, so any forge call after the failed check would fail differently
-		s := mock.NewMockServer()
-		defer s.Close()
+	t.Run("rejects a payload not signed with the secret it gets", func(t *testing.T) {
+		// no store in the context: the signature is checked before the repo is loaded
+		c := &client{forgeID: 1, url: "https://bitbucket.example.com"}
 
-		c := &client{forgeID: 1, urlAPI: s.URL, url: "https://bitbucket.example.com"}
-		ctx := hookContext(t, "1684", &model.Repo{ID: 2, UserID: 1, Owner: "DEV", Name: "deployment-automation", Hash: "secret"})
-
-		_, _, err := c.Hook(ctx, signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "other"))
-		assert.ErrorContains(t, err, "signature does not match")
+		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "other"), "secret")
+		assert.ErrorIs(t, err, forge_types.ErrInvalidWebhookSignature)
 	})
 
 	t.Run("fails without a store", func(t *testing.T) {
 		c := &client{forgeID: 1, url: "https://bitbucket.example.com"}
-		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"))
+		_, _, err := c.Hook(t.Context(), signedHookRequest(t, "repo:refs_changed", fixtures.HookPush, "secret"), "secret")
 		assert.ErrorContains(t, err, "unable to get store from context")
 	})
 }
@@ -325,7 +346,8 @@ func TestUpdatePipelineFromCommits(t *testing.T) {
 	)
 
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.GetCommit,
+		mock.WithRequestMatch(
+			mock.GetCommit,
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 			bitbucket.Commit{ID: commitSHA, Message: "Release"},
 		),
@@ -444,7 +466,8 @@ func TestOrgMembership(t *testing.T) {
 
 func TestTeams(t *testing.T) {
 	s := mock.NewMockServer(
-		mock.WithRequestMatch(mock.ListProjects,
+		mock.WithRequestMatch(
+			mock.ListProjects,
 			bitbucket.ProjectList{NextPageStart: 1, Projects: []*bitbucket.Project{{Key: "ONE"}}},
 			bitbucket.ProjectList{LastPage: true, Projects: []*bitbucket.Project{{Key: "TWO"}}},
 		),
@@ -653,7 +676,7 @@ func TestActivate(t *testing.T) {
 	defer s.Close()
 
 	c := &client{urlAPI: s.URL}
-	repo := &model.Repo{ForgeRemoteID: "1", Owner: "PRJ", Name: "repo", Hash: "repo-secret"}
+	repo := &model.Repo{ForgeRemoteID: "1", Owner: "PRJ", Name: "repo", WebhookSecret: "repo-secret"}
 
 	require.NoError(t, c.Activate(t.Context(), fakeUser, repo, "https://ci.example.com/api/hook?access_token=new"))
 

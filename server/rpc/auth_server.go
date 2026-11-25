@@ -16,10 +16,15 @@ package rpc
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"fmt"
+	"net"
+	"strings"
 
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -38,9 +43,10 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 	return &WoodpeckerAuthServer{jwtManager: jwtManager, agentMasterToken: agentMasterToken, store: store}
 }
 
-func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
+func (s *WoodpeckerAuthServer) Auth(ctx context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
+		logAuthFailure(ctx, err)
 		return nil, fmt.Errorf("agent could not auth: %w", err)
 	}
 
@@ -59,7 +65,9 @@ func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (
 func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
 	// global agent secret auth
 	if s.agentMasterToken != "" {
-		if agentToken == s.agentMasterToken && agentID == -1 {
+		isMaster := subtle.ConstantTimeCompare([]byte(agentToken), []byte(s.agentMasterToken)) == 1
+
+		if isMaster && agentID == -1 {
 			agent := &model.Agent{
 				OwnerID:  model.IDNotSet,
 				OrgID:    model.IDNotSet,
@@ -74,7 +82,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 			return agent, nil
 		}
 
-		if agentToken == s.agentMasterToken {
+		if isMaster {
 			agent, err := s.store.AgentFind(agentID)
 			if err != nil {
 				if errors.Is(err, types.ErrRecordNotExist) {
@@ -91,9 +99,62 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	}
 
 	// individual agent token auth
-	agent, err := s.store.AgentFindByToken(agentToken)
-	if err != nil && errors.Is(err, types.ErrRecordNotExist) {
-		return nil, fmt.Errorf("individual agent not found by token: %w", err)
+	if agentID > 0 {
+		agent, err := s.store.AgentFind(agentID)
+		if err == nil && subtle.ConstantTimeCompare([]byte(agentToken), []byte(agent.Token)) == 1 {
+			return agent, nil
+		}
+		// a stale agent ID (e.g. agent recreated with a new token) falls back to the token lookup
 	}
-	return agent, err
+
+	agent, err := s.store.AgentFindByToken(agentToken)
+	if err != nil {
+		if errors.Is(err, types.ErrRecordNotExist) {
+			return nil, fmt.Errorf("individual agent not found by token: %w", err)
+		}
+		return nil, err
+	}
+	// the hash lookup only finds the row, the token itself is checked here in constant time
+	if subtle.ConstantTimeCompare([]byte(agentToken), []byte(agent.Token)) != 1 {
+		return nil, fmt.Errorf("individual agent not found by token: %w", types.ErrRecordNotExist)
+	}
+	return agent, nil
+}
+
+// logAuthFailure logs a failed agent login in the format the fail2ban docs match.
+func logAuthFailure(ctx context.Context, err error) {
+	var msg strings.Builder
+	msg.WriteString("agent authentication failed")
+	event := log.Warn().Err(err)
+	if p, ok := peer.FromContext(ctx); ok {
+		// a unix socket has no address
+		if addr, ok := p.Addr.(*net.TCPAddr); ok {
+			msg.WriteString(" from " + addr.IP.String())
+			event = event.Str("ip", addr.IP.String())
+		}
+	}
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		for _, header := range []string{"x-real-ip", "x-forwarded-for"} {
+			if ips := forwardedIPs(md.Get(header)); ips != "" {
+				msg.WriteString(" " + header + "=" + ips)
+				event = event.Str(header, ips)
+			}
+		}
+	}
+	event.Msg(msg.String())
+}
+
+// forwardedIPs returns the header addresses, or nothing if one is not an IP.
+func forwardedIPs(values []string) string {
+	var ips []string
+	for _, value := range values {
+		for entry := range strings.SplitSeq(value, ",") {
+			ip := net.ParseIP(strings.TrimSpace(entry))
+			if ip == nil {
+				return ""
+			}
+			ips = append(ips, ip.String())
+		}
+	}
+	return strings.Join(ips, ",")
 }

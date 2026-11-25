@@ -396,7 +396,7 @@ func (h *pipelineLockHook) AfterProcess(c *contexts.ContextHook) error {
 func TestCreatePipelineRetriesSQLiteLocks(t *testing.T) {
 	for _, phase := range []string{"read", "commit"} {
 		t.Run(phase, func(t *testing.T) {
-			ctx := context.Background()
+			ctx := t.Context()
 			// Rollback journaling lets a reader block COMMIT after INSERT succeeds.
 			dsn := "file:" + filepath.Join(t.TempDir(), "pipeline.db") + "?_busy_timeout=0&_journal_mode=DELETE"
 			engine, err := xorm.NewEngine("sqlite3", dsn)

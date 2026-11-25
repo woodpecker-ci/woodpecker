@@ -72,6 +72,10 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 		}
 	}
 
+	if timeoutErr, ok := errors.AsType[*types.ErrConfigFetchTimeout](err); ok {
+		timeoutErr.Attempts = f.retryCount
+	}
+
 	return files, err
 }
 
@@ -100,6 +104,9 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 		if err == nil {
 			return fileMetas, nil
 		}
+		if f.timedOut(c, ctx) {
+			return nil, &types.ErrConfigFetchTimeout{Timeout: f.timeout, Configs: configs}
+		}
 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
 	}
@@ -110,6 +117,9 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 	if err == nil {
 		return fileMetas, nil
 	}
+	if f.timedOut(c, ctx) {
+		return nil, &types.ErrConfigFetchTimeout{Timeout: f.timeout, Configs: f.configPaths}
+	}
 
 	select {
 	case <-ctx.Done():
@@ -117,6 +127,11 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 	default:
 		return nil, fmt.Errorf("configFetcher: fallback did not find config: %w", err)
 	}
+}
+
+// timedOut reports whether the attempt context hit the forge timeout while the parent context is still alive.
+func (f *forgeFetcherContext) timedOut(parent, attempt context.Context) bool {
+	return parent.Err() == nil && errors.Is(attempt.Err(), context.DeadlineExceeded)
 }
 
 func (f *forgeFetcherContext) filterPipelineFiles(files []*types.FileMeta) []*types.FileMeta {

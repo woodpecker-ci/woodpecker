@@ -68,17 +68,20 @@ func TestMetadataFromContext(t *testing.T) {
 		flags := []cli.Flag{
 			&cli.StringFlag{Name: "metadata-file"},
 			&cli.StringFlag{Name: "repo-name"},
+			&cli.Int64Flag{Name: "repo-id"},
 			&cli.Int64Flag{Name: "pipeline-number"},
 		}
 
 		runCommand(flags, func(c *cli.Command) {
 			_ = c.Set("metadata-file", tempFileName)
 			_ = c.Set("repo-name", "aUser/override-repo")
+			_ = c.Set("repo-id", "42")
 			_ = c.Set("pipeline-number", "10")
 
 			m, err := metadataFromContext(t.Context(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "override-repo", m.Repo.Name)
+			assert.Equal(t, int64(42), m.Repo.ID)
 			assert.Equal(t, int64(10), m.Curr.Number)
 		})
 	})

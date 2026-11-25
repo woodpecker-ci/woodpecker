@@ -103,10 +103,10 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:                 map[string]string{},
-		nonPluginEnv:        map[string]string{},
-		cloneEnv:            map[string]string{},
-		secrets:             map[string]Secret{},
+		env:                 make(map[string]string),
+		nonPluginEnv:        make(map[string]string),
+		cloneEnv:            make(map[string]string),
+		secrets:             make(map[string]Secret),
 		defaultClonePlugin:  constant.DefaultClonePlugin,
 		trustedClonePlugins: constant.TrustedClonePlugins,
 	}
@@ -121,7 +121,7 @@ func New(opts ...Option) *Compiler {
 func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, error) {
 	config := new(backend_types.Config)
 
-	whenEnv := map[string]string{}
+	whenEnv := make(map[string]string)
 	maps.Copy(whenEnv, c.env)
 	maps.Copy(whenEnv, c.nonPluginEnv)
 

@@ -23,40 +23,41 @@ import (
 )
 
 type Pipeline struct {
-	ID                   int64                   `json:"id"                      xorm:"pk autoincr 'id'"`
-	RepoID               int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
-	Number               int64                   `json:"number"                  xorm:"UNIQUE(s) 'number'"`
-	Author               string                  `json:"author"                  xorm:"INDEX 'author'"` // TODO: only // The user sending the webhook data or triggering the pipeline event
-	Parent               int64                   `json:"parent"                  xorm:"parent"`
-	Event                WebhookEvent            `json:"event"                   xorm:"event"`
-	EventReason          []string                `json:"event_reason"            xorm:"json 'event_reason'"`
-	Status               StatusValue             `json:"status"                  xorm:"INDEX 'status'"`
-	Errors               []*errors.PipelineError `json:"errors"                  xorm:"json 'errors'"`
-	Created              int64                   `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
-	Updated              int64                   `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
-	Started              int64                   `json:"started"                 xorm:"started"`
-	Finished             int64                   `json:"finished"                xorm:"finished"`
-	DeployTo             string                  `json:"deploy_to"               xorm:"deploy"`
-	DeployTask           string                  `json:"deploy_task"             xorm:"deploy_task"`
-	Commit               string                  `json:"commit"                  xorm:"commit"`
-	Branch               string                  `json:"branch"                  xorm:"branch"`
-	RerunCount           int64                   `json:"rerun_count"             xorm:"rerun_count"`
-	Ref                  string                  `json:"ref"                     xorm:"ref"`
-	Refspec              string                  `json:"refspec"                 xorm:"refspec"`
-	Avatar               string                  `json:"author_avatar"           xorm:"varchar(500) avatar"` // TODO: only & rename to AuthorAvatar // Avatar URL of the author of the commit
-	ForgeURL             string                  `json:"forge_url"               xorm:"forge_url"`
-	Reviewer             string                  `json:"reviewed_by"             xorm:"reviewer"`
-	Reviewed             int64                   `json:"reviewed"                xorm:"reviewed"`
-	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"   xorm:"json 'cancel_info'"`
-	Workflows            []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
-	ChangedFiles         []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	AdditionalVariables  map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	PullRequestLabels    []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
-	PullRequestMilestone string                  `json:"pr_milestone,omitempty"  xorm:"pr_milestone"`
-	PullRequestDraft     bool                    `json:"pr_draft,omitempty"      xorm:"pr_draft"`
-	Cron                 string                  `json:"cron,omitempty"          xorm:"cron"` // name of the cron job
-	FromFork             bool                    `json:"from_fork,omitempty"     xorm:"from_fork"`
-	Version              string                  `json:"version"                 xorm:"'version'"`
+	ID                   int64                   `json:"id"                          xorm:"pk autoincr 'id'"`
+	RepoID               int64                   `json:"-"                           xorm:"UNIQUE(s) INDEX 'repo_id'"`
+	Number               int64                   `json:"number"                      xorm:"UNIQUE(s) 'number'"`
+	Author               string                  `json:"author"                      xorm:"INDEX 'author'"` // TODO: only // The user sending the webhook data or triggering the pipeline event
+	Parent               int64                   `json:"parent"                      xorm:"parent"`
+	Event                WebhookEvent            `json:"event"                       xorm:"event"`
+	EventReason          []string                `json:"event_reason"                xorm:"json 'event_reason'"`
+	Status               StatusValue             `json:"status"                      xorm:"INDEX 'status'"`
+	Errors               []*errors.PipelineError `json:"errors"                      xorm:"json 'errors'"`
+	Created              int64                   `json:"created"                     xorm:"'created' NOT NULL DEFAULT 0 created"`
+	Updated              int64                   `json:"updated"                     xorm:"'updated' NOT NULL DEFAULT 0 updated"`
+	Started              int64                   `json:"started"                     xorm:"started"`
+	Finished             int64                   `json:"finished"                    xorm:"finished"`
+	DeployTo             string                  `json:"deploy_to"                   xorm:"deploy"`
+	DeployTask           string                  `json:"deploy_task"                 xorm:"deploy_task"`
+	Commit               string                  `json:"commit"                      xorm:"commit"`
+	Branch               string                  `json:"branch"                      xorm:"branch"`
+	RerunCount           int64                   `json:"rerun_count"                 xorm:"rerun_count"`
+	Ref                  string                  `json:"ref"                         xorm:"ref"`
+	Refspec              string                  `json:"refspec"                     xorm:"refspec"`
+	Avatar               string                  `json:"author_avatar"               xorm:"varchar(500) avatar"` // TODO: only & rename to AuthorAvatar // Avatar URL of the author of the commit
+	ForgeURL             string                  `json:"forge_url"                   xorm:"forge_url"`
+	Reviewer             string                  `json:"reviewed_by"                 xorm:"reviewer"`
+	Reviewed             int64                   `json:"reviewed"                    xorm:"reviewed"`
+	CancelInfo           *CancelInfo             `json:"cancel_info,omitempty"       xorm:"json 'cancel_info'"`
+	Workflows            []*Workflow             `json:"workflows,omitempty"         xorm:"-"`
+	ChangedFiles         []string                `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
+	AdditionalVariables  map[string]string       `json:"variables,omitempty"         xorm:"json 'additional_variables'"`
+	PullRequestLabels    []string                `json:"pr_labels,omitempty"         xorm:"json 'pr_labels'"`
+	PullRequestMilestone string                  `json:"pr_milestone,omitempty"      xorm:"pr_milestone"`
+	PullRequestDraft     bool                    `json:"pr_draft,omitempty"          xorm:"pr_draft"`
+	Cron                 string                  `json:"cron,omitempty"              xorm:"cron"` // name of the cron job
+	FromFork             bool                    `json:"from_fork,omitempty"         xorm:"from_fork"`
+	SelectedWorkflow     string                  `json:"selected_workflow,omitempty" xorm:"selected_workflow"` // only run this workflow and its hard dependencies
+	Version              string                  `json:"version"                     xorm:"'version'"`
 
 	// Ongoing Work: https://github.com/woodpecker-ci/woodpecker/pull/4626
 	// // New
@@ -128,7 +129,14 @@ type PipelineOptions struct {
 	Message   string            `json:"message"`
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
+	Workflow  string            `json:"workflow,omitempty"` // only run this workflow and its hard dependencies
 } //	@name	PipelineOptions
+
+// WorkflowInfo describes a workflow a pipeline config would run, without its compiled config.
+type WorkflowInfo struct {
+	Name      string   `json:"name"`
+	DependsOn []string `json:"depends_on,omitempty"`
+} //	@name	WorkflowInfo
 
 type Release struct {
 	Title        string `json:"title,omitempty"`

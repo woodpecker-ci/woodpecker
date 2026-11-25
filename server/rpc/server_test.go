@@ -140,3 +140,23 @@ func TestServerUnregisterAgent(t *testing.T) {
 		assert.ErrorIs(t, err, delErr)
 	})
 }
+
+// A request can carry log entries of several steps. An error while storing the
+// entries of an earlier step must be reported, not only the last one.
+func TestServerLogReportsEveryStepError(t *testing.T) {
+	t.Parallel()
+
+	errA := errors.New("step a failed")
+	errB := errors.New("step b failed")
+	store := store_mocks.NewMockStore(t)
+	store.On("StepByUUID", "a").Return(nil, errA)
+	store.On("StepByUUID", "b").Return(nil, errB)
+	srv := newTestServer(t, store)
+
+	_, err := srv.Log(ctxWithAgentID(1), &proto.LogRequest{LogEntries: []*proto.LogEntry{
+		{StepUuid: "a", Line: 0},
+		{StepUuid: "b", Line: 0},
+	}})
+	assert.ErrorIs(t, err, errA)
+	assert.ErrorIs(t, err, errB)
+}

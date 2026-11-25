@@ -27,7 +27,7 @@ import (
 
 // pipelineTasks builds the queue tasks for a pipeline's workflow items.
 // Enqueuing happens via the scheduler (see scheduler.StartPipeline).
-func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
+func pipelineTasks(repo *model.Repo, org *model.Org, activePipeline *model.Pipeline, pipelineItems []*builder.Item) ([]*model.Task, error) {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		task := &model.Task{
@@ -49,6 +49,7 @@ func pipelineTasks(repo *model.Repo, activePipeline *model.Pipeline, pipelineIte
 		if err != nil {
 			return nil, err
 		}
+		task.ApplyLabelsFromOrg(org)
 		task.Dependencies = getTaskDependencies(item.DependsOn.Names(), pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)

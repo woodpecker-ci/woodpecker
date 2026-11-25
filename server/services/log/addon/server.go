@@ -15,6 +15,7 @@
 package addon
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/hashicorp/go-plugin"
@@ -47,7 +48,7 @@ func (s *RPCServer) LogFind(args []byte, resp *[]byte) error {
 	if err != nil {
 		return err
 	}
-	log, err := s.Impl.LogFind(&a)
+	log, err := s.Impl.LogFind(context.Background(), &a)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func (s *RPCServer) LogAppend(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.LogAppend(a.Step, a.LogEntries)
+	return s.Impl.LogAppend(context.Background(), a.Step, a.LogEntries)
 }
 
 func (s *RPCServer) LogDelete(args []byte, resp *[]byte) error {
@@ -72,7 +73,7 @@ func (s *RPCServer) LogDelete(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.LogDelete(&a)
+	return s.Impl.LogDelete(context.Background(), &a)
 }
 
 func (s *RPCServer) StepFinished(args []byte, resp *[]byte) error {
@@ -82,5 +83,5 @@ func (s *RPCServer) StepFinished(args []byte, resp *[]byte) error {
 		return err
 	}
 	*resp = []byte{}
-	return s.Impl.StepFinished(&a)
+	return s.Impl.StepFinished(context.Background(), &a)
 }
