@@ -46,6 +46,7 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	defaultPageSize   = 50
+	cloneTokenName    = "woodpecker-clone"
 )
 
 type Gitea struct {
@@ -60,6 +61,10 @@ type Gitea struct {
 	// canSkip tells if the server knows the skipped state, checked once per forge.
 	canSkipOnce sync.Once
 	canSkip     bool
+
+	// canCloneToken tells if the server knows deploy tokens, checked once per forge.
+	canCloneTokenOnce sync.Once
+	canCloneToken     bool
 }
 
 // Opts defines configuration options.
@@ -344,33 +349,31 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	return err
 }
 
-// Netrc returns a netrc file capable of authenticating Gitea requests and
-// cloning Gitea repositories. The netrc will use the global machine account
-// when configured.
+// Netrc returns a netrc file capable of cloning Gitea repositories.
+// It uses the deploy token of the repository and falls back to the token of the user.
 func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	login := ""
-	token := ""
-
-	if u != nil {
-		login = u.Login
-		token = u.AccessToken
-	}
-
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.Netrc{
-		Login:    login,
-		Password: token,
-		Machine:  host,
-		Type:     model.ForgeTypeGitea,
-	}, nil
+	netrc := &model.Netrc{
+		Machine: host,
+		Type:    model.ForgeTypeGitea,
+	}
+	switch {
+	case r.CloneSecret != nil:
+		netrc.Login = r.CloneSecret.Login
+		netrc.Password = r.CloneSecret.Token
+	case u != nil:
+		netrc.Login = u.Login
+		netrc.Password = u.AccessToken
+	}
+	return netrc, nil
 }
 
 // Activate activates the repository by registering post-commit hooks with
-// the Gitea repository.
+// the Gitea repository and a read-only deploy token to clone it, if allowed.
 func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	config := map[string]string{
 		"url":          link,
@@ -400,11 +403,40 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 		}
 		return err
 	}
+
+	c.canCloneTokenOnce.Do(func() {
+		// https://github.com/go-gitea/gitea/pull/37306
+		c.canCloneToken = client.CheckServerVersionConstraint(ctx, ">= 28.0.0") == nil
+	})
+	if !c.canCloneToken {
+		r.CloneSecret = nil
+		return nil
+	}
+
+	// the token name must be unique, so drop a token left over from before
+	if err := c.deleteCloneTokens(ctx, client, r.Owner, r.Name); err != nil {
+		log.Debug().Err(err).Msgf("could not delete old deploy tokens of %s", r.FullName)
+	}
+	cloneToken, _, err := client.Repositories.CreateDeployToken(ctx, r.Owner, r.Name, gitea.CreateDeployKeyTokenOption{
+		Title:    cloneTokenName,
+		ReadOnly: true,
+	})
+	if err != nil {
+		log.Warn().Err(err).Msgf("could not create a deploy token for %s, pipelines clone with the user token", r.FullName)
+		r.CloneSecret = nil
+		return nil
+	}
+	r.CloneSecret = &model.CloneSecret{
+		// https://github.com/go-gitea/gitea/blob/c04f64824b145ec4b7ac5e77b5a3d0212f4cdfa0/services/auth/basic.go#L55-L63
+		Login:         cloneTokenName,
+		Token:         cloneToken.Token,
+		ForgeRemoteID: model.ForgeRemoteID(strconv.FormatInt(cloneToken.ID, 10)),
+	}
 	return nil
 }
 
-// Deactivate deactivates the repository be removing repository push hooks from
-// the Gitea repository.
+// Deactivate deactivates the repository by removing repository push hooks
+// and the deploy token from Gitea.
 func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client, err := c.newClientToken(u.AccessToken)
 	if err != nil {
@@ -415,6 +447,10 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 	forgeRepo, err := c.Repo(ctx, u, r.ForgeRemoteID, r.Owner, r.Name)
 	if err != nil {
 		return err
+	}
+
+	if err := c.deleteCloneTokens(ctx, client, forgeRepo.Owner, forgeRepo.Name); err != nil {
+		log.Warn().Err(err).Msgf("could not delete the deploy token of %s", r.FullName)
 	}
 
 	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
@@ -434,6 +470,29 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		return err
 	}
 
+	return nil
+}
+
+// deleteCloneTokens deletes the deploy tokens Woodpecker created to clone the repository.
+func (c *Gitea) deleteCloneTokens(ctx context.Context, client *gitea.Client, owner, name string) error {
+	keys, err := shared_utils.Paginate(func(page int) ([]*gitea.DeployKey, error) {
+		keys, _, err := client.Repositories.ListDeployKeys(ctx, owner, name, gitea.ListDeployKeysOptions{
+			Page:     page,
+			PageSize: c.perPage(ctx),
+		})
+		return keys, err
+	}, -1)
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		// https://github.com/go-gitea/gitea/blob/c04f64824b145ec4b7ac5e77b5a3d0212f4cdfa0/modules/structs/repo_key.go#L12-L14
+		if key.KeyType == "token" && key.Title == cloneTokenName {
+			if _, err := client.Repositories.DeleteDeployKey(ctx, owner, name, key.ID); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
