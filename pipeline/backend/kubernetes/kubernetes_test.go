@@ -608,3 +608,54 @@ func TestWaitStepRelistDeletion(t *testing.T) {
 	assert.GreaterOrEqual(t, lists, 2, "the informer must relist to discover deletion")
 	assert.Equal(t, 2, gets, "completion must reach the post-event Get")
 }
+
+func TestStepInformersSelectOnlyTheirPod(t *testing.T) {
+	for _, method := range []string{"WaitStep", "TailStep"} {
+		t.Run(method, func(t *testing.T) {
+			client := fake.NewClientset()
+			engine := makeEngine(client)
+			step := makeStep("pod-scoped-01")
+			podName := createPod(t, client, step, "test-ns")
+
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+
+			var mu sync.Mutex
+			var listSelectors, watchSelectors []string
+			client.PrependReactor("list", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+				mu.Lock()
+				defer mu.Unlock()
+				list, ok := action.(kube_testing.ListAction)
+				require.True(t, ok)
+				listSelectors = append(listSelectors, list.GetListRestrictions().Fields.String())
+				return false, nil, nil
+			})
+			client.PrependWatchReactor("pods", func(action kube_testing.Action) (bool, watch.Interface, error) {
+				mu.Lock()
+				defer mu.Unlock()
+				watchAction, ok := action.(kube_testing.WatchAction)
+				require.True(t, ok)
+				watchSelectors = append(watchSelectors, watchAction.GetWatchRestrictions().Fields.String())
+				// The informer has listed and started watching: nothing more to observe.
+				cancel()
+				return false, nil, nil
+			})
+
+			if method == "WaitStep" {
+				_, err := engine.WaitStep(ctx, step, "task-1")
+				require.ErrorIs(t, err, context.Canceled)
+			} else {
+				_, err := engine.TailStep(ctx, step, "task-1")
+				require.ErrorIs(t, err, context.Canceled)
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+			require.NotEmpty(t, listSelectors)
+			require.NotEmpty(t, watchSelectors)
+			for _, selector := range append(listSelectors, watchSelectors...) {
+				assert.Equal(t, "metadata.name="+podName, selector)
+			}
+		})
+	}
+}
