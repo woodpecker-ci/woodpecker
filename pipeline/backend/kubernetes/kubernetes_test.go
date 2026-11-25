@@ -700,11 +700,11 @@ func TestDestroyWorkflowDeletesRemainingServicesOnPartialFailure(t *testing.T) {
 		},
 	}
 
-	_ = engine.DestroyWorkflow(context.Background(), conf, "task-1")
+	_ = engine.DestroyWorkflow(t.Context(), conf, "task-1")
 
-	_, err := client.CoreV1().Pods(namespace).Get(context.Background(), redisPodName, kube_meta_v1.GetOptions{})
+	_, err := client.CoreV1().Pods(namespace).Get(t.Context(), redisPodName, kube_meta_v1.GetOptions{})
 	assert.Error(t, err, "redis service pod should be deleted despite psql failure")
 
-	_, err = client.CoreV1().Pods(namespace).Get(context.Background(), psqlPodName, kube_meta_v1.GetOptions{})
+	_, err = client.CoreV1().Pods(namespace).Get(t.Context(), psqlPodName, kube_meta_v1.GetOptions{})
 	assert.NoError(t, err, "psql pod should still exist since its delete was rejected")
 }

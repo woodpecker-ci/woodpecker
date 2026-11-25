@@ -378,7 +378,7 @@ func TestCompleteStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		require.NotNil(t, ws, "nil guard must allocate a new State")
-		assert.True(t, ws.Exited, "cancelled step must be marked exited")
+		assert.True(t, ws.Exited, "canceled step must be marked exited")
 		assert.Equal(t, pipeline_errors.ErrCancel, ws.Error)
 	})
 
