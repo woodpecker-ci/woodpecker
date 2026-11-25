@@ -1,0 +1,23 @@
+steps:
+  lint:
+    image: golang
+    workspace: readonly
+    commands:
+      - go vet ./...
+
+  report:
+    image: example/report-plugin
+    workspace: overlay
+    settings:
+      format: json
+
+  build:
+    image: golang
+    workspace: write
+    commands:
+      - go build
+
+services:
+  database:
+    image: postgres
+    workspace: readonly

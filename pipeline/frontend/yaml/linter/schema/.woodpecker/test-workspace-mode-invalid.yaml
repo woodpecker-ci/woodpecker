@@ -1,0 +1,6 @@
+steps:
+  lint:
+    image: golang
+    workspace: readwrite
+    commands:
+      - go vet ./...

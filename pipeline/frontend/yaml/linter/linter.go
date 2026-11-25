@@ -21,6 +21,7 @@ import (
 
 	"go.uber.org/multierr"
 
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
@@ -128,6 +129,15 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
+		if container.Workspace != "" && container.Workspace != string(backend_types.WorkspaceModeWrite) {
+			linterErr = multierr.Append(
+				linterErr,
+				newLinterError(
+					"Clone steps need write access to the workspace, use `workspace: write` or leave it unset",
+					config.File, fmt.Sprintf("clone.%s", container.Name), false,
+				),
+			)
+		}
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
 			linterErr = multierr.Append(
 				linterErr,
