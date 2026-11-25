@@ -17,6 +17,7 @@ package pipeline
 import (
 	"context"
 	"errors"
+	"fmt"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -26,8 +27,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_mocks "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	scheduler_mocks "go.woodpecker-ci.org/woodpecker/v3/server/scheduler/mocks"
+	config_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/config/mocks"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	registry_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/registry/mocks"
+	secret_service_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/secret/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
@@ -516,4 +525,208 @@ func TestStatusLocksForgetAbandonedWaits(t *testing.T) {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	assert.Empty(t, k.locks, "an abandoned wait kept its key alive")
+}
+
+const statusEnvYAML = "steps:\n  - name: test\n    image: alpine\n    commands:\n      - echo hi\n"
+
+// statusEnv runs Create, Approve and Restart against mocks that keep what they
+// are handed, like a store, and records what every forge status post carried.
+// It replaces the global manager and scheduler, so its tests can't run in
+// parallel.
+type statusEnv struct {
+	store     *store_mocks.MockStore
+	scheduler *scheduler_mocks.MockScheduler
+	repo      *model.Repo
+	user      *model.User
+
+	mu        sync.Mutex
+	pipeline  model.Pipeline
+	workflows map[int64]model.Workflow
+	steps     map[int64]model.StatusValue
+	posts     []statusPost
+}
+
+type statusPost struct {
+	workflowID int64
+	pipeline   model.StatusValue
+	workflow   model.StatusValue
+}
+
+// newStatusEnv sets up a repo with two workflows; the scheduler fails to
+// start pipelines with startErr.
+func newStatusEnv(t *testing.T, startErr error) *statusEnv {
+	env := &statusEnv{
+		repo:      &model.Repo{ID: 1, UserID: 1, FullName: "octocat/hello-world", Config: ".woodpecker"},
+		user:      &model.User{ID: 1, Login: "octocat"},
+		workflows: make(map[int64]model.Workflow),
+		steps:     make(map[int64]model.StatusValue),
+	}
+	files := []*forge_types.FileMeta{
+		{Name: ".woodpecker/a.yaml", Data: []byte(statusEnvYAML)},
+		{Name: ".woodpecker/b.yaml", Data: []byte(statusEnvYAML)},
+	}
+	var configs []*model.Config
+	for _, f := range files {
+		configs = append(configs, &model.Config{RepoID: 1, Name: f.Name, Data: f.Data})
+	}
+
+	savePipeline := func(args mock.Arguments) {
+		p, _ := args.Get(0).(*model.Pipeline)
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		if p.ID == 0 {
+			p.ID = 1
+		}
+		env.pipeline = *p
+	}
+	// like the datastore, creating workflows stores their steps too, while
+	// WorkflowUpdate only writes the workflow row
+	saveWorkflows := func(workflows []*model.Workflow) {
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		for _, w := range workflows {
+			if w.ID == 0 {
+				w.ID = int64(len(env.workflows) + 1)
+			}
+			for _, step := range w.Children {
+				if step.ID == 0 {
+					step.ID = int64(len(env.steps) + 1)
+				}
+				env.steps[step.ID] = step.State
+			}
+			env.workflows[w.ID] = *w
+		}
+	}
+
+	s := store_mocks.NewMockStore(t)
+	s.On("GetUser", int64(1)).Return(env.user, nil).Maybe()
+	s.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(&model.Pipeline{}, nil).Maybe()
+	s.On("ConfigsForPipeline", mock.Anything).Return(configs, nil).Maybe()
+	s.On("ConfigPersist", mock.Anything).Return(&model.Config{ID: 1, RepoID: 1}, nil).Maybe()
+	s.On("PipelineConfigCreate", mock.Anything).Return(nil).Maybe()
+	s.On("OrgGet", mock.Anything).Return(&model.Org{}, nil).Maybe()
+	s.On("CreatePipeline", mock.Anything).Run(savePipeline).Return(nil).Maybe()
+	s.On("UpdatePipeline", mock.Anything).Run(savePipeline).Return(nil).Maybe()
+	s.On("GetPipeline", mock.Anything).Return(func(id int64) (*model.Pipeline, error) {
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		if id != env.pipeline.ID {
+			return nil, fmt.Errorf("no pipeline %d", id)
+		}
+		p := env.pipeline
+		return &p, nil
+	}).Maybe()
+	s.On("WorkflowsCreate", mock.Anything).Run(func(args mock.Arguments) {
+		workflows, _ := args.Get(0).([]*model.Workflow)
+		saveWorkflows(workflows)
+	}).Return(nil).Maybe()
+	s.On("WorkflowsReplace", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		workflows, _ := args.Get(1).([]*model.Workflow)
+		env.mu.Lock()
+		clear(env.workflows)
+		clear(env.steps)
+		env.mu.Unlock()
+		saveWorkflows(workflows)
+	}).Return(nil).Maybe()
+	s.On("WorkflowUpdate", mock.Anything).Run(func(args mock.Arguments) {
+		w, _ := args.Get(0).(*model.Workflow)
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		env.workflows[w.ID] = *w
+	}).Return(nil).Maybe()
+	s.On("WorkflowLoad", mock.Anything).Return(func(id int64) (*model.Workflow, error) {
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		w, ok := env.workflows[id]
+		if !ok {
+			return nil, fmt.Errorf("no workflow %d", id)
+		}
+		return &w, nil
+	}).Maybe()
+	s.On("StepUpdate", mock.Anything).Run(func(args mock.Arguments) {
+		step, _ := args.Get(0).(*model.Step)
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		env.steps[step.ID] = step.State
+	}).Return(nil).Maybe()
+	env.store = s
+
+	f := forge_mocks.NewMockForge(t)
+	f.On("Config").Return(metadata.Forge{Type: "github", URL: "https://github.com", Host: "github.com"}).Maybe()
+	f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil).Maybe()
+	f.On("Status", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		p, _ := args.Get(3).(*model.Pipeline)
+		w := postedWorkflow(t, args)
+		env.mu.Lock()
+		defer env.mu.Unlock()
+		env.posts = append(env.posts, statusPost{workflowID: w.ID, pipeline: p.Status, workflow: w.State})
+	}).Return(nil).Maybe()
+
+	configService := config_service_mocks.NewMockService(t)
+	configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(files, nil).Maybe()
+	secretService := secret_service_mocks.NewMockService(t)
+	secretService.On("SecretListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Secret{}, nil).Maybe()
+	registryService := registry_service_mocks.NewMockService(t)
+	registryService.On("RegistryListPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return([]*model.Registry{}, nil).Maybe()
+
+	manager := manager_mocks.NewMockManager(t)
+	manager.On("ForgeFromRepo", mock.Anything).Return(f, nil).Maybe()
+	manager.On("ConfigServiceFromRepo", mock.Anything).Return(configService).Maybe()
+	manager.On("SecretServiceFromRepo", mock.Anything).Return(secretService, nil).Maybe()
+	manager.On("RegistryServiceFromRepo", mock.Anything).Return(registryService, nil).Maybe()
+	manager.On("EnvironmentService").Return(nil, nil).Maybe()
+
+	env.scheduler = scheduler_mocks.NewMockScheduler(t)
+	env.scheduler.On("PublishPipelineEvent", mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	env.scheduler.On("StartPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(startErr).Maybe()
+
+	prevManager, prevScheduler := server.Config.Services.Manager, server.Config.Services.Scheduler
+	server.Config.Services.Manager, server.Config.Services.Scheduler = manager, env.scheduler
+	t.Cleanup(func() {
+		server.Config.Services.Manager, server.Config.Services.Scheduler = prevManager, prevScheduler
+	})
+
+	return env
+}
+
+// round is one post per workflow, all with the given states.
+func (env *statusEnv) round(pipeline, workflow model.StatusValue) []statusPost {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	var posts []statusPost
+	for id := range env.workflows {
+		posts = append(posts, statusPost{workflowID: id, pipeline: pipeline, workflow: workflow})
+	}
+	return posts
+}
+
+func (env *statusEnv) postedStatuses() []statusPost {
+	env.mu.Lock()
+	defer env.mu.Unlock()
+	return append([]statusPost(nil), env.posts...)
+}
+
+// assertErrored checks that a pipeline which failed to start ended in error
+// along with its workflows and steps, and that the forge got exactly one
+// round of statuses, carrying the error.
+func (env *statusEnv) assertErrored(t *testing.T) {
+	t.Helper()
+	env.mu.Lock()
+	defer env.mu.Unlock()
+
+	assert.Equal(t, model.StatusError, env.pipeline.Status)
+	assert.Len(t, env.workflows, 2)
+	for id, w := range env.workflows {
+		assert.Equal(t, model.StatusError, w.State, "workflow %d", id)
+	}
+	assert.NotEmpty(t, env.steps)
+	for id, state := range env.steps {
+		assert.Equal(t, model.StatusError, state, "step %d", id)
+	}
+	var want []statusPost
+	for id := range env.workflows {
+		want = append(want, statusPost{workflowID: id, pipeline: model.StatusError, workflow: model.StatusError})
+	}
+	assert.ElementsMatch(t, want, env.posts)
 }

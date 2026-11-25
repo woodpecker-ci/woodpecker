@@ -191,3 +191,43 @@ func TestCreateAllWorkflowsFilteredReturnsErrFiltered(t *testing.T) {
 	assert.Nil(t, created)
 	assert.ErrorIs(t, err, ErrFiltered)
 }
+
+func pushPipeline() *model.Pipeline {
+	return &model.Pipeline{Event: model.EventPush, Ref: "refs/heads/main", Branch: "main", Commit: "c0ffee"}
+}
+
+// Create used to post every workflow's status three times before the pipeline
+// started, all pending. Only start() posts them now.
+func TestCreatePostsStatusesOnce(t *testing.T) {
+	env := newStatusEnv(t, nil)
+
+	created, err := Create(t.Context(), env.store, env.repo, pushPipeline())
+	require.NoError(t, err)
+	require.Len(t, created.Workflows, 2)
+
+	assert.ElementsMatch(t, env.round(model.StatusPending, model.StatusPending), env.postedStatuses())
+}
+
+// A blocked pipeline never reaches start(), so Create posts its statuses itself.
+func TestCreatePostsStatusesOfBlockedPipeline(t *testing.T) {
+	env := newStatusEnv(t, nil)
+	env.repo.RequireApproval = model.RequireApprovalAllEvents
+
+	created, err := Create(t.Context(), env.store, env.repo, pushPipeline())
+	require.NoError(t, err)
+	assert.Equal(t, model.StatusBlocked, created.Status)
+
+	assert.ElementsMatch(t, env.round(model.StatusBlocked, model.StatusBlocked), env.postedStatuses())
+	env.scheduler.AssertNotCalled(t, "StartPipeline", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+}
+
+// When start() fails nothing was posted yet; the pipeline, its workflows and
+// their steps have to end in error, or the commit statuses stay pending forever.
+func TestCreateStartFailureErrorsWorkflowsAndSteps(t *testing.T) {
+	env := newStatusEnv(t, errors.New("queue unavailable"))
+
+	_, err := Create(t.Context(), env.store, env.repo, pushPipeline())
+	require.Error(t, err)
+
+	env.assertErrored(t)
+}

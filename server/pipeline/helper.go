@@ -119,7 +119,9 @@ var statusLockTimeout = 2 * time.Minute
 // last, and posts of one status may be made concurrently (a pipeline posts its
 // workflows' statuses after queueing them, while an agent reports a workflow
 // it already runs). Each state change is persisted before it is posted, so the
-// post that reaches the forge last carries the latest state.
+// post that reaches the forge last carries the latest state. If persisting a
+// change failed, the post carries the state that is still stored, which is
+// also what the API serves.
 func PostWorkflowStatus(ctx context.Context, _store store.Store, _forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	lockCtx, cancelLock := context.WithTimeout(ctx, statusLockTimeout)
 	unlock, err := statusLocks.lock(lockCtx, statusKeyOf(pipeline, workflow))
