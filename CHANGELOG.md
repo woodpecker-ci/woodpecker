@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @bitskeptic, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @thomas-baumeister, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @bitskeptic, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @ivaldibot, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @thomas-baumeister, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -21,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Watch only the step's own pod in the Kubernetes backend [[#7600](https://github.com/woodpecker-ci/woodpecker/pull/7600)]
 - Generate SBOM on release [[#6075](https://github.com/woodpecker-ci/woodpecker/pull/6075)]
 - Make the task lease timeout configurable via WOODPECKER_TASK_TIMEOUT [[#7558](https://github.com/woodpecker-ci/woodpecker/pull/7558)]
 - Remove `--pipeline-counter` arg from CLI repo update [[#7586](https://github.com/woodpecker-ci/woodpecker/pull/7586)]
