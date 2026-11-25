@@ -378,6 +378,7 @@ func TestCompleteStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		require.NotNil(t, ws, "nil guard must allocate a new State")
+		assert.True(t, ws.Exited, "cancelled step must be marked exited")
 		assert.Equal(t, pipeline_errors.ErrCancel, ws.Error)
 	})
 
@@ -447,7 +448,7 @@ func TestCompleteStep(t *testing.T) {
 
 		engine := mocks.NewMockBackend(t)
 		engine.On("WaitStep", mock.Anything, mock.Anything, mock.Anything).
-			Return(&backend_types.State{Exited: true, ExitCode: 0}, nil)
+			Return(&backend_types.State{Exited: false, ExitCode: 0}, nil)
 		engine.On("DestroyStep", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 		r := New(
@@ -462,6 +463,7 @@ func TestCompleteStep(t *testing.T) {
 
 		assert.NoError(t, err)
 		require.NotNil(t, ws)
+		assert.True(t, ws.Exited, "re-check should mark the step exited when r.ctx is canceled")
 		assert.Equal(t, pipeline_errors.ErrCancel, ws.Error,
 			"re-check should set ErrCancel when r.ctx is already canceled")
 	})

@@ -392,7 +392,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	select {
 	case <-finished:
 	case <-ctx.Done():
-		return &types.State{ExitCode: 0, Exited: true}, nil
+		return nil, ctx.Err()
 	}
 
 	// After the informer signals completion, kubelet may not have finalized
