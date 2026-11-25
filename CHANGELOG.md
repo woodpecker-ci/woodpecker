@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Use repo read-only deploy-token to clone Gitea repos [[#7625](https://github.com/woodpecker-ci/woodpecker/pull/7625)]
 - Check allowed deployments also on deployment restarts [[#7621](https://github.com/woodpecker-ci/woodpecker/pull/7621)]
 - Sync repo visibility with forge as new default option [[#7602](https://github.com/woodpecker-ci/woodpecker/pull/7602)]
 - Log agent auth fails fail2ban friendly [[#7601](https://github.com/woodpecker-ci/woodpecker/pull/7601)]
