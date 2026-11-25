@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Use constant time to compare agent tokens [[#7638](https://github.com/woodpecker-ci/woodpecker/pull/7638)]
 - Use repo read-only deploy-token to clone Gitea repos [[#7625](https://github.com/woodpecker-ci/woodpecker/pull/7625)]
 - Check allowed deployments also on deployment restarts [[#7621](https://github.com/woodpecker-ci/woodpecker/pull/7621)]
 - Sync repo visibility with forge as new default option [[#7602](https://github.com/woodpecker-ci/woodpecker/pull/7602)]
