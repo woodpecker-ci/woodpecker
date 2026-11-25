@@ -275,6 +275,36 @@ func TestGetAgent(t *testing.T) {
 		assert.Contains(t, err.Error(), "timeout")
 	})
 
+	t.Run("individual token with agentID is checked against that agent", func(t *testing.T) {
+		t.Parallel()
+
+		agent := &model.Agent{ID: 4, Token: "ind-token"}
+		store := store_mocks.NewMockStore(t)
+		store.On("AgentFind", int64(4)).Return(agent, nil).Once()
+
+		srv := newAuthServer(t, "", store)
+		got, err := srv.getAgent(4, "ind-token")
+
+		require.NoError(t, err)
+		assert.Equal(t, int64(4), got.ID)
+	})
+
+	t.Run("individual token with stale agentID falls back to the token lookup", func(t *testing.T) {
+		t.Parallel()
+
+		oldAgent := &model.Agent{ID: 4, Token: "old-token"}
+		newAgent := &model.Agent{ID: 9, Token: "new-token"}
+		store := store_mocks.NewMockStore(t)
+		store.On("AgentFind", int64(4)).Return(oldAgent, nil).Once()
+		store.On("AgentFindByToken", "new-token").Return(newAgent, nil).Once()
+
+		srv := newAuthServer(t, "", store)
+		got, err := srv.getAgent(4, "new-token")
+
+		require.NoError(t, err)
+		assert.Equal(t, int64(9), got.ID)
+	})
+
 	t.Run("master token configured but wrong token falls through to individual auth", func(t *testing.T) {
 		t.Parallel()
 
@@ -299,6 +329,7 @@ func TestAuthLogsFailureWithClientAddress(t *testing.T) {
 	t.Cleanup(func() { log.Logger = orig })
 
 	store := store_mocks.NewMockStore(t)
+	store.On("AgentFind", int64(3)).Return(nil, types.ErrRecordNotExist)
 	store.On("AgentFindByToken", mock.Anything).Return(nil, types.ErrRecordNotExist)
 	srv := newAuthServer(t, "master", store)
 
@@ -322,6 +353,7 @@ func TestAuthLogsForwardedClientAddress(t *testing.T) {
 	t.Cleanup(func() { log.Logger = orig })
 
 	store := store_mocks.NewMockStore(t)
+	store.On("AgentFind", int64(3)).Return(nil, types.ErrRecordNotExist)
 	store.On("AgentFindByToken", mock.Anything).Return(nil, types.ErrRecordNotExist)
 	srv := newAuthServer(t, "master", store)
 	proxy := &peer.Peer{Addr: &net.TCPAddr{IP: net.ParseIP("10.0.0.2"), Port: 41234}}

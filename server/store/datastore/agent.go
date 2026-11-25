@@ -37,15 +37,18 @@ func (s storage) AgentFindByToken(token string) (*model.Agent, error) {
 		return nil, ErrNoTokenProvided
 	}
 	agent := new(model.Agent)
-	return agent, wrapGet(s.engine.Where("token = ?", token).Get(agent))
+	// never query "token = ?", see model.HashAgentToken
+	return agent, wrapGet(s.engine.Where("token_hash = ?", model.HashAgentToken(token)).Get(agent))
 }
 
 func (s storage) AgentCreate(agent *model.Agent) error {
+	agent.TokenHash = model.HashAgentToken(agent.Token)
 	// only Insert set auto created ID back to object
 	return wrapInsert(s.engine.Insert(agent))
 }
 
 func (s storage) AgentUpdate(agent *model.Agent) error {
+	agent.TokenHash = model.HashAgentToken(agent.Token)
 	return retryWrite(func() error {
 		return wrapUpdate(s.engine.ID(agent.ID).AllCols().Update(agent))
 	})
