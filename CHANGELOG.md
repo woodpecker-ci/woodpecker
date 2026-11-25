@@ -87,7 +87,6 @@
 
 ### 📦️ Dependency
 
-- Update golang-packages [[#7631](https://github.com/woodpecker-ci/woodpecker/pull/7631)]
 - Update module gitlab.com/gitlab-org/api/client-go/v3 to v3.56.0 [[#7626](https://github.com/woodpecker-ci/woodpecker/pull/7626)]
 - Update codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 digest to 0f7befc [[#7617](https://github.com/woodpecker-ci/woodpecker/pull/7617)]
 - Update gitea.dev/sdk digest to 0a741c0 [[#7604](https://github.com/woodpecker-ci/woodpecker/pull/7604)]
