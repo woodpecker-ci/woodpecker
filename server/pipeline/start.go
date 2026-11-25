@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -34,7 +35,12 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
 
-	tasks, err := pipelineTasks(repo, activePipeline, pipelineItems)
+	org, err := store.OrgGet(repo.OrgID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load org %d of repo %s: %w", repo.OrgID, repo.FullName, err)
+	}
+
+	tasks, err := pipelineTasks(repo, org, activePipeline, pipelineItems)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +51,7 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 		return nil, err
 	}
 
-	updatePipelineStatus(ctx, forge, activePipeline, repo, user)
+	updatePipelineStatusOnForge(ctx, forge, activePipeline, repo, user)
 
 	return activePipeline, nil
 }
@@ -54,5 +60,5 @@ func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pip
 	if err := server.Config.Services.Scheduler.PublishPipelineEvent(ctx, repo, pipeline); err != nil {
 		log.Error().Err(err).Msg("could not push pipeline status change to pubsub provider")
 	}
-	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
+	updatePipelineStatusOnForge(ctx, forge, pipeline, repo, repoUser)
 }

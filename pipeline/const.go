@@ -31,6 +31,7 @@ const (
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
 	LabelCommitBranch   string = InternalLabelPrefix + "/commit-branch"
 	LabelEvent          string = InternalLabelPrefix + "/event"
+	LabelOrgAgentsOnly  string = InternalLabelPrefix + "/org-agents-only"
 	LabelFilterOrg      string = "org-id"
 	LabelFilterRepo     string = "repo"
 	LabelFilterPlatform string = "platform"

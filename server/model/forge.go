@@ -14,6 +14,12 @@
 
 package model
 
+const (
+	// ID of the primary forge.
+	// This forge is set up via environment variables.
+	PrimaryForgeID = 1
+)
+
 type ForgeType string
 
 const (
@@ -70,6 +76,7 @@ func SecretForgeOptionSetMarker(key string) string {
 type Forge struct {
 	ID                int64          `json:"id"                           xorm:"pk autoincr 'id'"`
 	Type              ForgeType      `json:"type"                         xorm:"VARCHAR(250)"`
+	Name              string         `json:"name,omitempty"               xorm:"VARCHAR(250) 'name'"`
 	URL               string         `json:"url"                          xorm:"VARCHAR(500) 'url'"`
 	OAuthClientID     string         `json:"client,omitempty"             xorm:"VARCHAR(250) 'oauth_client_id'"`
 	OAuthClientSecret string         `json:"-"                            xorm:"VARCHAR(250) 'oauth_client_secret'"` // do not expose client secret
@@ -89,6 +96,7 @@ func (f *Forge) PublicCopy() *Forge {
 	forge := &Forge{
 		ID:   f.ID,
 		Type: f.Type,
+		Name: f.Name,
 		URL:  f.URL,
 	}
 

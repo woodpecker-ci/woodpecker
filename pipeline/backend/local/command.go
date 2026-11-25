@@ -89,17 +89,15 @@ func checkShellExistence(shell string) error {
 	return err
 }
 
-// PowerShell treats U+0027, U+2018, U+2019, U+201A and U+201B as single quotes:
-// https://github.com/PowerShell/PowerShell/blob/5d871eb5e02cbcc8ecb03fce4b24d7f48bf97c26/src/System.Management.Automation/engine/parser/CharTraits.cs#L265-L272
-func quotePowerShell(value string) string {
-	replacer := strings.NewReplacer(
-		"'", "''",
-		"‘", "‘‘",
-		"’", "’’",
-		"‚", "‚‚",
-		"‛", "‛‛",
-	)
-	return "'" + replacer.Replace(value) + "'"
+// Use a delimiter not present in the value to preserve its contents.
+// https://www.nushell.sh/lang-guide/chapters/strings_and_text.html#string-literals
+func quoteNushell(value string) string {
+	for n := 1; ; n++ {
+		hashes := strings.Repeat("#", n)
+		if !strings.Contains(value, "'"+hashes) {
+			return "r" + hashes + "'" + value + "'" + hashes
+		}
+	}
 }
 
 func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, baseDir string) (args []string, err error) {
@@ -157,10 +155,10 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 			script.WriteString(cmd + " || exit $status\n")
 		}
 		return []string{"-c", script.String()}, nil
-	case "nu":
+	case "nu", "nushell":
 		var script strings.Builder
 		for _, cmd := range cmdList {
-			script.WriteString("echo " + shellescape.Quote(common.CommandMarker+cmd) + "\n")
+			script.WriteString("print " + quoteNushell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"--commands", script.String()}, nil
@@ -168,10 +166,12 @@ func (e *local) genCmdByShell(shellName, shellPath string, cmdList []string, bas
 		var script strings.Builder
 		script.WriteString("$ErrorActionPreference = \"Stop\"\n")
 		for _, cmd := range cmdList {
-			script.WriteString("Write-Host " + quotePowerShell(common.CommandMarker+cmd) + "\n")
+			script.WriteString("Write-Host " + common.QuotePowerShell(common.CommandMarker+cmd) + "\n")
 			script.WriteString(cmd + "\n")
 		}
 		return []string{"-noprofile", "-noninteractive", "-c", script.String()}, nil
+	case "csi", "dotnet-script", "csharp":
+		return genCSharpScript(cmdList, baseDir)
 	}
 }
 

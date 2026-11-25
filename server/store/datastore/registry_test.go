@@ -66,6 +66,23 @@ func TestRegistryList(t *testing.T) {
 	assert.Len(t, list, 2)
 }
 
+func TestRegistryListOrgZeroIsolation(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		RepoID:   1,
+		OrgID:    0,
+		Address:  "victim-registry.example.com",
+		Username: "foo",
+		Password: "top-secret-password",
+	}))
+
+	list, err := store.RegistryList(&model.Repo{ID: 2, OrgID: 0}, true, &model.ListOptionsWithAll{ListOptions: &model.ListOptions{Page: 1, PerPage: 50}})
+	assert.NoError(t, err)
+	assert.Empty(t, list, "repo 2 (OrgID 0) must not see repo 1's repo-scoped registry just because both have OrgID 0")
+}
+
 func TestRegistryUpdate(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()

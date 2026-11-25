@@ -76,6 +76,9 @@ type ExpectedStep struct {
 	Name     string            `json:"name"`
 	Status   model.StatusValue `json:"status"`
 	ExitCode int               `json:"exit_code"`
+	// Error must be contained in the error stored for the step, as runtime
+	// errors embed the random step UUID. Empty means no error is stored.
+	Error string `json:"error"`
 }
 
 // ExpectedWorkflow describes what we expect for one named workflow after the pipeline finishes.

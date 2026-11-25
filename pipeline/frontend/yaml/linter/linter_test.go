@@ -91,13 +91,13 @@ steps:
 `,
 	}, {
 		Title: "explicitly privileged container",
-		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 	}}
 
 	for _, testd := range testdatas {
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
 				Network:  true,
@@ -206,7 +206,7 @@ func TestLintErrors(t *testing.T) {
 			want: "Additional property pipeline is not allowed",
 		},
 		{
-			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 			want: "The formerly privileged plugin `plugins/docker` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`",
 		},
 		{
@@ -267,7 +267,7 @@ func TestDeprecations(t *testing.T) {
 
 	for _, tt := range testdata {
 		conf, err := yaml.ParseString(tt.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      tt.from,
@@ -307,7 +307,7 @@ func TestBadHabits(t *testing.T) {
 
 	for _, tt := range testdata {
 		conf, err := yaml.ParseString(tt.from)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      tt.from,

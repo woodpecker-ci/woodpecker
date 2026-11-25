@@ -23,6 +23,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
@@ -154,6 +155,7 @@ func PatchForge(c *gin.Context) {
 	oldAdditionalOptions := forge.AdditionalOptions
 	forge.URL = in.URL
 	forge.Type = in.Type
+	forge.Name = in.Name
 	forge.OAuthClientID = in.OAuthClientID
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
@@ -173,6 +175,10 @@ func PatchForge(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatus(http.StatusConflict)
 		return
+	}
+	// drop the cached forge, so the next use sets it up with the new config
+	if server.Config.Services.Manager != nil {
+		server.Config.Services.Manager.RemoveForge(forgeID)
 	}
 
 	forge.RedactSecrets()
@@ -238,6 +244,7 @@ func PostForge(c *gin.Context) {
 	forge := &model.Forge{
 		URL:               in.URL,
 		Type:              in.Type,
+		Name:              in.Name,
 		OAuthClientID:     in.OAuthClientID,
 		OAuthClientSecret: in.OAuthClientSecret,
 		OAuthHost:         in.OAuthHost,
@@ -361,6 +368,9 @@ func DeleteForge(c *gin.Context) {
 	if err = _store.ForgeDelete(forge); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return
+	}
+	if server.Config.Services.Manager != nil {
+		server.Config.Services.Manager.RemoveForge(forgeID)
 	}
 	c.Status(http.StatusNoContent)
 }

@@ -18,7 +18,7 @@ package github
 import (
 	"testing"
 
-	"github.com/google/go-github/v92/github"
+	"github.com/google/go-github/v93/github"
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -38,8 +38,8 @@ func TestConvertStatus(t *testing.T) {
 		{name: "pending", status: model.StatusPending, want: statusPending},
 		{name: "running", status: model.StatusRunning, want: statusPending},
 		{name: "blocked", status: model.StatusBlocked, want: statusPending},
-		{name: "skipped", status: model.StatusSkipped, want: statusPending},
-		{name: "canceled", status: model.StatusCanceled, want: statusPending},
+		{name: "skipped", status: model.StatusSkipped, want: statusError},
+		{name: "canceled", status: model.StatusCanceled, want: statusError},
 		// StatusCreated is internal-only and never terminal.
 		{name: "created", status: model.StatusCreated, want: statusPending},
 		{name: "out of enum", status: model.StatusValue("bogus"), want: statusError},
@@ -88,6 +88,7 @@ func TestConvertRepoList(t *testing.T) {
 	assert.Equal(t, "octocat/hello-world", to[0].FullName)
 	assert.Equal(t, "octocat", to[0].Owner)
 	assert.Equal(t, "hello-world", to[0].Name)
+	assert.Equal(t, model.VisibilityPublic, to[0].Visibility)
 }
 
 func TestConvertRepo(t *testing.T) {
@@ -116,6 +117,7 @@ func TestConvertRepo(t *testing.T) {
 	assert.Equal(t, "hello-world", to.Name)
 	assert.Equal(t, "develop", to.Branch)
 	assert.True(t, to.IsSCMPrivate)
+	assert.Equal(t, model.VisibilityPrivate, to.Visibility)
 	assert.Equal(t, "https://github.com/octocat/hello-world.git", to.Clone)
 	assert.Equal(t, "https://github.com/octocat/hello-world", to.ForgeURL)
 }
@@ -174,6 +176,7 @@ func TestConvertRepoHook(t *testing.T) {
 		assert.Equal(t, *from.Name, repo.Name)
 		assert.Equal(t, *from.FullName, repo.FullName)
 		assert.Equal(t, *from.Private, repo.IsSCMPrivate)
+		assert.Equal(t, model.VisibilityPrivate, repo.Visibility)
 		assert.Equal(t, *from.HTMLURL, repo.ForgeURL)
 		assert.Equal(t, *from.CloneURL, repo.Clone)
 		assert.Equal(t, *from.DefaultBranch, repo.Branch)

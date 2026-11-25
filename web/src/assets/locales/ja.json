@@ -1,1 +1,25 @@
-{}
+{
+    "cancel": "キャンセル",
+    "login_to_woodpecker_with": "Woodpeckerにサインイン",
+    "login": "サインイン",
+    "repos": "リポジトリ",
+    "repositories": {
+        "title": "リポジトリ",
+        "all": {
+            "title": "すべてのリポジトリ",
+            "desc": "パイプラインの最終実行順"
+        }
+    },
+    "docs": "ドキュメント",
+    "api": "API",
+    "logout": "ログアウト",
+    "username": "ユーザ名",
+    "password": "パスワード",
+    "search": "検索",
+    "back": "戻る",
+    "repo": {
+        "deploy_pipeline": {
+            "trigger": "デプロイ"
+        }
+    }
+}

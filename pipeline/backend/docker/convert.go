@@ -124,7 +124,7 @@ func toHostConfig(step *types.Step, conf *config) (*container.HostConfig, error)
 	if len(step.Volumes) != 0 {
 		config.Binds = step.Volumes
 	}
-	config.Tmpfs = map[string]string{}
+	config.Tmpfs = make(map[string]string)
 	for _, path := range step.Tmpfs {
 		if !strings.Contains(path, ":") {
 			config.Tmpfs[path] = ""

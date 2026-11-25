@@ -48,7 +48,7 @@ func TestForge_RedactSecrets(t *testing.T) {
 
 		forge.RedactSecrets()
 
-		assert.Equal(t, map[string]any{}, forge.AdditionalOptions)
+		assert.Equal(t, make(map[string]any), forge.AdditionalOptions)
 	})
 
 	t.Run("GithubWithoutPrivateKey", func(t *testing.T) {

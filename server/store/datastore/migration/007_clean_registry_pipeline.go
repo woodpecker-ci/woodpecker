@@ -23,16 +23,16 @@ var cleanRegistryPipeline = xormigrate.Migration{
 	ID: "clean-registry-pipeline",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type registry struct {
-			ID    int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-			Token string `json:"token"    xorm:"TEXT 'registry_token'"`
-			Email string `json:"email"    xorm:"varchar(500) 'registry_email'"`
+			ID    int64  `json:"id"    xorm:"pk autoincr 'registry_id'"`
+			Token string `json:"token" xorm:"TEXT 'registry_token'"`
+			Email string `json:"email" xorm:"varchar(500) 'registry_email'"`
 		}
 
 		type pipelines struct {
-			ID       int64  `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
-			ConfigID int64  `json:"-"                       xorm:"pipeline_config_id"`
-			Enqueued int64  `json:"enqueued_at"             xorm:"pipeline_enqueued"`
-			CloneURL string `json:"clone_url"               xorm:"pipeline_clone_url"`
+			ID       int64  `json:"id"          xorm:"pk autoincr 'pipeline_id'"`
+			ConfigID int64  `json:"-"           xorm:"pipeline_config_id"`
+			Enqueued int64  `json:"enqueued_at" xorm:"pipeline_enqueued"`
+			CloneURL string `json:"clone_url"   xorm:"pipeline_clone_url"`
 		}
 
 		// ensure columns to drop exist

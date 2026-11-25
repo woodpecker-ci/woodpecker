@@ -55,14 +55,6 @@ func setupRegistryService(store store.Store, dockerConfig, endpoint string, incl
 }
 
 func setupSecretService(store store.Store, endpoint string, client *utils.Client, includeNetrc bool) secret.Service {
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-
 	if endpoint != "" {
 		return secret.NewCombined(secret.NewDB(store), secret.NewHTTP(endpoint, client, includeNetrc))
 	}
@@ -117,7 +109,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 }
 
 func setupForgeService(c *cli.Command, _store store.Store, setupForge SetupForge) error {
-	_forge, err := _store.ForgeGet(1)
+	_forge, err := _store.ForgeGet(model.PrimaryForgeID)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
 	}
@@ -181,8 +173,12 @@ func setupForgeService(c *cli.Command, _store store.Store, setupForge SetupForge
 	// fail fast on invalid GitHub App credentials instead of breaking every
 	// forge API call at runtime
 	if _forge.Type == model.ForgeTypeGithub && setupForge != nil {
-		if _, err := setupForge(_forge); err != nil {
+		validated, err := setupForge(_forge)
+		if err != nil {
 			return fmt.Errorf("invalid forge configuration: %w", err)
+		}
+		if validated != nil {
+			_ = validated.Close()
 		}
 	}
 

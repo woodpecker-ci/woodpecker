@@ -65,8 +65,9 @@ func (s storage) stepCreate(sess *xorm.Session, steps []*model.Step) error {
 }
 
 func (s storage) StepUpdate(step *model.Step) error {
-	_, err := s.engine.ID(step.ID).AllCols().Update(step)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(step.ID).AllCols().Update(step))
+	})
 }
 
 func deleteStep(sess *xorm.Session, stepID int64) error {

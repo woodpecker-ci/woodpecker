@@ -29,20 +29,6 @@ var (
 	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
-// SecretStore persists secret information to storage.
-type SecretStore interface {
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, bool, *ListOptions) ([]*Secret, error)
-	SecretCreate(*Secret) error
-	SecretUpdate(*Secret) error
-	SecretDelete(*Secret) error
-	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
-	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
-	SecretListAll() ([]*Secret, error)
-}
-
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'id'"`
@@ -52,7 +38,7 @@ type Secret struct {
 	Value  string         `json:"value,omitempty" xorm:"TEXT 'value'"`
 	Images []string       `json:"images"          xorm:"json 'images'"`
 	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
-	Note   string         `json:"note" xorm:"note"`
+	Note   string         `json:"note"            xorm:"note"`
 } //	@name	Secret
 
 // TableName return database table name for xorm.
@@ -141,9 +127,9 @@ func sortEvents(wel WebhookEventList) WebhookEventList {
 }
 
 type SecretPatch struct {
-	Name   *string        `json:"name"            `
-	Value  *string        `json:"value,omitempty" `
-	Images []string       `json:"images"          `
-	Events []WebhookEvent `json:"events"          `
-	Note   *string        `json:"note" `
+	Name   *string        `json:"name"`
+	Value  *string        `json:"value,omitempty"`
+	Images []string       `json:"images"`
+	Events []WebhookEvent `json:"events"`
+	Note   *string        `json:"note"`
 } //	@name	SecretPatch

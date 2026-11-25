@@ -1,3 +1,4 @@
+import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import Fuse from 'fuse.js';
 import React, { useRef, useState } from 'react';
@@ -5,7 +6,7 @@ import React, { useRef, useState } from 'react';
 import './style.css';
 
 import { WoodpeckerPlugin } from '../types';
-import { IconPlugin, IconVerified } from './Icons';
+import { IconPlugin, IconRelease, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   const pluginUrl = `/plugins/${plugin.slug}`;
@@ -19,9 +20,15 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
         <div className="col col--10">
           <h3>{plugin.name}</h3>
           <p>{plugin.description}</p>
-          {plugin.tags && (
+          {(plugin.latestRelease || plugin.tags) && (
             <div className="wp-plugin-tags">
-              {plugin.tags.map((tag, idx) => (
+              {plugin.latestRelease && (
+                <span className="badge badge--secondary wp-plugin-release">
+                  {IconRelease(14)}
+                  {plugin.latestRelease.tag}
+                </span>
+              )}
+              {plugin.tags?.map((tag, idx) => (
                 <span className="badge badge--success" key={idx}>
                   {tag}
                 </span>
@@ -57,9 +64,14 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
           <div style={{ display: 'flex', flexFlow: 'column', alignItems: 'center' }}>
             <h1>Woodpecker CI plugins</h1>
             <p>This list contains plugins which you can use to easily execute usual pipeline tasks.</p>
-            <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="button button--primary">
-              🎉 Add your plugin
-            </a>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
+              <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="button button--primary">
+                🎉 Add your plugin
+              </a>
+              <Link to="/docs/usage/plugins/creating-plugins" className="button button--secondary">
+                🛠️ Developer guide
+              </Link>
+            </div>
           </div>
           <div className="container" style={{ display: 'flex', flexFlow: 'column', marginTop: '4rem' }}>
             <input

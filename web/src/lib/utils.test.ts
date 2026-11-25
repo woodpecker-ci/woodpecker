@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { escapeHtml } from './utils';
+import { escapeHtml, httpUrl } from './utils';
 
 describe('escapeHtml', () => {
   it('should return plain text unchanged', () => {
@@ -41,5 +41,25 @@ describe('escapeHtml', () => {
 
   it('should escape already-escaped ampersands', () => {
     expect(escapeHtml('&amp;')).toBe('&amp;amp;');
+  });
+});
+
+describe('httpUrl', () => {
+  it('should keep http and https URLs', () => {
+    expect(httpUrl('https://example.com/a?b=c')).toBe('https://example.com/a?b=c');
+    expect(httpUrl('http://example.com')).toBe('http://example.com');
+  });
+
+  it('should drop other schemes', () => {
+    expect(httpUrl('javascript:void(0)')).toBeUndefined();
+    expect(httpUrl(' JavaScript:void(0)')).toBeUndefined();
+    expect(httpUrl('data:text/html,hi')).toBeUndefined();
+    expect(httpUrl('httpfoo:bar')).toBeUndefined();
+  });
+
+  it('should drop empty and invalid values', () => {
+    expect(httpUrl(undefined)).toBeUndefined();
+    expect(httpUrl('')).toBeUndefined();
+    expect(httpUrl('not a url')).toBeUndefined();
   });
 });

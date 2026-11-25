@@ -56,7 +56,7 @@ func (c *client) Self() (*User, error) {
 func (c *client) User(login string, forgeID ...int64) (*User, error) {
 	out := new(User)
 	if len(forgeID) == 0 {
-		forgeID = []int64{defaultForgeID}
+		forgeID = []int64{primaryForgeID}
 	}
 	err := c.get(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]), out)
 	return out, err
@@ -81,8 +81,8 @@ func (c *client) UserPost(in *User) (*User, error) {
 
 // UserPatch updates a user account.
 func (c *client) UserPatch(in *User) (*User, error) {
-	if in.ForgeID < defaultForgeID {
-		in.ForgeID = defaultForgeID
+	if in.ForgeID < primaryForgeID {
+		in.ForgeID = primaryForgeID
 	}
 	out := new(User)
 	uri := fmt.Sprintf(pathUser, c.addr, in.Login, in.ForgeID)
@@ -94,7 +94,7 @@ func (c *client) UserPatch(in *User) (*User, error) {
 // It is recommended to specify forgeID (default is 1).
 func (c *client) UserDel(login string, forgeID ...int64) error {
 	if len(forgeID) == 0 {
-		forgeID = []int64{defaultForgeID}
+		forgeID = []int64{primaryForgeID}
 	}
 	return c.delete(fmt.Sprintf(pathUser, c.addr, login, forgeID[0]))
 }

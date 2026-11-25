@@ -99,3 +99,27 @@ func TestRetry(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rr)
 	assert.Equal(t, 6, numRetry)
 }
+
+// A 204 No Content response has no body to decode. Extensions use it to say
+// "nothing to add", so it must succeed at once instead of being retried.
+func TestSendNoContent(t *testing.T) {
+	_, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+
+	calls := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		calls++
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
+	require.NoError(t, err)
+
+	var out map[string]any
+	status, err := client.Send(t.Context(), http.MethodPost, server.URL+"/", map[string]string{"foo": "bar"}, &out)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusNoContent, status)
+	assert.Equal(t, 1, calls)
+	assert.Nil(t, out)
+}

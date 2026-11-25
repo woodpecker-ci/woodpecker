@@ -38,6 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type ctxKey struct{}
@@ -78,6 +79,9 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	// enforce labels from server by overwriting agent labels
+	if agentFilter.Labels == nil {
+		agentFilter.Labels = make(map[string]string)
+	}
 	maps.Copy(agentFilter.Labels, agentServerLabels)
 
 	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
@@ -179,11 +183,13 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if step.PipelineID != currentPipeline.ID {
-		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current pipeline", state.StepUUID)
+	if step.PipelineID != currentPipeline.ID || step.PPID != workflow.PID {
+		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current workflow", state.StepUUID)
 		log.Error().
 			Int64("stepPipelineID", step.PipelineID).
 			Int64("currentPipelineID", currentPipeline.ID).
+			Int("stepPPID", step.PPID).
+			Int("workflowPID", workflow.PID).
 			Msg(msg)
 		return errors.New(msg)
 	}
@@ -226,7 +232,9 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		).Observe(float64(duration))
 	}
 	if state.Exited {
-		server.Config.Services.LogStore.StepFinished(step)
+		if err := server.Config.Services.LogStore.StepFinished(c, step); err != nil {
+			log.Error().Err(err).Int64("step", step.ID).Msg("log store could not finalize the step log")
+		}
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
@@ -287,8 +295,6 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
 		}
 	}
-
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	defer func() {
 		currentPipeline.Workflows, _ = s.store.WorkflowGetTree(currentPipeline)
@@ -441,6 +447,11 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
 
+	// The agent only marked a skipped workflow as done, it did no work.
+	if workflow.State == model.StatusSkipped {
+		return nil
+	}
+
 	return s.updateAgentLastWork(agent)
 }
 
@@ -507,8 +518,11 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 		}
 	}()
 
-	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
+	// Entries the agent sends again after a retry are already stored and rejected
+	// by the unique index; that is the only error that is safe to drop.
+	if err = server.Config.Services.LogStore.LogAppend(c, step, logEntries); err != nil && !errors.Is(err, types.ErrInsertDuplicateDetected) {
 		log.Error().Err(err).Msg("could not store log entries")
+		return err
 	}
 
 	return nil

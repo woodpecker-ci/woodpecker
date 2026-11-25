@@ -21,8 +21,15 @@ type Org struct {
 	Name    string `json:"name"               xorm:"'name' UNIQUE(s)"`
 	IsUser  bool   `json:"is_user"            xorm:"is_user"`
 	// if name lookup has to check for membership or not
-	Private bool `json:"-"                    xorm:"private"`
+	Private bool `json:"-" xorm:"private"`
+	// RequireOrgAgents restricts workflows of the organization's repos to agents of this organization
+	RequireOrgAgents bool `json:"require_org_agents" xorm:"DEFAULT FALSE 'require_org_agents'"`
 } //	@name	Org
+
+// OrgPatch represents an organization patch object.
+type OrgPatch struct {
+	RequireOrgAgents *bool `json:"require_org_agents,omitempty"`
+} //	@name	OrgPatch
 
 // TableName return database table name for xorm.
 func (Org) TableName() string {

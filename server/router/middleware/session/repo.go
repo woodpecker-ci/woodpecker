@@ -30,6 +30,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
+// PermSyncInterval defines how long stored repo permissions of a user are
+// trusted before they are re-synced with the forge.
+const PermSyncInterval = time.Hour
+
 func Repo(c *gin.Context) *model.Repo {
 	v, ok := c.Get("repo")
 	if !ok {
@@ -124,7 +128,7 @@ func SetPerm() gin.HandlerFunc {
 			}
 			// a user of another forge has no permissions on this repo and
 			// their token must not be sent to the repo's forge
-			if user.ForgeID == repo.ForgeID && time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
+			if user.ForgeID == repo.ForgeID && time.Unix(perm.Synced, 0).Add(PermSyncInterval).Before(time.Now()) {
 				_repo, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 				if err == nil {
 					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)

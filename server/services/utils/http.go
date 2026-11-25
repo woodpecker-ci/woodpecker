@@ -180,7 +180,8 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 
 			// If status code is OK (2xx), parse and return response
 			if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
-				if out != nil {
+				// a 204 No Content response has no body to decode
+				if out != nil && statusCode != http.StatusNoContent {
 					err = json.NewDecoder(bytes.NewReader(respBody)).Decode(out)
 					// Check for EOF error during response body parsing
 					if err != nil && (errors.Is(err, io.EOF) || strings.Contains(err.Error(), "unexpected EOF")) {

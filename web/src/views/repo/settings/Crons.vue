@@ -15,7 +15,7 @@
         v-else
         start-icon="plus"
         :text="$t('repo.settings.crons.add')"
-        @click="selectedCron = { timezone: 'UTC' }"
+        @click="selectedCron = { timezone: 'UTC', enabled: true }"
       />
     </template>
 

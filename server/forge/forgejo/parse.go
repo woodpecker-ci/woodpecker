@@ -15,8 +15,6 @@
 package forgejo
 
 import (
-	"io"
-	"net/http"
 	"slices"
 	"strings"
 
@@ -29,6 +27,7 @@ import (
 
 const (
 	hookEvent       = "X-Forgejo-Event"
+	hookSignature   = "X-Forgejo-Signature"
 	hookPush        = "push"
 	hookCreated     = "create"
 	hookPullRequest = "pull_request"
@@ -68,19 +67,18 @@ func supportedAction(action string) bool {
 	return slices.Contains(actionList, action)
 }
 
-// parseHook parses a Forgejo hook from an http.Request and returns
+// parseHook parses a Forgejo hook payload of the given type and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	hookType := r.Header.Get(hookEvent)
+func parseHook(hookType string, payload []byte) (*model.Repo, *model.Pipeline, error) {
 	switch hookType {
 	case hookPush:
-		return parsePushHook(r.Body)
+		return parsePushHook(payload)
 	case hookCreated:
-		return parseCreatedHook(r.Body)
+		return parseCreatedHook(payload)
 	case hookPullRequest:
-		return parsePullRequestHook(r.Body)
+		return parsePullRequestHook(payload)
 	case hookRelease:
-		return parseReleaseHook(r.Body)
+		return parseReleaseHook(payload)
 	}
 	log.Debug().Msgf("unsupported hook type: '%s'", hookType)
 	return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
@@ -88,7 +86,7 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
+func parsePushHook(payload []byte) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -114,7 +112,7 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipelin
 
 // parseCreatedHook parses a push hook and returns the Repo and Pipeline details.
 // If the commit type is unsupported nil values are returned.
-func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipeline, err error) {
+func parseCreatedHook(payload []byte) (repo *model.Repo, pipeline *model.Pipeline, err error) {
 	push, err := parsePush(payload)
 	if err != nil {
 		return nil, nil, err
@@ -133,7 +131,7 @@ func parseCreatedHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipe
 }
 
 // parsePullRequestHook parses a pull_request hook and returns the Repo and Pipeline details.
-func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
+func parsePullRequestHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline
@@ -172,7 +170,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 }
 
 // parseReleaseHook parses a release hook and returns the Repo and Pipeline details.
-func parseReleaseHook(payload io.Reader) (*model.Repo, *model.Pipeline, error) {
+func parseReleaseHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	var (
 		repo     *model.Repo
 		pipeline *model.Pipeline

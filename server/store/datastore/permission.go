@@ -32,17 +32,17 @@ func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, erro
 }
 
 func (s storage) PermUpsert(perm *model.Perm) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
-	if err := s.permUpsert(sess, perm); err != nil {
-		return err
-	}
-
-	return sess.Commit()
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
+		if err := s.permUpsert(sess, perm); err != nil {
+			return err
+		}
+		return sess.Commit()
+	})
 }
 
 func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
@@ -61,7 +61,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 
 	if exist {
 		perm.Updated = time.Now().Unix()
-		_, err = sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm)
+		err = wrapUpdate(sess.Where(userIDAndRepoIDCond(perm)).AllCols().Update(perm))
 	} else {
 		// insert will set auto created ID back to perm object
 		perm.Created = time.Now().Unix()

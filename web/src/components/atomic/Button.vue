@@ -2,13 +2,13 @@
   <component
     :is="to === undefined ? 'button' : httpLink ? 'a' : 'router-link'"
     v-bind="btnAttrs"
-    class="border-wp-control-neutral-200 relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border px-2 py-1 whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50"
+    class="border-wp-control-neutral-300 relative flex shrink-0 cursor-pointer items-center overflow-hidden rounded-md border px-2 py-1 whitespace-nowrap transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50"
     :class="{
-      'border-wp-control-neutral-200 bg-wp-control-neutral-100 text-wp-text-100 hover:bg-wp-control-neutral-200':
+      'border-wp-control-neutral-300 bg-wp-control-neutral-100 text-wp-text-100 hover:bg-wp-control-neutral-200':
         color === 'gray',
       'border-wp-control-ok-300 bg-wp-control-ok-100 hover:bg-wp-control-ok-200 text-white': color === 'green',
       'border-wp-control-info-300 bg-wp-control-info-100 hover:bg-wp-control-info-200 text-white': color === 'blue',
-      'border-wp-error-300 bg-wp-error-100 hover:bg-wp-error-200 text-white': color === 'red',
+      'border-wp-error-300 bg-wp-error-200 hover:bg-wp-error-300 text-white': color === 'red',
       ...passedClasses,
     }"
     :title="title"

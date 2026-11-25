@@ -33,16 +33,45 @@ import (
 const serverConfigQueuePaused = "queue-paused"
 
 // WithTaskStore returns a queue that is backed by the TaskStore. This
-// ensures pending tasks and the paused flag can be restored when the system
-// starts.
+// ensures queued and running tasks and the paused flag can be restored when
+// the system starts.
 func WithTaskStore(ctx context.Context, q Queue, s store.Store) Queue {
 	tasks, _ := s.TaskList()
+	for _, task := range tasks {
+		restoreDepStatus(s, task)
+	}
 	if err := q.PushAtOnce(ctx, tasks); err != nil {
 		log.Error().Err(err).Msg("PushAtOnce failed")
 	}
 	pq := &persistentQueue{q, s}
 	pq.restorePausedState()
 	return pq
+}
+
+// restoreDepStatus sets the status of every finished dependency of a reloaded
+// task from its workflow. The queue keeps that status only in memory, so the
+// stored task still has the empty DepStatus it was inserted with and
+// Task.ShouldRun() would vacuously let it run.
+func restoreDepStatus(s store.Store, task *model.Task) {
+	for _, dep := range task.Dependencies {
+		workflowID, err := strconv.ParseInt(dep, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: invalid dependency id %s", task.ID, dep)
+			continue
+		}
+		workflow, err := s.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("restore queue item: %s: cannot load dependency %s", task.ID, dep)
+			continue
+		}
+		if !isTerminalWorkflowState(workflow.State) {
+			continue
+		}
+		if task.DepStatus == nil {
+			task.DepStatus = make(map[string]model.StatusValue)
+		}
+		task.DepStatus[dep] = workflow.State
+	}
 }
 
 type persistentQueue struct {
@@ -119,22 +148,24 @@ func (q *persistentQueue) PushAtOnce(c context.Context, tasks []*model.Task) err
 func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.Task) (bool, int)) (*model.Task, error) {
 	task, err := q.Queue.Poll(c, agentID, f)
 	if task != nil {
-		log.Debug().Msgf("pull queue item: %s: remove from backup", task.ID)
-		if deleteErr := q.store.TaskDelete(task.ID); deleteErr != nil {
-			if errors.Is(deleteErr, types.ErrRecordNotExist) {
+		log.Debug().Msgf("pull queue item: %s: assign to agent in backup", task.ID)
+		// The backup keeps the task until it is done, so a server restart
+		// gives it back to the agent that runs it.
+		if setErr := q.store.TaskSetAgent(task.ID, agentID); setErr != nil {
+			if errors.Is(setErr, types.ErrRecordNotExist) {
 				// The task is no longer in the backup store, which means it was
 				// already finished/removed (e.g. its workflow was canceled) and
 				// only lingered in the in-memory queue. Handing it to the agent
 				// would loop forever, so drop it from the queue instead.
-				log.Error().Err(deleteErr).Msgf("pull queue item: %s: not found in backup, dropping stale task", task.ID)
-				if dropErr := q.Queue.Error(c, task.ID, deleteErr); dropErr != nil {
+				log.Error().Err(setErr).Msgf("pull queue item: %s: not found in backup, dropping stale task", task.ID)
+				if dropErr := q.Queue.Error(c, task.ID, setErr); dropErr != nil {
 					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
 				}
 				return nil, nil
 			}
-			log.Error().Err(deleteErr).Msgf("pull queue item: %s: failed to remove from backup", task.ID)
+			log.Error().Err(setErr).Msgf("pull queue item: %s: failed to assign to agent in backup", task.ID)
 		} else {
-			log.Debug().Msgf("pull queue item: %s: successfully removed from backup", task.ID)
+			log.Debug().Msgf("pull queue item: %s: successfully assigned to agent in backup", task.ID)
 
 			workflowID, parseErr := strconv.ParseInt(task.ID, 10, 64)
 			if parseErr != nil {
@@ -149,7 +180,7 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.T
 					// Drop it now instead of letting the agent reject and later
 					// re-poll the same task after its lease expires.
 					log.Error().Err(loadErr).Msgf("pull queue item: %s: workflow missing, dropping stale task", task.ID)
-					if dropErr := q.Queue.Error(c, task.ID, loadErr); dropErr != nil {
+					if dropErr := q.Error(c, task.ID, loadErr); dropErr != nil {
 						log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop stale task", task.ID)
 					}
 					return nil, nil
@@ -164,7 +195,7 @@ func (q *persistentQueue) Poll(c context.Context, agentID int64, f func(*model.T
 				// agent makes RPC.Init reject it as already finished, while the
 				// in-memory task remains running and is resubmitted after timeout.
 				log.Warn().Str("state", string(workflow.State)).Msgf("pull queue item: %s: workflow already terminal, dropping stale task", task.ID)
-				if dropErr := q.Queue.Done(c, task.ID, workflow.State); dropErr != nil {
+				if dropErr := q.Done(c, task.ID, workflow.State); dropErr != nil {
 					log.Error().Err(dropErr).Msgf("pull queue item: %s: failed to drop terminal task", task.ID)
 				}
 				return nil, nil

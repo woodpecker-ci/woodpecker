@@ -62,8 +62,18 @@ func (when *When) IsEmpty() bool {
 
 // Returns true if at least one of the internal constraints is true.
 func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	return when.match(metadata, global, env, false)
+}
+
+// MatchIgnoringEvaluate is like Match but treats `evaluate` as matching. Use it
+// when the environment is not known yet.
+func (when *When) MatchIgnoringEvaluate(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	return when.match(metadata, global, env, true)
+}
+
+func (when *When) match(metadata metadata.Metadata, global bool, env map[string]string, ignoreEvaluate bool) (bool, error) {
 	for _, c := range when.Constraints {
-		match, err := c.Match(metadata, global, env)
+		match, err := c.match(metadata, global, env, ignoreEvaluate)
 		if err != nil {
 			return false, err
 		}
@@ -75,7 +85,7 @@ func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]
 	if when.IsEmpty() {
 		// test against default Constraints
 		empty := &Constraint{}
-		return empty.Match(metadata, global, env)
+		return empty.match(metadata, global, env, ignoreEvaluate)
 	}
 	return false, nil
 }
@@ -168,6 +178,10 @@ func (when When) MarshalYAML() (any, error) {
 // Match returns true if all constraints match the given input. If a single
 // constraint fails a false value is returned.
 func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]string) (bool, error) {
+	return c.match(m, global, env, false)
+}
+
+func (c *Constraint) match(m metadata.Metadata, global bool, env map[string]string, ignoreEvaluate bool) (bool, error) {
 	match := true
 	if !global {
 		// apply step only filters
@@ -193,7 +207,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		match = match && c.Cron.Match(m.Curr.Cron)
 	}
 
-	if c.Evaluate != "" {
+	if c.Evaluate != "" && !ignoreEvaluate {
 		if env == nil {
 			env = m.Environ()
 		} else {

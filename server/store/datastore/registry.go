@@ -33,8 +33,8 @@ func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *mod
 	var regs []*model.Registry
 	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrg {
-		cond = cond.Or(builder.Eq{"org_id": repo.OrgID}).
-			Or(builder.And(builder.Eq{"org_id": 0}, builder.Eq{"repo_id": 0}))
+		cond = cond.Or(builder.Eq{"org_id": repo.OrgID, "repo_id": 0}).
+			Or(builder.Eq{"org_id": 0, "repo_id": 0})
 	}
 	return regs, s.paginate(p).Where(cond).OrderBy(orderRegistriesBy).Find(&regs)
 }
@@ -50,12 +50,15 @@ func (s storage) RegistryCreate(registry *model.Registry) error {
 }
 
 func (s storage) RegistryUpdate(registry *model.Registry) error {
-	_, err := s.engine.ID(registry.ID).AllCols().Update(registry)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(registry.ID).AllCols().Update(registry))
+	})
 }
 
 func (s storage) RegistryDelete(registry *model.Registry) error {
-	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
+	return retryWrite(func() error {
+		return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
+	})
 }
 
 func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {

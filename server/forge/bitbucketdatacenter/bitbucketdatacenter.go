@@ -27,6 +27,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/internal"
@@ -99,9 +100,11 @@ func (c *client) Name() string {
 	return "bitbucket_dc"
 }
 
-// URL returns the root url of a configured forge.
-func (c *client) URL() string {
-	return c.url
+func (c *client) Close() error { return nil }
+
+// Config returns the metadata of the configured forge.
+func (c *client) Config() metadata.Forge {
+	return metadata.Forge{Type: c.Name(), URL: c.url, Host: common.HostFromURL(c.url)}
 }
 
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
@@ -182,7 +185,8 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 					break
 				}
 			}
-			if resp.LastPage {
+			// if repo was found or last page reached we give up
+			if repo != nil || resp.LastPage {
 				break
 			}
 			opts.Start = resp.NextPageStart
@@ -437,7 +441,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		Events: []bitbucket.EventKey{bitbucket.EventKeyRepoRefsChanged, bitbucket.EventKeyPullRequestFrom, bitbucket.EventKeyPullRequestMerged, bitbucket.EventKeyPullRequestDeclined, bitbucket.EventKeyPullRequestDeleted, bitbucket.EventKeyPullRequestOpened},
 		Active: true,
 		Config: &bitbucket.WebhookConfiguration{
-			Secret: r.Hash,
+			Secret: r.WebhookSecret,
 		},
 	}
 	_, _, err = bc.Projects.CreateWebhook(ctx, r.Owner, r.Name, webhook)
@@ -489,20 +493,19 @@ func (c *client) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 	return nil
 }
 
-func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (c *client) Hook(ctx context.Context, r *http.Request, secret string) (*model.Repo, *model.Pipeline, error) {
 	hook, currCommit, prevCommit, err := parseHook(r, c.url)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to parse hook: %w", err)
 	}
 
+	if err := bitbucket.ValidateSignature(r, hook.Payload, []byte(secret)); err != nil {
+		return nil, nil, forge_types.ErrInvalidWebhookSignature
+	}
+
 	user, repo, err := c.getUserAndRepo(ctx, hook.Repo)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
-	}
-
-	err = bitbucket.ValidateSignature(r, hook.Payload, []byte(repo.Hash))
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}
 
 	var pipe *model.Pipeline

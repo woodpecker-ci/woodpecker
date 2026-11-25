@@ -375,7 +375,7 @@ func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []kube_co
 }
 
 func filterSecrets(environment, secrets map[string]string) (map[string]string, []string) {
-	ev := map[string]string{}
+	ev := make(map[string]string)
 	var secs []string
 
 	for k, v := range environment {

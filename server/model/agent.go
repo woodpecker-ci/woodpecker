@@ -15,6 +15,7 @@
 package model
 
 import (
+	"crypto/sha256"
 	"encoding/base32"
 	"fmt"
 	"maps"
@@ -31,6 +32,7 @@ type Agent struct {
 	Name         string            `json:"name"          xorm:"name"`
 	OwnerID      int64             `json:"owner_id"      xorm:"'owner_id'"`
 	Token        string            `json:"token"         xorm:"token"`
+	TokenHash    string            `json:"-"             xorm:"VARCHAR(64) INDEX 'token_hash'"`
 	LastContact  int64             `json:"last_contact"  xorm:"last_contact"`
 	LastWork     int64             `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
 	Platform     string            `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
@@ -40,7 +42,7 @@ type Agent struct {
 	NoSchedule   bool              `json:"no_schedule"   xorm:"no_schedule"`
 	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
-	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
+	OrgID int64 `json:"org_id" xorm:"INDEX 'org_id'"`
 	// Server side enforced agent filters
 	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name	Agent
@@ -61,6 +63,12 @@ func (a *Agent) IsSystemAgent() bool {
 
 func GenerateNewAgentToken() string {
 	return base32.StdEncoding.EncodeToString(random.GetRandomBytes(32))
+}
+
+// HashAgentToken returns the key agents are looked up by in SQL.
+// SQL string compares are not constant time, so the database must never compare the token itself.
+func HashAgentToken(token string) string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(token)))
 }
 
 func (a *Agent) GetServerLabels() (map[string]string, error) {

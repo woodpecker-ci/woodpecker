@@ -25,6 +25,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
@@ -107,6 +108,10 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 	}
 
 	rawConfig := string(buf)
+
+	if _, err := metadata.EnvVarSubst(rawConfig, nil); err != nil {
+		return err
+	}
 
 	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {

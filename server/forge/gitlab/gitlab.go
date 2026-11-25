@@ -30,6 +30,7 @@ import (
 	gitlab "gitlab.com/gitlab-org/api/client-go/v3"
 	"golang.org/x/oauth2"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
@@ -42,6 +43,7 @@ import (
 const (
 	defaultScope   = "api"
 	defaultPerPage = 100
+	cloneTokenName = "woodpecker-clone"
 )
 
 // Opts defines configuration options.
@@ -84,9 +86,11 @@ func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// URL returns the root url of a configured forge.
-func (g *GitLab) URL() string {
-	return g.url
+func (g *GitLab) Close() error { return nil }
+
+// Config returns the metadata of the configured forge.
+func (g *GitLab) Config() metadata.Forge {
+	return metadata.Forge{Type: g.Name(), URL: g.url, Host: common.HostFromURL(g.url)}
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
@@ -157,6 +161,19 @@ func (g *GitLab) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 // Refresh refreshes the Gitlab oauth2 access token. If the token is
 // refreshed the user is updated and a true value is returned.
 func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
+	// Some forges issue non-expiring tokens, e.g. GitLab < 15.0 OAuth
+	// applications with "Expire access tokens" disabled: the token response
+	// then omits expires_in, so the stored expiry stays at or below zero.
+	// For such tokens every refresh_token exchange invalidates the previous
+	// access_token and refresh_token —
+	// https://docs.gitlab.com/api/oauth2/#authorization-code-flow — so
+	// forcing the exchange on every refresh would rotate the token and
+	// invalidate the clone credentials already baked into running pipelines.
+	// Keep the stored token whenever the forge reports no expiry for it.
+	if user.Expiry <= 0 {
+		return false, nil
+	}
+
 	config, oauth2Ctx := g.oauth2Config(ctx)
 	config.RedirectURL = ""
 
@@ -364,7 +381,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].ID))),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].IID))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -408,8 +425,8 @@ func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pi
 		Recursive: new(false),
 	}
 
-	for i := 1; true; i++ {
-		opts.Page = 1
+	for page := int64(1); ; page++ {
+		opts.Page = page
 		batch, _, err := client.Repositories.ListTree(_repo.ID, opts, gitlab.WithContext(ctx))
 		if err != nil {
 			return nil, err
@@ -475,29 +492,27 @@ func isRejectedStatusTransition(err error) bool {
 		strings.Contains(errResp.Message, "Cannot transition status")
 }
 
-// Netrc returns a netrc file capable of authenticating Gitlab requests and
-// cloning Gitlab repositories. The netrc will use the global machine account
-// when configured.
+// Netrc returns a netrc file capable of cloning Gitlab repositories.
+// It uses the deploy token of the repository and falls back to the token of the user.
 func (g *GitLab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
-	login := ""
-	token := ""
-
-	if u != nil {
-		login = "oauth2"
-		token = u.AccessToken
-	}
-
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.Netrc{
-		Login:    login,
-		Password: token,
-		Machine:  host,
-		Type:     model.ForgeTypeGitlab,
-	}, nil
+	netrc := &model.Netrc{
+		Machine: host,
+		Type:    model.ForgeTypeGitlab,
+	}
+	switch {
+	case r.CloneSecret != nil:
+		netrc.Login = r.CloneSecret.Login
+		netrc.Password = r.CloneSecret.Token
+	case u != nil:
+		netrc.Login = "oauth2"
+		netrc.Password = u.AccessToken
+	}
+	return netrc, nil
 }
 
 func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error) {
@@ -511,7 +526,7 @@ func (g *GitLab) getTokenAndWebURL(link string) (token, webURL string, err error
 }
 
 // Activate activates a repository by adding a Post-commit hook and
-// a Public Deploy key, if applicable.
+// a read-only deploy token to clone it, if allowed.
 func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
@@ -541,12 +556,29 @@ func (g *GitLab) Activate(ctx context.Context, user *model.User, repo *model.Rep
 		DeploymentEvents:      new(true),
 		EnableSSLVerification: new(!g.skipVerify),
 	}, gitlab.WithContext(ctx))
+	if err != nil {
+		return err
+	}
 
-	return err
+	cloneToken, _, err := client.DeployTokens.CreateProjectDeployToken(_repo.ID, &gitlab.CreateProjectDeployTokenOptions{
+		Name:   new(cloneTokenName),
+		Scopes: &[]string{"read_repository"},
+	}, gitlab.WithContext(ctx))
+	if err != nil {
+		log.Warn().Err(err).Msgf("could not create a deploy token for %s, pipelines clone with the user token", repo.FullName)
+		repo.CloneSecret = nil
+		return nil
+	}
+	repo.CloneSecret = &model.CloneSecret{
+		Login:         cloneToken.Username,
+		Token:         cloneToken.Token,
+		ForgeRemoteID: model.ForgeRemoteID(strconv.FormatInt(cloneToken.ID, 10)),
+	}
+	return nil
 }
 
 // Deactivate removes a repository by removing all the post-commit hooks
-// which are equal to link and removing the SSH deploy key.
+// which are equal to link and the deploy token to clone it.
 func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.Repo, link string) error {
 	client, err := newClient(g.url, user.AccessToken, g.skipVerify)
 	if err != nil {
@@ -561,6 +593,13 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 	_, webURL, err := g.getTokenAndWebURL(link)
 	if err != nil {
 		return err
+	}
+
+	if repo.CloneSecret != nil {
+		id, _ := strconv.ParseInt(string(repo.CloneSecret.ForgeRemoteID), 10, 64)
+		if _, err := client.DeployTokens.DeleteProjectDeployToken(_repo.ID, id, gitlab.WithContext(ctx)); err != nil {
+			log.Warn().Err(err).Msgf("could not delete the deploy token of %s", repo.FullName)
+		}
 	}
 
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
@@ -647,7 +686,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 // Hook parses the post-commit hook from the Request body
 // and returns the required data in a standard format.
-func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+func (g *GitLab) Hook(ctx context.Context, req *http.Request, _ string) (*model.Repo, *model.Pipeline, error) {
 	defer req.Body.Close()
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -835,14 +874,22 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
-	if err != nil {
-		return nil, err
+	files := make([]string, 0, defaultPerPage*2)
+	diffOpts := &gitlab.ListMergeRequestDiffsOptions{
+		PerPage: defaultPerPage,
 	}
-
-	files := make([]string, 0, len(changes)*2)
-	for _, file := range changes {
-		files = append(files, file.NewPath, file.OldPath)
+	for {
+		changes, resp, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, diffOpts, gitlab.WithContext(ctx))
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range changes {
+			files = append(files, file.NewPath, file.OldPath)
+		}
+		if resp == nil || resp.NextPage == 0 {
+			break
+		}
+		diffOpts.Page = resp.NextPage
 	}
 	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
@@ -929,7 +976,16 @@ func (g *GitLab) loadCommitFromSHA(ctx context.Context, tmpRepo *model.Repo, pip
 		return nil, err
 	}
 
-	pipeline.Author = cm.AuthorName
+	// For annotated tags `sha` is the tag object's own SHA; the commits
+	// endpoint resolves it to the tagged commit. Record that commit so
+	// CI_COMMIT_SHA matches the commit GitLab shows on the tag page.
+	pipeline.Commit = cm.ID
+
+	// Do not set pipeline.Author from the git commit metadata here: it is
+	// controlled by whoever made the commit and would overwrite the author
+	// taken from the authenticated webhook (convertTagHook sets it to
+	// hook.UserUsername). Trusting it lets a pusher spoof an
+	// ApprovalAllowedUsers entry and skip approval (CVE-2026-58370).
 	pipeline.Email = cm.AuthorEmail
 	pipeline.Message = cm.Message
 	pipeline.Timestamp = cm.CommittedDate.Unix()

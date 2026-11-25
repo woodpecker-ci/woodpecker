@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"io"
 	std_log "log"
+	"slices"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/rs/zerolog"
@@ -51,14 +52,14 @@ func convertLvl(level hclog.Level) zerolog.Level {
 func (c *AddonClientLogger) applyArgs(args []any) *zerolog.Logger {
 	var key string
 	logger := c.Logger.With()
-	args = append(args, c.withArgs)
+	args = append(slices.Clone(c.withArgs), args...)
 	for i, arg := range args {
 		switch {
 		case key != "":
-			logger.Any(key, arg)
+			logger = logger.Any(key, arg)
 			key = ""
 		case i == len(args)-1:
-			logger.Any(hclog.MissingKey, arg)
+			logger = logger.Any(hclog.MissingKey, arg)
 		default:
 
 			key, _ = arg.(string)

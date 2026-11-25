@@ -49,6 +49,7 @@ func Handler() http.Handler {
 	e.GET("/api/v3/repos/:owner/:name/branches", listBranches)
 	e.GET("/api/v3/repos/:owner/:name/branches/:branch", getBranch)
 	e.GET("/api/v3/repos/:owner/:name/pulls", listPulls)
+	e.POST("/api/graphql", graphqlDir)
 	e.GET("/api/v3/repos/:owner/:name/contents/*path", getContents)
 
 	return e
@@ -85,12 +86,89 @@ func listPulls(c *gin.Context) {
 	c.String(http.StatusOK, `[{"number": 7, "title": "test pr"}]`)
 }
 
+// graphqlDir mocks the single-request directory fetch used by Dir.
+func graphqlDir(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	var req struct {
+		Variables struct {
+			Expression string `json:"expression"`
+		} `json:"variables"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	switch {
+	case strings.HasSuffix(req.Variables.Expression, ":somedir"):
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "pipeline:", "isTruncated": false, "isBinary": false}},
+			{"name": "sub", "type": "tree", "mode": 16384, "object": {}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":symlink-dir"):
+		// symlink blobs carry the link target as text, the forge must load the
+		// linked file over REST or skip it
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: a", "isTruncated": false, "isBinary": false}},
+			{"name": "link.yaml", "type": "blob", "mode": 40960, "object": {"text": "../target.yaml", "isTruncated": false, "isBinary": false}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":large-dir"):
+		// no usable text for large or binary files, the forge must load them over REST
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: a", "isTruncated": false, "isBinary": false}},
+			{"name": "large.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: partial", "isTruncated": true, "isBinary": false}},
+			{"name": "binary.yaml", "type": "blob", "mode": 33188, "object": {"text": null, "isTruncated": false, "isBinary": true}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":app-fallback-dir"):
+		// force the app tests onto the per-file REST fallback
+		c.String(http.StatusBadGateway, "")
+	case strings.HasSuffix(req.Variables.Expression, ":rest-fallback-dir"):
+		// force the caller onto the per-file REST fallback
+		c.String(http.StatusBadGateway, "")
+	case strings.HasSuffix(req.Variables.Expression, ":null-repo-dir"):
+		// a 200 that carries no repository object at all: this must not be
+		// mistaken for "the path does not exist"
+		c.String(http.StatusOK, `{"data": {"repository": null}}`)
+	default:
+		c.String(http.StatusOK, `{"data": {"repository": {"object": null}}}`)
+	}
+}
+
+// graphqlFallbackDirs are the directories used by the graphql tests that load
+// files over REST. Those tests run without app credentials, so requests for
+// them (and for the files inside them) authenticate with the plain user token.
+var graphqlFallbackDirs = []string{"rest-fallback-dir", "null-repo-dir", "symlink-dir", "large-dir"}
+
+// getContents serves the per-file REST fallback.
 func getContents(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	path := c.Param("path")
+	for _, dir := range graphqlFallbackDirs {
+		if !strings.Contains(path, dir) {
+			continue
+		}
+		switch {
+		case strings.HasSuffix(path, "rest-fallback-dir"):
+			c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "rest-fallback-dir/b.yaml"}, {"type": "dir", "name": "nested", "path": "rest-fallback-dir/nested"}]`)
+		case strings.HasSuffix(path, "null-repo-dir"):
+			c.String(http.StatusOK, `[{"type": "file", "name": "c.yaml", "path": "null-repo-dir/c.yaml"}]`)
+		default:
+			// an individual file inside one of those directories
+			// base64 of "pipeline:"
+			c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
+		}
+		return
+	}
+
+	// every remaining path asserts that repo contents are fetched with the app
+	// installation token
 	if !requireInstallationToken(c) {
 		return
 	}
-	if strings.HasSuffix(c.Param("path"), "somedir") {
-		c.String(http.StatusOK, `[{"type": "file", "name": "a.yaml", "path": "somedir/a.yaml"}]`)
+	if strings.HasSuffix(path, "app-fallback-dir") {
+		c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "app-fallback-dir/b.yaml"}]`)
 		return
 	}
 	// base64 of "pipeline:"

@@ -120,7 +120,8 @@ func PostCron(c *gin.Context) {
 		return
 	}
 
-	in := new(model.Cron)
+	// Enabled is preset so a body without it creates an enabled cron.
+	in := &model.Cron{Enabled: true}
 	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, "Error parsing request. %s", err)
 		return

@@ -43,9 +43,9 @@ func (mode ApprovalMode) Valid() bool {
 
 // Repo represents a repository.
 type Repo struct {
-	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
-	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
-	ForgeID int64 `json:"forge_id,omitempty"              xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
+	ID      int64 `json:"id,omitempty"       xorm:"pk autoincr 'id'"`
+	UserID  int64 `json:"-"                  xorm:"INDEX 'user_id'"`
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"UNIQUE(forge) UNIQUE(name) UNIQUE(full_name) forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"UNIQUE(forge) forge_remote_id"`
 	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
@@ -60,6 +60,7 @@ type Repo struct {
 	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	VisibilitySync               bool                 `json:"visibility_sync"                 xorm:"visibility_sync"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
@@ -68,29 +69,40 @@ type Repo struct {
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
 	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
-	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	WebhookSecret                string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	CloneSecret                  *CloneSecret         `json:"-"                               xorm:"json 'clone_secret'"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 	ConfigExtensionEndpoint      string               `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	ConfigExtensionExclusive     bool                 `json:"config_extension_exclusive"      xorm:"DEFAULT FALSE 'config_extension_exclusive'"`
 	ConfigExtensionNetrc         bool                 `json:"config_extension_netrc"          xorm:"DEFAULT FALSE 'config_extension_netrc'"`
 	RegistryExtensionEndpoint    string               `json:"registry_extension_endpoint"     xorm:"varchar(500) 'registry_extension_endpoint'"`
-	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"          xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
+	RegistryExtensionNetrc       bool                 `json:"registry_extension_netrc"        xorm:"DEFAULT FALSE 'registry_extension_netrc'"`
 	SecretExtensionEndpoint      string               `json:"secret_extension_endpoint"       xorm:"varchar(500) 'secret_extension_endpoint'"`
 	SecretExtensionNetrc         bool                 `json:"secret_extension_netrc"          xorm:"DEFAULT FALSE 'secret_extension_netrc'"`
 
 	// Rest API Only
 
 	// HasForgeNameConflict is true if forge returned a repo with same name but different forge remote id
-	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty"    xorm:"-"`
+	HasForgeNameConflict bool `json:"has_forge_name_conflict,omitempty" xorm:"-"`
 
 	// HasNoForgeRepo is true if repo only exist in the woodpecker store and not at the forge anymore
-	HasNoForgeRepo bool `      json:"has_no_forge_repo,omitempty"          xorm:"-"`
+	HasNoForgeRepo bool `json:"has_no_forge_repo,omitempty" xorm:"-"`
 
 	// internal usage
 
-	Perm *Perm `json:"-"    xorm:"-"`
+	Perm *Perm `json:"-" xorm:"-"`
 } //	@name	Repo
+
+// CloneSecret holds credentials the forge created for Woodpecker to clone only this
+// repository, so pipelines do not need the token of the repository user to clone.
+type CloneSecret struct {
+	// Login and Token are the credentials to clone the repository over HTTP(S).
+	Login string `json:"login,omitempty"`
+	Token string `json:"token,omitempty"`
+	// ForgeRemoteID is the forge ID of the credentials, to remove them again.
+	ForgeRemoteID ForgeRemoteID `json:"forge_remote_id,omitempty"`
+}
 
 // TableName return database table name for xorm.
 func (Repo) TableName() string {
@@ -99,13 +111,6 @@ func (Repo) TableName() string {
 
 type RepoFilter struct {
 	Name string
-}
-
-func (r *Repo) ResetVisibility() {
-	r.Visibility = VisibilityPublic
-	if r.IsSCMPrivate {
-		r.Visibility = VisibilityPrivate
-	}
 }
 
 // ParseRepo parses the repository owner and name from a string.
@@ -145,7 +150,9 @@ func (r *Repo) Update(from *Repo) {
 	// overwrite the authoritative value previously synced from the forge API
 	// during activation or repair, breaking netrc-protected clones.
 	if from.Visibility != "" {
-		r.Visibility = from.Visibility
+		if r.VisibilitySync {
+			r.Visibility = from.Visibility
+		}
 		r.IsSCMPrivate = from.IsSCMPrivate
 	}
 }
@@ -157,6 +164,7 @@ type RepoPatch struct {
 	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
+	VisibilitySync               *bool                      `json:"visibility_sync,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`

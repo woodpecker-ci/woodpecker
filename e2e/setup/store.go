@@ -30,6 +30,7 @@ import (
 // Fixtures holds the pre-seeded database records shared across all tests.
 type Fixtures struct {
 	Forge *model.Forge
+	Org   *model.Org
 	Owner *model.User
 	Repo  *model.Repo
 }
@@ -59,7 +60,7 @@ func newStore(ctx context.Context, t *testing.T) store.Store {
 }
 
 // seedFixtures creates the minimal set of DB records every test needs:
-// one Forge, one owner User, one Repo linked to both.
+// one Forge, one owner User with its personal Org, one Repo linked to them.
 func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 	t.Helper()
 
@@ -69,8 +70,16 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 	}
 	require.NoError(t, s.ForgeCreate(forge), "seed forge")
 
+	org := &model.Org{
+		ForgeID: forge.ID,
+		Name:    "test-owner",
+		IsUser:  true,
+	}
+	require.NoError(t, s.OrgCreate(org), "seed org")
+
 	owner := &model.User{
 		ForgeID:       forge.ID,
+		OrgID:         org.ID,
 		ForgeRemoteID: "1",
 		Login:         "test-owner",
 		Email:         "owner@example.test",
@@ -81,6 +90,7 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 		ForgeID:       forge.ID,
 		ForgeRemoteID: "1",
 		UserID:        owner.ID,
+		OrgID:         org.ID,
 		FullName:      "test-owner/test-repo",
 		Owner:         "test-owner",
 		Name:          "test-repo",
@@ -93,6 +103,7 @@ func seedFixtures(t *testing.T, s store.Store) *Fixtures {
 
 	return &Fixtures{
 		Forge: forge,
+		Org:   org,
 		Owner: owner,
 		Repo:  repo,
 	}

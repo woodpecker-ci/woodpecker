@@ -86,7 +86,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login && org.ForgeID == user.ForgeID) || (user.Admin && !org.IsUser) {
+	if user.OwnsOrg(org) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
@@ -160,10 +160,12 @@ func LookupOrg(c *gin.Context) {
 			return
 		}
 
-		if !user.Admin && org.Name != user.Login {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		} else if !user.Admin {
+		if !user.Admin && !user.OwnsOrg(org) {
+			if org.IsUser || org.ForgeID != user.ForgeID {
+				c.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+
 			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to check membership")
@@ -176,6 +178,38 @@ func LookupOrg(c *gin.Context) {
 				return
 			}
 		}
+	}
+
+	c.JSON(http.StatusOK, org)
+}
+
+// PatchOrg
+//
+//	@Summary	Update an organization
+//	@Router		/orgs/{org_id} [patch]
+//	@Produce	json
+//	@Success	200	{object}	Org
+//	@Tags		Organization
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string		true	"the organization's id"
+//	@Param		org				body	OrgPatch	true	"the org's updated data"
+func PatchOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+	org := session.Org(c)
+
+	in := new(model.OrgPatch)
+	if err := c.Bind(in); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if in.RequireOrgAgents != nil {
+		org.RequireOrgAgents = *in.RequireOrgAgents
+	}
+
+	if err := _store.OrgUpdate(org); err != nil {
+		handleDBError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, org)

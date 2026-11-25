@@ -31,8 +31,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
@@ -61,6 +63,17 @@ func newForgeCtx(t *testing.T, method string, body any) (*gin.Context, *httptest
 	_store := store_mocks.NewMockStore(t)
 	c.Set("store", _store)
 	return c, rec, _store
+}
+
+// mockForgeManager installs a fresh mock manager for one test, so calls are
+// checked against this test's expectations and not a manager left by another.
+func mockForgeManager(t *testing.T) *manager_mocks.MockManager {
+	t.Helper()
+	mgr := manager_mocks.NewMockManager(t)
+	old := server.Config.Services.Manager
+	server.Config.Services.Manager = mgr
+	t.Cleanup(func() { server.Config.Services.Manager = old })
+	return mgr
 }
 
 func TestGetForge(t *testing.T) {
@@ -201,6 +214,9 @@ func TestGetForges(t *testing.T) {
 
 func patchForgeRequest(t *testing.T, mockStore *store_mocks.MockStore, body string) *httptest.ResponseRecorder {
 	t.Helper()
+	manager := mockForgeManager(t)
+	manager.On("RemoveForge", int64(1)).Maybe()
+
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	c.Set("store", mockStore)
@@ -210,6 +226,13 @@ func patchForgeRequest(t *testing.T, mockStore *store_mocks.MockStore, body stri
 
 	PatchForge(c)
 	c.Writer.WriteHeaderNow()
+
+	// an updated forge must be dropped from the cache, a rejected one kept
+	if w.Code == http.StatusOK {
+		manager.AssertNumberOfCalls(t, "RemoveForge", 1)
+	} else {
+		manager.AssertNotCalled(t, "RemoveForge", mock.Anything)
+	}
 	return w
 }
 
@@ -413,6 +436,35 @@ func TestPatchForge(t *testing.T) {
 		mockStore.AssertNotCalled(t, "ForgeUpdate", mock.Anything)
 	})
 
+	t.Run("should update the name of the forge", func(t *testing.T) {
+		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Name: "Renamed forge",
+		})
+		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
+		// the cached forge must be dropped, so the next use loads the new config
+		mockForgeManager(t).On("RemoveForge", int64(1)).Once()
+
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{
+			ID:   1,
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+			Name: "Old name",
+		}, nil)
+
+		var updated *model.Forge
+		_store.On("ForgeUpdate", mock.Anything).Run(func(args mock.Arguments) {
+			updated, _ = args.Get(0).(*model.Forge)
+		}).Return(nil)
+
+		PatchForge(c)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, updated)
+		assert.Equal(t, "Renamed forge", updated.Name)
+	})
+
 	t.Run("should update the allowed orgs of the forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
 			Type: model.ForgeTypeGithub,
@@ -420,6 +472,8 @@ func TestPatchForge(t *testing.T) {
 			Orgs: []string{"org2"},
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
+		// the cached forge must be dropped, so the next use loads the new config
+		mockForgeManager(t).On("RemoveForge", int64(1)).Once()
 
 		_store.On("ForgeGet", int64(1)).Return(&model.Forge{
 			ID:                1,
@@ -449,6 +503,8 @@ func TestPatchForge(t *testing.T) {
 			URL:  "https://github.com",
 		})
 		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
+		// the cached forge must be dropped, so the next use loads the new config
+		mockForgeManager(t).On("RemoveForge", int64(1)).Once()
 
 		_store.On("ForgeGet", int64(1)).Return(&model.Forge{
 			ID:   1,
@@ -467,6 +523,22 @@ func TestPatchForge(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		require.NotNil(t, updated)
 		assert.Empty(t, updated.Orgs)
+	})
+
+	t.Run("should keep the cached forge if the update fails", func(t *testing.T) {
+		c, rec, _store := newForgeCtx(t, http.MethodPatch, &model.ForgeWithOAuthClientSecret{
+			Type: model.ForgeTypeGithub,
+			URL:  "https://github.com",
+		})
+		c.Params = gin.Params{{Key: "forge_id", Value: "1"}}
+		mockForgeManager(t) // no RemoveForge expected
+
+		_store.On("ForgeGet", int64(1)).Return(&model.Forge{ID: 1, Type: model.ForgeTypeGithub}, nil)
+		_store.On("ForgeUpdate", mock.Anything).Return(assert.AnError)
+
+		PatchForge(c)
+
+		assert.Equal(t, http.StatusConflict, rec.Code)
 	})
 }
 
@@ -557,11 +629,9 @@ func TestPostForge(t *testing.T) {
 
 	t.Run("should store the allowed orgs of the new forge", func(t *testing.T) {
 		c, rec, _store := newForgeCtx(t, http.MethodPost, &model.ForgeWithOAuthClientSecret{
-			Forge: model.Forge{
-				Type: model.ForgeTypeGithub,
-				URL:  "https://github.com",
-				Orgs: []string{"org1", "org2"},
-			},
+			Type:              model.ForgeTypeGithub,
+			URL:               "https://github.com",
+			Orgs:              []string{"org1", "org2"},
 			OAuthClientSecret: "client-secret",
 		})
 
@@ -575,6 +645,26 @@ func TestPostForge(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		require.NotNil(t, created)
 		assert.Equal(t, []string{"org1", "org2"}, created.Orgs)
+	})
+
+	t.Run("should store the name of the new forge", func(t *testing.T) {
+		c, rec, _store := newForgeCtx(t, http.MethodPost, &model.ForgeWithOAuthClientSecret{
+			Type:              model.ForgeTypeGithub,
+			URL:               "https://github.com",
+			Name:              "My Org GitHub",
+			OAuthClientSecret: "client-secret",
+		})
+
+		var created *model.Forge
+		_store.On("ForgeCreate", mock.Anything).Run(func(args mock.Arguments) {
+			created, _ = args.Get(0).(*model.Forge)
+		}).Return(nil)
+
+		PostForge(c)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, created)
+		assert.Equal(t, "My Org GitHub", created.Name)
 	})
 }
 

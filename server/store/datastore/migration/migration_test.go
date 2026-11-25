@@ -156,13 +156,43 @@ func TestMigrate(t *testing.T) {
 	closeDB()
 
 	dbType := engine.Dialect().URI().DBType
-	if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
-		// wait for mysql/postgres to sync ...
-		time.Sleep(100 * time.Millisecond)
+	waitForSync := func() {
+		if dbType == schemas.MYSQL || dbType == schemas.POSTGRES {
+			// wait for mysql/postgres to sync ...
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
+	waitForSync()
 
 	// migrate old db
 	engine, closeDB = testDB(t, false)
 	assert.NoError(t, Migrate(t.Context(), engine, true))
 	closeDB()
+	waitForSync()
+
+	// migrate old db, the long migrations only on a later start
+	engine, closeDB = testDB(t, false)
+	defer closeDB()
+	require.NoError(t, Migrate(t.Context(), engine, false))
+	require.NoError(t, Migrate(t.Context(), engine, true))
+	pending, err := pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Empty(t, pending)
+}
+
+func TestPendingLongMigrations(t *testing.T) {
+	// a new install marks all migrations as done
+	engine, closeDB := testDB(t, true)
+	require.NoError(t, Migrate(t.Context(), engine, false))
+	pending, err := pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Empty(t, pending)
+	closeDB()
+
+	engine, closeDB = testDB(t, false)
+	defer closeDB()
+	require.NoError(t, Migrate(t.Context(), engine, false))
+	pending, err = pendingLongMigrations(engine)
+	require.NoError(t, err)
+	assert.Contains(t, pending, removeSQLiteLegacyInlineUnique.ID)
 }

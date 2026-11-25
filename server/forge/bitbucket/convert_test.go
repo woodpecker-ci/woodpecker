@@ -35,8 +35,8 @@ func TestConvertStatus(t *testing.T) {
 	assert.Equal(t, statusFailure, convertStatus(model.StatusKilled))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusError))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusDeclined))
-	assert.Equal(t, statusFailure, convertStatus(model.StatusSkipped))
-	assert.Equal(t, statusFailure, convertStatus(model.StatusCanceled))
+	assert.Equal(t, statusStopped, convertStatus(model.StatusSkipped))
+	assert.Equal(t, statusStopped, convertStatus(model.StatusCanceled))
 	assert.Equal(t, statusFailure, convertStatus(model.StatusValue("bogus")))
 }
 
@@ -60,6 +60,7 @@ func TestConvertRepo(t *testing.T) {
 	assert.Equal(t, "hello-world", to.Name)
 	assert.Equal(t, "default", to.Branch)
 	assert.Equal(t, from.IsPrivate, to.IsSCMPrivate)
+	assert.Equal(t, model.VisibilityPrivate, to.Visibility)
 	assert.Equal(t, from.Links.HTML.Href, to.Clone)
 	assert.Equal(t, from.Links.HTML.Href, to.ForgeURL)
 	assert.True(t, to.Perm.Push)

@@ -9,6 +9,9 @@
       />
       <Button v-else :text="$t('admin.settings.agents.add')" start-icon="plus" @click="showAddAgent" />
     </template>
+    <template v-if="$slots.headerEnd" #headerEnd>
+      <slot name="headerEnd" />
+    </template>
 
     <AgentList
       v-if="!selectedAgent"

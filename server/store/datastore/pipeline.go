@@ -15,16 +15,12 @@
 package datastore
 
 import (
-	"context"
-	"errors"
 	"time"
 
-	"github.com/cenkalti/backoff/v7"
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -152,27 +148,20 @@ func (s storage) GetPipelineCount() (int64, error) {
 
 // CreatePipeline creates a new pipeline with retry logic for unique constraint errors.
 func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Step) error {
-	// Maximum number of retries
-	const maxRetries = 3
-
-	// Create backoff configuration
-	exponentialBackoff := backoff.NewExponentialBackOff()
-
-	// Execute with backoff retry
-	_, err := backoff.Retry(context.Background(), func() (struct{}, error) {
+	return retryWrite(func() error {
 		sess := s.engine.NewSession()
 		defer sess.Close()
 		if err := sess.Begin(); err != nil {
-			return struct{}{}, err
+			return wrapUpdate(0, err)
 		}
 
 		repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
 		if err != nil {
-			return struct{}{}, err
+			return wrapUpdate(0, err)
 		}
 
 		if !repoExist {
-			return struct{}{}, ErrorRepoNotExist{RepoID: pipeline.RepoID}
+			return ErrorRepoNotExist{RepoID: pipeline.RepoID}
 		}
 
 		// calc pipeline number
@@ -181,43 +170,38 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 			Table(new(model.Pipeline)).
 			Where("repo_id = ?", pipeline.RepoID).
 			Get(&number); err != nil {
-			return struct{}{}, err
+			return wrapUpdate(0, err)
 		}
 		pipeline.Number = number + 1
 
 		pipeline.Created = time.Now().UTC().Unix()
 		// only Insert set auto created ID back to object
 		if err := wrapInsert(sess.Insert(pipeline)); err != nil {
-			if errors.Is(err, types.ErrInsertDuplicateDetected) {
-				return struct{}{}, err
-			}
-			return struct{}{}, backoff.Permanent(err)
+			return err
 		}
 
 		for i := range stepList {
 			stepList[i].PipelineID = pipeline.ID
 			// only Insert set auto created ID back to object
 			if err := wrapInsert(sess.Insert(stepList[i])); err != nil {
-				if errors.Is(err, types.ErrInsertDuplicateDetected) {
-					return struct{}{}, err
-				}
-				return struct{}{}, backoff.Permanent(err)
+				return err
 			}
 		}
 
-		return struct{}{}, sess.Commit()
-	}, backoff.WithBackOff(exponentialBackoff), backoff.WithMaxTries(maxRetries))
-
-	return err
+		return wrapUpdate(0, sess.Commit())
+	})
 }
 
 func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
-	_, err := s.engine.ID(pipeline.ID).AllCols().Update(pipeline)
-	return err
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(pipeline.ID).AllCols().Update(pipeline))
+	})
 }
 
 func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
-	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
+	return retryWrite(func() error {
+		return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
+	})
 }
 
 func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {

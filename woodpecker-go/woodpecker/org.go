@@ -45,6 +45,14 @@ func (c *client) OrgLookup(name string) (*Org, error) {
 	return out, err
 }
 
+// OrgPatch updates an organization.
+func (c *client) OrgPatch(orgID int64, in *OrgPatch) (*Org, error) {
+	out := new(Org)
+	uri := fmt.Sprintf(pathOrg, c.addr, orgID)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
 func (c *client) OrgList(opt ListOptions) ([]*Org, error) {
 	var out []*Org
 	uri, _ := url.Parse(fmt.Sprintf(pathOrgList, c.addr))

@@ -49,7 +49,13 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
+	// one transaction, so a failed user insert does not leave its org behind
 	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
 	org := &model.Org{
 		Name:    user.Login,
 		ForgeID: user.ForgeID,
@@ -77,32 +83,39 @@ func (s storage) CreateUser(user *model.User) error {
 	}
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	return wrapInsert(sess.Insert(user))
-}
-
-func (s storage) UpdateUser(user *model.User) error {
-	_, err := s.engine.ID(user.ID).AllCols().Update(user)
-	return err
-}
-
-func (s storage) DeleteUser(user *model.User) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
+	if err := wrapInsert(sess.Insert(user)); err != nil {
 		return err
 	}
 
-	if err := s.orgDelete(sess, user.OrgID); err != nil {
-		return fmt.Errorf("failed to delete org: %w", err)
-	}
-
-	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
-	}
-
-	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
-		return fmt.Errorf("failed to delete perms: %w", err)
-	}
-
 	return sess.Commit()
+}
+
+func (s storage) UpdateUser(user *model.User) error {
+	return retryWrite(func() error {
+		return wrapUpdate(s.engine.ID(user.ID).AllCols().Update(user))
+	})
+}
+
+func (s storage) DeleteUser(user *model.User) error {
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		if err := sess.Begin(); err != nil {
+			return err
+		}
+
+		if err := s.orgDelete(sess, user.OrgID); err != nil {
+			return fmt.Errorf("failed to delete org: %w", err)
+		}
+
+		if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
+
+		if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+			return fmt.Errorf("failed to delete perms: %w", err)
+		}
+
+		return sess.Commit()
+	})
 }

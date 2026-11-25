@@ -66,12 +66,7 @@ func GetQueueInfo(c *gin.Context) {
 		Pending:       pendingWithAgents,
 		WaitingOnDeps: waitingWithAgents,
 		Running:       runningWithAgents,
-		Stats: struct {
-			WorkerCount        int `json:"worker_count"`
-			PendingCount       int `json:"pending_count"`
-			WaitingOnDepsCount int `json:"waiting_on_deps_count"`
-			RunningCount       int `json:"running_count"`
-		}{
+		Stats: model.QueueStats{
 			WorkerCount:        info.Stats.Workers,
 			PendingCount:       info.Stats.Pending,
 			WaitingOnDepsCount: info.Stats.WaitingOnDeps,
@@ -140,9 +135,9 @@ func processQueueTasks(store store.Store, tasks []*model.Task, agentNameMap map[
 			name, ok := getAgentName(store, agentNameMap, task.AgentID)
 			if !ok {
 				log.Error().Msgf("agent not found for task %s", task.ID)
+			} else {
+				taskResponse.AgentName = name
 			}
-
-			taskResponse.AgentName = name
 		}
 
 		if task.PipelineID != 0 {

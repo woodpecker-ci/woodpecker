@@ -25,7 +25,11 @@ import (
 )
 
 func (s storage) OrgCreate(org *model.Org) error {
-	return s.orgCreate(org, s.engine.NewSession())
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		return s.orgCreate(org, sess)
+	})
 }
 
 func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
@@ -41,17 +45,22 @@ func (s storage) OrgGet(id int64) (*model.Org, error) {
 }
 
 func (s storage) OrgUpdate(org *model.Org) error {
-	return s.orgUpdate(s.engine.NewSession(), org)
+	return retryWrite(func() error {
+		sess := s.engine.NewSession()
+		defer sess.Close()
+		return s.orgUpdate(sess, org)
+	})
 }
 
 func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
 	// update
-	_, err := sess.ID(org.ID).AllCols().Update(org)
-	return err
+	return wrapUpdate(sess.ID(org.ID).AllCols().Update(org))
 }
 
 func (s storage) OrgDelete(id int64) error {
-	return s.orgDelete(s.engine.NewSession(), id)
+	return retryWrite(func() error {
+		return s.orgDelete(s.engine.NewSession(), id)
+	})
 }
 
 func (s storage) orgDelete(sess *xorm.Session, id int64) error {

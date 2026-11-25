@@ -157,3 +157,12 @@ The relative weight vs. other containers.
 Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
 
 Example: `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SET=1,2`
+
+---
+
+### BACKEND_DOCKER_STOP_TIMEOUT
+
+- Name: `WOODPECKER_BACKEND_DOCKER_STOP_TIMEOUT`
+- Default: `20`
+
+Seconds Woodpecker waits for a container to stop gracefully before it kills it.

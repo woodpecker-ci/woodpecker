@@ -1,0 +1,21 @@
+skip_clone: true
+
+steps:
+  - name: hungry
+    image: dummy
+    commands:
+      - echo eating memory
+    environment:
+      STEP_OOM_KILLED: 'true'
+
+  - name: deploy
+    image: dummy
+    commands:
+      - echo deploying
+
+  - name: notify
+    image: dummy
+    commands:
+      - echo notifying
+    when:
+      - status: [failure]

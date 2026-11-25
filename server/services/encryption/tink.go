@@ -18,7 +18,6 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/tink-crypto/tink-go/v2/tink"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
@@ -26,12 +25,11 @@ import (
 )
 
 type tinkEncryptionService struct {
-	keysetFilePath    string
-	primaryKeyID      string
-	encryption        tink.AEAD
-	store             store.Store
-	keysetFileWatcher *fsnotify.Watcher
-	clients           []types.EncryptionClient
+	keysetFilePath string
+	primaryKeyID   string
+	encryption     tink.AEAD
+	store          store.Store
+	clients        []types.EncryptionClient
 }
 
 func (svc *tinkEncryptionService) Encrypt(plaintext, associatedData string) (string, error) {

@@ -33,6 +33,8 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
+Also see [security boundaries](./17-security-boundaries.md#approval-of-pipelines).
+
 ## Trusted
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
@@ -42,6 +44,8 @@ If you set your project to trusted, a pipeline step and by this the underlying c
 Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
+
+Also see [security boundaries](./17-security-boundaries.md#trusted-repositories).
 
 ## Custom trusted clone plugins
 
@@ -59,6 +63,8 @@ This setting does not affect subsequent steps, nor does it allow direct pushes t
 To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/git-push).
 :::
 
+Also see [security boundaries](./17-security-boundaries.md#git-credentials).
+
 ## Project visibility
 
 You can change the visibility of your project by this setting. If a user has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
@@ -66,6 +72,10 @@ You can change the visibility of your project by this setting. If a user has acc
 - `Public` Every user can see your project without being logged in.
 - `Internal` Only authenticated users of the Woodpecker instance can see this project.
 - `Private` Only you and other owners of the repository can see this project.
+
+With **Sync visibility with forge** enabled, the visibility follows the repository on the forge: public becomes `Public`, private becomes `Private`, and GitLab internal or a Gitea/Forgejo owner with limited visibility becomes `Internal`.
+It is updated whenever Woodpecker gets the repository from the forge.
+New repositories have it enabled by default.
 
 ## Timeout
 

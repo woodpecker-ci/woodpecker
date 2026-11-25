@@ -56,9 +56,8 @@ type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
 	logs   chan *proto.LogEntry
-	// connectionRetryTimeout is the maximum time to wait for a connection to be
-	// restored before the agent gives up and exits. Zero means infinite.
-	// Maps directly onto backoff.WithMaxElapsedTime.
+	// connectionRetryTimeout is how long an RPC may keep failing before it gives up.
+	// Zero means infinite.
 	connectionRetryTimeout time.Duration
 	// logEntryBufferSize sets the buffer size before the log reader is blocking.
 	// If you have enough memory and log bursts, set it higher.
@@ -111,16 +110,50 @@ func (c *client) IsConnected() bool {
 	return state == connectivity.Ready || state == connectivity.Idle
 }
 
-// retryOpts returns the backoff options used for every retry loop in this
-// file. The exponential backoff parameters preserve the original tuning
-// (10 ms initial, 10 s cap), and connectionRetryTimeout is wired straight into
-// WithMaxElapsedTime — when it elapses, backoff.Retry returns the last error,
-// which we translate into ErrConnectionLost in retryRPC.
-func (c *client) retryOpts(op string) []backoff.RetryOption {
-	b := backoff.NewExponentialBackOff()
-	b.MaxInterval = 10 * time.Second          //nolint:mnd
-	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
+// failureWindowBackOff stops once failures last longer than window (0 = never).
+// Unlike backoff.WithMaxElapsedTime it ignores the running call, so long polls still get retried.
+type failureWindowBackOff struct {
+	backoff.BackOff
+	window       time.Duration
+	firstFailure time.Time
+}
 
+func newFailureWindowBackOff(window time.Duration) *failureWindowBackOff {
+	exp := backoff.NewExponentialBackOff()
+	exp.MaxInterval = 10 * time.Second          //nolint:mnd
+	exp.InitialInterval = 10 * time.Millisecond //nolint:mnd
+	return &failureWindowBackOff{BackOff: exp, window: window}
+}
+
+// attemptFailed starts a new streak if the attempt outlived window, as it was connected meanwhile.
+func (b *failureWindowBackOff) attemptFailed(started time.Time) {
+	now := time.Now()
+	if b.window > 0 && now.Sub(started) > b.window {
+		b.Reset()
+	}
+	if b.firstFailure.IsZero() {
+		b.firstFailure = now
+	}
+}
+
+func (b *failureWindowBackOff) NextBackOff() time.Duration {
+	if b.firstFailure.IsZero() {
+		b.firstFailure = time.Now()
+	}
+	next := b.BackOff.NextBackOff()
+	if b.window > 0 && time.Since(b.firstFailure)+next > b.window {
+		return backoff.Stop
+	}
+	return next
+}
+
+func (b *failureWindowBackOff) Reset() {
+	b.firstFailure = time.Time{}
+	b.BackOff.Reset()
+}
+
+// retryOpts returns the backoff options used for every retry loop in this file.
+func (c *client) retryOpts(op string, b backoff.BackOff) []backoff.RetryOption {
 	notify := func(err error, next time.Duration) {
 		// The "too_many_pings" GOAWAY is well-known noise; demote to trace.
 		// See https://github.com/woodpecker-ci/woodpecker/issues/717
@@ -137,7 +170,7 @@ func (c *client) retryOpts(op string) []backoff.RetryOption {
 
 	return []backoff.RetryOption{
 		backoff.WithBackOff(b),
-		backoff.WithMaxElapsedTime(c.connectionRetryTimeout),
+		backoff.WithMaxElapsedTime(0), // b enforces the timeout; 0 drops the 15m library default
 		backoff.WithNotify(notify),
 	}
 }
@@ -146,10 +179,11 @@ func (c *client) retryOpts(op string) []backoff.RetryOption {
 // under backoff.Retry with the standard options, and translates the few
 // special outcomes the callers care about:
 //
-//   - op succeeds          -> (result, nil)
-//   - ctx canceled         -> (zero, nil)            same contract as before
-//   - MaxElapsedTime hit   -> (zero, ErrConnectionLost)
-//   - permanent (fatal)    -> (zero, underlying err)
+//   - op succeeds           -> (result, nil)
+//   - ctx canceled          -> (zero, nil)            same contract as before
+//   - timeout, disconnected -> (zero, ErrConnectionLost)
+//   - timeout, other error  -> (zero, err wrapping backoff.ErrMaxElapsedTime)
+//   - permanent (fatal)     -> (zero, underlying err)
 //
 // The op closure is responsible for:
 //   - returning errNotConnected when IsConnected() is false (Retry will sleep
@@ -157,7 +191,17 @@ func (c *client) retryOpts(op string) []backoff.RetryOption {
 //   - returning backoff.Permanent(err) for unrecoverable gRPC codes
 //   - returning the raw error for retryable codes (Aborted/DataLoss/...)
 func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.Operation[T]) (T, error) {
-	res, err := backoff.Retry(ctx, op, c.retryOpts(opName)...)
+	b := newFailureWindowBackOff(c.connectionRetryTimeout)
+	attempt := func() (T, error) {
+		started := time.Now()
+		res, err := op()
+		if err != nil {
+			b.attemptFailed(started)
+		}
+		return res, err
+	}
+
+	res, err := backoff.Retry(ctx, attempt, c.retryOpts(opName, b)...)
 	if err == nil {
 		return res, nil
 	}
@@ -173,9 +217,14 @@ func retryRPC[T any](ctx context.Context, c *client, opName string, op backoff.O
 
 	re := backoff.AsRetryError(err)
 
-	// MaxElapsedTime exhausted while we were still in errNotConnected — give up.
+	// b reports the timeout as ErrExhausted; keep the known ErrMaxElapsedTime cause.
+	if errors.Is(re.Cause, backoff.ErrExhausted) {
+		err = &backoff.RetryError{LastErr: re.LastErr, Cause: backoff.ErrMaxElapsedTime}
+	}
+
+	// Timeout hit while still in errNotConnected: give up.
 	if errors.Is(re.LastErr, errNotConnected) {
-		log.Error().Msg("grpc: connection lost, giving up")
+		log.Error().Msgf("grpc: %s(): connection lost, giving up", opName)
 		return zero, ErrConnectionLost
 	}
 
@@ -422,7 +471,7 @@ func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error 
 
 	// sendLogs intentionally does not gate on IsConnected — the original code
 	// didn't either. backoff.Retry will keep trying through transient transport
-	// errors until MaxElapsedTime elapses.
+	// errors until the retry window elapses.
 	_, err := retryRPC(ctx, c, "log", func() (*proto.Empty, error) {
 		r, err := c.client.Log(ctx, req)
 		return r, classifyRPCErr(ctx, err)

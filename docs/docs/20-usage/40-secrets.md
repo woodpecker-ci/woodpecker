@@ -75,6 +75,8 @@ If your repository is public and accepts pull requests from everyone, your secre
 Malicious actors could take advantage of this to expose your secrets or transfer them to an external location.
 :::
 
+Also see [security boundaries](./17-security-boundaries.md#secrets).
+
 ### Plugins filter
 
 To prevent your secrets from being misused by malicious users, you can restrict a secret to a list of plugins.

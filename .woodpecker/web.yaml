@@ -5,7 +5,7 @@ when:
       - release/*
 
 variables:
-  - &node_image 'docker.io/node:24-alpine'
+  - &node_image 'docker.io/node:26-alpine'
   - &when
     path:
       # related config files
@@ -20,7 +20,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm install --frozen-lockfile
     when: *when
 
@@ -30,7 +32,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm lint
     when: *when
 
@@ -40,7 +44,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm format:check
     when: *when
 
@@ -50,7 +56,9 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm typecheck
     when: *when
 
@@ -61,6 +69,8 @@ steps:
     image: *node_image
     directory: web/
     commands:
-      - corepack enable
+      - npx get-pnpm
+      - export PNPM_HOME='/root/.local/share/pnpm'
+      - export PATH="$PNPM_HOME/bin:$PATH"
       - pnpm test
     when: *when

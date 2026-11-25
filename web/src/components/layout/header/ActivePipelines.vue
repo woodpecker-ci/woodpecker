@@ -5,7 +5,7 @@
     @click="toggle"
   >
     <div v-if="pipelineCount > 0" class="spinner" />
-    <div class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white/15 font-bold dark:bg-black/10">
+    <div class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white/15 font-bold">
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       {{ pipelineCount > 9 ? '9+' : pipelineCount }}
     </div>
