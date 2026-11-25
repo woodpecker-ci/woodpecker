@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
@@ -52,8 +53,14 @@ func validateForge(forge *model.Forge) error {
 		}
 	}
 
-	_, err := setup.Forge(forge)
-	return err
+	instance, err := setup.Forge(forge)
+	if err != nil {
+		return err
+	}
+	if err := instance.Close(); err != nil {
+		log.Error().Err(err).Str("forge-type", string(forge.Type)).Msg("could not close forge built for validation")
+	}
+	return nil
 }
 
 // GetForges
@@ -322,6 +329,11 @@ func GetForgeAppHealth(c *gin.Context) {
 		c.JSON(http.StatusOK, ForgeAppHealth{Healthy: false, Error: err.Error()})
 		return
 	}
+	defer func() {
+		if err := forgeInstance.Close(); err != nil {
+			log.Error().Err(err).Int64("forge-id", forge.ID).Msg("could not close forge used for the app health check")
+		}
+	}()
 
 	checker, ok := forgeInstance.(githubAppChecker)
 	if !ok {
