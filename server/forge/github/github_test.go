@@ -289,7 +289,12 @@ func TestGithubApp(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "pipeline:", string(data))
 
-		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "app-fallback-dir")
+		files, err := c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "app-dir")
+		assert.NoError(t, err)
+		assert.Equal(t, []*forge_types.FileMeta{{Name: "app-dir/a.yaml", Data: []byte("pipeline:")}}, files)
+
+		// the per-file REST fallback too
+		files, err = c.Dir(ctx, fakeUser, fakeRepo, &model.Pipeline{Commit: "abc123"}, "app-fallback-dir")
 		assert.NoError(t, err)
 		assert.Equal(t, []*forge_types.FileMeta{{Name: "app-fallback-dir/b.yaml", Data: []byte("pipeline:")}}, files)
 	})

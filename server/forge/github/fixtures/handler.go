@@ -118,6 +118,14 @@ func graphqlDir(c *gin.Context) {
 			{"name": "large.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: partial", "isTruncated": true, "isBinary": false}},
 			{"name": "binary.yaml", "type": "blob", "mode": 33188, "object": {"text": null, "isTruncated": false, "isBinary": true}}
 		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":app-dir"):
+		// the app tests' directory: only the installation token may read it
+		if !requireInstallationToken(c) {
+			return
+		}
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "pipeline:", "isTruncated": false, "isBinary": false}}
+		]}}}}`)
 	case strings.HasSuffix(req.Variables.Expression, ":app-fallback-dir"):
 		// force the app tests onto the per-file REST fallback
 		c.String(http.StatusBadGateway, "")
@@ -165,6 +173,12 @@ func getContents(c *gin.Context) {
 	// every remaining path asserts that repo contents are fetched with the app
 	// installation token
 	if !requireInstallationToken(c) {
+		return
+	}
+	if strings.HasSuffix(path, "/app-dir") {
+		// app-dir is only served over GraphQL, so a test reading it can't pass
+		// by falling back to REST
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 	if strings.HasSuffix(path, "app-fallback-dir") {
