@@ -258,7 +258,8 @@
     "Yuno",
     "zerolog",
     "zerologger",
-    "zoneinfo"
+    "zoneinfo",
+    "kubelet"
   ],
   "ignorePaths": [
     ".cspell.json",
