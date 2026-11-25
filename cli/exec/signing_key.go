@@ -33,12 +33,12 @@ import (
 )
 
 const (
-	// configExtensionKeyringService is the CLI name tokens are stored under.
+	// The CLI name that tokens are stored under.
 	configExtensionKeyringService = "woodpecker-cli"
-	// configExtensionKeyringUser keeps the signing key next to tokens, under its own account.
+	// The keyring account that keeps the signing key next to tokens.
 	configExtensionKeyringUser = "config-extension-signing-key"
-	// configExtensionSignatureName is the HTTP signature label. It is not the
-	// server's "woodpecker-ci-extensions", so an extension can trust both keys.
+	// The HTTP signature label. It is not the server's "woodpecker-ci-extensions",
+	// so an extension can trust both keys.
 	configExtensionSignatureName = "woodpecker-cli-extensions"
 )
 
@@ -97,7 +97,7 @@ func provideConfigExtensionPublicKey(privateKey ed25519.PrivateKey) error {
 	if err != nil {
 		return err
 	}
-	log.Info().Str("keyid", configExtensionSignatureName).Msg("signing config extension requests; configure the extension to trust this public key")
+	log.Info().Str("signature_name", configExtensionSignatureName).Msg("signing config extension requests; configure the extension to trust this public key")
 	if _, err := fmt.Fprint(os.Stderr, pemKey); err != nil {
 		return fmt.Errorf("could not write the config extension public key: %w", err)
 	}
