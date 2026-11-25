@@ -43,8 +43,8 @@ import (
 	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/finalizer"
 	log_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/log/mocks"
-	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	manager_mocks "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
 	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
