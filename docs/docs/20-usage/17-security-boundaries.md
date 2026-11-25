@@ -104,7 +104,7 @@ as they can at least compromise the hosts agents run on!
 
 For private repositories, or with [`WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`](../30-administration/10-configuration/10-server.md#authenticate_public_repos),
 Woodpecker creates Git credentials of a forge user. They can also push to the repository.
-On [GitLab](../30-administration/10-configuration/12-forges/40-gitlab.md#clone-credentials) Woodpecker uses read-only credentials of only this repository instead, if it can create them.
+On [Gitea](../30-administration/10-configuration/12-forges/30-gitea.md#clone-credentials) and [GitLab](../30-administration/10-configuration/12-forges/40-gitlab.md#clone-credentials) Woodpecker uses read-only credentials of only this repository instead, if it can create them.
 
 They are only passed to the default clone step, to plugins in the [trusted clone plugins](./75-project-settings.md#custom-trusted-clone-plugins)
 and to every step of a repository with the [security option](#trusted-repositories).
