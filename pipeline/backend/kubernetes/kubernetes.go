@@ -32,9 +32,11 @@ import (
 	"github.com/cenkalti/backoff/v7"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 	kube_core_v1 "k8s.io/api/core/v1"
 	kube_errors "k8s.io/apimachinery/pkg/api/errors"
 	kube_meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -354,7 +356,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
+	si := e.podInformerFactory(step.OrgID, podName)
 	podInformer := si.Core().V1().Pods().Informer()
 	handler, err := podInformer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
@@ -447,6 +449,18 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
+// podInformerFactory watches only podName, so each informer doesn't cache every pod in the namespace.
+func (e *kube) podInformerFactory(orgID int64, podName string) informers.SharedInformerFactory {
+	return informers.NewSharedInformerFactoryWithOptions(
+		e.client,
+		defaultResyncDuration,
+		informers.WithNamespace(e.config.GetNamespace(orgID)),
+		informers.WithTweakListOptions(func(options *kube_meta_v1.ListOptions) {
+			options.FieldSelector = fields.OneTermEqualSelector("metadata.name", podName).String()
+		}),
+	)
+}
+
 // TailStep tails the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := stepToPodName(step)
@@ -477,7 +491,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.GetNamespace(step.OrgID)))
+	si := e.podInformerFactory(step.OrgID, podName)
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -563,27 +577,30 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
+	var g errgroup.Group
+
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, e.config.newDefaultDeleteOptions())
-			if err != nil {
-				return err
-			}
+			g.Go(func() error {
+				return e.DestroyStep(ctx, step, taskUUID)
+			})
 		}
+	}
+
+	if err := g.Wait(); err != nil {
+		log.Error().Err(err).Msg("could not destroy all pods")
 	}
 
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow headless service")
-	err := e.stopHeadlessService(ctx, e, namespace, taskUUID)
-	if err != nil {
-		return err
+	if err := e.stopHeadlessService(ctx, e, namespace, taskUUID); err != nil {
+		log.Error().Err(err).Msg("could not delete headless service")
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("deleting workflow volume")
-	err = stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions())
-	if err != nil {
-		return err
+	if err := stopVolume(ctx, e, conf.Volume, e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID), e.config.newDefaultDeleteOptions()); err != nil {
+		log.Error().Err(err).Msg("could not delete workflow volume")
 	}
 
 	return nil
