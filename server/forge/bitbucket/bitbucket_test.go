@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
@@ -222,8 +223,47 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, "master", r.Branch)
-	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit.SHA)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
+}
+
+func TestPullCommit(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	s := httptest.NewServer(fixtures.Handler())
+	defer s.Close()
+	c := &config{url: s.URL, api: s.URL}
+	client := c.newClient(t.Context(), fakeUser)
+
+	for _, tt := range []struct {
+		name, event, payload, fork, sha, url string
+	}{
+		// the hook only carries a short sha, the forge answers with the full one
+		{name: "open", event: hookPullCreated, payload: fixtures.HookPull, sha: "d3022fc0ca3d", url: "user_name/repo_name"},
+		{name: "open from fork", event: hookPullCreated, payload: fixtures.HookPull, fork: "fork_owner/fork_repo", sha: "d3022fc0ca3d", url: "fork_owner/fork_repo"},
+		{name: "merged", event: hookPullMerged, payload: fixtures.HookPullRequestMerged, fork: "fork_owner/fork_repo", sha: "006704dbeab2", url: "anbraten/test-2"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(http.MethodPost, "/hook", bytes.NewBufferString(tt.payload))
+			req.Header = http.Header{}
+			req.Header.Set(hookEvent, tt.event)
+			pr, repo, pl, err := parseHook(req)
+			require.NoError(t, err)
+			if tt.fork != "" {
+				pr.PullRequest.Source.Repo.FullName = tt.fork
+			}
+
+			commit, err := pullCommit(client, repo, pr, pl.Commit.SHA)
+			require.NoError(t, err)
+			assert.Equal(t, &model.Commit{
+				SHA:       tt.sha + "full",
+				Message:   "fix the thing",
+				ForgeURL:  "https://bitbucket.org/" + tt.url + "/commit/" + tt.sha,
+				Author:    model.CommitAuthor{Name: "Jane Doe", Email: "jane@example.com"},
+				Timestamp: 1700000000,
+			}, commit)
+		})
+	}
 }
 
 var (
@@ -295,7 +335,9 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{
+			SHA: "9ecad50",
+		},
 	}
 
 	fakeWorkflow = &model.Workflow{

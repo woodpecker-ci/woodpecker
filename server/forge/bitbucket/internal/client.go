@@ -45,6 +45,7 @@ const (
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathCommit        = "%s/2.0/repositories/%s/%s/commit/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
 	pageSize          = 100
@@ -218,6 +219,15 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 	uri := fmt.Sprintf(pathBranches, c.base, owner, name, opts.Encode())
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out.Values, err
+}
+
+// GetCommit returns a single commit.
+// https://developer.atlassian.com/cloud/bitbucket/rest/api-group-commits/#api-repositories-workspace-repo-slug-commit-commit-get
+func (c *Client) GetCommit(owner, name, sha string) (*Commit, error) {
+	out := new(Commit)
+	uri := fmt.Sprintf(pathCommit, c.base, owner, name, sha)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
 }
 
 func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {

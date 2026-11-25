@@ -113,9 +113,9 @@ func (p *impl) Subscribe(c context.Context, t pubsub.Topics, r pubsub.Receiver) 
 // PublishPipelineEvent builds a pipeline state-change event and publishes it
 // to the repo topic (and the public topic for public woodpecker repos).
 func (p *impl) PublishPipelineEvent(c context.Context, repo *model.Repo, pipeline *model.Pipeline) error {
-	data, err := json.Marshal(model.Event{
+	data, err := json.Marshal(PipelineEvent{
 		Repo:     *repo,
-		Pipeline: *pipeline,
+		Pipeline: pipeline.ToAPIModel(),
 	})
 	if err != nil {
 		return fmt.Errorf("can't marshal JSON: %w", err)

@@ -48,6 +48,12 @@ func TestFeedToAPIModel(t *testing.T) {
 			wantMessage: "created release My Release",
 		},
 		{
+			name:        "pull keeps the pull request title as message",
+			feed:        Feed{Event: EventPullClosed, Title: "Add feature", Commit: &Commit{Message: "fix bug"}},
+			wantTitle:   "Add feature",
+			wantMessage: "Add feature",
+		},
+		{
 			name:        "push leaves derived fields untouched",
 			feed:        Feed{Event: EventPush, Title: "some commit"},
 			wantTitle:   "some commit",

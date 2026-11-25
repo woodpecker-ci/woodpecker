@@ -273,7 +273,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	}
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	content, _, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -316,7 +316,7 @@ func (c *client) dirFromREST(ctx context.Context, u *model.User, r *model.Repo, 
 	}
 
 	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = b.Commit
+	opts.Ref = b.Commit.SHA
 	_, data, resp, err := client.Repositories.GetContents(ctx, r.Owner, r.Name, f, opts)
 	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -620,7 +620,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		return err
 	}
 
-	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, github.RepoStatus{
+	_, _, err = client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, github.RepoStatus{
 		Context:     new(common.GetPipelineStatusContext(repo, pipeline, workflow)),
 		State:       new(convertStatus(workflow.State)),
 		Description: new(common.GetPipelineStatusDescription(workflow.State)),
@@ -691,10 +691,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.GetCommit().GetSHA(),
-		ForgeURL: b.GetCommit().GetHTMLURL(),
-	}, nil
+	return convertCommit(b.GetCommit()), nil
 }
 
 // Hook parses the post-commit hook from the Request body
@@ -706,17 +703,27 @@ func (c *client) Hook(ctx context.Context, r *http.Request, _ string) (*model.Re
 	}
 
 	if pipeline != nil {
-		switch pipeline.Event { //nolint:gocritic // ignore lint issue as this will get more cases later
+		switch pipeline.Event {
 		case model.EventRelease:
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			if pipeline.Commit == "" {
-				sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			if pipeline.Commit.SHA == "" {
+				commit, err := c.getCommit(ctx, repo, "", pipeline.TagTitle)
 				if err != nil {
 					return nil, nil, err
 				}
-				pipeline.Commit = sha
+				if commit != nil {
+					pipeline.Commit = commit
+				}
+			}
+		case model.EventPull, model.EventPullClosed, model.EventPullMetadata, model.EventDeploy:
+			commit, err := c.getCommit(ctx, repo, pipeline.Commit.SHA, "")
+			if err != nil {
+				return nil, nil, err
+			}
+			if commit != nil {
+				pipeline.Commit = commit
 			}
 		}
 	}
@@ -783,21 +790,23 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	return pipeline, err
 }
 
-func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+// getCommit loads a commit from the forge, as hooks do not carry all of its data.
+// With a tagName the commit of that tag is loaded.
+func (c *client) getCommit(ctx context.Context, repo *model.Repo, sha, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return "", nil
+		return nil, nil
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// Refresh the OAuth token before making API calls.
@@ -807,33 +816,41 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 
 	gh, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	opts := &github.ListOptions{Page: 1}
-	var tag *github.RepositoryTag
-	for opts.Page > 0 {
-		tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
-		if err != nil {
-			return "", err
-		}
+	if tagName != "" {
+		opts := &github.ListOptions{Page: 1}
+		var tag *github.RepositoryTag
+		for opts.Page > 0 {
+			tags, resp, err := gh.Repositories.ListTags(ctx, repo.Owner, repo.Name, opts)
+			if err != nil {
+				return nil, err
+			}
 
-		for _, t := range tags {
-			if t.GetName() == tagName {
-				tag = t
+			for _, t := range tags {
+				if t.GetName() == tagName {
+					tag = t
+					break
+				}
+			}
+			if tag != nil {
 				break
 			}
-		}
-		if tag != nil {
-			break
-		}
 
-		opts.Page = resp.NextPage
+			opts.Page = resp.NextPage
+		}
+		if tag == nil {
+			return nil, fmt.Errorf("could not find tag %s", tagName)
+		}
+		sha = tag.GetCommit().GetSHA()
 	}
-	if tag == nil {
-		return "", fmt.Errorf("could not find tag %s", tagName)
+
+	commit, _, err := gh.Repositories.GetCommit(ctx, repo.Owner, repo.Name, sha, nil)
+	if err != nil {
+		return nil, err
 	}
-	return tag.GetCommit().GetSHA(), nil
+	return convertCommit(commit), nil
 }
 
 func (c *client) loadChangedFilesFromCommits(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, curr, prev string) (*model.Pipeline, error) {

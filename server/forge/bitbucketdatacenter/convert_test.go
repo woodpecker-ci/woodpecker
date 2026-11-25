@@ -177,16 +177,13 @@ func TestConvertRepositoryPushEvent(t *testing.T) {
 				},
 			},
 			to: &model.Pipeline{
-				Commit:    "1234567890abcdef",
-				Branch:    "branch",
-				Message:   "",
-				Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-				Author:    "John Doe",
-				Email:     "john.doe@mail.com",
-				Timestamp: now.UTC().Unix(),
-				Ref:       "refs/head/branch",
-				ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-				Event:     model.EventPush,
+				Commit:   &model.Commit{SHA: "1234567890abcdef"},
+				Branch:   "branch",
+				Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+				Author:   "John Doe",
+				Ref:      "refs/head/branch",
+				ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+				Event:    model.EventPush,
 			},
 		},
 	}
@@ -235,18 +232,15 @@ func TestConvertPullRequestEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit:    "1234567890abcdef",
-		Branch:    "branch",
-		Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author:    "John Doe",
-		Email:     "john.doe@mail.com",
-		Timestamp: now.UTC().Unix(),
-		Ref:       "refs/pull-requests/123/from",
-		ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-		Event:     model.EventPull,
-		Refspec:   "branch:main",
-		Title:     "my title",
-		Message:   "my title",
+		Commit:   &model.Commit{SHA: "1234567890abcdef"},
+		Branch:   "branch",
+		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+		Author:   "John Doe",
+		Ref:      "refs/pull-requests/123/from",
+		ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		Event:    model.EventPull,
+		Refspec:  "branch:main",
+		Title:    "my title",
 	}, to)
 }
 
@@ -289,18 +283,15 @@ func TestConvertPullRequestCloseEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit:    "1234567890abcdef",
-		Branch:    "branch",
-		Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author:    "John Doe",
-		Email:     "john.doe@mail.com",
-		Timestamp: now.UTC().Unix(),
-		Ref:       "refs/pull-requests/123/from",
-		ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-		Event:     model.EventPullClosed,
-		Refspec:   "branch:main",
-		Title:     "my title",
-		Message:   "my title",
+		Commit:   &model.Commit{SHA: "1234567890abcdef"},
+		Branch:   "branch",
+		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+		Author:   "John Doe",
+		Ref:      "refs/pull-requests/123/from",
+		ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		Event:    model.EventPullClosed,
+		Refspec:  "branch:main",
+		Title:    "my title",
 	}, to)
 }
 

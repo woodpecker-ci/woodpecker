@@ -174,7 +174,9 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{
+			SHA: "9ecad50",
+		},
 	}
 
 	fakeWorkflow = &model.Workflow{
@@ -314,27 +316,44 @@ func TestHookLoadsTagCommit(t *testing.T) {
 
 	t.Run("release events get the commit of their tag", func(t *testing.T) {
 		g := newTestForge(t, map[string]http.HandlerFunc{
-			"/api/v1/repos/anbraten/demo/tags/0.0.5": respond(http.StatusOK, `{"name":"0.0.5","commit":{"sha":"abc123"}}`),
+			"/api/v1/repos/anbraten/demo/tags/0.0.5":         respond(http.StatusOK, `{"name":"0.0.5","commit":{"sha":"abc123"}}`),
+			"/api/v1/repos/anbraten/demo/git/commits/abc123": respond(http.StatusOK, commitPayload("abc123")),
 		})
 
 		_, pipeline, err := g.Hook(ctx, newRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventRelease, pipeline.Event)
 		assert.Equal(t, "0.0.5", pipeline.TagTitle)
-		assert.Equal(t, "abc123", pipeline.Commit)
+		assert.Equal(t, expectedCommit("abc123"), pipeline.Commit)
 	})
 
 	t.Run("tag events get the commit of their tag, not the annotated tag object", func(t *testing.T) {
 		// the create hook of a pushed annotated tag holds the SHA of the tag object
 		g := newTestForge(t, map[string]http.HandlerFunc{
-			"/api/v1/repos/anbraten/demo/tags/v1.0.0": respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
+			"/api/v1/repos/anbraten/demo/tags/v1.0.0":        respond(http.StatusOK, `{"name":"v1.0.0","id":"ef98532add3b2feb7a137426bba1248724367df5","commit":{"sha":"abc123"}}`),
+			"/api/v1/repos/anbraten/demo/git/commits/abc123": respond(http.StatusOK, commitPayload("abc123")),
 		})
 
 		_, pipeline, err := g.Hook(ctx, newTagRequest(), testHookSecret)
 		require.NoError(t, err)
 		assert.Equal(t, model.EventTag, pipeline.Event)
 		assert.Equal(t, "v1.0.0", pipeline.TagTitle)
-		assert.Equal(t, "abc123", pipeline.Commit)
+		assert.Equal(t, expectedCommit("abc123"), pipeline.Commit)
+	})
+
+	t.Run("pull request events get their head commit", func(t *testing.T) {
+		const sha = "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"
+		g := newTestForge(t, map[string]http.HandlerFunc{
+			"/api/v1/repos/anbraten/demo/git/commits/" + sha: respond(http.StatusOK, commitPayload(sha)),
+			"/api/v1/repos/anbraten/demo/pulls/1/files":      respond(http.StatusOK, "[]"),
+		})
+		req := httptest.NewRequest(http.MethodPost, "/hook", bytes.NewBuffer(fixtures.HookPullRequest))
+		req.Header.Set(hookEvent, hookPullRequest)
+
+		_, pipeline, err := g.Hook(ctx, signHookRequest(t, req), testHookSecret)
+		require.NoError(t, err)
+		assert.Equal(t, model.EventPull, pipeline.Event)
+		assert.Equal(t, expectedCommit(sha), pipeline.Commit)
 	})
 
 	t.Run("missing tag fails the hook", func(t *testing.T) {
@@ -474,7 +493,7 @@ func TestFileAndDir(t *testing.T) {
 	})
 	user := &model.User{AccessToken: "token"}
 	repo := &model.Repo{Owner: "owner", Name: "repo"}
-	pipeline := &model.Pipeline{Commit: "abc"}
+	pipeline := &model.Pipeline{Commit: &model.Commit{SHA: "abc"}}
 
 	_, err := g.File(t.Context(), user, repo, pipeline, ".woodpecker.yaml")
 	assert.ErrorIs(t, err, &forge_types.ErrConfigNotFound{})
@@ -582,4 +601,20 @@ func TestRefreshExchangesStillValidToken(t *testing.T) {
 	assert.Equal(t, "new-access", user.AccessToken)
 	assert.Equal(t, "new-refresh", user.RefreshToken)
 	assert.WithinDuration(t, time.Now().Add(time.Hour), time.Unix(user.Expiry, 0), 2*time.Minute)
+}
+
+// commitPayload is a commit like the API sends it.
+func commitPayload(sha string) string {
+	return `{"sha":"` + sha + `","html_url":"https://example.com/anbraten/demo/commit/` + sha + `",` +
+		`"commit":{"message":"fix the thing\n","author":{"name":"Jane Doe","email":"jane@example.com","date":"2026-11-20T10:00:00Z"}}}`
+}
+
+func expectedCommit(sha string) *model.Commit {
+	return &model.Commit{
+		SHA:       sha,
+		Message:   "fix the thing\n",
+		ForgeURL:  "https://example.com/anbraten/demo/commit/" + sha,
+		Author:    model.CommitAuthor{Name: "Jane Doe", Email: "jane@example.com"},
+		Timestamp: time.Date(2026, 11, 20, 10, 0, 0, 0, time.UTC).Unix(),
+	}
 }

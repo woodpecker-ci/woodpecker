@@ -28,6 +28,13 @@ import (
 // is skipped; the int is a match score (higher is better).
 type FilterFn func(*model.Task) (bool, int)
 
+// PipelineEvent is sent over the event stream (/api/stream/events) when a
+// pipeline changes, so the web UI can update the repo and pipeline it shows.
+type PipelineEvent struct {
+	Repo     model.Repo         `json:"repo"`
+	Pipeline *model.APIPipeline `json:"pipeline"`
+}
+
 // Scheduler coordinates the queue and pubsub providers behind a single
 // surface. The low-level enqueue (queue.PushAtOnce) and publish
 // (pubsub.Publish) calls are intentionally not exposed: callers use the

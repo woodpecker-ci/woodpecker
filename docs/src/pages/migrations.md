@@ -12,6 +12,8 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- `CI_COMMIT_AUTHOR` and `CI_PREV_COMMIT_AUTHOR` are the name of the git commit author now, and empty if the forge does not report it. Use `CI_PIPELINE_AUTHOR` for the forge user who started the pipeline.
+- `CI_COMMIT_MESSAGE` of pull request pipelines is the message of the head commit now, not the pull request title. So `[SKIP CI]` in the pull request title does not skip a pipeline anymore, only in the commit message.
 
 ### API changes
 
@@ -21,6 +23,12 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
     - `release.title`: for release events
   - `message` =>
     - `tag_title` for tag events
+    - `title` for pull request events
+    - `commit_pipeline.message` for other events that carry a commit
+    - `manual_message` for manual events, which report the head commit of the branch as `commit_pipeline` now
+  - `commit` => `commit_pipeline.sha`
+  - `timestamp` => `commit_pipeline.timestamp`
+  - `author_email` => `commit_pipeline.author.email`
   - `is_prerelease` => `release.is_prerelease`
   - extraction from `ref` => `tag_title`
 

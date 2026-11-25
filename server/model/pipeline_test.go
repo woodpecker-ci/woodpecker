@@ -57,8 +57,14 @@ func TestPipelineToAPIModel(t *testing.T) {
 			wantIsPrerelease: true,
 		},
 		{
+			name:        "pull keeps the pull request title as message",
+			pipeline:    Pipeline{Event: EventPull, Title: "Add feature", Commit: &Commit{Message: "fix bug"}},
+			wantTitle:   "Add feature",
+			wantMessage: "Add feature",
+		},
+		{
 			name:     "push leaves derived fields untouched",
-			pipeline: Pipeline{Event: EventPush, Message: "fix bug"},
+			pipeline: Pipeline{Event: EventPush, Commit: &Commit{Message: "fix bug"}},
 			// message is the stored commit message, not overwritten
 			wantMessage: "fix bug",
 		},

@@ -279,7 +279,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, resp, err := client.Repositories.GetFile(ctx, r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.Repositories.GetFile(ctx, r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
@@ -295,7 +295,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	// List files in repository
-	contents, resp, err := client.Repositories.ListContents(ctx, r.Owner, r.Name, b.Commit, f)
+	contents, resp, err := client.Repositories.ListContents(ctx, r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
@@ -333,7 +333,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.Repositories.CreateStatus(ctx,
 		repo.Owner,
 		repo.Name,
-		pipeline.Commit,
+		pipeline.Commit.SHA,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State, c.canSkip),
 			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
@@ -469,10 +469,7 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 	if err != nil {
 		return nil, err
 	}
-	return &model.Commit{
-		SHA:      b.Commit.ID,
-		ForgeURL: b.Commit.URL,
-	}, nil
+	return convertPayloadCommit(b.Commit), nil
 }
 
 func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -527,15 +524,22 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request, secret string) (*mode
 			if pipeline.TagTitle == "" {
 				pipeline.TagTitle = strings.Split(pipeline.Ref, "/")[2]
 			}
-			// the create hook of a pushed annotated tag holds the SHA of the
-			// tag object, not of the tagged commit
-			sha, err := c.getTagCommitSHA(ctx, repo, pipeline.TagTitle)
+			commit, err := c.getCommit(ctx, repo, "", pipeline.TagTitle)
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
+			if commit != nil {
+				pipeline.Commit = commit
+			}
 
 		case model.EventPull, model.EventPullClosed, model.EventPullMetadata:
+			commit, err := c.getCommit(ctx, repo, pipeline.Commit.SHA, "")
+			if err != nil {
+				return nil, nil, err
+			}
+			if commit != nil {
+				pipeline.Commit = commit
+			}
 			if len(pipeline.ChangedFiles) == 0 {
 				index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 				if err != nil {
@@ -687,36 +691,47 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 	return shared_utils.DeduplicateStrings(files), nil
 }
 
-func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+// getCommit loads a commit from the forge, as hooks do not carry all of its data.
+// With a tagName the commit of that tag is loaded, as the hook of an annotated
+// tag holds the SHA of the tag object, not of the tagged commit.
+func (c *Gitea) getCommit(ctx context.Context, repo *model.Repo, sha, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return "", nil
+		return nil, nil
 	}
 
 	repo, err := _store.GetRepoNameFallback(c.id, repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	forge.Refresh(ctx, c, _store, user)
 
 	client, err := c.newClientToken(user.AccessToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	tag, _, err := client.Repositories.GetTag(ctx, repo.Owner, repo.Name, tagName)
+	if tagName != "" {
+		tag, _, err := client.Repositories.GetTag(ctx, repo.Owner, repo.Name, tagName)
+		if err != nil {
+			return nil, err
+		}
+		sha = tag.Commit.SHA
+	}
+
+	commit, _, err := client.Repositories.GetSingleCommit(ctx, repo.Owner, repo.Name, sha)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tag.Commit.SHA, nil
+	return convertCommit(commit), nil
 }
 
 func (c *Gitea) perPage(ctx context.Context) int {
