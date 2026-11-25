@@ -61,6 +61,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&deduplicateLogEntries,
 	&drop024MigrationArtifacts,
 	&removeSQLiteLegacyInlineUnique,
+	&addAgentTokenHash,
 }
 
 var allBeans = []any{
