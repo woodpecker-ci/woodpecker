@@ -7,19 +7,19 @@ require (
 	charm.land/huh/v2 v2.0.3
 	codeberg.org/6543/go-yaml2json/v2 v2.0.0
 	codeberg.org/6543/xyaml/v2 v2.0.1
-	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.0
-	gitea.dev/sdk v1.5.2-0.20261121024034-0a741c051d52
+	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v4 v4.0.1-0.20261121172830-0f7befc6b835
+	gitea.dev/sdk v1.5.2
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
-	github.com/bmatcuk/doublestar/v4 v4.10.4
+	github.com/bmatcuk/doublestar/v4 v4.10.7
 	github.com/cenkalti/backoff/v7 v7.0.3
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.10.0+incompatible
+	github.com/docker/cli v29.10.1+incompatible
 	github.com/docker/go-connections v0.8.2
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.17.8
+	github.com/expr-lang/expr v1.18.1
 	github.com/gdgvda/cron v0.8.0
 	github.com/getkin/kin-openapi v0.153.0
 	github.com/gin-gonic/gin v1.12.0
@@ -52,9 +52,9 @@ require (
 	github.com/urfave/cli-docs/v3 v3.2.0
 	github.com/urfave/cli/v3 v3.14.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/yaronf/httpsign v0.6.4
+	github.com/yaronf/httpsign v0.6.5
 	github.com/zalando/go-keyring v0.2.8
-	gitlab.com/gitlab-org/api/client-go/v3 v3.54.1
+	gitlab.com/gitlab-org/api/client-go/v3 v3.57.0
 	go.uber.org/multierr v1.11.0
 	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/image v0.48.0

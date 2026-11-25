@@ -681,6 +681,29 @@ func TestPostPipeline(t *testing.T) {
 		assert.Equal(t, "pipeline definition not found", got.Errors[0].Message)
 	})
 
+	t.Run("restart of a deployment is forbidden when the repo does not allow deployments", func(t *testing.T) {
+		parent := newErroredParent()
+		parent.Event = model.EventDeploy
+
+		mockStore := store_mocks.NewMockStore(t)
+		mockStore.On("GetUser", int64(1)).Return(fakeUser, nil)
+		mockManager := manager_mocks.NewMockManager(t)
+		mockManager.On("ForgeFromUser", fakeUser).Return(forge_mocks.NewMockForge(t), nil)
+		server.Config.Services.Manager = mockManager
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Set("repo", fakeRepo)
+		c.Set("user", fakeUser)
+		c.Set("pipeline", parent)
+		c.Request, _ = http.NewRequest(http.MethodPost, "", nil)
+
+		PostPipeline(c)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+	})
+
 	t.Run("deployment is attributed to the session user, not the original author or repo owner", func(t *testing.T) {
 		fakeRepo.AllowDeploy = true
 		t.Cleanup(func() { fakeRepo.AllowDeploy = false })

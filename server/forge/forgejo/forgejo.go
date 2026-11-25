@@ -45,10 +45,6 @@ const (
 	accessTokenURL    = "%s/login/oauth/access_token"
 	defaultPageSize   = 50
 	forgejoDevVersion = "v7.0.2"
-
-	// Forgejo knows the skipped state since 16 (https://codeberg.org/forgejo/forgejo/pulls/12606).
-	// TODO: replace with upstream enum asap https://codeberg.org/mvdkleijn/forgejo-sdk/pulls/201 was merged and new sdk version released.
-	statusSkipped forgejo.StatusState = "skipped"
 )
 
 type Forgejo struct {
@@ -642,7 +638,7 @@ func getStatus(status model.StatusValue, canSkip bool) forgejo.StatusState {
 		return forgejo.StatusFailure
 	case model.StatusSkipped:
 		if canSkip {
-			return statusSkipped
+			return forgejo.StatusSkipped
 		}
 		return forgejo.StatusFailure
 	case model.StatusDeclined:
