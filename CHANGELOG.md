@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @bitskeptic, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @ivaldibot, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @thomas-baumeister, @xunguangzlj-cloud, @zeevogels
+@6543, @AhmadNajiKam, @Bynlk, @amalsaidov, @arpitjain099, @bitskeptic, @chaitanya-y20, @chiliec, @confusedsushi, @dgesteves, @gzm0, @hippi345, @hsdfat, @ivaldibot, @nk-batman21, @pcbeingused333, @qsun, @qwerty287, @roian6, @sarankumar1325, @savv, @slayerjain, @solarhell, @thomas-baumeister, @xoxys, @xunguangzlj-cloud, @zeevogels
 
 ### 🔒 Security
 
@@ -51,6 +51,7 @@
 
 ### 🐛 Bug Fixes
 
+- Ensure full Kubernetes workflow cleanup on teardown [[#7635](https://github.com/woodpecker-ci/woodpecker/pull/7635)]
 - Count agent retry timeout from first failure, not from call start [[#7111](https://github.com/woodpecker-ci/woodpecker/pull/7111)]
 - Harden config service [[#7241](https://github.com/woodpecker-ci/woodpecker/pull/7241)]
 - Migrate legacy SQLite inline constrains and fix long running ones [[#7440](https://github.com/woodpecker-ci/woodpecker/pull/7440)]
