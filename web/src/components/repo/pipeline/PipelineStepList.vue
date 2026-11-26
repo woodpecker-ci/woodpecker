@@ -61,7 +61,7 @@
     </Panel>
 
     <div class="relative min-h-0 w-full grow">
-        <div class="absolute top-0 right-0 left-0 flex h-full flex-col gap-y-2 overflow-y-auto">
+      <div class="absolute top-0 right-0 left-0 flex h-full flex-col gap-y-2 overflow-y-auto">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
