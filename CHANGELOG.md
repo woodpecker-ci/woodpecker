@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@rogervokma-stack
+@rogervokma-stack, @xoxys
+
+### 🐛 Bug Fixes
+
+- Improve pipeline log readability and consistency [[#7641](https://github.com/woodpecker-ci/woodpecker/pull/7641)]
 
 ### 📚 Documentation
 
