@@ -34,6 +34,7 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Grafana Dashboard](https://github.com/Janik-Haag/woodpecker-grafana-dashboard) - A dashboard visualizing information exposed by the Woodpecker prometheus endpoint.
 - [woodpecker-autoscaler](https://github.com/Lerentis/woodpecker-autoscaler) - Yet another Woodpecker autoscaler currently targeting [Hetzner cloud](https://www.hetzner.com/cloud) that works in parallel to other autoscaler implementations.
 - [Woodpecker MCP](https://github.com/j04n-f/woodpecker-mcp) - A Model Context Protocol (MCP) server that connects AI assistants to Woodpecker CI. Debug pipeline failures, analyze build logs, and troubleshoot CI/CD configurations with AI assistance.
+- [Pipeline Inbox for Forgejo and Gitea](https://plugins.jetbrains.com/plugin/35556-pipeline-inbox-for-forgejo-and-gitea) - A JetBrains IDE plugin; for Codeberg repositories built by Woodpecker CI (ci.codeberg.org or your own Woodpecker server), it lists their pipelines (beta), with steps and logs, instead of Forgejo Actions runs. Listing is free; cancel and re-run are paid.
 
 ## [Configuration Extensions](/docs/usage/extensions#configuration)
 
