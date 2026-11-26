@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-26
+
+### ❤️ Thanks to all contributors! ❤️
+
+@rogervokma-stack
+
+### 📚 Documentation
+
+- Add Pipeline Inbox for Forgejo and Gitea to awesome list [[#7640](https://github.com/woodpecker-ci/woodpecker/pull/7640)]
+
 ## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-25
 
 ### ❤️ Thanks to all contributors! ❤️
