@@ -12,6 +12,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 - deprecated `CI_COMMIT_PRERELEASE` env var in favor of `CI_PIPELINE_RELEASE_PRE`
 - deprecated `runs_on` workflow property in favor of `when.status`.
+- Steps that set both `settings` and `environment` now fail the linter instead of only warning. Pass the values as `settings` instead.
 
 ### API changes
 
