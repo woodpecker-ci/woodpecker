@@ -37,3 +37,10 @@ func WithTrustedClonePlugins(plugins []string) Option {
 		linter.trustedClonePlugins = &plugins
 	}
 }
+
+// WithWorkflowPriorityDisabled disables workflow-level queue priority.
+func WithWorkflowPriorityDisabled(disabled bool) Option {
+	return func(linter *Linter) {
+		linter.disableWorkflowPriority = disabled
+	}
+}

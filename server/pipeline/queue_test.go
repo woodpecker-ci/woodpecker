@@ -138,3 +138,17 @@ func TestQueuePipelineOrgAgentsOnly(t *testing.T) {
 		})
 	}
 }
+
+func TestQueuePipelinePriority(t *testing.T) {
+	repo := &model.Repo{ID: 7}
+	item := &builder.Item{
+		Workflow: &builder.Workflow{ID: 1, Name: "build"},
+		Priority: -20,
+	}
+
+	tasks, err := pipelineTasks(repo, nil, &model.Pipeline{ID: 42}, []*builder.Item{item})
+	require.NoError(t, err)
+	require.Len(t, tasks, 1)
+
+	assert.Equal(t, -20, tasks[0].Priority)
+}
