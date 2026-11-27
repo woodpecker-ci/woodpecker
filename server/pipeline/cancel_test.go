@@ -118,6 +118,9 @@ func TestCancelSendsStatusOfWorkflowsThatDidNotStart(t *testing.T) {
 			s.EXPECT().UpdatePipeline(mock.MatchedBy(func(p *model.Pipeline) bool {
 				return p.Status == tt.status
 			})).Return(nil).Once()
+			// the status post re-reads what Cancel persisted
+			s.EXPECT().WorkflowLoad(tt.sent).Return(&model.Workflow{ID: tt.sent, State: model.StatusSkipped}, nil).Once()
+			s.EXPECT().GetPipeline(int64(1)).Return(&model.Pipeline{ID: 1, Status: tt.status}, nil).Once()
 
 			scheduler := scheduler_mocks.NewMockScheduler(t)
 			scheduler.EXPECT().CancelWorkflows(mock.Anything, tt.canceled).Return(nil).Once()

@@ -117,7 +117,9 @@ func PostHook(c *gin.Context) {
 	// 2. Parse the webhook data
 	//
 
+	hookParseStart := time.Now()
 	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request, repo.WebhookSecret)
+	hookParseDuration := time.Since(hookParseStart)
 	if err != nil {
 		if errors.Is(err, types.ErrInvalidWebhookSignature) {
 			log.Warn().Str("repo", repo.FullName).Msg("ignoring hook: invalid webhook signature")
@@ -222,6 +224,8 @@ func PostHook(c *gin.Context) {
 	// respond synchronously with the created pipeline (preserving the old
 	// behavior and API response). If it takes longer we respond 202 Accepted and
 	// let creation finish in the background.
+	log.Debug().Str("repo", repo.FullName).Dur("hook_parse", hookParseDuration).Msg("webhook parse timing")
+
 	bgCtx, cancel := context.WithTimeout(context.WithoutCancel(context.Background()), backgroundPipelineCreationTimeout)
 
 	done := make(chan struct{})

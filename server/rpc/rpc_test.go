@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -610,12 +611,27 @@ func TestRPCInit(t *testing.T) {
 		workflow := defaultWorkflow(model.StatusPending)
 		user := &model.User{ID: 40, Expiry: time.Now().Add(time.Hour).Unix()}
 
-		mockStore.On("WorkflowLoad", int64(30)).Return(workflow, nil)
+		// like a store, WorkflowLoad returns what WorkflowUpdate saved last:
+		// the status post re-reads the workflow
+		stored := *workflow
+		var storedMu sync.Mutex
+		mockStore.On("WorkflowLoad", int64(30)).Return(func(int64) (*model.Workflow, error) {
+			storedMu.Lock()
+			defer storedMu.Unlock()
+			w := stored
+			return &w, nil
+		})
 		mockStore.On("AgentFind", int64(1)).Return(agent, nil)
 		mockStore.On("GetPipeline", int64(20)).Return(pipeline, nil)
 		mockStore.On("GetRepo", int64(10)).Return(repo, nil)
 		mockStore.On("GetUser", int64(40)).Return(user, nil)
-		mockStore.On("WorkflowUpdate", mock.Anything).Return(nil)
+		mockStore.On("WorkflowUpdate", mock.Anything).Run(func(args mock.Arguments) {
+			if w, ok := args.Get(0).(*model.Workflow); ok {
+				storedMu.Lock()
+				defer storedMu.Unlock()
+				stored = *w
+			}
+		}).Return(nil)
 		mockStore.On("WorkflowGetTree", mock.Anything).Return([]*model.Workflow{workflow}, nil)
 		mockStore.On("AgentUpdate", mock.Anything).Return(nil)
 
