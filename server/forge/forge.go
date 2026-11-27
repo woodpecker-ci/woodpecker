@@ -181,3 +181,18 @@ type Forge interface {
 	// If identifier is a user, return org with IsUser: true.
 	Org(ctx context.Context, u *model.User, org string) (*model.Org, error)
 }
+
+// MultiHook is implemented by forges whose webhooks can ask for more than one pipeline at once.
+// Bitbucket Cloud, for one, sends a single push webhook for everything a `git push` moves, with one
+// change per branch or tag; Hook can only return one of them.
+//
+// When a forge implements it, the webhook handler calls HookPipelines instead of Hook and creates
+// every pipeline it returns, in order. It receives the same secret as Hook, and must verify the
+// webhook signature the same way. Its return semantics are those of Hook, with a slice:
+//   - (repo, pipelines, nil): execute each pipeline
+//   - (repo, nil or empty, nil): valid webhook, no pipeline should run
+//   - (nil, nil, types.ErrIgnoreEvent): event ignored (logged)
+//   - (nil, nil, error): invalid webhook or parsing error
+type MultiHook interface {
+	HookPipelines(ctx context.Context, r *http.Request, secret string) (*model.Repo, []*model.Pipeline, error)
+}

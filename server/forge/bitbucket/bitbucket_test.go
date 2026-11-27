@@ -224,6 +224,34 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 	assert.Equal(t, []string{"main.go"}, b.ChangedFiles)
+
+	// One push webhook for several refs: HookPipelines returns a pipeline per change with a new
+	// commit, each with its own changed files, while Hook keeps returning the first one.
+	buf = bytes.NewBufferString(fixtures.HookPushMultipleChanges)
+	req, _ = http.NewRequest(http.MethodPost, "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, hookPush)
+
+	r, bs, err := c.HookPipelines(ctx, req, "")
+	assert.NoError(t, err)
+	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	if assert.Len(t, bs, 3) {
+		assert.Equal(t, "refs/heads/develop", bs[0].Ref)
+		assert.Equal(t, "refs/heads/release/1.2", bs[1].Ref)
+		assert.Equal(t, "refs/tags/v1.0.0", bs[2].Ref)
+		assert.Equal(t, []string{"main.go"}, bs[0].ChangedFiles)
+		assert.Equal(t, []string{"main.go"}, bs[1].ChangedFiles)
+		assert.Empty(t, bs[2].ChangedFiles)
+	}
+
+	buf = bytes.NewBufferString(fixtures.HookPushMultipleChanges)
+	req, _ = http.NewRequest(http.MethodPost, "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, hookPush)
+
+	_, b, err = c.Hook(ctx, req, "")
+	assert.NoError(t, err)
+	assert.Equal(t, "refs/heads/develop", b.Ref)
 }
 
 var (

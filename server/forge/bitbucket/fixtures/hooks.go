@@ -20,6 +20,12 @@ import _ "embed"
 //go:embed HookPush.json
 var HookPush string
 
+// HookPushMultipleChanges is one repo:push webhook for a `git push` that moved two branches,
+// deleted a third and created a tag: Bitbucket lists every ref it moved in push.changes.
+//
+//go:embed HookPushMultipleChanges.json
+var HookPushMultipleChanges string
+
 const HookPushEmptyHash = `
 {
   "push": {
