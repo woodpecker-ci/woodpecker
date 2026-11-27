@@ -94,6 +94,7 @@
       "forge_repo_missing": "Forge repo is missing!"
     },
     "open_in_forge": "Open repository in forge",
+    "orphaned": "This repository does not exist on the forge anymore. Repair, move or delete it in the repository settings.",
     "visibility": {
       "visibility": "Project visibility",
       "public": {
