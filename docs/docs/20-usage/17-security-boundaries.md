@@ -48,6 +48,18 @@ What the pipeline can do then depends on the author the forge reports, the [appr
 Woodpecker caches the permissions of a user for up to [one hour](https://github.com/woodpecker-ci/woodpecker/blob/5d41af5c30bc11f52bbaee298d387191e16192c8/server/router/middleware/session/repo.go#L35).
 If fetching permissions failed, the user is downgraded to read access till fetching works again.
 
+### When someone loses access
+
+Removing a user on the forge does not end everything in Woodpecker right away:
+
+- Their membership in an organization is cached for up to [10 minutes](https://github.com/woodpecker-ci/woodpecker/blob/e1cc4d5890634f2646a52ac11e5369cdc972f066/server/cache/membership.go#L47).
+- Their sessions stay valid until they expire after [`WOODPECKER_SESSION_EXPIRES`](../30-administration/10-configuration/10-server.md#session_expires).
+  Their personal access token stays valid until they reset it or an instance admin deletes the user.
+- An open web UI keeps getting the pipeline updates of the repositories the user could see when it was opened.
+- Crons and agents belong to the repository or organization, not to the user who added them, so they keep running.
+- `WOODPECKER_ADMIN` and the [allowed users list](#approval-of-pipelines) hold logins.
+  When a login gets free on the forge, for example after a rename, someone else can take it, so remove users who leave from these lists.
+
 ## Approval of pipelines
 
 A pipeline can wait for approval before it runs, see [require approval setting](./75-project-settings.md#require-approval-for).
