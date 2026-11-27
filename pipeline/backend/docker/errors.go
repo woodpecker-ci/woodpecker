@@ -14,7 +14,11 @@
 
 package docker
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/containerd/errdefs"
+)
 
 func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...
@@ -22,8 +26,11 @@ func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from podman daemon: can only kill running containers. ... is in state exited
 	// Error response from daemon: removal of container ... is already in progress
 	// Error: No such container: ...
+	// Podman answers a missing container with a 404 and a lowercase message:
+	// no container with name or ID "..." found: no such container
 	return err != nil &&
-		(strings.Contains(err.Error(), "No such container") ||
+		(errdefs.IsNotFound(err) ||
+			strings.Contains(err.Error(), "No such container") ||
 			strings.Contains(err.Error(), "is not running") ||
 			strings.Contains(err.Error(), "can only kill running containers") ||
 			(strings.Contains(err.Error(), "removal of container") && strings.Contains(err.Error(), "is already in progress")))
