@@ -542,6 +542,28 @@ For more details check the [service docs](./60-services.md#detachment).
 
 Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
 
+### `workspace` mode
+
+With `workspace` a step or service sets how it mounts the shared workspace. It is not the workflow [`workspace`](#workspace) block.
+
+- `write` (default): changes stay for the next steps.
+- `readonly`: the step can read the workspace but not change it.
+- `overlay`: the step can change the workspace, but the changes are thrown away when the step ends.
+
+```diff
+ steps:
+   - name: lint
+     image: golangci/golangci-lint
++    workspace: readonly
+     commands:
+       - golangci-lint run
+```
+
+Clone steps always need write access and reject the other modes.
+The working directory must already exist, normally the clone step creates it.
+While an `overlay` step runs, other steps and services must not change the workspace, or the step sees undefined content.
+How each backend implements the modes is described for [Docker](../30-administration/10-configuration/11-backends/10-docker.md#workspace-modes), [Kubernetes](../30-administration/10-configuration/11-backends/20-kubernetes.md#workspace-modes) and [local](../30-administration/10-configuration/11-backends/30-local.md#workspace-modes).
+
 ### `backend_options`
 
 With `backend_options` you can define options that are specific to the respective backend that is used to execute the steps. For example, you can specify the user and/or group used in a Docker container or you can specify the service account for Kubernetes.

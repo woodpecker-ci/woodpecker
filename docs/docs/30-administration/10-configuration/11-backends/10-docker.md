@@ -37,6 +37,12 @@ steps:
 
 The syntax is the same as the [docker run](https://docs.docker.com/engine/reference/run/#user) `--user` flag.
 
+## Workspace modes
+
+A step with [`workspace: readonly`](../../../20-usage/20-workflow-syntax.md#workspace-mode) mounts the workspace volume read-only.
+
+For `workspace: overlay` the agent creates an overlay volume with the `local` volume driver for the step. The workspace volume is the lower layer, the step writes go into an extra volume, and all of them are removed with the step. This needs a Linux Docker daemon with overlayfs and is not available on Windows.
+
 ## Tips and tricks
 
 ### Image cleanup

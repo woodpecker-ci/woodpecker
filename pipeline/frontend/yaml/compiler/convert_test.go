@@ -89,3 +89,113 @@ func TestWorkspaceVolumeAlwaysAdded(t *testing.T) {
 	assert.Contains(t, config.Stages[0].Steps[0].Volumes, "test_default:/woodpecker",
 		"workspace volume must always be added, even in local mode")
 }
+
+func TestWorkspaceModes(t *testing.T) {
+	compiler := New(
+		WithPrefix("test"),
+		WithWorkspace("/woodpecker", "src"),
+		WithVolumes(
+			"/home/me/repo:/woodpecker/src",
+			`C:\repo:/woodpecker/src`,
+			"/etc/ssl/certs:/etc/ssl/certs",
+			"/opt/cache:/woodpecker/cache:rw",
+		),
+	)
+
+	workflow := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{{
+				Name:      "readonly",
+				Image:     "alpine",
+				Commands:  []string{"ls"},
+				Workspace: "readonly",
+			}, {
+				Name:      "readonly-plugin",
+				Image:     "example/plugin",
+				Workspace: "readonly",
+			}, {
+				Name:      "overlay",
+				Image:     "alpine",
+				Commands:  []string{"touch file"},
+				Workspace: "overlay",
+			}, {
+				Name:      "write",
+				Image:     "alpine",
+				Commands:  []string{"touch file"},
+				Workspace: "write",
+			}, {
+				Name:     "default",
+				Image:    "alpine",
+				Commands: []string{"touch file"},
+			}},
+		},
+		Services: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{{
+				Name:      "service",
+				Image:     "postgres",
+				Workspace: "readonly",
+			}},
+		},
+	}
+
+	config, err := compiler.Compile(workflow)
+	assert.NoError(t, err)
+
+	steps := make(map[string]*backend_types.Step)
+	for _, stage := range config.Stages {
+		for _, step := range stage.Steps {
+			steps[step.Name] = step
+		}
+	}
+
+	readOnlyVolumes := []string{
+		"test_default:/woodpecker:ro",
+		"/home/me/repo:/woodpecker/src:ro",
+		`C:\repo:/woodpecker/src:ro`,
+		"/etc/ssl/certs:/etc/ssl/certs",
+		"/opt/cache:/woodpecker/cache:rw",
+	}
+	writableVolumes := []string{
+		"test_default:/woodpecker",
+		"/home/me/repo:/woodpecker/src",
+		`C:\repo:/woodpecker/src`,
+		"/etc/ssl/certs:/etc/ssl/certs",
+		"/opt/cache:/woodpecker/cache:rw",
+	}
+
+	assert.Equal(t, backend_types.WorkspaceModeReadOnly, steps["readonly"].WorkspaceMode)
+	assert.Equal(t, readOnlyVolumes, steps["readonly"].Volumes)
+	assert.Equal(t, backend_types.WorkspaceModeReadOnly, steps["readonly-plugin"].WorkspaceMode)
+	assert.Equal(t, backend_types.WorkspaceModeReadOnly, steps["service"].WorkspaceMode)
+	assert.Equal(t, "test_default:/woodpecker:ro", steps["service"].Volumes[0])
+
+	// the backend replaces the workspace volume, global volumes in the workspace must not keep changes
+	assert.Equal(t, backend_types.WorkspaceModeOverlay, steps["overlay"].WorkspaceMode)
+	assert.Equal(t, []string{
+		"test_default:/woodpecker",
+		"/home/me/repo:/woodpecker/src:ro",
+		`C:\repo:/woodpecker/src:ro`,
+		"/etc/ssl/certs:/etc/ssl/certs",
+		"/opt/cache:/woodpecker/cache:rw",
+	}, steps["overlay"].Volumes)
+
+	assert.Empty(t, steps["write"].WorkspaceMode)
+	assert.Equal(t, writableVolumes, steps["write"].Volumes)
+	assert.Empty(t, steps["default"].WorkspaceMode)
+	assert.Equal(t, writableVolumes, steps["default"].Volumes)
+}
+
+func TestWorkspaceModeInvalid(t *testing.T) {
+	compiler := New(WithPrefix("test"), WithWorkspace("/woodpecker", "src"))
+	_, err := compiler.Compile(&yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+			Name:      "step",
+			Image:     "alpine",
+			Commands:  []string{"ls"},
+			Workspace: "readwrite",
+		}}},
+	})
+	assert.ErrorContains(t, err, `unknown workspace mode "readwrite"`)
+}

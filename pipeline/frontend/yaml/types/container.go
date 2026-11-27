@@ -37,7 +37,8 @@ type Container struct {
 	Failure   string               `yaml:"failure,omitempty"`
 	Detached  bool                 `yaml:"detach,omitempty"`
 	// state
-	Volumes Volumes `yaml:"volumes,omitempty"`
+	Volumes   Volumes `yaml:"volumes,omitempty"`
+	Workspace string  `yaml:"workspace,omitempty"`
 	// network
 	Ports     []string           `yaml:"ports,omitempty"`
 	DNS       base.StringOrSlice `yaml:"dns,omitempty"`

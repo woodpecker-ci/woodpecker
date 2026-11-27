@@ -26,6 +26,7 @@ type Step struct {
 	Privileged     bool              `json:"privileged,omitempty"`
 	WorkingDir     string            `json:"working_dir,omitempty"`
 	WorkspaceBase  string            `json:"workspace_base,omitempty"`
+	WorkspaceMode  WorkspaceMode     `json:"workspace_mode,omitempty"`
 	Environment    map[string]string `json:"environment,omitempty"`
 	SecretMapping  map[string]string `json:"secret_mapping,omitempty"`
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
@@ -47,6 +48,15 @@ type Step struct {
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 	WorkflowLabels map[string]string `json:"workflow_labels,omitempty"`
 }
+
+// WorkspaceMode defines how a step mounts the workspace, empty means write.
+type WorkspaceMode string
+
+const (
+	WorkspaceModeWrite    WorkspaceMode = "write"
+	WorkspaceModeReadOnly WorkspaceMode = "readonly"
+	WorkspaceModeOverlay  WorkspaceMode = "overlay"
+)
 
 // StepType identifies the type of step.
 type StepType string

@@ -90,6 +90,30 @@ steps:
     image: golang:latest
 `,
 	}, {
+		Title: "workspace modes", Data: `
+when:
+  event: push
+
+steps:
+  - name: lint
+    image: golang
+    workspace: readonly
+    commands:
+      - go vet ./...
+  - name: report
+    image: example/report-plugin
+    workspace: overlay
+  - name: build
+    image: golang
+    workspace: write
+    commands:
+      - go build
+services:
+  - name: database
+    image: postgres
+    workspace: readonly
+`,
+	}, {
 		Title: "explicitly privileged container",
 		Data:  "{steps: { build: { image: plugins/docker, privileged: true, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 	}}
@@ -212,6 +236,14 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
 			want: "Specified clone image does not match allow list, netrc is not injected",
+		},
+		{
+			from: "{steps: { build: { image: golang } }, clone: [ { name: git, image: woodpeckerci/plugin-git, workspace: readonly } ] }",
+			want: "Clone steps need write access to the workspace, use `workspace: write` or leave it unset",
+		},
+		{
+			from: "{steps: { build: { image: golang } }, clone: [ { name: git, image: woodpeckerci/plugin-git, workspace: overlay } ] }",
+			want: "Clone steps need write access to the workspace, use `workspace: write` or leave it unset",
 		},
 		{
 			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",

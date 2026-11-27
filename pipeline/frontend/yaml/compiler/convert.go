@@ -54,6 +54,17 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		workspaceBase = pluginWorkspaceBase
 	}
 	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
+	workspaceMode, err := toWorkspaceMode(container.Workspace)
+	if err != nil {
+		return nil, err
+	}
+	// clone steps always need write access, the linter rejects other modes for them
+	if stepType == backend_types.StepTypeClone {
+		workspaceMode = ""
+	}
+	if workspaceMode == backend_types.WorkspaceModeReadOnly {
+		workspaceVolume += ":ro"
+	}
 
 	networks := []backend_types.Conn{
 		{
@@ -80,7 +91,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	// always mount the workspace volume: it references config.Volume, which the
 	// backend provisions, so steps mount the volume the backend actually creates
 	volumes := []string{workspaceVolume}
-	volumes = append(volumes, c.volumes...)
+	for _, volume := range c.volumes {
+		if workspaceMode != "" {
+			volume = readOnlyInWorkspace(volume, workspaceBase)
+		}
+		volumes = append(volumes, volume)
+	}
 	for _, volume := range container.Volumes.Volumes {
 		volumes = append(volumes, volume.String())
 	}
@@ -178,6 +194,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
 		WorkspaceBase:  workspaceBase,
+		WorkspaceMode:  workspaceMode,
 		Environment:    environment,
 		SecretMapping:  secretMapping,
 		Commands:       container.Commands,
@@ -198,6 +215,34 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		BackendOptions: container.BackendOptions,
 		WorkflowLabels: workflow.Labels,
 	}, nil
+}
+
+// toWorkspaceMode converts the workspace key of a step, write and unset both mean the default.
+func toWorkspaceMode(mode string) (backend_types.WorkspaceMode, error) {
+	switch backend_types.WorkspaceMode(mode) {
+	case "", backend_types.WorkspaceModeWrite:
+		return "", nil
+	case backend_types.WorkspaceModeReadOnly, backend_types.WorkspaceModeOverlay:
+		return backend_types.WorkspaceMode(mode), nil
+	}
+	return "", fmt.Errorf("unknown workspace mode %q, use write, readonly or overlay", mode)
+}
+
+// readOnlyInWorkspace adds the ro mode to a volume without mode that mounts at
+// or below the workspace base, like the repository bind of cli exec, so it can
+// not keep changes of a readonly or overlay step.
+func readOnlyInWorkspace(volume, workspaceBase string) string {
+	_, dest, found := strings.CutLast(volume, ":")
+	if !found {
+		return volume
+	}
+	if !strings.HasPrefix(dest, "/") {
+		return volume // the last part is a mode, keep what was set
+	}
+	if dest == workspaceBase || strings.HasPrefix(dest, strings.TrimSuffix(workspaceBase, "/")+"/") {
+		return volume + ":ro"
+	}
+	return volume
 }
 
 func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {

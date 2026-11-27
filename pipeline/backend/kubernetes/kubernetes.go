@@ -56,9 +56,10 @@ const (
 )
 
 type kube struct {
-	client kubernetes.Interface
-	config *config
-	goos   string
+	client     kubernetes.Interface
+	config     *config
+	goos       string
+	cloneProbe cloneProbeCache
 }
 
 type config struct {

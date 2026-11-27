@@ -32,6 +32,10 @@ In order to use this backend, you need to download (or build) the
 
 The local backend is supported on Windows, macOS, FreeBSD and OpenBSD; see [Supported platforms](../../05-installation/05-supported-platforms.md) for the full component and backend matrix.
 
+## Workspace modes
+
+Steps with [`workspace: readonly`](../../../20-usage/20-workflow-syntax.md#workspace-mode) fail, because the local backend runs them directly in the workspace directory. For `workspace: overlay` the step runs in a copy of the workspace, which is removed when the step ends.
+
 ## Step specific configuration
 
 ### Shell

@@ -42,7 +42,7 @@ func lookupShellPath(shellName string) string {
 }
 
 // execCommands use step.Image as shell and run the commands in it.
-func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
+func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, workspaceDir string, env []string) error {
 	// Use the image name to determine the shell.
 	shellName := strings.TrimSuffix(strings.ToLower(step.Image), ".exe")
 	shellPath := lookupShellPath(shellName)
@@ -59,7 +59,7 @@ func (e *local) execCommands(ctx context.Context, step *types.Step, state *workf
 
 	cmd := newCmd(ctx, shellPath, args...)
 	cmd.Env = env
-	cmd.Dir = state.workspaceDir
+	cmd.Dir = workspaceDir
 
 	reader, err := cmd.StdoutPipe()
 	if err != nil {

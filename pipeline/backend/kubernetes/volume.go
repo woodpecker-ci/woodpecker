@@ -75,6 +75,12 @@ func volumeMountPath(name string) string {
 	return s[0]
 }
 
+// volumeReadOnly reports whether the volume mode (name:path:mode) is ro.
+func volumeReadOnly(name string) bool {
+	s := strings.Split(name, ":")
+	return len(s) > 2 && s[2] == "ro"
+}
+
 func startVolume(ctx context.Context, engine *kube, name, namespace string) (*kube_core_v1.PersistentVolumeClaim, error) {
 	engineConfig := engine.getConfig()
 	pvc, err := mkPersistentVolumeClaim(engineConfig, name, namespace)

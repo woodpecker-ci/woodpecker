@@ -382,6 +382,9 @@
         "directory": {
           "$ref": "#/definitions/step_directory"
         },
+        "workspace": {
+          "$ref": "#/definitions/step_workspace"
+        },
         "when": {
           "$ref": "#/definitions/step_when"
         },
@@ -436,6 +439,9 @@
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
+        },
+        "workspace": {
+          "$ref": "#/definitions/step_workspace"
         },
         "settings": {
           "$ref": "#/definitions/step_settings"
@@ -715,6 +721,10 @@
       "type": "string",
       "enum": ["fail", "ignore", "cancel"],
       "default": "fail"
+    },
+    "step_workspace": {
+      "description": "How the step mounts the workspace. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#workspace-mode",
+      "enum": ["write", "readonly", "overlay"]
     },
     "step_backend_options": {
       "description": "Advanced options for the different agent backends. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#backend_options",
@@ -1030,6 +1040,9 @@
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
+        },
+        "workspace": {
+          "$ref": "#/definitions/step_workspace"
         },
         "settings": {
           "$ref": "#/definitions/step_settings"

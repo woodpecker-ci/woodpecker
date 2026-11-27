@@ -77,6 +77,15 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-workspace.yaml",
 		},
 		{
+			name:     "Workspace mode",
+			testFile: ".woodpecker/test-workspace-mode.yaml",
+		},
+		{
+			name:     "Workspace mode invalid",
+			testFile: ".woodpecker/test-workspace-mode-invalid.yaml",
+			fail:     true,
+		},
+		{
 			name:     "Labels",
 			testFile: ".woodpecker/test-labels.yaml",
 		},

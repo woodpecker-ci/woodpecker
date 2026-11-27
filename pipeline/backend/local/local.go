@@ -149,6 +149,11 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		return err
 	}
 
+	workspaceDir, err := stepWorkspace(step, state)
+	if err != nil {
+		return err
+	}
+
 	// Get environment variables
 	env := os.Environ()
 	for a, b := range step.Environment {
@@ -163,15 +168,15 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 		env = append(env, "USERPROFILE="+state.homeDir)
 	}
 
-	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
+	env = append(env, "CI_WORKSPACE="+workspaceDir)
 
 	switch step.Type {
 	case types.StepTypeClone:
 		return e.execClone(ctx, step, state, env)
 	case types.StepTypeCommands:
-		return e.execCommands(ctx, step, state, env)
+		return e.execCommands(ctx, step, state, workspaceDir, env)
 	case types.StepTypePlugin:
-		return e.execPlugin(ctx, step, state, env)
+		return e.execPlugin(ctx, step, state, workspaceDir, env)
 	default:
 		return ErrUnsupportedStepType
 	}
@@ -259,6 +264,10 @@ func (e *local) DestroyStep(_ context.Context, step *types.Step, taskUUID string
 	}
 
 	workflowState.stepState.Delete(step.UUID)
+
+	if step.WorkspaceMode == types.WorkspaceModeOverlay {
+		return os.RemoveAll(overlayDir(step, workflowState))
+	}
 	return nil
 }
 
