@@ -16,13 +16,11 @@ package agent
 
 import (
 	"context"
-	"errors"
-	"time"
 
 	"github.com/rs/zerolog"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/state"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/tracing"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 )
@@ -37,24 +35,9 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			Bool("exited", state.CurrStepState.Exited).
 			Logger()
 
-		stepState := rpc.StepState{
-			StepUUID: state.CurrStep.UUID,
-			Exited:   state.CurrStepState.Exited,
-			ExitCode: state.CurrStepState.ExitCode,
-			Started:  state.CurrStepState.Started,
-			Canceled: errors.Is(state.CurrStepState.Error, pipeline_errors.ErrCancel),
-			Skipped:  state.CurrStepState.Skipped,
-		}
-		if state.CurrStepState.Error != nil {
-			stepState.Error = state.CurrStepState.Error.Error()
-		}
-		if state.CurrStepState.Exited {
-			stepState.Finished = time.Now().Unix()
-		}
-
 		stepLogger.Debug().Msg("update step status")
 		defer stepLogger.Debug().Msg("update step status complete")
 
-		return r.client.Update(ctxMeta, workflow.ID, stepState)
+		return r.client.Update(ctxMeta, workflow.ID, status.NewStepState(state))
 	}
 }

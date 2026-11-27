@@ -15,22 +15,23 @@
 package pipeline
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/status"
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
+func statusSteps(steps []*model.Step) []status.Step {
+	out := make([]status.Step, 0, len(steps))
+	for _, step := range steps {
+		out = append(out, statusStep(step))
+	}
+	return out
+}
+
 // WorkflowStatus determine workflow status based on corresponding step list.
 func WorkflowStatus(steps []*model.Step) model.StatusValue {
-	status := model.StatusSuccess
-
-	for _, p := range steps {
-		if p.Failure == model.FailureFail || !p.Failing() {
-			status = MergeStatusValues(status, p.State)
-		}
-	}
-
-	return status
+	return model.StatusValue(status.Workflow(statusSteps(steps)))
 }
 
 func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
@@ -47,16 +48,6 @@ func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (
 func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Finished = state.Finished
 	workflow.Error = state.Error
-	if state.Started == 0 {
-		workflow.State = model.StatusSkipped
-	} else {
-		workflow.State = WorkflowStatus(workflow.Children)
-	}
-	if workflow.Error != "" {
-		workflow.State = model.StatusFailure
-	}
-	if state.Canceled {
-		workflow.State = model.StatusKilled
-	}
+	workflow.State = model.StatusValue(status.WorkflowDone(statusSteps(workflow.Children), state))
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
