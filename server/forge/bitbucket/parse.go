@@ -50,33 +50,36 @@ func validateRepo(repo *internal.Repo) error {
 }
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns Pull Request,
-// Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
-func parseHook(r *http.Request) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, error) {
+// Repo and Pipeline detail, and for a push the commit before it (see convertPushPrevCommit).
+// If a hook type is unsupported nil values are returned.
+func parseHook(r *http.Request) (*internal.PullRequestHook, *model.Repo, *model.Pipeline, string, error) {
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, "", err
 	}
 
 	hookType := r.Header.Get(hookEvent)
 	switch hookType {
 	case hookPush:
-		r, pl, err := parsePushHook(payload)
-		return nil, r, pl, err
+		r, pl, prevCommit, err := parsePushHook(payload)
+		return nil, r, pl, prevCommit, err
 	case hookPullCreated, hookPullUpdated, hookPullMerged, hookPullDeclined:
-		return parsePullHook(payload)
+		pr, r, pl, err := parsePullHook(payload)
+		return pr, r, pl, "", err
 	default:
-		return nil, nil, nil, &types.ErrIgnoreEvent{Event: hookType}
+		return nil, nil, nil, "", &types.ErrIgnoreEvent{Event: hookType}
 	}
 }
 
-// parsePushHook parses a push hook and returns the Repo and Pipeline details.
+// parsePushHook parses a push hook and returns the Repo and Pipeline details,
+// and the commit before the push.
 // If the commit type is unsupported it returns an ErrIgnoreEvent error.
-func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
+func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, string, error) {
 	hook := internal.PushHook{}
 
 	err := json.Unmarshal(payload, &hook)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, "", err
 	}
 
 	for _, change := range hook.Push.Changes {
@@ -84,11 +87,11 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 			continue
 		}
 		if err := validateRepo(&hook.Repo); err != nil {
-			return nil, nil, err
+			return nil, nil, "", err
 		}
-		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
+		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), convertPushPrevCommit(&change), nil
 	}
-	return nil, nil, &types.ErrIgnoreEvent{Event: "push", Reason: "BB reports no Changes"}
+	return nil, nil, "", &types.ErrIgnoreEvent{Event: "push", Reason: "BB reports no Changes"}
 }
 
 // parsePullHook parses a pull request hook and returns the Pull Request, Repo and Pipeline
