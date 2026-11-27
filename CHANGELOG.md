@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-26
+## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -13,6 +13,10 @@
 ### 📚 Documentation
 
 - Add Pipeline Inbox for Forgejo and Gitea to awesome list [[#7640](https://github.com/woodpecker-ci/woodpecker/pull/7640)]
+
+### 📦️ Dependency
+
+- Update golang-packages to v0.37.3 [[#7647](https://github.com/woodpecker-ci/woodpecker/pull/7647)]
 
 ## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-25
 
