@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@rogervokma-stack, @xoxys
+@lightminds-re, @rogervokma-stack, @xoxys
 
 ### 🐛 Bug Fixes
 
@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Added ESLint plugin [[#7644](https://github.com/woodpecker-ci/woodpecker/pull/7644)]
 - Add Pipeline Inbox for Forgejo and Gitea to awesome list [[#7640](https://github.com/woodpecker-ci/woodpecker/pull/7640)]
 
 ### 📦️ Dependency
