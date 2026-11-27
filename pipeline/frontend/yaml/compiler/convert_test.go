@@ -89,3 +89,84 @@ func TestWorkspaceVolumeAlwaysAdded(t *testing.T) {
 	assert.Contains(t, config.Stages[0].Steps[0].Volumes, "test_default:/woodpecker",
 		"workspace volume must always be added, even in local mode")
 }
+
+func codes(c ...int) yaml_types.SignalConfig { return yaml_types.SignalConfig{ExitCodes: c} }
+
+func TestConvertSignals(t *testing.T) {
+	sig := convertSignals
+
+	t.Run("empty", func(t *testing.T) {
+		got, err := sig(nil)
+		assert.NoError(t, err)
+		assert.Nil(t, got.exitCodeSignals)
+		assert.Equal(t, 0, got.maxRestarts)
+	})
+
+	t.Run("single and list", func(t *testing.T) {
+		got, err := sig(map[string]yaml_types.SignalConfig{"skip": codes(78, 79)})
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]backend_types.StepSignal{
+			78: backend_types.StepSignalSkip,
+			79: backend_types.StepSignalSkip,
+		}, got.exitCodeSignals)
+	})
+
+	t.Run("several signals", func(t *testing.T) {
+		got, err := sig(map[string]yaml_types.SignalConfig{
+			"skip":    codes(78),
+			"success": codes(1, 2),
+			"restart": codes(75),
+			"cancel":  codes(70),
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, map[int]backend_types.StepSignal{
+			78: backend_types.StepSignalSkip,
+			1:  backend_types.StepSignalSuccess,
+			2:  backend_types.StepSignalSuccess,
+			75: backend_types.StepSignalRestart,
+			70: backend_types.StepSignalCancel,
+		}, got.exitCodeSignals)
+	})
+
+	t.Run("same code for two signals", func(t *testing.T) {
+		_, err := sig(map[string]yaml_types.SignalConfig{"skip": codes(78), "success": codes(78)})
+		assert.ErrorContains(t, err, `exit code 78 is mapped to both signal "skip" and "success"`)
+	})
+
+	t.Run("unknown signal", func(t *testing.T) {
+		_, err := sig(map[string]yaml_types.SignalConfig{"pause_forever": codes(78)})
+		assert.ErrorContains(t, err, `unknown signal "pause_forever"`)
+	})
+
+	t.Run("out of range", func(t *testing.T) {
+		for _, code := range []int{0, -1, 256} {
+			_, err := sig(map[string]yaml_types.SignalConfig{"skip": codes(code)})
+			assert.ErrorContains(t, err, "out of range", "code %d", code)
+		}
+	})
+
+	t.Run("duplicate", func(t *testing.T) {
+		_, err := sig(map[string]yaml_types.SignalConfig{"skip": codes(78, 78)})
+		assert.ErrorContains(t, err, "exit code 78 is mapped to both")
+	})
+
+	t.Run("max_restarts", func(t *testing.T) {
+		five := 5
+		got, err := sig(map[string]yaml_types.SignalConfig{"restart": {ExitCodes: []int{75}, MaxRestarts: &five}})
+		assert.NoError(t, err)
+		assert.Equal(t, 5, got.maxRestarts)
+	})
+
+	t.Run("max_restarts out of range", func(t *testing.T) {
+		for _, v := range []int{0, -1, 11} {
+			_, err := sig(map[string]yaml_types.SignalConfig{"restart": {ExitCodes: []int{75}, MaxRestarts: &v}})
+			assert.ErrorContains(t, err, "max_restarts", "value %d", v)
+		}
+	})
+
+	t.Run("max_restarts on other signal", func(t *testing.T) {
+		two := 2
+		_, err := sig(map[string]yaml_types.SignalConfig{"skip": {ExitCodes: []int{78}, MaxRestarts: &two}})
+		assert.ErrorContains(t, err, "only allowed for the restart signal")
+	})
+}
