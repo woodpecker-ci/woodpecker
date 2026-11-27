@@ -376,6 +376,11 @@
       "verified": true
     },
     {
+      "name": "ESLint",
+      "docs": "https://codeberg.org/adamlui/drone-eslint/raw/branch/main/docs/woodpecker/README.md",
+      "verified": false
+    },
+    {
       "name": "Oxlint",
       "docs": "https://codeberg.org/adamlui/drone-oxlint/raw/branch/main/docs/woodpecker/README.md",
       "verified": false
