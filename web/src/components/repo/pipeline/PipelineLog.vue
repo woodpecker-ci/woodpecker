@@ -79,15 +79,16 @@
         <div v-for="group in groupedLogs" :key="group.id" class="contents">
           <div
             v-if="group.isActualCommand && group.command"
-            class="sticky -top-4 z-10 col-span-3 mb-1 grid cursor-pointer grid-cols-subgrid rounded-sm font-mono shadow-xs"
+            class="sticky -top-4 z-10 col-span-3 my-0.5 grid cursor-pointer grid-cols-subgrid items-center rounded-sm py-1 font-mono shadow-xs"
             :class="[isSelected(group.command) ? 'bg-blue-900 dark:bg-blue-800' : 'bg-wp-code-100']"
             @click="toggleGroup(group.id)"
           >
             <a
               :id="`L${group.command.number}`"
               :href="`#L${group.command.number}`"
-              class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+              class="text-wp-code-text-alt-100 pr-4 pl-2 text-right whitespace-nowrap select-none"
               :class="{ underline: isSelected(group.command) }"
+              :style="{ minWidth: lineNumberMinWidth }"
               @click.stop
             >
               {{ group.command.number }}
@@ -95,7 +96,7 @@
             <div class="flex min-w-0 items-center">
               <Icon
                 name="chevron-right"
-                class="mr-1 size-4 shrink-0 transition-transform"
+                class="mr-1 h-4 w-4 shrink-0 transition-transform"
                 :class="{
                   'rotate-90': !collapsedCommands.has(group.id),
                   invisible: group.lines.length === 0,
@@ -104,7 +105,7 @@
               <span class="flex-1 truncate" :title="group.command.rawText?.trim().slice(commandMarker.length).trim()">
                 <span class="text-[0px] whitespace-pre" aria-hidden="true" v-text="commandMarker" />
                 <!-- eslint-disable vue/no-v-html -->
-                <span v-html="group.command.text?.substring(3)" />
+                <span v-html="group.command.text?.substring(commandMarker.length)" />
               </span>
             </div>
             <span class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none">
@@ -117,23 +118,25 @@
               <a
                 :id="`L${line.number}`"
                 :href="`#L${line.number}`"
-                class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
+                class="text-wp-code-text-alt-100 pr-4 pl-2 text-right whitespace-nowrap select-none"
                 :class="{
                   'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
                   'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
                   'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
                   underline: isSelected(line),
                 }"
+                :style="{ minWidth: lineNumberMinWidth }"
               >
                 {{ line.number }}
               </a>
               <!-- eslint-disable vue/no-v-html -->
               <span
-                class="wrap-break-words align-top whitespace-pre-wrap"
+                class="wrap-break-words whitespace-pre-wrap"
                 :class="{
                   'bg-red-600/40 dark:bg-red-500/40': line.type === 'error',
                   'bg-yellow-600/40 dark:bg-yellow-500/40': line.type === 'warning',
                   'bg-blue-600/30 dark:bg-blue-500/40': isSelected(line),
+                  'pl-5': group.isActualCommand,
                 }"
                 v-html="line.text"
               />
@@ -261,6 +264,11 @@ const collapsedCommands = ref(new Set<number>());
 
 const commandMarker = '▶  ';
 
+const lineNumberMinWidth = computed(() => {
+  const maxNumber = log.value?.at(-1)?.number ?? 0;
+  return `calc(${String(maxNumber).length}ch + 2rem)`;
+});
+
 const groupedLogs = computed(() => {
   if (!log.value) return [];
 
@@ -269,7 +277,8 @@ const groupedLogs = computed(() => {
 
   log.value.forEach((line) => {
     const trimmedText = (line.rawText || '').trim();
-    const isCommand = trimmedText.startsWith(commandMarker) && trimmedText.slice(3).trim().length > 0;
+    const isCommand =
+      trimmedText.startsWith(commandMarker) && trimmedText.slice(commandMarker.length).trim().length > 0;
 
     if (isCommand) {
       currentBlock = {

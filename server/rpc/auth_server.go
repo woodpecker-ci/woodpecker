@@ -16,6 +16,7 @@ package rpc
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 	"net"
@@ -64,7 +65,9 @@ func (s *WoodpeckerAuthServer) Auth(ctx context.Context, req *proto.AuthRequest)
 func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*model.Agent, error) {
 	// global agent secret auth
 	if s.agentMasterToken != "" {
-		if agentToken == s.agentMasterToken && agentID == -1 {
+		isMaster := subtle.ConstantTimeCompare([]byte(agentToken), []byte(s.agentMasterToken)) == 1
+
+		if isMaster && agentID == -1 {
 			agent := &model.Agent{
 				OwnerID:  model.IDNotSet,
 				OrgID:    model.IDNotSet,
@@ -79,7 +82,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 			return agent, nil
 		}
 
-		if agentToken == s.agentMasterToken {
+		if isMaster {
 			agent, err := s.store.AgentFind(agentID)
 			if err != nil {
 				if errors.Is(err, types.ErrRecordNotExist) {
@@ -96,11 +99,26 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	}
 
 	// individual agent token auth
-	agent, err := s.store.AgentFindByToken(agentToken)
-	if err != nil && errors.Is(err, types.ErrRecordNotExist) {
-		return nil, fmt.Errorf("individual agent not found by token: %w", err)
+	if agentID > 0 {
+		agent, err := s.store.AgentFind(agentID)
+		if err == nil && subtle.ConstantTimeCompare([]byte(agentToken), []byte(agent.Token)) == 1 {
+			return agent, nil
+		}
+		// a stale agent ID (e.g. agent recreated with a new token) falls back to the token lookup
 	}
-	return agent, err
+
+	agent, err := s.store.AgentFindByToken(agentToken)
+	if err != nil {
+		if errors.Is(err, types.ErrRecordNotExist) {
+			return nil, fmt.Errorf("individual agent not found by token: %w", err)
+		}
+		return nil, err
+	}
+	// the hash lookup only finds the row, the token itself is checked here in constant time
+	if subtle.ConstantTimeCompare([]byte(agentToken), []byte(agent.Token)) != 1 {
+		return nil, fmt.Errorf("individual agent not found by token: %w", types.ErrRecordNotExist)
+	}
+	return agent, nil
 }
 
 // logAuthFailure logs a failed agent login in the format the fail2ban docs match.
