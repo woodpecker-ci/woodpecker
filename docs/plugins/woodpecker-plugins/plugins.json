@@ -374,6 +374,11 @@
       "name": "Betterleaks",
       "docs": "https://codeberg.org/woodpecker-plugins/betterleaks/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "ESLint",
+      "docs": "https://codeberg.org/adamlui/drone-eslint/raw/branch/main/docs/woodpecker/README.md",
+      "verified": false
     }
   ]
 }
