@@ -33,6 +33,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub/memory"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
 	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
 	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v3/server/scheduler"
@@ -407,6 +408,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("Info", mock.Anything).Return(queue.InfoT{}).Maybe()
 		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
 
 		// mimic the valid config data
@@ -479,6 +481,7 @@ func TestCreatePipeline(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("Info", mock.Anything).Return(queue.InfoT{}).Maybe()
 		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
 
 		// mimic the old config data
@@ -610,6 +613,7 @@ func TestPostPipeline(t *testing.T) {
 		mockQueue := queue_mocks.NewMockQueue(t)
 		mockQueue.On("Push", mock.Anything, mock.Anything).Return(nil).Maybe()
 		mockQueue.On("PushAtOnce", mock.Anything, mock.Anything).Return(nil).Maybe()
+		mockQueue.On("Info", mock.Anything).Return(queue.InfoT{}).Maybe()
 		server.Config.Services.Scheduler = scheduler.NewScheduler(t.Context(), mockStore, mockQueue, memory.New())
 
 		mockConfigService.On("Fetch", mock.Anything, mockForge, fakeUser, fakeRepo, mock.Anything, mock.Anything, true).Return(fetchResult, nil)

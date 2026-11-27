@@ -74,6 +74,7 @@ func TestGetQueueInfo(t *testing.T) {
 		waiting := &model.Task{
 			ID: "76054", Name: "build", PipelineID: pipe.ID, RepoID: repo.ID,
 			Dependencies: []string{"76057"},
+			Priority:     10,
 		}
 		running := &model.Task{
 			ID: "76057", Name: "check_preconditions", PipelineID: pipe.ID, RepoID: repo.ID,
@@ -106,6 +107,7 @@ func TestGetQueueInfo(t *testing.T) {
 
 		require.Len(t, got.WaitingOnDeps, 1)
 		assert.Equal(t, "76054", got.WaitingOnDeps[0].ID)
+		assert.Equal(t, 10, got.WaitingOnDeps[0].Priority)
 		assert.Empty(t, got.WaitingOnDeps[0].AgentName) // no agent assigned
 		assert.Equal(t, pipe.Number, got.WaitingOnDeps[0].PipelineNumber)
 

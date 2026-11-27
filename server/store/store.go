@@ -153,6 +153,7 @@ type Store interface {
 	TaskList() ([]*model.Task, error)
 	TaskInsert(*model.Task) error
 	TaskSetAgent(id string, agentID int64) error
+	TaskUpdatePriority(string, int) error
 	TaskDelete(string) error
 
 	// ServerConfig
