@@ -45,8 +45,6 @@ type Step struct {
 // which claims the log atomically, so concurrent calls never work on the same log.
 type LogState int
 
-// The values are stored in the database, only add new ones at the end.
-// The zero value is open, so new steps and steps from before the upgrade start open.
 const (
 	LogStateOpen       LogState = iota // log lines may still come
 	LogStateFinalizing                 // claimed by a log finalizer
