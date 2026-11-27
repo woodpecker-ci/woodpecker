@@ -1,5 +1,5 @@
 <template>
-  <Container full-width class="md:min-h-xs flex grow-0 flex-col md:grow md:px-4">
+  <Container full-width class="md:min-h-xs flex min-h-0 grow flex-col md:px-4">
     <div class="flex min-h-0 w-full grow flex-wrap-reverse md:flex-nowrap md:gap-4">
       <PipelineStepList
         v-model:selected-step-id="selectedStepId"
@@ -7,7 +7,12 @@
         :pipeline="pipeline!"
       />
 
-      <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
+      <div
+        v-if="
+          showErrorPanel || pipeline!.status === 'blocked' || pipeline!.status === 'declined' || selectedStepId !== null
+        "
+        class="relative flex grow basis-full items-start justify-center md:basis-auto"
+      >
         <div v-if="showErrorPanel" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">

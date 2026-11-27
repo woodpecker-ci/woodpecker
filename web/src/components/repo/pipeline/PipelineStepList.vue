@@ -1,5 +1,5 @@
 <template>
-  <div class="text-wp-text-100 flex w-full flex-col gap-2 pb-2 md:w-3/12 md:max-w-md md:min-w-xs">
+  <div class="text-wp-text-100 flex w-full flex-col gap-2 pb-2 md:w-3/12 md:max-w-md md:min-w-xs md:pb-0">
     <div
       class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-200 flex shrink-0 flex-wrap justify-between gap-1 rounded-md border p-4"
     >
@@ -61,7 +61,7 @@
     </Panel>
 
     <div class="relative min-h-0 w-full grow">
-      <div class="absolute top-0 right-0 left-0 flex h-full flex-col gap-y-2 md:overflow-y-auto">
+      <div class="absolute top-0 right-0 left-0 flex h-full flex-col gap-y-2 overflow-y-auto">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
