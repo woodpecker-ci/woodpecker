@@ -35,6 +35,8 @@ When a pipeline is triggered Woodpecker will fetch the pipeline configuration fr
 
 You can enable the exclusive setting (both globally and on a per-repo level). Then Woodpecker will only call your extension, but nothing else. This allows you to completely skip the forge. Requests sent to the extension will not have the configuration files added.
 
+To run the workflows an extension returns on your own machine, see [local execution](../73-local-execution.md#use-a-configuration-extension).
+
 ### Request
 
 The extension receives an HTTP POST request with the following JSON payload:

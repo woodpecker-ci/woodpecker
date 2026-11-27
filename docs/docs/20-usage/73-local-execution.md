@@ -55,6 +55,27 @@ woodpecker-cli exec \
 The metadata file is not a stable, portable API: its format is only guaranteed for the same server and CLI version it came from. Use it to replay against a matching version, and re-download after upgrades instead of reusing old files.
 :::
 
+## Use a configuration extension
+
+If your server gets the workflows from a [configuration extension](./72-extensions/40-configuration-extension.md), pass the same endpoint to run the workflows the server would run:
+
+```shell
+woodpecker-cli exec \
+  --config-extension-endpoint https://example.com/ciconfig \
+  --repo octocat/hello-world \
+  --commit-branch main
+```
+
+The CLI sends the request the server sends, built from the metadata flags. Workflow files given as arguments, or found at the default config paths, are sent as `configuration` and are run when the extension responds with `204 No Content`. Without local files the request has no `configuration`, as in exclusive mode.
+
+The request is signed the same way the server signs extension calls: an ed25519 [HTTP signature](https://tools.ietf.org/html/draft-cavage-http-signatures) over `@request-target` and `content-digest`. The signature name is `woodpecker-cli-extensions`, not the server's `woodpecker-ci-extensions`, so the extension can trust both. The first time the option is used, the private key is generated and stored in the system keyring, in the same place as CLI tokens (`woodpecker-cli` / `config-extension-signing-key`). The public key is printed as PEM, in the same format as the server's `GET /api/signature/public-key`. Configure the extension with that public key.
+
+If the extension does not verify signatures, add `--config-extension-unsigned` to send the request without a signature. Then no key is created or printed. Use this only for extensions that do not check signatures, since the extension cannot then tell the CLI apart from any other caller.
+
+:::note
+The CLI does not send `netrc` credentials. Signing is on by default, so a system without a keyring cannot store the signing key, and the command fails unless `--config-extension-unsigned` is set.
+:::
+
 ## Pass environment variables and secrets
 
 Use `--env` for regular environment variables:
