@@ -901,7 +901,7 @@ Also see [security boundaries](../../20-usage/17-security-boundaries.md#plugins)
 ### PLUGINS_TRUSTED_CLONE
 
 - Name: `WOODPECKER_PLUGINS_TRUSTED_CLONE`
-- Default: `docker.io/woodpeckerci/plugin-git,docker.io/woodpeckerci/plugin-git,quay.io/woodpeckerci/plugin-git`
+- Default: the [default clone plugin](#default_clone_plugin) with its exact tag
 
 Plugins which are trusted to handle the Git credential info in clone steps.
 If a clone step use an image not in this list, Git credentials will not be injected and users have to use other methods (e.g. secrets) to clone non-public repos.

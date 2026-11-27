@@ -571,3 +571,31 @@ func TestCompilerCompileDefaultCloneStep(t *testing.T) {
 	assert.Equal(t, "pass", backConf.Stages[0].Steps[0].Environment["CI_NETRC_PASSWORD"])
 	assert.Equal(t, "example.com", backConf.Stages[0].Steps[0].Environment["CI_NETRC_MACHINE"])
 }
+
+func TestCompilerCompileCustomCloneStepNetrc(t *testing.T) {
+	for _, tt := range []struct {
+		image   string
+		trusted bool
+	}{
+		{image: constant.DefaultClonePlugin, trusted: true},
+		{image: "woodpeckerci/plugin-git:2.11.0", trusted: false},
+		{image: "docker.io/woodpeckerci/plugin-git", trusted: false},
+		{image: "quay.io/woodpeckerci/plugin-git", trusted: false},
+	} {
+		t.Run(tt.image, func(t *testing.T) {
+			compiler := New(WithNetrc("user", "pass", "example.com"))
+			backConf, err := compiler.Compile(&yaml_types.Workflow{
+				Clone: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+					Name:  "git",
+					Image: tt.image,
+				}}},
+			})
+			assert.NoError(t, err)
+			if !assert.Len(t, backConf.Stages, 1) || !assert.Len(t, backConf.Stages[0].Steps, 1) {
+				return
+			}
+			_, hasNetrc := backConf.Stages[0].Steps[0].Environment["CI_NETRC_PASSWORD"]
+			assert.Equal(t, tt.trusted, hasNetrc)
+		})
+	}
+}
