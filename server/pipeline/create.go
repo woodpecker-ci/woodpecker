@@ -90,7 +90,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	case configFetchErr != nil:
 		// error while fetching config - not using the old config
 		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s', and did not get any config", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
+		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config: %w", configFetchErr))
 	}
 
 	// persist the pipeline config for historical correctness, restarts, etc

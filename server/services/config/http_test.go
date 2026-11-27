@@ -18,14 +18,17 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v3/server/services/utils"
@@ -75,4 +78,22 @@ func TestHTTPExtensionRejectsNullConfig(t *testing.T) {
 	files, err := config.NewHTTP(ts.URL, client, false).Fetch(t.Context(), nil, nil, &model.Repo{}, &model.Pipeline{}, nil, false)
 	require.ErrorContains(t, err, "empty config")
 	assert.Nil(t, files)
+}
+
+// Failures of the extension must not look like forge errors in the UI.
+func TestHTTPExtensionErrorType(t *testing.T) {
+	// the client does not trust the test cert, like an endpoint with a broken TLS setup
+	ts := httptest.NewTLSServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	defer ts.Close()
+
+	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+	client, err := utils.NewHTTPClient(privateKey, "loopback")
+	require.NoError(t, err)
+
+	_, err = config.NewHTTP(ts.URL, client, false).Fetch(t.Context(), nil, nil, &model.Repo{}, &model.Pipeline{}, nil, false)
+	pipelineErr, ok := errors.AsType[*pipeline_errors.PipelineError](err)
+	require.True(t, ok, "expected a pipeline error, got: %v", err)
+	assert.Equal(t, pipeline_errors.PipelineErrorTypeExtension, pipelineErr.Type)
+	assert.True(t, strings.HasPrefix(pipelineErr.Message, "config extension: could not reach endpoint: "), pipelineErr.Message)
 }

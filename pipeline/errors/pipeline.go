@@ -28,6 +28,7 @@ const (
 	PipelineErrorTypeCompiler    PipelineErrorType = "compiler"    // some error with the config semantics
 	PipelineErrorTypeGeneric     PipelineErrorType = "generic"     // some generic error
 	PipelineErrorTypeBadHabit    PipelineErrorType = "bad_habit"   // some bad-habit error
+	PipelineErrorTypeExtension   PipelineErrorType = "extension"   // some error from an extension
 )
 
 type PipelineError struct {

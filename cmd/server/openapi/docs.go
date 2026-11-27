@@ -6122,12 +6122,14 @@ const docTemplate = `{
                 "deprecation",
                 "compiler",
                 "generic",
-                "bad_habit"
+                "bad_habit",
+                "extension"
             ],
             "x-enum-comments": {
                 "PipelineErrorTypeBadHabit": "some bad-habit error",
                 "PipelineErrorTypeCompiler": "some error with the config semantics",
                 "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeExtension": "some error from an extension",
                 "PipelineErrorTypeGeneric": "some generic error",
                 "PipelineErrorTypeLinter": "some error with the config syntax"
             },
@@ -6136,14 +6138,16 @@ const docTemplate = `{
                 "using some deprecated feature",
                 "some error with the config semantics",
                 "some generic error",
-                "some bad-habit error"
+                "some bad-habit error",
+                "some error from an extension"
             ],
             "x-enum-varnames": [
                 "PipelineErrorTypeLinter",
                 "PipelineErrorTypeDeprecation",
                 "PipelineErrorTypeCompiler",
                 "PipelineErrorTypeGeneric",
-                "PipelineErrorTypeBadHabit"
+                "PipelineErrorTypeBadHabit",
+                "PipelineErrorTypeExtension"
             ]
         },
         "metadata.Author": {
