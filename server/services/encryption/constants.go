@@ -28,8 +28,7 @@ const (
 	keyTypeRaw  = "raw"
 	keyTypeNone = "none"
 
-	keyIDAssociatedData   = "Primary key id"
-	AES_GCM_SIV_NonceSize = 12 //nolint:revive
+	keyIDAssociatedData = "Primary key id"
 )
 
 var (
@@ -85,10 +84,8 @@ const (
 // AES.
 const (
 	keyIDDomainSeparation = "woodpecker-encryption-key-id/v1"
+	aesKeySize            = 32 // AES-256
 
 	// Error wrapping templates.
-	errTemplateAesFailedLoadingCipher   = "failed loading encryption cipher: %w"
-	errTemplateAesFailedCalculatingHash = "failed calculating hash: %w"
-	errTemplateAesFailedGeneratingKey   = "failed generating key from passphrase: %w"
-	errTemplateAesFailedGeneratingKeyID = "failed generating key id: %w"
+	errTemplateAesFailedLoadingCipher = "failed loading encryption cipher: %w"
 )
