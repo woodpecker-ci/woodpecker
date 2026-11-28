@@ -14,6 +14,19 @@
       "desc": "Most recently visited repositories sorted by access time"
     }
   },
+  "orgs": {
+    "title": "Organizations",
+    "short": "Orgs",
+    "repo_count": "{count} repository | {count} repositories",
+    "all": {
+      "title": "All organizations",
+      "desc": "Organizations of your repositories sorted by name"
+    },
+    "last": {
+      "title": "Last visited",
+      "desc": "Organizations of your most recently visited repositories"
+    }
+  },
   "docs": "Docs",
   "api": "API",
   "logout": "Sign out",

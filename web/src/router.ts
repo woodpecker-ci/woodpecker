@@ -185,6 +185,12 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/orgs',
+    name: 'orgs',
+    component: (): Component => import('~/views/Orgs.vue'),
+    meta: { authentication: 'required' },
+  },
+  {
     path: '/orgs/:orgId',
     component: (): Component => import('~/views/org/OrgWrapper.vue'),
     props: true,
