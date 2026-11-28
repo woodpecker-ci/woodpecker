@@ -133,17 +133,38 @@ func TestToContainerName(t *testing.T) {
 }
 
 func TestToHostConfigApparmorProfile(t *testing.T) {
-	hostConfig, err := toHostConfig(testCmdStep, &config{apparmor: "osgeo-woodie"})
+	hostConfig, err := toHostConfig(testCmdStep, BackendOptions{}, &config{apparmor: "osgeo-woodie"})
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, []string{"apparmor=osgeo-woodie"}, hostConfig.SecurityOpt)
 }
 
 func TestToHostConfigApparmorProfileDefault(t *testing.T) {
-	hostConfig, err := toHostConfig(testCmdStep, &config{})
+	hostConfig, err := toHostConfig(testCmdStep, BackendOptions{}, &config{})
 
 	assert.NoError(t, err)
 	assert.Nil(t, hostConfig.SecurityOpt)
+}
+
+func TestToHostConfigCapabilities(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, BackendOptions{
+		Capabilities: &Capabilities{
+			Add:  []string{"SYS_PTRACE", "NET_ADMIN"},
+			Drop: []string{"MKNOD"},
+		},
+	}, &config{})
+
+	assert.NoError(t, err)
+	assert.EqualValues(t, []string{"SYS_PTRACE", "NET_ADMIN"}, hostConfig.CapAdd)
+	assert.EqualValues(t, []string{"MKNOD"}, hostConfig.CapDrop)
+}
+
+func TestToHostConfigCapabilitiesDefault(t *testing.T) {
+	hostConfig, err := toHostConfig(testCmdStep, BackendOptions{}, &config{})
+
+	assert.NoError(t, err)
+	assert.Nil(t, hostConfig.CapAdd)
+	assert.Nil(t, hostConfig.CapDrop)
 }
 
 func TestStepToConfig(t *testing.T) {

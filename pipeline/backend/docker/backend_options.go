@@ -22,7 +22,15 @@ import (
 
 // BackendOptions defines all the advanced options for the docker backend.
 type BackendOptions struct {
-	User string `mapstructure:"user"`
+	User         string        `mapstructure:"user"`
+	Capabilities *Capabilities `mapstructure:"capabilities"`
+}
+
+// Capabilities defines the Linux capabilities that are added to or dropped
+// from the default set of the step container.
+type Capabilities struct {
+	Add  []string `mapstructure:"add"`
+	Drop []string `mapstructure:"drop"`
 }
 
 func parseBackendOptions(step *backend_types.Step) (BackendOptions, error) {

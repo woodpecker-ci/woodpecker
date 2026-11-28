@@ -5,6 +5,11 @@ steps:
     backend_options:
       docker:
         user: 1000:1000
+        capabilities:
+          add:
+            - SYS_PTRACE
+          drop:
+            - MKNOD
       kubernetes:
         resources:
           requests:
