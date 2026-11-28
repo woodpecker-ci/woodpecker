@@ -124,13 +124,14 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
+import { computed, inject, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
+import type { InjectKeys } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
 import type { Pipeline, PipelineStep } from '~/lib/api/types';
@@ -147,6 +148,7 @@ defineEmits<{
 
 const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
+const pipelineConfigs = inject<InjectKeys['pipeline-configs'] | undefined>('pipeline-configs', undefined);
 const { prettyRef } = usePipeline(pipeline);
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
@@ -163,7 +165,9 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
     : {},
 );
 
-const singleWorkflow = computed(() => pipeline.value.workflows && pipeline.value.workflows.length === 1);
+const singleWorkflow = computed(
+  () => pipeline.value.workflows?.length === 1 && (pipelineConfigs?.value?.length ?? 0) <= 1,
+);
 
 const steps = useTemplateRef('steps');
 watch(selectedStepId, async (newSelectedStepId, oldSelectedStepId) => {

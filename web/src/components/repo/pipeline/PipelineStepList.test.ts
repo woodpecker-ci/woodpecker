@@ -1,9 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
+import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 
+import Panel from '~/components/layout/Panel.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
-import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
+import type { Pipeline, PipelineConfig, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
 // usePipeline() calls useI18n(), which must resolve during setup.
 const i18n = createI18n({
@@ -15,15 +17,24 @@ const i18n = createI18n({
   messages: { en: {} },
 });
 
-function mountStepList(pipeline: Pipeline) {
+function mountStepList(pipeline: Pipeline, configs?: PipelineConfig[]) {
   return shallowMount(PipelineStepList, {
     props: { pipeline },
     global: {
       plugins: [i18n],
+      ...(configs !== undefined ? { provide: { 'pipeline-configs': ref(configs) } } : {}),
       // router-link resolves globally, so shallowMount does not stub it.
       stubs: { 'router-link': true, RouterLink: true },
     },
   });
+}
+
+function makeConfig(name: string): PipelineConfig {
+  return {
+    hash: `hash-${name}`,
+    name,
+    data: '',
+  };
 }
 
 function makeStep(pid: number): PipelineStep {
@@ -114,7 +125,7 @@ describe('pipelineStepList', () => {
   it('renders a single stepless workflow without throwing', () => {
     const pipeline = makePipeline([makeWorkflow(1, null, 'skipped')]);
 
-    let wrapper;
+    let wrapper!: ReturnType<typeof mountStepList>;
     expect(() => {
       wrapper = mountStepList(pipeline);
     }).not.toThrow();
@@ -150,10 +161,33 @@ describe('pipelineStepList', () => {
     expect(
       wrapper.findAll('button[title]').filter((b) => (b.attributes('title') ?? '').startsWith('workflow-')),
     ).toHaveLength(0);
+    expect(wrapper.findComponent(Panel).exists()).toBe(true);
+    expect(wrapper.text()).not.toContain('workflow-');
   });
 
   it('hides the collapse button for a single workflow', () => {
     const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]));
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
+  });
+
+  it('hides the workflow name for a single workflow with one config', () => {
+    const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]), [makeConfig('ci')]);
+    expect(wrapper.text()).not.toContain('workflow-1');
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
+  });
+
+  it('shows the workflow collapse button for a single workflow with multiple configs', () => {
+    const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]), [
+      makeConfig('ci'),
+      makeConfig('lint'),
+      makeConfig('deploy'),
+    ]);
+    expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(true);
+  });
+
+  it('hides the workflow name for a single workflow when configs are not provided', () => {
+    const wrapper = mountStepList(makePipeline([makeWorkflow(1, [makeStep(1)], 'success')]));
+    expect(wrapper.text()).not.toContain('workflow-1');
     expect(wrapper.find('button[title="workflow-1"]').exists()).toBe(false);
   });
 
