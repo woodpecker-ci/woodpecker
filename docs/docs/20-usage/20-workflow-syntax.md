@@ -526,6 +526,19 @@ steps:
 As soon as one step uses `depends_on`, steps are looked up by name, so all step names of the workflow must be unique. Duplicate names are rejected.
 :::
 
+:::info
+As soon as one step uses `depends_on`, the steps of the workflow are grouped into stages.
+Steps without dependencies (including `depends_on: []`) form the first stage of steps.
+Every other step goes into the stage right after the latest stage that holds one of its dependencies.
+The stages run one after another: a stage only starts once all steps of the previous stage have finished (detached steps and services only need to have started).
+So a slow step also delays the steps of the next stage, even if they don't depend on it.
+
+If a step fails (with the default `failure: fail`), the other steps of its stage still finish, but all steps in later stages are skipped, even if they don't depend on the failed step.
+Only steps that are set to run on failure (see [`status`](#status)) still run.
+To keep the later stages running, set [`failure: ignore`](#failure) on the step that may fail.
+The step still shows as failed, but it no longer fails the workflow.
+:::
+
 ### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
