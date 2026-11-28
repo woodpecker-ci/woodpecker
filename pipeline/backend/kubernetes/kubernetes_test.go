@@ -608,3 +608,103 @@ func TestWaitStepRelistDeletion(t *testing.T) {
 	assert.GreaterOrEqual(t, lists, 2, "the informer must relist to discover deletion")
 	assert.Equal(t, 2, gets, "completion must reach the post-event Get")
 }
+
+func TestStepInformersSelectOnlyTheirPod(t *testing.T) {
+	for _, method := range []string{"WaitStep", "TailStep"} {
+		t.Run(method, func(t *testing.T) {
+			client := fake.NewClientset()
+			engine := makeEngine(client)
+			step := makeStep("pod-scoped-01")
+			podName := createPod(t, client, step, "test-ns")
+
+			ctx, cancel := context.WithTimeout(t.Context(), 3*time.Second)
+			defer cancel()
+
+			var mu sync.Mutex
+			var listSelectors, watchSelectors []string
+			client.PrependReactor("list", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+				mu.Lock()
+				defer mu.Unlock()
+				list, ok := action.(kube_testing.ListAction)
+				require.True(t, ok)
+				listSelectors = append(listSelectors, list.GetListRestrictions().Fields.String())
+				return false, nil, nil
+			})
+			client.PrependWatchReactor("pods", func(action kube_testing.Action) (bool, watch.Interface, error) {
+				mu.Lock()
+				defer mu.Unlock()
+				watchAction, ok := action.(kube_testing.WatchAction)
+				require.True(t, ok)
+				watchSelectors = append(watchSelectors, watchAction.GetWatchRestrictions().Fields.String())
+				// The informer has listed and started watching: nothing more to observe.
+				cancel()
+				return false, nil, nil
+			})
+
+			if method == "WaitStep" {
+				_, err := engine.WaitStep(ctx, step, "task-1")
+				require.ErrorIs(t, err, context.Canceled)
+			} else {
+				_, err := engine.TailStep(ctx, step, "task-1")
+				require.ErrorIs(t, err, context.Canceled)
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+			require.NotEmpty(t, listSelectors)
+			require.NotEmpty(t, watchSelectors)
+			for _, selector := range append(listSelectors, watchSelectors...) {
+				assert.Equal(t, "metadata.name="+podName, selector)
+			}
+		})
+	}
+}
+
+func makeServiceStep(uuid string) *types.Step {
+	return &types.Step{
+		UUID:     uuid,
+		Name:     "svc-" + uuid,
+		OrgID:    1,
+		Type:     types.StepTypeService,
+		Detached: true,
+	}
+}
+
+func TestDestroyWorkflowDeletesRemainingServicesOnPartialFailure(t *testing.T) {
+	t.Parallel()
+
+	namespace := "test-ns"
+	client := fake.NewClientset()
+	engine := makeEngine(client)
+
+	psqlStep := makeServiceStep("psql-01")
+	redisStep := makeServiceStep("redis-01")
+	buildStep := makeStep("build-01")
+
+	psqlPodName := createPod(t, client, psqlStep, namespace)
+	redisPodName := createPod(t, client, redisStep, namespace)
+	createPod(t, client, buildStep, namespace)
+
+	client.PrependReactor("delete", "pods", func(action kube_testing.Action) (bool, kube_runtime.Object, error) {
+		da, ok := action.(kube_testing.DeleteAction)
+		if ok && da.GetName() == psqlPodName {
+			return true, nil, fmt.Errorf("simulated transient API error")
+		}
+		return false, nil, nil
+	})
+
+	conf := &types.Config{
+		Stages: []*types.Stage{
+			{Steps: []*types.Step{psqlStep, redisStep, buildStep}},
+			{Steps: []*types.Step{makeStep("test-01")}},
+		},
+	}
+
+	_ = engine.DestroyWorkflow(t.Context(), conf, "task-1")
+
+	_, err := client.CoreV1().Pods(namespace).Get(t.Context(), redisPodName, kube_meta_v1.GetOptions{})
+	assert.Error(t, err, "redis service pod should be deleted despite psql failure")
+
+	_, err = client.CoreV1().Pods(namespace).Get(t.Context(), psqlPodName, kube_meta_v1.GetOptions{})
+	assert.NoError(t, err, "psql pod should still exist since its delete was rejected")
+}

@@ -316,6 +316,16 @@ describe('pipelineLog', () => {
       expect(wrapper.get('.sticky .truncate').attributes('title')).toBe('Build <assets> & bundle');
     });
 
+    it('indents group output lines under the command but not initialization', async () => {
+      const wrapper = await loadLog(['Preparing', '▶  Build', 'built']);
+
+      const initContent = wrapper.get('a#L1').element.nextElementSibling as HTMLElement;
+      expect(initContent.classList.contains('pl-5')).toBe(false);
+
+      const groupContent = wrapper.get('a#L3').element.nextElementSibling as HTMLElement;
+      expect(groupContent.classList.contains('pl-5')).toBe(true);
+    });
+
     it('collapses and expands all groups while retaining initialization', async () => {
       const wrapper = await loadLog(['Preparing', '▶  Build', 'built', '▶  Test', 'passed']);
 

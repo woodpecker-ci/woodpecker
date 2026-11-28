@@ -37,20 +37,31 @@ else
 	endif
 endif
 
+# go build tags, feature flags like SQLITE_ENABLED add to them
 TAGS ?=
 LDFLAGS := -X go.woodpecker-ci.org/woodpecker/v3/version.Version=${VERSION}
 STATIC_BUILD ?= true
 ifeq ($(STATIC_BUILD),true)
 	LDFLAGS := -s -w -extldflags "-static" $(LDFLAGS)
 endif
-CGO_ENABLED ?= 1 # only used to compile server
-
-HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
-ifeq ($(HAS_GO),GO)
+# only forwarded on server and agent and cli compilation
+CGO_ENABLED ?= 1
+ifeq ($(shell hash go > /dev/null 2>&1 && echo 1),$(CGO_ENABLED))
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
 
+# enable sqlite by default if cgo is enabled
+ifeq ($(CGO_ENABLED),1)
+	SQLITE_ENABLED ?= true
+else
+	ifeq ($(SQLITE_ENABLED),true)
+    $(error wrong combination CGO_ENABLED must be '1' if SQLITE_ENABLED is 'true')
+	endif
+endif
+ifeq ($(SQLITE_ENABLED),true)
+	override TAGS += sqlite
+endif
 
 # If the first argument is "in_docker"...
 ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
@@ -243,10 +254,10 @@ build-server: build-ui generate-openapi ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/server
 
 build-agent: ## Build agent
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/agent
 
 build-cli: ## Build cli
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v3/cmd/cli
 
 build-tarball: ## Build tar archive
 	mkdir -p ${DIST_DIR} && tar chzvf ${DIST_DIR}/woodpecker-src.tar.gz \
@@ -265,43 +276,52 @@ build: build-agent build-server build-cli ## Build all binaries
 .PHONY: release-frontend
 release-frontend: build-ui ## Build frontend
 
+.PHONY: cross-compile-server
 cross-compile-server: ## Cross compile the server
+.PHONY: cross-compile-agent
+cross-compile-agent: ## Cross compile the agent
+.PHONY: cross-compile-cli
+cross-compile-cli: ## Cross compile the cli
+cross-compile-server cross-compile-agent cross-compile-cli: cross-compile-%:
 	$(foreach platform,$(subst ;, ,$(PLATFORMS)),\
-		TARGETOS=$(firstword $(subst |, ,$(platform))) \
+		COMPONENT=$* \
+		TARGETOS_XGO=$(firstword $(subst |, ,$(platform))) \
+		TARGETOS=$(firstword $(subst -, ,$(firstword $(subst |, ,$(platform))))) \
 		TARGETARCH_XGO=$(subst arm64/v8,arm64,$(subst arm/v7,arm-7,$(word 2,$(subst |, ,$(platform))))) \
 		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
-		make release-server-xgo || exit 1; \
+		make release-xgo || exit 1; \
 	)
 	tree ${DIST_DIR}
 
-release-server-xgo: check-xgo ## Create server binaries for release using xgo
+release-xgo: check-xgo ## Create binaries of COMPONENT (server, agent or cli) for release using xgo
 	@echo "Building for:"
 	@echo "os:$(TARGETOS)"
+	@echo "os (xgo):$(TARGETOS_XGO)"
 	@echo "arch orgi:$(TARGETARCH)"
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 	# build via xgo
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(or $(TARGETOS_XGO),$(TARGETOS))/$(TARGETARCH_XGO)' -out woodpecker-$(COMPONENT) -pkg cmd/$(COMPONENT) .
 	# move binary into subfolder depending on target os and arch
 	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then \
 	  echo "inside xgo image"; \
-	  mkdir -p ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
-	  mv -vf /build/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  mkdir -p ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX); \
+	  mv -vf /build/woodpecker-$(COMPONENT)* ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	else \
 	  echo "outside xgo image"; \
-	  [ -f "${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
-	  mv -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  [ -f "${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
+	  mv -v ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-$(COMPONENT)* ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	fi
 	# if enabled package it in an archive
 	@if [ "$${ARCHIVE_IT:-0}" -eq "1" ]; then \
 	  if [ "$(BIN_SUFFIX)" = ".exe" ]; then \
-		  rm -f  ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip; \
-	    zip -j ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server.exe; \
+		  rm -f  ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).zip; \
+	    zip -j ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).zip ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-$(COMPONENT).exe; \
 	  else \
-	    tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX); \
+	    tar -cvzf ${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/$(COMPONENT)/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-$(COMPONENT)$(BIN_SUFFIX); \
 	  fi; \
 	else \
-	  echo "skip creating '${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"; \
+	  echo "skip creating '${DIST_DIR}/woodpecker-$(COMPONENT)_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"; \
 	fi
 
 release-server: ## Create server binaries for release

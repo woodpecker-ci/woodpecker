@@ -182,6 +182,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 		if waitState == nil {
 			waitState = &backend_types.State{}
 		}
+		waitState.Exited = true
 		waitState.Error = r.cancelErr(err, step)
 	}
 
@@ -195,6 +196,7 @@ func (r *Runtime) completeStep(runnerCtx context.Context, step *backend_types.St
 
 	// Re-check context cancellation: the wait may have raced with cancellation.
 	if r.canceled() {
+		waitState.Exited = true
 		waitState.Error = pipeline_errors.ErrCancel
 	}
 

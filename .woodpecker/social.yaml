@@ -28,7 +28,7 @@ steps:
         The changelog entry: {{ changelog }}
 
   - name: mastodon-profile
-    image: docker.io/woodpeckerci/plugin-mastodon-profile:1.0.2
+    image: docker.io/woodpeckerci/plugin-mastodon-profile:1.0.3
     depends_on: []
     settings:
       server_url: https://floss.social
