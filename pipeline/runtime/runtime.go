@@ -34,6 +34,9 @@ type Runtime struct {
 	// err holds the first error that occurred in the workflow.
 	err utils.Protected[error]
 
+	// exitCodes holds the exit code of every finished blocking step, keyed by step UUID.
+	exitCodes sync.Map
+
 	spec    *backend_types.Config
 	engine  backend_types.Backend
 	started int64

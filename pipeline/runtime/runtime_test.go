@@ -484,6 +484,7 @@ func TestWorkflowPluginStep(t *testing.T) {
 
 		assert.EqualValues(t, map[string]string{
 			"CI_PIPELINE_STATUS":             "success",
+			"CI_PREV_STEP_EXIT_CODE":         "0",
 			"CI_STEP_NAME":                   "publish",
 			"CI_STEP_TYPE":                   "plugin",
 			"DRONE_BUILD_STATUS":             "success",
@@ -743,6 +744,100 @@ func TestWorkflowEmptyStages(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Empty(t, getTracerStates(tracer))
+}
+
+func TestWorkflowPrevStepExitCode(t *testing.T) {
+	t.Parallel()
+
+	withDependsOn := func(names ...string) func(*backend_types.Step) {
+		return func(s *backend_types.Step) { s.DependsOn = names }
+	}
+
+	tests := []struct {
+		name   string
+		stages []*backend_types.Stage
+		step   string
+		want   string
+	}{
+		{
+			name: "sequence",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("lint", withExitCode(2), withIgnoreFailure())}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+			},
+			step: "build",
+			want: "2",
+		},
+		{
+			name: "single dependency",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{
+					cmdStep("lint", withExitCode(3), withIgnoreFailure()),
+					cmdStep("test"),
+				}},
+				{Steps: []*backend_types.Step{cmdStep("build", withDependsOn("lint"))}},
+			},
+			step: "build",
+			want: "3",
+		},
+		{
+			name: "multiple dependencies",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("lint"), cmdStep("test")}},
+				{Steps: []*backend_types.Step{cmdStep("build", withDependsOn("lint", "test"))}},
+			},
+			step: "build",
+		},
+		{
+			name: "parallel steps before",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("lint"), cmdStep("test")}},
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+			},
+			step: "build",
+		},
+		{
+			name: "first step",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build")}},
+			},
+			step: "build",
+		},
+		{
+			name: "skipped step before",
+			stages: []*backend_types.Stage{
+				{Steps: []*backend_types.Step{cmdStep("build", withExitCode(1))}},
+				{Steps: []*backend_types.Step{cmdStep("deploy")}},
+				{Steps: []*backend_types.Step{cmdStep("notify", withOnFailure())}},
+			},
+			step: "notify",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tracer := newTestTracer(t)
+			r := New(
+				&backend_types.Config{Stages: tt.stages},
+				dummy.New(),
+				WithTracer(tracer),
+				WithLogger(newTestLogger(t)),
+			)
+
+			_ = r.Run(t.Context())
+
+			last := findLastTraceByName(getTracerStates(tracer), tt.step)
+			require.NotNil(t, last)
+			require.False(t, last.CurrStepState.Skipped, "%s should run", tt.step)
+			got, ok := last.CurrStep.Environment["CI_PREV_STEP_EXIT_CODE"]
+			if tt.want == "" {
+				assert.False(t, ok, "CI_PREV_STEP_EXIT_CODE should not be set, got %q", got)
+			} else {
+				assert.Equal(t, tt.want, got)
+			}
+		})
+	}
 }
 
 //
