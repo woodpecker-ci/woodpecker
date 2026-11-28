@@ -15,11 +15,21 @@
 package fixtures
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// InstallationToken is the installation access token returned by the mock
+// installation token endpoint for unrestricted (installation-wide) tokens.
+const InstallationToken = "ghs_mock_installation_token"
+
+// ScopedInstallationToken is returned instead when the token request is
+// restricted to specific repositories, as clone tokens are.
+const ScopedInstallationToken = "ghs_mock_scoped_installation_token"
 
 // Handler returns an http.Handler that is capable of handling a variety of mock
 // Bitbucket requests and returning mock responses.
@@ -31,10 +41,49 @@ func Handler() http.Handler {
 	e.GET("/api/v3/repositories/:id", getRepoByID)
 	e.GET("/api/v3/orgs/:org/memberships/:user", getMembership)
 	e.GET("/api/v3/user/memberships/orgs/:org", getMembership)
+	e.GET("/api/v3/repos/:owner/:name/installation", getRepoInstallation)
+	e.POST("/api/v3/app/installations/:id/access_tokens", createInstallationToken)
+	e.POST("/api/v3/repos/:owner/:name/statuses/:commit", createStatus)
+	e.GET("/api/v3/app", getApp)
+	e.GET("/api/v3/app/installations", listInstallations)
+	e.GET("/api/v3/repos/:owner/:name/branches", listBranches)
+	e.GET("/api/v3/repos/:owner/:name/branches/:branch", getBranch)
+	e.GET("/api/v3/repos/:owner/:name/pulls", listPulls)
 	e.POST("/api/graphql", graphqlDir)
 	e.GET("/api/v3/repos/:owner/:name/contents/*path", getContents)
 
 	return e
+}
+
+// requireInstallationToken guards fixture endpoints used to assert that
+// repo-scoped API calls are made with the app installation token.
+func requireInstallationToken(c *gin.Context) bool {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return false
+	}
+	return true
+}
+
+func listBranches(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"name": "main"}, {"name": "dev"}]`)
+}
+
+func getBranch(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `{"name": "main", "commit": {"sha": "abc123", "html_url": "https://github.com/octocat/Hello-World/commit/abc123"}}`)
+}
+
+func listPulls(c *gin.Context) {
+	if !requireInstallationToken(c) {
+		return
+	}
+	c.String(http.StatusOK, `[{"number": 7, "title": "test pr"}]`)
 }
 
 // graphqlDir mocks the single-request directory fetch used by Dir.
@@ -69,6 +118,17 @@ func graphqlDir(c *gin.Context) {
 			{"name": "large.yaml", "type": "blob", "mode": 33188, "object": {"text": "steps: partial", "isTruncated": true, "isBinary": false}},
 			{"name": "binary.yaml", "type": "blob", "mode": 33188, "object": {"text": null, "isTruncated": false, "isBinary": true}}
 		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":app-dir"):
+		// the app tests' directory: only the installation token may read it
+		if !requireInstallationToken(c) {
+			return
+		}
+		c.String(http.StatusOK, `{"data": {"repository": {"object": {"__typename": "Tree", "entries": [
+			{"name": "a.yaml", "type": "blob", "mode": 33188, "object": {"text": "pipeline:", "isTruncated": false, "isBinary": false}}
+		]}}}}`)
+	case strings.HasSuffix(req.Variables.Expression, ":app-fallback-dir"):
+		// force the app tests onto the per-file REST fallback
+		c.String(http.StatusBadGateway, "")
 	case strings.HasSuffix(req.Variables.Expression, ":rest-fallback-dir"):
 		// force the caller onto the per-file REST fallback
 		c.String(http.StatusBadGateway, "")
@@ -81,22 +141,120 @@ func graphqlDir(c *gin.Context) {
 	}
 }
 
+// graphqlFallbackDirs are the directories used by the graphql tests that load
+// files over REST. Those tests run without app credentials, so requests for
+// them (and for the files inside them) authenticate with the plain user token.
+var graphqlFallbackDirs = []string{"rest-fallback-dir", "null-repo-dir", "symlink-dir", "large-dir"}
+
 // getContents serves the per-file REST fallback.
 func getContents(c *gin.Context) {
 	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
 		c.String(http.StatusUnauthorized, "")
 		return
 	}
-	if strings.HasSuffix(c.Param("path"), "rest-fallback-dir") {
-		c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "rest-fallback-dir/b.yaml"}, {"type": "dir", "name": "nested", "path": "rest-fallback-dir/nested"}]`)
+	path := c.Param("path")
+	for _, dir := range graphqlFallbackDirs {
+		if !strings.Contains(path, dir) {
+			continue
+		}
+		switch {
+		case strings.HasSuffix(path, "rest-fallback-dir"):
+			c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "rest-fallback-dir/b.yaml"}, {"type": "dir", "name": "nested", "path": "rest-fallback-dir/nested"}]`)
+		case strings.HasSuffix(path, "null-repo-dir"):
+			c.String(http.StatusOK, `[{"type": "file", "name": "c.yaml", "path": "null-repo-dir/c.yaml"}]`)
+		default:
+			// an individual file inside one of those directories
+			// base64 of "pipeline:"
+			c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
+		}
 		return
 	}
-	if strings.HasSuffix(c.Param("path"), "null-repo-dir") {
-		c.String(http.StatusOK, `[{"type": "file", "name": "c.yaml", "path": "null-repo-dir/c.yaml"}]`)
+
+	// every remaining path asserts that repo contents are fetched with the app
+	// installation token
+	if !requireInstallationToken(c) {
+		return
+	}
+	if strings.HasSuffix(path, "/app-dir") {
+		// app-dir is only served over GraphQL, so a test reading it can't pass
+		// by falling back to REST
+		c.String(http.StatusInternalServerError, "")
+		return
+	}
+	if strings.HasSuffix(path, "app-fallback-dir") {
+		c.String(http.StatusOK, `[{"type": "file", "name": "b.yaml", "path": "app-fallback-dir/b.yaml"}]`)
 		return
 	}
 	// base64 of "pipeline:"
 	c.String(http.StatusOK, `{"type": "file", "encoding": "base64", "name": "config", "content": "cGlwZWxpbmU6"}`)
+}
+
+func getApp(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `{"id": 12345, "name": "Woodpecker Test App", "slug": "woodpecker-test-app"}`)
+}
+
+func listInstallations(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusOK, `[{"id": 42}]`)
+}
+
+func getRepoInstallation(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	switch c.Param("owner") {
+	case "not-installed":
+		c.String(http.StatusNotFound, "")
+	case "lookup-error":
+		c.String(http.StatusInternalServerError, "")
+	default:
+		c.String(http.StatusOK, `{"id": 42}`)
+	}
+}
+
+func createInstallationToken(c *gin.Context) {
+	if !strings.HasPrefix(c.GetHeader("Authorization"), "Bearer ") {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	if c.Param("id") != "42" {
+		c.String(http.StatusNotFound, "")
+		return
+	}
+	var req struct {
+		Repositories []string          `json:"repositories"`
+		Permissions  map[string]string `json:"permissions"`
+	}
+	_ = c.ShouldBindJSON(&req)
+	token := InstallationToken
+	if len(req.Repositories) > 0 {
+		// repository-restricted clone tokens must also drop write access
+		if req.Permissions["contents"] != "read" {
+			c.String(http.StatusUnprocessableEntity, "")
+			return
+		}
+		token = ScopedInstallationToken
+	}
+	expiresAt := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
+	c.String(http.StatusCreated, fmt.Sprintf(`{"token": %q, "expires_at": %q}`, token, expiresAt))
+}
+
+// createStatus only accepts the mock installation token, so tests can assert
+// that a status was sent with GitHub App credentials.
+func createStatus(c *gin.Context) {
+	if c.GetHeader("Authorization") != "Bearer "+InstallationToken {
+		c.String(http.StatusUnauthorized, "")
+		return
+	}
+	c.String(http.StatusCreated, `{"id": 1}`)
 }
 
 func getRepo(c *gin.Context) {

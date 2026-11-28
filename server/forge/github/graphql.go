@@ -93,6 +93,8 @@ type graphqlDirResponse struct {
 // many files neither multiplies the fetch latency nor the exposure to
 // transient forge errors.
 func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
+	token := c.repoToken(ctx, u, r)
+
 	body, err := json.Marshal(map[string]any{
 		"query": dirQuery,
 		"variables": map[string]string{
@@ -114,13 +116,13 @@ func (c *client) dirFromGraphQL(ctx context.Context, u *model.User, r *model.Rep
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+u.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
 	// reuse the REST client's http client, so the transport (and any client
 	// injected into the context) is shared instead of allocating a new
 	// connection pool per directory fetch
-	restClient, err := c.newClientToken(ctx, u.AccessToken)
+	restClient, err := c.newClientToken(ctx, token)
 	if err != nil {
 		return nil, err
 	}

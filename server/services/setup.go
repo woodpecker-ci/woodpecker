@@ -108,7 +108,7 @@ func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKe
 	return privateKey, privateKey.Public(), nil
 }
 
-func setupForgeService(c *cli.Command, _store store.Store) error {
+func setupForgeService(c *cli.Command, _store store.Store, setupForge SetupForge) error {
 	_forge, err := _store.ForgeGet(model.PrimaryForgeID)
 	if err != nil && !errors.Is(err, types.ErrRecordNotExist) {
 		return err
@@ -132,11 +132,14 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 	switch {
 	case c.String("addon-forge") != "":
 		_forge.Type = model.ForgeTypeAddon
-		_forge.AdditionalOptions["executable"] = c.String("addon-forge")
+		_forge.AdditionalOptions[model.ForgeAddonOptionExecutable] = c.String("addon-forge")
 	case c.Bool("github"):
 		_forge.Type = model.ForgeTypeGithub
-		_forge.AdditionalOptions["merge-ref"] = c.Bool("github-merge-ref")
-		_forge.AdditionalOptions["public-only"] = c.Bool("github-public-only")
+		_forge.AdditionalOptions[model.ForgeGithubOptionMergeRef] = c.Bool("github-merge-ref")
+		_forge.AdditionalOptions[model.ForgeGithubOptionPublicOnly] = c.Bool("github-public-only")
+		_forge.AdditionalOptions[model.ForgeGithubOptionAppID] = c.String("github-app-id")
+		_forge.AdditionalOptions[model.ForgeGithubOptionAppPrivateKey] = c.String("github-app-private-key")
+		_forge.AdditionalOptions[model.ForgeGithubOptionAppCloneTokenScope] = c.String("github-app-clone-token-scope")
 		if _forge.URL == "" {
 			_forge.URL = "https://github.com"
 		}
@@ -160,11 +163,23 @@ func setupForgeService(c *cli.Command, _store store.Store) error {
 		_forge.Type = model.ForgeTypeBitbucket
 	case c.Bool("bitbucket-dc"):
 		_forge.Type = model.ForgeTypeBitbucketDatacenter
-		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
-		_forge.AdditionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
-		_forge.AdditionalOptions["oauth-enable-project-admin-scope"] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
+		_forge.AdditionalOptions[model.ForgeBitbucketDCOptionGitUsername] = c.String("bitbucket-dc-git-username")
+		_forge.AdditionalOptions[model.ForgeBitbucketDCOptionGitPassword] = c.String("bitbucket-dc-git-password")
+		_forge.AdditionalOptions[model.ForgeBitbucketDCOptionAdminScope] = c.Bool("bitbucket-dc-oauth-enable-oauth2-scope-project-admin")
 	default:
 		return errors.New("forge not configured")
+	}
+
+	// fail fast on invalid GitHub App credentials instead of breaking every
+	// forge API call at runtime
+	if _forge.Type == model.ForgeTypeGithub && setupForge != nil {
+		validated, err := setupForge(_forge)
+		if err != nil {
+			return fmt.Errorf("invalid forge configuration: %w", err)
+		}
+		if validated != nil {
+			_ = validated.Close()
+		}
 	}
 
 	if forgeExists {
