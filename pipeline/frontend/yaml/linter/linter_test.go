@@ -327,3 +327,57 @@ func TestBadHabits(t *testing.T) {
 		assert.True(t, found, "Expected error %q, got %q", tt.want, lerrors)
 	}
 }
+
+func TestLintWorkflowDependencies(t *testing.T) {
+	const steps = "when: { event: push }\nsteps: { build: { image: golang } }\n"
+
+	testdata := []struct {
+		name  string
+		files map[string]string
+		want  []string
+	}{
+		{
+			name: "existing and optional dependencies",
+			files: map[string]string{
+				"build":  steps,
+				"test":   steps + "depends_on: [build]",
+				"deploy": steps + "depends_on: [test, { name: docs, optional: true }]",
+			},
+		},
+		{
+			name: "missing dependency",
+			files: map[string]string{
+				"test": steps + "depends_on: [build]",
+			},
+			want: []string{`test: Workflow "build" does not exist`},
+		},
+		{
+			name: "dependency cycle",
+			files: map[string]string{
+				"a": steps + "depends_on: [b]",
+				"b": steps + "depends_on: [a]",
+			},
+			want: []string{"a: Workflow dependency cycle: a -> b -> a"},
+		},
+	}
+
+	for _, tt := range testdata {
+		t.Run(tt.name, func(t *testing.T) {
+			var configs []*linter.WorkflowConfig
+			for name, data := range tt.files {
+				conf, err := yaml.ParseString(data)
+				require.NoError(t, err)
+				configs = append(configs, &linter.WorkflowConfig{File: name, RawConfig: data, Workflow: conf})
+			}
+
+			// without the option every workflow is linted on its own
+			require.NoError(t, linter.New().Lint(configs))
+
+			var got []string
+			for _, lerr := range errors.GetPipelineErrors(linter.New(linter.WithWorkflowDependencies()).Lint(configs)) {
+				got = append(got, errors.GetLinterData(lerr).File+": "+lerr.Message)
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}

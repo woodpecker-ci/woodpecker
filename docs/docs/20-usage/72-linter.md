@@ -12,6 +12,8 @@ You can run the linter also manually from the CLI:
 woodpecker-cli lint <workflow files>
 ```
 
+If you lint a folder like `.woodpecker/`, it also checks that the `depends_on` of each workflow names an existing workflow and that workflows do not depend on each other in a loop.
+
 ## Bad habit warnings
 
 Woodpecker warns you if your configuration contains some bad habits.

@@ -31,6 +31,16 @@ func PrivilegedPlugins(plugins []string) Option {
 	}
 }
 
+// WithWorkflowDependencies checks the workflow depends_on of all linted
+// configs against each other. The File of each config must be its workflow
+// name. Only use it if the configs are all workflows of a repo, as a
+// dependency on any other workflow is reported as missing.
+func WithWorkflowDependencies() Option {
+	return func(linter *Linter) {
+		linter.workflowDependencies = true
+	}
+}
+
 // WithTrustedClonePlugins adds the list of trusted clone plugins.
 func WithTrustedClonePlugins(plugins []string) Option {
 	return func(linter *Linter) {
