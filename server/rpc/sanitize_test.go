@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	service_log "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
 )
 
 func TestCheckWorkflowAllowsStepUpdate(t *testing.T) {
@@ -302,7 +303,7 @@ func TestAllowAppendingLogsStepFinished(t *testing.T) {
 
 	t.Run("stale step finish rejected", func(t *testing.T) {
 		t.Parallel()
-		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix()}
+		step := &model.Step{State: model.StatusFailure, Finished: time.Now().Add(-(service_log.StreamDelayAllowed + time.Second)).Unix()}
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }
@@ -318,7 +319,7 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 		t.Parallel()
 		p := &model.Pipeline{
 			Status:   model.StatusSuccess,
-			Finished: time.Now().Add(-(logStreamDelayAllowed - time.Second)).Unix(),
+			Finished: time.Now().Add(-(service_log.StreamDelayAllowed - time.Second)).Unix(),
 		}
 		assert.NoError(t, allowAppendingLogs(p, step))
 	})
@@ -327,8 +328,35 @@ func TestAllowAppendingLogsDrainBoundary(t *testing.T) {
 		t.Parallel()
 		p := &model.Pipeline{
 			Status:   model.StatusSuccess,
-			Finished: time.Now().Add(-(logStreamDelayAllowed + time.Second)).Unix(),
+			Finished: time.Now().Add(-(service_log.StreamDelayAllowed + time.Second)).Unix(),
 		}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+}
+
+// TestAllowAppendingLogsFinalized ensures a step whose log is finalized never takes new lines,
+// also not inside the drain window.
+func TestAllowAppendingLogsFinalized(t *testing.T) {
+	t.Parallel()
+
+	t.Run("finalized step inside window rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusSuccess, Finished: time.Now().Unix()}
+		step := &model.Step{State: model.StatusSuccess, Finished: time.Now().Unix(), LogState: model.LogStateFinalized}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+
+	t.Run("step claimed by the log finalizer rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusSuccess, Finished: time.Now().Unix()}
+		step := &model.Step{State: model.StatusSuccess, Finished: time.Now().Unix(), LogState: model.LogStateFinalizing}
+		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
+	})
+
+	t.Run("finalized step of running pipeline rejected", func(t *testing.T) {
+		t.Parallel()
+		p := &model.Pipeline{Status: model.StatusRunning}
+		step := &model.Step{State: model.StatusSuccess, LogState: model.LogStateFinalized}
 		assert.ErrorIs(t, allowAppendingLogs(p, step), ErrAgentIllegalLogStreaming)
 	})
 }
