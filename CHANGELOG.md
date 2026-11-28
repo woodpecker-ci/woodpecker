@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#7651](https://github.com/woodpecker-ci/woodpecker/pull/7651)]
 - Added Oxlint plugin [[#7645](https://github.com/woodpecker-ci/woodpecker/pull/7645)]
 - Added ESLint plugin [[#7644](https://github.com/woodpecker-ci/woodpecker/pull/7644)]
 - Add Pipeline Inbox for Forgejo and Gitea to awesome list [[#7640](https://github.com/woodpecker-ci/woodpecker/pull/7640)]
