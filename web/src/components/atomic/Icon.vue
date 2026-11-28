@@ -83,7 +83,7 @@
   <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3rem" />
 
-  <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <svg v-else-if="name === 'spinner'" width="1.3rem" height="1.3rem" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
       fill="currentColor"
       d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"

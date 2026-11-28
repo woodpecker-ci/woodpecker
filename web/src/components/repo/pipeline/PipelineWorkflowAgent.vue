@@ -2,11 +2,10 @@
   <div ref="root">
     <IconButton
       ref="button"
-      icon="info"
+      :icon="loading ? 'spinner' : 'info'"
       class="hover:bg-white/10!"
       :title="title"
       :disabled="!agent"
-      :is-loading="loading"
       :aria-expanded="open"
       :aria-controls="popoverId"
       aria-haspopup="dialog"
@@ -21,26 +20,29 @@
         ref="popover"
         role="dialog"
         :aria-label="$t('repo.pipeline.agent.title')"
-        class="bg-wp-code-200 border-wp-code-300 text-wp-code-text-100 fixed z-30 w-72 max-w-[calc(100vw-2rem)] rounded-md border text-sm shadow-lg"
+        class="bg-wp-code-100 border-wp-code-300 text-wp-code-text-100 fixed z-30 w-72 max-w-[calc(100vw-2rem)] rounded-md border text-sm shadow-lg"
         :style="{ top: `${position.top}px`, right: `${position.right}px` }"
       >
         <span
           data-arrow
-          class="bg-wp-code-200 border-wp-code-300 absolute -top-[7px] h-3 w-3 rotate-45 border-t border-l"
+          class="bg-wp-code-100 border-wp-code-300 absolute -top-[7px] h-3 w-3 rotate-45 border-t border-l"
           :style="{ right: `${position.arrowRight}px` }"
         />
         <div
           data-scroll
-          class="overflow-y-auto overscroll-contain p-4"
+          class="overflow-y-auto overscroll-contain"
           :style="{ maxHeight: `${position.maxHeight}px` }"
         >
-          <h3 class="mb-3 font-bold">{{ $t('repo.pipeline.agent.title') }}</h3>
-          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+          <header class="border-wp-code-300 flex items-center gap-2 border-b px-4 py-3">
+            <Icon name="agent" class="text-wp-code-text-alt-100 h-4 w-4 shrink-0" />
+            <h3 class="font-semibold">{{ $t('repo.pipeline.agent.title') }}</h3>
+          </header>
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2 px-4 py-3">
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.workflow') }}</dt>
             <dd class="break-words">{{ workflow?.name }}</dd>
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.agent') }}</dt>
             <dd class="break-words">
-              <router-link v-if="agentLink" :to="agentLink" target="_blank" class="text-wp-link-100 hover:underline">
+              <router-link v-if="agentLink" :to="agentLink" class="text-blue-400 hover:text-blue-500">
                 {{ agentName }}
               </router-link>
               <template v-else>{{ agentName }}</template>
@@ -50,24 +52,30 @@
             <dt class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.backend') }}</dt>
             <dd class="break-words">{{ agent.backend }}</dd>
           </dl>
-          <div class="border-wp-code-300 mt-3 border-t pt-3">
+          <div class="border-wp-code-300 border-t">
             <button
               type="button"
-              class="text-wp-link-100 cursor-pointer hover:underline"
+              class="text-wp-code-text-alt-100 hover:bg-white/5 hover:text-wp-code-text-100 flex w-full cursor-pointer items-center justify-between px-4 py-2 transition-colors"
+              :class="{ 'rounded-b-md': !showLabels }"
               :aria-expanded="showLabels"
               @click="showLabels = !showLabels"
             >
-              {{ showLabels ? $t('repo.pipeline.agent.hide_labels') : $t('repo.pipeline.agent.show_labels') }}
+              <span>{{ $t('repo.pipeline.agent.labels') }}</span>
+              <Icon
+                name="chevron-right"
+                class="h-4 w-4 shrink-0 transition-transform"
+                :class="{ 'rotate-90': showLabels }"
+              />
             </button>
-            <template v-if="showLabels">
-              <ul v-if="labels.length > 0" class="mt-2 flex flex-col gap-1 font-mono text-xs">
+            <div v-if="showLabels" class="px-4 py-3">
+              <ul v-if="labels.length > 0" class="flex flex-col gap-1 font-mono text-xs">
                 <li v-for="[key, value] in labels" :key="key" class="flex flex-wrap">
                   <span class="text-wp-code-text-alt-100 break-all">{{ `${key}=` }}</span>
                   <span class="break-all">{{ value }}</span>
                 </li>
               </ul>
-              <p v-else class="text-wp-code-text-alt-100 mt-2">{{ $t('repo.pipeline.agent.no_labels') }}</p>
-            </template>
+              <p v-else class="text-wp-code-text-alt-100">{{ $t('repo.pipeline.agent.no_labels') }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -81,6 +89,7 @@ import { computed, ref, useId, useTemplateRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { RouteLocationRaw } from 'vue-router';
 
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
