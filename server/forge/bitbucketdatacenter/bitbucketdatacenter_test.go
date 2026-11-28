@@ -31,6 +31,7 @@ import (
 	"github.com/neticdk/go-bitbucket/mock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter/fixtures"
@@ -692,4 +693,18 @@ func TestActivate(t *testing.T) {
 	assert.Equal(t, "repo-secret", created.Config.Secret)
 	assert.Contains(t, created.Events, bitbucket.EventKeyRepoRefsChanged)
 	assert.Contains(t, created.Events, bitbucket.EventKeyPullRequestOpened)
+}
+
+func TestWithHTTPClientSkipVerify(t *testing.T) {
+	base := context.Background()
+
+	c := &client{skipVerify: false}
+	assert.Nil(t, c.withHTTPClient(base).Value(oauth2.HTTPClient))
+
+	c = &client{skipVerify: true}
+	hc, ok := c.withHTTPClient(base).Value(oauth2.HTTPClient).(*http.Client)
+	require.True(t, ok)
+	tr, ok := hc.Transport.(*http.Transport)
+	require.True(t, ok)
+	assert.True(t, tr.TLSClientConfig.InsecureSkipVerify)
 }

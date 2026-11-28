@@ -190,6 +190,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Password:                     gitPassword,
 		OAuthHost:                    forge.OAuthHost,
 		OAuthEnableProjectAdminScope: enableProjectAdminScope,
+		SkipVerify:                   forge.SkipVerify,
 	}
 	log.Debug().
 		Str("url", opts.URL).
@@ -198,6 +199,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Bool("oauth-client-secret-set", opts.OAuthClientSecret != "").
 		Str("type", string(forge.Type)).
 		Bool("oauth-enable-project-admin-scope", opts.OAuthEnableProjectAdminScope).
+		Bool("skip-verify", opts.SkipVerify).
 		Msg("setting up forge")
 	return bitbucketdatacenter.New(forge.ID, opts)
 }
