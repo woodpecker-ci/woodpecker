@@ -111,6 +111,9 @@ type Store interface {
 	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
+	// AgentSnapshots
+	AgentSnapshotFind(int64) (*model.AgentSnapshot, error)
+
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool, *model.ListOptionsWithAll) ([]*model.Secret, error)
@@ -192,6 +195,7 @@ type Store interface {
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowByStep(*model.Step) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
+	WorkflowUpdateWithSnapshot(*model.Workflow, *model.AgentSnapshot) error
 
 	// Org
 	OrgCreate(*model.Org) error

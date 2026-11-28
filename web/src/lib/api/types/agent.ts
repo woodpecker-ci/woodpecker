@@ -15,3 +15,13 @@ export interface Agent {
   custom_labels: Record<string, string>;
   filters: Record<string, string>;
 }
+
+// Snapshot of the agent a workflow got assigned to, taken on assignment.
+export interface AgentSnapshot {
+  id: number;
+  org_id: number;
+  name: string;
+  platform: string;
+  backend: string;
+  custom_labels: Record<string, string> | null;
+}
