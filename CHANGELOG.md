@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- Update web npm deps non-major [[#7653](https://github.com/woodpecker-ci/woodpecker/pull/7653)]
 - Update docker.io/woodpeckerci/plugin-mastodon-profile Docker tag to v1.0.3 [[#7650](https://github.com/woodpecker-ci/woodpecker/pull/7650)]
 - Update golang-packages to v0.37.3 [[#7647](https://github.com/woodpecker-ci/woodpecker/pull/7647)]
 
