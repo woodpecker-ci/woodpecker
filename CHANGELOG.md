@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-27
+## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- Update docker.io/woodpeckerci/plugin-mastodon-profile Docker tag to v1.0.3 [[#7650](https://github.com/woodpecker-ci/woodpecker/pull/7650)]
 - Update golang-packages to v0.37.3 [[#7647](https://github.com/woodpecker-ci/woodpecker/pull/7647)]
 
 ## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-25
