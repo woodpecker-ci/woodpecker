@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.21.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.1) - 2026-11-28
+
+### ❤️ Thanks to all contributors! ❤️
+
+@lightminds-re, @rogervokma-stack, @xoxys
+
+### 🐛 Bug Fixes
+
+- Improve pipeline log readability and consistency [[#7641](https://github.com/woodpecker-ci/woodpecker/pull/7641)]
+
+### 📚 Documentation
+
+- Update docs npm deps non-major [[#7651](https://github.com/woodpecker-ci/woodpecker/pull/7651)]
+- Added Oxlint plugin [[#7645](https://github.com/woodpecker-ci/woodpecker/pull/7645)]
+- Added ESLint plugin [[#7644](https://github.com/woodpecker-ci/woodpecker/pull/7644)]
+- Add Pipeline Inbox for Forgejo and Gitea to awesome list [[#7640](https://github.com/woodpecker-ci/woodpecker/pull/7640)]
+
+### 📦️ Dependency
+
+- Update web npm deps non-major [[#7653](https://github.com/woodpecker-ci/woodpecker/pull/7653)]
+- Update docker.io/woodpeckerci/plugin-mastodon-profile Docker tag to v1.0.3 [[#7650](https://github.com/woodpecker-ci/woodpecker/pull/7650)]
+- Update golang-packages to v0.37.3 [[#7647](https://github.com/woodpecker-ci/woodpecker/pull/7647)]
+
 ## [3.21.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.21.0) - 2026-11-25
 
 ### ❤️ Thanks to all contributors! ❤️
