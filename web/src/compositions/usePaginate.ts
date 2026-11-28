@@ -41,9 +41,11 @@ export function usePagination<T, S = unknown>(
   // incremented on every resetPage; a response started under an older
   // generation is stale and must not touch any state
   let generation = 0;
+  // set while refresh reloads the already loaded pages in the background
+  let refreshing = false;
 
   async function loadData() {
-    if (loading.value === true || hasMore.value === false) {
+    if (loading.value === true || refreshing || hasMore.value === false) {
       return;
     }
 
@@ -78,7 +80,7 @@ export function usePagination<T, S = unknown>(
   watch(page, loadData);
 
   function nextPage() {
-    if (isActive() && !loading.value && hasMore.value) {
+    if (isActive() && !loading.value && !refreshing && hasMore.value) {
       page.value += 1;
     }
   }
@@ -91,6 +93,8 @@ export function usePagination<T, S = unknown>(
     const _page = page.value;
 
     generation += 1;
+    // a running refresh belongs to the old generation and will be discarded
+    refreshing = false;
     page.value = 1;
     hasMore.value = true;
     data.value = [];
@@ -103,5 +107,42 @@ export function usePagination<T, S = unknown>(
     }
   }
 
-  return { resetPage, nextPage, data, hasMore, loading };
+  // refresh reloads all pages loaded so far and replaces the data at once,
+  // so the list does not get emptied and refilled like with resetPage
+  async function refresh() {
+    if (loading.value || refreshing) {
+      return;
+    }
+
+    if ((_each ?? []).length > 0) {
+      // data of multiple each elements can't be reloaded page by page
+      await resetPage();
+      return;
+    }
+
+    refreshing = true;
+    const requestGeneration = generation;
+    const lastPage = page.value;
+    const newData: T[] = [];
+    let newHasMore = true;
+    try {
+      for (let _page = 1; _page <= lastPage && newHasMore; _page++) {
+        const pageData = (await _loadData(_page, undefined as S)) ?? [];
+        if (requestGeneration !== generation) {
+          // resetPage was called in the meantime and owns the state now
+          return;
+        }
+        newData.push(...pageData);
+        newHasMore = pageData.length >= pageSize.value && pageData.length > 0;
+      }
+      data.value = newData;
+      hasMore.value = newHasMore;
+    } finally {
+      if (requestGeneration === generation) {
+        refreshing = false;
+      }
+    }
+  }
+
+  return { resetPage, refresh, nextPage, data, hasMore, loading };
 }
